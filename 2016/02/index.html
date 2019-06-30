@@ -15,9 +15,9 @@
     
 
     
-    <meta name="title" content="前缀和问题总结" />
-    <meta property="og:title" content="前缀和问题总结" />
-    <meta property="twitter:title" content="前缀和问题总结" />
+    <meta name="title" content="莫队算法总结" />
+    <meta property="og:title" content="莫队算法总结" />
+    <meta property="twitter:title" content="莫队算法总结" />
     
 
     
@@ -34,7 +34,7 @@
     <meta name="keyword"  content="ACM,111qqz,商汤科技,hust,华中科技大学">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>前缀和问题总结-111qqz的小窝</title>
+    <title>莫队算法总结-111qqz的小窝</title>
 
     <link rel="canonical" href="/2016/02/">
 
@@ -186,12 +186,12 @@
                 <div class="post-heading">
                     <div class="tags">
                         
-                        <a class="tag" href="/tags/%E5%89%8D%E7%BC%80%E5%92%8C" title="前缀和">
-                            前缀和
+                        <a class="tag" href="/tags/%E8%8E%AB%E9%98%9F%E7%AE%97%E6%B3%95" title="莫队算法">
+                            莫队算法
                         </a>
                         
                     </div>
-                    <h1>前缀和问题总结</h1>
+                    <h1>莫队算法总结</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
 			Posted by 
@@ -199,7 +199,7 @@
 			    111qqz
 			 
 			on 
-			Friday, February 19, 2016
+			Wednesday, February 17, 2016
                         
                     </span>
                 </div>
@@ -225,57 +225,21 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li><a href="#先说最简单也是最常见的一种">先说最简单也是最常见的一种。</a></li>
-<li><a href="#还有一种遇到相对较少的用法-每次对数组a的某区间-l-r-内的每个数增加x-最后要求输出经过所有变换后的数组a-做法是-声明另一个数组p-当对区间-l-r-增加x时-p-l-x-p-r-1-x-所有的变换完成后-另p-i-p-i-1-那么最后的答案就是p-i-a-i-i-1-n-可以这样理解-p-l-x-表示从x开始被增加x这个变换影响-一直影响到r-也就是从r-1取消这种变换的效果-所以p-r-1-x-然后处理前缀和-把标记在开头的变幻累计到每个元素">还有一种遇到相对较少的用法。 每次对数组a的某区间[l,r]内的每个数增加x。最后要求输出经过所有变换后的数组a。做法是：声明另一个数组p，当对区间[l,r]增加x时， p[l]+=x,p[r-1]-=x; 所有的变换完成后，另p[i]+=p[i-1] ，那么最后的答案就是p[i]+a[i]（i:1..n） （可以这样理解：p[l]+=x,表示从x开始被增加x这个变换影响，一直影响到r,也就是从r+1取消这种变换的效果，所以p[r+1]-=x,然后处理前缀和，把标记在开头的变幻累计到每个元素）</a></li>
-<li><a href="#此外-前缀和不一定是-和-加法可以推广到任何有-前缀和性质-的运算-比如乘积-异或-虽然那样就应该不叫前缀-和-了2333">此外：前缀和不一定是“和”，加法可以推广到任何有“前缀和性质”的运算，比如乘积，异或（虽然那样就应该不叫前缀“和”了2333）</a></li>
-<li><a href="#这些都是区间上的前缀和-我们可以进一步推广到树上-区间的前缀和是从第一个节点开始累加-树上则是从根节点开始做dfs然后累加">这些都是区间上的前缀和，我们可以进一步推广到树上。区间的前缀和是从第一个节点开始累加，树上则是从根节点开始做dfs然后累加。</a></li>
-</ul></li>
-</ul></li>
-</ul>
-</nav>
                 
                 
+                <p>写了几道莫队，总结下。
+目前只会区间莫队。。树上莫队以后再补。</p>
 
-<blockquote>There are two types of problems solvable by partial sum.
+<p><a href="http://blog.csdn.net/bossup/article/details/39236275">莫队算法学习</a></p>
 
-1.Problems which you are asked to answer some queries about the sum of a part of elements (without modify queries).
+<p>说说我自己的理解：
+莫队算法是一类用来处理离线静态区间问题的算法。
+必须是离线，而且对区间没有修改。
+还要满足，如果我们知道区间[l,r]的答案，那么知道区间[l-1,r],[l+1,r],[l,r-1],[l,r+1]的答案都是平凡的。。也就是O(1)可以实现才可以。</p>
 
-Solution of all of this problems are the same. You just need to know how to solve one of them.
+<p>本质的话。。感觉就是分块+暴力？ 通过离线操作，把查询按照某种顺序均分使得复杂度降低。</p>
 
-Example : You are asked some queries on an array _a_1, _a_2, ..._a_, _n_. Each query give you numbers _l_ and _r_ and you should print _a__l_ + _a__l_ + 1 + ... + _a__r_ .
-
-Solution : You need to build another array _s_1, _s_2, ..., _s__n_ which _s__i_ = _a_1 + _a_2 + ... + _a__i_ and answer is _s__r_ - _s__l_ - 1 .
-
-2.Problems which you are asked to perform some queries asking you to modify a part of elements (without printing queries.)
-
-Solution of all of this problems are the same. You just need to know how to solve one of them.
-
-Example : You need to perform some queries on an array _a_1, _a_2, ..._a_, _n_. Each query give you numbers _l_, _r_ and _v_ and for each _i_ such that _l_ ≤ _i_ ≤ _r_ you should increase _a__i_ by _v_, and then after performing all queries, you should print the whole array.
-
-Solution : You should have another array _p_1, _p_2, ..., _p__n_ which, all of its members are initially 0, for each query, you should increase _p__l_ by _v_ and decrease _p__r_ + 1 by _v_ .
-
-An then, for each _i_, starting from 1 you should increase _p__i_ by _p__i_ - 1. So, final array would be _a_1 + _p_1, _a_2 + _p_2, ..., _a__n_ + _p__n_ .</blockquote>
-
-<h3 id="先说最简单也是最常见的一种">先说最简单也是最常见的一种。</h3>
-
-<p>sum[i]=sum[i-1]+a[i] （初始sum[0]=0,所以a[i]的下标最好从1开始）
-询问得到[l,r]的和，答案为sum[r]-sum[l-1];</p>
-
-<h3 id="还有一种遇到相对较少的用法-每次对数组a的某区间-l-r-内的每个数增加x-最后要求输出经过所有变换后的数组a-做法是-声明另一个数组p-当对区间-l-r-增加x时-p-l-x-p-r-1-x-所有的变换完成后-另p-i-p-i-1-那么最后的答案就是p-i-a-i-i-1-n-可以这样理解-p-l-x-表示从x开始被增加x这个变换影响-一直影响到r-也就是从r-1取消这种变换的效果-所以p-r-1-x-然后处理前缀和-把标记在开头的变幻累计到每个元素">还有一种遇到相对较少的用法。 每次对数组a的某区间[l,r]内的每个数增加x。最后要求输出经过所有变换后的数组a。做法是：声明另一个数组p，当对区间[l,r]增加x时， p[l]+=x,p[r-1]-=x; 所有的变换完成后，另p[i]+=p[i-1] ，那么最后的答案就是p[i]+a[i]（i:1..n） （可以这样理解：p[l]+=x,表示从x开始被增加x这个变换影响，一直影响到r,也就是从r+1取消这种变换的效果，所以p[r+1]-=x,然后处理前缀和，把标记在开头的变幻累计到每个元素）</h3>
-
-<h3 id="此外-前缀和不一定是-和-加法可以推广到任何有-前缀和性质-的运算-比如乘积-异或-虽然那样就应该不叫前缀-和-了2333">此外：前缀和不一定是“和”，加法可以推广到任何有“前缀和性质”的运算，比如乘积，异或（虽然那样就应该不叫前缀“和”了2333）</h3>
-
-<p><a href="https://111qqz.com/wordpress/2016/02/cf617e/">cf617E异或前缀和</a></p>
-
-<h3 id="这些都是区间上的前缀和-我们可以进一步推广到树上-区间的前缀和是从第一个节点开始累加-树上则是从根节点开始做dfs然后累加">这些都是区间上的前缀和，我们可以进一步推广到树上。区间的前缀和是从第一个节点开始累加，树上则是从根节点开始做dfs然后累加。</h3>
-
-<p><a href="https://111qqz.com/wordpress/2016/02/hdu5416/">树上前缀和hdu5416</a></p>
+<p>除了bzoj的权限题。。。区间莫队基本都A掉了。</p>
 
 
                 
@@ -324,13 +288,13 @@ An then, for each _i_, starting from 1 you should increase _p__i_ by _p__i_ -�
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2016/02/hdu5416/" data-toggle="tooltip" data-placement="top" title="hdu 5416 CRB and Tree ( 2015 多校 #10 )">&larr;
+                        <a href="/2016/02/nbut1457/" data-toggle="tooltip" data-placement="top" title="nbut 1457 Sona">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/2016/02/bzoj3289/" data-toggle="tooltip" data-placement="top" title="BZOJ 3289  Mato的文件管理 (莫队算法套树状数组)">Next
+                        <a href="/2016/02/cf614c/" data-toggle="tooltip" data-placement="top" title="codeforces #339 div 2 C. Peter and Snow Blower">Next
                             Post &rarr;</a>
                     </li>
                     
@@ -1239,6 +1203,178 @@ An then, for each _i_, starting from 1 you should increase _p__i_ by _p__i_ -�
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://111qqz.com">111qqz的wordpress博客</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="111qqz的小窝" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:hust.111qqz@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/111qqz/">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy; 111qqz的小窝 2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
+     
                         
                         
                         
