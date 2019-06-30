@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="111qqz的小窝">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="https://111qqz.github.io/img/2.png">
+    <meta property="twitter:image" content="https://111qqz.github.io/img/2.png" />
+    
+
+    
+    <meta name="title" content="hdoj 2036 (计算几何，叉积求面积)" />
+    <meta property="og:title" content="hdoj 2036 (计算几何，叉积求面积)" />
+    <meta property="twitter:title" content="hdoj 2036 (计算几何，叉积求面积)" />
+    
+
+    
+    <meta name="description" content="">
+    <meta property="og:description" content="" />
+    <meta property="twitter:description" content="" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="ACM,111qqz,商汤科技,hust,华中科技大学">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>hdoj 2036 (计算几何，叉积求面积)-111qqz的小窝</title>
+
+    <link rel="canonical" href="/2015/11/hdoj2036/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+    <link rel="stylesheet" href="/css/hux-blog.min-custom.css">
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">111qqz的小窝</a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/acm">acm</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/c&#43;&#43;">c&#43;&#43;</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/deep-learning">deep-learning</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/%E4%BC%98%E5%8C%96">优化</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/%E5%85%B6%E4%BB%96">其他</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/%E9%9A%8F%E7%AC%94%E6%9D%82%E8%B0%88">随笔杂谈</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/%E9%9D%A2%E8%AF%95">面试</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('/img/2.png')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>hdoj 2036 (计算几何，叉积求面积)</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    111qqz
+			 
+			on 
+			Friday, November 6, 2015
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#改革春风吹满地">改革春风吹满地</a></li>
+</ul>
+</nav>
+                
+                
+
+<h1 id="改革春风吹满地">改革春风吹满地</h1>
+
+<p>**Time Limit: <sup>2000</sup>&frasl;<sub>1000</sub> MS (Java/Others) Memory Limit: <sup>65536</sup>&frasl;<sub>32768</sub> K (Java/Others)<br />
+Total Submission(s): 24179 Accepted Submission(s): 12504<br />
+**</p>
+
+<p>Problem Description</p>
+
+<p>&rdquo; 改革春风吹满地,<br />
+不会AC没关系;<br />
+实在不行回老家，<br />
+还有一亩三分地。<br />
+谢谢!（乐队奏乐）&rdquo;</p>
+
+<p>话说部分学生心态极好，每天就知道游戏，这次考试如此简单的题目，也是云里雾里，而且，还竟然来这么几句打油诗。<br />
+好呀，老师的责任就是帮你解决问题，既然想种田，那就分你一块。<br />
+这块田位于浙江省温州市苍南县灵溪镇林家铺子村，多边形形状的一块地，原本是linle 的，现在就准备送给你了。不过，任何事情都没有那么简单，你必须首先告诉我这块地到底有多少面积，如果回答正确才能真正得到这块地。<br />
+发愁了吧？就是要让你知道，种地也是需要AC知识的！以后还是好好练吧&hellip;</p>
+
+<p>Input</p>
+
+<p>输入数据包含多个测试实例，每个测试实例占一行，每行的开始是一个整数n(3&lt;=n&lt;=100)，它表示多边形的边数（当然也是顶点数），然后是按照逆时针顺序给出的n个顶点的坐标（x1, y1, x2, y2&hellip; xn, yn）,为了简化问题，这里的所有坐标都用整数表示。<br />
+输入数据中所有的整数都在32位整数范围内，n=0表示数据的结束，不做处理。</p>
+
+<p>Output</p>
+
+<p>对于每个测试实例，请输出对应的多边形面积，结果精确到小数点后一位小数。<br />
+每个实例的输出占一行。</p>
+
+<p>Sample Input</p>
+
+<p>3 0 0 1 0 0 1
+4 1 0 0 1 -1 0 0 -1
+0</p>
+
+<p>Sample Output</p>
+
+<p>0.5
+2.0</p>
+
+<p>Author</p>
+
+<p>lcy</p>
+
+<p>Source</p>
+
+<p><a href="http://acm.hdu.edu.cn/search.php?field=problem&amp;key=ACM20060607&amp;source=1&amp;searchmode=source">ACM程序设计期末考试（2006/06/07）</a></p>
+
+<p>一个多边形。</p>
+
+<p>n个定点按照逆时针方向给出..</p>
+
+<p>求面积。</p>
+
+<p><img src="https://111qqz.com/wp-content/uploads/2015/11/ContractedBlock16.gif" alt="" />
+<img src="https://111qqz.com/wp-content/uploads/2015/11/ExpandedBlockStart16.gif" alt="" /></p>
+
+<pre><code>&lt;span style=&quot;color: #008080;&quot;&gt; 1&lt;/span&gt; &lt;span style=&quot;color: #008000;&quot;&gt;/*&lt;/span&gt;&lt;span style=&quot;color: #008000;&quot;&gt;************************************************************************
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt; 2&lt;/span&gt; &lt;span style=&quot;color: #008000;&quot;&gt;    &gt; File Name: code/hdoj/2036.cpp
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt; 3&lt;/span&gt; &lt;span style=&quot;color: #008000;&quot;&gt;    &gt; Author: 111qqz
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt; 4&lt;/span&gt; &lt;span style=&quot;color: #008000;&quot;&gt;    &gt; Email: rkz2013@126.com 
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt; 5&lt;/span&gt; &lt;span style=&quot;color: #008000;&quot;&gt;    &gt; Created Time: 2015年11月06日 星期五 12时05分30秒
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt; 6&lt;/span&gt; &lt;span style=&quot;color: #008000;&quot;&gt; ***********************************************************************&lt;/span&gt;&lt;span style=&quot;color: #008000;&quot;&gt;*/&lt;/span&gt;
+&lt;span style=&quot;color: #008080;&quot;&gt; 7&lt;/span&gt; 
+&lt;span style=&quot;color: #008080;&quot;&gt; 8&lt;/span&gt; #include&lt;iostream&gt;
+&lt;span style=&quot;color: #008080;&quot;&gt; 9&lt;/span&gt; #include&lt;iomanip&gt;
+&lt;span style=&quot;color: #008080;&quot;&gt;10&lt;/span&gt; #include&lt;cstdio&gt;
+&lt;span style=&quot;color: #008080;&quot;&gt;11&lt;/span&gt; #include&lt;algorithm&gt;
+&lt;span style=&quot;color: #008080;&quot;&gt;12&lt;/span&gt; #include&lt;cmath&gt;
+&lt;span style=&quot;color: #008080;&quot;&gt;13&lt;/span&gt; #include&lt;cstring&gt;
+&lt;span style=&quot;color: #008080;&quot;&gt;14&lt;/span&gt; #include&lt;&lt;span style=&quot;color: #0000ff;&quot;&gt;string&lt;/span&gt;&gt;
+&lt;span style=&quot;color: #008080;&quot;&gt;15&lt;/span&gt; #include&lt;map&gt;
+&lt;span style=&quot;color: #008080;&quot;&gt;16&lt;/span&gt; #include&lt;&lt;span style=&quot;color: #0000ff;&quot;&gt;set&lt;/span&gt;&gt;
+&lt;span style=&quot;color: #008080;&quot;&gt;17&lt;/span&gt; #include&lt;queue&gt;
+&lt;span style=&quot;color: #008080;&quot;&gt;18&lt;/span&gt; #include&lt;vector&gt;
+&lt;span style=&quot;color: #008080;&quot;&gt;19&lt;/span&gt; #include&lt;stack&gt;
+&lt;span style=&quot;color: #008080;&quot;&gt;20&lt;/span&gt; #include&lt;cctype&gt;
+&lt;span style=&quot;color: #008080;&quot;&gt;21&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;#define&lt;/span&gt; fst first              
+&lt;span style=&quot;color: #008080;&quot;&gt;22&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;#define&lt;/span&gt; lson l,m,rt&lt;&lt;1
+&lt;span style=&quot;color: #008080;&quot;&gt;23&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;#define&lt;/span&gt; rson m+1,r,rt&lt;&lt;1|1
+&lt;span style=&quot;color: #008080;&quot;&gt;24&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;#define&lt;/span&gt; ms(a,x) memset(a,x,sizeof(a))
+&lt;span style=&quot;color: #008080;&quot;&gt;25&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;using&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;namespace&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt; std;
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;26&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;const&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;int&lt;/span&gt; dx4[&lt;span style=&quot;color: #800080;&quot;&gt;4&lt;/span&gt;]={&lt;span style=&quot;color: #800080;&quot;&gt;1&lt;/span&gt;,&lt;span style=&quot;color: #800080;&quot;&gt;0&lt;/span&gt;,&lt;span style=&quot;color: #800080;&quot;&gt;0&lt;/span&gt;,-&lt;span style=&quot;color: #800080;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt;};
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;27&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;const&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;int&lt;/span&gt; dy4[&lt;span style=&quot;color: #800080;&quot;&gt;4&lt;/span&gt;]={&lt;span style=&quot;color: #800080;&quot;&gt;0&lt;/span&gt;,-&lt;span style=&quot;color: #800080;&quot;&gt;1&lt;/span&gt;,&lt;span style=&quot;color: #800080;&quot;&gt;1&lt;/span&gt;,&lt;span style=&quot;color: #800080;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt;};
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;28&lt;/span&gt; typedef &lt;span style=&quot;color: #0000ff;&quot;&gt;long&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;long&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt; LL;
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;29&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;#define&lt;/span&gt; sec second
+&lt;span style=&quot;color: #008080;&quot;&gt;30&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;const&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;int&lt;/span&gt; inf = &lt;span style=&quot;color: #800080;&quot;&gt;0x3f3f3f3f&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt;;
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;31&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;const&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;int&lt;/span&gt; N=&lt;span style=&quot;color: #800080;&quot;&gt;105&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt;;
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;32&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;int&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt; n;
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;33&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;struct&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt; point 
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;34&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;{
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;35&lt;/span&gt;     &lt;span style=&quot;color: #0000ff;&quot;&gt;double&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt; x,y;
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;36&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;    point(){}
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;37&lt;/span&gt;     point(&lt;span style=&quot;color: #0000ff;&quot;&gt;double&lt;/span&gt; _x,&lt;span style=&quot;color: #0000ff;&quot;&gt;double&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt; _y):
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;38&lt;/span&gt;     x(_x),y(-&lt;span style=&quot;color: #000000;&quot;&gt;y){};
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;39&lt;/span&gt;     &lt;span style=&quot;color: #0000ff;&quot;&gt;void&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt; input()
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;40&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;    {
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;41&lt;/span&gt;     scanf(&lt;span style=&quot;color: #800000;&quot;&gt;&quot;&lt;/span&gt;&lt;span style=&quot;color: #800000;&quot;&gt;%lf%lf&lt;/span&gt;&lt;span style=&quot;color: #800000;&quot;&gt;&quot;&lt;/span&gt;,&amp;x;,&amp;&lt;span style=&quot;color: #000000;&quot;&gt;y);
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;42&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;    }
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;43&lt;/span&gt;     &lt;span style=&quot;color: #0000ff;&quot;&gt;double&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt; det(point p)
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;44&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;    {
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;45&lt;/span&gt;     &lt;span style=&quot;color: #0000ff;&quot;&gt;return&lt;/span&gt; x*p.y-y*&lt;span style=&quot;color: #000000;&quot;&gt;p.x;
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;46&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;    }
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;47&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;};
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;48&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;struct&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt;  polygon
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;49&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;{
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;50&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;    point  p[N];
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;51&lt;/span&gt;     &lt;span style=&quot;color: #0000ff;&quot;&gt;void&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt; input()
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;52&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;    {
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;53&lt;/span&gt;     &lt;span style=&quot;color: #0000ff;&quot;&gt;for&lt;/span&gt; ( &lt;span style=&quot;color: #0000ff;&quot;&gt;int&lt;/span&gt; i = &lt;span style=&quot;color: #800080;&quot;&gt;0&lt;/span&gt; ; i &lt; n ; i++&lt;span style=&quot;color: #000000;&quot;&gt;)
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;54&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;    {
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;55&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;        p[i].input();
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;56&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;    }
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;57&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;    }
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;58&lt;/span&gt;     &lt;span style=&quot;color: #0000ff;&quot;&gt;double&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt; getarea()
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;59&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;    {
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;60&lt;/span&gt;     &lt;span style=&quot;color: #0000ff;&quot;&gt;double&lt;/span&gt; sum= &lt;span style=&quot;color: #800080;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt; ;
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;61&lt;/span&gt;     &lt;span style=&quot;color: #0000ff;&quot;&gt;int&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt; i;
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;62&lt;/span&gt;     &lt;span style=&quot;color: #0000ff;&quot;&gt;for&lt;/span&gt; ( &lt;span style=&quot;color: #0000ff;&quot;&gt;int&lt;/span&gt; i = &lt;span style=&quot;color: #800080;&quot;&gt;0&lt;/span&gt; ; i &lt; n ; i++&lt;span style=&quot;color: #000000;&quot;&gt; )
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;63&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;    {
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;64&lt;/span&gt;         sum+=p[i].det(p[(i+&lt;span style=&quot;color: #800080;&quot;&gt;1&lt;/span&gt;)%&lt;span style=&quot;color: #000000;&quot;&gt;n]);
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;65&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;    }
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;66&lt;/span&gt;     &lt;span style=&quot;color: #0000ff;&quot;&gt;return&lt;/span&gt; fabs(sum)/&lt;span style=&quot;color: #800080;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt;;
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;67&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;    }
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;68&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;}pol;
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;69&lt;/span&gt; &lt;span style=&quot;color: #0000ff;&quot;&gt;int&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt; main()
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;70&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;{
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;71&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;  #ifndef  ONLINE_JUDGE 
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;72&lt;/span&gt;    freopen(&lt;span style=&quot;color: #800000;&quot;&gt;&quot;&lt;/span&gt;&lt;span style=&quot;color: #800000;&quot;&gt;in.txt&lt;/span&gt;&lt;span style=&quot;color: #800000;&quot;&gt;&quot;&lt;/span&gt;,&lt;span style=&quot;color: #800000;&quot;&gt;&quot;&lt;/span&gt;&lt;span style=&quot;color: #800000;&quot;&gt;r&lt;/span&gt;&lt;span style=&quot;color: #800000;&quot;&gt;&quot;&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt;,stdin);
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;73&lt;/span&gt;   &lt;span style=&quot;color: #0000ff;&quot;&gt;#endif&lt;/span&gt;
+&lt;span style=&quot;color: #008080;&quot;&gt;74&lt;/span&gt;    &lt;span style=&quot;color: #0000ff;&quot;&gt;while&lt;/span&gt; (scanf(&lt;span style=&quot;color: #800000;&quot;&gt;&quot;&lt;/span&gt;&lt;span style=&quot;color: #800000;&quot;&gt;%d&lt;/span&gt;&lt;span style=&quot;color: #800000;&quot;&gt;&quot;&lt;/span&gt;,&amp;n;)!=EOF&amp;&amp;&lt;span style=&quot;color: #000000;&quot;&gt;n)
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;75&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;    {
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;76&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;    pol.input();
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;77&lt;/span&gt;     printf(&lt;span style=&quot;color: #800000;&quot;&gt;&quot;&lt;/span&gt;&lt;span style=&quot;color: #800000;&quot;&gt;%.1fn&lt;/span&gt;&lt;span style=&quot;color: #800000;&quot;&gt;&quot;&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt;,pol.getarea());
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;78&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;    }
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;79&lt;/span&gt; 
+&lt;span style=&quot;color: #008080;&quot;&gt;80&lt;/span&gt;   
+&lt;span style=&quot;color: #008080;&quot;&gt;81&lt;/span&gt;    
+&lt;span style=&quot;color: #008080;&quot;&gt;82&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt; #ifndef ONLINE_JUDGE  
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;83&lt;/span&gt; &lt;span style=&quot;color: #000000;&quot;&gt;  fclose(stdin);
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;84&lt;/span&gt;   &lt;span style=&quot;color: #0000ff;&quot;&gt;#endif&lt;/span&gt;
+&lt;span style=&quot;color: #008080;&quot;&gt;85&lt;/span&gt;     &lt;span style=&quot;color: #0000ff;&quot;&gt;return&lt;/span&gt; &lt;span style=&quot;color: #800080;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #000000;&quot;&gt;;
+&lt;/span&gt;&lt;span style=&quot;color: #008080;&quot;&gt;86&lt;/span&gt; }
+</code></pre>
+
+<p>View Code</p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="https://111qqz.github.io"><img src="/img/favicon.png" />111qqz的小窝</a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2015/11/poj1269intersectinglines/" data-toggle="tooltip" data-placement="top" title="poj 1269  Intersecting Lines (计算几何)">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2015/11/hdu1086a-youcansolveageometryproblemtoo/" data-toggle="tooltip" data-placement="top" title="hdu 1086  A - You can Solve a Geometry Problem too （线段的规范相交&amp;&amp;非规范相交）">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+<div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "111qqz" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/bfs" title="bfs">
+                            bfs
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/binary-search" title="binary-search">
+                            binary-search
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/brute-force" title="brute-force">
+                            brute-force
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/c&#43;&#43;" title="c&#43;&#43;">
+                            c&#43;&#43;
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dfs" title="dfs">
+                            dfs
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dp" title="dp">
+                            dp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/greedy" title="greedy">
+                            greedy
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/hash" title="hash">
+                            hash
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/km" title="km">
+                            km
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/kmp" title="kmp">
+                            kmp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/leetcode" title="leetcode">
+                            leetcode
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/math" title="math">
+                            math
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/number-theory" title="number-theory">
+                            number-theory
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/rmq" title="rmq">
+                            rmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/sg%E5%87%BD%E6%95%B0" title="sg函数">
+                            sg函数
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/stl" title="stl">
+                            stl
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/tensorflow" title="tensorflow">
+                            tensorflow
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%BA%8C%E5%88%86%E5%9B%BE%E6%9C%80%E4%BD%B3%E5%8C%B9%E9%85%8D" title="二分图最佳匹配">
+                            二分图最佳匹配
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%9D%97" title="分块">
+                            分块
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%89%8D%E7%BC%80%E5%92%8C" title="前缀和">
+                            前缀和
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8C%88%E7%89%99%E5%88%A9%E7%AE%97%E6%B3%95" title="匈牙利算法">
+                            匈牙利算法
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E5%8C%BA%E9%97%B4dp" title="区间dp">
+                            区间dp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8D%9A%E5%BC%88%E8%AE%BA" title="博弈论">
+                            博弈论
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%90%8E%E7%BC%80%E8%87%AA%E5%8A%A8%E6%9C%BA" title="后缀自动机">
+                            后缀自动机
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%9B%BE%E8%AE%BA" title="图论">
+                            图论
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2" title="字符串">
+                            字符串
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BF%AB%E9%80%9F%E5%B9%82" title="快速幂">
+                            快速幂
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E4%BD%8Ddp" title="数位dp">
+                            数位dp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9E%84%E9%80%A0" title="构造">
+                            构造
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84" title="树状数组">
+                            树状数组
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%A6%82%E7%8E%87" title="概率">
+                            概率
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E6%A8%A1%E6%8B%9F" title="模拟">
+                            模拟
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%AF%8D%E5%87%BD%E6%95%B0" title="母函数">
+                            母函数
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%9F%A9%E9%98%B5" title="矩阵">
+                            矩阵
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%A6%BB%E6%95%A3%E5%8C%96" title="离散化">
+                            离散化
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%BA%BF%E6%AE%B5%E6%A0%91" title="线段树">
+                            线段树
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95" title="计算几何">
+                            计算几何
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://111qqz.com">111qqz的wordpress博客</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="111qqz的小窝" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:hust.111qqz@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/111qqz/">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy; 111qqz的小窝 2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
