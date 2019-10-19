@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="111qqz的小窝">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="https://111qqz.github.io/img/2.png">
+    <meta property="twitter:image" content="https://111qqz.github.io/img/2.png" />
+    
+
+    
+    <meta name="title" content="C&#43;&#43; STL中Map的按Key排序和按Value排序" />
+    <meta property="og:title" content="C&#43;&#43; STL中Map的按Key排序和按Value排序" />
+    <meta property="twitter:title" content="C&#43;&#43; STL中Map的按Key排序和按Value排序" />
+    
+
+    
+    <meta name="description" content="">
+    <meta property="og:description" content="" />
+    <meta property="twitter:description" content="" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="ACM,111qqz,商汤科技,hust,华中科技大学">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>C&#43;&#43; STL中Map的按Key排序和按Value排序-111qqz的小窝</title>
+
+    <link rel="canonical" href="/2015/04/cstlmapkeyvalue/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+    <link rel="stylesheet" href="/css/hux-blog.min-custom.css">
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">111qqz的小窝</a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/acm">acm</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/c&#43;&#43;">c&#43;&#43;</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/deep-learning">deep-learning</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/%E4%BC%98%E5%8C%96">优化</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/%E5%85%B6%E4%BB%96">其他</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/%E9%9A%8F%E7%AC%94%E6%9D%82%E8%B0%88">随笔杂谈</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/%E9%9D%A2%E8%AF%95">面试</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('/img/2.png')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>C&#43;&#43; STL中Map的按Key排序和按Value排序</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    111qqz
+			 
+			on 
+			Friday, April 24, 2015
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                
+                
+                <p>map是用来存放键值对的数据结构，可以很方便快速的根据key查到相应的value。假如存储学生和其成绩（假定不存在重名，当然可以对重名加以区分），我们用map来进行存储就是个不错的选择。 我们这样定义，map，其中学生姓名用string类型，作为Key；该学生的成绩用int类型，作为value。这样一来，我们可以根据学生姓名快速的查找到他的成绩。</p>
+
+<p>但是，我们除了希望能够查询某个学生的成绩，或许还想看看整体的情况。我们想把所有同学和他相应的成绩都输出来，并且按照我们想要的顺序进行输出：比如按照学生姓名的顺序进行输出，或者按照学生成绩的高低进行输出。换句话说，我们希望能够对map进行按Key排序或按Value排序，然后按序输出其键值对的内容。</p>
+
+<p><strong>一、C++ STL中Map的按Key排序</strong></p>
+
+<p>其实，为了实现快速查找，map内部本身就是按序存储的（比如红黑树）。在我们插入键值对时，就会按照key的大小顺序进行存储。这也是作为key的类型必须能够进行&lt;运算比较的原因。现在我们用string类型作为key，因此，我们的存储就是按学生姓名的字典排序储存的。</p>
+
+<p>【参考代码】</p>
+
+<ol>
+<li>#include</li>
+<li>#include</li>
+<li>#include</li>
+<li>using namespace std;</li>
+<li></li>
+<li>typedef pairint&gt; PAIR;</li>
+<li></li>
+<li>ostream&amp; operator&lt;&lt;(ostream&amp; out, const PAIR&amp; p) {</li>
+<li>return out &lt;&lt; p.first &lt;&lt; &ldquo;t&rdquo; &lt;&lt; p.second;</li>
+<li>}</li>
+<li></li>
+<li>int main() {</li>
+<li>mapint&gt; name_score_map;</li>
+<li>name_score_map[&ldquo;LiMin&rdquo;] = 90;</li>
+<li>name_score_map[&ldquo;ZiLinMi&rdquo;] = 79;</li>
+<li>name_score_map[&ldquo;BoB&rdquo;] = 92;</li>
+<li>name_score_map.insert(make_pair(&ldquo;Bing&rdquo;,99));</li>
+<li>name_score_map.insert(make_pair(&ldquo;Albert&rdquo;,86));</li>
+<li>for (mapint&gt;::iterator iter = name_score_map.begin();</li>
+<li>iter != name_score_map.end();</li>
+<li>++iter) {</li>
+<li>cout &lt;&lt; *iter &lt;&lt; endl;</li>
+<li>}</li>
+<li>return 0;</li>
+<li>}</li>
+</ol>
+
+<p>【运行结果】</p>
+
+<p><img src="https://111qqz.com/wp-content/uploads/2015/11/1354288047_7951.jpg" alt="" /></p>
+
+<p>大家都知道map是stl里面的一个模板类，现在我们来看下map的定义：</p>
+
+<ol>
+<li>template &lt; class Key, class T, class Compare = less,</li>
+<li>class Allocator = allocatorconst Key,T&gt; &gt; &gt; class map;
+
+
+
+
+
+<br /></li>
+</ol>
+
+<p>它有四个参数，其中我们比较熟悉的有两个: Key 和 Value。第四个是 Allocator，用来定义存储分配模型的，此处我们不作介绍。</p>
+
+<p>现在我们重点看下第三个参数： class Compare = less</p>
+
+<p>这也是一个class类型的，而且提供了默认值 less。 less是stl里面的一个函数对象，那么什么是函数对象呢？</p>
+
+<p>所谓的函数对象：即调用操作符的类，其对象常称为函数对象（function object），它们是行为类似函数的对象。表现出一个函数的特征，就是通过&rdquo;对象名+(参数列表)&ldquo;的方式使用一个 类，其实质是对operator()操作符的重载。</p>
+
+<p>现在我们来看一下less的实现：</p>
+
+<ol>
+<li>template <class T> struct less : binary_function bool&gt; {</li>
+<li>bool operator() (const T&amp; x, const T&amp; y) const</li>
+<li>{return x</li>
+<li>};
+
+
+
+
+
+
+
+
+<br /></li>
+</ol>
+
+<p>它是一个带模板的struct，里面仅仅对()运算符进行了重载，实现很简单，但用起来很方便，这就是函数对象的优点所在。stl中还为四则运算等常见运算定义了这样的函数对象，与less相对的还有greater：</p>
+
+<ol>
+<li>template <class T> struct greater : binary_function bool&gt; {</li>
+<li>bool operator() (const T&amp; x, const T&amp; y) const</li>
+<li>{return x&gt;y;}</li>
+<li>};
+
+
+
+
+
+
+
+
+<br /></li>
+</ol>
+
+<p>map这里指定less作为其默认比较函数(对象)，所以我们通常如果不自己指定Compare，map中键值对就会按照Key的less顺序进行组织存储，因此我们就看到了上面代码输出结果是按照学生姓名的字典顺序输出的，即string的less序列。</p>
+
+<p>我们可以在定义map的时候，指定它的第三个参数Compare，比如我们把默认的less指定为greater：</p>
+
+<p>【参考代码】</p>
+
+<ol>
+<li>#include</li>
+<li>#include</li>
+<li>#include</li>
+<li>using namespace std;</li>
+<li></li>
+<li>typedef pairint&gt; PAIR;</li>
+<li></li>
+<li>ostream&amp; operator&lt;&lt;(ostream&amp; out, const PAIR&amp; p) {</li>
+<li>return out &lt;&lt; p.first &lt;&lt; &ldquo;t&rdquo; &lt;&lt; p.second;</li>
+<li>}</li>
+<li></li>
+<li>int main() {</li>
+<li>mapint, greater &gt; name_score_map;</li>
+<li>name_score_map[&ldquo;LiMin&rdquo;] = 90;</li>
+<li>name_score_map[&ldquo;ZiLinMi&rdquo;] = 79;</li>
+<li>name_score_map[&ldquo;BoB&rdquo;] = 92;</li>
+<li>name_score_map.insert(make_pair(&ldquo;Bing&rdquo;,99));</li>
+<li>name_score_map.insert(make_pair(&ldquo;Albert&rdquo;,86));</li>
+<li>for (mapint&gt;::iterator iter = name_score_map.begin();</li>
+<li>iter != name_score_map.end();</li>
+<li>++iter) {</li>
+<li>cout &lt;&lt; *iter &lt;&lt; endl;</li>
+<li>}</li>
+<li>return 0;</li>
+<li>}</li>
+</ol>
+
+<p>【运行结果】</p>
+
+<p><img src="https://111qqz.com/wp-content/uploads/2015/11/1354287870_9567.jpg" alt="" /></p>
+
+<p>现在知道如何为map指定Compare类了，如果我们想自己写一个compare的类，让map按照我们想要的顺序来存储，比如，按照学生姓名的长短排序进行存储，那该怎么做呢？</p>
+
+<p>其实很简单，只要我们自己写一个函数对象，实现想要的逻辑，定义map的时候把Compare指定为我们自己编写的这个就ok啦。</p>
+
+<ol>
+<li>struct CmpByKeyLength {</li>
+<li>bool operator()(const string&amp; k1, const string&amp; k2) {</li>
+<li>return k1.length() &lt; k2.length();</li>
+<li>}</li>
+<li>};</li>
+</ol>
+
+<p>是不是很简单！这里我们不用把它定义为模板，直接指定它的参数为string类型就可以了。</p>
+
+<p>【参考代码】</p>
+
+<ol>
+<li>int main() {</li>
+<li>mapint, CmpByKeyLength&gt; name_score_map;</li>
+<li>name_score_map[&ldquo;LiMin&rdquo;] = 90;</li>
+<li>name_score_map[&ldquo;ZiLinMi&rdquo;] = 79;</li>
+<li>name_score_map[&ldquo;BoB&rdquo;] = 92;</li>
+<li>name_score_map.insert(make_pair(&ldquo;Bing&rdquo;,99));</li>
+<li>name_score_map.insert(make_pair(&ldquo;Albert&rdquo;,86));</li>
+<li>for (mapint&gt;::iterator iter = name_score_map.begin();</li>
+<li>iter != name_score_map.end();</li>
+<li>++iter) {</li>
+<li>cout &lt;&lt; *iter &lt;&lt; endl;</li>
+<li>}</li>
+<li>return 0;</li>
+<li>}</li>
+</ol>
+
+<p>【运行结果】</p>
+
+<p><img src="https://111qqz.com/wp-content/uploads/2015/11/1354287915_4835.jpg" alt="" /></p>
+
+<hr />
+
+<p><strong>二、C++ STL中Map的按Value排序</strong></p>
+
+<p>在第一部分中，我们借助map提供的参数接口，为它指定相应Compare类，就可以实现对map按Key排序，是在创建map并不断的向其中添加元素的过程中就会完成排序。</p>
+
+<p>现在我们想要从map中得到学生按成绩的从低到高的次序输出，该如何实现呢？换句话说，该如何实现Map的按Value排序呢？</p>
+
+<p>第一反应是利用stl中提供的sort算法实现，这个想法是好的，不幸的是，sort算法有个限制，利用sort算法只能对序列容器进行排序，就是线性的（如vector，list，deque）。map也是一个集合容器，它里面存储的元素是pair，但是它不是线性存储的（前面提过，像红黑树），所以利用sort不能直接和map结合进行排序。</p>
+
+<p>虽然不能直接用sort对map进行排序，那么我们可不可以迂回一下，把map中的元素放到序列容器（如vector）中，然后再对这些元素进行排序呢？这个想法看似是可行的。要对序列容器中的元素进行排序，也有个必要条件：就是容器中的元素必须是可比较的，也就是实现了&lt;操作的。那么我们现在就来看下map中的元素满足这个条件么？</p>
+
+<p>我们知道map中的元素类型为pair，具体定义如下：</p>
+
+<ol>
+<li>template <class T1, class T2> struct pair</li>
+<li>{</li>
+<li>typedef T1 first_type;</li>
+<li>typedef T2 second_type;</li>
+<li></li>
+<li>T1 first;</li>
+<li>T2 second;</li>
+<li>pair() : first(T1()), second(T2()) {}</li>
+<li>pair(const T1&amp; x, const T2&amp; y) : first(x), second(y) {}</li>
+<li>template <class U, class V></li>
+<li>pair (const pair &p;) : first(p.first), second(p.second) { }</li>
+<li>}
+
+
+
+
+
+
+
+
+<br /></li>
+</ol>
+
+<p>pair也是一个模板类，这样就实现了良好的通用性。它仅有两个数据成员first 和 second，即 key 和 value，而且</p>
+
+<p>在头文件中，还为pair重载了 &lt; 运算符， 具体实现如下：</p>
+
+<ol>
+<li>template<class _T1, class _T2></li>
+<li>inline bool</li>
+<li>operator&lt;(const pair&lt;_T1, _T2&gt;&amp; __x, const pair&lt;_T1, _T2&gt;&amp; __y)</li>
+<li>{ return __x.first &lt; __y.first</li>
+<li>|| (!(__y.first &lt; __x.first) &amp;&amp; __x.second &lt; __y.second); }
+
+
+
+
+
+
+
+
+<br /></li>
+</ol>
+
+<p>重点看下其实现：</p>
+
+<ol>
+<li>__x.first &lt; <strong>y.first || (!(</strong>y.first &lt; __x.first) &amp;&amp; __x.second &lt; __y.second)</li>
+</ol>
+
+<p>这个less在两种情况下返回true，第一种情况：__x.first &lt; <strong>y.first  这个好理解，就是比较key，如果</strong>x的key 小于 __y的key 则返回true。</p>
+
+<p>第二种情况有点费解：  !(__y.first &lt; __x.first) &amp;&amp; __x.second &lt; __y.second</p>
+
+<p>当然由于||运算具有短路作用，即当前面的条件不满足是，才进行第二种情况的判断 。第一种情况__x.first &lt; <strong>y.first 不成立，即</strong>x.first &gt;= <strong>y.first 成立，在这个条件下，我们来分析下 !(</strong>y.first &lt; __x.first)  &amp;&amp; __x.second &lt; __y.second</p>
+
+<p>!(__y.first &lt; <strong>x.first) ，看清出，这里是y的key不小于x的key ，结合前提条件，</strong>x.first &lt; __y.first 不成立，即x的key不小于y的key</p>
+
+<p>即： !(__y.first &lt; <strong>x.first)  &amp;&amp; !(</strong>x.first &lt; __y.first )  等价于  __x.first == __y.first ,也就是说，第二种情况是在key相等的情况下，比较两者的value（second）。</p>
+
+<p>这里比较令人费解的地方就是，为什么不直接写 __x.first == <strong>y.first 呢？ 这么写看似费解，但其实也不无道理：前面讲过，作为map的key必须实现&lt;操作符的重载，但是并不保证==符也被重载了，如果key没有提供==，那么 ，</strong>x.first == __y.first 这样写就错了。由此可见，stl中的代码是相当严谨的，值得我们好好研读。</p>
+
+<p>现在我们知道了pair类重载了&lt;符，但是它并不是按照value进行比较的，而是先对key进行比较，key相等时候才对value进行比较。显然不能满足我们按value进行排序的要求。</p>
+
+<p>而且，既然pair已经重载了&lt;符，而且我们不能修改其实现，又不能在外部重复实现重载&lt;符。</p>
+
+<ol>
+<li>typedef pairint&gt; PAIR;</li>
+<li>bool operator&lt; (const PAIR&amp; lhs, const PAIR&amp; rhs) {</li>
+<li>return lhs.second &lt; rhs.second;</li>
+<li>}
+
+
+
+
+
+
+
+
+<br /></li>
+</ol>
+
+<p>如果pair类本身没有重载&lt;符，那么我们按照上面的代码重载&lt;符，是可以实现对pair的按value比较的。现在这样做不行了，甚至会出错（编译器不同，严格的就报错）。</p>
+
+<p>那么我们如何实现对pair按value进行比较呢？ 第一种：是最原始的方法，写一个比较函数；  第二种：刚才用到了，写一个函数对象。这两种方式实现起来都比较简单。</p>
+
+<ol>
+<li>typedef pairint&gt; PAIR;</li>
+<li></li>
+<li>bool cmp_by_value(const PAIR&amp; lhs, const PAIR&amp; rhs) {</li>
+<li>return lhs.second &lt; rhs.second;</li>
+<li>}</li>
+<li></li>
+<li>struct CmpByValue {</li>
+<li>bool operator()(const PAIR&amp; lhs, const PAIR&amp; rhs) {</li>
+<li>return lhs.second &lt; rhs.second;</li>
+<li>}</li>
+<li>};
+
+
+
+
+
+
+
+
+<br /></li>
+</ol>
+
+<p>接下来，我们看下sort算法，是不是也像map一样，可以让我们自己指定元素间如何进行比较呢？</p>
+
+<ol>
+<li>template <class RandomAccessIterator></li>
+<li>void sort ( RandomAccessIterator first, RandomAccessIterator last );</li>
+<li></li>
+<li>template <class RandomAccessIterator, class Compare></li>
+<li>void sort ( RandomAccessIterator first, RandomAccessIterator last, Compare comp );</li>
+</ol>
+
+<p>我们看到，令人兴奋的是，sort算法和map一样，也可以让我们指定元素间如何进行比较，即指定Compare。需要注意的是，map是在定义时指定的，所以传参的时候直接传入函数对象的类名，就像指定key和value时指定的类型名一样；sort算法是在调用时指定的，需要传入一个对象，当然这个也简单，类名()就会调用构造函数生成对象。</p>
+
+<p>这里也可以传入一个函数指针，就是把上面说的第一种方法的函数名传过来。（应该是存在函数指针到函数对象的转换，或者两者调用形式上是一致的，具体确切原因还不明白，希望知道的朋友给讲下，先谢谢了。）</p>
+
+<p>【参考代码】</p>
+
+<ol>
+<li>int main() {</li>
+<li>mapint&gt; name_score_map;</li>
+<li>name_score_map[&ldquo;LiMin&rdquo;] = 90;</li>
+<li>name_score_map[&ldquo;ZiLinMi&rdquo;] = 79;</li>
+<li>name_score_map[&ldquo;BoB&rdquo;] = 92;</li>
+<li>name_score_map.insert(make_pair(&ldquo;Bing&rdquo;,99));</li>
+<li>name_score_map.insert(make_pair(&ldquo;Albert&rdquo;,86));</li>
+<li>//把map中元素转存到vector中</li>
+<li>vector name_score_vec(name_score_map.begin(), name_score_map.end());</li>
+<li>sort(name_score_vec.begin(), name_score_vec.end(), CmpByValue());</li>
+<li>// sort(name_score_vec.begin(), name_score_vec.end(), cmp_by_value);</li>
+<li>for (int i = 0; i != name_score_vec.size(); ++i) {</li>
+<li>cout &lt;&lt; name_score_vec[i] &lt;&lt; endl;</li>
+<li>}</li>
+<li>return 0;</li>
+<li>}</li>
+</ol>
+
+<p>【运行结果】</p>
+
+<p><img src="https://111qqz.com/wp-content/uploads/2015/11/1354287940_8311.jpg" alt="" /></p>
+
+<p>原创文章，转载请注明： 转载自  <a href="http://blog.csdn.net/iicy266">IIcyZhao&rsquo;s Road</a></p>
+
+<p>本文链接地址： <a href="http://blog.csdn.net/iicy266/article/details/11906189">http://blog.csdn.net/iicy266/article/details/11906189</a></p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="https://111qqz.github.io"><img src="/img/favicon.png" />111qqz的小窝</a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2015/04/poj2492/" data-toggle="tooltip" data-placement="top" title="poj 2492  A Bug&#39;s Life (并查集)">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2015/05/cf548a/" data-toggle="tooltip" data-placement="top" title="codeforces  548 A. Mike and Fax">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+<div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "111qqz" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/bfs" title="bfs">
+                            bfs
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/binary-search" title="binary-search">
+                            binary-search
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/brute-force" title="brute-force">
+                            brute-force
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/c&#43;&#43;" title="c&#43;&#43;">
+                            c&#43;&#43;
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dfs" title="dfs">
+                            dfs
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dp" title="dp">
+                            dp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/greedy" title="greedy">
+                            greedy
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/hash" title="hash">
+                            hash
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/km" title="km">
+                            km
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/kmp" title="kmp">
+                            kmp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/leetcode" title="leetcode">
+                            leetcode
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/math" title="math">
+                            math
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/number-theory" title="number-theory">
+                            number-theory
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/rmq" title="rmq">
+                            rmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/sg%E5%87%BD%E6%95%B0" title="sg函数">
+                            sg函数
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/stl" title="stl">
+                            stl
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/tensorflow" title="tensorflow">
+                            tensorflow
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%BA%8C%E5%88%86%E5%9B%BE%E6%9C%80%E4%BD%B3%E5%8C%B9%E9%85%8D" title="二分图最佳匹配">
+                            二分图最佳匹配
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%9D%97" title="分块">
+                            分块
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%89%8D%E7%BC%80%E5%92%8C" title="前缀和">
+                            前缀和
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8C%88%E7%89%99%E5%88%A9%E7%AE%97%E6%B3%95" title="匈牙利算法">
+                            匈牙利算法
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E5%8C%BA%E9%97%B4dp" title="区间dp">
+                            区间dp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8D%9A%E5%BC%88%E8%AE%BA" title="博弈论">
+                            博弈论
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%90%8E%E7%BC%80%E8%87%AA%E5%8A%A8%E6%9C%BA" title="后缀自动机">
+                            后缀自动机
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%9B%BE%E8%AE%BA" title="图论">
+                            图论
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2" title="字符串">
+                            字符串
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BF%AB%E9%80%9F%E5%B9%82" title="快速幂">
+                            快速幂
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E4%BD%8Ddp" title="数位dp">
+                            数位dp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9E%84%E9%80%A0" title="构造">
+                            构造
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84" title="树状数组">
+                            树状数组
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%A6%82%E7%8E%87" title="概率">
+                            概率
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E6%A8%A1%E6%8B%9F" title="模拟">
+                            模拟
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%AF%8D%E5%87%BD%E6%95%B0" title="母函数">
+                            母函数
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%9F%A9%E9%98%B5" title="矩阵">
+                            矩阵
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%A6%BB%E6%95%A3%E5%8C%96" title="离散化">
+                            离散化
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%BA%BF%E6%AE%B5%E6%A0%91" title="线段树">
+                            线段树
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95" title="计算几何">
+                            计算几何
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://111qqz.com">111qqz的wordpress博客</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="111qqz的小窝" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:hust.111qqz@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/111qqz/">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy; 111qqz的小窝 2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
