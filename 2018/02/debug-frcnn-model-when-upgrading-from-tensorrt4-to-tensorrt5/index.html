@@ -250,18 +250,23 @@
 
 <p>最终发现有问题的layer 是softmax!</p>
 
-<p>cls_score 的维度应该为 N*K*C*H*W
-其中k表示ROI的个数</p>
+<p>cls_score 的维度应该为 N*K*C*H*W</p>
 
 <p>softmax应该按照C这一维度来做,因此softmax_param中axis应该为2.</p>
 
-<p>但是&hellip;由于tensorrt4中,该参数只支持为1 (然后似乎会自动在channel 这个维度上做softmax) 所以模型转换工具中生成的prototxt 生成的也是axis:1</p>
+<p>查阅&rdquo;tensorrt support matrix&rdquo; ，发现 <a href="https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#softmax-layer">tensorrt5</a>中，softmax会按照用户指定的维度进行。</p>
 
-<p>也就是说,由于tensorrt5 升级使得softmax_param 中axis为任意维度都可以正常工作,导致需要按照需求写这个参数&hellip;
-或者&hellip;
-干脆不写softmax_param</p>
+<p><img src="https://i.loli.net/2019/11/13/3nVKSDOAPB9Hfjm.png" alt="trt5_softmax.png" /></p>
 
-<p>问题解决!</p>
+<p>而对于<a href="https://docs.nvidia.com/deeplearning/sdk/tensorrt-archived/tensorrt_401/tensorrt-developer-guide/index.html">tensorrt4.0</a>, softmax layer 与设定的softmax_param无关，只会在channel 的维度上来做softmax.</p>
+
+<p><img src="https://i.loli.net/2019/11/13/PnN75eUTCjhcEKo.png" alt="trt4_softmax.png" /></p>
+
+<p>所以，比较好的解决办法是，干脆不写softmax_param这个参数
+对于trt4，会直接按照channel 维度来做
+对于trt5，会在第N-3的axis上进行。对于SSD的 N*C*H*W或者 faster rcnn 的N*K*C*H*W, N-3都是channel所在的维度。</p>
+
+<p>问题解决！</p>
 
 
                 
