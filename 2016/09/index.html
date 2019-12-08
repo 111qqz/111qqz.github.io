@@ -15,9 +15,9 @@
     
 
     
-    <meta name="title" content="康托展开和康托逆展开" />
-    <meta property="og:title" content="康托展开和康托逆展开" />
-    <meta property="twitter:title" content="康托展开和康托逆展开" />
+    <meta name="title" content="【施工中】回文自动机学习笔记" />
+    <meta property="og:title" content="【施工中】回文自动机学习笔记" />
+    <meta property="twitter:title" content="【施工中】回文自动机学习笔记" />
     
 
     
@@ -34,7 +34,7 @@
     <meta name="keyword"  content="ACM,111qqz,商汤科技,hust,华中科技大学">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>康托展开和康托逆展开-111qqz的小窝</title>
+    <title>【施工中】回文自动机学习笔记-111qqz的小窝</title>
 
     <link rel="canonical" href="/2016/09/">
 
@@ -186,16 +186,12 @@
                 <div class="post-heading">
                     <div class="tags">
                         
-                        <a class="tag" href="/tags/hash" title="hash">
-                            hash
-                        </a>
-                        
-                        <a class="tag" href="/tags/%E5%BA%B7%E6%89%98%E5%B1%95%E5%BC%80" title="康托展开">
-                            康托展开
+                        <a class="tag" href="/tags/%E5%9B%9E%E6%96%87%E8%87%AA%E5%8A%A8%E6%9C%BA" title="回文自动机">
+                            回文自动机
                         </a>
                         
                     </div>
-                    <h1>康托展开和康托逆展开</h1>
+                    <h1>【施工中】回文自动机学习笔记</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
 			Posted by 
@@ -203,7 +199,7 @@
 			    111qqz
 			 
 			on 
-			Tuesday, September 13, 2016
+			Thursday, September 22, 2016
                         
                     </span>
                 </div>
@@ -231,11 +227,129 @@
                 </header>
                 
                 
-                <p>感觉就是为了记录排列。。。重复之类的。。。用到的一个hash函数。。。？</p>
+                <p>是14年才被提出来的算法&hellip;
+先%一下该算法的作者：<a href="http://codeforces.com/profile/MikhailRubinchik">作者的codeforces页</a></p>
 
-<p><a href="https://zh.wikipedia.org/wiki/#.E5.BA.B7.E6.89.98.E5.B1.95.E5.BC.80.E7.9A.84.E9.80.86.E8.BF.90.E7.AE.97">维基百科</a></p>
+<p>接下来，老规矩，放一波资料：</p>
 
-<p><a href="http://blog.csdn.net/lttree/article/details/24798653">讲解</a></p>
+<p><a href="http://adilet.org/blog/25-09-14/">参考博客1</a>
+<a href="http://codeforces.com/blog/entry/13959">codeforces上的讲解</a></p>
+
+<p>20171115 update:</p>
+
+<p>emmmm，这篇是学习笔记是１６年９月写的。。。。一转眼13个月过去了啊。。</p>
+
+<p>回文树，也叫回文自动机，简称PAM</p>
+
+<p>学了SAM之后PAM简直是傻逼算法&hellip;</p>
+
+<p>该算法时间和空间复杂度都是O(n)</p>
+
+<p>这样的复杂度基于以下结论：</p>
+
+<p><strong>长度为n的字符串的本质不同的回文串的数目不超过n</strong></p>
+
+<p><strong>因此状态数开到和字符串长度一样就可以了orz</strong></p>
+
+<p>len表示某个状态所表示的回文串的长度</p>
+
+<p>cnt表示某个状态所表示的回文串的数量</p>
+
+<p>构建PAM的算法仍然是增量算法，在某一时刻，本质不同的回文串的数量是sz-1 (sz标号从０开始，出去标号为０和标号为１的２个根)</p>
+
+<p>唯一需要特别注意的是</p>
+
+<p><strong>在构建完PAM之后，沿着回文链（类比后缀链)从底向上跑一遍得到的cnt，才是真正的cnt</strong></p>
+
+<p><strong>在构建完PAM之后，沿着回文链（类比后缀链)从底向上跑一遍得到的cnt，才是真正的cnt</strong></p>
+
+<p><strong>在构建完PAM之后，沿着回文链（类比后缀链)从底向上跑一遍得到的cnt，才是真正的cnt</strong></p>
+
+<p>我的模板：</p>
+
+<pre><code>/* ***********************************************
+Author :111qqz
+Created Time :2017年11月15日 星期三 20时31分58秒
+File Name :PAM.cpp
+************************************************ */
+
+#include &lt;bits/stdc++.h&gt;
+#define PB push_back
+#define fst first
+#define sec second
+#define lson l,m,rt&lt;&lt;1
+#define rson m+1,r,rt&lt;&lt;1|1
+#define ms(a,x) memset(a,x,sizeof(a))
+typedef long long LL;
+#define pi pair &lt; int ,int &gt;
+#define MP make_pair
+
+using namespace std;
+const double eps = 1E-8;
+const int dx4[4]={1,0,0,-1};
+const int dy4[4]={0,-1,1,0};
+const int inf = 0x3f3f3f3f;
+struct PAM
+{
+    //cnt表示某个节点的回文串的数量
+    //len表示的是该状态所表示的回文串的长度
+    //PAM有２个根，分别为状态０和状态１
+    //初２个根外，其余每个状态表示一个本质不同的回文串,总数为sz-1
+    struct state
+    {
+    int fail,cnt,len;
+    int nxt[26];
+    }st[N];
+    char S[N],RS[N];
+    int n,now,sz;
+    int Right[N];//Right[i]表示以i结尾的最长回文串的长度
+    int Left[N]; //Left[i]表示以i开头的最长回文串的长度...只需要倒序构建PAM就行了
+    void init()
+    {
+    ms(st,0);
+    now = 0 ;
+    st[0].fail = st[1].fail = 1;
+    st[1].len = -1;
+    sz = 1;
+    }
+    void extend(int c,int pos)  
+    {
+    int p = now;
+    while (S[pos-st[p].len-1]!=S[pos]) p = st[p].fail;
+    if (!st[p].nxt[c]){
+        int np=++sz,q=st[p].fail;
+        st[np].len=st[p].len+2;
+        while (S[pos-st[q].len-1]!=S[pos]) q=st[q].fail;
+        st[np].fail=st[q].nxt[c];
+        st[p].nxt[c] = np;
+    }
+    now=st[p].nxt[c];
+    Right[pos] = st[now].len;
+    st[now].cnt++;
+    }
+    void Cnt() //构建之后跑cnt得到的才是真正的cnt
+    {
+    for ( int i = sz ; i &gt;= 2;  i--) st[st[i].fail].cnt += st[i].cnt;
+    }
+    void build ()
+    {
+    init();
+    int len = strlen(S+1);
+    for ( int i = 1 ; i &lt;= len ; i++) extend(S[i]-'a',i);
+    }
+}A,B;
+int main()
+{
+#ifndef  ONLINE_JUDGE 
+    freopen(&quot;./in.txt&quot;,&quot;r&quot;,stdin);
+#endif
+
+#ifndef ONLINE_JUDGE  
+    fclose(stdin);
+#endif
+    return 0;
+}
+</code></pre>
 
 
                 
@@ -284,13 +398,13 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2016/09/20160910/" data-toggle="tooltip" data-placement="top" title="20160910随笔">&larr;
+                        <a href="/2016/09/cf594d/" data-toggle="tooltip" data-placement="top" title="codeforces 594  D. REQ (树状数组&#43;欧拉函数&#43;逆元)">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/2016/09/digits-of-factorial-k/" data-toggle="tooltip" data-placement="top" title="light oj 1045 Digits of Factorial (k进制数的位数)">Next
+                        <a href="/2016/09/too-sad-to-live/" data-toggle="tooltip" data-placement="top" title="挫败感&#43;&#43;">Next
                             Post &rarr;</a>
                     </li>
                     
@@ -380,8 +494,6 @@
                         
                         
                         
-                        
-                        
                         <a href="/tags/brute-force" title="brute-force">
                             brute-force
                         </a>
@@ -453,6 +565,10 @@
                         <a href="/tags/dp" title="dp">
                             dp
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
