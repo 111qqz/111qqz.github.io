@@ -15,9 +15,9 @@
     
 
     
-    <meta name="title" content="一点感受，其实你并没有那么弱" />
-    <meta property="og:title" content="一点感受，其实你并没有那么弱" />
-    <meta property="twitter:title" content="一点感受，其实你并没有那么弱" />
+    <meta name="title" content="最小表示法学习笔记（同构问题&#43;模板）" />
+    <meta property="og:title" content="最小表示法学习笔记（同构问题&#43;模板）" />
+    <meta property="twitter:title" content="最小表示法学习笔记（同构问题&#43;模板）" />
     
 
     
@@ -34,7 +34,7 @@
     <meta name="keyword"  content="ACM,111qqz,商汤科技,hust,华中科技大学">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>一点感受，其实你并没有那么弱-111qqz的小窝</title>
+    <title>最小表示法学习笔记（同构问题&#43;模板）-111qqz的小窝</title>
 
     <link rel="canonical" href="/2016/08/">
 
@@ -186,8 +186,20 @@
                 <div class="post-heading">
                     <div class="tags">
                         
+                        <a class="tag" href="/tags/%E5%90%8C%E6%9E%84" title="同构">
+                            同构
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%BE%AA%E7%8E%AF%E5%90%8C%E6%9E%84" title="字符串循环同构">
+                            字符串循环同构
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E6%9C%80%E5%B0%8F%E8%A1%A8%E7%A4%BA%E6%B3%95" title="最小表示法">
+                            最小表示法
+                        </a>
+                        
                     </div>
-                    <h1>一点感受，其实你并没有那么弱</h1>
+                    <h1>最小表示法学习笔记（同构问题&#43;模板）</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
 			Posted by 
@@ -195,7 +207,7 @@
 			    111qqz
 			 
 			on 
-			Thursday, August 11, 2016
+			Friday, August 12, 2016
                         
                     </span>
                 </div>
@@ -223,8 +235,77 @@
                 </header>
                 
                 
-                <pre><code>  * 很多题毫无思路，真的只是见过的套路太少，如果知道套路，瞬间成水题。
-  * 很多算法觉得难懂，九成原因是看到的资料不够好或者不够适合你。
+                <p>首先放一波资料：<a href="https://111qqz.com/wordpress/wp-content/uploads/2016/08/最小表示法.ppt">叶子豪_最小表示法</a></p>
+
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2016/08/周源.ppt">周源_《浅谈最小表示法在字符串循环同构问题中的应用》</a>
+<a href="http://blog.csdn.net/cclsoft/article/details/5467743">参考博客</a>
+对于字符串循环同构的最小表示法，<strong>其问题实质是求S串的一个位置</strong>，从这个位置开始循环输出S，得到的S’字典序最小。</p>
+
+<p>一种朴素的方法是设计i,j两个指针。其中i指向最小表示的位置，j作为比较指针。</p>
+
+<blockquote>令i=0,j=1
+如果S[i] > S[j] i=j, j=i+1
+如果S[i] < S[j] j++
+如果S[i]==S[j] 设指针k，分别从i和j位置向下比较，直到S[i] != S[j]
+_         __**如果S[i+k] > S[j+k] i=j,j=i+1**
+_         否则j++
+**返回i**</blockquote>
+
+<p>注意到，朴素算法的缺陷在于斜体的情况下i指针的移动太少了。针对这一问题改进就得到了最小表示法的算法。最小表示法的算法思路是维护两个指针i,j。</p>
+
+<blockquote>令i=0,j=1
+如果S[i] > S[j] i=j, j=i+1
+如果S[i] < S[j] j++
+如果S[i]==S[j] 设指针k，分别从i和j位置向下比较，直到S[i] != S[j]
+**如果S[i+k] > S[j+k] i=i+k
+**         否则j++
+**返回i****和j****的小者**</blockquote>
+
+<p>注意到上面两个算法唯一的区别是粗体的一行。这一行就把复杂度降到O(n)了。
+值得一提的是，与KMP类似，最小表示法处理的是一个字符串S的性质，而不是看论文时给人感觉的处理两个字符串。
+应用最小表示法判断两个字符串同构，只要将两个串的最小表示求出来，然后从最小表示开始比较。剩下的工作就不用多说了。</p>
+
+<p>模板：</p>
+
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+const int N = 100000+10;
+char str[N];
+int minimalRepresentation()
+{
+    int n = strlen(str);
+    int i = 0,j = 1, k = 0;
+    while(i&lt;n &amp;&amp; j&lt;n &amp;&amp; k&lt;n)
+    {
+        int t = str[(i+k)%n] - str[(j+k)%n] ;
+        if(t == 0)
+            k++;
+        else
+        {
+            if(t&gt;0)
+                i+=k+1;
+            else 
+                j+=k+1;
+            if(i==j)
+                j++;
+            k = 0;
+        }
+    }
+    return i &lt; j ? i : j;
+}
+int main()
+{
+    int t;
+    scanf(&quot;%d&quot;,&amp;t);
+    int n;
+    while(t--)
+    {
+        scanf(&quot;%d&quot;,&amp;n);
+        scanf(&quot;%s&quot;,str);
+        int index = minimalRepresentation();
+        printf(&quot;%d\n&quot;,index);
+    }
+}
 </code></pre>
 
 
@@ -274,13 +355,13 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2016/08/hdu2203/" data-toggle="tooltip" data-placement="top" title="hdu 2203 亲和串 (kmp)">&larr;
+                        <a href="/2016/08/hdu4300/" data-toggle="tooltip" data-placement="top" title="hdu 4300 Clairewd’s message (kmp)">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/2016/08/hdu-2594/" data-toggle="tooltip" data-placement="top" title="hdu 2594 Simpsons’ Hidden Talent (kmp)">Next
+                        <a href="/2016/08/ural-1314-hidden-password-/" data-toggle="tooltip" data-placement="top" title="ural 1314 Hidden Password (字符串的最小表示法模板题)">Next
                             Post &rarr;</a>
                     </li>
                     
@@ -681,6 +762,10 @@
                         <a href="/tags/sg%E5%87%BD%E6%95%B0" title="sg函数">
                             sg函数
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
