@@ -15,9 +15,9 @@
     
 
     
-    <meta name="title" content="矩阵加速线性递推式（转载）" />
-    <meta property="og:title" content="矩阵加速线性递推式（转载）" />
-    <meta property="twitter:title" content="矩阵加速线性递推式（转载）" />
+    <meta name="title" content="逆元学习笔记" />
+    <meta property="og:title" content="逆元学习笔记" />
+    <meta property="twitter:title" content="逆元学习笔记" />
     
 
     
@@ -34,7 +34,7 @@
     <meta name="keyword"  content="ACM,111qqz,商汤科技,hust,华中科技大学">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>矩阵加速线性递推式（转载）-111qqz的小窝</title>
+    <title>逆元学习笔记-111qqz的小窝</title>
 
     <link rel="canonical" href="/2016/10/">
 
@@ -186,12 +186,12 @@
                 <div class="post-heading">
                     <div class="tags">
                         
-                        <a class="tag" href="/tags/%E7%9F%A9%E9%98%B5" title="矩阵">
-                            矩阵
+                        <a class="tag" href="/tags/%E9%80%86%E5%85%83" title="逆元">
+                            逆元
                         </a>
                         
                     </div>
-                    <h1>矩阵加速线性递推式（转载）</h1>
+                    <h1>逆元学习笔记</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
 			Posted by 
@@ -199,7 +199,7 @@
 			    111qqz
 			 
 			on 
-			Monday, October 17, 2016
+			Wednesday, October 19, 2016
                         
                     </span>
                 </div>
@@ -225,156 +225,77 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#快速求解多项递推式">快速求解多项递推式</a></li>
-</ul></li>
-</ul>
-</nav>
                 
                 
+                <p><a href="http://blog.csdn.net/acdreamers/article/details/8220787">acdreamer_逆元学习笔记</a></p>
 
-<p>找到了篇四年前空间中的旧文，也是有点感动2333.</p>
+<p>摘重点：</p>
 
-<!-- more -->
+<p>ksm(a,mod-2)的方法求逆元只适用于mod为质数且 gcd(a,mod)==1</p>
 
-<h2 id="快速求解多项递推式">快速求解多项递推式</h2>
+<p>扩展欧几里得算法求逆元只适用于gcd(a,mod)==1</p>
 
-<p>问题描述:</p>
+<p><a href="http://www.cnblogs.com/frog112111/archive/2012/08/19/2646012.html">扩展欧几里得算法求逆元</a></p>
 
-<p>已知 F(n) = AF(n-1) + BF(n-2) + CF(n-3)+&hellip;..</p>
+<p>acdreamer的博客里<del>提到一种通用的方法，正确性未知</del>。<strong>（然而有b|a的前提呵呵呵呵呵）</strong></p>
 
-<p>求解 F(n)%P</p>
+<blockquote>但是你会发现费马小定理和扩展欧几里得算法求逆元是有局限性的，它们都会要求![](http://img.blog.csdn.net/20140613102654328)
+与![](http://img.blog.csdn.net/20140613102712781)
+互素。实际上我们还有一
 
-<p>分析:</p>
+种通用的求逆元方法，适合所有情况。公式如下
 
-<p>＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊</p>
+![](http://img.blog.csdn.net/20140613105646406)
+</blockquote>
 
-<p>如果n的值不大,一般来说在1000000之内,则可以考虑直接递推求解,只要预先花O(n)时间复杂度,可打出一张表,运行时直接查表就可以了.</p>
+<p>O(n)求逆元：</p>
 
-<p>另一方面,如果n值可能很大,如10^9,用这种方法无论是在内存还是时间上开销都太大,根本无法满足.本文将介绍一种与矩阵相关的高效通用算法.</p>
+<blockquote>其实有些题需要用到![](http://img.blog.csdn.net/20140613122746828)
+模![](http://img.blog.csdn.net/20140613122821000)
+的所有逆元，这里![](http://img.blog.csdn.net/20140613122821000)
+为奇质数。那么如果用快速幂求时间复杂度为![](http://img.blog.csdn.net/20140613123226296)
+，
 
-<p>举个例子:</p>
+如果对于一个**1000000**级别的素数![](http://img.blog.csdn.net/20140613122821000)
+，这样做的时间复杂度是很高了。实际上有![](http://img.blog.csdn.net/20140613123603656)
+的算法，有一个递推式如下
 
-<p>＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊</p>
+![](http://img.blog.csdn.net/20140613123955765)
 
-<p>如果我们已知一个序列的前两项为a0,a1,递推关系为:F(n) = AF(n-1)+BF(n-2)</p>
 
-<p>令矩阵 M = | 0   1 |         M(1) = | a0 |</p>
 
-<p>| B A |                     | a1 |</p>
 
-<p>N = M * M(1) =   |    a1           |</p>
+它的推导过程如下，设![](http://img.blog.csdn.net/20140613124932968)
+，那么
 
-<p>| A*a1+B*a0 |</p>
+![](http://img.blog.csdn.net/20140613125025984)
 
-<p>而 A*a1+B*a0 刚好就是 a2 !</p>
 
-<p>设     M(n) =    |   a(n-1) |</p>
+对上式两边同时除![](http://img.blog.csdn.net/20140613125121234)
+，进一步得到
 
-<p>|    an     |</p>
+![](http://img.blog.csdn.net/20140613125208000)
 
-<p>N = M * M(n) =     |    an              |</p>
 
-<p>| A*an+B*a(n-1)|</p>
+再把![](http://img.blog.csdn.net/20140613125307921)
+和![](http://img.blog.csdn.net/20140613125324765)
+替换掉，最终得到
 
-<p>很显然, A*an+B*a(n-1) 就是 a(n+1)</p>
+![](http://img.blog.csdn.net/20140613123955765)
 
-<p>矩阵M(n)的第二个元素对应F(n),只要在前一个矩阵基础上左乘一个矩阵M就可以得到下一项F(n+1).这样把递推转化成了矩阵的乘法运算．</p>
 
-<p>M^(n-1)*M1 =      |   F(n-1) |</p>
+初始化![](http://img.blog.csdn.net/20140613125520578)
+，这样就可以通过递推法求出![](http://img.blog.csdn.net/20140613122746828)
+模奇素数![](http://img.blog.csdn.net/20140613122821000)
+的所有逆元了。
 
-<p>|    F(n)   |</p>
-
-<p>因此该问题就转化成了求解一个矩阵的n次方．</p>
-
-<p>＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊</p>
-
-<p>同理，对于一个涉及三项的递推式F(n) = AF(n-1)+BF(n-2)+CF(n-3)</p>
-
-<p>只要令　 M =       | 0   1   0 |         M(1) =  | a0 |</p>
-
-<p>| 0    0 1 |                       | a1 |</p>
-
-<p>| C   B A |                      | a2 |</p>
-
-<p>推导过程和上面类似，可以自己推导一下，也会得到如下的结论：</p>
-
-<p>M^(n-1)*M1 =         |   F(n-1) |</p>
-
-<p>|    F(n)    |</p>
-
-<p>|    F(n+1) |</p>
-
-<p>同样将问题转化成了解一个矩阵的n次方．</p>
-
-<p>＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊</p>
-
-<p>一般化：</p>
-
-<p>M　阵的建立：若一共有 m　个递推式，则建一个m行m列的矩阵，让第m行从右到左依次是递推项的系数A,B,C&hellip;..，在除第一列和最后一行的剩余矩阵的主对角线上写1,其余所有的都写0.</p>
-
-<p>M(1)   阵的建立：该矩阵是 m 行一列阵，其值分别为F(0),F(1)&hellip;F(m-1)</p>
-
-<p>结论的形式和上面的结论都差不多．</p>
-
-<p>为什么要这样设定 M 和 M(1), 设定M(1)很好理解，关键是M, 只要你把两个矩阵乘起来，你就会发现其中的奥妙所在．</p>
-
-<p>＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊</p>
-
-<p>要求一个矩阵的n次方，线性代数里面有相应的方法．</p>
-
-<p>很实用的一个算法是二进制扫描法．(刘汝佳&lt;算法艺术与信息学竞赛&gt;P224)</p>
-
-<p>总的时间复杂度约为O(log2(n))</p>
-
-<p>这样一个很大的数n也能在很短的时间内算出来．</p>
-
-<p>＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊</p>
-
-<p>二进制扫描法：</p>
-
-<p>1.将n转化为二进制　n = bjb(j-1)&hellip;b2b1b0 bi = 0或1</p>
-
-<p>2.M^2 = M*M   M^4 = (M^2)^2</p>
-
-<p>这样可以得到 M 的1,2,4,8&hellip;2^32次方记为,M0,M1,M2,M3..M32．</p>
-
-<p>3.M^n = (bj<em>Mj)</em>(b(j-1)<em>M(j-1))</em>&hellip;*(b2<em>M2)</em>(b1<em>M1)</em>(b0*M0)</p>
-
-<p>若bi=1,则乘Ｍj;bj=0,则不乘</p>
-
-<p>因为有　M^(a+b) = M^a*M^b</p>
-
-<p>例：n = 9 = 1001(2) = 1000+0+0+1(2)</p>
-
-<p>M^9 = M^(1000+0+0+1) = M^1000*M^1</p>
-
-<p>= M3*M0</p>
-
-<p>4.模运算有这样的性质: (a<em>b)%c = [(a%c)</em>(b%c)]%c</p>
-
-<p>＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊</p>
-
-<p>练习:</p>
-
-<p>SOJ:   cs.scu.edu.cn/soj</p>
-
-<p>2984 Fibonacci</p>
-
-<p>2385 Fibonacci Problem Again</p>
-
-<p>2129 Sequence</p>
-
-<p>1826 Number Sequence</p>
-
-<p>3083 windy&rsquo;s cake III(只用到了二进制扫描法)</p>
-
-<p>  阿宽补充:tyvj p1947 p1155 </p>
-
-<p>Powered by baoer</p>
+另外![](http://img.blog.csdn.net/20140613122746828)
+模![](http://img.blog.csdn.net/20140613122821000)
+的所有逆元值对应![](http://img.blog.csdn.net/20140613122746828)
+中所有的数，比如![](http://img.blog.csdn.net/20140613125913078)
+，那么![](http://img.blog.csdn.net/20140613130144843)
+对应的逆元是![](http://img.blog.csdn.net/20140613130219921)
+。</blockquote>
 
 
                 
@@ -423,13 +344,13 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2016/10//" data-toggle="tooltip" data-placement="top" title="矩阵学习笔记">&larr;
+                        <a href="/2016/10/poj-3233/" data-toggle="tooltip" data-placement="top" title="poj 3233 Matrix Power Series  （矩阵快速幂&#43;分治）">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/2016/10/poj-3070-fibonacci/" data-toggle="tooltip" data-placement="top" title="poj 3070 Fibonacci (矩阵加速线性递推式)">Next
+                        <a href="/2016/10/hdu-1211-rsa--/" data-toggle="tooltip" data-placement="top" title="hdu 1211 RSA (扩展欧几里得算法求逆元 &#43;快速幂)">Next
                             Post &rarr;</a>
                     </li>
                     
