@@ -306,7 +306,161 @@ backward是指，根据top blob的结果和参数值计算得到的gradient,回�
 
 <h2 id="layer-factory-介绍">layer factory 介绍</h2>
 
-<p>等待补充</p>
+<p><del>等待补充</del></p>
+
+<p>layor factory 可以用来registry layers.</p>
+
+<pre><code class="language-c++">  typedef shared_ptr&lt;Layer&lt;Dtype&gt; &gt; (*Creator)(const LayerParameter&amp;);
+  typedef std::map&lt;string, Creator&gt; CreatorRegistry;
+</code></pre>
+
+<p>我们可以看到LayerRegistry class template 定义了两个类型
+一个是函数指针Creator,类型为　</p>
+
+<pre><code class="language-c++"> shared_ptr&lt;Layer&lt;Dtype&gt; &gt;　(const LayerParameter&amp;）;
+</code></pre>
+
+<p>另一个是CreatorRegistry，建立起了某种映射。</p>
+
+<p>下面我们看到成员函数Registry</p>
+
+<pre><code class="language-c++">  static CreatorRegistry&amp; Registry() {
+    static CreatorRegistry* g_registry_ = new CreatorRegistry();
+    return *g_registry_;
+  }
+
+</code></pre>
+
+<p>这里用到了单例模式(Singleton),使得整个class只有唯一的一个CreatorRegistry实例</p>
+
+<p>单例模式可以参考<a href="https://en.wikibooks.org/wiki/C%2B%2B_Programming/Code/Design_Patterns#Singleton">这里</a></p>
+
+<p>接下来我们看到成员函数AddCreator</p>
+
+<pre><code class="language-c++">  // Adds a creator.
+  static void AddCreator(const string&amp; type, Creator creator) {
+    CreatorRegistry&amp; registry = Registry();
+    // layer type需要在 CreatorRegistry 表中唯一
+    CHECK_EQ(registry.count(type), 0)
+        &lt;&lt; &quot;Layer type &quot; &lt;&lt; type &lt;&lt; &quot; already registered.&quot;;
+    registry[type] = creator;
+  }
+</code></pre>
+
+<p>此时我们知道，CreatorRegistry的这个table是用来存layer type到相应layer的creator的映射关系的。</p>
+
+<p>接下来我们看到成员函数CreateLayer，见注释</p>
+
+<pre><code class="language-c++">  // Get a layer using a LayerParameter.
+  static shared_ptr&lt;Layer&lt;Dtype&gt; &gt; CreateLayer(const LayerParameter&amp; param) {
+    if (Caffe::root_solver()) {
+      LOG(INFO) &lt;&lt; &quot;Creating layer &quot; &lt;&lt; param.name();
+    }
+    const string&amp; type = param.type();
+    CreatorRegistry&amp; registry = Registry();
+    CHECK_EQ(registry.count(type), 1) &lt;&lt; &quot;Unknown layer type: &quot; &lt;&lt; type
+        &lt;&lt; &quot; (known types: &quot; &lt;&lt; LayerTypeListString() &lt;&lt; &quot;)&quot;;
+    // registry[type]返回一个creator
+    //  creator是第一个　函数指针，类型为　shared_ptr&lt;Layer&lt;Dtype&gt; &gt;　(const LayerParameter&amp;）
+    // 因此最终的返回值类型为shared_ptr&lt;Layer&lt;Dtype&gt; &gt;,也就是layer的指针。
+    return registry[type](param);
+  }
+
+</code></pre>
+
+<p>接下来是成员函数LayerTypeList,作用是列出目前注册过的所有layer type的名称。</p>
+
+<pre><code class="language-c++">  static vector&lt;string&gt; LayerTypeList() {
+    CreatorRegistry&amp; registry = Registry();
+    vector&lt;string&gt; layer_types;
+    // 　在模板实例化之前，编译器无法知道scope operator（::）后是&quot;static members“还是”type members“
+    //  默认情况下，scope operator后接的是static merbers
+    // 　所以这里需要使用typename　关键词，显式告诉编译器，后面是一个type name
+    for (typename CreatorRegistry::iterator iter = registry.begin();
+         iter != registry.end(); ++iter) {
+      layer_types.push_back(iter-&gt;first);
+    }
+    return layer_types;
+  }
+
+</code></pre>
+
+<p>值得注意的是此处typename　关键词的使用，原因见注释。</p>
+
+<p>最后可以看到两个宏定义</p>
+
+<pre><code class="language-c++">
+#define REGISTER_LAYER_CREATOR(type, creator)                                  \
+  static LayerRegisterer&lt;float&gt; g_creator_f_##type(#type, creator&lt;float&gt;);     \
+  static LayerRegisterer&lt;double&gt; g_creator_d_##type(#type, creator&lt;double&gt;)    \
+
+#define REGISTER_LAYER_CLASS(type)                                             \
+  template &lt;typename Dtype&gt;                                                    \
+  shared_ptr&lt;Layer&lt;Dtype&gt; &gt; Creator_##type##Layer(const LayerParameter&amp; param) \
+  {                                                                            \
+    return shared_ptr&lt;Layer&lt;Dtype&gt; &gt;(new type##Layer&lt;Dtype&gt;(param));           \
+  }                                                                            \
+  REGISTER_LAYER_CREATOR(type, Creator_##type##Layer)
+
+</code></pre>
+
+<p>对应了两种register a layer 的方式</p>
+
+<p>一种是可以直接通过layer的constructor来创建，另一种是通过一个其他的creator函数来创建。</p>
+
+<p>从这两个宏定义中可以看出，<strong>REGISTER_LAYER_CREATOR</strong>　是真正做工作的部分。　<strong>REGISTER_LAYER_CLASS</strong>　可以看做没有提供creator的特殊情况，此时先通过layer的constructor来定义一个creator,再去调用<strong>REGISTER_LAYER_CREATOR</strong></p>
+
+<p>可能值得一提的是宏定义中## 符号，称为 macro operator
+作用是将两个token，合成一个token</p>
+
+<pre><code>&lt;token&gt; ## &lt;token&gt;
+</code></pre>
+
+<p>我们观察layer_factory.cpp中，发现使用其他creator来创建layer的一种情况是，某个layer可能有cudnn对应的实现。要根据是否有use_cudnn的编译选项，来返回一个cudnn版本的layer还是普通版本的layer.</p>
+
+<p>比如下面这个conv layer</p>
+
+<pre><code class="language-c++">
+// Get convolution layer according to engine.
+template &lt;typename Dtype&gt;
+shared_ptr&lt;Layer&lt;Dtype&gt; &gt; GetConvolutionLayer(
+    const LayerParameter&amp; param) {
+  ConvolutionParameter conv_param = param.convolution_param();
+  ConvolutionParameter_Engine engine = conv_param.engine();
+#ifdef USE_CUDNN
+  bool use_dilation = false;
+  for (int i = 0; i &lt; conv_param.dilation_size(); ++i) {
+    if (conv_param.dilation(i) &gt; 1) {
+      use_dilation = true;
+    }
+  }
+#endif
+  if (engine == ConvolutionParameter_Engine_DEFAULT) {
+    engine = ConvolutionParameter_Engine_CAFFE;
+#ifdef USE_CUDNN
+    if (!use_dilation) {
+      engine = ConvolutionParameter_Engine_CUDNN;
+    }
+#endif
+  }
+  if (engine == ConvolutionParameter_Engine_CAFFE) {
+    return shared_ptr&lt;Layer&lt;Dtype&gt; &gt;(new ConvolutionLayer&lt;Dtype&gt;(param));
+#ifdef USE_CUDNN
+  } else if (engine == ConvolutionParameter_Engine_CUDNN) {
+    if (use_dilation) {
+      LOG(FATAL) &lt;&lt; &quot;CuDNN doesn't support the dilated convolution at Layer &quot;
+                 &lt;&lt; param.name();
+    }
+    return shared_ptr&lt;Layer&lt;Dtype&gt; &gt;(new CuDNNConvolutionLayer&lt;Dtype&gt;(param));
+#endif
+  } else {
+    LOG(FATAL) &lt;&lt; &quot;Layer &quot; &lt;&lt; param.name() &lt;&lt; &quot; has unknown engine.&quot;;
+    throw;  // Avoids missing return warning
+  }
+}
+
+REGISTER_LAYER_CREATOR(Convolution, GetConvolutionLayer);
+</code></pre>
 
 
                 
