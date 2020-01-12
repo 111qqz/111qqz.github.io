@@ -226,23 +226,17 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li><a href="#adding-a-new-op">Adding a New Op</a>
-<ul>
-<li><a href="#define-the-op-s-interface">Define the op&rsquo;s interface</a></li>
-</ul></li>
-<li><a href="#implement-the-kernel-for-the-op">Implement the kernel for the op</a>
-<ul>
-<li><a href="#multi-threaded-cpu-kernels">Multi-threaded CPU kernels</a></li>
-<li><a href="#gpu-kernels">GPU kernels</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#define-the-ops-interface">Define the op's interface</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#multi-threaded-cpu-kernels">Multi-threaded CPU kernels</a></li>
+    <li><a href="#gpu-kernels">GPU kernels</a></li>
+  </ul>
 </nav>
                 
-                
-
-<h1 id="adding-a-new-op">Adding a New Op</h1>
-
+                <h1 id="adding-a-new-op">Adding a New Op</h1>
 <pre><code>  * [目录](https://www.tensorflow.org/extend/adding_an_op#top_of_page)
   * [定义运算的接口](https://www.tensorflow.org/extend/adding_an_op#define_the_ops_interface)
   * [实现运算的核心部分(kernels)](https://www.tensorflow.org/extend/adding_an_op#implement_the_kernel_for_the_op)
@@ -267,26 +261,18 @@
     * [用python 实现梯度](https://www.tensorflow.org/extend/adding_an_op#implement_the_gradient_in_python)
     * [Shape functions in C++](https://www.tensorflow.org/extend/adding_an_op#shape_functions_in_c)
 </code></pre>
-
 <p>对于要添加原生tensorflow中没有定义的运算的需求，首先建议在python层面，能不能将需要的op用其他原生的op拼凑起来。</p>
-
 <p>如果不能这样做，或者这样做逻辑很复杂，或者这样做效率比较低的时候，我们才考虑在cpp层面添加一个新的op</p>
-
 <p>去实现你自定义的运算需要如下步骤：</p>
-
 <pre><code>  1. 在C++文件中注册该运算。包含参数个数，类型，返回值类型，运算名称等。大概就是C++头文件中函数的定义吧.同时在此处也要定义shape function
   2. 用C++实现该运算，运算的实现被称之为kernel，该实现与第一步中的注册对应，相同功能的op对于不同的输入输出类型，或者是架构（GPU,CPU)可能 有不同的实现.
   3. 创建一个python包装器（**可选**），该包装器使得可以在python层面用API对该运算进行调用。在运算注册阶段会生成默认的包装器
   4. 编写计算该运算梯度 的函数**（可选）**
   5. 测试你新添加的运算。为了方便一般在python层面进行测试，不过你想在C++层面测试也没什么问题。
 </code></pre>
-
-<h2 id="define-the-op-s-interface">Define the op&rsquo;s interface</h2>
-
+<h2 id="define-the-ops-interface">Define the op's interface</h2>
 <p>直接看代码好了&hellip;</p>
-
 <p>发现提供了REGISTER_OP的宏来帮助定义&hellip;</p>
-
 <pre><code>#include &quot;tensorflow/core/framework/op.h&quot;
 #include &quot;tensorflow/core/framework/shape_inference.h&quot;
 
@@ -445,11 +431,8 @@ class OpDefBuilder {
 
 }  // namespace tensorflow
 </code></pre>
-
 <p><strong>需要注意运算(op)的明明需要遵循驼峰命名法</strong></p>
-
 <h1 id="implement-the-kernel-for-the-op">Implement the kernel for the op</h1>
-
 <pre><code>#include &quot;tensorflow/core/framework/op_kernel.h&quot;
 
 using namespace tensorflow;
@@ -480,19 +463,12 @@ class ZeroOutOp : public OpKernel {
   }
 };
 </code></pre>
-
 <p>需要注意的是，你定义的运算的kernel可能被并行地访问，所以要求<code>Compute</code> method 一定是线程安全的。</p>
-
 <p>可以通过添加互斥锁(c++11?)或者完全就不要通过类成员来共享状态。</p>
-
 <p>可以使用 <a href="https://www.github.com/tensorflow/tensorflow/blob/r1.2/tensorflow/core/framework/resource_mgr.h"><code>ResourceMgr</code></a> 来追踪运算的状态。</p>
-
 <h2 id="multi-threaded-cpu-kernels">Multi-threaded CPU kernels</h2>
-
 <p>要实现多线程cpu版本的kernel,可以参考 <a href="https://www.github.com/tensorflow/tensorflow/blob/r1.2/tensorflow/core/framework/work_sharder.h"><code>work_sharder.h</code></a></p>
-
 <h2 id="gpu-kernels">GPU kernels</h2>
-
 <p>&mdash;&ndash;先忙手头工作了，有时间再更orz</p>
 
 

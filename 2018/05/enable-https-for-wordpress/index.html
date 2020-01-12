@@ -229,24 +229,16 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><strong>20190511更新:</strong></p>
-
 <p>证书到期了,写一下更换证书的流程.</p>
-
 <p>重新申请好证书之后,直接把Apache里面对应的123放到/data/cert文件夹.</p>
-
 <p>其中1对应server-ca.crt,2对应server.crt,3对应server.key</p>
-
 <p>由于从套路云转移到良心云，迫于国内某些蛋疼的政策，以及一些其他原因，决定全站上https.</p>
-
 <p>首先是申请SSL证书，这个良心云就可以申请，也有其他地方。</p>
-
 <p>这里要注意的是，有些证书是只能对应一个域名，腾讯云貌似就是这样，不过好像www.111qqz.com的证书也可以用于111qqz.com</p>
-
 <p>得到证书中有Apache,Nginx,Tomcat和IIS四个文件夹，由于我们使用的是Apache，所以其他三个不用管。</p>
-
 <pre><code>  1. 将证书上传到服务器证书目录：/data/cert（没有cert目录可以自己新建）
   2. 在/etc/httpd/conf.d目录下新建一个https配置文件，假设命名为mydomain-ssl.conf。
   3. 拷贝下面的https配置文件模板到mydomain-ssl.conf文件中，并保存
@@ -269,27 +261,20 @@ SSLCertificateKeyFile  /data/cert/server.key
 SSLCertificateChainFile  /data/cert/server-ca.crt
 &lt;/VirtualHost&gt;
 </code></pre>
-
-<p>需要注意的是，servername那里要写带www的域名，不带www的写在serveralias
-      4. 修改配置文件中相关项，并保存
-ServerName  #主域名，务必修改
-ServerAlias   #副域名，可选项
-DocumentRoot #网站路径，务必填写网站实际路径，例如:/data/wwwroot/default/wordpress
-Directory #同上
-SSLCertificateFile #证书，务必填写网站实际路径
-SSLCertificateKeyFile #证书私钥，务必填写网站实际路径
+<p>需要注意的是，servername那里要写带www的域名，不带www的写在serveralias<br>
+4. 修改配置文件中相关项，并保存<br>
+ServerName  #主域名，务必修改<br>
+ServerAlias   #副域名，可选项<br>
+DocumentRoot #网站路径，务必填写网站实际路径，例如:/data/wwwroot/default/wordpress<br>
+Directory #同上<br>
+SSLCertificateFile #证书，务必填写网站实际路径<br>
+SSLCertificateKeyFile #证书私钥，务必填写网站实际路径<br>
 SSLCertificateChainFile #证书链（CA文件），务必填写网站实际路径</p>
-
 <p>然后由于我是迁移了服务器，很大可能是主页可以访问，但任何一个其他页面都会因报错500 internal error 之类，查看日志，位置在/var/log/httpd 里面，发现报错AH00124: Request exceeded the limit of 10 internal redirects due to probable configuration error. Use &lsquo;LimitInternalRecursion&rsquo; to increase the limit if necessary. Use &lsquo;LogLevel debug&rsquo; to get a backtrace., referer: <a href="https://qq.111qqz.com/">https://111qqz.com/</a></p>
-
 <p>查了很多，最后发现问题是在wordpress的根目录下的.htaccess文件中</p>
-
 <p>将Rewritebase的  /wordpress 改成/</p>
-
 <p>将RewriteRule的 .  /wordpress/index.php  改成  .  /index.php</p>
-
 <p>最后.htaccess文件如下：</p>
-
 <pre><code>RewriteEngine On
 RewriteCond %{HTTPS} !=on
 RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R=301,L]
@@ -306,19 +291,12 @@ RewriteRule . /index.php [L]
 
 # END WordPress
 </code></pre>
-
 <p>这个时候发现，虽然一般页面也是可以访问了，但是后台登录不进去，提示重定向次数过多。</p>
-
 <p>查了下发现基本都在说由于原始链接是http://的问题，并给了几种解决方案。</p>
-
 <p>我是用phpadmin直接改的，大概是wp_option里面有两项要修改。</p>
-
 <p>然而修改之后仍然不可以。尝试了好多内容都不行。大概包括排查插件，修改权限之类</p>
-
 <p>最后发现，http到https在数据库里修改是不行的，必须要在wp-config.php中修改才可以。主要是手动添加wp_home和wp_siteurl</p>
-
 <p>修改后的wp-config.php如下:</p>
-
 <pre><code>&lt;?php
 /**
  * The base configuration for WordPress
@@ -419,9 +397,7 @@ if ( !defined('ABSPATH') )
 /** Sets up WordPress vars and included files. */
 require_once(ABSPATH . 'wp-settings.php');
 </code></pre>
-
 <p>至此，博客终于可以访问了&hellip;感动</p>
-
 <p>然后用了个叫really simple ssl的插件，据说很好用。。。</p>
 
 

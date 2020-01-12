@@ -225,42 +225,25 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://codeforces.com/problemset/problem/515/E">题目链接</a></p>
-
 <p>题意：圆上，询问任意一段弧中，任意两点的距离+两点的权值和的最大值。</p>
-
 <p>思路：</p>
-
 <p>1.环先拆成串，复制1..n到后面，变成1..2n。</p>
-
 <p>化简公式：</p>
-
 <p>2 * h[u] + 2 * h[v] + dist(u, v) = 2 * h[v] + d[1] + d[2] + &hellip; + d[v-1] + 2 * h[u] - (d[1] + d[2] + &hellip; + d[u-1]).</p>
-
 <p>设A[v] = 2 * h[v] + d[1] + d[2] + &hellip; + d[v-1], B[u] = 2 * h[u] - (d[1] + d[2] + &hellip; + d[u-1]).</p>
-
-<p>Another important thing is that _L<strong>u_ + _R</strong>v_ always bigger than _L<strong>v_ + _R</strong>u_ when _u_ &lt; <em>v</em>.</p>
-
-<p>So we can almost solve the problem just by finding the maximum value of _L<strong>u_ and _R</strong>v_ by RMQ separately and sum them up.</p>
-
+<p>Another important thing is that <em>L__u</em> + <em>R__v</em> always bigger than <em>L__v</em> + <em>R__u</em> when <em>u</em> &lt; <em>v</em>.</p>
+<p>So we can almost solve the problem just by finding the maximum value of <em>L__u</em> and <em>R__v</em> by RMQ separately and sum them up.</p>
 <p>但是至少由两颗树。。。所以要保证u!=v&hellip;</p>
-
 <p>这也是本题的难点。。。</p>
-
 <p>做法是，线段树维护三个域。</p>
-
 <p>分别表示某区间A的最大值，某区间B的最大值，某区间A+B的最大值（且保证A和B不属于同一个区间）</p>
-
 <p>如何保证呢？ 每次合并的时候。。。合并不同的区间就好了。。。</p>
-
 <p>具体见代码</p>
-
 <p>注意体会这种区间合并的思想。。。</p>
-
 <p>以及query的时候。。。做法类似于：<a href="https://111qqz.com/wordpress/2016/09/bzoj-1756/">bzoj1756题目链接</a></p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :Mon 19 Sep 2016 04:35:20 PM CST

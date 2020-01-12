@@ -226,242 +226,184 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#layer-整体介绍">layer 整体介绍</a></li>
-<li><a href="#layer-实现细节">layer 实现细节</a></li>
-<li><a href="#layer-factory-介绍">layer factory 介绍</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#layer-整体介绍">layer 整体介绍</a></li>
+    <li><a href="#layer-实现细节">layer 实现细节</a></li>
+    <li><a href="#layer-factory-介绍">layer factory 介绍</a></li>
+  </ul>
 </nav>
                 
-                
-
-<h2 id="layer-整体介绍">layer 整体介绍</h2>
-
-<p>layer是模型计算的基本单元
-类似于pytorch或者其他深度学习框架的op
-layer中的数据流向为,输入若干个blob，称之为&rdquo;bottom blob&rdquo;,然后经过layer的计算，输出若干个blob,称之为&rdquo;top blob&rdquo;</p>
-
+                <h2 id="layer-整体介绍">layer 整体介绍</h2>
+<p>layer是模型计算的基本单元<br>
+类似于pytorch或者其他深度学习框架的op<br>
+layer中的数据流向为,输入若干个blob，称之为&quot;bottom blob&rdquo;,然后经过layer的计算，输出若干个blob,称之为&quot;top blob&rdquo;</p>
 <p>也就是数据是从“bottom”流向“top”</p>
-
-<p><img src="https://caffe.berkeleyvision.org/tutorial/fig/layer.jpg" alt="layer数据流向" /></p>
-
+<p><img src="https://caffe.berkeleyvision.org/tutorial/fig/layer.jpg" alt="layer数据流向"></p>
 <p>layer通常会进行两种计算，forward和backward</p>
-
-<p>forward是指，根据bottom blob计算得到top blob
+<p>forward是指，根据bottom blob计算得到top blob<br>
 backward是指，根据top blob的结果和参数值计算得到的gradient,回传给前面的layer.</p>
-
 <h2 id="layer-实现细节">layer 实现细节</h2>
-
-<p>layer作为一个base class,实现了所有layer都需要的common的部分。
+<p>layer作为一个base class,实现了所有layer都需要的common的部分。<br>
 比如:</p>
-
-<pre><code class="language-c++">  /**
-   * @brief Implements common layer setup functionality.
-   *
-   * @param bottom the preshaped input blobs
-   * @param top
-   *     the allocated but unshaped output blobs, to be shaped by Reshape
-   *
-   * Checks that the number of bottom and top blobs is correct.
-   * Calls LayerSetUp to do special layer setup for individual layer types,
-   * followed by Reshape to set up sizes of top blobs and internal buffers.
-   * Sets up the loss weight multiplier blobs for any non-zero loss weights.
-   * This method may not be overridden.
-   */
-  void SetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">  <span style="color:#75715e">/**
+</span><span style="color:#75715e">   * @brief Implements common layer setup functionality.
+</span><span style="color:#75715e">   *
+</span><span style="color:#75715e">   * @param bottom the preshaped input blobs
+</span><span style="color:#75715e">   * @param top
+</span><span style="color:#75715e">   *     the allocated but unshaped output blobs, to be shaped by Reshape
+</span><span style="color:#75715e">   *
+</span><span style="color:#75715e">   * Checks that the number of bottom and top blobs is correct.
+</span><span style="color:#75715e">   * Calls LayerSetUp to do special layer setup for individual layer types,
+</span><span style="color:#75715e">   * followed by Reshape to set up sizes of top blobs and internal buffers.
+</span><span style="color:#75715e">   * Sets up the loss weight multiplier blobs for any non-zero loss weights.
+</span><span style="color:#75715e">   * This method may not be overridden.
+</span><span style="color:#75715e">   */</span>
+  <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">SetUp</span>(<span style="color:#66d9ef">const</span> vector<span style="color:#f92672">&lt;</span>Blob<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span><span style="color:#f92672">*</span><span style="color:#f92672">&gt;</span><span style="color:#f92672">&amp;</span> bottom,
+      <span style="color:#66d9ef">const</span> vector<span style="color:#f92672">&lt;</span>Blob<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span><span style="color:#f92672">*</span><span style="color:#f92672">&gt;</span><span style="color:#f92672">&amp;</span> top) {
     CheckBlobCounts(bottom, top);
     LayerSetUp(bottom, top);
     Reshape(bottom, top);
     SetLossWeights(top);
   }
-</code></pre>
-
-<p>SetUp可以理解成layer的初始化函数。</p>
-
-<p>这部分代码比较容易看懂，可以说的不多。
+</code></pre></div><p>SetUp可以理解成layer的初始化函数。</p>
+<p>这部分代码比较容易看懂，可以说的不多。<br>
 值得注意的是，下面这段代码:</p>
-
-<pre><code class="language-c++"> /** @brief Using the CPU device, compute the layer output. */
-  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) = 0;
-  /**
-   * @brief Using the GPU device, compute the layer output.
-   *        Fall back to Forward_cpu() if unavailable.
-   */
-  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-    // LOG(WARNING) &lt;&lt; &quot;Using CPU code as backup.&quot;;
-    return Forward_cpu(bottom, top);
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"> <span style="color:#75715e">/** @brief Using the CPU device, compute the layer output. */</span>
+  <span style="color:#66d9ef">virtual</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">Forward_cpu</span>(<span style="color:#66d9ef">const</span> vector<span style="color:#f92672">&lt;</span>Blob<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span><span style="color:#f92672">*</span><span style="color:#f92672">&gt;</span><span style="color:#f92672">&amp;</span> bottom,
+      <span style="color:#66d9ef">const</span> vector<span style="color:#f92672">&lt;</span>Blob<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span><span style="color:#f92672">*</span><span style="color:#f92672">&gt;</span><span style="color:#f92672">&amp;</span> top) <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+  <span style="color:#75715e">/**
+</span><span style="color:#75715e">   * @brief Using the GPU device, compute the layer output.
+</span><span style="color:#75715e">   *        Fall back to Forward_cpu() if unavailable.
+</span><span style="color:#75715e">   */</span>
+  <span style="color:#66d9ef">virtual</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">Forward_gpu</span>(<span style="color:#66d9ef">const</span> vector<span style="color:#f92672">&lt;</span>Blob<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span><span style="color:#f92672">*</span><span style="color:#f92672">&gt;</span><span style="color:#f92672">&amp;</span> bottom,
+      <span style="color:#66d9ef">const</span> vector<span style="color:#f92672">&lt;</span>Blob<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span><span style="color:#f92672">*</span><span style="color:#f92672">&gt;</span><span style="color:#f92672">&amp;</span> top) {
+    <span style="color:#75715e">// LOG(WARNING) &lt;&lt; &#34;Using CPU code as backup.&#34;;
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">return</span> Forward_cpu(bottom, top);
   }
 
-</code></pre>
-
-<p>只有cpu上的forward(backward同理)被定义成纯虚函数，而base class上gpu上的forward被定义调用基类的forward_cpu</p>
-
+</code></pre></div><p>只有cpu上的forward(backward同理)被定义成纯虚函数，而base class上gpu上的forward被定义调用基类的forward_cpu</p>
 <p>这样做使得每个layer必须定义自己的Forward_cpu函数，同时使得某个layer没有自己的Forward_gpu函数时，会fall back到相应的cpu版本。</p>
-
 <h2 id="layer-factory-介绍">layer factory 介绍</h2>
-
 <p><del>等待补充</del></p>
-
 <p>layor factory 可以用来registry layers.</p>
-
-<pre><code class="language-c++">  typedef shared_ptr&lt;Layer&lt;Dtype&gt; &gt; (*Creator)(const LayerParameter&amp;);
-  typedef std::map&lt;string, Creator&gt; CreatorRegistry;
-</code></pre>
-
-<p>我们可以看到LayerRegistry class template 定义了两个类型
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">  <span style="color:#66d9ef">typedef</span> shared_ptr<span style="color:#f92672">&lt;</span>Layer<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span> <span style="color:#f92672">&gt;</span> (<span style="color:#f92672">*</span>Creator)(<span style="color:#66d9ef">const</span> LayerParameter<span style="color:#f92672">&amp;</span>);
+  <span style="color:#66d9ef">typedef</span> std<span style="color:#f92672">:</span><span style="color:#f92672">:</span>map<span style="color:#f92672">&lt;</span>string, Creator<span style="color:#f92672">&gt;</span> CreatorRegistry;
+</code></pre></div><p>我们可以看到LayerRegistry class template 定义了两个类型<br>
 一个是函数指针Creator,类型为　</p>
-
-<pre><code class="language-c++"> shared_ptr&lt;Layer&lt;Dtype&gt; &gt;　(const LayerParameter&amp;）;
-</code></pre>
-
-<p>另一个是CreatorRegistry，建立起了某种映射。</p>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"> shared_ptr<span style="color:#f92672">&lt;</span>Layer<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span> <span style="color:#f92672">&gt;</span>　(<span style="color:#66d9ef">const</span> LayerParameter<span style="color:#f92672">&amp;</span><span style="color:#960050;background-color:#1e0010">）</span>;
+</code></pre></div><p>另一个是CreatorRegistry，建立起了某种映射。</p>
 <p>下面我们看到成员函数Registry</p>
-
-<pre><code class="language-c++">  static CreatorRegistry&amp; Registry() {
-    static CreatorRegistry* g_registry_ = new CreatorRegistry();
-    return *g_registry_;
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">  <span style="color:#66d9ef">static</span> CreatorRegistry<span style="color:#f92672">&amp;</span> Registry() {
+    <span style="color:#66d9ef">static</span> CreatorRegistry<span style="color:#f92672">*</span> g_registry_ <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> CreatorRegistry();
+    <span style="color:#66d9ef">return</span> <span style="color:#f92672">*</span>g_registry_;
   }
 
-</code></pre>
-
-<p>这里用到了单例模式(Singleton),使得整个class只有唯一的一个CreatorRegistry实例</p>
-
+</code></pre></div><p>这里用到了单例模式(Singleton),使得整个class只有唯一的一个CreatorRegistry实例</p>
 <p>单例模式可以参考<a href="https://en.wikibooks.org/wiki/C%2B%2B_Programming/Code/Design_Patterns#Singleton">这里</a></p>
-
 <p>接下来我们看到成员函数AddCreator</p>
-
-<pre><code class="language-c++">  // Adds a creator.
-  static void AddCreator(const string&amp; type, Creator creator) {
-    CreatorRegistry&amp; registry = Registry();
-    // layer type需要在 CreatorRegistry 表中唯一
-    CHECK_EQ(registry.count(type), 0)
-        &lt;&lt; &quot;Layer type &quot; &lt;&lt; type &lt;&lt; &quot; already registered.&quot;;
-    registry[type] = creator;
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">  <span style="color:#75715e">// Adds a creator.
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">AddCreator</span>(<span style="color:#66d9ef">const</span> string<span style="color:#f92672">&amp;</span> type, Creator creator) {
+    CreatorRegistry<span style="color:#f92672">&amp;</span> registry <span style="color:#f92672">=</span> Registry();
+    <span style="color:#75715e">// layer type需要在 CreatorRegistry 表中唯一
+</span><span style="color:#75715e"></span>    CHECK_EQ(registry.count(type), <span style="color:#ae81ff">0</span>)
+        <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Layer type </span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> type <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74"> already registered.</span><span style="color:#e6db74">&#34;</span>;
+    registry[type] <span style="color:#f92672">=</span> creator;
   }
-</code></pre>
-
-<p>此时我们知道，CreatorRegistry的这个table是用来存layer type到相应layer的creator的映射关系的。</p>
-
+</code></pre></div><p>此时我们知道，CreatorRegistry的这个table是用来存layer type到相应layer的creator的映射关系的。</p>
 <p>接下来我们看到成员函数CreateLayer，见注释</p>
-
-<pre><code class="language-c++">  // Get a layer using a LayerParameter.
-  static shared_ptr&lt;Layer&lt;Dtype&gt; &gt; CreateLayer(const LayerParameter&amp; param) {
-    if (Caffe::root_solver()) {
-      LOG(INFO) &lt;&lt; &quot;Creating layer &quot; &lt;&lt; param.name();
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">  <span style="color:#75715e">// Get a layer using a LayerParameter.
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">static</span> shared_ptr<span style="color:#f92672">&lt;</span>Layer<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span> <span style="color:#f92672">&gt;</span> CreateLayer(<span style="color:#66d9ef">const</span> LayerParameter<span style="color:#f92672">&amp;</span> param) {
+    <span style="color:#66d9ef">if</span> (Caffe<span style="color:#f92672">:</span><span style="color:#f92672">:</span>root_solver()) {
+      LOG(INFO) <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Creating layer </span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> param.name();
     }
-    const string&amp; type = param.type();
-    CreatorRegistry&amp; registry = Registry();
-    CHECK_EQ(registry.count(type), 1) &lt;&lt; &quot;Unknown layer type: &quot; &lt;&lt; type
-        &lt;&lt; &quot; (known types: &quot; &lt;&lt; LayerTypeListString() &lt;&lt; &quot;)&quot;;
-    // registry[type]返回一个creator
-    //  creator是第一个　函数指针，类型为　shared_ptr&lt;Layer&lt;Dtype&gt; &gt;　(const LayerParameter&amp;）
-    // 因此最终的返回值类型为shared_ptr&lt;Layer&lt;Dtype&gt; &gt;,也就是layer的指针。
-    return registry[type](param);
+    <span style="color:#66d9ef">const</span> string<span style="color:#f92672">&amp;</span> type <span style="color:#f92672">=</span> param.type();
+    CreatorRegistry<span style="color:#f92672">&amp;</span> registry <span style="color:#f92672">=</span> Registry();
+    CHECK_EQ(registry.count(type), <span style="color:#ae81ff">1</span>) <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Unknown layer type: </span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> type
+        <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74"> (known types: </span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> LayerTypeListString() <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">)</span><span style="color:#e6db74">&#34;</span>;
+    <span style="color:#75715e">// registry[type]返回一个creator
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//  creator是第一个　函数指针，类型为　shared_ptr&lt;Layer&lt;Dtype&gt; &gt;　(const LayerParameter&amp;）
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// 因此最终的返回值类型为shared_ptr&lt;Layer&lt;Dtype&gt; &gt;,也就是layer的指针。
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">return</span> registry[type](param);
   }
 
-</code></pre>
-
-<p>接下来是成员函数LayerTypeList,作用是列出目前注册过的所有layer type的名称。</p>
-
-<pre><code class="language-c++">  static vector&lt;string&gt; LayerTypeList() {
-    CreatorRegistry&amp; registry = Registry();
-    vector&lt;string&gt; layer_types;
-    // 　在模板实例化之前，编译器无法知道scope operator（::）后是&quot;static members“还是”type members“
-    //  默认情况下，scope operator后接的是static merbers
-    // 　所以这里需要使用typename　关键词，显式告诉编译器，后面是一个type name
-    for (typename CreatorRegistry::iterator iter = registry.begin();
-         iter != registry.end(); ++iter) {
-      layer_types.push_back(iter-&gt;first);
+</code></pre></div><p>接下来是成员函数LayerTypeList,作用是列出目前注册过的所有layer type的名称。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">  <span style="color:#66d9ef">static</span> vector<span style="color:#f92672">&lt;</span>string<span style="color:#f92672">&gt;</span> LayerTypeList() {
+    CreatorRegistry<span style="color:#f92672">&amp;</span> registry <span style="color:#f92672">=</span> Registry();
+    vector<span style="color:#f92672">&lt;</span>string<span style="color:#f92672">&gt;</span> layer_types;
+    <span style="color:#75715e">// 　在模板实例化之前，编译器无法知道scope operator（::）后是&#34;static members“还是”type members“
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//  默认情况下，scope operator后接的是static merbers
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// 　所以这里需要使用typename　关键词，显式告诉编译器，后面是一个type name
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">typename</span> CreatorRegistry<span style="color:#f92672">:</span><span style="color:#f92672">:</span>iterator iter <span style="color:#f92672">=</span> registry.begin();
+         iter <span style="color:#f92672">!</span><span style="color:#f92672">=</span> registry.end(); <span style="color:#f92672">+</span><span style="color:#f92672">+</span>iter) {
+      layer_types.push_back(iter<span style="color:#f92672">-</span><span style="color:#f92672">&gt;</span>first);
     }
-    return layer_types;
+    <span style="color:#66d9ef">return</span> layer_types;
   }
 
-</code></pre>
-
-<p>值得注意的是此处typename　关键词的使用，原因见注释。</p>
-
+</code></pre></div><p>值得注意的是此处typename　关键词的使用，原因见注释。</p>
 <p>最后可以看到两个宏定义</p>
-
-<pre><code class="language-c++">
-#define REGISTER_LAYER_CREATOR(type, creator)                                  \
-  static LayerRegisterer&lt;float&gt; g_creator_f_##type(#type, creator&lt;float&gt;);     \
-  static LayerRegisterer&lt;double&gt; g_creator_d_##type(#type, creator&lt;double&gt;)    \
-
-#define REGISTER_LAYER_CLASS(type)                                             \
-  template &lt;typename Dtype&gt;                                                    \
-  shared_ptr&lt;Layer&lt;Dtype&gt; &gt; Creator_##type##Layer(const LayerParameter&amp; param) \
-  {                                                                            \
-    return shared_ptr&lt;Layer&lt;Dtype&gt; &gt;(new type##Layer&lt;Dtype&gt;(param));           \
-  }                                                                            \
-  REGISTER_LAYER_CREATOR(type, Creator_##type##Layer)
-
-</code></pre>
-
-<p>对应了两种register a layer 的方式</p>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">
+<span style="color:#75715e">#</span><span style="color:#75715e">define REGISTER_LAYER_CREATOR(type, creator)                                  \</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span><span style="color:#75715e">  static LayerRegisterer&lt;float&gt; g_creator_f_##type(#type, creator&lt;float&gt;);     \</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span><span style="color:#75715e">  static LayerRegisterer&lt;double&gt; g_creator_d_##type(#type, creator&lt;double&gt;)    \</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span><span style="color:#75715e">
+</span><span style="color:#75715e"></span><span style="color:#75715e">#</span><span style="color:#75715e">define REGISTER_LAYER_CLASS(type)                                             \</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span><span style="color:#75715e">  template &lt;typename Dtype&gt;                                                    \</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span><span style="color:#75715e">  shared_ptr&lt;Layer&lt;Dtype&gt; &gt; Creator_##type##Layer(const LayerParameter&amp; param) \</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span><span style="color:#75715e">  {                                                                            \</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span><span style="color:#75715e">    return shared_ptr&lt;Layer&lt;Dtype&gt; &gt;(new type##Layer&lt;Dtype&gt;(param));           \</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span><span style="color:#75715e">  }                                                                            \</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span><span style="color:#75715e">  REGISTER_LAYER_CREATOR(type, Creator_##type##Layer)</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+</code></pre></div><p>对应了两种register a layer 的方式</p>
 <p>一种是可以直接通过layer的constructor来创建，另一种是通过一个其他的creator函数来创建。</p>
-
 <p>从这两个宏定义中可以看出，<strong>REGISTER_LAYER_CREATOR</strong>　是真正做工作的部分。　<strong>REGISTER_LAYER_CLASS</strong>　可以看做没有提供creator的特殊情况，此时先通过layer的constructor来定义一个creator,再去调用<strong>REGISTER_LAYER_CREATOR</strong></p>
-
-<p>可能值得一提的是宏定义中## 符号，称为 macro operator
+<p>可能值得一提的是宏定义中## 符号，称为 macro operator<br>
 作用是将两个token，合成一个token</p>
-
-<pre><code>&lt;token&gt; ## &lt;token&gt;
-</code></pre>
-
-<p>我们观察layer_factory.cpp中，发现使用其他creator来创建layer的一种情况是，某个layer可能有cudnn对应的实现。要根据是否有use_cudnn的编译选项，来返回一个cudnn版本的layer还是普通版本的layer.</p>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;token&gt; ## &lt;token&gt;
+</code></pre></div><p>我们观察layer_factory.cpp中，发现使用其他creator来创建layer的一种情况是，某个layer可能有cudnn对应的实现。要根据是否有use_cudnn的编译选项，来返回一个cudnn版本的layer还是普通版本的layer.</p>
 <p>比如下面这个conv layer</p>
-
-<pre><code class="language-c++">
-// Get convolution layer according to engine.
-template &lt;typename Dtype&gt;
-shared_ptr&lt;Layer&lt;Dtype&gt; &gt; GetConvolutionLayer(
-    const LayerParameter&amp; param) {
-  ConvolutionParameter conv_param = param.convolution_param();
-  ConvolutionParameter_Engine engine = conv_param.engine();
-#ifdef USE_CUDNN
-  bool use_dilation = false;
-  for (int i = 0; i &lt; conv_param.dilation_size(); ++i) {
-    if (conv_param.dilation(i) &gt; 1) {
-      use_dilation = true;
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">
+<span style="color:#75715e">// Get convolution layer according to engine.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">template</span> <span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> Dtype<span style="color:#f92672">&gt;</span>
+shared_ptr<span style="color:#f92672">&lt;</span>Layer<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span> <span style="color:#f92672">&gt;</span> GetConvolutionLayer(
+    <span style="color:#66d9ef">const</span> LayerParameter<span style="color:#f92672">&amp;</span> param) {
+  ConvolutionParameter conv_param <span style="color:#f92672">=</span> param.convolution_param();
+  ConvolutionParameter_Engine engine <span style="color:#f92672">=</span> conv_param.engine();
+<span style="color:#75715e">#</span><span style="color:#75715e">ifdef USE_CUDNN</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">bool</span> use_dilation <span style="color:#f92672">=</span> false;
+  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> conv_param.dilation_size(); <span style="color:#f92672">+</span><span style="color:#f92672">+</span>i) {
+    <span style="color:#66d9ef">if</span> (conv_param.dilation(i) <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">1</span>) {
+      use_dilation <span style="color:#f92672">=</span> true;
     }
   }
-#endif
-  if (engine == ConvolutionParameter_Engine_DEFAULT) {
-    engine = ConvolutionParameter_Engine_CAFFE;
-#ifdef USE_CUDNN
-    if (!use_dilation) {
-      engine = ConvolutionParameter_Engine_CUDNN;
+<span style="color:#75715e">#</span><span style="color:#75715e">endif</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">if</span> (engine <span style="color:#f92672">=</span><span style="color:#f92672">=</span> ConvolutionParameter_Engine_DEFAULT) {
+    engine <span style="color:#f92672">=</span> ConvolutionParameter_Engine_CAFFE;
+<span style="color:#75715e">#</span><span style="color:#75715e">ifdef USE_CUDNN</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>use_dilation) {
+      engine <span style="color:#f92672">=</span> ConvolutionParameter_Engine_CUDNN;
     }
-#endif
-  }
-  if (engine == ConvolutionParameter_Engine_CAFFE) {
-    return shared_ptr&lt;Layer&lt;Dtype&gt; &gt;(new ConvolutionLayer&lt;Dtype&gt;(param));
-#ifdef USE_CUDNN
-  } else if (engine == ConvolutionParameter_Engine_CUDNN) {
-    if (use_dilation) {
-      LOG(FATAL) &lt;&lt; &quot;CuDNN doesn't support the dilated convolution at Layer &quot;
-                 &lt;&lt; param.name();
+<span style="color:#75715e">#</span><span style="color:#75715e">endif</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>  }
+  <span style="color:#66d9ef">if</span> (engine <span style="color:#f92672">=</span><span style="color:#f92672">=</span> ConvolutionParameter_Engine_CAFFE) {
+    <span style="color:#66d9ef">return</span> shared_ptr<span style="color:#f92672">&lt;</span>Layer<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span> <span style="color:#f92672">&gt;</span>(<span style="color:#66d9ef">new</span> ConvolutionLayer<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span>(param));
+<span style="color:#75715e">#</span><span style="color:#75715e">ifdef USE_CUDNN</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>  } <span style="color:#66d9ef">else</span> <span style="color:#a6e22e">if</span> (engine <span style="color:#f92672">=</span><span style="color:#f92672">=</span> ConvolutionParameter_Engine_CUDNN) {
+    <span style="color:#66d9ef">if</span> (use_dilation) {
+      LOG(FATAL) <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">CuDNN doesn&#39;t support the dilated convolution at Layer </span><span style="color:#e6db74">&#34;</span>
+                 <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> param.name();
     }
-    return shared_ptr&lt;Layer&lt;Dtype&gt; &gt;(new CuDNNConvolutionLayer&lt;Dtype&gt;(param));
-#endif
-  } else {
-    LOG(FATAL) &lt;&lt; &quot;Layer &quot; &lt;&lt; param.name() &lt;&lt; &quot; has unknown engine.&quot;;
-    throw;  // Avoids missing return warning
-  }
+    <span style="color:#66d9ef">return</span> shared_ptr<span style="color:#f92672">&lt;</span>Layer<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span> <span style="color:#f92672">&gt;</span>(<span style="color:#66d9ef">new</span> CuDNNConvolutionLayer<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span>(param));
+<span style="color:#75715e">#</span><span style="color:#75715e">endif</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>  } <span style="color:#66d9ef">else</span> {
+    LOG(FATAL) <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Layer </span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> param.name() <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74"> has unknown engine.</span><span style="color:#e6db74">&#34;</span>;
+    <span style="color:#66d9ef">throw</span>;  <span style="color:#75715e">// Avoids missing return warning
+</span><span style="color:#75715e"></span>  }
 }
 
 REGISTER_LAYER_CREATOR(Convolution, GetConvolutionLayer);
-</code></pre>
-
+</code></pre></div>
 
                 
                 

@@ -233,38 +233,24 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
+                <nav id="TableOfContents"></nav>
                 
-                
-                <p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=2065">http://acm.hdu.edu.cn/showproblem.php?pid=2065</a>
-题意：a,b,c,d四种元素，a,c只能出现偶数次（包括0次），b,d没有限制，问n个（2^64）个元素有多少种不同的组合。
+                <p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=2065">http://acm.hdu.edu.cn/showproblem.php?pid=2065</a><br>
+题意：a,b,c,d四种元素，a,c只能出现偶数次（包括0次），b,d没有限制，问n个（2^64）个元素有多少种不同的组合。<br>
 思路：指数型母函数。。。n大的没办法用之前的办法做。</p>
-
-<p>先来看下我们要求的式子：A=(1+x/1!+x^<sup>2</sup>&frasl;<sub>2</sub>!+x^<sup>3</sup>&frasl;<sub>3</sub>!……)^2*(1+x^<sup>2</sup>&frasl;<sub>2</sub>!+x^<sup>4</sup>&frasl;<sub>4</sub>!+x^<sup>6</sup>&frasl;<sub>6</sub>!……)^2.</p>
-
+<p>先来看下我们要求的式子：A=(1+x/1!+x^2/2!+x^3/3!……)^2*(1+x^2/2!+x^4/4!+x^6/6!……)^2.</p>
 <p>其实一共四个式子相乘，但是a和c的情况相同，b和d的式子相同。</p>
-
 <p>我们要求的是x^n的系数。。。n太大了。。直接搞肯定不行。</p>
-
 <p>想到微积分学的泰勒展开。</p>
-
-<p>e^x=1+x/1!+x^<sup>2</sup>&frasl;<sub>2</sub>!+x^<sup>3</sup>&frasl;<sub>3</sub>!+&hellip; (|x|&lt;oo)</p>
-
+<p>e^x=1+x/1!+x^2/2!+x^3/3!+&hellip; (|x|&lt;oo)</p>
 <p>其实这里x的范围没有意义，因为母函数关注的是系数，不会代入x的值，所以可以不用考虑收敛性。</p>
-
-<p>那么第一项(1+x/1!+x^<sup>2</sup>&frasl;<sub>2</sub>!+x^<sup>3</sup>&frasl;<sub>3</sub>!……)^2就可以换成(e^x)^2</p>
-
+<p>那么第一项(1+x/1!+x^2/2!+x^3/3!……)^2就可以换成(e^x)^2</p>
 <p>第二项没有奇数项，很容易想到可以写成(（e^x+e^(-x)）/2)^2</p>
-
 <p>继续化简：4<em>A=(e^x)^2</em>((e^x+e^(-x))/2)^2</p>
-
-<p>4*A = (e^(4x)+2*e^(2x)+1)</p>
-
+<p>4<em>A = (e^(4x)+2</em>e^(2x)+1)</p>
 <p>我们要的是x^n的系数，再正向泰勒展开，得到x^n的系数应该是 (4^n+2*2^n)/4,也就是4^(n-1)+2^(n-1)</p>
-
 <p>因为只要后两位的结果，其实就是结果0.快速幂搞之。</p>
-
 <p>以及，2^64 long long 存不下，应该用unsigned long long ，类型说明符是 %llu</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2016年02月28日 星期日 14时01分58秒
@@ -331,7 +317,7 @@ int main()
         }
         printf(&quot;\n&quot;);
     }
-
+	
 
   #ifndef ONLINE_JUDGE  
   fclose(stdin);

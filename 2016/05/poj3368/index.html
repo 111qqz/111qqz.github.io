@@ -233,26 +233,17 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://poj.org/problem?id=3368">poj 3368 题目链接</a></p>
-
 <p>题意：给出n个非减的数a[i],求区间[l,r]中出现次数最多的数的出现的次数。</p>
-
 <p>思路：由于数列非减，那么相等的数一定相邻。很容易系哪个到构造另一个数组f[i]，表示从当前位置向左边延伸最多延伸几个相等的数。</p>
-
 <p>f[i] = f[i-1] + 1 (iff a[i]==a[i-1])</p>
-
 <p>然后查询的时候。</p>
-
 <p>如果直接用ST算法查询rmq的话。。。</p>
-
 <p>可能产生错误结果，原因是f[i]是从左边1到i这段连续区间里当前数出现的次数。</p>
-
 <p>但是查询区间不一定是从1开始，所以查询区间内的第一段连续相等的数可能不完整。。。想了半天。。最后看了题解，发现是这部分暴力来搞。但是如果所有数列中所有数都相等，这样的复杂度就达到了o(1E10)?。。。2s应该过不了吧。。。但是所有题解都是这么写的。。。不是很懂。。。所谓的面向数据编程？</p>
-
 <p>不过还是有启示的：<strong>分类讨论的思想。一道题未必用一种算法解。如果因为一小部分导致某算法不能用的话，不妨暴力搞之然后再用这个算法。</strong></p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2016年05月18日 星期三 13时44分47秒
@@ -337,7 +328,7 @@ int main()
         }
         }
 
-//      for ( int i = 1 ;i  &lt;= n ; i++) cout&lt;&lt;a[i].fst&lt;&lt;&quot; &quot;&lt;&lt;a[i].sec&lt;&lt;endl;
+//	    for ( int i = 1 ;i  &lt;= n ; i++) cout&lt;&lt;a[i].fst&lt;&lt;&quot; &quot;&lt;&lt;a[i].sec&lt;&lt;endl;
 
         init_rmq();
         while (q--)
@@ -347,7 +338,7 @@ int main()
         int tmp = l;
         while (tmp&lt;r&amp;&amp;a[tmp].fst==a[tmp+1].fst) tmp++; //mdzz，最坏复杂度1E10啊。。。题解都是面向数据编程吗
         int ans = rmq_max(tmp+1,r);
-//      cout&lt;&lt;&quot;tmp-l:&quot;&lt;&lt;tmp-l+1&lt;&lt;endl;
+//		cout&lt;&lt;&quot;tmp-l:&quot;&lt;&lt;tmp-l+1&lt;&lt;endl;
         ans = max(ans,tmp+1-l);
         printf(&quot;%d\n&quot;,ans);
         }

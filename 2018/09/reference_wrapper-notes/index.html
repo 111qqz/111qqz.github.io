@@ -225,21 +225,16 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p>起因是在看《CplusplusConcurrencyInAction_PracticalMultithreading》的时候，里面讲到初始化std::thread的时候，如果thread funtion的参数列表中有引用，需要传入std::ref才可以得到符合预期的结果。</p>
-
 <p>查阅发现std::ref是用来生成std::reference_wrapper。 按照 <a href="https://zh.cppreference.com/w/cpp/utility/functional/reference_wrapper">cppreference</a> 上的话来说</p>
-
-<blockquote>`std::reference_wrapper` 是包装引用于可复制、可赋值对象的类模板。它常用作将容器存储入无法正常保有引用的标准容器（类似 [std::vector](https://zh.cppreference.com/w/cpp/container/vector) ）的机制。</blockquote>
-
+<!-- raw HTML omitted -->
 <p>用人话来说，就是有的时候一些地方（比如STL容器中传值，又比如std::bind）会默认使用复制，这可能与我们想使用引用的期望不符。</p>
-
 <p>具体见下面的几个例子：</p>
-
 <pre><code>#include &lt;functional&gt;
 #include &lt;iostream&gt;
-
+ 
 void f(int&amp; n1, int&amp; n2, const int&amp; n3)
 {
     std::cout &lt;&lt; &quot;In function: &quot; &lt;&lt; n1 &lt;&lt; ' ' &lt;&lt; n2 &lt;&lt; ' ' &lt;&lt; n3 &lt;&lt; '\n';
@@ -247,7 +242,7 @@ void f(int&amp; n1, int&amp; n2, const int&amp; n3)
     ++n2; // increments the main()'s n2
     // ++n3; // compile error
 }
-
+ 
 int main()
 {
     int n1 = 1, n2 = 2, n3 = 3;
@@ -264,13 +259,9 @@ Before function: 10 11 12
 In function: 1 11 12
 After function: 10 12 12
 </code></pre>
-
 <p>我们发现直接传进去的参数n1的值没有改变，而使用std::ref传进去的值的结果符合预期。</p>
-
 <p>n1的值不符合预期的原因是，在调用std::bind的时候，会先将参数复制一份，然后传入函数f时，传入的不是在main函数中定义的n1的引用，而是对n1复制了一份得到的临时变量的引用。在函数f中对n1的修改只会使得n1的复制值与其保持一致，而不会改变n1.</p>
-
 <p>下面是一个关于<code>std::reference_wrapper 的例子</code></p>
-
 <pre><code>#include &lt;algorithm&gt;
 #include &lt;list&gt;
 #include &lt;vector&gt;
@@ -278,27 +269,27 @@ After function: 10 12 12
 #include &lt;numeric&gt;
 #include &lt;random&gt;
 #include &lt;functional&gt;
-
+ 
 int main()
 {
     std::list&lt;int&gt; l(10);
     std::iota(l.begin(), l.end(), -4);
-
+ 
     std::vector&lt;std::reference_wrapper&lt;int&gt;&gt; v(l.begin(), l.end());
     // 不能在 list 上用 shuffle （要求随机访问），但能在 vector 上使用它
     std::shuffle(v.begin(), v.end(), std::mt19937{std::random_device{}()});
-
+ 
     std::cout &lt;&lt; &quot;Contents of the list: &quot;;
     for (int n : l) std::cout &lt;&lt; n &lt;&lt; ' '; std::cout &lt;&lt; '\n';
-
+ 
     std::cout &lt;&lt; &quot;Contents of the list, as seen through a shuffled vector: &quot;;
     for (int i : v) std::cout &lt;&lt; i &lt;&lt; ' '; std::cout &lt;&lt; '\n';
-
+ 
     std::cout &lt;&lt; &quot;Doubling the values in the initial list...\n&quot;;
     for (int&amp; i : l) {
         i *= 2;
     }
-
+ 
     std::cout &lt;&lt; &quot;Contents of the list, as seen through a shuffled vector: &quot;;
     for (int i : v) std::cout &lt;&lt; i &lt;&lt; ' '; std::cout &lt;&lt; '\n';
 }
@@ -309,11 +300,8 @@ Contents of the list, as seen through a shuffled vector: -1 2 -2 1 5 0 3 -3 -4 4
 Doubling the values in the initial list...
 Contents of the list, as seen through a shuffled vector: -2 4 -4 2 10 0 6 -6 -8 8
 </code></pre>
-
 <p>最后我们回到开始，将参数在通过创建std::thread传给thread funtion的时候，参数默认情况下仍然是被拷贝了一份，与上面std::bind的情况类似，因此需要使用std::ref</p>
-
 <p>参考资料:</p>
-
 <pre><code>  * 《CplusplusConcurrencyInAction_PracticalMultithreading》2.2节
   * [std::ref](https://zh.cppreference.com/w/cpp/utility/functional/ref)
   * [std::reference_wrapper](https://zh.cppreference.com/w/cpp/utility/functional/reference_wrapper)

@@ -229,36 +229,22 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://poj.org/problem?id=1964">poj 1964</a></p>
-
-<p>题意：n*m的maze,由&rsquo;R&rsquo;和‘F’组成，现在要求找到面积最大的矩形，使得矩形中所有格子都是&rsquo;F&rsquo;。</p>
-
+<p>题意：n*m的maze,由'R'和‘F’组成，现在要求找到面积最大的矩形，使得矩形中所有格子都是'F&rsquo;。</p>
 <p>思路：单调栈&hellip;一开始神tm tle&hellip;.复杂度没问题啊。。。</p>
-
 <p>结果看到有人说这题由于数据量比较大。。。scanf会超时。。。<strong>所以要用输入挂。。</strong>。。。getchar什么的。。。</p>
-
 <p>poj竟然也卡读入。。。人性呢。。。。</p>
-
 <p>改了输出以后再交wa了。</p>
-
-<p>发现想错了，我是写了从(i,j)到两个方向能到的最大距离。。但是这样写有些点上的情况是没有考虑到的。。比如如果(i+1,j+1)上的点是&rsquo;R&rsquo;，实际上是不可以构成l*r的矩形的(l&gt;=2&amp;r&gt;=2)。。。但是我这样做无法体现。</p>
-
+<p>发现想错了，我是写了从(i,j)到两个方向能到的最大距离。。但是这样写有些点上的情况是没有考虑到的。。比如如果(i+1,j+1)上的点是'R&rsquo;，实际上是不可以构成l*r的矩形的(l&gt;=2&amp;r&gt;=2)。。。但是我这样做无法体现。</p>
 <p>改了下，变成：</p>
-
 <p>仍然对于每行做一次单调栈，预处理出点(i,j)能往右的最远距离a[i][j]。</p>
-
 <p>然后观察一下。。。如果我把每一列分别看成x轴，那a[i][j]不就是矩形的高度了吗。。。</p>
-
 <p>那我要求的不又变成了最大矩形面积了吗。。。</p>
-
 <p>于是接下来对于每一列，做上下两个方向的单调栈得到（i,j）上下能延伸到的最远距离。</p>
-
 <p>(i,j)点所在的矩形面积就是** (r[i][j]-l[i][j]+1)*a[i][j];**</p>
-
 <p>再交，A了</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2016年08月03日 星期三 05时55分30秒
@@ -320,7 +306,7 @@ int main()
         }
         maze[i][m+1] = 'R'; //单调栈的哨兵
         }
-/*      for ( int i = 1 ;i  &lt;= n ;i++){
+/*	    for ( int i = 1 ;i  &lt;= n ;i++){
         for ( int j = 1 ; j &lt;= m ; j++)
             printf(&quot;%c &quot;,maze[i][j]);
             printf(&quot;\n&quot;);
@@ -332,7 +318,7 @@ int main()
         stk.push(m+1);
         for ( int j = m ; j &gt;=1 ; j--)
         {
-    /*      if (maze[i][j]=='R')
+    /*	    if (maze[i][j]=='R')
             {
             row[i][j]=j;
             stk.push(j);
@@ -345,7 +331,7 @@ int main()
             if (maze[i][j]=='R') a[i][j] = 0 ;
         }
         }
-/*      for ( int i = 1 ; i &lt;= n ; i++)
+/*	    for ( int i = 1 ; i &lt;= n ; i++)
         {
         for ( int j = 1 ; j &lt;= m ; j++)
         {

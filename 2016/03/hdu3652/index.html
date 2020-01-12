@@ -229,22 +229,16 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
+                <nav id="TableOfContents"></nav>
                 
-                
-                <p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=3652">题目链接</a>
-题意：给出n,问[1,n]中，满足包含“13”且这个数（不是各位的和）能被13整除的数的个数。
+                <p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=3652">题目链接</a><br>
+题意：给出n,问[1,n]中，满足包含“13”且这个数（不是各位的和）能被13整除的数的个数。<br>
 思路：依然是数位dp..不过有一个小tip。。</p>
-
 <p>由于包含13的情况非常难考虑（包含一个“13”，两个“13”&hellip;..)</p>
-
 <p>所以要从反面考虑，即不包含13的情况。</p>
-
 <p>但是由于还有另一个条件。</p>
-
 <p><strong>做法是把能被13整除的数考虑成全集U,然后在U中做分划，一部分是含13的，另一部分是不含13的。</strong></p>
-
 <p>这样我们要求两个答案，一个是能被13整除的，另一个是能被13整除并且不含13的，相减即为题目所求。</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2016年03月16日 星期三 09时27分49秒
@@ -286,7 +280,7 @@ int digit[20];
 LL dfs (int pos,int sum,bool limit)
 {
     if (pos==0) return sum==0;
-
+    
     if (!limit&amp;&amp;dp[pos][sum]!=-1) return dp[pos][sum];
 
     int mx = limit ? digit[pos]:9;
@@ -296,7 +290,7 @@ LL dfs (int pos,int sum,bool limit)
     {
     res+=dfs(pos-1,(sum*10+i),limit&amp;&amp;i==mx);
     }
-
+    
     if(!limit) dp[pos][sum] = res;
     return res;
 }
@@ -336,7 +330,7 @@ int main()
     #ifndef  ONLINE_JUDGE 
     freopen(&quot;code/in.txt&quot;,&quot;r&quot;,stdin);
   #endif
-
+	
     ms(dp,-1); //dp数组子啊外面清空就好。。。。因为dp数组是所有数据公用的啊。。。。
     ms(dp2,-1);
     while (~scanf(&quot;%lld&quot;,&amp;n))

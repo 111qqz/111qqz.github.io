@@ -226,42 +226,33 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#make-interleaved">make_interleaved()</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#halide-is-a-programming-language-designed-to-make-it-easier-to-write-high-performance-image-and-array-processing-code-on-modern-machines">**Halide is a programming language designed to make it easier to write high-performance image and array processing code on modern machines. **</a></li>
+      </ul>
+    </li>
+    <li><a href="#make_interleaved">make_interleaved()</a></li>
+  </ul>
 </nav>
                 
-                
-
+                <!-- raw HTML omitted -->
 <blockquote>
-
-> 
-> ### **Halide is a programming language designed to make it easier to write high-performance image and array processing code on modern machines. **
-> 
-> 
+<h3 id="halide-is-a-programming-language-designed-to-make-it-easier-to-write-high-performance-image-and-array-processing-code-on-modern-machines">**Halide is a programming language designed to make it easier to write high-performance image and array processing code on modern machines. **</h3>
 </blockquote>
-
+<!-- raw HTML omitted -->
 <p>halide有两个特性比较吸引人。一个是对于各种平台架构的支持。</p>
-
+<!-- raw HTML omitted -->
 <blockquote>
-
-> 
-> 
-      * CPU architectures: X86, ARM, MIPS, Hexagon, PowerPC
-      * Operating systems: Linux, Windows, macOS, Android, iOS, Qualcomm QuRT
-      * GPU Compute APIs: CUDA, OpenCL, OpenGL, OpenGL Compute Shaders, Apple Metal, Microsoft Direct X 12
-
 </blockquote>
-
+<pre><code>  * CPU architectures: X86, ARM, MIPS, Hexagon, PowerPC
+  * Operating systems: Linux, Windows, macOS, Android, iOS, Qualcomm QuRT
+  * GPU Compute APIs: CUDA, OpenCL, OpenGL, OpenGL Compute Shaders, Apple Metal, Microsoft Direct X 12
+</code></pre>
+<!-- raw HTML omitted -->
 <p>另一个是把计算什么和怎么计算(何时计算)分离开来。</p>
-
 <p>可以直接参考<a href="http://halide-lang.org/tutorials/tutorial_introduction.html">tutorials</a> 来学习</p>
-
 <p>下面是一段将Halide Buffer转化成opencv Mat的代码，用于调试。</p>
-
 <pre><code>// Include some support code for loading pngs.
 // #include &quot;halide_image_io.h&quot;
 #include &lt;iostream&gt;
@@ -316,11 +307,8 @@ int main(int argc, char **argv)
     return 0;
 }
 </code></pre>
-
 <p>吐槽下hahide的文档&hellip;各种函数全靠试&hellip;</p>
-
 <p>试了好久得到的,opencv Mat转halide::buffer的办法:</p>
-
 <pre><code>cv::Mat image = cv::imread(&quot;/data/github/learnhalide/png.png&quot;);
     cv::imshow(&quot;input&quot;,image);
     cv::waitKey(0);
@@ -347,7 +335,7 @@ int main(int argc, char **argv)
     Halide::Runtime::Buffer&lt;uint8_t&gt; input(buffer);
     printf(&quot;input buffer:%d %d %d\n&quot;,input.width(),input.height(),input.channels());
     // printf(&quot;%d\n&quot;,input(2,2));
-    const halide_buffer_t *     raw_buffer = input.raw_buffer();
+    const halide_buffer_t * 	raw_buffer = input.raw_buffer();
     printf(&quot;raw buffer: %d %d %d\n&quot;,raw_buffer-&gt;host[0],raw_buffer-&gt;host[1],raw_buffer-&gt;host[2]);
 
 
@@ -357,59 +345,32 @@ int main(int argc, char **argv)
     cv::imshow(&quot;debug&quot;, Img);
     cv::waitKey(0);
 </code></pre>
-
 <p>可能会报错Error: Constraint violated: input.stride.0 (3) == 1 (1),原因是:</p>
-
-<blockquote>**We have a default constraint of stride==1 on the innermost dimension, so that vectorization works out well**</blockquote>
-
+<!-- raw HTML omitted -->
 <p><a href="https://github.com/halide/Halide/issues/3109">Constraint violated: f.stride.0 (2) == 1 (1) #3109</a></p>
-
 <p>解决办法是(对于AOT的编译方式):</p>
-
-<p>ImageParam input(type_of<uint8_t>(), 3);</p>
-
+<p>ImageParam input(type_of&lt;uint8_t&gt;(), 3);</p>
 <p>input.dim(0).set_stride(Expr());</p>
-
 <p>一种更简便的opencv Mat得到halide buffer的办法.　一个关键的问题是opencv Mat的memory layout是Interleaved的方式，也就是如下:</p>
-
 <p>// RGBRGBRGBRGBRGBRGBRGBRGB</p>
-
 <p>// RGBRGBRGBRGBRGBRGBRGBRGB</p>
-
 <p>// RGBRGBRGBRGBRGBRGBRGBRGB</p>
-
 <p>// RGBRGBRGBRGBRGBRGBRGBRGB</p>
-
 <p>但是Halide::buffer的默认memory layout是Planar的方式：</p>
-
 <p>// RRRRRRRR</p>
-
 <p>// RRRRRRRR</p>
-
 <p>// RRRRRRRR</p>
-
 <p>// RRRRRRRR</p>
-
 <p>// GGGGGGGG</p>
-
 <p>// GGGGGGGG</p>
-
 <p>// GGGGGGGG</p>
-
 <p>// GGGGGGGG</p>
-
 <p>// BBBBBBBB</p>
-
 <p>// BBBBBBBB</p>
-
 <p>// BBBBBBBB</p>
-
 <p>// BBBBBBBB</p>
-
 <p>因此需要用到函数</p>
-
-<h2 id="make-interleaved">make_interleaved()</h2>
-
+<h2 id="make_interleaved">make_interleaved()</h2>
 <pre><code>  cv::Mat image = cv::imread(&quot;/data/github/learnhalide/png.png&quot;);
   Halide::Runtime::Buffer&lt;uint8_t&gt; input = Halide::Runtime::Buffer&lt;uint8_t&gt;::make_interleaved(image.data,1240, 460, 3);
 </code></pre>

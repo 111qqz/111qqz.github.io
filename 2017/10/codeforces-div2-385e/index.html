@@ -229,49 +229,25 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                <nav id="TableOfContents">
-<ul>
-<li><a href="#题意">题意：</a></li>
-<li><a href="#思路">思路：</a></li>
-</ul>
-</nav>
+                <nav id="TableOfContents"></nav>
                 
-                
-
-<p><a href="http://codeforces.com/problemset/problem/385/E">题目链接</a></p>
-
+                <p><a href="http://codeforces.com/problemset/problem/385/E">题目链接</a></p>
 <h1 id="题意">题意：</h1>
-
 <p>有一只熊，初始在(sx,sy)处，如果当前的位置在(x,y)，那么下一秒会在((x+dx-1)%n+1,(y+dy-1)%n+1)处， dx[i] = k[i-1] + dx[i-1],dy[i]=k[i-1] + dy[i-1]，k表示的是某个点的花丛数目。</p>
-
 <p>初始点(x,y)的花丛数为x+y,每经过一个时间，所有点的花丛数增加1.</p>
-
 <p>所以，k[i] = x[i] + y[i] + i-1，现在问经过时间t后，熊的位置在哪里。也就是x[t],y[t]的值。</p>
-
 <h1 id="思路">思路：</h1>
-
 <p>我们不妨先只考虑x方向的，因为y方向完全相同。</p>
-
-<p>观察x[t]的式子， _<strong>x[t] = (x[t-1] + dx[t-1] -1) % n +1</strong>_。。这个%n之后+1简直蛋疼得一逼。。。</p>
-
-<p>我们不妨构造_<strong>g[t] = x[t]-1</strong>_，这样原式子就变成了 _<strong>g[t] = (g[t-1] + dx[t-1]) %n</strong> _&hellip;看起来爽了很多。。。</p>
-
-<p>观察式子_<strong>g[t] = (g[t-1] + dx[t-1]) % n</strong>_，我们发现这是一个前缀和的形式。</p>
-
+<p>观察x[t]的式子， <em><strong>x[t] = (x[t-1] + dx[t-1] -1) % n +1</strong></em>。。这个%n之后+1简直蛋疼得一逼。。。</p>
+<p>我们不妨构造_**g[t] = x[t]-1**_，这样原式子就变成了 _**g[t] = (g[t-1] + dx[t-1]) %n** _&hellip;看起来爽了很多。。。</p>
+<p>观察式子_**g[t] = (g[t-1] + dx[t-1]) % n**_，我们发现这是一个前缀和的形式。</p>
 <p>根据在<a href="https://111qqz.com/wordpress/2017/10/hdu4686/">hdu4686解题报告</a>  中提到的经验，对于求和的式子，我们只需要考虑每一项的构造法。</p>
-
 <p>因此问题转化成构造矩阵dx[t]</p>
-
 <p><em><strong>dx[t] = k[t-1] + dx[t-1]</strong></em></p>
-
-<p>其中_<strong>k[t] = x[t] + y[t] + t-1,</strong>_我们写成gx[t]和gy[t]的形式</p>
-
-<p>有<strong><em>k[t] = gx[t] + gy[t] + t + 1</em></strong></p>
-
-<p>而<em><strong>k[t-1] = gx[t-1] + gy[t-1] + t</strong></em></p>
-
-<p>因此可以得到k[t-1]与k[t]之间的递推关系:<em>** k[t] = k[t-1] + dx[t-1] + dy[t-1] + 1**</em></p>
-
+<p>其中_**k[t] = x[t] + y[t] + t-1,**_我们写成gx[t]和gy[t]的形式</p>
+<p>有**_k[t] = gx[t] + gy[t] + t + 1_**</p>
+<p>而_**k[t-1] = gx[t-1] + gy[t-1] + t**_</p>
+<p>因此可以得到k[t-1]与k[t]之间的递推关系:_** k[t] = k[t-1] + dx[t-1] + dy[t-1] + 1**_</p>
 <p><strong>观察到k[t]的表达式中同时包含dx,dy项，因此之前考虑的单独处理x和y的想法应该是行不通的</strong>。我们考虑同事处理x,y。</p>
 
 

@@ -234,82 +234,48 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#description">Description</a></li>
-<li><a href="#input">Input</a></li>
-<li><a href="#output">Output</a></li>
-<li><a href="#sample-input">Sample Input</a></li>
-<li><a href="#sample-output">Sample Output</a></li>
-</ul></li>
-<li><a href="#思路">思路：</a></li>
-</ul>
+  <ul>
+    <li><a href="#description">Description</a></li>
+    <li><a href="#input">Input</a></li>
+    <li><a href="#output">Output</a></li>
+    <li><a href="#sample-input">Sample Input</a></li>
+    <li><a href="#sample-output">Sample Output</a></li>
+  </ul>
 </nav>
                 
-                
-
-<h2 id="description">Description</h2>
-
+                <h2 id="description">Description</h2>
 <p>给定一个含有n个数的序列a[1],a[2],a[3]……a[n]，程序必须回答这样的询问：对于给定的i,j,k，在a[i],a[i+1</p>
-
 <p>],a[i+2]……a[j]中第k小的数是多少(1≤k≤j-i+1)，并且，你可以改变一些a[i]的值，改变后，程序还能针对改</p>
-
 <p>变后的a继续回答上面的问题。</p>
-
 <h2 id="input">Input</h2>
-
 <p>第一行有两个正整数n(1≤n≤10000)，m(1≤m≤10000)。</p>
-
 <p>分别表示序列的长度和指令的个数。</p>
-
 <p>第二行有n个数，表示a[1],a[2]……a[n]，这些数都小于10^9。</p>
-
 <p>接下来的m行描述每条指令</p>
-
 <p>每行的格式是下面两种格式中的一种。</p>
-
 <p>Q i j k 或者 C i t</p>
-
 <p>Q i j k （i,j,k是数字，1≤i≤j≤n, 1≤k≤j-i+1）</p>
-
 <p>表示询问指令，询问a[i]，a[i+1]……a[j]中第k小的数。</p>
-
 <p>C i t (1≤i≤n，0≤t≤10^9)表示把a[i]改变成为t</p>
-
 <p>m,n≤10000</p>
-
 <h2 id="output">Output</h2>
-
 <p> 对于每一次询问，你都需要输出他的答案，每一个输出占单独的一行。</p>
-
 <h2 id="sample-input">Sample Input</h2>
-
-<p>5 3
-3 2 1 4 7
-Q 1 4 3
-C 2 6
+<p>5 3<br>
+3 2 1 4 7<br>
+Q 1 4 3<br>
+C 2 6<br>
 Q 2 5 3</p>
-
 <h2 id="sample-output">Sample Output</h2>
-
-<p>3
+<p>3<br>
 6</p>
-
 <h1 id="思路">思路：</h1>
-
 <p>现在我们已经会了用可持久化线段树，去做静态区间第k大的问题。</p>
-
 <p>考虑一次修改，修改的元素会影响后面所有建好的线段树，时间代价是无法承受的。</p>
-
 <p>我们考虑root[i]表示的这颗线段树，它保存的是从第一个元素开始插入到第i个元素后的数字区间。也就是说每次我们进行线段树区间相减时，我们是对两个前缀和[1, l - 1]和[1, r]进行了相减。</p>
-
 <p>所以我们需要的是，以一个可以接受的时间代价，维护一个前缀和。</p>
-
 <p>显然是用BIT来维护。</p>
-
 <p>所以带修改的可持久化线段树，本质上应该是BIT套可持久化线段树。</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2017年10月16日 星期一 23时50分14秒

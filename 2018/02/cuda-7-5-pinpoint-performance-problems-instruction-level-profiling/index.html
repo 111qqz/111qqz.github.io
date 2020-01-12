@@ -225,26 +225,17 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p>原文：</p>
-
 <p><a href="https://devblogs.nvidia.com/cuda-7-5-pinpoint-performance-problems-instruction-level-profiling/">CUDA 7.5: Pinpoint Performance Problems with Instruction-Level Profiling</a></p>
-
 <p>主要是介绍了CUDA 7.5 以上的版本的 NVIDIA Visual Profiler 加入的新特性</p>
-
 <p>可以细粒度到指令级，分析出性能的瓶颈（在这之前，只能分析到kernel级别）</p>
-
 <p>顺便了解了一下<a href="http://docs.nvidia.com/cuda/profiler-users-guide/index.html">nvidia-visual-profiler</a></p>
-
 <p>原理大概是用PC（程序计数器）采样目前活跃的warp,然后得到这些warp的PC和状态，以此来得到更细粒度的性能分析。</p>
-
-<blockquote>Instruction-level profiling in CUDA 7.5 uses program counter (PC) sampling with a per-streaming-multiprocessor (SM) fixed-frequency sampler. At each sample period, the collector picks an active warp from the SM and captures the warp’s PC and warp state. Warp selection is performed round-robin across all active warps on the SM.</blockquote>
-
+<!-- raw HTML omitted -->
 <p>文中还给出了分析完性能瓶颈之后做出的相应优化。</p>
-
 <p>下面是对一段存在内存依赖延迟（？Memory Dependency Stalls ）问题的代码给出优化的过程。</p>
-
 <pre><code>float row[7]
 //Initialize array row
 int shift = 0;
@@ -266,21 +257,13 @@ for (int i = 0; i &lt; 6; ++i)        // rows
     }
 }
 </code></pre>
-
 <p>我们注意到代码第一行定义了一个size为7的float类型的数组，性能分析表明这一行涉及了 LDL(“load local”)  指令,是性能的瓶颈之一。</p>
-
 <p>为什么？</p>
-
 <p>因为NVIDIA 的GPU 没有下标 寄存器文件，所以如果一个数组被以动态的下标访问，编译器不得不为这个数组分配local memory.</p>
-
 <p>在Maxwell 架构中，local memory 没有被加入在L1 缓存中,因此访问内存会有很大的延迟。</p>
-
 <p>所以为了优化这部分，就把数组拆分成相同个数的单独的变量。</p>
-
 <p>然后由于没有定义成数组，因此也需要把循环展开。</p>
-
 <p>优化后的代码如下：</p>
-
 <pre><code>float row0, row1, row2, row3, row4, row5, row6; 
 //Initialize all elements
 #define UNROLL_REDUCE(val, buf)                                     \

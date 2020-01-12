@@ -229,55 +229,28 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                <nav id="TableOfContents">
-<ul>
-<li><a href="#题意">题意：</a></li>
-<li><a href="#思路">思路：</a></li>
-</ul>
-</nav>
+                <nav id="TableOfContents"></nav>
                 
-                
-
-<p><a href="http://poj.org/problem?id=3415">http://poj.org/problem?id=3415</a></p>
-
+                <p><a href="http://poj.org/problem?id=3415">http://poj.org/problem?id=3415</a></p>
 <h1 id="题意">题意：</h1>
-
 <p>给出两个字符串，问公共长度大于等于k的子串个数（只要两个串的位置不同就认为是不同）</p>
-
 <h1 id="思路">思路：</h1>
-
 <p>考虑SAM的性质。</p>
-
-<p>SAM上的一个节点所能接受的本质不同的子串个数是<strong><a href="http://poj.org/problem?id=3415">st[v].len - st[st[v].link].len</a></strong></p>
-
-<p>而这些子串，都出现了right[v]次，因为不同子串的个数就是<strong>(st[v].len-st[st[v].link].len)*right[v]</strong></p>
-
+<p>SAM上的一个节点所能接受的本质不同的子串个数是**<a href="http://poj.org/problem?id=3415">st[v].len - st[st[v].link].len</a>**</p>
+<p>而这些子串，都出现了right[v]次，因为不同子串的个数就是**(st[v].len-st[st[v].link].len)*right[v]**</p>
 <p>现在有了限制条件，要求长度大于等于k.</p>
-
 <p>没有限制的话，SAM上的一个节点所能接受的字符串的长度范围是在[st[st[v].link].len+1,st[v].len]</p>
-
-<p>那么现在范围其实就变成了<strong>[MX,st[v].len],其中MX = max{st[st[v].link].len+1,k}</strong></p>
-
+<p>那么现在范围其实就变成了**[MX,st[v].len],其中MX = max{st[st[v].link].len+1,k}**</p>
 <p>对于A串构建SAM，然后B串在SAM上运行</p>
-
-<p>考虑对于SAM的某个状态，B串此时的最大匹配长度为len，那么len&gt;=MX时，满足条件的字符串的范围就变成了<strong>[MX,len] </strong></p>
-
+<p>考虑对于SAM的某个状态，B串此时的最大匹配长度为len，那么len&gt;=MX时，满足条件的字符串的范围就变成了**[MX,len] **</p>
 <p>len&lt;MX时无贡献。</p>
-
 <p>所以该状态(v)对答案的就是  (len-MX+1)*right[v]</p>
-
 <p>然而这还不算完，和之前的LCS2一样，如果SAM上的一个节点能匹配字符串B的长度大于等于k，那么该节点的祖先节点（父亲节点，父亲的父亲的节点&hellip;)</p>
-
 <p>能匹配的字符串B的长度也都大于等于k&hellip;</p>
-
-<p>如果我们一边匹配一边沿着parent树自底向上传递的话&hellip;复杂度n^2,<del>一首凉凉送给自己</del></p>
-
-<p><del>但是正常人会这样？.jpg</del></p>
-
+<p>如果我们一边匹配一边沿着parent树自底向上传递的话&hellip;复杂度n^2,<!-- raw HTML omitted -->一首凉凉送给自己<!-- raw HTML omitted --></p>
+<p><!-- raw HTML omitted -->但是正常人会这样？.jpg<!-- raw HTML omitted --></p>
 <p>我们先打个标记，最后沿parent树自底向上把标记传递上去就行了。。</p>
-
 <p><strong>需要注意的是，此题的字符集是大小写字母都会包含&hellip;RE了2发orz</strong></p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2017年11月08日 星期三 18时50分18秒

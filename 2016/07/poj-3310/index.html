@@ -241,26 +241,17 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://poj.org/problem?id=3310">poj3310 题目链接</a></p>
-
 <p>题意：给出一个无向图。。。问是否满足。。联通，并且无环，并且能找到一条路径，图中所有的顶点要么在这条路径上，要么与这条路径上的顶点相邻。</p>
-
 <p>思路：一个一个来。。。联通的话任意起点开始跑一遍dfs? 开一个bool数组标记走过的点。。最后扫一遍。。看是否有点没走过</p>
-
 <p>环的话并查集就好。。</p>
-
 <p>关键是第三个条件。。。根据题中题中的例子。。感觉如果存在这样的路径。。。那么这样的路径应该尽可能长？</p>
-
 <p>于是想到求直径。。。然后在bfs的时候顺便记录路径。。。这样我就知道直径是哪些点。。。然后对于所有点。。判断是否在这条直径上或者与之相邻就好。。。</p>
-
 <p>具体做法是。。。开了一个bool数组ok标记直径上的点。。。在存边的时候用一个to[]数组表示相连。。。to[u]=v,to[v]=u&hellip;</p>
-
 <p>然后只要ok[i]或者ok[to[i]]满足其一就好。。。</p>
-
 <p>又是1A，蛤蛤蛤蛤蛤，我好神啊（误</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2016年07月12日 星期二 20时27分28秒
@@ -378,7 +369,7 @@ int main()
     {
         int u,v;
         scanf(&quot;%d%d&quot;,&amp;u,&amp;v);
-//      cout&lt;&lt;&quot;u:&quot;&lt;&lt;u&lt;&lt;&quot; v:&quot;&lt;&lt;v&lt;&lt;endl;
+//	    cout&lt;&lt;&quot;u:&quot;&lt;&lt;u&lt;&lt;&quot; v:&quot;&lt;&lt;v&lt;&lt;endl;
         e[i].u =u;
         e[i].v= v;
         to[u] = v;
@@ -387,7 +378,7 @@ int main()
         edge[v].push_back(u);
     }
     dfs(1); //判断连通性
-//  cout&lt;&lt;&quot;dfs die?&quot;&lt;&lt;endl;
+//	cout&lt;&lt;&quot;dfs die?&quot;&lt;&lt;endl;
     for ( int i = 1 ; i &lt;= n ; i++) 
     {
         if (!vis[i])
@@ -412,14 +403,14 @@ int main()
         }
         merge(u,v);
     }
-//  cout&lt;&lt;&quot;union set die?&quot;&lt;&lt;endl;
+//	cout&lt;&lt;&quot;union set die?&quot;&lt;&lt;endl;
     if (die)
     {
         printf(&quot;Graph %d is not a caterpillar.\n&quot;,++cas);
         continue;
     }
     bfs(1);
-//  for ( int i = 1 ;i  &lt;= n ; i++) cout&lt;&lt;&quot; pre[i]:&quot;&lt;&lt;pre[i]&lt;&lt;endl;
+//	for ( int i = 1 ;i  &lt;= n ; i++) cout&lt;&lt;&quot; pre[i]:&quot;&lt;&lt;pre[i]&lt;&lt;endl;
     int mx = 0 ;
     for ( int i = 1 ; i &lt;= n ; i++)
     {
@@ -430,7 +421,7 @@ int main()
         }
     }
     bfs(lst);
-//  cout&lt;&lt;&quot;bfs die?&quot;&lt;&lt;endl;
+//	cout&lt;&lt;&quot;bfs die?&quot;&lt;&lt;endl;
     mx = 0 ;
     for ( int i = 1 ; i &lt;= n ; i++)
     {
@@ -441,18 +432,18 @@ int main()
         }
     }
     int x = beg;
-//  for ( int i = 1 ;i  &lt;= n ; i++) cout&lt;&lt;&quot; pre[i]:&quot;&lt;&lt;pre[i]&lt;&lt;endl;
+//	for ( int i = 1 ;i  &lt;= n ; i++) cout&lt;&lt;&quot; pre[i]:&quot;&lt;&lt;pre[i]&lt;&lt;endl;
     while(x!=-1)
     {
     //   cout&lt;&lt;&quot;x:&quot;&lt;&lt;x&lt;&lt;endl;
         ok[x] = true;
         x = pre[x];
     }
-//  cout&lt;&lt;&quot;get pre die?&quot;&lt;&lt;endl;
+//	cout&lt;&lt;&quot;get pre die?&quot;&lt;&lt;endl;
     for ( int i = 1 ; i &lt;= n ; i++)
     {
         if (ok[i]||ok[to[i]]) continue;
-//      cout&lt;&lt;&quot;i:&quot;&lt;&lt;i&lt;&lt;endl;
+//	    cout&lt;&lt;&quot;i:&quot;&lt;&lt;i&lt;&lt;endl;
         die = true;
         break;
     }

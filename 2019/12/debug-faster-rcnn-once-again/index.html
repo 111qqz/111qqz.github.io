@@ -226,194 +226,150 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#问题描述">问题描述</a></li>
-<li><a href="#debug-经过">debug 经过</a></li>
-<li><a href="#经验总结">经验总结</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#问题描述">问题描述</a></li>
+    <li><a href="#debug-经过">debug 经过</a></li>
+    <li><a href="#经验总结">经验总结</a></li>
+  </ul>
 </nav>
                 
-                
-
-<h2 id="问题描述">问题描述</h2>
-
+                <h2 id="问题描述">问题描述</h2>
 <p><strong>一年debug 三次faster rcnn,每次都有新感觉（不</strong></p>
-
-<p>接到一个bug report,现象为某人脸模型，转换成trt模型，当batch size为1时结果完全正确，但是batch size大于1时结果不正确。
-具体的现象是，如果跑多张不同的图，只有第一张图有结果，后面的图都没有结果。
+<p>接到一个bug report,现象为某人脸模型，转换成trt模型，当batch size为1时结果完全正确，但是batch size大于1时结果不正确。<br>
+具体的现象是，如果跑多张不同的图，只有第一张图有结果，后面的图都没有结果。<br>
 如果跑的图中有相同的，那么和第一张相同的图都会有结果，其余的图没有结果。</p>
-
-<pre><code class="language-protobuf">layer {
-  name: &quot;POD_proposal&quot;
-  type: &quot;RPRoIFused&quot;
-  bottom: &quot;Reshape_105&quot;
-  bottom: &quot;Conv_100&quot;
-  bottom: &quot;Add_95&quot;
-  bottom: &quot;im_info&quot;
-  top: &quot;rois&quot;
-  top: &quot;tmp_pooling&quot;
-  rpn_proposal_param{
-    feat_stride: 16
-    anchor_ratios: 1
-    anchor_scales: 1
-    anchor_scales: 2
-    anchor_scales: 4
-    anchor_scales: 8
-    anchor_scales: 16
-    anchor_scales: 32
-    test_desc_param {
-        rpn_pre_nms_top_n: 2000
-        rpn_post_nms_top_n: 50
-        rpn_min_size: 16
-        rpn_nms_thresh: 0.7
-    }
-  }
-
-  roi_pooling_param{
-    pooled_h: 7
-    pooled_w: 7
-    spatial_scale: 0.0625
-
-  }
-}
-
-
-</code></pre>
-
-<p>特别地，proposal layer中 rpn_post_nms_top_n的参数值如果使用默认的300,那么结果都是对的。把这个值改小（只要小于300)，结果就像上面所述。</p>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-protobuf" data-lang="protobuf">layer {<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  name<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;POD_proposal&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  type<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;RPRoIFused&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  bottom<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;Reshape_105&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  bottom<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;Conv_100&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  bottom<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;Add_95&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  bottom<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;im_info&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  top<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;rois&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  top<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;tmp_pooling&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  rpn_proposal_param{<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    feat_stride<span style="color:#f92672">:</span> <span style="color:#ae81ff">16</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    anchor_ratios<span style="color:#f92672">:</span> <span style="color:#ae81ff">1</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    anchor_scales<span style="color:#f92672">:</span> <span style="color:#ae81ff">1</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    anchor_scales<span style="color:#f92672">:</span> <span style="color:#ae81ff">2</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    anchor_scales<span style="color:#f92672">:</span> <span style="color:#ae81ff">4</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    anchor_scales<span style="color:#f92672">:</span> <span style="color:#ae81ff">8</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    anchor_scales<span style="color:#f92672">:</span> <span style="color:#ae81ff">16</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    anchor_scales<span style="color:#f92672">:</span> <span style="color:#ae81ff">32</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    test_desc_param {<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>        rpn_pre_nms_top_n<span style="color:#f92672">:</span> <span style="color:#ae81ff">2000</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>        rpn_post_nms_top_n<span style="color:#f92672">:</span> <span style="color:#ae81ff">50</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>        rpn_min_size<span style="color:#f92672">:</span> <span style="color:#ae81ff">16</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>        rpn_nms_thresh<span style="color:#f92672">:</span> <span style="color:#ae81ff">0.7</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    }<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  }<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  roi_pooling_param{<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    pooled_h<span style="color:#f92672">:</span> <span style="color:#ae81ff">7</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    pooled_w<span style="color:#f92672">:</span> <span style="color:#ae81ff">7</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    spatial_scale<span style="color:#f92672">:</span> <span style="color:#ae81ff">0.0625</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  }<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>}<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>特别地，proposal layer中 rpn_post_nms_top_n的参数值如果使用默认的300,那么结果都是对的。把这个值改小（只要小于300)，结果就像上面所述。</p>
 <h2 id="debug-经过">debug 经过</h2>
-
-<p>首先根据rpn_post_nms_top_n的值一修改，结果就是错的来看，怀疑是哪里参数写死了。
-然而很快就排除了这个问题。因为faster rcnn的模型已经在另一个产品中经过长期验证了。
+<p>首先根据rpn_post_nms_top_n的值一修改，结果就是错的来看，怀疑是哪里参数写死了。<br>
+然而很快就排除了这个问题。因为faster rcnn的模型已经在另一个产品中经过长期验证了。<br>
 而且proposal layer是tensorrt自己实现的，有bug早就有人发现了。</p>
-
-<p>然后根据batch size为1时结果正确，但是batch size大于1时结果错误来看，怀疑是proposal layer前面rpn做的softmax的维度 不太对。
-因为rpn前景和背景的得分有两种不同的排列方式
+<p>然后根据batch size为1时结果正确，但是batch size大于1时结果错误来看，怀疑是proposal layer前面rpn做的softmax的维度 不太对。<br>
+因为rpn前景和背景的得分有两种不同的排列方式<br>
 可能是</p>
-
-<pre><code>+ + + + + +
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">+ + + + + +
 - - - - - -
-</code></pre>
-
-<p>也可能是</p>
-
-<pre><code>+ - + - + -
+</code></pre></div><p>也可能是</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">+ - + - + -
 + - + - + -
-</code></pre>
-
-<p>其中‘+’代表前景，‘-’代表背景。</p>
-
+</code></pre></div><p>其中‘+’代表前景，‘-’代表背景。</p>
 <p>前者的排列方式在softmax前的维度应该是  N×2×A×H×W</p>
-
 <p>后者的排列方式在softmax前的维度应该是  N×A×2×H×W</p>
-
 <p>其中N为batch size,A为anchor的个数。</p>
-
 <p>排查发现pytorch模型的输出是后者的排列方式，而tensorrt proposal layer期望的排列方式是前者，也就是<strong>N×2×A×H×W</strong></p>
-
 <p>所以在做softmax之前要先permute 一下</p>
-
-<pre><code class="language-protobuf">
-layer {
-  name: &quot;tmp_add_for_continue&quot;
-  type: &quot;Permute&quot;
-  bottom:&quot;Reshape_102&quot;
-  top:&quot;tmp_add_for_continue&quot;
-  permute_param {
-    order: 0
-    order: 2
-    order: 1
-    order: 3
-  }
-}
-
-layer {
-  name: &quot;Softmax_103&quot;
-  type: &quot;Softmax&quot;
-  bottom: &quot;tmp_add_for_continue&quot;
-  top: &quot;Softmax_103&quot;
-  softmax_param {
-    axis:1
-  }
-}
-
-</code></pre>
-
-<p>但是。。这里，之前已经做了啊。。。
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-protobuf" data-lang="protobuf"><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>layer {<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  name<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;tmp_add_for_continue&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  type<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;Permute&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  bottom<span style="color:#f92672">:</span><span style="color:#e6db74">&#34;Reshape_102&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  top<span style="color:#f92672">:</span><span style="color:#e6db74">&#34;tmp_add_for_continue&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  permute_param {<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    order<span style="color:#f92672">:</span> <span style="color:#ae81ff">0</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    order<span style="color:#f92672">:</span> <span style="color:#ae81ff">2</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    order<span style="color:#f92672">:</span> <span style="color:#ae81ff">1</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    order<span style="color:#f92672">:</span> <span style="color:#ae81ff">3</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  }<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>}<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>layer {<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  name<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;Softmax_103&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  type<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;Softmax&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  bottom<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;tmp_add_for_continue&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  top<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;Softmax_103&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  softmax_param {<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    axis<span style="color:#f92672">:</span><span style="color:#ae81ff">1</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  }<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>}<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>但是。。这里，之前已经做了啊。。。<br>
 就是说其实已经考虑到前景背景排列不一致的问题了。。。</p>
-
-<p>然后根据一个batch中，和第一张图片相同的图片也是有结果的。。
+<p>然后根据一个batch中，和第一张图片相同的图片也是有结果的。。<br>
 怀疑是nms或者哪里做sort的时候，交换没写对。。</p>
-
-<p>按照之前debug faster rcnn 的经验，看一下roi的输出吧。
-结果发现把同一张图，分别放在一个batch的不同位置，roi的输出是一致的。
+<p>按照之前debug faster rcnn 的经验，看一下roi的输出吧。<br>
+结果发现把同一张图，分别放在一个batch的不同位置，roi的输出是一致的。<br>
 。。。这说明proposal 似乎是没问题的？</p>
-
 <p>尝试将roi_align换成roi_pooling&hellip; 发现结果似乎也是没问题的。。。</p>
-
 <p>所以是roi_align 的实现有问题？</p>
-
-<p>于是看了下caffe cuda的实现
+<p>于是看了下caffe cuda的实现<br>
 发现里面有个叫num_roi_per_image的东西。。。</p>
-
 <p>？？？？？</p>
-
-<pre><code class="language-c++">template &lt;typename T&gt;
-__global__ void RoIAlignForwardKernel(
-    const int nthreads,
-    const T* bottom_data,
-    const T spatial_scale,
-    const bool position_sensitive,
-    const int channels,
-    const int height,
-    const int width,
-    const int pooled_height,
-    const int pooled_width,
-    const int sampling_ratio,
-    const int num_roi_per_image,
-    const T* bottom_rois,
-    T* top_data) {
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">template</span> <span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> T<span style="color:#f92672">&gt;</span>
+__global__ <span style="color:#66d9ef">void</span> RoIAlignForwardKernel(
+    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> nthreads,
+    <span style="color:#66d9ef">const</span> T<span style="color:#f92672">*</span> bottom_data,
+    <span style="color:#66d9ef">const</span> T spatial_scale,
+    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">bool</span> position_sensitive,
+    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> channels,
+    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> height,
+    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> width,
+    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> pooled_height,
+    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> pooled_width,
+    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> sampling_ratio,
+    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> num_roi_per_image,
+    <span style="color:#66d9ef">const</span> T<span style="color:#f92672">*</span> bottom_rois,
+    T<span style="color:#f92672">*</span> top_data) {
   CUDA_KERNEL_LOOP(index, nthreads) {
-    // (n, c, ph, pw) is an element in the pooled output
-    int pw = index % pooled_width;
-    int ph = (index / pooled_width) % pooled_height;
-    int c = (index / pooled_width / pooled_height) % channels;
-    int n = index / pooled_width / pooled_height / channels;
+    <span style="color:#75715e">// (n, c, ph, pw) is an element in the pooled output
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">int</span> pw <span style="color:#f92672">=</span> index <span style="color:#f92672">%</span> pooled_width;
+    <span style="color:#66d9ef">int</span> ph <span style="color:#f92672">=</span> (index <span style="color:#f92672">/</span> pooled_width) <span style="color:#f92672">%</span> pooled_height;
+    <span style="color:#66d9ef">int</span> c <span style="color:#f92672">=</span> (index <span style="color:#f92672">/</span> pooled_width <span style="color:#f92672">/</span> pooled_height) <span style="color:#f92672">%</span> channels;
+    <span style="color:#66d9ef">int</span> n <span style="color:#f92672">=</span> index <span style="color:#f92672">/</span> pooled_width <span style="color:#f92672">/</span> pooled_height <span style="color:#f92672">/</span> channels;
 
-//    const T* offset_bottom_rois = bottom_rois + n * 5;
-    const T* offset_bottom_rois = bottom_rois + n * 4;
-    int roi_batch_ind = n / num_roi_per_image;
-</code></pre>
-
-<p><strong>int roi_batch_ind = n / num_roi_per_image;</strong></p>
-
-<p>这什么鬼了。。
-于是跑去看caffe.proto。。。。
+<span style="color:#75715e">//    const T* offset_bottom_rois = bottom_rois + n * 5;
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">const</span> T<span style="color:#f92672">*</span> offset_bottom_rois <span style="color:#f92672">=</span> bottom_rois <span style="color:#f92672">+</span> n <span style="color:#f92672">*</span> <span style="color:#ae81ff">4</span>;
+    <span style="color:#66d9ef">int</span> roi_batch_ind <span style="color:#f92672">=</span> n <span style="color:#f92672">/</span> num_roi_per_image;
+</code></pre></div><p><strong>int roi_batch_ind = n / num_roi_per_image;</strong></p>
+<p>这什么鬼了。。<br>
+于是跑去看caffe.proto。。。。<br>
 果然。。。</p>
-
-<pre><code class="language-protobuf">message RoIAlignParameter {
-  optional uint32 pooled_h = 1 [default = 0];
-  optional uint32 pooled_w = 2 [default = 0];
-  optional float spatial_scale = 3 [default = 1];
-  optional int32 sample_ratio = 4 [default = -1];
-  optional bool position_sensitive = 5 [default = false];
-  optional uint32 num_roi_per_image = 6 [default = 300];
-}
-</code></pre>
-
-<p>这个num_roi_per_image有个默认值。。。跪了。。</p>
-
-<p>所以当修改 rpn_post_nms_top_n 的时候，由于这个默认值一直是300
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-protobuf" data-lang="protobuf"><span style="color:#66d9ef">message</span> <span style="color:#a6e22e">RoIAlignParameter</span> {<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#66d9ef">optional</span> <span style="color:#66d9ef">uint32</span> pooled_h <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> [<span style="color:#66d9ef">default</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>];<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#66d9ef">optional</span> <span style="color:#66d9ef">uint32</span> pooled_w <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span> [<span style="color:#66d9ef">default</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>];<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#66d9ef">optional</span> <span style="color:#66d9ef">float</span> spatial_scale <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span> [<span style="color:#66d9ef">default</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>];<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#66d9ef">optional</span> <span style="color:#66d9ef">int32</span> sample_ratio <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span> [<span style="color:#66d9ef">default</span> <span style="color:#f92672">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>];<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#66d9ef">optional</span> <span style="color:#66d9ef">bool</span> position_sensitive <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span> [<span style="color:#66d9ef">default</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>];<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#66d9ef">optional</span> <span style="color:#66d9ef">uint32</span> num_roi_per_image <span style="color:#f92672">=</span> <span style="color:#ae81ff">6</span> [<span style="color:#66d9ef">default</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">300</span>];<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>}<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>这个num_roi_per_image有个默认值。。。跪了。。</p>
+<p>所以当修改 rpn_post_nms_top_n 的时候，由于这个默认值一直是300<br>
 所以就会把后面若干图片的roi都当成第一张图的roi来处理。。</p>
-
 <h2 id="经验总结">经验总结</h2>
-
 <p>caffe的源码还是要看的。。。</p>
-
 <p>希望2020年可以看完orz</p>
 
 

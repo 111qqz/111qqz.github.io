@@ -225,16 +225,12 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p>uodate:有毒吧。kernel中出问题原来是不会报错的。。。。</p>
-
 <p>请教了组里的hust学长orz..、</p>
-
 <p>学到了cuda-memcheck命令和cudaGetLastError来查看问题。。可以参考<a href="https://stackoverflow.com/questions/14038589/what-is-the-canonical-way-to-check-for-errors-using-the-cuda-runtime-api">What is the canonical way to check for errors using the CUDA runtime API?</a></p>
-
 <p>先放一波资料。</p>
-
 <pre><code>  * &lt;del&gt;[An Even Easier Introduction to CUDA](https://devblogs.nvidia.com/even-easier-introduction-cuda/)&lt;/del&gt;
   * &lt;del&gt;[CUDA C/C++ Basics](https://drive.google.com/open?id=1kHYyM4yiJoyjkWjp7FJp0vae_TcvskjK)&lt;/del&gt;
   * &lt;del&gt;[nvidia-thrust 官方文档](http://docs.nvidia.com/cuda/thrust/index.html)&lt;/del&gt;
@@ -244,17 +240,11 @@
   * [cuda-GDB官方文档](http://docs.nvidia.com/cuda/cuda-gdb/index.html)
   * [cuda-c-best-practices-guide](http://docs.nvidia.com/cuda/cuda-c-best-practices-guide/)
 </code></pre>
-
 <p>cuda 提出的目的是能够让程序员透明地使用GPU来高效地进行并行运算。</p>
-
 <p>kernel和c语言中的函数相似，函数名字前通常用<strong>global</strong>来标识。</p>
-
 <p>下面考虑一个2个大小的1M的数组相加的例子。</p>
-
 <p>总的思路是通过并行，来观察到计算速度的加快。</p>
-
 <p>如果不考虑并行，2个数组相加的代码，如下：</p>
-
 <pre><code>#include &lt;iostream&gt;
 #include &lt;math.h&gt;
 
@@ -278,9 +268,7 @@ int main(void)
     y[i] = 2.0f;
   }
 </code></pre>
-
 <p>如果用cuda的方式来搞，代码如下：</p>
-
 <pre><code>#include &lt;iostream&gt;
 #include &lt;math.h&gt;
 // Kernel function to add the elements of two arrays
@@ -321,30 +309,23 @@ int main(void)
   // Free memory
   cudaFree(x);
   cudaFree(y);
-
+  
   return 0;
 }
 </code></pre>
-
 <p>除了代码注释，还有几个地方要说明：</p>
-
 <pre><code>  * 函数名字前面的global 是 cuda kernel  标识符
   * cuda kernel的调用方式是 &lt;&lt;&lt;,&gt;&gt;&gt;  更具体地说，是add&lt;&lt;&lt;numBlocks,blockSize&gt;&gt;&gt;(N,x,y)
   * .cu是 cuda C++ 文件的后缀，类似.cpp
   * nvcc是cuda C++ 的编译器，其将source code分成**host code**和**device code**两部分。前者通过c++编译器编译，后者通过nvidia编译器编译。
 </code></pre>
-
 <p>关于devide code 和 host code，参考下图。</p>
-
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-145751.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-145751.png" alt="" />
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-145751.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-145751.png" alt=""><br>
 </a></p>
-
-<p>现在我们单线程地跑了一个cuda kernel, 接下来是如何使它并行.关键在于&lt;&lt;<1,1>&gt;&gt;这部分。</p>
-
-<p>这行代码告诉了cuda runtime 有多少个并行的线程要被执行。
-这里有2个参数，不过我们可以先改变第二个，也就是一个线程block中线程的个数。
+<p>现在我们单线程地跑了一个cuda kernel, 接下来是如何使它并行.关键在于&laquo;&lt;1,1&raquo;&gt;这部分。</p>
+<p>这行代码告诉了cuda runtime 有多少个并行的线程要被执行。<br>
+这里有2个参数，不过我们可以先改变第二个，也就是一个线程block中线程的个数。<br>
 cuda GPu的kernel 使用的blocks中线程的个数应该是32的倍数（后面会解释32代表什么），所以256看起来很合理。</p>
-
 <pre><code>#include &lt;cstdio&gt;
 #include &lt;iostream&gt;
 #include &lt;math.h&gt;
@@ -396,23 +377,17 @@ int main(void)
     return 0;
 }
 </code></pre>
-
-<p>不过如果只是修改了&lt;&lt;<1,1>&gt;&gt; 到  &lt;&lt;<1,256>&gt;&gt;
-那实际上是对于每个线程都算了整个array的相加，而没有将整个计算任务分给多个并行的线程。
-为了解决这个问题，我们需要修改kernel的代码。
-cuda C++ 提供了关键字，允许kernel得到正要执行的thread是哪一个
-threadIdx.x  表示当前运行的thread是block中的哪一个
+<p>不过如果只是修改了&laquo;&lt;1,1&raquo;&gt; 到  &laquo;&lt;1,256&raquo;&gt;<br>
+那实际上是对于每个线程都算了整个array的相加，而没有将整个计算任务分给多个并行的线程。<br>
+为了解决这个问题，我们需要修改kernel的代码。<br>
+cuda C++ 提供了关键字，允许kernel得到正要执行的thread是哪一个<br>
+threadIdx.x  表示当前运行的thread是block中的哪一个<br>
 blockDim.x 表示block中的线程个数</p>
-
 <p>关于threadIdx.x等 下标问题，参考下图。</p>
-
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-151308.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-151308.png" alt="" />
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-151308.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-151308.png" alt=""><br>
 </a></p>
-
 <p>我们需要观察到使用cuda的方法之后时间的变化。</p>
-
 <p>可以使用nvprof命令</p>
-
 <pre><code>➜ learn&gt;nvprof ./add_cuda
 ==9312== NVPROF is profiling process 9312, command: ./add_cuda
 Max error: 0
@@ -444,60 +419,34 @@ Time(%)      Time     Calls       Avg       Min       Max  Name
 Time(%)      Time     Calls       Avg       Min       Max  Name
 100.00%  1.8084ms         1  1.8084ms  1.8084ms  1.8084ms  add(int, float*, float*)
 </code></pre>
-
 <p>可以看出时间的变化，从167.48ms到3.5144ms，再到1.8084ms</p>
-
 <p>我们注意到，对线程的管理实际上是三维的 :grid,block,thread.</p>
-
 <p>为什么要这样设计？</p>
-
 <p>一个这样做的目的是，在一个block中，thread可以通过share_memory 来共享数据。</p>
-
 <p>通过在声明的变量前面添加 <strong>shared</strong>  来表示，这个变量是声明在share memory部分了。</p>
-
 <p>share memory类似与缓存，容量小，但是速度快。不过这个cache是可以编程控制的。</p>
-
 <p><strong>在一个block中共享的data,对于其他block是不可见的。</strong></p>
-
 <p>我们不妨考虑一个例子，有2个数组a,b</p>
-
 <p>进行如下运算：</p>
-
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-210339.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-210339.png" alt="" />
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-210339.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-210339.png" alt=""><br>
 </a></p>
-
 <p>为了加快运行速度，我们还是考虑多线程的办法。</p>
-
 <p>让每一个线程处理一个输出。</p>
-
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-095804.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-095804.png" alt="" />
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-095804.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-095804.png" alt=""><br>
 </a></p>
-
 <p>然而我们发现，in中除了边界元素，每一个元素都被读了7次。</p>
-
 <p>这显然是没有必要的。</p>
-
 <p>问题的关键在于，不同的线程之间，不知道某个元素已经被读入了。</p>
-
 <p>更进一步，不同线程之间可以共享数据吗？</p>
-
 <p>答案是可以的。也就是上面提到的shared_memory</p>
-
 <p>然而这样就可以了吗。。</p>
-
 <p>由于线程的访问顺序是不固定的(?</p>
-
 <p>会发生如下的问题：</p>
-
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-100824.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-100824.png" alt="" />
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-100824.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-100824.png" alt=""><br>
 </a></p>
-
 <p>解决办法很无脑。。。因为cuda并没有想象中得那么底层。。。</p>
-
 <p>就是使用__syncthreads(); 来同步一个block中的所有进程。。。</p>
-
 <p>完整代码如下：</p>
-
 <pre><code>#include &lt;iostream&gt;
 #include &lt;cstdio&gt;
 #include &lt;cmath&gt;
@@ -526,18 +475,18 @@ void solve( int *in,int *out)
     if (lindex + BLOCK_SIZE&lt; BLOCK_SIZE+2*R &amp;&amp; gindex + BLOCK_SIZE &lt; N )
        tmp[lindex+BLOCK_SIZE] = in[gindex + BLOCK_SIZE];
     }
-
+    
   //  printf(&quot;miao\n&quot;);
     __syncthreads();
     int res = 0 ;
-
+    
     for ( int offset = -R ; offset &lt;= R ; offset++)
     {
 //  printf (&quot;offset:%d\n&quot;,offset);
 //  if (lindex + offset &lt; BLOCK_SIZE+2*R)
     res += tmp[lindex + offset];
     }
-
+    
     out[gindex] = res;
     printf(&quot;res=%d\n&quot;,res);
 }
@@ -577,14 +526,11 @@ int main(void)
     return 0;
 }
 </code></pre>
-
-<p>需要特别强调的是，cuda代码的debug问题，很多错误，不用特定的工具查看是不会显示的。
-以及，虽然cuda代码是在c++上添加了一些东西，但是device code部分用的是nvidia的编译器。
-所以c/cpp中，对于访问非法内存不敏感的特点，在cuda代码中不存在（我猜是因为编译器&hellip;）
+<p>需要特别强调的是，cuda代码的debug问题，很多错误，不用特定的工具查看是不会显示的。<br>
+以及，虽然cuda代码是在c++上添加了一些东西，但是device code部分用的是nvidia的编译器。<br>
+所以c/cpp中，对于访问非法内存不敏感的特点，在cuda代码中不存在（我猜是因为编译器&hellip;）<br>
 <strong>在访问之前，一定要check访问地址合法性。。。。</strong></p>
-
 <p><strong>在访问之前，一定要check访问地址合法性。。。。</strong></p>
-
 <p><strong>在访问之前，一定要check访问地址合法性。。。。</strong></p>
 
 

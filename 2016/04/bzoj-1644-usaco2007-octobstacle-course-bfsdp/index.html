@@ -230,74 +230,47 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#1644-usaco2007-oct-obstacle-course-障碍训练课">1644: [Usaco2007 Oct]Obstacle Course 障碍训练课</a></li>
-<li><a href="#description">Description</a></li>
-<li><a href="#input">Input</a></li>
-<li><a href="#output">Output</a></li>
-<li><a href="#sample-input">Sample Input</a></li>
-<li><a href="#sample-output">Sample Output</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#1644-usaco2007-octobstacle-course-障碍训练课">1644: [Usaco2007 Oct]Obstacle Course 障碍训练课</a></li>
+    <li><a href="#description">Description</a></li>
+    <li><a href="#input">Input</a></li>
+    <li><a href="#output">Output</a></li>
+    <li><a href="#sample-input">Sample Input</a></li>
+    <li><a href="#sample-output">Sample Output</a></li>
+  </ul>
 </nav>
                 
-                
-
-<h2 id="1644-usaco2007-oct-obstacle-course-障碍训练课">1644: [Usaco2007 Oct]Obstacle Course 障碍训练课</h2>
-
-<p>Time Limit: 5 Sec  Memory Limit: 64 MB
-Submit: 451  Solved: 226
+                <h2 id="1644-usaco2007-octobstacle-course-障碍训练课">1644: [Usaco2007 Oct]Obstacle Course 障碍训练课</h2>
+<p>Time Limit: 5 Sec  Memory Limit: 64 MB<br>
+Submit: 451  Solved: 226<br>
 [<a href="http://www.lydsy.com/JudgeOnline/submitpage.php?id=1644">Submit</a>][<a href="http://www.lydsy.com/JudgeOnline/problemstatus.php?id=1644">Status</a>][<a href="http://www.lydsy.com/JudgeOnline/bbs.php?id=1644">Discuss</a>]</p>
-
 <h2 id="description">Description</h2>
-
-<p>考虑一个 N x N (1 &lt;= N &lt;= 100)的有1个个方格组成的正方形牧场。有些方格是奶牛们不能踏上的，它们被标记为了&rsquo;x&rsquo;。例如下图：</p>
-
-<p>. . B x .
-. x x A .
-&hellip; x .
-. x &hellip;
+<p>考虑一个 N x N (1 &lt;= N &lt;= 100)的有1个个方格组成的正方形牧场。有些方格是奶牛们不能踏上的，它们被标记为了'x&rsquo;。例如下图：</p>
+<p>. . B x .<br>
+. x x A .<br>
+. . . x .<br>
+. x . . .<br>
 . . x . .</p>
-
 <p>贝茜发现自己恰好在点A处，她想去B处的盐块舔盐。缓慢而且笨拙的动物，比如奶牛，十分讨厌转弯。尽管如此，当然在必要的时候她们还是会转弯的。对于一个给定的牧场，请你计算从A到B最少的转弯次数。开始的时候，贝茜可以使面对任意一个方向。贝茜知道她一定可以到达。</p>
-
 <h2 id="input">Input</h2>
-
 <p>第 1行: 一个整数 N 行</p>
-
-<p>2..N + 1: 行 i+1 有 N 个字符 (&lsquo;.&rsquo;, &lsquo;x&rsquo;, &lsquo;A&rsquo;, &lsquo;B&rsquo;)，表示每个点的状态。</p>
-
+<p>2..N + 1: 行 i+1 有 N 个字符 ('.', &lsquo;x&rsquo;, &lsquo;A&rsquo;, &lsquo;B&rsquo;)，表示每个点的状态。</p>
 <h2 id="output">Output</h2>
-
 <p>行 1: 一个整数，最少的转弯次数。</p>
-
 <h2 id="sample-input">Sample Input</h2>
-
-<p>3
-.xA
-&hellip;
+<p>3<br>
+.xA<br>
+&hellip;<br>
 Bx.</p>
-
 <h2 id="sample-output">Sample Output</h2>
-
 <p>2</p>
-
 <p>思路：bfs.我一开始的错误做法是用优先队列，以转弯数为关键字。</p>
-
 <p>但是实际上错的，因为到达同一个点可能之后到达的方法有更少的转弯数，但是在做bfs的时候，之前访问的节点已经被标记了，所以无法更新成更优的值。</p>
-
 <p>正解是类似dp的做法。需要注意不需要vis数组标记。</p>
-
 <p>用dir[x][y][i]表示从i方向到达x,y的需要转弯数。</p>
-
 <p>初始dir[s.x][s.y][0..3]为0,其余为inf</p>
-
 <p>然后更新的时候如果dir[fx][fy][i]=min(dir[x][y][j]+1) 当i!=j</p>
-
 <p>dir[fx][fy][i]=min(dir[x][y][j]) 当i=j</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2016年04月10日 星期日 17时00分22秒
@@ -361,7 +334,7 @@ void bfs()
     while (!q.empty())
     {
     node pre = q.front(); q.pop();
-//  pre.look();
+//	pre.look();
     for ( int i = 0 ; i &lt; 4 ; i++)
     {
         node nxt;
@@ -417,7 +390,7 @@ int main()
     ms(dir,0x3f);
     for ( int i = 0 ; i &lt; 4 ; i++) dir[s.x][s.y][i] = 0;
     bfs();
-//  for ( int i = 0 ; i &lt; 4 ; i++) cout&lt;&lt;dir[e.x][e.y][i]&lt;&lt;endl;
+//	for ( int i = 0 ; i &lt; 4 ; i++) cout&lt;&lt;dir[e.x][e.y][i]&lt;&lt;endl;
     int ans = inf;
     for ( int i = 0 ; i &lt; 4 ; i++) ans = min(ans,dir[e.x][e.y][i]);
     printf(&quot;%d\n&quot;,ans);

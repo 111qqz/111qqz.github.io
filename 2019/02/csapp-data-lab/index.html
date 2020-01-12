@@ -225,43 +225,27 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p>CSAPP第二章的内容以前组成原理基本都学过&hellip;所以就简单翻了翻。</p>
-
 <p>对应的lab是用位运算实现各种有的没的&hellip;</p>
-
 <p>题目基本都很tricky&hellip;</p>
-
 <p>除了用到一些常规的位运算性质，还用到了一些奇怪的条件:</p>
-
 <pre><code>  * ~0x7FFFFFFF = 0x7FFFFFFF + 1
   * 0xFFFFFFFF +1 =  0x00000000
   * 
 </code></pre>
-
 <p>0 == ~0+1</p>
-
 <p>唯一让我觉得比较有趣的是how many bits这道题</p>
-
 <p>题目要求是给一个32-bit signed int,问最少用多少位能得到它的补码表示。</p>
-
 <p>考虑正数，显然，<strong>高位的连续的多个0是不必要的</strong>，只需要一个符号位的0即可。</p>
-
-<p>那么对于负数，<strong>高位的连续的多个1也是不必要的。 </strong>原因是，-2^k + 2^(k-1) =  -2^(k-1),也就是说，去掉两个连续的1中高位的那个，数值没有改变。</p>
-
+<p>那么对于负数，**高位的连续的多个1也是不必要的。 **原因是，-2^k + 2^(k-1) =  -2^(k-1),也就是说，去掉两个连续的1中高位的那个，数值没有改变。</p>
 <p>我们可以将正数和负数统一来看，都是找到最高位的0和1的交界。</p>
-
 <p><strong>这可以通过和相邻的位置求异或，找到最高位的1的方式来实现。</strong></p>
-
 <p>接下来就是如何找一个数的最高位的1的位置了。</p>
-
 <p>方法是构造一个单调的函数f,假设最高位位置为a,那么f((a,32))=0,f([0,a])=1.</p>
-
 <p>然后在函数f上二分。</p>
-
 <p>全部问题的代码如下,思路写在注释里了。还有3个涉及浮点数的问题之后补。</p>
-
 <pre><code>/* 
  * bitXor - x^y using only ~ and &amp; 
  *   Example: bitXor(4, 5) = 1
@@ -332,7 +316,7 @@ int allOddBits(int x) {
   int mask = (half_mask&lt;&lt;16) + half_mask;
   // printf(&quot;mask:X x:x x\n&quot;,mask,x,x&amp;mask);
   return  !((x&amp;mask)^mask);  
-
+  
 }
 /* 
  * negate - return -x 
@@ -462,13 +446,11 @@ int howManyBits(int x) {
   // int s = (x&gt;&gt;31)&amp;1;
   // int ret = n+1+((1^s)&amp;(!!x));
   // // printf(&quot;x:%d ret:%d\n&quot;,x,ret);
-
+  
   return n+1;
 }
 </code></pre>
-
 <p>补上三个涉及浮点数的问题&hellip;比较无聊，按照IEEE754操作即可．</p>
-
 <pre><code>//float
 /* 
  * floatScale2 - Return bit-level equivalent of expression 2*f for

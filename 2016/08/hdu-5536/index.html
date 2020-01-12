@@ -225,28 +225,18 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=5536">hdu 5536 题目链接</a></p>
-
 <p>题意：给出n个数，然后问最大的(a[i]+a[j])^a[k]  (i,j,k互不相同)</p>
-
 <p>思路：异或和最大很容易想到字典树。。但是如何保证i,j,k互不相同这里没有想明白。。。。。我的想法是加一个标记代表之前的id，但是我加的标记是只有在叶子节点上才有的。。。也就是会出现走到了最后一步才发现这个节点是不能走的情况。。。</p>
-
 <p><strong>正确的做法是，加一个cnt标记。</strong></p>
-
 <p><strong>每次插入的时候，这个数从根节点到叶子节点每个节点的cnt都+1</strong></p>
-
 <p><strong>删除的时候做就是每个节点的cnt都-1.</strong></p>
-
 <p><strong>这样子每次Find的时候只走cnt&gt;0的点。。</strong></p>
-
 <p>这种做法的正确性基与：</p>
-
 <p><strong>两个不同的数。。一定有至少一位的二进制数不同</strong>。。。保证了当只出现过一次的数x被删掉以后，其他的数y的存在不会导致经过x的路径</p>
-
 <p>** 两个相同的数，每一位二进制数位都是相同搞的。  **保证了id不同的相同的数。。即使一个被删掉。。另外的也可以继续访问。。。因为cnt仍然是大于0的。。。</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2016年08月15日 星期一 22时54分03秒
@@ -327,7 +317,7 @@ struct Trie
     {
         int v = s[i]-'0';
         if (u-&gt;nxt[v]!=NULL)
-        {   
+        {	
            u=u-&gt;nxt[v];
            u-&gt;cnt--;
         }
@@ -368,7 +358,7 @@ int main()
         {
         scanf(&quot;%d&quot;,&amp;a[i]);
         change(a[i]);
-//      cout&lt;&lt;&quot; str:&quot;&lt;&lt;str&lt;&lt;endl;
+//		cout&lt;&lt;&quot; str:&quot;&lt;&lt;str&lt;&lt;endl;
         trie.Insert(str,a[i]);
         }
         int ans = 0 ;
@@ -382,7 +372,7 @@ int main()
             trie.Delete(str);
             change(a[i]+a[j]);
             int cur = trie.Find(str)^(a[i]+a[j]);
-//          cout&lt;&lt;&quot;cur:&quot;&lt;&lt;cur&lt;&lt;endl;
+//		    cout&lt;&lt;&quot;cur:&quot;&lt;&lt;cur&lt;&lt;endl;
             ans = max(ans,cur);
             change(a[j]);
             trie.Insert(str,a[j]);

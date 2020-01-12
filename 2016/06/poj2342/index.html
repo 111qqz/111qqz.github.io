@@ -225,24 +225,16 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://poj.org/problem?id=2342">题目链接</a></p>
-
 <p>题意：n个人的上下级关系形成一棵树..每一个人有一个val（可正可负），要选若干个人参加一个party,要求是一个人和他的直接上级不能同时在场。问参加party的人最大的val之和。</p>
-
 <p>思路：树形dp入门题。</p>
-
 <p>dp[i][0]和dp[i][1]分别表示第i个人不参加和参加party对应的val和。</p>
-
 <p>注意dp转移方程是放在每次dfs之后的回溯位置的。。。</p>
-
 <p>这样做的话访问是从根节点到叶子节点，更新就成了从叶子节点到根节点。。。</p>
-
 <p>联想到数字三角形&hellip;其实是一样的。。</p>
-
 <p>sad&hellip;dp苦手如我也开始刷dp了吗。。。。</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2016年06月24日 星期五 13时07分51秒
@@ -290,20 +282,20 @@ void debug()
 }
 void dfs ( int u,int pre)
 {
-
+    
    // cout&lt;&lt;&quot;u:&quot;&lt;&lt;u&lt;&lt;endl;
     int siz = edge[u].size();
     for ( int i = 0 ; i &lt; siz ; i ++)
     {
     int v = edge[u][i];
     if (v==pre) continue;
-
-
+	
+		
     dfs(v,u);
-    dp[u][0] +=max(dp[v][0],dp[v][1]);  //如果父节点没选，那么当前节点可以有两种选择。    
+    dp[u][0] +=max(dp[v][0],dp[v][1]);  //如果父节点没选，那么当前节点可以有两种选择。	
     dp[u][1] +=dp[v][0];              //如果父亲节点选了，那么当前节点只能不选。
 
-
+	
     }
 }
 int main()
@@ -312,12 +304,12 @@ int main()
     freopen(&quot;code/in.txt&quot;,&quot;r&quot;,stdin);
   #endif
 
-
+	
     ms(dp,0);
     ms(in,0);
     scanf(&quot;%d&quot;,&amp;n);
     for ( int i = 1 ; i &lt;= n ; i++) scanf(&quot;%d&quot;,&amp;a[i]);
-
+	
     int u,v;
     while (~scanf(&quot;%d%d&quot;,&amp;u,&amp;v))
     {
@@ -329,7 +321,7 @@ int main()
     for ( int i = 1 ; i &lt;= n ; i++) dp[i][1] = a[i];
 
     dfs(root,-1);
-
+	
     int mx = -inf;
     mx = max(dp[root][0],dp[root][1]);
     debug();

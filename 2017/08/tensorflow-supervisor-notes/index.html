@@ -230,53 +230,32 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#概述">概述</a></li>
-<li><a href="#实例">实例</a></li>
-<li><a href="#结论">结论</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#概述">概述</a></li>
+    <li><a href="#实例">实例</a></li>
+    <li><a href="#结论">结论</a></li>
+  </ul>
 </nav>
                 
-                
-
-<p>update:supervisor的缺点是遇到问题只会抛异常，所以现在有一个better的管理工具,<a href="https://www.tensorflow.org/api_docs/python/tf/train/MonitoredSession">MonitoredSession</a></p>
-
+                <p>update:supervisor的缺点是遇到问题只会抛异常，所以现在有一个better的管理工具,<a href="https://www.tensorflow.org/api_docs/python/tf/train/MonitoredSession">MonitoredSession</a></p>
 <p>master,chief worker,Supervisor 这几个概念有点搞不清（我最菜.jpg  因此来学习一下。</p>
-
 <h2 id="概述">概述</h2>
-
 <p>原生的tensorflow 是各种东西都需要自己手动，如果是小规模的训练问题倒是不大，但是如果是训练的数据量比较大，可能需要训练几天或者几个月。。。</p>
-
 <p>那原生的tensorflow的健壮性可能就比较堪忧。。。</p>
-
 <p>万一断电了之类。。。</p>
-
 <p>这时候我们就可以使用supervisor</p>
-
 <p>其主要提供下面三个功能，以增强训练的健壮性：</p>
-
 <pre><code>  * Handles shutdowns and crashes cleanly.
   * Can be resumed after a shutdown or a crash.
   * Can be monitored through TensorBoard.
 </code></pre>
-
 <p>supervisor可以看做一个工具，或者说是对原生tensorflow的一层封装，目的主要是通过定期save的方法增强训练健壮性，</p>
-
 <p>就算程序挂掉了也可以从上一次save的checkpoint恢复，而不是从头再来（虽然这些也可以手动实现（？）</p>
-
 <p>同时也可以简化代码量</p>
-
 <p>除了supervisor,还有tf.learn库，里面提供对原生tensorflow更高层的封装，也提供更丰富的功能。</p>
-
 <h2 id="实例">实例</h2>
-
 <p>来举个具体的例子好了：</p>
-
 <p>在不使用supervisor的时候，我们的训练代码如下：</p>
-
 <pre><code>variables
 ...
 ops
@@ -297,9 +276,7 @@ with tf.Session() as sess:
     writer.add_summary(merged_summary,i)
   saver.save
 </code></pre>
-
 <p>如果使用supervisor，代码如下：</p>
-
 <pre><code>import tensorflow as tf
 a = tf.Variable(1)
 b = tf.Variable(2)
@@ -320,22 +297,17 @@ with sv.managed_session() as sess: #会自动去logdir中去找checkpoint，如�
         if i0 == 0:
             saver.save(sess,logdir=&quot;/home/keith/tmp/&quot;,global_step=i)
 </code></pre>
-
 <h2 id="结论">结论</h2>
-
-<p>从上面代码可以看出，<code>Supervisor</code>帮助我们处理一些事情
-（1）自动去checkpoint加载数据或初始化数据
-（2）自身有一个<code>Saver</code>，可以用来保存checkpoint
-（3）有一个<code>summary_computed</code>用来保存<code>Summary</code>
-所以，我们就不需要：
-（1）手动初始化或从<code>checkpoint</code>中加载数据
-（2）不需要创建<code>Saver</code>，使用<code>sv</code>内部的就可以
+<p>从上面代码可以看出，<code>Supervisor</code>帮助我们处理一些事情<br>
+（1）自动去checkpoint加载数据或初始化数据<br>
+（2）自身有一个<code>Saver</code>，可以用来保存checkpoint<br>
+（3）有一个<code>summary_computed</code>用来保存<code>Summary</code><br>
+所以，我们就不需要：<br>
+（1）手动初始化或从<code>checkpoint</code>中加载数据<br>
+（2）不需要创建<code>Saver</code>，使用<code>sv</code>内部的就可以<br>
 （3）不需要创建<code>summary writer</code></p>
-
 <p>参考资料：</p>
-
 <p><a href="http://blog.csdn.net/u012436149/article/details/53341372http://blog.csdn.net/u012436149/article/details/53341372">tensorflow学习笔记（二十二）：Supervisor</a></p>
-
 <p><a href="https://www.tensorflow.org/programmers_guide/supervisor">Supervisor: Training Helper for Days-Long Trainings.</a></p>
 
 

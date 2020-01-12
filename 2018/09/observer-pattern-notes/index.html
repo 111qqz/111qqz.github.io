@@ -229,16 +229,12 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p>最近在学习node.js，里面讲到node.js的事件机制使用了观察者模式，因此来学习一下。</p>
-
 <p>观察者模式的目的是定义对象间的一种一对多的依赖关系，当一个对象的状态发生改变时，所有依赖于它的对象都得到通知并被自动更新。</p>
-
 <p>因此观察者模式又叫发布-订阅模式。</p>
-
 <p>下面放一个简化之后的例子:</p>
-
 <pre><code>#include &lt;iostream&gt;
 #include &lt;vector&gt;
 #include &lt;string&gt;
@@ -253,18 +249,18 @@ public:
         name = strName;
         sub = strSub;
     }
-
+ 
     void Update();
-
+ 
 private:
     string name;
     Secretary* sub;我所理解的设计模式（C++实现）——观察者模式（Observer Pattern）
 };
-
+ 
 // 秘书类（主题对象，通知者）
 class Secretary
 {
-
+ 
 public:
     string action;
     void Add(StockObserver ob) { observers.push_back(ob); }
@@ -281,52 +277,48 @@ public:
             (*it).Update();
         }
     }
-
+ 
 private:
     vector&lt;StockObserver&gt; observers;
 };
-
-
-
-
+ 
+ 
+ 
+ 
 void StockObserver::Update()
 {
     cout &lt;&lt; name &lt;&lt; &quot; : &quot; &lt;&lt; sub-&gt;action &lt;&lt; &quot;, begin to work&quot; &lt;&lt; endl;
 }
-
+ 
 int main()
 {
     // 创建通知者
     Secretary* p = new Secretary();
-
+ 
     // 观察者
     StockObserver* s1 = new StockObserver(&quot;Lazy&quot;, p);
     StockObserver* s2 = new StockObserver(&quot;SnowFire&quot;, p);
-
+ 
     // 加入通知队列
     p-&gt;Add(*s1);
     p-&gt;Add(*s2);
-
+ 
     // 事件
     p-&gt;action = &quot;The boss is coming...&quot;;
-
+ 
     // 通知
     p-&gt;Notify();
-
+ 
     // 动态删除
     p-&gt;Remove(0);
-
+	
     p-&gt;Notify();
-
+ 
     return 0;
 </code></pre>
-
 <p>update:怪不得觉得熟悉，原来Qt的信号槽机制<a href="https://en.wikipedia.org/wiki/Signals_and_slots">Signals_and_slots </a>就是使用了观察者模式。</p>
-
 <p>参考资料:</p>
-
 <p><a href="http://www.runoob.com/design-pattern/observer-pattern.html">观察者模式-菜鸟教程</a></p>
-
 <p><a href="https://blog.csdn.net/lcl_data/article/details/9208561">我所理解的设计模式（C++实现）——观察者模式（Observer Pattern）</a></p>
 
 

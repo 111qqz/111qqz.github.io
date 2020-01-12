@@ -229,38 +229,23 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=4747">题目连接</a></p>
-
 <p>题意：给出n(n&lt;=200000)个数，问所有区间[l,r]中mex的和。 （一个区间mex的定义为，这个区间中没有出现的最小的非负数）</p>
-
 <p>思路：我们观察到mex(1,i)随着i增大，是不减的。(<strong>单调是线段树查询区间的时候非常好用的东西,这也是次题的突破口</strong>)</p>
-
 <p>mex(1,i)可以O(n)维护出</p>
-
 <p>现在我们考虑左端点向右移动对答案的影响。</p>
-
 <p>当i移动到i+1时，此时序列中少了a[i]，设r为最小的x，满足a[x]=a[i]，那么当右断点在区间[r+1,n]，mex值是没有改变的。</p>
-
 <p>当右端点属于[i+1,r-1]时，mex大于a[i]的会变成a[i]。</p>
-
 <p>由于我们知道从1到某区间的mex值是单调的，那么mex大于a[i]的点必然是连续的一段。</p>
-
 <p>我们可以知道最左边的q，满足mex(1,q)大于a[i]，然后将区间[q,r-1]成段更新为a[i]</p>
-
 <p><strong>因此整理思路，我们需要做两件事。</strong></p>
-
 <p><strong>一个是每次区间求和，一个是找到最左边的q满足mex(1,q)大于a[i].</strong></p>
-
 <p>线段树维护三个域，max域，表示该区间中mex(1,i)的最大值；</p>
-
 <p>sum域，表示该区间中mex(1,i)的和</p>
-
 <p>lazy域，表示延迟标记。</p>
-
 <p>可以预处理出nxt数组，表示位置i上的数下次出现最近是在nxt[i]</p>
-
 <pre><code>#include &lt;cstdio&gt;
 #include &lt;cstring&gt;
 #include &lt;algorithm&gt;

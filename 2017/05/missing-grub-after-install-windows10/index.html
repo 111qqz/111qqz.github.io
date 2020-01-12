@@ -221,42 +221,35 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p>我之前是单系统manjaro，装了win10以后，grub menu直接消失不见&hellip;</p>
-
 <p>ubuntu 的live cd进去，用神器boot-repair也没作用&hellip;</p>
-
 <p>最后的解决办法是：</p>
-
 <ol>
-<li><p>用随便一个什么linux的live cd,进入live模式</p></li>
-
-<li><p>使用某种方法（fdisk?gparted?自己记得？）确认linux安装在哪个分区（如果有安装了多个，应该以最后一个为准）我的linux安装在了sda5</p></li>
-
-<li><p>挂载linux分区:</p>
-
-<p>sudo mount /dev/sda5 /mnt  #Replace sda5 with your partition number</p></li>
+<li>
+<p>用随便一个什么linux的live cd,进入live模式</p>
+</li>
+<li>
+<p>使用某种方法（fdisk?gparted?自己记得？）确认linux安装在哪个分区（如果有安装了多个，应该以最后一个为准）我的linux安装在了sda5</p>
+</li>
+<li>
+<p>挂载linux分区:</p>
+<p>sudo mount /dev/sda5 /mnt  #Replace sda5 with your partition number</p>
+</li>
 </ol>
-
 <p>4.挂载其他必要的文件夹</p>
-
 <pre><code>for i in /sys /proc /run /dev; do sudo mount --bind &quot;$i&quot; &quot;/mnt$i&quot;; done
 </code></pre>
-
 <p>5:chroot进你的系统</p>
-
 <pre><code>sudo chroot /mnt
 </code></pre>
-
 <p>6.重装并更新grub引导</p>
-
 <pre><code>grub-install /dev/sda
 update-grub
 exit
 sudo reboot
 </code></pre>
-
 <p>完美解决！</p>
 
 

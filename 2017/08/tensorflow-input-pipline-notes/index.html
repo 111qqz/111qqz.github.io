@@ -229,53 +229,23 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                <nav id="TableOfContents">
-<ul>
-<li><a href="#tl-dr">TL;DR;</a></li>
-<li><a href="#load-data-in-tensorflow">Load Data in Tensorflow</a></li>
-<li><a href="#load-the-label-data">Load the Label Data</a></li>
-<li><a href="#do-some-optional-processing-on-our-string-lists">Do Some Optional Processing on Our String Lists</a></li>
-<li><a href="#start-building-the-pipeline">Start Building the Pipeline</a></li>
-<li><a href="#lets-partition-the-data">Lets Partition the Data</a></li>
-<li><a href="#build-the-input-queues-and-define-how-to-load-images">Build the Input Queues and Define How to Load Images</a></li>
-<li><a href="#group-samples-into-batches">Group Samples into Batches</a></li>
-<li><a href="#run-the-queue-runners-and-start-a-session">Run the Queue Runners and Start a Session</a></li>
-<li><a href="#complete-code-for-this-example">Complete Code for this example</a></li>
-</ul>
-</nav>
+                <nav id="TableOfContents"></nav>
                 
-                
-
-<p>参考资料：</p>
-
+                <p>参考资料：</p>
 <p><a href="https://www.tensorflow.org/api_guides/python/reading_data">tf_doc_Reading data</a></p>
-
 <p><a href="https://ischlag.github.io/2016/06/19/tensorflow-input-pipeline-example/">TENSORFLOW INPUT PIPELINE EXAMPLE</a></p>
-
 <p><a href="http://shartoo.github.io/tensorflow-inputpipeline/">tensorflow：理解tensorflow中的输入管道</a></p>
-
 <p>第二个参考资料是第一个的翻译版本，翻译的水平一般，建议看原文，不是很长。</p>
-
 <p>下面是我挑了文章中重点的部分+自己的理解。</p>
-
-<h1 id="tl-dr">TL;DR;</h1>
-
+<h1 id="tldr">TL;DR;</h1>
 <p>一个适用于不是很大的数据集的pipline input 的例子。</p>
-
 <h1 id="load-data-in-tensorflow">Load Data in Tensorflow</h1>
-
 <p><strong>input pipline 可以理解称一种load data的方式</strong>。 一般有两种方式load data,一种是比较传统的，使用feed 的方式。如果数据集比较大，这种方式就不适用了，因为这种方式需要将数据全部导入到memory中。因此tf提供了pipline input的读入数据的方式。</p>
-
 <p>input pipline 会处理 csv file,解码文件格式，重构数据结构，打乱数据顺序，做数据扩充或者其他预处理，然后使用线程(threads)将数据导进batch.</p>
-
 <h1 id="load-the-label-data">Load the Label Data</h1>
-
 <p>确保使用正确的dataset,csv文件路径。</p>
-
 <p>然后处理 得到train和test 的label</p>
-
 <p><strong>由于我们只是读数据而没有真的打算训练，所以没有使用one-hot的编码方式</strong>，而是直接将（本来也是由数字字符组成的）字符串，转化成int.</p>
-
 <pre><code>def encode_label(label):
   return int(label)
 
@@ -293,9 +263,7 @@ def read_label_file(file):
 train_filepaths, train_labels = read_label_file(dataset_path + train_labels_file)
 test_filepaths, test_labels = read_label_file(dataset_path + test_labels_file)
 </code></pre>
-
 <h1 id="do-some-optional-processing-on-our-string-lists">Do Some Optional Processing on Our String Lists</h1>
-
 <pre><code># transform relative path into full path
 train_filepaths = [ dataset_path + fp for fp in train_filepaths]
 test_filepaths = [ dataset_path + fp for fp in test_filepaths]
@@ -308,24 +276,17 @@ all_labels = train_labels + test_labels
 all_filepaths = all_filepaths[:20]
 all_labels = all_labels[:20]
 </code></pre>
-
 <h1 id="start-building-the-pipeline">Start Building the Pipeline</h1>
-
 <p>确保tensor的 dtype和list中的数据的type相匹配。</p>
-
 <pre><code>from tensorflow.python.framework import ops
 from tensorflow.python.framework import dtypes
 # convert string into tensors
 all_images = ops.convert_to_tensor(all_filepaths, dtype=dtypes.string)
 all_labels = ops.convert_to_tensor(all_labels, dtype=dtypes.int32)
 </code></pre>
-
 <h1 id="lets-partition-the-data">Lets Partition the Data</h1>
-
 <p>这是一个可选的步骤。可能由于我们的数据集比较大，我们先把它分成train set 和 test set</p>
-
-<p><img src="https://ischlag.github.io/images/DynamicPartition.png" alt="A visualization of the dynamic partition function in tensorflow." /></p>
-
+<p><img src="https://ischlag.github.io/images/DynamicPartition.png" alt="A visualization of the dynamic partition function in tensorflow."></p>
 <pre><code># create a partition vector
 partitions = [0] * len(all_filepaths)
 partitions[:test_set_size] = [1] * test_set_size
@@ -335,13 +296,9 @@ random.shuffle(partitions)
 train_images, test_images = tf.dynamic_partition(all_images, partitions, 2)
 train_labels, test_labels = tf.dynamic_partition(all_labels, partitions, 2)
 </code></pre>
-
 <h1 id="build-the-input-queues-and-define-how-to-load-images">Build the Input Queues and Define How to Load Images</h1>
-
 <p>使用slice_input_producer 切分 tensor,得到一个个的实例（？）,然后使用线程 queue them up.</p>
-
 <p>shuffle表示是否打乱数据，此处我们不打乱。</p>
-
 <pre><code># create input queues
 train_input_queue = tf.train.slice_input_producer(
                                     [train_images, train_labels],
@@ -359,15 +316,10 @@ file_content = tf.read_file(test_input_queue[0])
 test_image = tf.image.decode_jpeg(file_content, channels=NUM_CHANNELS)
 test_label = test_input_queue[1]
 </code></pre>
-
 <h1 id="group-samples-into-batches">Group Samples into Batches</h1>
-
 <p>单个sample训练效率会很低，通常的做法是将若干个samples合成一个batch一起训练。每个batch中samples的个数就是所谓的batch_size</p>
-
 <p>到目前为止我们只是描述了pipline大致的样子，但是tensorflow还不知道我们image数据的shape.  在使用tf.train_batch将samples合成若干个batch之前，我们需要首先定义image</p>
-
 <p>tensor 的 shape</p>
-
 <pre><code># define tensor shape
 train_image.set_shape([IMAGE_HEIGHT, IMAGE_WIDTH, NUM_CHANNELS])
 test_image.set_shape([IMAGE_HEIGHT, IMAGE_WIDTH, NUM_CHANNELS])
@@ -385,16 +337,13 @@ test_image_batch, test_label_batch = tf.train.batch(
                                     #,num_threads=1
                                     )
 </code></pre>
-
 <h1 id="run-the-queue-runners-and-start-a-session">Run the Queue Runners and Start a Session</h1>
-
 <p>到目前为止我们已经构建好了input pipline.但是为了将pipline 启动，我们还需要使用线程，线程将加载queue,将数据导入tensorflow objects.</p>
-
 <pre><code>with tf.Session() as sess:
-
+  
   # initialize the variables
   sess.run(tf.initialize_all_variables())
-
+  
   # initialize the queue threads to start to shovel data
   coord = tf.train.Coordinator()
   threads = tf.train.start_queue_runners(coord=coord)
@@ -412,9 +361,7 @@ test_image_batch, test_label_batch = tf.train.batch(
   coord.join(threads)
   sess.close()
 </code></pre>
-
 <p>如下面的输出所示，tensorflow 不会关心epoch(全部数据过了一遍叫一个epoch)的数值，所以需要你自己手动统计。</p>
-
 <pre><code>(tf-env)worker1:~$ python mnist_feed.py 
 I tensorflow/stream_executor/dso_loader.cc:105] successfully opened CUDA library libcublas.so locally
 I tensorflow/stream_executor/dso_loader.cc:105] successfully opened CUDA library libcudnn.so locally
@@ -465,9 +412,7 @@ from the test set:
 [0 4 5 3 8]
 [0 4 5 3 8]
 </code></pre>
-
 <h1 id="complete-code-for-this-example">Complete Code for this example</h1>
-
 <pre><code># Example on how to use the tensorflow input pipelines. The explanation can be found here ischlag.github.io.
 import tensorflow as tf
 import random
@@ -563,10 +508,10 @@ test_image_batch, test_label_batch = tf.train.batch(
 print &quot;input pipeline ready&quot;
 
 with tf.Session() as sess:
-
+  
   # initialize the variables
   sess.run(tf.initialize_all_variables())
-
+  
   # initialize the queue threads to start to shovel data
   coord = tf.train.Coordinator()
   threads = tf.train.start_queue_runners(coord=coord)

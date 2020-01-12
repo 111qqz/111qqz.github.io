@@ -230,99 +230,58 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li><a href="#what-do-we-need">What do we need ?</a></li>
-<li><a href="#a-note-on-that-5th-statement">A note on that 5th statement</a></li>
-<li><a href="#let-s-write-some-code">Let’s write some code</a>
-<ul>
-<li><a href="#installing-dependencies">Installing Dependencies</a></li>
-<li><a href="#creating-django-project">Creating Django Project</a></li>
-<li><a href="#creating-scrapy-project">Creating Scrapy Project</a></li>
-<li><a href="#connecting-scrapy-to-django">Connecting Scrapy to Django</a></li>
-<li><a href="#configuring-our-scrapy-project">Configuring Our Scrapy Project</a></li>
-</ul></li>
-<li><a href="#notes-on-front-end-part">Notes on Front-End Part</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#what-do-we-need">What do we need ?</a></li>
+        <li><a href="#a-note-on-that-5th-statement">A note on that 5th statement</a></li>
+        <li><a href="#lets-write-somecode">Let’s write some code</a></li>
+        <li><a href="#notes-on-front-end-part">Notes on Front-End Part</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
                 
-                
-
-<p>在meidum上看到一篇很赞的文章&hellip;无奈关键部分一律无法加载出来&hellip;挂了梯子也不行，很心塞&hellip;刚刚突然发现加载出来了&hellip;以防之后再次无法访问，所以搬运过来．</p>
-
+                <p>在meidum上看到一篇很赞的文章&hellip;无奈关键部分一律无法加载出来&hellip;挂了梯子也不行，很心塞&hellip;刚刚突然发现加载出来了&hellip;以防之后再次无法访问，所以搬运过来．</p>
 <p>There are couple of articles on how to integrate Scrapy into a Django Application (or vice versa?). But most of them don’t cover a full complete example that includes triggering spiders from Django views. Since this is a web application, that must be our main goal.</p>
-
 <h3 id="what-do-we-need">What do we need ?</h3>
-
 <p>Before we start, it is better to specify what we want and how we want it. Check this diagram:</p>
-
-<p><img src="https://cdn-images-1.medium.com/max/1000/1*ZzTm-J_UgiuSoQtRmUoE9g.png" alt="" /></p>
-
+<p><img src="https://cdn-images-1.medium.com/max/1000/1*ZzTm-J_UgiuSoQtRmUoE9g.png" alt=""></p>
 <p>It shows how our app should work</p>
-
 <pre><code>  * Client sends a request with a URL to crawl it. (1)
   * Django triggets scrapy to run  a spider to crawl that URL. (2)
   * Django returns a response to tell Client that crawling just started. (3)
   * scrapy  completes crawling and saves extracted data into database. (4)
   * django fetches that data from database and return it to Client. (5)
 </code></pre>
-
 <p>Looks great and simple so far.</p>
-
 <h3 id="a-note-on-that-5th-statement">A note on that 5th statement</h3>
-
 <p><strong><code>Django</code></strong> fetches that data from database and return it to <strong><code>Client</code></strong>. (5)</p>
-
 <p><code>Neither Django nor client</code> don’t know when <code>Scrapy</code> completes crawling. There is a callback method named <code>pipeline_closed,</code> but it belongs to Scrapy project. We can’t return a response from Scrapy <code>pipelines</code>. We use that method only to save extracted data into database.</p>
-
 <p>Well eventually, in somewhere, we have to tell the client :</p>
-
-<blockquote>Hey! Crawling completed and i am sending you crawled data here.</blockquote>
-
+<!-- raw HTML omitted -->
 <p>There are two possible ways of this (<em>Please comment if you discover more</em>):</p>
-
 <p>We can either use <code>web sockets</code> to inform client when crawling completed.</p>
-
 <p>Or,</p>
-
 <p>We can start sending requests on every 2 seconds (more? or less ?) from client to check crawling status after we get the <code>&quot;crawling started&quot;</code> response.</p>
-
 <p>Web Socket solution sounds more stable and robust. But it requires a second service running separately and means more configuration. I will skip this option for now. But i would choose web sockets for my production-level applications.</p>
-
-<h3 id="let-s-write-some-code">Let’s write some code</h3>
-
+<h3 id="lets-write-somecode">Let’s write some code</h3>
 <p>It’s time to do some real job. Let’s start by preparing our environment.</p>
-
 <h4 id="installing-dependencies">Installing Dependencies</h4>
-
 <p>Create a virtual environment and activate it:</p>
-
 <pre><code>$ python3.5 -m venv venv
 $ source venv/bin/activate
 $ pip install django scrapy scrapyd python-scrapyd-api
 </code></pre>
-
 <p><a href="https://github.com/scrapy/scrapyd">Scrapyd</a> is a daemon service for running <a href="https://github.com/scrapy/scrapy">Scrapy</a> spiders. You can discover its details from <a href="http://scrapyd.readthedocs.io/en/stable/">here</a>.</p>
-
 <p><a href="https://github.com/djm/python-scrapyd-api">python-scrapyd-api</a> is a wrapper allows us to talk <code>scrapyd</code> from our Python progam.</p>
-
 <p><strong>Note: I am going to use Python 3.5 for this project</strong></p>
-
-<h4 id="creating-django-project">Creating Django Project</h4>
-
+<h4 id="creating-djangoproject">Creating Django Project</h4>
 <p>Create a django project with an app named <code>main</code> :</p>
-
 <pre><code>$ django-admin startproject iCrawler
 $ cd iCrawler &amp;&amp; python manage.py startapp main
 </code></pre>
-
 <p>We also need a model to save our scraped data. Let’s keep it simple:</p>
-
 <pre><code>import json
 from django.db import models
 from django.utils import timezone
@@ -331,7 +290,7 @@ class ScrapyItem(models.Model):
     unique_id = models.CharField(max_length=100, null=True)
     data = models.TextField() # this stands for our crawled data
     date = models.DateTimeField(default=timezone.now)
-
+    
     # This is for basic and custom serialisation to return it to client as a JSON.
     @property
     def to_dict(self):
@@ -344,15 +303,11 @@ class ScrapyItem(models.Model):
     def __str__(self):
         return self.unique_id
 </code></pre>
-
 <p>Add <code>main</code> app into <code>INSTALLED_APPS</code> in <code>settings.py</code> And as a final step, migrations:</p>
-
 <pre><code>$ python manage.py makemigrations
 $ python manage.py migrate
 </code></pre>
-
 <p>Let’s add a view and url to our <code>main</code> app:</p>
-
 <pre><code>from uuid import uuid4
 from urllib.parse import urlparse
 from django.core.validators import URLValidator
@@ -389,13 +344,13 @@ def crawl(request):
 
         if not url:
             return JsonResponse({'error': 'Missing  args'})
-
+        
         if not is_valid_url(url):
             return JsonResponse({'error': 'URL is invalid'})
-
+        
         domain = urlparse(url).netloc # parse the url and extract the domain
         unique_id = str(uuid4()) # create a unique ID. 
-
+        
         # This is the custom settings for scrapy spider. 
         # We can send anything we want to use it inside spiders and pipelines. 
         # I mean, anything
@@ -442,13 +397,9 @@ def crawl(request):
         else:
             return JsonResponse({'status': status})
 </code></pre>
-
 <p>I tried to document the code as much as i can.</p>
-
 <p>But the main trick is, <code>unique_id.</code> Normally, we save an object to database, then we get its <code>ID</code>. In our case, we are specifying its <code>unique_id</code> before creating it. Once crawling completed and client asks for the crawled data; we can create a query with that <code>unique_id</code> and fetch results.</p>
-
 <p>And an url for this view:</p>
-
 <pre><code>from django.conf import settings
 from django.conf.urls import url,static
 from django.views.generic import TemplateView
@@ -465,23 +416,16 @@ if settings.DEBUG:
     urlpatterns += static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static.static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 </code></pre>
-
-<h4 id="creating-scrapy-project">Creating Scrapy Project</h4>
-
+<h4 id="creating-scrapyproject">Creating Scrapy Project\</h4>
 <p>It is better if we create Scrapy project under (or next to) our Django project. This makes easier to connect them together. So let’s create it under Django project folder:</p>
-
 <pre><code>$ cd iCrawler
 $ scrapy startproject scrapy_app
 </code></pre>
-
 <p>Now we need to create our first spider from inside <code>scrapy_app</code> folder:</p>
-
 <pre><code>$ cd scrapy_app
 $ scrapy genspider -t crawl icrawler https://google.com
 </code></pre>
-
 <p>i name spider as <code>icrawler</code>. You can name it as anything. Look <code>-t crawl</code> part. We specify a base template for our spider. You can see all available templates with:</p>
-
 <pre><code>$ scrapy genspider -l
 Available templates:
 basic
@@ -489,15 +433,10 @@ crawl
 csvfeed
 xmlfeed
 </code></pre>
-
 <p>Now we should have a folder structure like this:</p>
-
-<p><img src="https://cdn-images-1.medium.com/max/1000/1*CYNVpLHx8H6gMSkXkD91BQ.png" alt="" /></p>
-
-<h4 id="connecting-scrapy-to-django">Connecting Scrapy to Django</h4>
-
+<p><img src="https://cdn-images-1.medium.com/max/1000/1*CYNVpLHx8H6gMSkXkD91BQ.png" alt=""></p>
+<h4 id="connecting-scrapy-todjango">Connecting Scrapy to Django</h4>
 <p>In order to have access Django models from Scrapy, we need to connect them together. Go to <code>settings.py</code> file under <code>scrapy_app/scrapy_app/</code> and put:</p>
-
 <pre><code>import os
 import sys
 
@@ -515,17 +454,11 @@ django.setup()
 
 ## Rest of settings are below ..
 </code></pre>
-
 <p>That’s it. Now let’s start <code>scrapyd</code> to make sure everything installed and configured properly. Inside <code>scrapy_app/</code> folder run:</p>
-
 <p>$ scrapyd</p>
-
 <p>This will start scrapyd and generate some outputs. Scrapyd also has a very minimal and simple web console. We don’t need it on production but we can use it to watch active jobs while developing. Once you start the scrapyd go to <a href="http://127.0.0.1:6800/">http://127.0.0.1:6800</a> and see if it is working.</p>
-
-<h4 id="configuring-our-scrapy-project">Configuring Our Scrapy Project</h4>
-
+<h4 id="configuring-our-scrapyproject">Configuring Our Scrapy Project</h4>
 <p>Since this post is not about fundamentals of scrapy, i will skip the part about modifying spiders. You can create your spider with official documentation. I will put my example spider here, though:</p>
-
 <pre><code>class IcrawlerSpider(CrawlSpider):
     name = 'icrawler'
 
@@ -549,21 +482,15 @@ django.setup()
         i['url'] = response.url
         return i
 </code></pre>
-
 <p>Above is <code>icrawler.py</code> file from <code>scrapy_app/scrapy_app/spiders</code>. Attention to <code>__init__</code> method. It is important. If we want to make a method or property dynamic, we need to define it under <code>__init__</code> method, so we can pass arguments from Django and use them here.</p>
-
 <p>We also need to create a <code>Item Pipeline</code> for our scrapy project. Pipeline is a class for making actions over scraped items. From <a href="https://doc.scrapy.org/en/latest/topics/item-pipeline.html">documentation</a>:</p>
-
-<blockquote>Typical uses of item pipelines are:</blockquote>
-
+<!-- raw HTML omitted -->
 <pre><code>  * cleansing HTML data
   * validating scraped data (checking that the items contain certain fields)
   * checking for duplicates (and dropping them)
   * **storing the scraped item in a database**
 </code></pre>
-
 <p>Yay! <code>Storing the scraped item in a database</code>. Now let’s create one. Actually there is already a file named <code>pipelines.py</code> inside <code>scrapy_project</code> folder. And also that file contains an empty-but-ready pipeline. We just need to modify it a little bit:</p>
-
 <pre><code>from main.models import ScrapyItem
 import json
 
@@ -589,34 +516,24 @@ class ScrapyAppPipeline(object):
         self.items.append(item['url'])
         return item
 </code></pre>
-
 <p>And as a final step, we need to enable (uncomment) this pipeline in scrapy <code>settings.py</code> file:</p>
-
 <pre><code># Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'scrapy_app.pipelines.ScrapyAppPipeline': 300,
 }
 </code></pre>
-
-<blockquote>Don’t forget to restart `scraypd` if it is working.</blockquote>
-
+<!-- raw HTML omitted -->
 <p>This scrapy project basically,</p>
-
 <pre><code>  * Crawls a website (comes from Django view)
   * Extract all URLs from website
   * Put them into a list
   * Save the list to database over Django models.
 </code></pre>
-
 <p>And that’s all for the back-end part. Django and Scrapy are both integrated and should be working fine.</p>
-
 <h3 id="notes-on-front-end-part">Notes on Front-End Part</h3>
-
 <p>Well, this part is so subjective. We have tons of options. Personally I have build my front-end with <code>React</code> . The only part that is not subjective is <code>usage of setInterval</code> . Yes, let’s remember our options: <code>web sockets</code> and <code>to send requests to server every X seconds</code>.</p>
-
 <p>To clarify base logic, this is simplified version of my React Component:</p>
-
 <pre><code>class Home extends React.Component {
   constructor(props) {
       super(props)
@@ -694,16 +611,14 @@ ITEM_PIPELINES = {
           }
       })
   }
-
+  
   render () {
     // render componenet
     return (&lt;div&gt;&lt;/div&gt;)
   }
 }
 </code></pre>
-
 <p>You can discover the details by comments i added. It is quite simple actually.</p>
-
 <p>Oh, that’s it. It took longer than i expected. Please leave a comment for any kind of feedback.</p>
 
 

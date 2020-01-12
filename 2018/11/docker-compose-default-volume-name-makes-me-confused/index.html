@@ -226,55 +226,35 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li><a href="#现象">现象:</a></li>
-<li><a href="#排查过程">排查过程:</a></li>
-<li><a href="#解决办法">解决办法：</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#现象">现象:</a></li>
+        <li><a href="#排查过程">排查过程:</a></li>
+        <li><a href="#解决办法">解决办法：</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
                 
-                
-
-<h3 id="现象">现象:</h3>
-
+                <h3 id="现象">现象:</h3>
 <p>使用docker compose 挂载 named volume 无效（且没有错误提示)</p>
-
 <h3 id="排查过程">排查过程:</h3>
-
 <p>一开始是没有使用docker-compose命令，直接使用docker run  -v 命令，挂载两个绝对路径，没有问题。</p>
-
 <p>然后使用named volume，在这里使用了<a href="https://github.com/CWSpear/local-persist">local-persist</a> 插件，来指定数据卷(volume)在host上的位置。直接用docker run  -v 命令，依然没有问题。</p>
-
 <p>接下里打算放到docker compose里面，发现并没有挂载成功。</p>
-
 <p>但是在docker compose里面，挂载两个绝对路径是ok的。</p>
-
 <p>于是怀疑是volume的问题</p>
-
 <p>此时使用docker inspect 查看 用docker compose 启动起来的，挂载named volume的容器</p>
-
 <p>发现mount里面，挂载的named volume并不是我在docker-compose.yml填写的名称，而是多了一个前缀，这个前缀恰好是docker-compose.yml 文件所在的目录名称。</p>
-
 <p>查了一下，发现果然不止我一个人被坑到orz <a href="https://forums.docker.com/t/docker-compose-prepends-directory-name-to-named-volumes/32835">Docker-compose prepends directory name to named volumes</a></p>
-
 <p>其实应该直接使用docker inspect来排查的&hellip;应该会更快找到问题</p>
-
 <h3 id="解决办法">解决办法：</h3>
-
 <p>有几种解决办法：</p>
-
 <pre><code>  * 不手动创建volume，而是在docker-compose.yml中，设置volume的mountpoint
   * 在docker-compose.yml中，添加external: true的选项到 volume中，参考[external](https://docs.docker.com/compose/compose-file/#external)
 </code></pre>
-
 <p>顺便附上我的docker-compose.yml文件</p>
-
 <pre><code>version: '3'
 services:
   django:
@@ -288,7 +268,7 @@ services:
     entrypoint: bash run.sh
     tty: true
     container_name: django
-
+   
   splash: 
     image: &quot;scrapinghub/splash&quot;
     container_name: splash

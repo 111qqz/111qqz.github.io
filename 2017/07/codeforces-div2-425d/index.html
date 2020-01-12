@@ -234,41 +234,24 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#题意">题意：</a></li>
-<li><a href="#思路">思路：</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#题意">题意：</a></li>
+    <li><a href="#思路">思路：</a></li>
+  </ul>
 </nav>
                 
-                
-
-<p><a href="http://codeforces.com/contest/832/problem/D">题目链接</a></p>
-
+                <p><a href="http://codeforces.com/contest/832/problem/D">题目链接</a></p>
 <h2 id="题意">题意：</h2>
-
 <p>给出一棵树，以及三个点（可能重合），问两两组成的3条路径中，哪2条路径重合部分最长。</p>
-
 <h2 id="思路">思路：</h2>
-
 <p>LCA还是一下就能想到的，rmq+dfs在线求。</p>
-
 <p>然后我开始分情况讨论，讨论了一年也没讨论完，哭哭</p>
-
 <p>结论是：<strong>求出三个lca，并取深度最大的那个，就是我们要的三岔路口K，然后分别求出K到a，b，c三点的路径长度，取最大值+1就是答案。</strong></p>
-
 <p>所以我的问题在于，没有试图往一般性的方向考虑，以为讨论一下就可以了&hellip;</p>
-
 <p>这大概就是所谓的猜结论？</p>
-
 <p>感性的理解的话，LCA越深，意味着另一个点到LCA的距离越远，也就是相交的路径越长</p>
-
 <p>但是我的话，估计还是很难在短短不到一个小时内得出这样一般性的结论orz&hellip;</p>
-
 <p>这大概就是数学方面的天赋差距把&hellip;T T</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2017年07月30日 星期日 15时12分34秒
@@ -372,9 +355,9 @@ int solve( int a,int b,int c) //a-&gt;c,b-&gt;c
     {
     int LCA3 = E[rmq_min(R[c],R[LCA])];
 
-//  if (dis[c]+D(c,LCA)==dis[LCA])
-//      res = dis[LCA]-dis[c]+1;
-//  else
+//	if (dis[c]+D(c,LCA)==dis[LCA])
+//	    res = dis[LCA]-dis[c]+1;
+//	else
         if (D(c,LCA3)+D(LCA3,LCA)==D(c,LCA))
         res = D(c,LCA)+1;
     }
@@ -392,7 +375,7 @@ int solve( int a,int b,int c) //a-&gt;c,b-&gt;c
     if (D(b,c)==D(b,a)+D(a,c))
     {
         res =D(a,c)+1;
-//      cout&lt;&lt;&quot;1&quot;&lt;&lt;endl;
+//	    cout&lt;&lt;&quot;1&quot;&lt;&lt;endl;
     }
     else 
     if (D(a,c)==D(a,b)+D(b,c))
@@ -482,7 +465,7 @@ int main()
     int LCA = max_dep3(E[rmq_min(R[a],R[b])],E[rmq_min(R[b],R[c])],E[rmq_min(R[a],R[c])]);
     int ans = max3(D(LCA,a),D(LCA,b),D(LCA,c))+1;
     printf(&quot;%d\n&quot;,ans);
-//  printf(&quot;%d\n&quot;,solve(a,b,c));
+//	printf(&quot;%d\n&quot;,solve(a,b,c));
     }
 #ifndef ONLINE_JUDGE
     fclose(stdin);

@@ -225,23 +225,17 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p>Given a <em>m</em> x <em>n</em> matrix, if an element is 0, set its entire row and column to 0. Do it in place.</p>
-
 <p><a href="https://leetcode.com/problems/set-matrix-zeroes/#">click to show follow up.</a></p>
-
-<p><strong>Follow up:</strong>Did you use extra space?
-A straight forward solution using O(_m_<em>n</em>) space is probably a bad idea.
-A simple improvement uses O(<em>m</em> + <em>n</em>) space, but still not the best solution.
+<p>**Follow up:**Did you use extra space?<br>
+A straight forward solution using O(<em>m__n</em>) space is probably a bad idea.<br>
+A simple improvement uses O(<em>m</em> + <em>n</em>) space, but still not the best solution.<br>
 Could you devise a constant space solution?</p>
-
 <p>直接放常数空间的做法。</p>
-
 <p>这道题面hypereal的时候遇到过，基本思路就是用已经确定是0的位置来存储其他行和列的信息。</p>
-
 <p>三点注意：</p>
-
 <pre><code>  *   (x,y)不要放任何信息，不然行和列的信息，后面处理的那个可能被覆盖掉。
   *   (x,y)位置要进行标记，否则默认的0值可能会造成歧义
   * 赋值成0的时候要分成两部分，处理的时候避免因为处理前面赋值成了0，把后面标记的行和列的标号覆盖掉。
@@ -316,7 +310,7 @@ public:
     for ( int i =  0 ; i &lt; cntx ; i++)
     {
         int XX = a[i][y];
-
+	    
         if (XX==x||XX==-1) continue;
         for ( int j = 0 ; j &lt; m ; j++)
         if (j!=y)   // fill the 0 in two steps,ensuring not to cover the info
@@ -337,13 +331,9 @@ public:
     }
 };
 </code></pre>
-
 <p>下面有一个更精简的思路：</p>
-
 <p>直接用每一行和每一列的第一个位置记录相应行和相应列的状态（(0,0)点会有重合，再加一个变量记录就好）</p>
-
 <p>得到信息后记得从右下角往左上更新，避免信息覆盖。</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2017年04月10日 星期一 08时06分27秒
@@ -360,7 +350,7 @@ public:
             if (matrix[i][j] == 0)
                 matrix[i][0] = matrix[0][j] = 0;
     }
-
+    
     for (int i = n-1; i &gt;=0 ;i--) {
         for (int j = m-1; j &gt;=1; j--)
             if (matrix[i][0] == 0 || matrix[0][j] == 0)

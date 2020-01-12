@@ -237,31 +237,20 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=4291">题目链接</a></p>
-
 <p>题意：</p>
-
 <p>Given n (1 &lt;= n &lt;= 1018), You should solve for</p>
-
-<p>g(g(g(n))) mod 109 + 7
+<p>g(g(g(n))) mod 109 + 7<br>
 where</p>
-
 <p>g(n) = 3g(n - 1) + g(n - 2)</p>
-
 <p>g(1) = 1</p>
-
 <p>g(0) = 0思路：找循环节。首先由于模数固定，可以暴力一下找到循环节。</p>
-
 <p>得到1E9+7的循环节是222222224,222222224的循环节是183120.</p>
-
 <p>然后三次矩阵快速幂就行了。</p>
-
 <p><strong>需要注意每次都要判断那一层的n是否为0和1。</strong></p>
-
 <p>暴力解法：</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :Mon 31 Oct 2016 02:47:01 PM CST
@@ -307,7 +296,7 @@ LL find_loop(LL mod)
     c = (a+3*b%mod)% mod;
     a = b;
     b = c; 
-//  cout&lt;&lt;&quot;a:&quot;&lt;&lt;a&lt;&lt;&quot; b:&quot;&lt;&lt;b&lt;&lt;endl;
+//	cout&lt;&lt;&quot;a:&quot;&lt;&lt;a&lt;&lt;&quot; b:&quot;&lt;&lt;b&lt;&lt;endl;
     if (a==0&amp;&amp;b==1)
     {
         return i-1; // i的时候得到第i项，判断循环的时候是判断g[i-1]==g[0]&amp;&amp;g[i]==g[1]，所以循环节长度是i-1;
@@ -414,40 +403,26 @@ int main()
     return 0;
 }
 </code></pre>
-
 <p>再来一个比较一般的做法：</p>
-
 <p>参考<a href="http://blog.csdn.net/shiyuankongbu/article/details/37320443">递推式循环节</a></p>
-
 <p><a href="http://blog.csdn.net/acdreamers/article/details/25616461">Acdreamer的博客_广义Fibonacci数列找循环节</a></p>
-
 <p>摘重点：</p>
-
-<blockquote>今天早上起来后，看了下代码，为什么要判断5是不是p的模二次剩余呢，为什么是5呢
-
-想了想，5对于斐波那契数列来讲，不就是x^2=x+1的delta么，那么这题的递推式是x^2=3*x+1，delta=3*3+4=13，然后我就把勒让德符号判断二次剩余那里改成13，然后对应的暴力出13及13以内的素数对应的循环节，交了一发，AC了</blockquote>
-
-<blockquote>      所以综上所述：
-
-![](http://img.blog.csdn.net/20140512151050140)
-是模![](http://img.blog.csdn.net/20140512151151359)
-的二次剩余时，枚举![](http://img.blog.csdn.net/20140512151341546)
-的因子
-
-![](http://img.blog.csdn.net/20140512151050140)
-是模![](http://img.blog.csdn.net/20140512151151359)
-的二次非剩余时，枚举![](http://img.blog.csdn.net/20140512154134531)
-的因子</blockquote>
-
-<p>对于第二种非剩余的情况，理论上是枚举(p+1)(p-1)的因子，<strong>实际上常常只是枚举2*(p+1)的因子</strong></p>
-
+<!-- raw HTML omitted -->
+<p>想了想，5对于斐波那契数列来讲，不就是x^2=x+1的delta么，那么这题的递推式是x^2=3<em>x+1，delta=3</em>3+4=13，然后我就把勒让德符号判断二次剩余那里改成13，然后对应的暴力出13及13以内的素数对应的循环节，交了一发，AC了<!-- raw HTML omitted --></p>
+<!-- raw HTML omitted -->
+<p><img src="http://img.blog.csdn.net/20140512151050140" alt=""><br>
+是模<img src="http://img.blog.csdn.net/20140512151151359" alt=""><br>
+的二次剩余时，枚举<img src="http://img.blog.csdn.net/20140512151341546" alt=""><br>
+的因子</p>
+<p><img src="http://img.blog.csdn.net/20140512151050140" alt=""><br>
+是模<img src="http://img.blog.csdn.net/20140512151151359" alt=""><br>
+的二次非剩余时，枚举<img src="http://img.blog.csdn.net/20140512154134531" alt=""><br>
+的因子<!-- raw HTML omitted --></p>
+<p>对于第二种非剩余的情况，理论上是枚举(p+1)(p-1)的因子，<em><em>实际上常常只是枚举2</em>(p+1)的因子</em>*</p>
 <p>对于c=5的情况，是有定理：</p>
-
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2016/10/Screenshot-from-2016-10-31-21-23-45.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2016/10/Screenshot-from-2016-10-31-21-23-45.png" alt="screenshot-from-2016-10-31-21-23-45" />
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2016/10/Screenshot-from-2016-10-31-21-23-45.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2016/10/Screenshot-from-2016-10-31-21-23-45.png" alt="screenshot-from-2016-10-31-21-23-45"><br>
 </a></p>
-
 <p>不过对于c不等于5的情况。。。该结论是否一定成立呢&hellip;感觉不是很好证，求指教。</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :Mon 31 Oct 2016 08:22:17 PM CST
@@ -593,7 +568,7 @@ void get_fac(LL n)//得到n的所有因子
     }
 }
 int get_loop( LL p) //暴力得到不大于13的素数的循环节。
-{           
+{		    
     LL a,b,c;
     a = 0 ;
     b = 1 ;
@@ -685,7 +660,7 @@ int main()
         }
         LL loop1 = find_loop(loop0);
         LL loop2 = find_loop(loop1);
-//      printf(&quot;loop1:%lld loop2:%lld\n&quot;,loop1,loop2);
+//	    printf(&quot;loop1:%lld loop2:%lld\n&quot;,loop1,loop2);
         LL cur = n;
         Mat ans = mat_ksm(M,cur-1,loop2);
         ans = mul(ans,M1,loop2);

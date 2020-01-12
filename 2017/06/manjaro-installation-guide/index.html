@@ -226,23 +226,17 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li><a href="#1-关于更换源"><strong>1.关于更换源</strong></a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#1关于更换源">1.关于更换源</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
                 
-                
-
-<p>20180214 update:</p>
-
+                <p>20180214 update:</p>
 <p>第一个版本已经比较久了，于是更新一下，顺便写了个脚本orz</p>
-
 <pre><code>pacman-mirrors -c China
 echo &quot; [archlinuxcn] &quot; &gt;&gt; /etc/pacman.conf
 echo &quot; SigLevel = Optional TrustedOnly &quot;  &gt;&gt; /etc/pacman.conf
@@ -281,12 +275,12 @@ localnet 127.0.0.0/255.0.0.0
 localnet 10.0.0.0/255.0.0.0
 localnet 172.16.0.0/255.240.0.0
 localnet 192.168.0.0/255.255.0.0
-
+ 
 [ProxyList]
 socks5  127.0.0.1 1080
 http    127.0.0.1 1087
 EOF
-
+ 
 pacman -S vundle-git
 cat &gt;&gt; ~/.vimrc  &lt;&lt;EOF
 set guifont=Neep\ 18
@@ -745,57 +739,37 @@ EOF
 
 echo &quot; please install vim plug-in&quot;
 </code></pre>
-
 <p>出于目前对manjaro的依赖，以及没有找到很简单易行的备份系统的方案的原因，决定详细记录一下系统安装的过程，以防哪天系统挂掉了，可以快速恢复。</p>
-
-<h3 id="1-关于更换源"><strong>1.关于更换源</strong></h3>
-
-<p>坑点主要在系统默认的源是国外源，如何切换成中国源，网上有很多教程，但这些教程都是针对Arch的，弄来弄去也很不容易搞好，而且胡乱修改会把Manjaro的源破坏掉（不要问我怎么知道的）。
+<h3 id="1关于更换源"><strong>1.关于更换源</strong></h3>
+<p>坑点主要在系统默认的源是国外源，如何切换成中国源，网上有很多教程，但这些教程都是针对Arch的，弄来弄去也很不容易搞好，而且胡乱修改会把Manjaro的源破坏掉（不要问我怎么知道的）。<br>
 其实网上有个blog的方法很方便，附上连接</p>
-
 <p>就两行命令搞定：</p>
-
 <pre><code>sudo pacman-mirrors -c China  //选择中国源并更新
 sudo pacman -Syyu  //更新系统
 </code></pre>
-
 <p>2.安装搜狗输入法</p>
-
 <p>具体为，安装fcitx,安装fcitx-sogoupinyin,安装kcm-fcitx</p>
-
 <p>然后</p>
-
 <p>~/.xprofile 文件中添加如下内容</p>
-
 <pre><code>export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
 export XMODIFIERS=&quot;@im=fcitx&quot;
 </code></pre>
-
 <p>由于初始安装系统时选择的是英文，在安装搜狗输入法之前先安装了chrome，导致在chrome中无法输入中文（而在firefox中可以），解决办法时，删除掉.config中google-chrome文件夹即可</p>
-
 <p>3 添加archlinuxcn源</p>
-
 <p>在 <code>/etc/pacman.conf</code> 文件末尾添加以下两行：</p>
-
 <pre><code>[archlinuxcn]
 SigLevel = Optional TrustedOnly
 Server = https://mirrors.ustc.edu.cn/archlinuxcn/$arch
 </code></pre>
-
 <p>之后安装 archlinuxcn-keyring 包以导入 GPG key。</p>
-
 <p>4 添加arch4edu源</p>
-
 <p>在/etc/pacman.conf 文件末尾添加</p>
-
 <pre><code>[arch4edu]
 SigLevel = Never
 Server = http://mirrors.tuna.tsinghua.edu.cn/arch4edu/$arch
 </code></pre>
-
 <p>5 安装常用软件()</p>
-
 <pre><code>  * guake
   * fish
   * vim
@@ -805,9 +779,7 @@ Server = http://mirrors.tuna.tsinghua.edu.cn/arch4edu/$arch
   * franz,telegram-desktop
   * remarkable (markdown编辑器，轻量级)
 </code></pre>
-
 <p>6.proxychains-ng</p>
-
 <pre><code>dynamic_chain
 chain_len = 1 
 proxy_dns 
@@ -817,9 +789,7 @@ tcp_connect_time_out 8000
 [ProxyList]
 socks5     127.0.0.1 1080
 </code></pre>
-
 <p>就很气，配置文件经常失效，再记录一份好了</p>
-
 <pre><code>quiet_mode
 dynamic_chain
 chain_len = 1 #round_robin_chain和random_chain使用
@@ -836,20 +806,18 @@ localnet 192.168.0.0/255.255.0.0
 socks5  127.0.0.1 1080
 http    127.0.0.1 1087
 </code></pre>
-
 <p>7 vim 配置</p>
-
 <pre><code>set guifont=Neep\ 18
-
+ 
 map &lt;F9&gt; :call SaveInputData()&lt;CR&gt;
 func! SaveInputData()
     exec &quot;tabnew&quot;
     exec 'normal &quot;+gP'
     exec &quot;w! code/in.txt&quot;
 endfunc
-
-
-
+ 
+ 
+ 
 &quot;colorscheme torte
 &quot; colorscheme murphy
 colorscheme elflord
@@ -861,20 +829,20 @@ colorscheme elflord
 &quot;colorscheme darkblue
 &quot;colorscheme evening
 &quot;colorscheme shine
-
+ 
 &quot;colorscheme molokai
 &quot;colorscheme solarized
 &quot;colorscheme sift
 &quot;colorscheme advantage
 &quot;colorscheme 256_jungle
-
-
+ 
+ 
 &quot;set fencs=utf-8,ucs-bom,shift-jis,gb18030,gbk,gb2312,cp936
 &quot;set termencoding=utf-8
 &quot;set encoding=utf-8
 &quot;set fileencodings=ucs-bom,utf-8,cp936
 &quot;set fileencoding=utf-8
-
+ 
 &quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
 &quot; 显示相关  
 &quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
@@ -946,8 +914,8 @@ func SetTitle()
         let l = l + 1 | call setline(l,'{')
         let l = l + 1 | call setline(l,'    return 0;')
         let l = l + 1 | call setline(l,'}')
-
-
+ 
+ 
     endif
     if &amp;filetype == 'c'
         call append(line(&quot;.&quot;)+6, &quot;#include&lt;stdio.h&gt;&quot;)
@@ -963,13 +931,13 @@ endfunc
 &quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
 &quot;键盘命令
 &quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;v&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-
+ 
 nmap &lt;leader&gt;w :w!&lt;cr&gt;
 nmap &lt;leader&gt;f :find&lt;cr&gt;
-
+ 
 nmap &lt;F8&gt; :TagbarToggle&lt;CR&gt;
-
-
+ 
+ 
 &quot; 映射全选+复制 ctrl+a
 map &lt;C-A&gt; ggvG&quot;+Y
 map! &lt;C-A&gt; &lt;Esc&gt;ggVGY
@@ -988,9 +956,9 @@ map &lt;F3&gt; :tabnew .&lt;CR&gt;
 map &lt;C-F3&gt; \be  
 &quot;C，C++ 按F5编译运行
 map &lt;F5&gt; :call CompileRunGcc()&lt;CR&gt;
-
+ 
 au BufRead *.py map &lt;buffer&gt; &lt;F6&gt; :w&lt;CR&gt;:!/usr/bin/env python % &lt;CR&gt;
-
+ 
 let g:tagbar_usearrows = 1
 nnoremap &lt;leader&gt;l :TagbarToggle&lt;CR&gt;
 func! CompileRunGcc()
@@ -1019,9 +987,9 @@ func! Rungdb()
     exec &quot;!g++ % -std=c++11 -g  -o %&lt;&quot;
     exec &quot;!gdb ./%&lt;&quot;
 endfunc
-
-
-
+ 
+ 
+ 
 &quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
 &quot;&quot;实用设置
 &quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
@@ -1158,19 +1126,19 @@ filetype plugin indent on
 &quot;打开文件类型检测, 加了这句才可以用智能补全
 set completeopt=longest,menu
 &quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-
-
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 &quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;vundle设置&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
 set nocompatible              &quot; be iMproved, required
 &quot;filetype off                  &quot; required
 set shell=/bin/bash 
-
-
+ 
+ 
 &quot; Interface
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
@@ -1178,11 +1146,11 @@ Plugin 'VundleVim/Vundle.vim'
 &quot; vim-scripts repos
 &quot;
 &quot;
-
+ 
   Plugin 'MarcWeber/vim-addon-mw-utils'
   Plugin 'tomtom/tlib_vim'
   Plugin 'garbas/vim-snipmate'
-
+ 
   &quot; Optional:
  Plugin 'honza/vim-snippets'
  Plugin 'davidhalter/jedi-vim'
@@ -1197,33 +1165,33 @@ Plugin 'VundleVim/Vundle.vim'
 Plugin 'Valloric/YouCompleteMe'
 call vundle#end()            &quot; required
 filetype plugin indent on    &quot; required
-
-
-
-
+ 
+ 
+ 
+ 
 &quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;youcompleteme设置&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-
-
+ 
+ 
 &quot;let g:ycm_autoclose_preview_window_after_completion=1
 &quot;nnoremap &lt;leader&gt;g :YcmCompleter GoToDefinitionElseDeclaration&lt;CR&gt;
-
+ 
 &quot; YouCompleteMe 功能
 &quot; 补全功能在注释中同样有效
 &quot;let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/cpp/ycm/.ycm_extra_conf.py'
 &quot;let g:ycm_complete_in_comments=1
  &quot;允许 vim 加载 .ycm_extra_conf.py 文件，不再提示
 &quot;let g:ycm_confirm_extra_conf=0
-
+ 
 &quot;let g:ycm_error_symbol = '&lt;&lt;'
 &quot;let g:ycm_warning_symbol = '&lt;'
 &quot;nnoremap &lt;leader&gt;gl :YcmCompleter GoToDeclaration&lt;CR&gt;
 &quot;nnoremap &lt;leader&gt;gf :YcmCompleter GoToDefinition&lt;CR&gt;
 &quot;nnoremap &lt;leader&gt;gg :YcmCompleter GoToDefinitionElseDeclaration&lt;CR&gt;
 &quot;nmap &lt;F4&gt; :YcmDiags&lt;CR&gt;
-
-
-
-
+ 
+ 
+ 
+ 
 &quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;youcompleteme设置 by wyz&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
 let g:cpp_class_scope_highlight=1
 let g:cpp_experimental_template_highlight=1
@@ -1239,13 +1207,13 @@ let g:ycm_collect_identifiers_from_tags_files = 1
 let g:ycm_confirm_extra_conf = 0
 let g:ycm_autoclose_preview_window_after_completion = 1
 let g:ycm_autoclose_preview_window_after_insertion = 1
-
-
-
+ 
+ 
+ 
 &quot; for python
 &quot;
 &quot;
-
+ 
 &quot;默认配置文件路径&quot;
 let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
 &quot;打开vim时不再询问是否加载ycm_extra_conf.py配置&quot;
@@ -1266,24 +1234,24 @@ let g:ycm_autoclose_preview_window_after_completion=1
 let g:ycm_cache_omnifunc=0
 &quot;字符串中也开启补全&quot;
 let g:ycm_complete_in_strings = 1
-
-
-
+ 
+ 
+ 
 &quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;'for airline&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-
+ 
 let g:airline_powerline_fonts = 1   
 let g:airline#extensions#tabline#enabled = 1
  let g:airline#extensions#tabline#buffer_nr_show = 1
 let g:airline#extensions#tabline#left_sep = ' '
 let g:airline#extensions#tabline#left_alt_sep = '|'
-
+ 
  nnoremap &lt;F2&gt; :bnext&lt;CR&gt;
  nnoremap &lt;F4&gt; :bprevious&lt;CR&gt;
-
+ 
  if !exists('g:airline_symbols')
     let g:airline_symbols = {}
     endif
-
+ 
  let g:airline_left_sep = '⮀'
   let g:airline_left_alt_sep = '⮁'
   let g:airline_right_sep = '⮂'
@@ -1291,24 +1259,17 @@ let g:airline#extensions#tabline#left_alt_sep = '|'
   let g:airline_symbols.branch = '⭠'
   let g:airline_symbols.readonly = '⭤'
 </code></pre>
-
 <p>8修改键盘映射</p>
-
 <pre><code>keysym XF86Back = Page_Up
 keysym XF86Forward = Page_Down
 </code></pre>
-
 <p>9安装中文字体：</p>
-
 <pre><code>sudo pacman -S wqy-microhei wqy-microhei-lite wqy-bitmapfont wqy-zenhei ttf-arphic-ukai ttf-arphic-uming adobe-source-han-sans-cn-fonts
 </code></pre>
-
 <ol>
 <li>anaconda with fish</li>
 </ol>
-
 <p>anaconda 默认的环境变量是bash,对于fish,需要修改~/.config/fish/config.fish 如下</p>
-
 <pre><code>#export LD_LIBRARY_PATH=/usr/local/cuda/lib64/
 set -x LD_LIBRARY_PATH /usr/local/cuda/lib64/
 
@@ -1316,9 +1277,7 @@ set -x LD_LIBRARY_PATH /usr/local/cuda/lib64/
 #export PATH=&quot;/home/sensetime/anaconda2/bin:$PATH&quot;
 set -x PATH /home/sensetime/anaconda2/bin $PATH
 </code></pre>
-
 <p>11 youcompleteme</p>
-
 <pre><code># This file is NOT licensed under the GPLv3, which is the license for the rest
 # of YouCompleteMe.
 #
@@ -1516,15 +1475,10 @@ def FlagsForFile( filename, **kwargs ):
     'do_cache': True
   }
 </code></pre>
-
 <p>12.关于vim 剪贴板的问题</p>
-
 <p><a href="https://vi.stackexchange.com/questions/3076/how-do-i-use-the-system-clipboard-with-vim-in-arch-linux">How do I use the system clipboard with Vim in Arch Linux?</a></p>
-
 <p>uninstall vim,install gvim,and use vim instead of gvim</p>
-
 <p>13 vim 配色文件molokai.vim(透明背景修改</p>
-
 <pre><code>&quot; Vim color file
 &quot;
 &quot; Author: Tomas Restrepo &lt;tomas@winterdom.com&gt;

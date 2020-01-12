@@ -229,72 +229,40 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://codeforces.com/problemset/problem/540/E">题目链接</a></p>
-
 <p>题意：一个无穷数列，从1开始，初始第i个位置上为i，给出n个swap，每次交换两个位置的数。问交换n次以后得到的数列中，逆序对的数。</p>
-
 <p>思路：</p>
-
 <p>官方题解：</p>
-
-<blockquote>At first find the position of each element which is used in swap (using map). Now let's find the answer. It consists of the two parts. First part is the number of inversions formed by only whose elements which took part in the swaps. They can be counted by one of the standard ways: mergesort or Fenwick tree. The second part is the number of inversions formed by pairs of elements where one element has been swapped even once, and the other element stayed at his position. Let's consider the following test:
-
-2
-
-2 6
-
-4 8
-
-The global sequence will look as follows: [1 6 3 8 5 2 7 4 9 ...], and here is the array of swapped elements: [6 8 2 4].
-
-Let's understand with which numbers the number 8 forms the inversions. The only elements that could do that are the elements between the initial position of the number 8 (where the number 4 is now) and its current position: [5 2 7]. There are two numbers on this segment which didn't take part in swaps: 5 and 7. The number 2 should not be counted as it took part in the swaps and we have already counted it in the first part of the solution.
-
-So we should take the count of numbers between 8's indices in the global sequence (8 - 4 - 1 = 3) and subtract the count of numbers between its indices in the swaps array **(4 - 2 - 1 = 1)(在交换序列中【6,8,2,4】4的位置在4,8的位置在2).** We'll get the number of inversions formed by the element 8 and the elements which haven't moved at all, it's 2. Counting this value for all elements which have been swapped at least once, we get the second part of the answer. All operations in the second part of the solution can be performed using sorts and binary searches.</blockquote>
-
+<!-- raw HTML omitted -->
+<p>2</p>
+<p>2 6</p>
+<p>4 8</p>
+<p>The global sequence will look as follows: [1 6 3 8 5 2 7 4 9 &hellip;], and here is the array of swapped elements: [6 8 2 4].</p>
+<p>Let's understand with which numbers the number 8 forms the inversions. The only elements that could do that are the elements between the initial position of the number 8 (where the number 4 is now) and its current position: [5 2 7]. There are two numbers on this segment which didn't take part in swaps: 5 and 7. The number 2 should not be counted as it took part in the swaps and we have already counted it in the first part of the solution.</p>
+<p>So we should take the count of numbers between 8's indices in the global sequence (8 - 4 - 1 = 3) and subtract the count of numbers between its indices in the swaps array <strong>(4 - 2 - 1 = 1)(在交换序列中【6,8,2,4】4的位置在4,8的位置在2).</strong> We'll get the number of inversions formed by the element 8 and the elements which haven't moved at all, it's 2. Counting this value for all elements which have been swapped at least once, we get the second part of the answer. All operations in the second part of the solution can be performed using sorts and binary searches.<!-- raw HTML omitted --></p>
 <p>讲真。。。题解写的真是不友好。。。。很多概念从天而降。。。公式中magic number不加说明。。。。差评。</p>
-
 <p>我来说一下这道题的做法：</p>
-
 <p>首先，由于交换的位置最大1E9，但是最多1E5个交换。。所以自然而然想到离散化。</p>
-
-<p><strong>需要注意的是，离散化后最多有2E5个，而不是1E5 （<del>因此re #7</del>）</strong></p>
-
+<p><strong>需要注意的是，离散化后最多有2E5个，而不是1E5 （<!-- raw HTML omitted -->因此re #7<!-- raw HTML omitted -->）</strong></p>
 <p>对于统计最后的逆序对数，我们分为两部分。</p>
-
 <p>首先我们知道，对于两个没有被交换过的数，肯定不是一对逆序对。</p>
-
 <p>因此答案分为，<strong>两个数都是被交换过的数产生的逆序对数 和 交换过的数和没被交换过的数之间产生的逆序对数。</strong></p>
-
-<blockquote>First part is the number of inversions formed by only whose elements which took part in the swaps. They can be counted by one of the standard ways: mergesort or Fenwick tree. The second part is the number of inversions formed by pairs of elements where one element has been swapped even once, and the other element stayed at his position. Let's consider the following test:</blockquote>
-
+<!-- raw HTML omitted -->
 <p>对于前者。。。。</p>
-
-<p>就是普通的逆序对。。。直接BIT处理（<del>故意写成线段树真是不美丽）</del></p>
-
+<p>就是普通的逆序对。。。直接BIT处理（<!-- raw HTML omitted -->故意写成线段树真是不美丽）<!-- raw HTML omitted --></p>
 <p>对于后者。。。我们的做法是。。。</p>
-
 <p>处理两个数组。。。f[i]和p[i]</p>
-
 <p><strong>f[i]表示交换序列中，离散化后，处于第i个位置上面的值（也是离散化之前的位置）</strong></p>
-
 <p><strong>p[i]表示现在在i位置上的数初始是在p[i]位置(位置是离散化后的从小到大的顺序，因此是对于交换序列的（因为只有交换序列才离散化了））</strong></p>
-
 <p>对于处于交换序列中的某个数，其初始位置和最终位置之间有多少个数，答案为：<strong>abs(f[p[i]]-f[i])-1</strong></p>
-
 <p>但是这两个位置之间，处于交换序列中的数在之前的第一部分已经算过了（也就是两个数都是被交换过的数）</p>
-
 <p>所以我们需要减去 两个位置之间，已经处于交换序列的个数（不包含两个位置）</p>
-
 <p>结果为<strong>abs(i-p[i])-1</strong> (交换序列中 i和p[i]位置之间，有<strong>abs(i-p[i])-1</strong>个数)</p>
-
 <p>两部分相间，答案为res = abs(f[p[i]-f[i]]-1 - (ans(i-p[i])-1) = abs(f[p[i]]-f[i]) - abs(i-p[i])</p>
-
 <p>把每个处于交换序列中的数的res累加，就是最后的结果。</p>
-
 <p>注意要开LL.</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :Tue 20 Sep 2016 02:14:23 PM CST

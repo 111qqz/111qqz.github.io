@@ -226,63 +226,42 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#description">Description</a></li>
-<li><a href="#input">Input</a></li>
-<li><a href="#output">Output</a></li>
-<li><a href="#sample-input">Sample Input</a></li>
-<li><a href="#sample-output">Sample Output</a></li>
-<li><a href="#hint">HINT</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#heading"></a></li>
+    <li><a href="#description">Description</a></li>
+    <li><a href="#input">Input</a></li>
+    <li><a href="#output">Output</a></li>
+    <li><a href="#sample-input">Sample Input</a></li>
+    <li><a href="#sample-output">Sample Output</a></li>
+    <li><a href="#hint">HINT</a></li>
+  </ul>
 </nav>
                 
-                
-
-<p>Time Limit: 5 Sec  Memory Limit: 64 MB
-Submit: 667  Solved: 389
+                <h2 id="heading"></h2>
+<p>Time Limit: 5 Sec  Memory Limit: 64 MB<br>
+Submit: 667  Solved: 389<br>
 [<a href="http://www.lydsy.com/JudgeOnline/submitpage.php?id=1642">Submit</a>][<a href="http://www.lydsy.com/JudgeOnline/problemstatus.php?id=1642">Status</a>][<a href="http://www.lydsy.com/JudgeOnline/bbs.php?id=1642">Discuss</a>]</p>
-
 <h2 id="description">Description</h2>
-
 <p>贝茜是一只非常努力工作的奶牛，她总是专注于提高自己的产量。为了产更多的奶，她预计好了接下来的N (1 ≤ N ≤ 1,000,000)个小时，标记为0..N-1。 Farmer John 计划好了 M (1 ≤ M ≤ 1,000) 个可以挤奶的时间段。每个时间段有一个开始时间(0 ≤ 开始时间 ≤ N), 和一个结束时间 (开始时间 &lt; 结束时间 ≤ N), 和一个产量 (1 ≤ 产量 ≤ 1,000,000) 表示可以从贝茜挤奶的数量。Farmer John 从分别从开始时间挤奶，到结束时间为止。每次挤奶必须使用整个时间段。 但即使是贝茜也有她的产量限制。每次挤奶以后，她必须休息 R (1 ≤ R ≤ N) 个小时才能下次挤奶。给定Farmer John 计划的时间段，请你算出在 N 个小时内，最大的挤奶的量。</p>
-
 <h2 id="input">Input</h2>
-
 <p>第1行三个整数N，M，R.接下来M行，每行三个整数Si，Ei，Pi．</p>
-
 <h2 id="output">Output</h2>
-
 <p> 最大产奶量．</p>
-
 <h2 id="sample-input">Sample Input</h2>
-
-<p>12 4 2
-1 2 8
-10 12 19
-3 6 24
+<p>12 4 2<br>
+1 2 8<br>
+10 12 19<br>
+3 6 24<br>
 7 10 31</p>
-
 <h2 id="sample-output">Sample Output</h2>
-
 <p>43</p>
-
 <h2 id="hint">HINT</h2>
-
 <p>注意：结束时间不挤奶</p>
-
 <p>思路：这题很像LIS啊。。由于每次结束要休息R的时间，所以把结束时间+R就好。</p>
-
 <p>然后按照开始时间排序。</p>
-
 <p><strong>dp[i]表示前i个任务安排最大的挤奶量。</strong></p>
-
 <p><strong>初始化dp[i] = a[i].val</strong></p>
-
 <p><strong>转移的时候 dp[i] = max(dp[i],dp[j]+a[i].val)  (j&lt;i&amp;&amp;a[j].r&lt;=a[i].l)</strong></p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2016年04月10日 星期日 01时50分11秒
@@ -325,7 +304,7 @@ struct node
     {
     if (l==b.l) return r&lt;b.r;
     return l&lt;b.l;
-    }   
+    }	
 }a[N];
 int n,m,R;
 int sum;
@@ -349,8 +328,8 @@ int main()
     ms(dp,0);
     for ( int i = 1 ;i  &lt;= m ; i++) dp[i] =  a[i].val;
 
-//  for ( int i = 1 ; i &lt;= m ; i++) cout&lt;&lt;dp[i]&lt;&lt;&quot; &quot;;
-//  cout&lt;&lt;endl;
+//	for ( int i = 1 ; i &lt;= m ; i++) cout&lt;&lt;dp[i]&lt;&lt;&quot; &quot;;
+//	cout&lt;&lt;endl;
     int ans = -1;
     for ( int i = 2 ; i &lt;= m ; i++)
     {
@@ -361,8 +340,8 @@ int main()
             dp[i] = max(dp[i],dp[j]+a[i].val);
         }
         }
-//      for ( int j = 1 ; j &lt;= m ; j++) cout&lt;&lt;dp[j]&lt;&lt;&quot; &quot;;
-//      cout&lt;&lt;endl;
+//	    for ( int j = 1 ; j &lt;= m ; j++) cout&lt;&lt;dp[j]&lt;&lt;&quot; &quot;;
+//	    cout&lt;&lt;endl;
         ans = max(ans,dp[i]);
     }
 

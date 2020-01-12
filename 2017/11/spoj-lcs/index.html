@@ -225,69 +225,41 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                <nav id="TableOfContents">
-<ul>
-<li><a href="#题意">题意：</a></li>
-<li><a href="#思路">思路：</a></li>
-</ul>
-</nav>
+                <nav id="TableOfContents"></nav>
                 
-                
-
-<h1 id="题意">题意：</h1>
-
+                <h1 id="题意">题意：</h1>
 <p>给出2个字符串(2.5E5)，问最长公共子串的长度。</p>
-
 <h1 id="思路">思路：</h1>
-
 <p>拿一个串建SAM</p>
-
-<p><del>由于SAM上的任何一个状态，都对应一个或者若干个子串，然后拿另一个串在SAM上面跑就行了</del></p>
-
+<p><!-- raw HTML omitted -->由于SAM上的任何一个状态，都对应一个或者若干个子串，然后拿另一个串在SAM上面跑就行了<!-- raw HTML omitted --></p>
 <p>20171110UPdate:我好像说得太简略了。。</p>
-
 <p>参考clj的冬令营讲稿：</p>
-
+<!-- raw HTML omitted -->
 <blockquote>
-
-> 
-> 
-      * 给两个长度小于100000的字符串A和B，求出他们的最长公共连续子串。 Ê我们构造出A的后缀自动机SAM
-      * 对于SAM的每个状态s，令r为Right(s)中任意的一个元素，它代表的是结束位置在r的，长度在[Min(s),Max(s)]之间的所有子串。
-      * 我们不妨对状态s，求出所有B的子串中，从任意r开始往前能匹配的最大长度L，那么min(L,Max(s))就可以更新答案了。
-      * 我们考虑用_SAM_读入字符串_B_。
-      * **令当前状态为_s_，同时最大匹配长度为_len _Ê我们读入字符_x_。如果_s_有标号为_x_的边，**
-      * **那么_s=trans(s,x),len = len+1 _Ê否则我们找到_s_的第一个祖先_a_，它有标号为_x_的边，令**
-      * **_s=trans(a,x),len=Max(a)+1__。 _Ê如果没有这样的祖先，那么令_s=root,len=0_。**
-      * 在过程中更新状态的最大匹配长度
-
 </blockquote>
-
+<pre><code>  * 给两个长度小于100000的字符串A和B，求出他们的最长公共连续子串。 Ê我们构造出A的后缀自动机SAM
+  * 对于SAM的每个状态s，令r为Right(s)中任意的一个元素，它代表的是结束位置在r的，长度在[Min(s),Max(s)]之间的所有子串。
+  * 我们不妨对状态s，求出所有B的子串中，从任意r开始往前能匹配的最大长度L，那么min(L,Max(s))就可以更新答案了。
+  * 我们考虑用_SAM_读入字符串_B_。
+  * **令当前状态为_s_，同时最大匹配长度为_len _Ê我们读入字符_x_。如果_s_有标号为_x_的边，**
+  * **那么_s=trans(s,x),len = len+1 _Ê否则我们找到_s_的第一个祖先_a_，它有标号为_x_的边，令**
+  * **_s=trans(a,x),len=Max(a)+1__。 _Ê如果没有这样的祖先，那么令_s=root,len=0_。**
+  * 在过程中更新状态的最大匹配长度
+</code></pre>
+<!-- raw HTML omitted -->
 <p><strong>唯一不显然的地方在于，为什么当失配时，我们是沿着parent树向上找。</strong></p>
-
 <p>考虑如下例子：</p>
-
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2017/11/深度截图_选择区域_20171110203549.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2017/11/深度截图_选择区域_20171110203549.png" alt="" />
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2017/11/%E6%B7%B1%E5%BA%A6%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20171110203549.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2017/11/%E6%B7%B1%E5%BA%A6%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20171110203549.png" alt=""><br>
 </a></p>
-
 <p><strong>我们知道，parent树，或者叫后缀链树，一个状态S指向的是，总起点开始到S的子串的后缀中，长度最长的后缀，满足该后缀所对应的某个状态Q(对应的意思是说，从初始状态到状态Q表示的子串恰好是该后缀)的right集合和状态S的集合不相等。</strong></p>
-
 <p>假设我们目前匹配到的状态表示的子串是abcbc,然后下一位要匹配的字母是b，而状态abcbc没有通过b转移的边（这些图上没有,我懒得画了orz)</p>
-
 <p>这个时候考虑回退&hellip;对于abcbc的后缀，bcbc,cbc和abcbc面临的情况是一样的，因为bcbc,cbc,abcbc三个字符串的right集合相同，也就是出现的位置完全相同，那么既然abcbc没有通过b转移的边，bcbc,cbc也一定没有通过b转移的边。</p>
-
 <p>这时候考虑转移到abcbc的par状态，也就是表示子串bc的状态，原因是bc的right集合和abcbc的right集合不同，更准确得说，bc的right集合是包含abcbc的right集合的。</p>
-
 <p>而bc在之前匹配abcbc的时候，已经匹配过了，也就是说bc一定是可以匹配的，</p>
-
 <p>如果此时bc有一条通过b转移的边，此时匹配的长度就变成了bc对应的状态所对应的max再+1</p>
-
 <p>老年人的第一个SAM</p>
-
 <p>关于SAM的笔记之后补。</p>
-
 <p>用了动态的写法.</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2017年11月03日 星期五 18时20分42秒hongchenzuoban
@@ -375,11 +347,8 @@ int main()
     return 0;
 }
 </code></pre>
-
 <p>不过还是比较喜欢写静态的？</p>
-
 <p>参考了zqc大爷的代码风格：</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2017年11月03日 星期五 18时20分42秒
@@ -510,7 +479,7 @@ File Name :SAM.cpp
 typedef long long LL;
 #define pi pair &lt; int ,int &gt;
 #define MP make_pair
-
+ 
 using namespace std;
 const double eps = 1E-8;
 const int dx4[4]={1,0,0,-1};

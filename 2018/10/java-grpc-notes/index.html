@@ -229,28 +229,20 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p>最近的项目需要java和python之间的进程通信，想到了之前使用过的的grpc.</p>
-
 <p>参考官方<a href="https://grpc.io/docs/quickstart/java.html">quickstart</a></p>
-
+<!-- raw HTML omitted -->
 <blockquote>
-
-> 
-> 
-      * JDK: version 7 or higher
-
 </blockquote>
-
+<pre><code>  * JDK: version 7 or higher
+</code></pre>
+<!-- raw HTML omitted -->
 <p>看起来只依赖jdk,美滋滋</p>
-
 <p>然后按照文档执行</p>
-
 <p>./gradlew installDist</p>
-
 <p>报错:</p>
-
 <pre><code>Task :grpc-compiler:compileJava_pluginExecutableJava_pluginCpp FAILED
 
 FAILURE: Build failed with an exception.
@@ -271,11 +263,8 @@ BUILD FAILED in 3m 47s
 
 ~
 </code></pre>
-
 <p>看起来是gcc或者clang的问题&hellip; 先装个clang再说，可能clang太常用了，所以文档没有提到，这下一定可以了。</p>
-
 <p>然而又报错:</p>
-
 <pre><code>&gt; Task :grpc-compiler:linkJava_pluginExecutable FAILED
 /usr/bin/ld: cannot find -lstdc++
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
@@ -303,19 +292,13 @@ Run with --stacktrace option to get the stack trace. Run with --info or --debug 
 ~                                                                                                                      
 ~
 </code></pre>
-
 <p>??????</p>
-
 <p>看起来是stdc++的lib没有找到。</p>
-
-<p>在centos上安装了:libstdc++.x86_64 4.8.5-28.el7_5.1 @updates
-libstdc++-devel.x86_64 4.8.5-28.el7_5.1 @updates
+<p>在centos上安装了:libstdc++.x86_64 4.8.5-28.el7_5.1 @updates<br>
+libstdc++-devel.x86_64 4.8.5-28.el7_5.1 @updates<br>
 libstdc++-static.x86_64</p>
-
 <p>这回一定没问题了吧？</p>
-
 <p>然而继续报错，变成了javedoc找不到</p>
-
 <pre><code>*** Skipping the build of codegen and compilation of proto files because skipCodegen=true
 &gt; Task :grpc-all:javadoc FAILED
 
@@ -333,11 +316,8 @@ Run with --stacktrace option to get the stack trace. Run with --info or --debug 
 BUILD FAILED in 1s
 30 actionable tasks: 1 executed, 29 up-to-date
 </code></pre>
-
-<p><del>简直了。。。grpc的文档还是一如既往的辣鸡。。。目前还在坑里面，先把前面踩的坑记录一下。</del></p>
-
+<p><!-- raw HTML omitted -->简直了。。。grpc的文档还是一如既往的辣鸡。。。目前还在坑里面，先把前面踩的坑记录一下。<!-- raw HTML omitted --></p>
 <p>然后继续报错:</p>
-
 <pre><code>*** Skipping the build of codegen and compilation of proto files because skipCodegen=true
 &gt; Task :grpc-all:javadoc FAILED
 
@@ -358,46 +338,34 @@ BUILD FAILED in 3s
 ~                                                                                                                                                                                             
 ~
 </code></pre>
-
 <p>好像不是很对啊&hellip;</p>
-
 <p>文档固然辣鸡，但是会不会有其他打开方式?</p>
-
 <p>于是跑到工程院那边请教了同事&hellip;发现果然打开方式不正确&hellip;</p>
-
 <p>正确的方式是直接在依赖管理工具如maven中添加，并不需要手动编译安装&hellip;</p>
-
 <p><a href="https://www.codenotfound.com/grpc-spring-boot-example.html">参考这个搞它一发先</a></p>
-
 <p>同时按照<a href="https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html">maven-in-five-minutes</a>　了解一下maven的使用</p>
-
-<blockquote>Although hardly a comprehensive list, these are the most common _default_ lifecycle phases executed.
-
-> 
-> 
-      * **validate**: validate the project is correct and all necessary information is available
-      * **compile**: compile the source code of the project
-      * **test**: test the compiled source code using a suitable unit testing framework. These tests should not require the code be packaged or deployed
-      * **package**: take the compiled code and package it in its distributable format, such as a JAR.
-      * **integration-test**: process and deploy the package if necessary into an environment where integration tests can be run
-      * **verify**: run any checks to verify the package is valid and meets quality criteria
-      * **install**: install the package into the local repository, for use as a dependency in other projects locally
-      * **deploy**: done in an integration or release environment, copies the final package to the remote repository for sharing with other developers and projects.
-
-There are two other Maven lifecycles of note beyond the _default_ list above. They are
-
-> 
-> 
-      * **clean**: cleans up artifacts created by prior builds
-      * **site**: generates site documentation for this project
-
+<!-- raw HTML omitted -->
+<blockquote>
 </blockquote>
-
+<pre><code>  * **validate**: validate the project is correct and all necessary information is available
+  * **compile**: compile the source code of the project
+  * **test**: test the compiled source code using a suitable unit testing framework. These tests should not require the code be packaged or deployed
+  * **package**: take the compiled code and package it in its distributable format, such as a JAR.
+  * **integration-test**: process and deploy the package if necessary into an environment where integration tests can be run
+  * **verify**: run any checks to verify the package is valid and meets quality criteria
+  * **install**: install the package into the local repository, for use as a dependency in other projects locally
+  * **deploy**: done in an integration or release environment, copies the final package to the remote repository for sharing with other developers and projects.
+</code></pre>
+<p>There are two other Maven lifecycles of note beyond the <em>default</em> list above. They are</p>
+<blockquote>
+</blockquote>
+<pre><code>  * **clean**: cleans up artifacts created by prior builds
+  * **site**: generates site documentation for this project
+</code></pre>
+<!-- raw HTML omitted -->
 <p>发现mvn package的时候会报几百行的错误</p>
-
-<p>于是先执行mvn validate验证一下情况,
+<p>于是先执行mvn validate验证一下情况,<br>
 最上面的错误如下:</p>
-
 <pre><code>[INFO] Scanning for projects...
 [INFO] ------------------------------------------------------------------------
 [INFO] Detecting the operating system and CPU architecture
@@ -431,17 +399,11 @@ java.lang.NoSuchMethodError: org.apache.maven.execution.MavenSession.getReposito
     at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
 [INFO]
 </code></pre>
-
 <p>参考<a href="https://github.com/grpc/grpc-java/issues/2267">An exception occurred when I use maven plugin, Why?</a>　　发现可能是maven版本不行,去官网下载了目前的最近版本3.5.4,ok了</p>
-
 <p>下一步该进行mvn compile，也ok</p>
-
 <p>然后是mvn test,又是几百行错误&hellip;核心的信息是java.lang.NoSuchMethodError: com.google.common.base.Preconditions.checkArgument</p>
-
 <p>参考<a href="https://stackoverflow.com/questions/42206440/java-lang-nosuchmethoderror-com-google-common-base-preconditions-checkargument">java.lang.NoSuchMethodError: com.google.common.base.Preconditions.checkArgument</a></p>
-
 <p>添加了两个依赖(再次吐槽grpc-java官方文档＆demo的不靠谱)</p>
-
 <pre><code>**Please add following dependencies in your project.**
 &lt;dependency&gt;
     &lt;groupId&gt;com.google.guava&lt;/groupId&gt;
@@ -454,11 +416,8 @@ java.lang.NoSuchMethodError: org.apache.maven.execution.MavenSession.getReposito
     &lt;version&gt;4.4.8&lt;/version&gt;
 &lt;/dependency&gt;
 </code></pre>
-
 <p>似乎是ok了．</p>
-
 <p>然后执行mvn package，继续报错,好在只有几十行&hellip;</p>
-
 <pre><code>[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:2.0.3.RELEASE:repackage (default) on project grpc-demo: Execution default of goal org.springframework.boot:spring-boot-maven-plugin:2.0.3.RELEASE:repackage failed: Unable to find a single main class from the following candidates [io.grpc.examples.advanced.HelloJsonClient, io.grpc.examples.advanced.HelloJsonServer, io.grpc.examples.alts.HelloWorldAltsClient, io.grpc.examples.alts.HelloWorldAltsServer, io.grpc.examples.errorhandling.DetailErrorSample, io.grpc.examples.errorhandling.ErrorHandlingClient, io.grpc.examples.experimental.CompressingHelloWorldClient, io.grpc.examples.header.CustomHeaderClient, io.grpc.examples.header.CustomHeaderServer, io.grpc.examples.helloworld.HelloWorldClient, io.grpc.examples.helloworld.HelloWorldServer, io.grpc.examples.helloworldtls.HelloWorldClientTls, io.grpc.examples.helloworldtls.HelloWorldServerTls, io.grpc.examples.manualflowcontrol.ManualFlowControlClient, io.grpc.examples.manualflowcontrol.ManualFlowControlServer, io.grpc.examples.routeguide.RouteGuideClient, io.grpc.examples.routeguide.RouteGuideServer] -&gt; [Help 1]
 [ERROR] 
 [ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
@@ -467,13 +426,9 @@ java.lang.NoSuchMethodError: org.apache.maven.execution.MavenSession.getReposito
 [ERROR] For more information about the errors and possible solutions, please read the following articles:
 [ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginExecutionException
 </code></pre>
-
 <p>摘重点: Unable to find a single main class from the following candidates</p>
-
 <p>看样子是找不到程序入口在哪里了&hellip;好像很合理，毕竟grpc-java的example里每个文件都带了main函数</p>
-
 <p>参考<a href="https://stackoverflow.com/questions/42840576/springboot-unable-to-find-a-single-main-class-from-the-following-candidates">SpringBoot: Unable to find a single main class from the following candidates</a>，在pom.xml中添加如下的属性就行了．</p>
-
 <pre><code>&lt;profiles&gt;
     &lt;profile&gt;
         &lt;id&gt;profile1&lt;/id&gt;
@@ -509,18 +464,14 @@ java.lang.NoSuchMethodError: org.apache.maven.execution.MavenSession.getReposito
     ...
 &lt;/plugin&gt;
 </code></pre>
-
 <p>然后另一边，将python的server启动起来</p>
-
 <p>注意ip和端口号要保持一致．　ok了</p>
-
 <pre><code>java -jar  /data/downloads/grpc-demo/target/grpc-demo-0.0.1-SNAPSHOT-exec.jar
 十月 18, 2018 11:48:06 上午 io.grpc.examples.helloworld.HelloWorldClient greet
 信息: Will try to greet sensetime autobots java backend ...
 十月 18, 2018 11:48:06 上午 io.grpc.examples.helloworld.HelloWorldClient greet
 信息: Greeting: Hello, sensetime autobots java backend  from python server
 </code></pre>
-
 <p>最后的代码请参考<a href="https://github.com/111qqz/grpc-java-maven-exmaple">grpc-java-maven-exmaple</a></p>
 
 

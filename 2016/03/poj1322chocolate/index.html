@@ -229,33 +229,21 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
+                <nav id="TableOfContents"></nav>
                 
-                
-                <p><a href="http://poj.org/problem?id=1322">http://poj.org/problem?id=1322</a>
+                <p><a href="http://poj.org/problem?id=1322">http://poj.org/problem?id=1322</a><br>
 题意：</p>
-
-<p><img src="http://images.cnitblog.com/blog/361759/201312/03210928-5c2c6f7484cc418e85b498c4d70d860b.jpg" alt="" /></p>
-
+<p><img src="http://images.cnitblog.com/blog/361759/201312/03210928-5c2c6f7484cc418e85b498c4d70d860b.jpg" alt=""></p>
 <p>思路：别看n,m很大。。。但是想一下。。m显然不可能大于c(如果大于c，那么根据抽屉原理，至少存在一种巧克力大于一个，然而大于一个就会被取走&hellip;矛盾)   这样概率为0.m也不可能大于n，因为最好的情况就是取出的巧克力都放在了桌子上，如果总共取的还不到n个，又怎么可能剩下m（m&gt;n）个呢。此外，还需要n,m奇偶性相同，否则设n-m=2K+1 ,说明如果要剩余m个，那么就要减少2k+1个，但是巧克力是两个两个减少的，减少的个数一定是偶数，因此矛盾。所以n,m奇偶性相同。</p>
-
 <p>接下来可以用概率dp做，由于n比较大，滚动一下应该可以&hellip; 然后看到别人的题解里写到当n&gt;1000的时候已经趋向平衡（达到了要求的精度）&hellip; 这道题dp写起来的确容易，也不是很难想。</p>
-
 <p>不过作为dp废宁愿选择数学方法，指数型母函数。</p>
-
 <p><strong>分析可知，取过偶数次的巧克力消失，只有取过奇数次的巧克力会留在桌子上。</strong></p>
-
 <p><strong>那么要剩余m个巧克力，也就是有m种巧克力取了奇数次，剩下的c-m种巧克力取了偶数次。</strong></p>
-
 <p><strong>对应的的生成函数（母函数）分别是(e^x-e(-x))/2和（e^x+e(-x)）/2  （推倒类似）</strong><a href="https://111qqz.com/wordpress/2016/02/hdu2065/">hdu2065红色病毒解题报告</a></p>
-
 <p>总事件个数为c^n</p>
-
-<p>根据古典概型，所求概率为 (Gn*n!*C[c][m])/(c^n)  其中Gn*n!为生成函数，C[c][m]是因为不确定c种巧克力中的哪m种取了奇数个。</p>
-
+<p>根据古典概型，所求概率为 (Gn*n!<em>C[c][m])/(c^n)  其中Gn</em>n!为生成函数，C[c][m]是因为不确定c种巧克力中的哪m种取了奇数个。</p>
 <p>现在的问题就成了求Gn中x^n的系数。。我就是因为这个卡了两天这道题。。。</p>
-
 <p>其实模拟就好，复杂度O(c^2)而已。。主要是好久没写二项式定理。。。有点忘了（手动智力-2）</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2016年03月02日 星期三 18时57分58秒
@@ -317,7 +305,7 @@ double ksm( double a,int b)
 void solve()
 {
     double posi[N],nega[N],a[N],b[N];
-
+    
     ms(posi,0);
     ms(nega,0);
     ms(a,0);
@@ -360,7 +348,7 @@ void solve()
     {
     if (n&amp;1) nega[i]=-nega[i];
     ans +=c[C][m]*ksm(1.0*i/(1.0*C),n)*(posi[i]+nega[i]);
-//  cout&lt;&lt;c[C][m]&lt;&lt;&quot; &quot;&lt;&lt;ksm(1.0*i/C,n)&lt;&lt;&quot; &quot;&lt;&lt;posi[i]+nega[i]&lt;&lt;endl;
+//	cout&lt;&lt;c[C][m]&lt;&lt;&quot; &quot;&lt;&lt;ksm(1.0*i/C,n)&lt;&lt;&quot; &quot;&lt;&lt;posi[i]+nega[i]&lt;&lt;endl;
     }
 
     printf(&quot;%.3f\n&quot;,ans);
@@ -372,7 +360,7 @@ int main()
     #ifndef  ONLINE_JUDGE 
     freopen(&quot;code/in.txt&quot;,&quot;r&quot;,stdin);
   #endif
-
+	
     pre();
     while (~scanf(&quot;%d&quot;,&amp;C))
     {

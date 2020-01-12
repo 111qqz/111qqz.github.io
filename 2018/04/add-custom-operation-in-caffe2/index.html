@@ -225,16 +225,12 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p>记录一些一个没有之前没有接触过caffe/caffe2的人为了添加自定义的op 到caffe2需要做的工作.</p>
-
 <p>首先参考caffe2 tutorial,随便跑个op来试试,不妨以比较简单的  <a href="https://caffe2.ai/docs/operators-catalogue.html#accumulate">Accumulate_op</a> 为例子.</p>
-
 <p>这个op的作用就是计算Y=X+gamma*Y, 其中X为输入,Y为输出,gamma是参数.</p>
-
 <p>跑起来这个运算所需要的代码如下:</p>
-
 <pre><code>from caffe2.python import workspace, model_helper
 import numpy as np
 # Create the input data
@@ -253,17 +249,14 @@ workspace.CreateNet(m.net)
 workspace.RunNet(m.name,2)  # run 2 times
 print(&quot;output=&quot;,workspace.FetchBlob('output'))
 </code></pre>
-
 <p>c之后我们仿照caffe2/operators/accumultate_op.h和affe2/operators/accumultate_op.cc,仿写一个我们自己的运算atest_op.h和atest_op.cc</p>
-
-<p>实现的功能为Y=5*X+gamma*Y</p>
-
+<p>实现的功能为Y=5<em>X+gamma</em>Y</p>
 <pre><code> 
 #include &quot;caffe2/operators/atest_op.h&quot;
-
+ 
 namespace caffe2 {
 REGISTER_CPU_OPERATOR(Atest, AtestOp&lt;float, CPUContext&gt;);
-
+ 
 OPERATOR_SCHEMA(Atest)
  .NumInputs(1)
  .NumOutputs(1)
@@ -285,7 +278,7 @@ argument.
  &quot;output tensor is first reshaped and initialized to zero, and only &quot;
  &quot;then, accumulation is done.&quot;)
  .Output(0, &quot;output&quot;, &quot;Accumulated output tensor&quot;);
-
+ 
 SHOULD_NOT_DO_GRADIENT(Atest);
 } // namespace caffe2
 
@@ -295,13 +288,13 @@ SHOULD_NOT_DO_GRADIENT(Atest);
 
 #ifndef CAFFE2_OPERATORS_ATEST_OP_H_
 #define CAFFE2_OPERATORS_ATEST_OP_H_
-
+ 
 #include &quot;caffe2/core/context.h&quot;
 #include &quot;caffe2/core/operator.h&quot;
 #include &quot;caffe2/utils/math.h&quot;
-
+ 
 namespace caffe2 {
-
+ 
 template &lt;typename T, class Context&gt;
 class AtestOp final : public Operator&lt;Context&gt; {
  public:
@@ -310,7 +303,7 @@ class AtestOp final : public Operator&lt;Context&gt; {
  gamma_(static_cast&lt;T&gt;(
  OperatorBase::template GetSingleArgument&lt;float&gt;(&quot;gamma&quot;, 1.0))) {}
  USE_OPERATOR_CONTEXT_FUNCTIONS;
-
+ 
  bool RunOnDevice() override {
  auto&amp; input = Input(0);
  auto* output = Output(0);
@@ -329,50 +322,37 @@ class AtestOp final : public Operator&lt;Context&gt; {
  &amp;context_);
  return true;
  }
-
+ 
  protected:
  T gamma_;
 };
-
+ 
 } // namespace caffe2
-
+ 
 #endif // CAFFE2_OPERATORS_Atest_OP_H_
 </code></pre>
-
 <p>之后我们编译整个caffe2,编译方式是运行pytorch/scripts/build_local.sh</p>
-
 <p>编译成功后,需要将pytorch目录添加到PYTHONPATH中</p>
-
 <pre><code>export PYTHONPATH=$PYTHONPATH:/mnt/lustre/renkuanze/workspace/rjm_pytorch
 </code></pre>
-
 <p>然后运行</p>
-
 <pre><code>cd ~ &amp;&amp; python -c 'from caffe2.python import core' 2&gt;/dev/null &amp;&amp; echo &quot;Success&quot; || echo &quot;Failure&quot;
 </code></pre>
-
 <p>看是否成功</p>
-
 <p>编译的时候可能出现<a href="https://github.com/caffe2/caffe2/issues/2144">mpi_test.cc.o: undefined reference to symbol &lsquo;_ZN3MPI8Datatype4FreeEv</a>  的报错。。解决办法是把CMakeList中的MPI关掉就好了。。。</p>
-
 <p><strong>以及。。。operators中的文件都不要删。。。本想删一些不相关的op来减少编译时间。。。想法是对的。。。但是似乎只删op是行不通的。。。。不如不删。。。不然会编译出现奇怪的错误！</strong></p>
-
 <p><strong>不然会编译出现奇怪的错误！</strong></p>
-
 <p><strong>不然会编译出现奇怪的错误！</strong></p>
-
 <p>以及。。。从github download的速度太慢了。。。干脆开了个40$/m的vps来搞。。。</p>
-
 <p>编译成功后修改测试的python代码，来测试一下我们定义的op</p>
-
 <pre><code>from caffe2.python import workspace, model_helper
 import numpy as np
 # Create the input data
 data = np.arange(6).reshape(2,3).astype(np.float32)
 print (&quot;data=&quot;,data)
-
+ 
 # Create labels for the data as integers [0, 9].
-
+ 
 workspace.FeedBlob(&quot;data&quot;, data)
 # Create model using a model helper
 m = model_helper.ModelHelper(name=&quot;my first net&quot;)
@@ -383,19 +363,12 @@ workspace.CreateNet(m.net)
 workspace.RunNet(m.name,1)  # run 2 times
 print(&quot;output=&quot;,workspace.FetchBlob('output'))
 </code></pre>
-
-<p>发现确实是得到了Y=5*X+gamma*Y 的结果。。</p>
-
+<p>发现确实是得到了Y=5<em>X+gamma</em>Y 的结果。。</p>
 <p>撒花！（然而这只是最近要做的任务中最容易的一条线orz&hellip;</p>
-
 <p>需要注意的是,运行bash build_local.sh脚本之后会在pytorch目录下生成build文件夹,下次<strong>编译的时候直接在build目录下执行make -j20,这样才是增量编译</strong></p>
-
 <p><strong>编译的时候直接在build目录下执行make -j20,这样才是增量编译</strong></p>
-
 <p><strong>编译的时候直接在build目录下执行make -j20,这样才是增量编译</strong></p>
-
 <p>不然每次执行build_local.sh&hellip;不知caffe2用了什么机制&hellip;每次要把所有文件编译一遍&hellip;简直没有人性啊&hellip;16个cpu一起编也要5分钟Orz</p>
-
 <p>以及．．．要在自己定义的函数最后返回true&hellip;这样在运行的时候才不会报错．否则会报net error 的错误Ｏｒｚ&hellip;.我好傻啊？</p>
 
 

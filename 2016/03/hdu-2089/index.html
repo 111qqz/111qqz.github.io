@@ -229,59 +229,38 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
+                <nav id="TableOfContents"></nav>
                 
-                
-                <p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=2089">题目链接</a>
+                <p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=2089">题目链接</a><br>
 <strong>题意：问区间[n,m]中，不含数字4，也不含数字串“62”的所有数的个数。</strong></p>
-
 <p>思路：可以转化成求区间[0,x]</p>
-
 <p><strong>第一次接触数位dp,参考了这几篇博客。</strong></p>
-
 <p><a href="http://m.blog.csdn.net/article/details?id=44082929">不要62（数位dp）解题报告</a></p>
-
 <p><a href="http://www.tuicool.com/articles/VF3yQ3">解题报告2</a></p>
-
 <p><a href="http://blog.csdn.net/qian99/article/details/18924495">解题报告3</a></p>
-
 <p>比较重要的前提：</p>
-
+<!-- raw HTML omitted -->
 <blockquote>
-
-> 
-> **¨对于一个小于n的数，肯定是从高位到低位出现某一位<n的那一位。**
-> 
-> 
-
-> 
-> **¨如 n = 58 n为十进制数。**
-> 
-> 
-
-> 
-> **¨  x = 49 此时x的十位<n**
-> 
-> 
-
-> 
-> **¨  x = 51 此时x的个位<n**
-> 
-> 
-
-> 
-> **¨有了上述性质，我们就可以从高到低枚举第一次<n对应位是哪一位。**
-> 
-> 
-
-> 
-> **这样之前的位确定了，之后的位就不受n的限制即从00...0~99...9，可以先预处理**
-> 
-> </blockquote>
-
+<p><strong>¨对于一个小于n的数，肯定是从高位到低位出现某一位&lt;n的那一位。</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>¨如 n = 58 n为十进制数。</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>¨  x = 49 此时x的十位&lt;n</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>¨  x = 51 此时x的个位&lt;n</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>¨有了上述性质，我们就可以从高到低枚举第一次&lt;n对应位是哪一位。</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>这样之前的位确定了，之后的位就不受n的限制即从00&hellip;0~99&hellip;9，可以先预处理</strong></p>
+<!-- raw HTML omitted -->
+</blockquote>
 <p>以及写成递归形式代码会简洁很多，所以就写了递归形式。</p>
-
 <p>更详细的解释参加代码注释。</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2016年03月15日 星期二 18时04分46秒
@@ -329,7 +308,7 @@ int dfs (int pos,bool preis6,bool limit)  //pos表示从低到高的第几位，
     if (!limit&amp;&amp;dp[pos][preis6]!=-1) return dp[pos][preis6];  //如果不是limit位置，表示结果是通用的，而之前又算过的话，就可以直接调用这个结果。
     int mx = limit?digit[pos]:9; //mx第pos位置能取到的最大的数字..如果不是limit,则可以0..9任意取。
 //    cout&lt;&lt;&quot;mx:&quot;&lt;&lt;mx&lt;&lt;endl;
-
+    
     for ( int i = 0 ; i &lt;= mx;  i++)
     {
     if (i==4||(i==2&amp;&amp;preis6)) continue;
@@ -339,7 +318,7 @@ int dfs (int pos,bool preis6,bool limit)  //pos表示从低到高的第几位，
     //而i==mx部分的意思是，在当前位置的数字小于当前位置的数字能取的最大值（mx）之前，
     //后面位的数字随便取也不会超过上界。
     }
-
+    
     if (!limit) dp[pos][preis6]=res;  //记忆化. 非limit位的结果才通用，不然没必要存。
 
     return res;
@@ -368,7 +347,7 @@ int main()
     while (~scanf(&quot;%d %d&quot;,&amp;n,&amp;m))
     {
         if (n==0&amp;&amp;m==0) break;
-
+	    
         ms(dp,-1);
         int ans = solve (m)-solve(n-1);
 

@@ -229,26 +229,17 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=2955">题目链接</a></p>
-
 <p>题意： 给出n个银行 ，以及抢劫每个银行可以得到的价值和被抓的概率，不同银行之间被抓的概率是相互独立的，现在给出安全概率p，只有当概率从小于安全概率时才是安全的，问最多能抢劫多少价值。</p>
-
 <p>思路：一开始很直接就想到把概率算成容量，</p>
-
 <p>于是就成了经典的01背包，然后发现概率是double型。。。想当然得以为最多是2位小数，于是都*100转化成了整数做01背包。</p>
-
 <p>然而正确思路是，<strong>把银行价值看成背包容量，而背包价值是概率！</strong></p>
-
 <p>将危险的概率转化成安全概率（1-危险概率=安全概率)</p>
-
 <p>然后做01背包。</p>
-
 <p>然后从大到小扫一遍价值，第一个大于安全概率的就是答案。</p>
-
 <p>注意精度。</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :Tue 15 Nov 2016 06:53:53 PM CST
@@ -305,10 +296,10 @@ int main()
    cin&gt;&gt;T;
    while (T--)
    {
-
+        
 
         scanf(&quot;%lf%d&quot;,&amp;p,&amp;n);
-        p = 1 - p;  
+        p = 1 - p;	
     V = 0 ;
         for ( int i = 1; i &lt;= n ; i++)
         {
@@ -319,7 +310,7 @@ int main()
     for ( int i = 0 ; i &lt;= V ; i++) dp[i] =  0;
         for ( int i = 1 ; i &lt;= n ; i++)
                 solve(cost[i],value[i]);
-
+      
         for ( int i = V ; i &gt;= 0 ; i--)
     {
         if (dblcmp(dp[i]-p)&gt;0)

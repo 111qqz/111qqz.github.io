@@ -230,120 +230,84 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#概述">概述</a></li>
-<li><a href="#yuv采样方式">YUV采样方式</a></li>
-<li><a href="#yuv封装格式">YUV封装格式</a></li>
-<li><a href="#yuv格式的名称-傻傻分不清楚">YUV格式的名称,傻傻分不清楚</a></li>
-<li><a href="#yuv格式转bgr格式">YUV格式转BGR格式</a></li>
-<li><a href="#小结">小结</a></li>
-<li><a href="#参考链接">参考链接</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#概述">概述</a></li>
+    <li><a href="#yuv采样方式">YUV采样方式</a></li>
+    <li><a href="#yuv封装格式">YUV封装格式</a></li>
+    <li><a href="#yuv格式的名称傻傻分不清楚">YUV格式的名称,傻傻分不清楚</a></li>
+    <li><a href="#yuv格式转bgr格式">YUV格式转BGR格式</a></li>
+    <li><a href="#小结">小结</a></li>
+    <li><a href="#参考链接">参考链接</a></li>
+  </ul>
 </nav>
                 
-                
-
-<h2 id="概述">概述</h2>
-
-<p>YUV是一种图像编码方式,或者称为<a href="https://zh.wikipedia.org/wiki/%E8%89%B2%E5%BD%A9%E7%A9%BA%E9%96%93">色彩空间</a>,与RGB是同级的概念.
+                <h2 id="概述">概述</h2>
+<p>YUV是一种图像编码方式,或者称为<a href="https://zh.wikipedia.org/wiki/%E8%89%B2%E5%BD%A9%E7%A9%BA%E9%96%93">色彩空间</a>,与RGB是同级的概念.<br>
 YUV是三个分量,Y,U和V,其中:</p>
-
 <ul>
 <li>Y 表示明亮度(Luminance或Luma),也就是灰度值,</li>
 <li>U,V表示色度,浓度（Chrominance、Chroma）,可以简单理解成用来表示某个像素的颜色的量.</li>
 </ul>
-
-<p>YUV格式的特点是,在对照片或影片编码时，考虑到人类的感知能力，允许降低色度的带宽。
+<p>YUV格式的特点是,在对照片或影片编码时，考虑到人类的感知能力，允许降低色度的带宽。<br>
 也就是说,YUV不像RGB那样要求三个独立的视频信号同时传输，<strong>所以用YUV方式传送占用极少的频宽。</strong></p>
-
 <p>其中<strong>YCbCr</strong>是YUV压缩和偏移的版本。YCbCr的Y与YUV中的Y含义一致，Cb和Cr与UV同样都指色彩，Cb指蓝色色度，Cr指红色色度，在应用上很广泛，JPEG、MPEG、DVD、摄影机、数字电视等皆采此一格式。因此一般俗称的YUV大多是指YCbCr。</p>
-
 <h2 id="yuv采样方式">YUV采样方式</h2>
-
-<p>主流的采样方式有三种:
+<p>主流的采样方式有三种:<br>
 其中<strong>Y 分量用叉表示，UV 分量用圆圈表示。</strong></p>
-
 <ul>
 <li>YUV4:4:4</li>
 <li>YUV4:2:2</li>
 <li>YUV4:2:0</li>
 </ul>
-
-<p>下面三张图分别为YUV444,YUV422和YUV420的采样方式. <br>
-<img src="https://i-msdn.sec.s-msft.com/dynimg/IC130499.gif" alt="YUV444" /></p>
-
-<p><img src="https://i-msdn.sec.s-msft.com/dynimg/IC84769.gif" alt="YUV422" /></p>
-
-<p><img src="https://i-msdn.sec.s-msft.com/dynimg/IC173152.gif" alt="YUV420" /></p>
-
+<p>下面三张图分别为YUV444,YUV422和YUV420的采样方式. <!-- raw HTML omitted --><br>
+<img src="https://i-msdn.sec.s-msft.com/dynimg/IC130499.gif" alt="YUV444"></p>
+<p><img src="https://i-msdn.sec.s-msft.com/dynimg/IC84769.gif" alt="YUV422"></p>
+<p><img src="https://i-msdn.sec.s-msft.com/dynimg/IC173152.gif" alt="YUV420"></p>
 <p>但是注意,<strong>上面的三张图只是说明了每个分量的比例,并不能说明排列方式.</strong></p>
-
 <p>需要注意的是yuv420并不是说只采样U分量或者只采样V分量,而是指，在每一行扫描时，只扫描一种色度分量（U 或者 V），和 Y 分量按照 2 : 1 的方式采样。比如，第一行扫描时，YU 按照 2 : 1 的方式采样，那么第二行扫描时，YV 分量按照 2:1 的方式采样</p>
-
 <h2 id="yuv封装格式">YUV封装格式</h2>
-
-<p>采样方式主要是告诉我们各个分量的比例,下面看一下封装格式.
+<p>采样方式主要是告诉我们各个分量的比例,下面看一下封装格式.<br>
 <strong>YUV格式有两大类：planar和packed。</strong></p>
-
 <ul>
 <li>planar: 先连续存储所有像素点的Y，紧接着存储所有像素点的U，随后是所有像素点的V。</li>
 <li>packed: 每个像素点的Y,U,V是连续交错存储的。</li>
 </ul>
-
 <p>其中,planar格式还分为<strong>SEMI PLANAR</strong>和<strong>PLANAR</strong></p>
-
 <ul>
 <li>semi planar:先连续存储所有的Y, 然后UV交错存储.</li>
 <li>planar:先连续存储所有像素点的Y，紧接着存储所有像素点的U，随后是所有像素点的V。</li>
 </ul>
-
-<p>以YUV420为例,前面的图为平面的封装格式,也就是YUV420P(Planar) <br>
-后面的图为半平面的封装格式,也就是YUV420SP(semi planar) <br>
-<img src="https://blog.sunzhihao.com/YUV%E6%A0%BC%E5%BC%8F%E7%9A%84%E8%AF%B4%E6%98%8E/3.png" alt="YUV420P封装格式" />
-<img src="https://blog.sunzhihao.com/YUV%E6%A0%BC%E5%BC%8F%E7%9A%84%E8%AF%B4%E6%98%8E/4.png" alt="YUV420SP封装格式" /></p>
-
-<p>或者以1920*1080的图片具体举例:<br>
-左边的图为平面的封装格式,也就是YUV420P(Planar) <br>
-右边的图为半平面的封装格式,也就是YUV420SP(semi planar) <br>
-<img src="https://blog.sunzhihao.com/YUV%E6%A0%BC%E5%BC%8F%E7%9A%84%E8%AF%B4%E6%98%8E/1.png" alt="YUV420P封装格式" /></p>
-
-<h2 id="yuv格式的名称-傻傻分不清楚">YUV格式的名称,傻傻分不清楚</h2>
-
-<p>由于最近使用的YUV420格式的,因此主要会涉及这一种.
-YUV420分为<strong>YUV420P</strong>和<strong>YUV420SP</strong>两种.
-其中YUV420P又有两种,一种是Y(w×h) + U(w×h/4) + V(w×h/4)的格式,这一种也叫<strong>I420</strong>或者<strong>420P</strong>或者<strong>IYUV</strong>(存疑,参考opencv convert_color函数文档)
+<p>以YUV420为例,前面的图为平面的封装格式,也就是YUV420P(Planar) <!-- raw HTML omitted --><br>
+后面的图为半平面的封装格式,也就是YUV420SP(semi planar) <!-- raw HTML omitted --><br>
+<img src="https://blog.sunzhihao.com/YUV%E6%A0%BC%E5%BC%8F%E7%9A%84%E8%AF%B4%E6%98%8E/3.png" alt="YUV420P封装格式"><br>
+<img src="https://blog.sunzhihao.com/YUV%E6%A0%BC%E5%BC%8F%E7%9A%84%E8%AF%B4%E6%98%8E/4.png" alt="YUV420SP封装格式"></p>
+<p>或者以1920*1080的图片具体举例:<!-- raw HTML omitted --><br>
+左边的图为平面的封装格式,也就是YUV420P(Planar) <!-- raw HTML omitted --><br>
+右边的图为半平面的封装格式,也就是YUV420SP(semi planar) <!-- raw HTML omitted --><br>
+<img src="https://blog.sunzhihao.com/YUV%E6%A0%BC%E5%BC%8F%E7%9A%84%E8%AF%B4%E6%98%8E/1.png" alt="YUV420P封装格式"></p>
+<h2 id="yuv格式的名称傻傻分不清楚">YUV格式的名称,傻傻分不清楚</h2>
+<p>由于最近使用的YUV420格式的,因此主要会涉及这一种.<br>
+YUV420分为<strong>YUV420P</strong>和<strong>YUV420SP</strong>两种.<br>
+其中YUV420P又有两种,一种是Y(w×h) + U(w×h/4) + V(w×h/4)的格式,这一种也叫<strong>I420</strong>或者<strong>420P</strong>或者<strong>IYUV</strong>(存疑,参考opencv convert_color函数文档)<br>
 另一种是Y(w×h) + V(w×h/4) + U(w×h/4)的格式,这一种也叫<strong>YV12</strong></p>
-
-<p>YUV420SP也分两种,分别是<strong>NV12</strong>和<strong>NV21</strong>.
-其中NV12的格式为: Y(w×h) + UV(w×h/4)
+<p>YUV420SP也分两种,分别是<strong>NV12</strong>和<strong>NV21</strong>.<br>
+其中NV12的格式为: Y(w×h) + UV(w×h/4)<br>
 NV21的格式为: Y(w×h) + VU(w×h/4)</p>
-
 <h2 id="yuv格式转bgr格式">YUV格式转BGR格式</h2>
-
-<p>方法有很多,可以直接用公式转.
-这里介绍一种借助opencv的比较简单可行的办法
-方法是读入时按照二进制文件的方式读入YUV文件,
+<p>方法有很多,可以直接用公式转.<br>
+这里介绍一种借助opencv的比较简单可行的办法<br>
+方法是读入时按照二进制文件的方式读入YUV文件,<br>
 然后使用opencv的 cvtColor 函数.</p>
-
-<pre><code class="language-c++">Mat mYUV(height + height/2, width, CV_8UC1, (void*) frameData);
-Mat mRGB(height, width, CV_8UC3);
-cvtColor(mYUV, mRGB, CV_YUV2RGB_YV12, 3);
-</code></pre>
-
-<h2 id="小结">小结</h2>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">Mat <span style="color:#a6e22e">mYUV</span>(height <span style="color:#f92672">+</span> height<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>, width, CV_8UC1, (<span style="color:#66d9ef">void</span><span style="color:#f92672">*</span>) frameData);
+Mat <span style="color:#a6e22e">mRGB</span>(height, width, CV_8UC3);
+cvtColor(mYUV, mRGB, CV_YUV2RGB_YV12, <span style="color:#ae81ff">3</span>);
+</code></pre></div><h2 id="小结">小结</h2>
 <p>由于最近遇到的是YUV420的图片格式,所以虽然题目叫YUV格式初探,但是没怎么涉及到其他YUV格式,可能以后有机会补充吧.</p>
-
-<p>放一个表格,懒得一点一点写了,直接贴了其他人博客的截图
-<img src="https://i.loli.net/2019/07/03/5d1cb4a02756074474.png" alt="表格" /></p>
-
+<p>放一个表格,懒得一点一点写了,直接贴了其他人博客的截图<br>
+<img src="https://i.loli.net/2019/07/03/5d1cb4a02756074474.png" alt="表格"></p>
 <h2 id="参考链接">参考链接</h2>
-
-<p><a href="https://blog.sunzhihao.com/YUV%E6%A0%BC%E5%BC%8F%E7%9A%84%E8%AF%B4%E6%98%8E/">YUV格式的说明</a> <br>
-<a href="https://glumes.com/post/ffmpeg/understand-yuv-format/">一文读懂 YUV 的采样与格式</a> <br>
+<p><a href="https://blog.sunzhihao.com/YUV%E6%A0%BC%E5%BC%8F%E7%9A%84%E8%AF%B4%E6%98%8E/">YUV格式的说明</a> <!-- raw HTML omitted --><br>
+<a href="https://glumes.com/post/ffmpeg/understand-yuv-format/">一文读懂 YUV 的采样与格式</a> <!-- raw HTML omitted --><br>
 <a href="https://stackoverflow.com/questions/2231518/how-to-read-a-frame-from-yuv-file-in-opencv/30539306#30539306">How to read a frame from YUV file in OpenCV?</a></p>
 
 

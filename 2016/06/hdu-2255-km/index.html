@@ -229,87 +229,49 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=2255">hdu 2255 题目链接</a></p>
-
-<p>题意：传说在遥远的地方有一个非常富裕的村落,有一天,村长决定进行制度改革：重新分配房子。
-这可是一件大事,关系到人民的住房问题啊。村里共有n间房间,刚好有n家老百姓,考虑到每家都要有房住（如果有老百姓没房子住的话，容易引起不安定因素），每家必须分配到一间房子且只能得到一间房子。
+<p>题意：传说在遥远的地方有一个非常富裕的村落,有一天,村长决定进行制度改革：重新分配房子。<br>
+这可是一件大事,关系到人民的住房问题啊。村里共有n间房间,刚好有n家老百姓,考虑到每家都要有房住（如果有老百姓没房子住的话，容易引起不安定因素），每家必须分配到一间房子且只能得到一间房子。<br>
 另一方面,村长和另外的村领导希望得到最大的效益,这样村里的机构才会有钱.由于老百姓都比较富裕,他们都能对每一间房子在他们的经济范围内出一定的价格,比如有3间房子,一家老百姓可以对第一间出10万,对第2间出2万,对第3间出20万.(当然是在他们的经济范围内).现在这个问题就是村领导怎样分配房子才能使收入最大.(村民即使有钱购买一间房子但不一定能买到,要看村领导分配的).</p>
-
 <p>思路：这是一道裸的二分图最佳匹配题目。</p>
-
-<blockquote>如果G为加权二分图,则权值和最大的完备匹配称为最佳匹配.</blockquote>
-
+<!-- raw HTML omitted -->
 <p>解决二分图最佳匹配的常用算法为KM算法，该算法的前置技能点为匈牙利算法。</p>
-
-<p>参考了以下文章：
-<a href="http://www.cppblog.com/MatoNo1/archive/2012/04/26/151724.html">关于KM算法的详细解释</a>
-<a href="http://www.cnblogs.com/vongang/archive/2012/04/28/2475731.html">km算法</a>
+<p>参考了以下文章：<br>
+<a href="http://www.cppblog.com/MatoNo1/archive/2012/04/26/151724.html">关于KM算法的详细解释</a><br>
+<a href="http://www.cnblogs.com/vongang/archive/2012/04/28/2475731.html">km算法</a><br>
 <a href="http://cuitianyi.com/blog/km/">求最大权二分匹配的KM算法</a></p>
-
 <p><a href="http://www.cnblogs.com/skyming/archive/2012/02/18/2356919.html">km算法模板</a></p>
-
 <p>先粗浅得说下我对这个算法的理解，等A掉足够多的题目之后再回来总结。</p>
-
 <p>因为才刚刚学习这个算法，可能有很多没理解透彻或者理解错误的地方，还望各位多多指教。</p>
-
 <p>KM算法引入了一个交顶标的概念，lx[i]表示X集合中第i个点的顶标，ly[i]表示Y集合中第i个点的顶标。<strong>至于这个顶标具体代表什么先不用考虑，只需要知道，这个概念的引入是为了解决二分图最佳匹配的问题。</strong></p>
-
 <p>如果一组xi,yi,满足lx[xi]+ly[yi]-w[xi][yi]&gt;=0成立，那么我们称这组点为【可行的】</p>
-
 <p>我们要时刻保证每组点都是可行的。</p>
-
 <p>如果我们把所有满足lx[xi]+ly[yi]==w[xi][yi]的（xi,yi）导出，形成一个新的图，那么新图的最大匹配一定是原图的最佳匹配。原因也很简单：新图的权值和等于所有的顶标和，而根据【可行】点对的定义，最好的情况就是所有不等式都取了等号。</p>
-
 <p>为了保证初始时lx[xi]+ly[yi]-w[xi][yi]对于任意xi,yi成立，<strong>不妨</strong>这样构造lx[],ly[]:</p>
-
 <p>lx[i]=max(w[i][j]),(1=&lt;j&lt;=ny) ，ly[i]=0;</p>
-
 <p>注意是“不妨”，也就是初始值并不是唯一的，只不过这种构造方法在满足不等式的前提下相对简单。</p>
-
 <p>然后就和hungary算法基本类似，从每一个X集合中的点开始寻找增广路。</p>
-
 <p>但是。。但是哪有那么好的事情。。。就那么恰好满足lx[xi]+ly[yi]=w[xi][yi]了。。？</p>
-
 <p>没有满足的怎么办。</p>
-
 <p>接下来就要说KM算法最关键的一步，<strong>调整顶标</strong>。</p>
-
 <p><strong>我们调整顶标的目的是让更多的点对满足式子lx[xi]+ly[yi]==w[xi][yi]，从而进入相等子图,直到图中存在仅由可行边组成的完全匹配为止.</strong></p>
-
-<p><strong>调整的过程中仍然要保证所有点对都【可行】</strong><strong>也就是保证lx[xi]+ly[yi]&gt;=w[xi][yi]一直成立。</strong></p>
-
+<p>**调整的过程中仍然要保证所有点对都【可行】**<strong>也就是保证lx[xi]+ly[yi]&gt;=w[xi][yi]一直成立。</strong></p>
 <p>由于当前lx[xi]+ly[yi]-w[xi][yi]是比我们预期的大，所以我们要想办法减小。</p>
-
 <p>具体方法为：</p>
-
-<blockquote>方法为：将所有在增广轨中（就是在增广过程中遍历到）的X方点的标号全部减去一个常数d，所有在增广轨中的Y方点的标号全部加上一个常数d，则对于图中的任意一条边(i, j, W)（i为X方点，j为Y方点）：</blockquote>
-
+<!-- raw HTML omitted -->
 <p>点对经过调整后分为四种情况：</p>
-
-<blockquote><1>i和j都在增广轨中：此时边(i, j)的(lx[i]+ly[j])值不变，也就是这条边的可行性不变（原来是可行边则现在仍是，原来不是则现在仍不是）；
-**<2>i在增广轨中而j不在：此时边(i, j)的(lx[i]+ly[j])的值减少了d，也就是原来这条边不是可行边（否则j就会被遍历到了），而现在可能是；**
-<3>j在增广轨中而i不在：此时边(i, j)的(lx[i]+ly[j])的值增加了d，也就是原来这条边不是可行边（若这条边是可行边，则在遍历到j时会紧接着执行DFS(i)，此时i就会被遍历到），现在仍不是；
-
-<4>i和j都不在增广轨中：此时边(i, j)的(lx[i]+ly[j])值不变，也就是这条边的可行性不变。</blockquote>
-
+<!-- raw HTML omitted -->
+<p>&lt;4&gt;i和j都不在增广轨中：此时边(i, j)的(lx[i]+ly[j])值不变，也就是这条边的可行性不变。<!-- raw HTML omitted --></p>
 <p>简单得说：<strong>(1) (3)(4)三种情况，不会改变一组点的可行性，用白话解释就是，以前满足那个等式而进入相等子图的点对不会因为调整而从相等子图中出来，以前不满足那个等式的点不会因为调整而进入相等子图。</strong></p>
-
 <p>而对于情况（2），因为lx[xi]+ly[yi]-w[xi][yi]减少了，那么以前不满足，现在有可能满足。注意，现在还只是可能满足。</p>
-
 <p>那么这个常数d到底是多少？怎么确定？</p>
-
 <p>是的，接下来的着手点就在这个d上。</p>
-
-<blockquote>那么d的值应取多少？显然，整个点标不能失去可行性，也就是对于上述的第<2>类边，其lx[i]+ly[j]>=W这一性质不能被改变，故取所有第<2>类边的(lx[i]+ly[j]-W)的最小值作为d值即可。这样一方面可以保证点标的可行性，另一方面，**经过这一步后，图中至少会增加一条可行边。**</blockquote>
-
+<!-- raw HTML omitted -->
 <p>这样的最小值d,会恰好使得得到最小值d的那组点对的lx[i]+ly[j]-w的值从大于0变成0（好像是废话，我只是为了强调一下）</p>
-
 <p>但是如果朴素得去找最小值更新d的话，复杂度是O(n4)（不会分析复杂度。。。mzdd)</p>
-
-<blockquote></blockquote>
-
+<!-- raw HTML omitted -->
 <pre><code>#define M 505
 #define inf 0x3fffffff
 bool sx[M], sy[M];
@@ -380,25 +342,15 @@ int KM ()
     return sum;
 }
 </code></pre>
-
-<blockquote>**O(n^3)的优化**：
-
-如果每次都花O(n^2)的时间时间去找 min(lx[i] + ly[j] - mp[i][j])；显然，总的时间复杂度是O(n^3)，这里加一个slack[]数组，记录每次dfs找完美匹配时lx[i] + ly[j] - mp[i][j]的最小值，在实现多次调整时只需要在slack[]里找到调整值d就可以。</blockquote>
-
+<!-- raw HTML omitted -->
+<p>如果每次都花O(n^2)的时间时间去找 min(lx[i] + ly[j] - mp[i][j])；显然，总的时间复杂度是O(n^3)，这里加一个slack[]数组，记录每次dfs找完美匹配时lx[i] + ly[j] - mp[i][j]的最小值，在实现多次调整时只需要在slack[]里找到调整值d就可以。<!-- raw HTML omitted --></p>
 <p>回过头来看KM算法的过程，像一种奇妙的<strong>构造法</strong></p>
-
 <p>根据给定的规则去初始化和调整顶标，就可以得到二分图的最佳匹配。</p>
-
 <p>正面来思考比较难以想到这种巧妙的构造法。在理解清楚整个过程之前，对于顶标到底是什么意义，为什么要满足那个等式，都是一脸蒙逼。。</p>
-
 <p>但是回过头来，就有了一种柳暗花明的感觉。</p>
-
 <p>回过头来说这道题：裸的二分图最佳匹配，n&lt;=300，存图可以用邻接矩阵。。</p>
-
 <p>然后意识到km算法O(N3)的复杂度。。。似乎存图总是可以邻接矩阵？</p>
-
 <p>说得差不多了，代码里还有一些细节的注释。</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2016年06月01日 星期三 11时23分42秒
@@ -442,16 +394,16 @@ bool find( int u)
 {
     visx[u] = true;
     for ( int v = 1 ; v &lt;= n ; v++) //这道题特殊：每两个点都有边相连。
-    {                   //对于有些题目中可能两个集合某些点没有边相连，我们可以看作有权值为0的边。
+    {				    //对于有些题目中可能两个集合某些点没有边相连，我们可以看作有权值为0的边。
     if (visy[v]) continue;  
     int tmp = lx[u] + ly[v] - w[u][v]; //要时刻保证tmp&gt;=0，并称一样一组点标为可行的。
-//  cout&lt;&lt;&quot;tmp:&quot;&lt;&lt;tmp&lt;&lt;endl;
+//	cout&lt;&lt;&quot;tmp:&quot;&lt;&lt;tmp&lt;&lt;endl;
     if (tmp==0) 
     {
         visy[v] = true;
         if (link[v]==-1||find(link[v]))
         {
-    //  cout&lt;&lt;&quot;link[v]:&quot;&lt;&lt;link[v]&lt;&lt;endl;
+    //	cout&lt;&lt;&quot;link[v]:&quot;&lt;&lt;link[v]&lt;&lt;endl;
         link[v] = u;
         return true;
         }
@@ -463,7 +415,7 @@ bool find( int u)
 }
 int KM()
 {
-
+    
     ms(link,-1);//初始没有找到匹配，同hungary
     ms(ly,0);
     ms(lx,0);//因为要使得所有lx[i]+ly[j]-w[i][j]&gt;=0,所以初始化的时候（不妨）lx[i]=max(w[i][j]),ly[i]=0;
@@ -474,14 +426,14 @@ int KM()
 
     for ( int i =  1 ; i &lt;= n ; i++)
     {
-//  ms(slk,0x3f);
+//	ms(slk,0x3f);
     for ( int j = 1 ; j &lt;= n ; j++) slk[j] = inf;
     while (true)
     {
      //   cout&lt;&lt;&quot;mio mio mio &quot;&lt;&lt;endl;
         ms(visx,false);
         ms(visy,false);
-
+	    
         if (find(i)) break;
         int d = inf;
         for ( int j = 1 ; j &lt;= n ; j++)

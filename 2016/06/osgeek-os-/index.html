@@ -225,60 +225,40 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://blog.csdn.net/cherylnatsu/article/details/6838459">参考了这篇博客</a></p>
-
 <p>流程部分不再具体描述，可以参考上面的博客。</p>
-
 <p>只详细给出我遇到的问题。</p>
-
 <p>我的pc环境是：Linux 111qqz-ThinkPad-X200 3.16.0-38-generic #52~14.04.1-Ubuntu SMP Fri May 8 09:43:57 UTC 2015 x86_64 x86_64 x86_64 GNU/Linux</p>
-
 <p>linux mint 17.2 cinnamon</p>
-
 <pre><code>apt-get install build-essential  
 apt-get install bochs bochs-x nasm
 </code></pre>
-
 <p><a href="http://sourceforge.net/projects/geekos/files/">http://sourceforge.net/projects/geekos/files/</a> 下载geekos软件包并且解压</p>
-
 <pre><code>$ cd ~/geekos-0.3.0/src/project0/build$ 
 $ make depend
 $ make
 </code></pre>
-
 <p>报错。。</p>
-
 <p>解法办法：修改/home/rkz2013/geekos-0.3.0/src/project0/build</p>
-
 <p>目录下的Makefile文件。</p>
-
 <pre><code>CC_GENERAL_OPTS := $(GENERAL_OPTS) -Werror  改为
 CC_GENERAL_OPTS := $(GENERAL_OPTS)
 </code></pre>
-
 <p>make后再次出现错误：</p>
-
 <pre><code>fmtout.c:(.text+0xa16)：对‘__stack_chk_fail’未定义的引用
 </code></pre>
-
 <p>解决办法：</p>
-
 <pre><code>在project0/build 目录下的makefile文件的148行
 添加编译选项 -fno-stack-protector
 </code></pre>
-
 <p>然后又报错</p>
-
 <pre><code>i386 architecture of input file `geekos/lowlevel.o' is incompatible with i386:x86-64 output
 </code></pre>
-
 <p>解决办法：</p>
-
-<p>修改/home/rkz2013/geekos-0.3.0/src/project0/build目录下的Makefile的100行至109行如下。
+<p>修改/home/rkz2013/geekos-0.3.0/src/project0/build目录下的Makefile的100行至109行如下。<br>
 （改动了100行，106行，109行。。。交叉编译什么的，因为做OS大作业的时候搞过这个。。。如果之前没有交叉编译过可能出现库依赖不全的情况。。。？ 缺什么安什么就好了。）</p>
-
 <pre><code>100 TARGET_CC := $(TARGET_CC_PREFIX)gcc -m32                                                  
 101 
 102 # Host C compiler.  This is used to compile programs to execute on                        
@@ -290,11 +270,8 @@ CC_GENERAL_OPTS := $(GENERAL_OPTS)
 108 # Target linker.  GNU ld is probably to only one that will work.                          
 109 TARGET_LD := $(TARGET_CC_PREFIX)ld  -m elf_i386
 </code></pre>
-
 <p>新建一个.bochsrc的配置文件</p>
-
 <p>放入一下内容</p>
-
 <pre><code># An example .bochsrc file.
 # You will need to edit these lines to reflect your system.
 vgaromimage: file=/usr/share/vgabios/vgabios.bin
@@ -314,17 +291,12 @@ i440fxsupport: enabled=0
 # useful for debugging the kernel.
 #debug: action=report
 </code></pre>
-
 <p>保存在主目录下。</p>
-
-<p>然后再启动bochs
+<p>然后再启动bochs<br>
 再次报错</p>
-
 <pre><code>bochs-bin: symbol lookup error: /usr/lib/bochs/plugins/libbx_x.so: undefined symbol: XpmCreatePixmapFromData
 </code></pre>
-
 <p>解决办法：</p>
-
 <pre><code>export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libXpm.so.4
 </code></pre>
 

@@ -229,36 +229,22 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://acm.hust.edu.cn/vjudge/contest/130303#problem/B">题目链接</a></p>
-
 <p>题意：把一个长度为n的只由数字构成的串分成k个不为空的字串，使得最大的串最小（大小是说串所对应的十进制数的大小）</p>
-
 <p>思路：由于长度为x的串肯定大于长度为x-1的串，因此很容易想到，我们要尽可能使得k组串的长度尽可能平均（避免出现某一个串的长度非常大的情况）</p>
-
 <p>我们可以知道，最大值的串的长度一定为 LEN=(n+k-1)/k;</p>
-
 <p>而每一组的长度，只可能是LEN或者LEN-1。</p>
-
 <p>然后build_sa</p>
-
 <p>注意循环串的几个地方记得%n</p>
-
 <p>接下来二分sa数组的下标。</p>
-
 <p>二分check的时候，先枚举断点，断环为链。</p>
-
 <p>由于每部分最长的长度为LEN，所以0..LEN-1中一定存在一个断点。</p>
-
 <p>然后贪心，尽可能取LEN</p>
-
 <p>根据rk值来决定某一段的长度是LEN还是LEN-1（如果rk值比当前的大，那么就只能取LEN-1，否则取LEN）</p>
-
 <p>如果此时k段的长度之和超过了n，说明此时的最大值还可能更小。</p>
-
 <p>于是继续二分区间的前一半。</p>
-
 <pre><code>#include &lt;cstdio&gt;
 #include &lt;cstring&gt;
 #include &lt;iostream&gt;
@@ -359,7 +345,7 @@ bool check( int p)
             if (rk[tmp]&gt;rk[p])
                 st+=L-1;
             else st+=L;
-//      cout&lt;&lt;&quot;tmp:&quot;&lt;&lt;tmp&lt;&lt;&quot; rk[tmp]:&quot;&lt;&lt;rk[tmp]&lt;&lt;&quot; st:&quot;&lt;&lt;st&lt;&lt;endl;
+//	    cout&lt;&lt;&quot;tmp:&quot;&lt;&lt;tmp&lt;&lt;&quot; rk[tmp]:&quot;&lt;&lt;rk[tmp]&lt;&lt;&quot; st:&quot;&lt;&lt;st&lt;&lt;endl;
             if (st&gt;ed) return true;
         }
     }

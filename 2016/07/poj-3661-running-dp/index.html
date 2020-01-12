@@ -230,56 +230,38 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li><a href="#我能想到的">我能想到的：</a></li>
-<li><a href="#我想错了的">我想错了的：</a></li>
-<li><a href="#我想的不够好的">我想的不够好的：</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#我能想到的">我能想到的：</a></li>
+        <li><a href="#我想错了的">我想错了的：</a></li>
+        <li><a href="#我想的不够好的">我想的不够好的：</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
                 
-                
-
-<p><a href="http://poj.org/problem?id=3661">poj 3661题目链接</a></p>
-
+                <p><a href="http://poj.org/problem?id=3661">poj 3661题目链接</a></p>
 <p>题意：锻炼，一共n分钟，每分钟可以选择跑步或者休息，第i分钟跑步可以跑d[i]米，并增加一点疲劳度，如果选择休息，那么每分钟减少1点疲劳值。一旦开始休息，必须休息到疲劳值为0才能再次开始跑步。疲劳值不能超过m.第n分钟的时候疲劳值必须为0，否则之后会感觉身体被掏空。问n分钟最远多多远。</p>
-
 <p>思路：</p>
-
 <h3 id="我能想到的">我能想到的：</h3>
-
 <pre><code>  * dp[i][j]表示第i分钟疲劳度为j的时候能跑的最远距离
   * 初始化dp为0.
   * 最后的答案为dp[n][0]
   * 如果第i分钟跑步，转移方程为dp[i][j] = max(dp[i][j],dp[i-1][j-1]+d[i]);
 </code></pre>
-
 <h3 id="我想错了的">我想错了的：</h3>
-
 <pre><code>  * 休息的时候的转移方程应该是第i天刚好**休息好**时：dp[i][0]=max(dp[i-j][j],dp[i][0]) 而不是**开始休息**时
   * 由于是第i天休息好时的状态，那么开始休息的时间是固定的（第i-j天），只进行一个转移，而不会影响中间的那些天
 </code></pre>
-
 <h3 id="我想的不够好的">我想的不够好的：</h3>
-
 <pre><code>  * 考虑到了可能最后几天为了疲劳度为0干脆就不跑，我的做法是取了所有的dp[i][0]的最大值。但是更好的做法似乎是dp[i][0] = dp[i-1][0]转移一下。
 </code></pre>
-
 <p>参考博客：<a href="http://www.cnblogs.com/vongang/archive/2012/05/05/2485349.html">参考博客</a></p>
-
 <p>参考题解：</p>
-
-<blockquote>分析：先设dp[i][j]表示小明在i分钟，疲劳值为j时所能走的最远距离。
-
-a)、先看dp[i][0]的情况，表示第i分钟时，疲劳值为0，考虑这个值由哪些情况得到，1、dp[i][0] = dp[i-1][0]，这个没有任何问题。2、dp[i][0] = dp[i-j][j]。表示i-j分钟时的疲劳值为j，然后一直休息j分钟把疲劳值降成0。
-
-b)、现在考虑dp[i][j]的情况，它可以由dp[i-1][j-1] + Di得到，表示第i分钟选择走Di。因为要保证没有后效性，所以只有这一种情况可以转移。</blockquote>
-
+<!-- raw HTML omitted -->
+<p>a)、先看dp[i][0]的情况，表示第i分钟时，疲劳值为0，考虑这个值由哪些情况得到，1、dp[i][0] = dp[i-1][0]，这个没有任何问题。2、dp[i][0] = dp[i-j][j]。表示i-j分钟时的疲劳值为j，然后一直休息j分钟把疲劳值降成0。</p>
+<p>b)、现在考虑dp[i][j]的情况，它可以由dp[i-1][j-1] + Di得到，表示第i分钟选择走Di。因为要保证没有后效性，所以只有这一种情况可以转移。<!-- raw HTML omitted --></p>
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2016年07月25日 星期一 23时42分26秒
@@ -324,7 +306,7 @@ int main()
     freopen(&quot;code/in.txt&quot;,&quot;r&quot;,stdin);
   #endif
 
-//  ios::sync_with_stdio(false);
+//	ios::sync_with_stdio(false);
     cin&gt;&gt;n&gt;&gt;m;
     for ( int i = 1 ; i &lt;= n ; i++) scanf(&quot;%d&quot;,&amp;d[i]);
 
@@ -338,17 +320,17 @@ int main()
         dp[i][j] = max(dp[i][j], dp[i-1][j-1]+d[i]);
         if (i-j&gt;=0)
             dp[i][0] = max(dp[i-j][j],dp[i][0]);
-    //  for ( int k = 1 ; k &lt;= j-1 ; k++)
-    //      dp[i-1+k][j-1-k] = max(dp[i-1][j-1],dp[i-1+k][j-1-k]);
+    //	for ( int k = 1 ; k &lt;= j-1 ; k++)
+    //	    dp[i-1+k][j-1-k] = max(dp[i-1][j-1],dp[i-1+k][j-1-k]);
         }
 
     }
     int ans = dp[n][0] ;
-//  for ( int i = 1 ; i &lt;= n ; i++) ans = max(ans,dp[i][0]);
-//  for ( int i = 1 ; i &lt;= n ; i++)
-//      for ( int j = 0 ; j &lt;= m ; j++)
-//      cout&lt;&lt;i&lt;&lt;&quot; &quot;&lt;&lt;j&lt;&lt;&quot; &quot;&lt;&lt;dp[i][j]&lt;&lt;endl;
-//  cout&lt;&lt;dp[n][0]&lt;&lt;endl;
+//	for ( int i = 1 ; i &lt;= n ; i++) ans = max(ans,dp[i][0]);
+//	for ( int i = 1 ; i &lt;= n ; i++)
+//	    for ( int j = 0 ; j &lt;= m ; j++)
+//		cout&lt;&lt;i&lt;&lt;&quot; &quot;&lt;&lt;j&lt;&lt;&quot; &quot;&lt;&lt;dp[i][j]&lt;&lt;endl;
+//	cout&lt;&lt;dp[n][0]&lt;&lt;endl;
         printf(&quot;%d\n&quot;,ans);
 
 

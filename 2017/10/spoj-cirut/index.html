@@ -225,36 +225,22 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                <nav id="TableOfContents">
-<ul>
-<li><a href="#题意-思路">题意&amp;思路：</a></li>
-</ul>
-</nav>
+                <nav id="TableOfContents"></nav>
                 
-                
-
-<p><a href="http://www.spoj.com/problems/CIRUT/">题目链接</a></p>
-
-<h1 id="题意-思路">题意&amp;思路：</h1>
-
+                <p><a href="http://www.spoj.com/problems/CIRUT/">题目链接</a></p>
+<h1 id="题意思路">题意&amp;思路：</h1>
 <p>给出n个圆</p>
-
 <p>求恰好k个圆相交的面积，k属于1..n</p>
-
 <p>先放个别人的代码。。。</p>
-
 <p>我真是体会到了。。。软件工程这门课的重要性。。。</p>
-
 <p>这代码真是烂得印象深刻。。。几何题全是面向过程？</p>
-
 <p>circle和point 类写在一起。。。感觉所有糟糕的写法这份代码全都占了。。。</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2017年10月11日 星期三 19时53分30秒
 File Name :ciru.cpp
 ************************************************ */
-
+ 
 #include &lt;cstdio&gt;
 #include &lt;cstring&gt;
 #include &lt;iostream&gt;
@@ -275,7 +261,7 @@ File Name :ciru.cpp
 #define ms(a,x) memset(a,x,sizeof(a))
 #define pi pair &lt; int ,int &gt;
 #define MP make_pair
-
+ 
 using namespace std;
 
 typedef long long LL;  
@@ -290,13 +276,13 @@ const double PI = acos(-1.0);
 const int N = 1010;  
 double area[N];  
 int n;  
-
+  
 int dcmp(double x)  
 {  
     if (x &lt; -eps) return -1;  
     else return x &gt; eps;  
 }  
-
+  
 struct cp  
 {  
     double x, y, r, angle;  
@@ -315,17 +301,17 @@ struct cp
         d = 1;  
     }  
 } cir[N], tp[N * 2];  
-
+  
 double dis(cp a, cp b)  
 {  
     return sqrt(sqr(a.x - b.x) + sqr(a.y - b.y));  
 }  
-
+  
 double cross(cp p0, cp p1, cp p2)  
 {  
     return (p1.x - p0.x) * (p2.y - p0.y) - (p1.y - p0.y) * (p2.x - p0.x);  
 }  
-
+  
 int CirCrossCir(cp p1, double r1, cp p2, double r2, cp &amp;cp1, cp &amp;cp2)  
 {  
     double mx = p2.x - p1.x, sx = p2.x + p1.x, mx2 = mx * mx;  
@@ -345,25 +331,25 @@ int CirCrossCir(cp p1, double r1, cp p2, double r2, cp &amp;cp1, cp &amp;cp2)
     if (d &gt; eps) return 2;  
     else return 1;  
 }  
-
+  
 bool circmp(const cp&amp; u, const cp&amp; v)  
 {  
     return dcmp(u.r - v.r) &lt; 0;  
 }  
-
+  
 bool cmp(const cp&amp; u, const cp&amp; v)  
 {  
     if (dcmp(u.angle - v.angle)) return u.angle &lt; v.angle;  
     return u.d &gt; v.d;  
 }  
-
+  
 double calc(cp cir, cp cp1, cp cp2)  
 {  
     double ans = (cp2.angle - cp1.angle) * sqr(cir.r)  
                  - cross(cir, cp1, cp2) + cross(cp(0, 0), cp1, cp2);  
     return ans / 2;  
 }  
-
+  
 void CirUnion(cp cir[], int n)  
 {  
     cp cp1, cp2;  
@@ -400,7 +386,7 @@ void CirUnion(cp cir[], int n)
         }  
     }  
 }  
-
+  
 void solve()  
 {  
     scanf(&quot;%d&quot;, &amp;n);  
@@ -420,7 +406,7 @@ void solve()
     //for(int i=1; i&lt;=n; i++) tot += area[i];  
     //printf(&quot;%f\n&quot;, tot);  
 }  
-
+  
 int main()  
 {  
    // freopen(&quot;./in.txt&quot;, &quot;r&quot;, stdin);  
@@ -428,19 +414,15 @@ int main()
     return 0;  
 }
 </code></pre>
-
 <p>打算改写一下。。。这代码实在是。。烂得看不下去了。。。</p>
-
 <p>所以说。。。读别人代码。。。才能体会到代码风格的重要性啊。。。orz</p>
-
 <p>重构了代码，感觉清爽了很多。。</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2017年10月11日 星期三 19时53分30秒
 File Name :ciru.circlep
 ************************************************ */
-
+ 
 #include &lt;cstdio&gt;
 #include &lt;cstring&gt;
 #include &lt;iostream&gt;
@@ -473,7 +455,7 @@ const double PI = acos(-1.0);
 const int N = 1010;  
 double area[N];  
 int n;  
-
+  
 int dblcmp(double d){ return d&lt;-eps?-1:d&gt;eps;}  
 struct point
 {
@@ -514,7 +496,7 @@ struct circle
     bool contain (const circle &amp; cir)const{ return dblcmp(dist(cir.c,c)+cir.r-r)&lt;=0;}
     bool interect (const circle &amp; cir)const{ return dblcmp(dist(cir.c,c)-cir.r-r)&lt;0;}
 } cir[N];// tp[N * 2];  
-
+  
 double dis(point a, point b)  {return sqrt(sqr(a.x - b.x) + sqr(a.y - b.y));} 
 int CirCrossCir(circle cir1,circle cir2, point &amp;p1, point &amp;p2)  
 {  
@@ -543,14 +525,14 @@ bool cmp(const point&amp; u, const point&amp; v)
     if (dblcmp(u.ang - v.ang)) return u.ang &lt; v.ang;  
     return u.d &gt; v.d;  
 }  
-
+  
 double calc(circle cir, point p1, point p2)  
 {  
     double ans = (p2.ang - p1.ang) * sqr(cir.r)
          - cross ( (p1-cir.c),(p2-cir.c)) + cross( p1,p2);
     return ans *0.5; 
 }  
-
+  
 void CirUnion(circle cir[], int n)  
 {  
     circle cir1, cir2;  
@@ -606,7 +588,7 @@ void solve()
     //for(int i=1; i&lt;=n; i++) tot += area[i];  
     //printf(&quot;%f\n&quot;, tot);  
 }  
-
+  
 int main()  
 {  
    // freopen(&quot;./in.txt&quot;, &quot;r&quot;, stdin);  

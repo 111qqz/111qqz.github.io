@@ -226,250 +226,207 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#net-基本介绍">Net 基本介绍</a></li>
-<li><a href="#net-实现细节">Net 实现细节</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#net-基本介绍">Net 基本介绍</a></li>
+    <li><a href="#net-实现细节">Net 实现细节</a></li>
+  </ul>
 </nav>
                 
-                
-
-<h2 id="net-基本介绍">Net 基本介绍</h2>
-
+                <h2 id="net-基本介绍">Net 基本介绍</h2>
 <p>网络通过组成和自微分共同定义一个函数及其梯度。</p>
-
 <p>网络是一些Layer组成的DAG,也就是有向无环图，在caffe中通常由prototxt定义．</p>
-
 <p>比如</p>
-
-<pre><code class="language-protobuf">name: &quot;LogReg&quot;
-layer {
-  name: &quot;mnist&quot;
-  type: &quot;Data&quot;
-  top: &quot;data&quot;
-  top: &quot;label&quot;
-  data_param {
-    source: &quot;input_leveldb&quot;
-    batch_size: 64
-  }
-}
-layer {
-  name: &quot;ip&quot;
-  type: &quot;InnerProduct&quot;
-  bottom: &quot;data&quot;
-  top: &quot;ip&quot;
-  inner_product_param {
-    num_output: 2
-  }
-}
-layer {
-  name: &quot;loss&quot;
-  type: &quot;SoftmaxWithLoss&quot;
-  bottom: &quot;ip&quot;
-  bottom: &quot;label&quot;
-  top: &quot;loss&quot;
-}
-</code></pre>
-
-<p>定义了</p>
-
-<p><img src="https://caffe.berkeleyvision.org/tutorial/fig/logreg.jpg" alt="网络结构" /></p>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-protobuf" data-lang="protobuf">name<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;LogReg&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>layer {<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  name<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;mnist&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  type<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;Data&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  top<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;data&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  top<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;label&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  data_param {<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    source<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;input_leveldb&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    batch_size<span style="color:#f92672">:</span> <span style="color:#ae81ff">64</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  }<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>}<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>layer {<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  name<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;ip&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  type<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;InnerProduct&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  bottom<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;data&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  top<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;ip&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  inner_product_param {<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    num_output<span style="color:#f92672">:</span> <span style="color:#ae81ff">2</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  }<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>}<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>layer {<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  name<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;loss&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  type<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;SoftmaxWithLoss&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  bottom<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;ip&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  bottom<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;label&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  top<span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;loss&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>}<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>定义了</p>
+<p><img src="https://caffe.berkeleyvision.org/tutorial/fig/logreg.jpg" alt="网络结构"></p>
 <p>值得强调的是，<strong>caffe中网络结构的定义与实现是无关的</strong>,这点比pytorch之类的深度学习框架不知高到哪里去了，也是caffe作为部署端的事实标准的重要原因．</p>
-
 <h2 id="net-实现细节">Net 实现细节</h2>
-
 <p>我们先看下NetParameter的proto</p>
-
-<pre><code class="language-protobuf">message NetParameter {
-  optional string name = 1; // consider giving the network a name
-  // DEPRECATED. See InputParameter. The input blobs to the network.
-  repeated string input = 3;
-  // DEPRECATED. See InputParameter. The shape of the input blobs.
-  repeated BlobShape input_shape = 8;
-
-  // 4D input dimensions -- deprecated.  Use &quot;input_shape&quot; instead.
-  // If specified, for each input blob there should be four
-  // values specifying the num, channels, height and width of the input blob.
-  // Thus, there should be a total of (4 * #input) numbers.
-  repeated int32 input_dim = 4;
-
-  // Whether the network will force every layer to carry out backward operation.
-  // If set False, then whether to carry out backward is determined
-  // automatically according to the net structure and learning rates.
-  optional bool force_backward = 5 [default = false];
-  // The current &quot;state&quot; of the network, including the phase, level, and stage.
-  // Some layers may be included/excluded depending on this state and the states
-  // specified in the layers' include and exclude fields.
-  optional NetState state = 6;
-
-  // Print debugging information about results while running Net::Forward,
-  // Net::Backward, and Net::Update.
-  optional bool debug_info = 7 [default = false];
-
-  // The layers that make up the net.  Each of their configurations, including
-  // connectivity and behavior, is specified as a LayerParameter.
-  repeated LayerParameter layer = 100;  // ID 100 so layers are printed last.
-
-  // DEPRECATED: use 'layer' instead.
-  repeated V1LayerParameter layers = 2;
-}
-</code></pre>
-
-<p>都很好理解，除了NetState不知道是个什么东西．．．</p>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-protobuf" data-lang="protobuf"><span style="color:#66d9ef">message</span> <span style="color:#a6e22e">NetParameter</span> {<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#66d9ef">optional</span> <span style="color:#66d9ef">string</span> name <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; <span style="color:#75715e">// consider giving the network a name
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// DEPRECATED. See InputParameter. The input blobs to the network.
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">repeated</span> <span style="color:#66d9ef">string</span> input <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>;<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#75715e">// DEPRECATED. See InputParameter. The shape of the input blobs.
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">repeated</span> BlobShape input_shape <span style="color:#f92672">=</span> <span style="color:#ae81ff">8</span>;<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#75715e">// 4D input dimensions -- deprecated.  Use &#34;input_shape&#34; instead.
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// If specified, for each input blob there should be four
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// values specifying the num, channels, height and width of the input blob.
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// Thus, there should be a total of (4 * #input) numbers.
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">repeated</span> <span style="color:#66d9ef">int32</span> input_dim <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span>;<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#75715e">// Whether the network will force every layer to carry out backward operation.
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// If set False, then whether to carry out backward is determined
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// automatically according to the net structure and learning rates.
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">optional</span> <span style="color:#66d9ef">bool</span> force_backward <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span> [<span style="color:#66d9ef">default</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>];<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#75715e">// The current &#34;state&#34; of the network, including the phase, level, and stage.
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// Some layers may be included/excluded depending on this state and the states
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// specified in the layers&#39; include and exclude fields.
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">optional</span> NetState state <span style="color:#f92672">=</span> <span style="color:#ae81ff">6</span>;<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#75715e">// Print debugging information about results while running Net::Forward,
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// Net::Backward, and Net::Update.
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">optional</span> <span style="color:#66d9ef">bool</span> debug_info <span style="color:#f92672">=</span> <span style="color:#ae81ff">7</span> [<span style="color:#66d9ef">default</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>];<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#75715e">// The layers that make up the net.  Each of their configurations, including
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// connectivity and behavior, is specified as a LayerParameter.
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">repeated</span> LayerParameter layer <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>;  <span style="color:#75715e">// ID 100 so layers are printed last.
+</span><span style="color:#75715e"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#75715e">// DEPRECATED: use &#39;layer&#39; instead.
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">repeated</span> V1LayerParameter layers <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>;<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>}<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>都很好理解，除了NetState不知道是个什么东西．．．</p>
 <p>继续往下看，看到和NetState有关的两个proto定义如下:</p>
-
-<pre><code class="language-protobuf">
-message NetState {
-  optional Phase phase = 1 [default = TEST];
-  optional int32 level = 2 [default = 0];
-  repeated string stage = 3;
-}
-
-message NetStateRule {
-  // Set phase to require the NetState have a particular phase (TRAIN or TEST)
-  // to meet this rule.
-  optional Phase phase = 1;
-
-  // Set the minimum and/or maximum levels in which the layer should be used.
-  // Leave undefined to meet the rule regardless of level.
-  optional int32 min_level = 2;
-  optional int32 max_level = 3;
-
-  // Customizable sets of stages to include or exclude.
-  // The net must have ALL of the specified stages and NONE of the specified
-  // &quot;not_stage&quot;s to meet the rule.
-  // (Use multiple NetStateRules to specify conjunctions of stages.)
-  repeated string stage = 4;
-  repeated string not_stage = 5;
-}
-</code></pre>
-
-<p>参考　<a href="https://github.com/BVLC/caffe/issues/3864">
-[Discussion] How to specify all-in-one networks #3864</a>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-protobuf" data-lang="protobuf"><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">message</span> <span style="color:#a6e22e">NetState</span> {<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#66d9ef">optional</span> Phase phase <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> [<span style="color:#66d9ef">default</span> <span style="color:#f92672">=</span> TEST];<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#66d9ef">optional</span> <span style="color:#66d9ef">int32</span> level <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span> [<span style="color:#66d9ef">default</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>];<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#66d9ef">repeated</span> <span style="color:#66d9ef">string</span> stage <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>;<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>}<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">message</span> <span style="color:#a6e22e">NetStateRule</span> {<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#75715e">// Set phase to require the NetState have a particular phase (TRAIN or TEST)
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// to meet this rule.
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">optional</span> Phase phase <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#75715e">// Set the minimum and/or maximum levels in which the layer should be used.
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// Leave undefined to meet the rule regardless of level.
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">optional</span> <span style="color:#66d9ef">int32</span> min_level <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>;<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#66d9ef">optional</span> <span style="color:#66d9ef">int32</span> max_level <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>;<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#75715e">// Customizable sets of stages to include or exclude.
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// The net must have ALL of the specified stages and NONE of the specified
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// &#34;not_stage&#34;s to meet the rule.
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// (Use multiple NetStateRules to specify conjunctions of stages.)
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">repeated</span> <span style="color:#66d9ef">string</span> stage <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span>;<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#66d9ef">repeated</span> <span style="color:#66d9ef">string</span> not_stage <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span>;<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>}<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>参考　<a href="https://github.com/BVLC/caffe/issues/3864"><br>
+[Discussion] How to specify all-in-one networks #3864</a><br>
 得知，这些参数的主要目的是为了解决部署和训练时，需要多个prototxt的问题．　</p>
-
 <p>实际上，部署和训练的protoxt可能大部分都是一样的，只不过是输入，输出以及少部分layer有些差别．如果分为多个文件，会带来的问题就是，如果要修改一些共同的layer,就需要修改两次．</p>
-
-<p>于是可以通过这些参数来控制网络结构，使得部署和训练使用相同的prototxt
-，得到一个&rdquo;all-in-one network&rdquo;</p>
-
+<p>于是可以通过这些参数来控制网络结构，使得部署和训练使用相同的prototxt<br>
+，得到一个&quot;all-in-one network&rdquo;</p>
 <p>接下来值得看的是网络的构建部分．</p>
-
 <p>对于一个Net，会顺序构建每个Layer</p>
-
 <p>对于每个Layer,大致分为AppendTop,AppendBottom，AppendParam　三部分．我们重点关注前两部分．</p>
-
-<pre><code class="language-c++">
-// Helper for Net::Init: add a new bottom blob to the net.
-template &lt;typename Dtype&gt;
-int Net&lt;Dtype&gt;::AppendBottom(const NetParameter&amp; param, const int layer_id,
-    const int bottom_id, set&lt;string&gt;* available_blobs,
-    map&lt;string, int&gt;* blob_name_to_idx) {
-  const LayerParameter&amp; layer_param = param.layer(layer_id);
-  const string&amp; blob_name = layer_param.bottom(bottom_id);
-  if (available_blobs-&gt;find(blob_name) == available_blobs-&gt;end()) {
-    LOG(FATAL) &lt;&lt; &quot;Unknown bottom blob '&quot; &lt;&lt; blob_name &lt;&lt; &quot;' (layer '&quot;
-               &lt;&lt; layer_param.name() &lt;&lt; &quot;', bottom index &quot; &lt;&lt; bottom_id &lt;&lt; &quot;)&quot;;
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">
+<span style="color:#75715e">// Helper for Net::Init: add a new bottom blob to the net.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">template</span> <span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> Dtype<span style="color:#f92672">&gt;</span>
+<span style="color:#66d9ef">int</span> Net<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span><span style="color:#f92672">:</span><span style="color:#f92672">:</span>AppendBottom(<span style="color:#66d9ef">const</span> NetParameter<span style="color:#f92672">&amp;</span> param, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> layer_id,
+    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> bottom_id, set<span style="color:#f92672">&lt;</span>string<span style="color:#f92672">&gt;</span><span style="color:#f92672">*</span> available_blobs,
+    map<span style="color:#f92672">&lt;</span>string, <span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span><span style="color:#f92672">*</span> blob_name_to_idx) {
+  <span style="color:#66d9ef">const</span> LayerParameter<span style="color:#f92672">&amp;</span> layer_param <span style="color:#f92672">=</span> param.layer(layer_id);
+  <span style="color:#66d9ef">const</span> string<span style="color:#f92672">&amp;</span> blob_name <span style="color:#f92672">=</span> layer_param.bottom(bottom_id);
+  <span style="color:#66d9ef">if</span> (available_blobs<span style="color:#f92672">-</span><span style="color:#f92672">&gt;</span>find(blob_name) <span style="color:#f92672">=</span><span style="color:#f92672">=</span> available_blobs<span style="color:#f92672">-</span><span style="color:#f92672">&gt;</span>end()) {
+    LOG(FATAL) <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Unknown bottom blob &#39;</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> blob_name <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">&#39; (layer &#39;</span><span style="color:#e6db74">&#34;</span>
+               <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> layer_param.name() <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">&#39;, bottom index </span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> bottom_id <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">)</span><span style="color:#e6db74">&#34;</span>;
   }
-  const int blob_id = (*blob_name_to_idx)[blob_name];
-  LOG_IF(INFO, Caffe::root_solver())
-      &lt;&lt; layer_names_[layer_id] &lt;&lt; &quot; &lt;- &quot; &lt;&lt; blob_name;
+  <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> blob_id <span style="color:#f92672">=</span> (<span style="color:#f92672">*</span>blob_name_to_idx)[blob_name];
+  LOG_IF(INFO, Caffe<span style="color:#f92672">:</span><span style="color:#f92672">:</span>root_solver())
+      <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> layer_names_[layer_id] <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74"> &lt;- </span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> blob_name;
   bottom_vecs_[layer_id].push_back(blobs_[blob_id].get());
   bottom_id_vecs_[layer_id].push_back(blob_id);
-  // 　？？？　怎么就erase了，一个top后面可以接多个layer的啊
-  available_blobs-&gt;erase(blob_name);
-  bool need_backward = blob_need_backward_[blob_id];
-  // Check if the backpropagation on bottom_id should be skipped
-  if (layer_param.propagate_down_size() &gt; 0) {
-    need_backward = layer_param.propagate_down(bottom_id);
+  <span style="color:#75715e">// 　？？？　怎么就erase了，一个top后面可以接多个layer的啊
+</span><span style="color:#75715e"></span>  available_blobs<span style="color:#f92672">-</span><span style="color:#f92672">&gt;</span>erase(blob_name);
+  <span style="color:#66d9ef">bool</span> need_backward <span style="color:#f92672">=</span> blob_need_backward_[blob_id];
+  <span style="color:#75715e">// Check if the backpropagation on bottom_id should be skipped
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">if</span> (layer_param.propagate_down_size() <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
+    need_backward <span style="color:#f92672">=</span> layer_param.propagate_down(bottom_id);
   }
   bottom_need_backward_[layer_id].push_back(need_backward);
-  return blob_id;
+  <span style="color:#66d9ef">return</span> blob_id;
 }
 
-</code></pre>
-
-<pre><code class="language-c++">
-// Helper for Net::Init: add a new top blob to the net.
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::AppendTop(const NetParameter&amp; param, const int layer_id,
-                           const int top_id, set&lt;string&gt;* available_blobs,
-                           map&lt;string, int&gt;* blob_name_to_idx) {
-  shared_ptr&lt;LayerParameter&gt; layer_param(
-      new LayerParameter(param.layer(layer_id)));
-  const string&amp; blob_name = (layer_param-&gt;top_size() &gt; top_id) ?
-      layer_param-&gt;top(top_id) : &quot;(automatic)&quot;;
-  // Check if we are doing in-place computation
-  if (blob_name_to_idx &amp;&amp; layer_param-&gt;bottom_size() &gt; top_id &amp;&amp;
-      blob_name == layer_param-&gt;bottom(top_id)) {
-    // In-place computation
-    LOG_IF(INFO, Caffe::root_solver())
-        &lt;&lt; layer_param-&gt;name() &lt;&lt; &quot; -&gt; &quot; &lt;&lt; blob_name &lt;&lt; &quot; (in-place)&quot;;
-    top_vecs_[layer_id].push_back(blobs_[(*blob_name_to_idx)[blob_name]].get());
-    top_id_vecs_[layer_id].push_back((*blob_name_to_idx)[blob_name]);
-  } else if (blob_name_to_idx &amp;&amp;
-             blob_name_to_idx-&gt;find(blob_name) != blob_name_to_idx-&gt;end()) {
-    // If we are not doing in-place computation but have duplicated blobs,
-    // raise an error.
-    LOG(FATAL) &lt;&lt; &quot;Top blob '&quot; &lt;&lt; blob_name
-               &lt;&lt; &quot;' produced by multiple sources.&quot;;
-  } else {
-    // Normal output.
-    if (Caffe::root_solver()) {
-      LOG(INFO) &lt;&lt; layer_param-&gt;name() &lt;&lt; &quot; -&gt; &quot; &lt;&lt; blob_name;
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">
+<span style="color:#75715e">// Helper for Net::Init: add a new top blob to the net.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">template</span> <span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> Dtype<span style="color:#f92672">&gt;</span>
+<span style="color:#66d9ef">void</span> Net<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span><span style="color:#f92672">:</span><span style="color:#f92672">:</span>AppendTop(<span style="color:#66d9ef">const</span> NetParameter<span style="color:#f92672">&amp;</span> param, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> layer_id,
+                           <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> top_id, set<span style="color:#f92672">&lt;</span>string<span style="color:#f92672">&gt;</span><span style="color:#f92672">*</span> available_blobs,
+                           map<span style="color:#f92672">&lt;</span>string, <span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span><span style="color:#f92672">*</span> blob_name_to_idx) {
+  shared_ptr<span style="color:#f92672">&lt;</span>LayerParameter<span style="color:#f92672">&gt;</span> layer_param(
+      <span style="color:#66d9ef">new</span> LayerParameter(param.layer(layer_id)));
+  <span style="color:#66d9ef">const</span> string<span style="color:#f92672">&amp;</span> blob_name <span style="color:#f92672">=</span> (layer_param<span style="color:#f92672">-</span><span style="color:#f92672">&gt;</span>top_size() <span style="color:#f92672">&gt;</span> top_id) <span style="color:#f92672">?</span>
+      layer_param<span style="color:#f92672">-</span><span style="color:#f92672">&gt;</span>top(top_id) <span style="color:#f92672">:</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">(automatic)</span><span style="color:#e6db74">&#34;</span>;
+  <span style="color:#75715e">// Check if we are doing in-place computation
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">if</span> (blob_name_to_idx <span style="color:#f92672">&amp;</span><span style="color:#f92672">&amp;</span> layer_param<span style="color:#f92672">-</span><span style="color:#f92672">&gt;</span>bottom_size() <span style="color:#f92672">&gt;</span> top_id <span style="color:#f92672">&amp;</span><span style="color:#f92672">&amp;</span>
+      blob_name <span style="color:#f92672">=</span><span style="color:#f92672">=</span> layer_param<span style="color:#f92672">-</span><span style="color:#f92672">&gt;</span>bottom(top_id)) {
+    <span style="color:#75715e">// In-place computation
+</span><span style="color:#75715e"></span>    LOG_IF(INFO, Caffe<span style="color:#f92672">:</span><span style="color:#f92672">:</span>root_solver())
+        <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> layer_param<span style="color:#f92672">-</span><span style="color:#f92672">&gt;</span>name() <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74"> -&gt; </span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> blob_name <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74"> (in-place)</span><span style="color:#e6db74">&#34;</span>;
+    top_vecs_[layer_id].push_back(blobs_[(<span style="color:#f92672">*</span>blob_name_to_idx)[blob_name]].get());
+    top_id_vecs_[layer_id].push_back((<span style="color:#f92672">*</span>blob_name_to_idx)[blob_name]);
+  } <span style="color:#66d9ef">else</span> <span style="color:#a6e22e">if</span> (blob_name_to_idx <span style="color:#f92672">&amp;</span><span style="color:#f92672">&amp;</span>
+             blob_name_to_idx<span style="color:#f92672">-</span><span style="color:#f92672">&gt;</span>find(blob_name) <span style="color:#f92672">!</span><span style="color:#f92672">=</span> blob_name_to_idx<span style="color:#f92672">-</span><span style="color:#f92672">&gt;</span>end()) {
+    <span style="color:#75715e">// If we are not doing in-place computation but have duplicated blobs,
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// raise an error.
+</span><span style="color:#75715e"></span>    LOG(FATAL) <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Top blob &#39;</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> blob_name
+               <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">&#39; produced by multiple sources.</span><span style="color:#e6db74">&#34;</span>;
+  } <span style="color:#66d9ef">else</span> {
+    <span style="color:#75715e">// Normal output.
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (Caffe<span style="color:#f92672">:</span><span style="color:#f92672">:</span>root_solver()) {
+      LOG(INFO) <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> layer_param<span style="color:#f92672">-</span><span style="color:#f92672">&gt;</span>name() <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74"> -&gt; </span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> blob_name;
     }
-    shared_ptr&lt;Blob&lt;Dtype&gt; &gt; blob_pointer(new Blob&lt;Dtype&gt;());
-    const int blob_id = blobs_.size();
-    // 　先取blob_id，再push_back 说明blob_id是从0开始递增的整数．
-    //  blob_id都是在appendTop时定义的
-    blobs_.push_back(blob_pointer);
+    shared_ptr<span style="color:#f92672">&lt;</span>Blob<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span> <span style="color:#f92672">&gt;</span> blob_pointer(<span style="color:#66d9ef">new</span> Blob<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span>());
+    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> blob_id <span style="color:#f92672">=</span> blobs_.size();
+    <span style="color:#75715e">// 　先取blob_id，再push_back 说明blob_id是从0开始递增的整数．
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//  blob_id都是在appendTop时定义的
+</span><span style="color:#75715e"></span>    blobs_.push_back(blob_pointer);
     blob_names_.push_back(blob_name);
     blob_need_backward_.push_back(false);
-    if (blob_name_to_idx) { (*blob_name_to_idx)[blob_name] = blob_id; }
+    <span style="color:#66d9ef">if</span> (blob_name_to_idx) { (<span style="color:#f92672">*</span>blob_name_to_idx)[blob_name] <span style="color:#f92672">=</span> blob_id; }
     top_id_vecs_[layer_id].push_back(blob_id);
     top_vecs_[layer_id].push_back(blob_pointer.get());
   }
-  // 　维护一个出现过的top　blob集合，目的是判断后面所接layer的bottom blob名称的合法性
-  // 　这里要判断　available_blobs　是否为NULL是因为，可能构造匿名的top blob,此时available_blobs
-  //  和　blob_name_to_idx　都会传NULL 值
-  if (available_blobs) { available_blobs-&gt;insert(blob_name); }
+  <span style="color:#75715e">// 　维护一个出现过的top　blob集合，目的是判断后面所接layer的bottom blob名称的合法性
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// 　这里要判断　available_blobs　是否为NULL是因为，可能构造匿名的top blob,此时available_blobs
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">//  和　blob_name_to_idx　都会传NULL 值
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">if</span> (available_blobs) { available_blobs<span style="color:#f92672">-</span><span style="color:#f92672">&gt;</span>insert(blob_name); }
 }
 
-</code></pre>
-
-<p>代码比较好懂，解析部分见注释&hellip;
+</code></pre></div><p>代码比较好懂，解析部分见注释&hellip;<br>
 唯一值得注意的地方是available_blobs这部分的维护．在AppendBottom中</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">
+  <span style="color:#75715e">// 　？？？　怎么就erase了，一个top后面可以接多个layer的啊
+</span><span style="color:#75715e"></span>  available_blobs<span style="color:#f92672">-</span><span style="color:#f92672">&gt;</span>erase(blob_name);
 
-<pre><code class="language-c++">
-  // 　？？？　怎么就erase了，一个top后面可以接多个layer的啊
-  available_blobs-&gt;erase(blob_name);
-
-</code></pre>
-
-<p>每次处理完一个bottom就从available_blobs 去掉．</p>
-
+</code></pre></div><p>每次处理完一个bottom就从available_blobs 去掉．</p>
 <p>然而，一个top blob明明是可以输入给多个layer的．．．</p>
-
 <p>？？？？？　不明白</p>
-
 <p>查阅资料看到　<a href="https://github.com/BVLC/caffe/issues/767">What does InsertSplit() / SplitLayer do? #767</a></p>
-
 <p>原来</p>
-
 <blockquote>
-<p>// Create split layer for any input blobs used by other layers as bottom
-    // blobs more than once.</p>
+<p>// Create split layer for any input blobs used by other layers as bottom<br>
+// blobs more than once.</p>
 </blockquote>
-
 <p>对于被多个layer用作bottom的top blob,做了分身&hellip;</p>
-
-<p><img src="https://images2017.cnblogs.com/blog/861394/201708/861394-20170810170352980-1492701664.png" alt="分身" /></p>
-
+<p><img src="https://images2017.cnblogs.com/blog/861394/201708/861394-20170810170352980-1492701664.png" alt="分身"></p>
 <p>可以参考<a href="https://www.cnblogs.com/liuzhongfeng/p/7340273.html">Net的网络层的构建(源码分析)</a></p>
 
 

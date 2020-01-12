@@ -225,54 +225,28 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                <nav id="TableOfContents">
-<ul>
-<li><a href="#题意">题意：</a></li>
-<li><a href="#思路">思路：</a></li>
-</ul>
-</nav>
+                <nav id="TableOfContents"></nav>
                 
-                
-
-<p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=3518">http://acm.hdu.edu.cn/showproblem.php?pid=3518</a></p>
-
+                <p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=3518">http://acm.hdu.edu.cn/showproblem.php?pid=3518</a></p>
 <h1 id="题意">题意：</h1>
-
 <p>给一个字符串，问字符串中，至少出现2次且不相交的本质不同的子串有多少个。本质不同给的子串是说存在至少一位的字母不同。</p>
-
 <h1 id="思路">思路：</h1>
-
 <p>考虑SAM</p>
-
 <p>SAM上的一个节点表示的是一段长度从[st[st[i].link],len+1,st[i].len]的字符串。</p>
-
 <p>考虑其right集合，如果right集合中最大的r设为rightmost,最小的r设为leftmost.</p>
-
 <p>那么如果rightmost-leftmost+1 &gt; st[i].len ，说明什么呢？</p>
-
 <p><strong>说明该状态所表示的最长的字符串能够至少放下两个而不重叠。</strong></p>
-
 <p>即从[leftmost-st[i].len+1,leftmost]一段 和 从[rightmost-st[i].len+1,rightmost]一段。</p>
-
 <p>如果最长的能放下，那么其他的也一定能放下。因此对答案贡献为<strong>st[i].len - st[st[i].link].len</strong></p>
-
 <p>如果rightmost-leftmost+1&lt;=st[i].len，也就是rightmost-leftmost&lt;st[i].len</p>
-
 <p>这个时候长的字符串因为重叠了不能出现2次，但是短的字符串仍然可以贡献答案。</p>
-
 <p>考虑如下图：</p>
-
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2017/11/photo_2017-11-12_05-07-10.jpg"><img src="https://111qqz.com/wordpress/wp-content/uploads/2017/11/photo_2017-11-12_05-07-10.jpg" alt="" />
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2017/11/photo_2017-11-12_05-07-10.jpg"><img src="https://111qqz.com/wordpress/wp-content/uploads/2017/11/photo_2017-11-12_05-07-10.jpg" alt=""><br>
 </a></p>
-
 <p>此时对答案的贡献为<strong>rightmost-leftmost+1 - (st[st[i].link].len+1),化简得到rightmost-leftmost-st[st[i].link].len</strong></p>
-
 <p>综合2种情况，SAM中每个节点对答案的贡献是** min(rightmost-leftmost,st[i].len)-st[st[i].link].len**</p>
-
 <p><strong>需要注意的是只有在st[i].link存在并且rightmost-leftmost&gt;st[st[i].link].len 时 才更新答案</strong></p>
-
 <p>leftmost可以在构建的时候直接求出,rightmost用拓扑序更新下即可。</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2017年11月08日 星期三 18时50分18秒
@@ -370,7 +344,7 @@ int main()
         {
         sa_extend(S[i]-'a',i);
         }
-
+        
         topo();
         for ( int i = sz ; i &gt;=1 ; i--)
         {
@@ -379,7 +353,7 @@ int main()
         st[fa].rightmost = max(st[fa].rightmost,st[v].rightmost);
 //      printf(&quot;len:%d rightmost %d leftmost:%d\n&quot;,st[i].len,st[i].rightmost,st[i].leftmost);
         } 
-
+        
         LL ans = 0 ;
         for ( int i = 1 ; i &lt;= sz ; i++) if (st[i].link!=-1&amp;&amp;st[i].rightmost-st[i].leftmost&gt;st[st[i].link].len)
             ans += min(st[i].len,st[i].rightmost-st[i].leftmost)-st[st[i].link].len;
@@ -416,7 +390,7 @@ File Name :SAM.cpp
 typedef long long LL;
 #define pi pair &lt; int ,int &gt;
 #define MP make_pair
-
+ 
 using namespace std;
 const double eps = 1E-8;
 const int dx4[4]={1,0,0,-1};
@@ -522,9 +496,9 @@ int main()
     A.pre();
     A.solve();
     }
-
-
-
+ 
+ 
+ 
 #ifndef ONLINE_JUDGE  
     fclose(stdin);
 #endif

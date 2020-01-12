@@ -225,22 +225,17 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p>说起C语言的变长参数，可能听起来比较陌生，因为很少会需要自己实现。不过想一下scanf和printf，参数个数的确是不固定的。</p>
-
-<p><a href="https://en.wikipedia.org/wiki/Stdarg.h#.3Cvarargs.h.3E">stdarg.h</a> 中提供以一套机制来实现变长参数。以及，要说明的是，变长参数不是什么黑魔法，原理依赖于stack frame的结构，具体可以参考<a href="https://111qqz.com/2019/01/x86-calling-conventions/">x86-calling-conventions</a>   简单来说，由于函数参数入栈的顺序是固定的，<strong>因此一旦我们知道某函数帧的栈上的一个固定参数的位置，我们完全有可能推导出其他变长参数的位置 </strong></p>
-
+<p><a href="https://en.wikipedia.org/wiki/Stdarg.h#.3Cvarargs.h.3E">stdarg.h</a> 中提供以一套机制来实现变长参数。以及，要说明的是，变长参数不是什么黑魔法，原理依赖于stack frame的结构，具体可以参考<a href="https://111qqz.com/2019/01/x86-calling-conventions/">x86-calling-conventions</a>   简单来说，由于函数参数入栈的顺序是固定的，**因此一旦我们知道某函数帧的栈上的一个固定参数的位置，我们完全有可能推导出其他变长参数的位置 **</p>
 <p>在实现上，需要了解的是：</p>
-
 <pre><code>  * va_list，一个类型，可以看做是变长参数列表；
   * [va_start](http://en.cppreference.com/w/cpp/utility/variadic/va_start)，用来初始化变长参数列表的宏，声明为void va_start( va_list ap, parm_n );  ap为va_list变量，parm_n为变长参数前一个变量（C语言要求至少有一个named variable作为函数的parameter)
   * [va_arg](http://en.cppreference.com/w/cpp/utility/variadic/va_arg),用来得到下一个参数的宏，声明为T va_arg( va_list ap, T ); **返回的类型取决于传入的类型T。特别注意:&quot;If `va_arg` is called when there are no more arguments in `ap`, the behavior is undefined.&quot;**
   * [va_end](http://en.cppreference.com/w/cpp/utility/variadic/va_end) ,用来将va_list释放的宏。
 </code></pre>
-
 <p>下面看一个例子就明白怎么用了orz</p>
-
 <pre><code>#include &lt;stdio.h&gt;
 #include &lt;stdarg.h&gt;
 
@@ -274,11 +269,8 @@ output:
 
 1
 </code></pre>
-
 <p>如果想研究c语言中变长参数的具体实现，可以参考 <a href="https://tonybai.com/2008/05/07/also-talk-about-c-variable-length-args/">也谈C语言变长参数</a></p>
-
 <p>参考资料:</p>
-
 <p><a href="https://publications.gbdirect.co.uk//c_book/chapter9/stdarg.html">Variable numbers of arguments</a></p>
 
 

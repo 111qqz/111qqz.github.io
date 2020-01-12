@@ -230,50 +230,26 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li><a href="#overview">OVERVIEW</a></li>
-<li><a href="#creating-a-variable">Creating a Variable</a></li>
-<li><a href="#variable-collections">Variable collections</a></li>
-<li><a href="#device-placement">Device placement</a></li>
-<li><a href="#initializing-variables">Initializing variables</a></li>
-<li><a href="#using-variables">Using variables</a></li>
-<li><a href="#saving-and-restoring">Saving and Restoring</a>
-<ul>
-<li><a href="#checkpoint-files">Checkpoint Files</a></li>
-<li><a href="#saving-variables">Saving Variables</a></li>
-<li><a href="#restoring-variables">Restoring Variables</a></li>
-<li><a href="#choosing-which-variables-to-save-and-restore">Choosing which Variables to Save and Restore</a></li>
-</ul></li>
-<li><a href="#sharing-variables">Sharing variables</a></li>
-</ul>
+  <ul>
+    <li><a href="#checkpoint-files">Checkpoint Files</a></li>
+    <li><a href="#saving-variables">Saving Variables</a></li>
+    <li><a href="#restoring-variables">Restoring Variables</a></li>
+    <li><a href="#choosing-which-variables-to-save-and-restore">Choosing which Variables to Save and Restore</a></li>
+  </ul>
 </nav>
                 
-                
-
-<p>参考资料：</p>
-
+                <p>参考资料：</p>
 <p><a href="https://www.tensorflow.org/programmers_guide/variables">programmers_guide/variables</a></p>
-
 <p><a href="https://www.tensorflow.org/api_docs/python/tf/Variable">tf/Variable</a></p>
-
 <p>之前感觉对tensorflow 的variable的理解不是很深刻&hellip;跑个模型啥的倒不会有什么问题，但是涉及分布式，模型并行之类的，感觉有些地方还是要理解得仔细一点比较好。</p>
-
 <h1 id="overview">OVERVIEW</h1>
-
 <p>variable的目的是将状态可持久化。</p>
-
 <p>Unlike <code>tf.Tensor</code> objects, a <code>tf.Variable</code> exists outside the context of a single<code>session.run</code> call.</p>
-
 <p>通俗地说就是，variable可以用来存储一个可持久化的tensor</p>
-
 <p>一些op允许读取或者修改tensor的值，这些修改是<strong>跨session可见的</strong>，也就是说，<strong>对于用variable可持久化过的tensor,多个worker（多卡之间）之间可以看到相同的值</strong>。</p>
-
 <h1 id="creating-a-variable">Creating a Variable</h1>
-
 <p>创建变量可以通过调用tf.get_variable function的方法实现。这个函数要求指明变量名称，这个名称会被作为标识该变量的key。</p>
-
 <p>tf.get_variable也允许变量复用，意思是用之前创建过的有相同名字的变量，创建当前的变量。</p>
-
 <pre><code>my_int_variable = tf.get_variable(&quot;my_int_variable&quot;, [1, 2, 3], dtype=tf.int32, 
   initializer=tf.zeros_initializer)
 
@@ -282,36 +258,24 @@
 #tf提供很多其他的初始化方法，以及也可以用一个tensor作为初始化。
 #注意用tensor作为初始化时，shape就不用提供了，因为会用tensor的shape作为variable的shape
 </code></pre>
-
 <h1 id="variable-collections">Variable collections</h1>
-
 <p>由于在不同的部分创建了的变量可能有是够想一起访问，所以我们需要一个简单的能访问一个集合的变量的方法。tensorflow提供了collecetions,可以理解成python list,</p>
-
 <p>是一个存储tensor，variable或者其他实例的容器。</p>
-
 <p>默认情况下，tf.variable被收集到如下两个collcetions:</p>
-
 <pre><code>  * tf.GraphKeys.GLOBAL_VARIABLES：放置可以被多个设备共享的variable(从名字中的GLOBAL也可以看出来...)
   * tf.GraphKeys.TRAINABLE_VARIABLES:用来放置用来计算梯度的variable
 </code></pre>
-
 <p>如果不想训练某个variable,那么将它加入名字叫tf.GraphKeys.LOCAL_VARIABLES 的默认collection&hellip;</p>
-
 <p>下面是一个将名字叫my_local的variable加入tf.GraphKeys.LOCAL_VARIABLES的例子</p>
-
 <pre><code>my_local = tf.get_variable(&quot;my_local&quot;, shape=(), 
 collections=[tf.GraphKeys.LOCAL_VARIABLES])
 </code></pre>
-
 <p>一个等价写法是，将trainable属性设置为False</p>
-
 <pre><code>my_non_trainable = tf.get_variable(&quot;my_non_trainable&quot;, 
                                    shape=(), 
                                    trainable=False)
 </code></pre>
-
 <p>当然自定义collcetion也是可以的，名字可以是任何字符串。</p>
-
 <pre><code>#将名字为my_local的variable放置进名字为my_collcetion_name的collection
 #如果当前这个collcetion不存在，则会自动创建
 #也就是说collcetion不用显式定义，在引用的时候如果不存在会自动定义。
@@ -328,15 +292,10 @@ tf.add_to_collection(&quot;my_collection_name&quot;, my_local)
 #返回一个元素为variable的list，顺序按照这些variable被collect的顺序
 tf.get_collection(&quot;my_collection_name&quot;)
 </code></pre>
-
 <h1 id="device-placement">Device placement</h1>
-
 <p>variable和op一样，也可以放在指定的设备上。</p>
-
 <p>在分布式tensorflow中，<strong>variable放在合适的设备上非常重要</strong>，如果不慎将variable 放在了 worker(GPU device)而不是PS(CPU device)上，将会严重减慢训练速度</p>
-
 <p>基于这样的原因，我们提供<a href="https://www.tensorflow.org/api_docs/python/tf/train/replica_device_setter">replica_device_setter</a>,来自动将variable放置在ps上&hellip;默认是轮盘转的放置策略</p>
-
 <pre><code>cluster_spec = {
     &quot;ps&quot;: [&quot;ps0:2222&quot;, &quot;ps1:2222&quot;],
     &quot;worker&quot;: [&quot;worker0:2222&quot;, &quot;worker1:2222&quot;, &quot;worker2:2222&quot;]}
@@ -345,73 +304,44 @@ with tf.device(tf.train.replica_device_setter(cluster=cluster_spec)):
                                             # in the parameter server
                                             # by the replica_device_setter
 </code></pre>
-
 <h1 id="initializing-variables">Initializing variables</h1>
-
 <p>在使用一个变量之前，必须先进行初始化。如果你用原生tensorflow，那初始化一般要手动显示完成。如果是使用slim,keras之类，variable的初始化一般是自动完成的。</p>
-
 <p>Explicit initialization is otherwise useful because it allows you not to rerun potentially expensive initializers when reloading a model from a checkpoint as well as allowing determinism when randomly-initialized variables are shared in a distributed setting.</p>
-
 <p>另一方面，明确地初始化可以保证你不会多次运行计算代价可能很昂贵的初始化操作，当你reload一个模型时。</p>
-
-<p>一次性初始化所有变量可以使用tf.global_variables_initializer()，运行
-session.run(tf.global_variables_initializer())
+<p>一次性初始化所有变量可以使用tf.global_variables_initializer()，运行<br>
+session.run(tf.global_variables_initializer())<br>
 这个操作会把tf.GraphKeys.GLOBAL_VARIABLES 中的所有变量初始化。</p>
-
 <p>也可以手动初始化特定变量，</p>
-
 <pre><code>session.run(my_variable.initializer)
 </code></pre>
-
 <p>还可以得到当前没有被初始化的变量有那些（这样就可以只初始化仍然没有初始化的变量，避免重复初始化，减小计算代价。</p>
-
 <pre><code>print(session.run(tf.report_uninitialized_variables()))
 </code></pre>
-
 <p><strong>需要注意的是,tf.global_variables_initializer()初始化所有变量时并没有固定的顺序，所以如果你的某个variable的值依赖于另一个variable的值，那么就很可能出错。</strong></p>
-
-<p>Any time you use the value of a variable in a context in which not all variables are initialized (say, if you use a variable&rsquo;s value while initializing another variable), it is best to use <code>variable.initialized_value()</code> instead of <code>variable</code>:</p>
-
+<p>Any time you use the value of a variable in a context in which not all variables are initialized (say, if you use a variable's value while initializing another variable), it is best to use <code>variable.initialized_value()</code> instead of <code>variable</code>:</p>
 <p>任何时候如果你处于一个不是所有变量都被初始化 的环境，最后使用myvar.initialized_value()来替代myvar</p>
-
 <pre><code>v = tf.get_variable(&quot;v&quot;, shape=(), initializer=tf.zeros_initializer())
 w = tf.get_variable(&quot;w&quot;, initializer=v.initialized_value() + 1)
 </code></pre>
-
 <h1 id="using-variables">Using variables</h1>
-
 <p>variable可以直接看做tensor</p>
-
 <pre><code>v = tf.get_variable(&quot;v&quot;, shape=(), initializer=tf.zeros_initializer())
 w = v + 1  # w is a tf.Tensor which is computed based on the value of v.
            # Any time a variable is used in an expression it gets automatically
            # converted to a tf.Tensor representing its value.
 </code></pre>
-
 <p>对变量赋值可以使用assign,assign_add或者tf.variable class中的方法</p>
-
 <h1 id="saving-and-restoring">Saving and Restoring</h1>
-
 <p>保存和恢复一个模型的最容易的方法就是使用tf.train.Saver object. <strong>该object包含save和restore两个op,</strong></p>
-
 <p>使用save 或者 restore  op来保存或者恢复<strong>图中</strong>全部，或者指定的varibales</p>
-
 <p>如果想在图外面恢复一个模型的checkpoint,必须先用tf.train.import_meta_graph将checkpoint中的metafile(以meta为后缀）的文件导入</p>
-
 <p>这样会返回一个Saver object，然后才能执行resotre op</p>
-
 <h2 id="checkpoint-files">Checkpoint Files</h2>
-
 <p>tensorflow将variable存储为二进制文件的形式，通俗地说，就是map variable names to tensor values</p>
-
 <p>当你创建了Saver object 之后，你可以选择为你保存进checkpoint files 文件的变量起一个名字。默认情况下，变量被使用tf.Variabel.name的名字。</p>
-
 <p>如果想检查checkpoint 中的variable,可以使用inspect_checkpoint库，尤其是其中的print_tensors_in_checkpoint_file 函数。</p>
-
 <h2 id="saving-variables">Saving Variables</h2>
-
 <p>下面是一个如何使用Saver object 中的save操作来保存变量的例子</p>
-
 <pre><code># Create some variables.
 v1 = tf.get_variable(&quot;v1&quot;, shape=[3], initializer = tf.zeros_initializer)
 v2 = tf.get_variable(&quot;v2&quot;, shape=[5], initializer = tf.zeros_initializer)
@@ -436,13 +366,9 @@ with tf.Session() as sess:
   save_path = saver.save(sess, &quot;/tmp/model.ckpt&quot;)
   print(&quot;Model saved in file: %s&quot; % save_path)
 </code></pre>
-
 <h2 id="restoring-variables">Restoring Variables</h2>
-
 <p>注意从checkpoint文件中恢复variables的时候没有必要初始化</p>
-
 <p>下面是一个使用saver object 的restore op的例子：</p>
-
 <pre><code>tf.reset_default_graph()
 
 # Create some variables.
@@ -462,13 +388,9 @@ with tf.Session() as sess:
   print(&quot;v1 : %s&quot; % v1.eval())
   print(&quot;v2 : %s&quot; % v2.eval())
 </code></pre>
-
 <h2 id="choosing-which-variables-to-save-and-restore">Choosing which Variables to Save and Restore</h2>
-
 <p>如果tf.train.Saver()中不传入任何参数就会默认处理所有变量。</p>
-
 <p>我们可以传入一些变量名，表示处理特定的变量。例子如下：</p>
-
 <pre><code>tf.reset_default_graph()
 # Create some variables.
 v1 = tf.get_variable(&quot;v1&quot;, [3], initializer = tf.zeros_initializer)
@@ -486,15 +408,11 @@ with tf.Session() as sess:
   print(&quot;v1 : %s&quot; % v1.eval())
   print(&quot;v2 : %s&quot; % v2.eval())
 </code></pre>
-
 <p>需要注意的是:</p>
-
 <pre><code>  * **Saver object可以有任意多个，同一个变量也可以被任意多个Saver object save**
   * **restore的时候如果只是restore了一部分变量，其余的变量记得要初始化**
 </code></pre>
-
 <h1 id="sharing-variables">Sharing variables</h1>
-
 <p>暂时用不上，有空补吧，困了orz</p>
 
 

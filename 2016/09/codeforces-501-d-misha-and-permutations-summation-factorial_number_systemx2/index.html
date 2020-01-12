@@ -233,56 +233,35 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://codeforces.com/problemset/problem/501/D">题目链接</a></p>
-
-<p>题意：给出两个排列，定义ord(p)为排列p的顺序（字典顺从小到大），定义perm(x)为顺序为x的排列，现在要求<img src="http://codeforces.com/predownloaded/46/04/46046198f19147fb9f021abaacf5458998990830.png" alt="" />
+<p>题意：给出两个排列，定义ord(p)为排列p的顺序（字典顺从小到大），定义perm(x)为顺序为x的排列，现在要求<img src="http://codeforces.com/predownloaded/46/04/46046198f19147fb9f021abaacf5458998990830.png" alt=""><br>
  1 ≤ <em>n</em> ≤ 200 000</p>
-
 <p>思路：首先去学了一下康托展开和逆展开。。。其实就是对于这种排列之类的问题。。。的一个比较省空间的hash函数。。。？</p>
-
 <p><a href="http://blog.csdn.net/acdreamers/article/details/7982067">康托展开资料</a></p>
-
 <p>然后由于n非常大。。康托展开中要查找当前位置后面有多少个比当前位置小的。。。</p>
-
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2016/09/Screenshot-from-2016-09-14-14-48-25.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2016/09/Screenshot-from-2016-09-14-14-48-25.png" alt="screenshot-from-2016-09-14-14-48-25" />
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2016/09/Screenshot-from-2016-09-14-14-48-25.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2016/09/Screenshot-from-2016-09-14-14-48-25.png" alt="screenshot-from-2016-09-14-14-48-25"><br>
 </a></p>
-
 <p>然而这复杂是n2。。。肯定gg。。。</p>
-
 <p>因此里面那层我们用一课线段树维护。。。复杂度nlgn</p>
-
 <p>在康托逆展开的过程中。。。我们要查询之前没有出现过的第k个元素。。。。</p>
-
 <p>因为n很大这里也需要线段树来维护。。。</p>
-
-<p>所以再建一棵线段树。。。某位置表示初始时刻是否为空，初始都为1，表示都没有出现。思想类似于poj 2828
+<p>所以再建一棵线段树。。。某位置表示初始时刻是否为空，初始都为1，表示都没有出现。思想类似于poj 2828<br>
 <a href="https://111qqz.com/wordpress/2016/09/poj-2828/">poj 2828解题报告</a></p>
-
 <p>然后还是由于n很大。。。在康托展开中的阶乘部分。。。完全存不下。。。</p>
-
 <p>直接用高精度应该也能做？</p>
-
-<p>不过比较推荐的做法是：
-<a href="http://www.mathpages.com/home/kmath165.htm">The Factorial Number System</a>
+<p>不过比较推荐的做法是：<br>
+<a href="http://www.mathpages.com/home/kmath165.htm">The Factorial Number System</a><br>
 <a href="https://www.google.com/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=1&amp;ved=0ahUKEwigydSPpI7PAhUCKpQKHTsyCEUQFggcMAA&amp;url=httpsenwikipediaorgwikiFactorial_number_system&amp;usg=AFQjCNGrAkOqwwIVzFQBMNUvJ4rV3OWkKA&amp;sig2=QHYbhZCXxsHDLxHGhqpe8Q&amp;bvm=bv.132479545,d.dGo">wiki_Factorial number system</a></p>
-
 <p>是一种和阶乘相关的进制表示法。</p>
-
 <p>大概就是不同位置上的权值，不像一般的k进制数，是k^0,k^1,k^2&hellip;.</p>
-
 <p>而是0!,1!,2!。。。</p>
-
 <p>这种表示合法的正确性基于：</p>
-
 <pre><code>1*1! + 2*2! + 3*3! + ... + k*k!  =  (k+1)! - 1
 </code></pre>
-
 <p>具体参见上面两个链接。</p>
-
 <p>因为我们可以把所有康托展开都用 Factorial number system来表示。</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :Tue 13 Sep 2016 04:33:55 PM CST
@@ -414,8 +393,8 @@ int main()
     cin&gt;&gt;n;
     Contor(A); //读入排列p并且将其康托展开，然后按照factorial_number_system存入A数组。
     Contor(B);
-//  print(A,n);
-//  print(B,n);
+//	print(A,n);
+//	print(B,n);
     int tmp = 0 ;
     for ( int i = 1 ; i &lt; n ; i++) //
     {
@@ -423,7 +402,7 @@ int main()
         tmp = A[i]/(i+1);
         A[i]-=tmp*(i+1);  //处理了高精度的进位和%运算。
     }
-//  print(A,n);
+//	print(A,n);
     ni_Contor();
 
   #ifndef ONLINE_JUDGE  

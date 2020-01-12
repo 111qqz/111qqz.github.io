@@ -229,27 +229,21 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p>x86的调用约定主要说的是这几件事:</p>
-
+<!-- raw HTML omitted -->
 <blockquote>
-
-> 
-> 
-      * The order in which atomic (scalar) parameters, or individual parts of a complex parameter, are allocated
-      * How parameters are passed (pushed on the stack, placed in registers, or a mix of both)
-      * Which registers the called function must preserve for the caller (also known as: callee-saved registers or non-volatile registers)
-      * How the task of preparing the stack for, and restoring after, a function call is divided between the caller and the callee
-
 </blockquote>
-
+<pre><code>  * The order in which atomic (scalar) parameters, or individual parts of a complex parameter, are allocated
+  * How parameters are passed (pushed on the stack, placed in registers, or a mix of both)
+  * Which registers the called function must preserve for the caller (also known as: callee-saved registers or non-volatile registers)
+  * How the task of preparing the stack for, and restoring after, a function call is divided between the caller and the callee
+</code></pre>
+<!-- raw HTML omitted -->
 <p>调用约定实际上并不唯一</p>
-
 <p>我们比较关注gcc编译器下的cdecl(<strong>C declaration</strong>)</p>
-
 <p>对于如下这段代码:</p>
-
 <pre><code>int callee(int, int, int);
 
 int caller(void)
@@ -257,9 +251,7 @@ int caller(void)
     return callee(1, 2, 3) + 5;
 }
 </code></pre>
-
 <p>调用过程如下:</p>
-
 <pre><code>caller:
     ; make new call frame
     ; (some compilers may produce an 'enter' instruction instead)
@@ -297,48 +289,28 @@ int caller(void)
     pop     ebp       ; restore old call frame
     ret               ; return
 </code></pre>
-
 <p><strong>在c语言中，函数的参数被以从右向左的顺序压入栈，也就是最后一个参数最先入栈。</strong></p>
-
 <p>这里是栈指的是调用栈(<a href="https://en.wikipedia.org/wiki/Call_stack">Call_stack</a>)</p>
-
 <p>调用栈的结构如下(<strong>注意此图的栈是从下往上增长的，这与通常情况并不相符</strong>，不过不影响此处的说明)，这是在调用的DrawSquare函数中调用DrawLine函数时的情景</p>
-
-<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Call_stack_layout.svg/342px-Call_stack_layout.svg.png" alt="" /></p>
-
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Call_stack_layout.svg/342px-Call_stack_layout.svg.png" alt=""></p>
 <p>stack frame通常按照入栈顺序(写在前面的先入栈)由三部分组成（可能某部分为空):</p>
-
 <pre><code>  * 函数的参数值（以从右向左的顺序入栈)
   * caller的地址值，为的是调用函数之后能继续执行caller其余的代码。
   * 函数的局部变量
 </code></pre>
-
 <p>接下来我们看一下调用过程对寄存器的影响。这里暂且不提eax寄存器通常用来保存结果之类，主要想谈谈调用过程对sp和bp两个寄存器的影响。</p>
-
 <p>sp是stack pointer，保存的是当前栈顶地址</p>
-
 <p>bp是base pointer(就是stack frame中的frame pointer), 值为函数刚刚被调用时的栈顶位置。</p>
-
 <p>bp这个寄存器的作用主要是比较方便，因为如果只有stack pointer，那么在函数里面，stack pointer也是可能变的，显然不如使用base pointer方便。</p>
-
 <p><strong>具体来说，在使用base pointer的情况下，函数的返回地址永远为ebp + 4，第一个参数的地址为ebp+8,第一个局部变量的地址为ebp-4</strong></p>
-
 <p>而且使用bp的情况下，回溯调用栈会变得非常方便。</p>
-
-<blockquote>**At ebp is a pointer to ebp for the previous frame** (**this is why push ebp; mov ebp, esp** is such a common way to start a function).  This effectively creates a linked list of base pointers.  This linked list makes it very easy to trace backwards up the stack.  For example if foo() calls bar() and bar() calls baz() and you’re debugging baz() you can easily find the parameters and local variables for foo() and bar().</blockquote>
-
+<!-- raw HTML omitted -->
 <p>为什么ebp指向的内容是上一个 stack frame中的ebp？我们看push ebp; mov ebp esp这两条指令。push ebp相当于先esp-=4,然后将ebp放到esp所指向的位置。接着mov ebp esp,相当于把当前的esp，也就是上一个ebp所在的位置，赋值给新的ebp.  所以。。<strong>这其实是个链表啊</strong>！</p>
-
 <p>参考资料:</p>
-
 <p><a href="https://en.wikipedia.org/wiki/X86_calling_conventions#x86-64_calling_conventions">x86 calling conventions</a></p>
-
 <p><a href="https://en.wikipedia.org/wiki/Stack_register">Stack_register</a></p>
-
 <p><a href="https://en.wikipedia.org/wiki/Call_stack#STACK-FRAME">Call_stack#STACK-FRAME</a></p>
-
 <p><a href="https://stackoverflow.com/questions/1395591/what-is-exactly-the-base-pointer-and-stack-pointer-to-what-do-they-point">What is exactly the base pointer and stack pointer? To what do they point?</a></p>
-
 <p><a href="https://practicalmalwareanalysis.com/2012/04/03/all-about-ebp/">All About EBP</a></p>
 
 

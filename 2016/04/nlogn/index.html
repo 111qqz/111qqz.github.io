@@ -229,11 +229,10 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
+                <nav id="TableOfContents"></nav>
                 
-                
-                <p>首先回顾一下n^2的做法。
-状态转移方程为dp[i] =max(1,dp[j]) (1=<j<=i-1&&a[i]>a[j])</p>
-
+                <p>首先回顾一下n^2的做法。<br>
+状态转移方程为dp[i] =max(1,dp[j]) (1=&lt;j&lt;=i-1&amp;&amp;a[i]&gt;a[j])</p>
 <pre><code>for ( int i = 1 ; i &lt;= n ; i++) cin&gt;&gt;a[i];
 
     for ( int i = 1 ; i &lt;= n ; i++)
@@ -247,35 +246,24 @@
                 ans = max(ans,dp[i]);
     }
 </code></pre>
-
-<p>然后我们发现，使得dp[i]得到同一个值的dp[j]可能有多个，那么选择哪个呢？
-假设 x&lt;y&lt;i，a[x]&lt;a[y],dp[x]==dp[y]，那么我们选择x好还是y好呢？
+<p>然后我们发现，使得dp[i]得到同一个值的dp[j]可能有多个，那么选择哪个呢？<br>
+假设 x&lt;y&lt;i，a[x]&lt;a[y],dp[x]==dp[y]，那么我们选择x好还是y好呢？<br>
 显然是x好。为什么？因为选择x潜力大。因为可能在x,y之间存在一个z,满足a[x]&lt;a[z]&lt;a[y],如果选择a[y]，就没有办法选择可能使长度更长的a[z]了。通俗得说。。我们要求的是最长上升子序列。。你一开始就弄那么大。。。后面还上哪上升去啊。。。长度小啊。。。</p>
-
 <p><strong>因此我们得出一个结论，对于dp[t]==k的所有t,要选择a[t]最小的，这样有更大可能得到更长的序列。</strong></p>
-
 <p>我们用g[k]表示所有dp[t]==k的t中，最小的a[t]的值。g[k] = min{A[t]} (dp[t] = k)</p>
-
 <p>我们可以发现关于g的两个性质。</p>
-
 <p>（1） g[k]肯定是单调不增的。因为求最小值嘛，肯</p>
-
 <p>（2）g[1]&lt;g[2]&lt;g[3]&hellip;.g数组是单调递增的。其实也很好理解，因为是求最长上升子序列，长度为i的序列的最末尾元素肯定要比长度为i+1的末尾的元素小，不然还怎么上升。</p>
-
 <p>g数组初始为无穷大，g[i]表示还没有dp[t]==i的值。</p>
-
-<blockquote>1. 设当前已求出的最长上升子序列的长度为len（初始时为1），每次读入一个新元素x：
-
-2. 若x>d[len]，则直接加入到d的末尾，且len++；（利用性质2）
-
-   否则，在g中二分查找，找到第一个比x小的数g[k]，并g[k+1]=x，在这里x<=g[k+1]一定成立（性质1,2）</blockquote>
-
+<!-- raw HTML omitted -->
+<ol start="2">
+<li>若x&gt;d[len]，则直接加入到d的末尾，且len++；（利用性质2）</li>
+</ol>
+<p>   否则，在g中二分查找，找到第一个比x小的数g[k]，并g[k+1]=x，在这里x&lt;=g[k+1]一定成立（性质1,2）<!-- raw HTML omitted --></p>
 <p>上面这段引用并没有很懂。。。。。回头再看。</p>
-
 <p>模板如下。</p>
-
 <pre><code>    for ( int i = 1 ; i &lt;= n ; i++) cin&gt;&gt;a[i];
-
+	
     ms(g,0x3f);  
     int ans = 0 ;
     for ( int i = 1 ; i &lt;= n ; i++)
@@ -284,7 +272,7 @@
 //如果是求上升序列即使lower_bound,求不下降就是upper_bound
         dp[i] = k ;
         g[k] = a[i];
-
+	    
         ans = max(ans,dp[i]);
     }
 </code></pre>

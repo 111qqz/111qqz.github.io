@@ -229,56 +229,32 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://poj.org/problem?id=2774">poj2774</a></p>
-
 <p>题意：给出两个字符串，问最长的公共连续字串。</p>
-
 <p>思路：后缀数组模板题。</p>
-
-<p>具体可以参考两篇国集论文（09，04）
-<a href="https://apps.topcoder.com/forums/jsessionid=BC99925E58CB2628CA9AA3AFC13F6593?module=Thread&amp;threadID=627379&amp;start=0">topcoder中的讲解</a>
-<a href="https://discuss.codechef.com/questions/21385/a-tutorial-on-suffix-arrays">codechef上的讲解</a>
-还有一篇讲 dc3算法的论文：<a href="https://111qqz.com/wordpress/wp-content/uploads/2016/07/SuffixArrays_dc3.pdf">SuffixArrays_dc3</a>
+<p>具体可以参考两篇国集论文（09，04）<br>
+<a href="https://apps.topcoder.com/forums/jsessionid=BC99925E58CB2628CA9AA3AFC13F6593?module=Thread&amp;threadID=627379&amp;start=0">topcoder中的讲解</a><br>
+<a href="https://discuss.codechef.com/questions/21385/a-tutorial-on-suffix-arrays">codechef上的讲解</a><br>
+还有一篇讲 dc3算法的论文：<a href="https://111qqz.com/wordpress/wp-content/uploads/2016/07/SuffixArrays_dc3.pdf">SuffixArrays_dc3</a><br>
 这里不谈具体的后缀数组的学习内容，说说大概的学习过程。</p>
-
 <p>首先要理解**后缀，后缀数组（sa[]），名次数组(rk[])，height数组，lcp **这些概念</p>
-
 <p>先从定义入手，得到sa数组的n2logn的求法&hellip;</p>
-
 <p>由于复杂度爆炸，所以有了两个算法来优化求sa的过程，一个是nlogn的倍增，还有一个是O(n)的dc3。。。</p>
-
 <p>倍增的算法中用到了radix sort</p>
-
 <p>上面这些，都是在说如何求sa,但是如果只有sa一个数组的话，就没有办法很好感受 后缀数组的power.</p>
-
 <p>于是引入了height数组。</p>
-
-<blockquote>**定义 height[i]=suffix(sa[i-1])和 suffix(sa[i])的最长公**
-**共前缀,也就是排名相邻的两个后缀的最长公共前缀。那么对于 j 和 k,不妨设**
-**rank[j]<rank[k],则有以下性质:**
-**suffix(j) 和 suffix(k) 的 最 长 公 共 前 缀 为 height[rank[j]+1],**
-**height[rank[j]+2], height[rank[j]+3], ... ,height[rank[k]]中的最小值。**</blockquote>
-
+<!-- raw HTML omitted -->
 <p>有很多问题都是基于height数组的，慢慢感受。</p>
-
 <p>再说这道题：我们可以把两个字符串中间用一个特殊符号连接起来。</p>
-
 <p>那么两个字符串的最长公共字串，就变成了求合并后的字符串的所有后缀的最长公共前缀。（<strong>原因是字符串的任何一个字串都可以看成是该字符串的某个后缀的前缀</strong>）</p>
-
 <p>那么容易知道，该最长公共前缀的长度一定是某个height值（<strong>原因是，height[i]表示的是排名相邻的两个后缀的最长公共前缀的长度，如果不相邻，那么取的是他们排名之间所有height的最小值，只会越来越小。</strong>）</p>
-
 <p>还需要注意的是，必须满足得到该height的两个后缀分别出现在原来的两个字符串中&hellip;</p>
-
 <p>要怎么办到呢？ 其实很容易，由于sa[i]数组存放的是排名第i的后缀是后缀几(定义从第x个字符开始的后缀就是后缀x)</p>
-
-<p><strong>设初始第一个字符串的长度为len1,那么如果是第一个字符串的后缀，一定有sa[i]<len1,如果是第二个字符串的后缀，就一定有sa[i]>len1  (sa[i]==len1的是插入的特殊符号开始的后缀)</strong></p>
-
+<p><strong>设初始第一个字符串的长度为len1,那么如果是第一个字符串的后缀，一定有sa[i]&lt;len1,如果是第二个字符串的后缀，就一定有sa[i]&gt;len1  (sa[i]==len1的是插入的特殊符号开始的后缀)</strong></p>
 <p>还有一些细节可以参考代码注释</p>
-
 <p>UD20160730:改正了lrj书中的错误。。对于rk[i]==0的情况进行了特判。。不然会re&hellip;</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2016年07月30日 星期六 20时58分10秒
@@ -325,7 +301,7 @@ void build_sa(int n,int m) //其实我觉得。。。sa怎么得到的不用管�
     for ( int i = 1 ; i &lt; m ; i++) c[i]+=c[i-1];
     for ( int i = n-1 ; i &gt;= 0 ;i--) sa[--c[x[i]]] =  i;
 
-
+    
     for ( int k = 1 ; k &lt;= n ; k&lt;&lt;=1)  //进行若干次基数排序，每次对长度为k的字符串排序
     {
     int p  = 0 ;
@@ -383,13 +359,13 @@ int main()
     st = st1 + &quot;$&quot; + st2;
     strcpy(s,st.c_str());
     int len = getSuffix(s);
-//  cout&lt;&lt;&quot;s:&quot;&lt;&lt;s&lt;&lt;endl;
-//  for ( int i = 0 ; i &lt; len ; i++) cout&lt;&lt;s[i]&lt;&lt;&quot; &quot;&lt;&lt;w[i]&lt;&lt;endl;
-//  for ( int i = 0 ; i &lt; len ; i++) cout&lt;&lt;&quot;sa[i]:&quot;&lt;&lt;sa[i]&lt;&lt;endl;
-//  for ( int i = 0 ; i &lt; len ; i++) cout&lt;&lt;&quot;height[i]:&quot;&lt;&lt;height[i]&lt;&lt;endl;
-
+//	cout&lt;&lt;&quot;s:&quot;&lt;&lt;s&lt;&lt;endl;
+//	for ( int i = 0 ; i &lt; len ; i++) cout&lt;&lt;s[i]&lt;&lt;&quot; &quot;&lt;&lt;w[i]&lt;&lt;endl;
+//	for ( int i = 0 ; i &lt; len ; i++) cout&lt;&lt;&quot;sa[i]:&quot;&lt;&lt;sa[i]&lt;&lt;endl;
+//	for ( int i = 0 ; i &lt; len ; i++) cout&lt;&lt;&quot;height[i]:&quot;&lt;&lt;height[i]&lt;&lt;endl;
+	
     int ans = 0 ;
-     //  cout&lt;&lt;&quot;len1:&quot;&lt;&lt;len1&lt;&lt;endl; 
+     //  cout&lt;&lt;&quot;len1:&quot;&lt;&lt;len1&lt;&lt;endl;	
     for ( int i = 2 ; i &lt; len ; i++)
     if (height[i]&gt;ans)
     {

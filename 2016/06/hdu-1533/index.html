@@ -229,28 +229,18 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1533">hdu 1533 题目链接</a></p>
-
 <p>题意：给出一个n*m的maze，其中包含不超过一个人（用m表示），以及和人数相等的房子（用H表示），其他都是‘.’，表示可以经过的路径。人向一个方向移动花费代价1.问每个人都回到一个房子里的最小代价是多少。ps:每个格子是无限大的，也就是所有人可以同时踩在一个格子里。以及：路过一个房子可以不住，而只是“经过”。</p>
-
 <p>思路：有了那两个条件，这题就是赤裸的二分图最优匹配了。建图也很easy.可以预处理下w,就是两点的哈密顿距离.</p>
-
 <p>需要注意的是这道题求的是最小权值。<strong>那么做法就是将w取负，然后答案再次取负即可</strong>。</p>
-
 <p>（还有其他方法处理，不过这种最easy应该？）</p>
-
 <p>（不过要保证初始化某些数组的时候要比所有的值小，所以不能是0，而应该是-inf)</p>
-
 <p><strong>以及：初始化数组为-inf的方法，可以memset(lx,0xc0,sizeof(lx));</strong></p>
-
 <p><strong>这样得到的-inf只和inf的绝对值差1，好评如潮。</strong></p>
-
 <p><strong>0xc0,0xc0,0xc0,重要的常数说三遍</strong></p>
-
 <p><strong>哦还有，不要忘记在每次find的时候记录X集合中的点，这是比hungary算法的find里多的一个步骤，并且是容易忘记的。。。</strong></p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2016年06月01日 星期三 16时45分41秒
@@ -345,13 +335,13 @@ int KM()
     ms(lx,0xc0); //因为所有的权值都是负的（？，所以初始化不能为0而是负无穷。
     ms(ly,0);
     ms(link,-1);
-
+    
     for ( int i = 1 ; i &lt;= tot1 ; i ++)
     for ( int j = 1 ; j &lt;= tot2 ; j++)
         lx[i] = max(w[i][j],lx[i]);
 
  //   cout&lt;&lt;&quot;tot1:&quot;&lt;&lt;tot1&lt;&lt;&quot; tot2:&quot;&lt;&lt;tot2&lt;&lt;endl;
-
+    
  //   for ( int i = 1 ; i &lt;= tot1 ; i ++) cout&lt;&lt;&quot;lx[i]:&quot;&lt;&lt;lx[i]&lt;&lt;&quot; ly[i]:&quot;&lt;&lt;ly[i]&lt;&lt;endl;
     for ( int i = 1 ; i &lt;= tot1 ; i++)
     {
@@ -363,7 +353,7 @@ int KM()
         ms(visy,false);
 
         if (find(i)) break;
-
+	    
         int d = inf;
         for ( int j = 1 ; j &lt;= tot1 ; j++)
         {
@@ -375,9 +365,9 @@ int KM()
     }
     }
 
-
+    
     int res = 0 ;
-
+    
     for ( int i = 1 ; i &lt;= tot1 ; i ++)
     if (link[i]&gt;-1) res += w[link[i]][i];
 
@@ -396,7 +386,7 @@ int main()
 
         init();
         for ( int i = 0 ; i &lt; n ; i++) scanf(&quot;%s&quot;,maze[i]);
-
+	    
         for ( int i = 0 ; i &lt; n ; i++)
         for ( int j = 0 ; j &lt; m ; j++)
             if (maze[i][j]=='m') p1[++tot1] = point(i,j);
@@ -405,7 +395,7 @@ int main()
         for ( int i = 1 ; i &lt;= tot1 ; i ++)
         for ( int j = 1; j &lt;= tot2 ; j++)
             w[i][j] = p1[i].dis(p2[j]);
-
+	    
       //  cout&lt;&lt;&quot;wwwwwwwwwwwwW?????&quot;&lt;&lt;endl;
         int ans = KM();
       //  cout&lt;&lt;&quot;kkkkkkkkkkkkkkkkk&quot;&lt;&lt;endl;

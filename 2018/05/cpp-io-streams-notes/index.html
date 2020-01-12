@@ -226,90 +226,76 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li><a href="#stream的基本认识">Stream的基本认识</a></li>
-<li><a href="#stream的错误处理">stream的错误处理</a></li>
-<li><a href="#string-streams">String Streams</a></li>
-<li><a href="#buffer的使用">buffer的使用</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#stream的基本认识">Stream的基本认识</a></li>
+        <li><a href="#stream的错误处理">stream的错误处理</a></li>
+        <li><a href="#string-streams">String Streams</a></li>
+        <li><a href="#buffer的使用">buffer的使用</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
                 
-                
-
-<p>迫于拙劣的cpp水平，来补补以前忽略掉的cpp细节。</p>
-
+                <p>迫于拙劣的cpp水平，来补补以前忽略掉的cpp细节。</p>
 <p>老规矩，先放资料。</p>
-
 <p>参考资料:</p>
-
 <p><a href="https://www.cprogramming.com/tutorial/c++-iostreams.html">A Gentle Introduction to C++ IO Streams</a></p>
-
-<blockquote>"Designing and implementing a general input/output facility for a
-programming language is notoriously difficult"
-- Bjarne Stroustrup</blockquote>
-
+<!-- raw HTML omitted -->
 <h3 id="stream的基本认识">Stream的基本认识</h3>
-
 <p>说说我的理解。stream(流)可以看做输入输出的抽象。我们通过流可以忽略掉device的细节，采取同样的输入输出方式。</p>
-
-<p>对于任何原生的cpp类型，都可以用stream来处理。用户自定义的类，也可以通过重载&lt;&lt;和&gt;&gt;而让stream可以处理。</p>
-
+<p>对于任何原生的cpp类型，都可以用stream来处理。用户自定义的类，也可以通过重载&laquo;和&raquo;而让stream可以处理。</p>
 <pre><code>#include &lt;iostream&gt;
 #include &lt;ctime&gt;
 #include &lt;sstream&gt;
 #include &lt;fstream&gt;
-
+ 
 using namespace std;
-
+ 
 // timestamp returns the current time as a string 
 std::string timestamp();    
-
+ 
 class LogStatement;
 ostream&amp; operator&lt;&lt;(ostream&amp; ost, const LogStatement&amp; ls);
-
+ 
 class LogStatement
 {
 public:
         LogStatement(std::string s): data(s), time_string( timestamp() )
         { };
-
+ 
         //This method handles all the outputs.    
         friend ostream&amp; operator&lt;&lt;(ostream&amp;, const LogStatement&amp;);   
 private:
         std::string data;
         std::string time_string;
-
+    
 };
-
+ 
 ostream&amp; operator&lt;&lt;(ostream&amp; ost, const LogStatement&amp; ls)
 {
         ost&lt;&lt;&quot;~|&quot;&lt;&lt;ls.time_string&lt;&lt;'|'&lt;&lt;ls.data&lt;&lt;&quot;|~&quot;;
         return ost;
 }
-
+ 
 std::string timestamp() 
 {
         //Notice the use of a stringstream, yet another useful stream medium!
         ostringstream stream;    
         time_t rawtime;
         tm * timeinfo;
-
+ 
         time(&amp;rawtime);
         timeinfo = localtime( &amp;rawtime );
-
+ 
         stream &lt;&lt; (timeinfo-&gt;tm_year)+1900&lt;&lt;&quot; &quot;&lt;&lt;timeinfo-&gt;tm_mon
         &lt;&lt;&quot; &quot;&lt;&lt;timeinfo-&gt;tm_mday&lt;&lt;&quot; &quot;&lt;&lt;timeinfo-&gt;tm_hour
         &lt;&lt;&quot; &quot;&lt;&lt;timeinfo-&gt;tm_min&lt;&lt;&quot; &quot;&lt;&lt;timeinfo-&gt;tm_sec;
         // The str() function of output stringstreams return a std::string.
         return stream.str();   
 }
-
+ 
 int main(int argc, char** argv)
 {
         if(argc&lt;2)
@@ -324,30 +310,27 @@ int main(int argc, char** argv)
         {
                log_data&lt;&lt;argv[i]&lt;&lt;' '; 
         }
-
+  
         LogStatement log_entry(log_data.str());
-
+ 
         clog&lt;&lt;log_entry&lt;&lt;endl;
-
+ 
         ofstream logfile(&quot;logfile&quot;,ios::app);
-
+ 
         // check for errors opening the file
         if ( ! logfile )      
         {
                 return -1;
         }       
-
+ 
         logfile&lt;&lt;log_entry&lt;&lt;endl;
         logfile.close();
-
+ 
         return 0;
 }
 </code></pre>
-
 <p>stream大致分为inputstream和outputstream两种，分别对应的类型为std::istream和std::ostream.</p>
-
 <p>stream大概有如下操作:</p>
-
 <pre><code>  *     使用适当的值类型(如stringstream的STD : : string和fstream的文件名)和适当的模式(如用于输入的IOs : : in和用于输出的IOs : : out等，具体取决于流的类型)初始化流
   * 可以通过get和put指针指定I / O应该发生的位置。根据您打开流的方式，可能已经适当地设置了位置(例如，如果使用IOs : : app打开文件，则在流的末尾设置get指针，允许附加)。
 
@@ -358,76 +341,59 @@ tellp(); tellg()              //returns the current value of the put/get pointer
 seekp(-10,ios::end);   //sets the put pointer to 10 chars before the end
 seekp(1,ios::cur);      //proceeds to next char
 </code></pre>
-
-<p>注意:<strong>如果需要在一个stream的中间位置插入数据的话，需要手动将指针位置后面的数据移动，否则会被覆盖掉。</strong>
-      * 使用&lt;&lt;或者&gt;&gt;来读或者写。</p>
-
+<p>注意:<strong>如果需要在一个stream的中间位置插入数据的话，需要手动将指针位置后面的数据移动，否则会被覆盖掉。</strong><br>
+* 使用&laquo;或者&raquo;来读或者写。</p>
 <h3 id="stream的错误处理">stream的错误处理</h3>
-
 <p>将stream当成bool来处理是比较常见的，</p>
-
 <pre><code>ifstream file( &quot;test.txt&quot; );
 if ( ! file )
 {
         cout &lt;&lt; &quot;An error occurred opening the file&quot; &lt;&lt; endl;
 }
 </code></pre>
-
 <p>但是实际上有四种status:</p>
-
 <pre><code>  * good() returns true when everything is okay.
   * bad() returns true when a fatal error has occurred.
   * fail() returns true after an unsuccessful stream operation like an unexpected type of input being encountered.
   * eof() returns true when the end of file is reached.
 </code></pre>
-
 <h3 id="string-streams">String Streams</h3>
-
 <p>emm,其实string和stream好像挺像的。 区别是,string是可以随机访问的，stream是顺序访问。</p>
-
 <pre><code>#include &lt;iostream&gt;
 #include &lt;sstream&gt;
-
+ 
 using namespace std;
-
+ 
 int main()
 {
         stringstream my_stream(ios::in|ios::out);
         std::string dat(&quot;Hey, I have a double : 74.79 .&quot;);
-
+ 
         my_stream.str(dat);
         my_stream.seekg(-7,ios::end);
-
+ 
         double val;
         my_stream&gt;&gt;val;
-
+ 
         val= val*val;
-
+ 
         my_stream.seekp(-7,ios::end);
         my_stream&lt;&lt;val;
-
+ 
         std::string new_val = my_stream.str();
         cout&lt;&lt;new_val;
-
+ 
         return 0;
 }
 </code></pre>
-
 <p>输出是:</p>
-
 <pre><code>Hey, I have a double : 5593.54
 </code></pre>
-
 <p>我们观察到原本句子末尾的英文句号&rdquo;.&ldquo;被覆盖掉了。</p>
-
 <h3 id="buffer的使用">buffer的使用</h3>
-
 <p>I/O操作是相对来说比较花时间的操作，如果我们要多次写很多小文件，那会浪费大量的时间。于是我们的想法是，使用一个临时的Buffer将数据存起来，当这个buffer满了之后再去读或者写。</p>
-
 <p>注意不是所有的stream都采用了这种机制，比如cerr就没有采用。</p>
-
 <p>下面放一段代码来感受下buffer</p>
-
 <pre><code>#include &lt;iostream&gt;
 #include &lt;string&gt;
 
@@ -495,10 +461,8 @@ int main() {
        cout &lt;&lt; endl;
 }
 </code></pre>
-
 <p>此处flush的含义是将buffer中的内容立即输出</p>
-
-<p>我们观察发现，在testBUffer中，&rdquo;before loop&rdquo;是在循环之后才输出的。暗示cout使用了buffer.</p>
+<p>我们观察发现，在testBUffer中，&ldquo;before loop&quot;是在循环之后才输出的。暗示cout使用了buffer.</p>
 
 
                 

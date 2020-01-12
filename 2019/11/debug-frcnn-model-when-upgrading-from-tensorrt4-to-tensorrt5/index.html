@@ -225,47 +225,30 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p>最近有同事report给我们,用同一个模型转换工具,转同一个faster rcnn 模型, 同样的sdk代码,在有些显卡上结果正常,但是再比较新的显卡上(比如Titan V)上 结果完全不正确.</p>
-
-<p>听说之后我的内心其实是 <strong>喵喵喵喵喵?</strong>的</p>
-
+<p>听说之后我的内心其实是 **喵喵喵喵喵?**的</p>
 <p>先在模型转换工具中infer了一下,发现&hellip;结果竟然真的不一样!</p>
-
 <p>于是又开始了debug faster rcnn 的旅程(奇怪..我为什么要说又)</p>
-
 <p>一份典型的faster rcnn 的</p>
-
 <p><a href="https://github.com/rbgirshick/py-faster-rcnn/blob/master/models/coco/VGG16/faster_rcnn_end2end/test.prototxt">prototxt</a></p>
-
 <p>按照经验,我们先对照了ROIS,来判断RPN 是否存在问题</p>
-
 <p>惊讶地发现,竟然是没有问题的&hellip;</p>
-
-<p>那看一下模型的输出 cls_score 和 bbox_pred好了
-发现cls_score 完全对不上,bbox_pred 倒是没问题&hellip;
-这和之前遇到的情况不太一样啊&hellip; 从proposal layer 到 最后&hellip;
+<p>那看一下模型的输出 cls_score 和 bbox_pred好了<br>
+发现cls_score 完全对不上,bbox_pred 倒是没问题&hellip;<br>
+这和之前遇到的情况不太一样啊&hellip; 从proposal layer 到 最后&hellip;<br>
 全都是些很常见的layer&hellip; 哪里会有问题呢&hellip;</p>
-
 <p>最终发现有问题的layer 是softmax!</p>
-
 <p>cls_score 的维度应该为 N*K*C*H*W</p>
-
 <p>softmax应该按照C这一维度来做,因此softmax_param中axis应该为2.</p>
-
-<p>查阅&rdquo;tensorrt support matrix&rdquo; ，发现 <a href="https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#softmax-layer">tensorrt5</a>中，softmax会按照用户指定的维度进行。</p>
-
-<p><img src="https://i.loli.net/2019/11/13/3nVKSDOAPB9Hfjm.png" alt="trt5_softmax.png" /></p>
-
+<p>查阅&quot;tensorrt support matrix&rdquo; ，发现 <a href="https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#softmax-layer">tensorrt5</a>中，softmax会按照用户指定的维度进行。</p>
+<p><img src="https://i.loli.net/2019/11/13/3nVKSDOAPB9Hfjm.png" alt="trt5_softmax.png"></p>
 <p>而对于<a href="https://docs.nvidia.com/deeplearning/sdk/tensorrt-archived/tensorrt_401/tensorrt-developer-guide/index.html">tensorrt4.0</a>, softmax layer 与设定的softmax_param无关，只会在channel 的维度上来做softmax.</p>
-
-<p><img src="https://i.loli.net/2019/11/13/PnN75eUTCjhcEKo.png" alt="trt4_softmax.png" /></p>
-
-<p>所以，比较好的解决办法是，干脆不写softmax_param这个参数
-对于trt4，会直接按照channel 维度来做
+<p><img src="https://i.loli.net/2019/11/13/PnN75eUTCjhcEKo.png" alt="trt4_softmax.png"></p>
+<p>所以，比较好的解决办法是，干脆不写softmax_param这个参数<br>
+对于trt4，会直接按照channel 维度来做<br>
 对于trt5，会在第N-3的axis上进行。对于SSD的 N*C*H*W或者 faster rcnn 的N*K*C*H*W, N-3都是channel所在的维度。</p>
-
 <p>问题解决！</p>
 
 

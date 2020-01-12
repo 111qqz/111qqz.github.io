@@ -225,31 +225,20 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p>在这里存个备份，还有些问题没有解决。</p>
-
-<p>raise ValueError(&ldquo;GraphDef cannot be larger than 2GB.&rdquo;)</p>
-
+<p>raise ValueError(&ldquo;GraphDef cannot be larger than 2GB.&quot;)</p>
 <p>记录一些思路好了。现在是没有生成.meta文件，爆掉应该是因为所有的变量都加载到了默认图里。</p>
-
 <p>也就是说我处理完checkpoint 0 之后开始处理checkpoint1,但是checkpoint0的那些变量还是存在的&hellip;所以越来越多？</p>
-
 <p>目前有两个想法，第一个想法是是受<a href="https://zhuanlan.zhihu.com/p/25906127">TensorFlow极简教程：创建、保存和恢复机器学习模型</a>  中启发，用多个saver，每个saver指定要搞的图（但是这样好像要每个checkpoint都是不同的saver才有意义？）</p>
-
 <p>第二个想法是，每次save完变量之后，将图恢复成默认状态（可以把图中所有变量清空。。</p>
-
 <p>想法二大失败：</p>
-
-<p>会遇到if self.stack[-1] is not default: │
+<p>会遇到if self.stack[-1] is not default: │<br>
 IndexError: list index out of range   的问题。。</p>
-
 <p>根据 <a href="https://github.com/tensorflow/tensorflow/issues/11121">reset_default_graph awkwardly breaks graph nesting        </a></p>
-
 <p>中提到了。。。reset_default_graph本身就不舍被设计成放在graph中清空变量用的。。。然后tf的代码也写得很不友好。。。没有 指明这个错误的原因。。。</p>
-
-<blockquote>For historical context, `tf.reset_default_graph()` was never designed to be used with `with g.as_default():` context managers. I think the proper fix here is to make `tf.reset_default_graph()` fail with an informative error message when used inside a `with g.as_default():` context. I think this could be done by checking that `ops._default_graph_stack` is empty before resetting.</blockquote>
-
+<!-- raw HTML omitted -->
 <pre><code>import sys, getopt
 import argparse
 import tensorflow as tf
@@ -354,9 +343,7 @@ def main():
 if __name__ == '__main__':
   main()
 </code></pre>
-
 <p>嘛。。先不管了。。。据数据那边说已经够用了。下面是最终版本,没有合并动量，因为对验证没有作用。</p>
-
 <pre><code>import sys, getopt
 import argparse
 import tensorflow as tf
@@ -452,9 +439,7 @@ def main():
 if __name__ == '__main__':
   main()
 </code></pre>
-
 <p>20170822update:去掉了卷基层的动量，添加了一些超参</p>
-
 <pre><code>import sys, getopt
 import argparse
 import tensorflow as tf

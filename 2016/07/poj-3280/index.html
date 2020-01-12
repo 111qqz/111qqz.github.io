@@ -229,41 +229,26 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://poj.org/problem?id=3280">poj 3280 题目链接</a></p>
-
 <p>题意：一个字符串，给出添加一个字符或者删掉该字符的花费，问最小的话费使得字符串变成回文串。</p>
-
 <p>思路：dp[i][j]表示区间[i,j]的字符串变成回文的最小花费。。。</p>
-
-<p>这个可以想到。。dp[i][j] = dp[i+1]<a href="a[i]==a[j]">j-1</a>这个也可以想到。。。</p>
-
+<p>这个可以想到。。dp[i][j] = dp[i+1][j-1] (a[i]==a[j])这个也可以想到。。。</p>
 <p>增加和删除是等价的，所以取小的那个代价就行。。这个我也想到了。。</p>
-
 <p>然后转移的地方没有特别明白。。。</p>
-
 <p>和之前的找到一个划分的点k不同的是。。。</p>
-
 <p>如果不等于。。</p>
-
 <p>那么</p>
-
 <pre><code>,
 dp[i][j] = min(dp[i][j],dp[i+1][j]+cost[a[i]]);
         dp[i][j] = min(dp[i][j],dp[i][j-1]+cost[a[j]]);
 </code></pre>
-
 <p>这个方程可以理解。。。但是感觉自己想不出来 QAQ</p>
-
 <p>以及。。我初始化写错了。。。</p>
-
 <p>以为是求 最小值就初始化成了0x3f&hellip;</p>
-
 <p>但是这样是错的。。。</p>
-
 <p>具体见代码注释。。。</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2016年07月25日 星期一 19时42分19秒
@@ -311,7 +296,7 @@ int main()
     {
     a[i] = s[i]-'a'+1;
     }
-    //  for ( int i = 1 ; i &lt;= len ; i++) cout&lt;&lt;&quot;a[i]:&quot;&lt;&lt;a[i]&lt;&lt;endl;
+    //	for ( int i = 1 ; i &lt;= len ; i++) cout&lt;&lt;&quot;a[i]:&quot;&lt;&lt;a[i]&lt;&lt;endl;
     getchar();
     for ( int i = 1 ; i &lt;= n ; i++)
     {
@@ -326,11 +311,11 @@ int main()
     ms(dp,0);
     //也告诉了我们。。。求最大最小和初始化成0还是正无穷没有关系。。。。要仔细分析。。
     //初始化成0可以理解成。。。初始不知道字符串。。认为是空。。。空是回文。。所以没有花费。。。
-    //  for ( int i = 0 ; i &lt; len ; i++)
-    //      dp[i][i] = cost[a[i]];   //错误的初始化。。。。智力-2
-    //  
-    //  这个初始化是错误的。 如果目前只有一个字符a，那么使之变成回文的除了增加一个a，删除一个a,还可以再两边增加两个相同的字符来实现。
-    //  而这个初始化没有考虑第三种情况。。。好菜啊。
+    //	for ( int i = 0 ; i &lt; len ; i++)
+    //	    dp[i][i] = cost[a[i]];   //错误的初始化。。。。智力-2
+    //	
+    //	这个初始化是错误的。 如果目前只有一个字符a，那么使之变成回文的除了增加一个a，删除一个a,还可以再两边增加两个相同的字符来实现。
+    //	而这个初始化没有考虑第三种情况。。。好菜啊。
 
 
 
@@ -338,24 +323,24 @@ int main()
     for ( int i = 0,j = l ; j &lt;len ; i++,j++)
     {
         dp[i][j] = inf;
-        //  cout&lt;&lt;&quot;dp[i][j]:&quot;&lt;&lt;dp[i][j]&lt;&lt;endl;
+        //	cout&lt;&lt;&quot;dp[i][j]:&quot;&lt;&lt;dp[i][j]&lt;&lt;endl;
         if (a[i]==a[j]) dp[i][j] = dp[i+1][j-1];
         else 
         {
         dp[i][j] = min(dp[i][j],dp[i+1][j]+cost[a[i]]);
         dp[i][j] = min(dp[i][j],dp[i][j-1]+cost[a[j]]);
         }
-        //  cout&lt;&lt;&quot;dpi0[i][j]::::&quot;&lt;&lt;dp[i][j]&lt;&lt;endl;
-        //      for ( int k = i ; k &lt; j ; k++)
-        //      {
-        //          dp[i][j] = min(dp[i][j],dp[k+1][j]);
-        //          dp[i][j] = min(dp[i][j],dp[i][k]);
-        //          printf(&quot;i==%d j==%d k==%d dp[i][k]==%d dp[k+1][j]%d\n&quot;,i,j,k,dp[i][k],dp[k+1][j]);
-        //      for ( int k = i ; k &lt; j ; k++)
-        //          dp[i][j] = min(dp[i][j],dp[])
-        //      }
-        //      cout&lt;&lt;&quot;i:&quot;&lt;&lt;i&lt;&lt;&quot; j:&quot;&lt;&lt;j&lt;&lt;&quot; dp[i][j]:&quot;&lt;&lt;dp[i][j]&lt;&lt;endl;
-        //  ans = min(dp[i][j],ans);
+        //	cout&lt;&lt;&quot;dpi0[i][j]::::&quot;&lt;&lt;dp[i][j]&lt;&lt;endl;
+        //		for ( int k = i ; k &lt; j ; k++)
+        //		{
+        //		    dp[i][j] = min(dp[i][j],dp[k+1][j]);
+        //		    dp[i][j] = min(dp[i][j],dp[i][k]);
+        //		    printf(&quot;i==%d j==%d k==%d dp[i][k]==%d dp[k+1][j]%d\n&quot;,i,j,k,dp[i][k],dp[k+1][j]);
+        //		for ( int k = i ; k &lt; j ; k++)
+        //		    dp[i][j] = min(dp[i][j],dp[])
+        //		}
+        //		cout&lt;&lt;&quot;i:&quot;&lt;&lt;i&lt;&lt;&quot; j:&quot;&lt;&lt;j&lt;&lt;&quot; dp[i][j]:&quot;&lt;&lt;dp[i][j]&lt;&lt;endl;
+        //	ans = min(dp[i][j],ans);
     }
     printf(&quot;%d\n&quot;,dp[0][len-1]);
 #ifndef ONLINE_JUDGE  

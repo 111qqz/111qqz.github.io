@@ -230,47 +230,27 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li><a href="#2-1-differences-between-host-and-device-http-docs-nvidia-com-cuda-cuda-c-best-practices-guide-differences-between-host-and-device"><a href="http://docs.nvidia.com/cuda/cuda-c-best-practices-guide/#differences-between-host-and-device">2.1. Differences between Host and Device</a></a>
-<ul>
-<li><a href="#threading-resources">Threading resources</a></li>
-<li><a href="#threads">Threads</a></li>
-<li><a href="#ram">RAM</a></li>
-</ul></li>
-<li><a href="#2-2-what-runs-on-a-cuda-enabled-device-http-docs-nvidia-com-cuda-cuda-c-best-practices-guide-what-runs-on-cuda-enabled-device"><a href="http://docs.nvidia.com/cuda/cuda-c-best-practices-guide/#what-runs-on-cuda-enabled-device">2.2. What Runs on a CUDA-Enabled Device?</a></a></li>
-</ul>
+  <ul>
+    <li><a href="#threading-resources">Threading resources</a></li>
+    <li><a href="#threads">Threads</a></li>
+    <li><a href="#ram">RAM</a></li>
+  </ul>
 </nav>
                 
-                
-
-<p>CUDA 编程涉及到在不同的平台上同时运行代码:包含CPU的host 和包含GPU的device.</p>
-
+                <p>CUDA 编程涉及到在不同的平台上同时运行代码:包含CPU的host 和包含GPU的device.</p>
 <p>所以了解host和device的对性能优化是非常重要的。</p>
-
-<h1 id="2-1-differences-between-host-and-device-http-docs-nvidia-com-cuda-cuda-c-best-practices-guide-differences-between-host-and-device"><a href="http://docs.nvidia.com/cuda/cuda-c-best-practices-guide/#differences-between-host-and-device">2.1. Differences between Host and Device</a></h1>
-
+<h1 id="21differences-between-host-and-devicehttpdocsnvidiacomcudacuda-c-best-practices-guidedifferences-between-host-and-device"><a href="http://docs.nvidia.com/cuda/cuda-c-best-practices-guide/#differences-between-host-and-device">2.1. Differences between Host and Device</a></h1>
 <h2 id="threading-resources">Threading resources</h2>
-
 <p>host 上能同时运行的线程数目比较少（比如24个）</p>
-
 <p>device上能同时运行的线程数目比较多（数量级通常为1E3，1E4等）</p>
-
 <h2 id="threads">Threads</h2>
-
 <p>操作系统必须交换CPU执行通道上和下的线程以提供多线程功能。因此，上下文切换(当交换两个线程时)既慢又昂贵。</p>
-
 <p>相比之下，GPU上的线程非常轻量级。在典型的系统中，成千上万的线程排队等待工作(每个线程有32个线程)。如果GPU必须等待 one warp of threads，它只需开始在另一个线程上执行工作。</p>
-
 <p><strong>简而言之，CPU内核被设计为每次最小化一个或两个线程的等待时间，而GPU被设计为处理大量并发的轻量级线程以最大化吞吐量。</strong></p>
-
 <h2 id="ram">RAM</h2>
-
 <p>host和device 各自具有各自不同的附接物理存储器。host和device内存由PCI Express ( PCIe )总线分隔，因此host内存中的项目必须偶尔通过总线传送到device内存，反之亦然</p>
-
-<h1 id="2-2-what-runs-on-a-cuda-enabled-device-http-docs-nvidia-com-cuda-cuda-c-best-practices-guide-what-runs-on-cuda-enabled-device"><a href="http://docs.nvidia.com/cuda/cuda-c-best-practices-guide/#what-runs-on-cuda-enabled-device">2.2. What Runs on a CUDA-Enabled Device?</a></h1>
-
+<h1 id="22what-runs-on-a-cuda-enabled-devicehttpdocsnvidiacomcudacuda-c-best-practices-guidewhat-runs-on-cuda-enabled-device"><a href="http://docs.nvidia.com/cuda/cuda-c-best-practices-guide/#what-runs-on-cuda-enabled-device">2.2. What Runs on a CUDA-Enabled Device?</a></h1>
 <p>下面谈谈应该把应用的哪些部分放在device 上运行</p>
-
 <pre><code>  * 大数据集上的算术运算
   * 为了获得最佳性能，设备上运行的相邻线程的内存访问应该具有一定的一致性。**某些内存访问模式使硬件能够将多个数据项的读或写组合并到一个操作中**。当在CUDA上的计算中使用时，无法布局以实现合并的数据，或者没有足够的局部性来有效地使用L1或纹理缓存的数据，将倾向于看到较小的加速比。
   * host和device之间的数据交换尽可能少

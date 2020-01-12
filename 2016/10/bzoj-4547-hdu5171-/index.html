@@ -234,76 +234,46 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#4547-hdu5171-小奇的集合">4547: Hdu5171 小奇的集合</a></li>
-<li><a href="#description">Description</a></li>
-<li><a href="#input">Input</a></li>
-<li><a href="#output">Output</a></li>
-<li><a href="#sample-input">Sample Input</a></li>
-<li><a href="#sample-output">Sample Output</a></li>
-<li><a href="#hint">HINT</a></li>
-<li><a href="#source">Source</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#4547-hdu5171-小奇的集合">4547: Hdu5171 小奇的集合</a></li>
+    <li><a href="#description">Description</a></li>
+    <li><a href="#input">Input</a></li>
+    <li><a href="#output">Output</a></li>
+    <li><a href="#sample-input">Sample Input</a></li>
+    <li><a href="#sample-output">Sample Output</a></li>
+    <li><a href="#hint">HINT</a></li>
+    <li><a href="#source">Source</a></li>
+  </ul>
 </nav>
                 
-                
-
-<h2 id="4547-hdu5171-小奇的集合">4547: Hdu5171 小奇的集合</h2>
-
-<p>Time Limit: 2 Sec  Memory Limit: 256 MB
-Submit: 263  Solved: 113
+                <h2 id="4547-hdu5171-小奇的集合">4547: Hdu5171 小奇的集合</h2>
+<p>Time Limit: 2 Sec  Memory Limit: 256 MB<br>
+Submit: 263  Solved: 113<br>
 [<a href="http://www.lydsy.com/JudgeOnline/submitpage.php?id=4547">Submit</a>][<a href="http://www.lydsy.com/JudgeOnline/problemstatus.php?id=4547">Status</a>][<a href="http://www.lydsy.com/JudgeOnline/bbs.php?id=4547">Discuss</a>]</p>
-
 <h2 id="description">Description</h2>
-
 <p> 有一个大小为n的可重集S，小奇每次操作可以加入一个数a+b(a,b均属于S)，求k次操作后它可获得的S的和的最大</p>
-
 <p>值。（数据保证这个值为非负数）</p>
-
 <h2 id="input">Input</h2>
-
 <p>第一行有两个整数n,k表示初始元素数量和操作数，第二行包含n个整数表示初始时可重集的元素。</p>
-
 <p>对于100%的数据，有 n&lt;=10^5，k&lt;=10^9，|ai|&lt;=10^5</p>
-
 <h2 id="output">Output</h2>
-
 <p>输出一个整数，表示和的最大值。答案对10000007取模。</p>
-
 <h2 id="sample-input">Sample Input</h2>
-
-<p>2 2
+<p>2 2<br>
 3 6</p>
-
 <h2 id="sample-output">Sample Output</h2>
-
 <p>33</p>
-
 <h2 id="hint">HINT</h2>
-
 <h2 id="source">Source</h2>
-
 <p><a href="http://www.lydsy.com/JudgeOnline/problemset.php?search=ByHzwer">By Hzwer</a></p>
-
 <p>思路：同hdu 5171的区别在于，a可能为负数。</p>
-
 <p>同样是设a0为次大值，a1为最大值。</p>
-
 <p>根据a0,a1的正负分类讨论。</p>
-
 <p>如果a1&lt;0（此时a0一定也小于0）那么每次操作都是a0+a1,因为越加越小。</p>
-
-<p>如果a0<0，需要计算需要几次运算，使得a0>=0。设需要num次。</p>
-
+<p>如果a0&lt;0，需要计算需要几次运算，使得a0&gt;=0。设需要num次。</p>
 <p>原因是，类斐波那契数列的性质可以对于正数，也可以对于负数，<strong>但是如果有正数有负数，性质是不满足的。</strong></p>
-
 <p>因此如果num&gt;k，说明一直都是负数，直接运算即可，如果num&lt;=k，就需要先把负数部分用等差数列的方法处理掉。</p>
-
 <p>然后再用矩阵快速幂的方法计算剩下的k-num次。</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :Tue 25 Oct 2016 07:00:23 PM CST
@@ -395,7 +365,7 @@ int main()
     if (a0&lt;0)
     {
     LL num = -a0/a1+1;
-//  cout&lt;&lt;&quot;num:&quot;&lt;&lt;num&lt;&lt;endl;
+//	cout&lt;&lt;&quot;num:&quot;&lt;&lt;num&lt;&lt;endl;
     if (num&lt;=k)
     {
         k-=num;
@@ -419,13 +389,13 @@ int main()
      if (a0&lt;0)
     {
     LL num = (-a0)/a1 + 1;
-//  cout&lt;&lt;&quot;num:&quot;&lt;&lt;num&lt;&lt;endl;
+//	cout&lt;&lt;&quot;num:&quot;&lt;&lt;num&lt;&lt;endl;
     if (k&lt;=num)
     {
         for ( int i = 1 ; i &lt;= n-2 ; i++) sum = (sum + a[i] + mod ) % mod;
         sum = ( sum + a[n] + mod ) %mod;
         num = k+1;
-//      cout&lt;&lt;&quot;sum:&quot;&lt;&lt;sum&lt;&lt;endl;
+//	    cout&lt;&lt;&quot;sum:&quot;&lt;&lt;sum&lt;&lt;endl;
         sum = (sum + (num*a0 + num*(num-1)/2*a1)%mod+mod)%mod;
         printf(&quot;%lld\n&quot;,sum);
         return 0;

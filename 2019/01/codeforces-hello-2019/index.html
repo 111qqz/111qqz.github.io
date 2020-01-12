@@ -221,25 +221,17 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p>好久没玩cf了，竟然还能涨分（虽然我用的小号Orz)</p>
-
 <p>三题，D应该是数学+DP&hellip;数学实在是忘干净了。。。</p>
-
-<p>前面三题大体还好，都是1A,不过因为没有提前配置环境。。耽误了一些时间。。。<a href="https://111qqz.com/wp-content/uploads/2019/01/123123.png"><img src="https://111qqz.com/wp-content/uploads/2019/01/123123.png" alt="" />
+<p>前面三题大体还好，都是1A,不过因为没有提前配置环境。。耽误了一些时间。。。<a href="https://111qqz.com/wp-content/uploads/2019/01/123123.png"><img src="https://111qqz.com/wp-content/uploads/2019/01/123123.png" alt=""><br>
 </a></p>
-
 <p>A:给出一个扑克牌x，和另一个包含5个扑克牌的集合。问扑克牌x是否和扑克牌集合中至少一张扑克牌的花色或者数字相同。</p>
-
 <p>不多说了。</p>
-
 <p>B:一块钟表（只有一个指针），初始指向12点，需要拨动指针恰好n次(n&lt;=15)，每次可能顺时针，也可能逆时针，拨动的角度范围在[1,180],问是否有一种方案，使得拨动n次后，指针回到12点。</p>
-
 <p>思路：观察下数据范围,n最大才15，最多也不过2^15的情况&hellip;既然如此，不如暴力。</p>
-
 <p>枚举的话我记得有三种方法来着。。。但是已经不记得怎么写了。。所以用了最朴素的办法。。。</p>
-
 <pre><code>#include &lt;bits/stdc++.h&gt;
 using namespace std;
 const int inf = 0x3f3f3f3f;
@@ -294,23 +286,18 @@ int main()
     }
     puts(&quot;NO&quot;);
 
+   
 
 
-
-
-
+    
+    
     return 0;
 }
 </code></pre>
-
 <p>C: 给出n(n&lt;=1E5)个括号序列,括号序列可能不合法，现在要从这n个括号序列中，组成尽可能多的有序二元组，使得有序二元组的括号序列合法，并且每个括号序列只能出现在一个有序二元组中，现在问最多能组成多少这样的有序二元组。</p>
-
 <p>思路：我们先考虑一下怎样的两个括号序列组成的有序二元组才是合法的有序序列。容易想到的是，如果两个括号序列本身都是合法的，那么组合在一起也一定是合法的。进一步，对于本身不合法的括号序列，容易知道，其必须只有一种没有完成匹配的括号方向，且该括号方向的数量与相反括号方向的数量相同，才能完成匹配。</p>
-
 <p>因此做法是，对于括号序列预处理，得到该括号序列的状态（本身匹配为0，正数代表&rsquo;(&lsquo;的个数，负数代表&rsquo;)&lsquo;的个数，如果有两个方向同时存在，则直接舍弃掉，因为这种括号序列不可能组成合法的括号序列。预处理之后，用multiset搞一下。</p>
-
 <p>代码写得比较乱&hellip;flag存的时候其实没必要存index&hellip;</p>
-
 <pre><code>#include &lt;bits/stdc++.h&gt;
 using namespace std;
 const int inf = 0x3f3f3f3f;
@@ -413,40 +400,25 @@ int main()
     }
     cout&lt;&lt;ans&lt;&lt;endl;
 
-
-
+    
+    
     return 0;
 }
 </code></pre>
-
 <p>D:初始一个数n(n&lt;=1E15)，k次操作，每次操作等概率将当前的数变为其因子中的一个。问k次操作之后，结果的期望是多少。</p>
-
 <p>在@适牛的指导下，以及参考了官方题解。。写了出来。。</p>
-
 <p>dp还是太弱了。。。。</p>
-
 <p>比较重要的一点是，不需要考虑所有因子，只需要考虑质因子。</p>
-
 <p>质因子的个数不超过50个（因为 2^50 &gt; 1E15）</p>
-
 <p>另外一个重要的是，对于每一个质因子的概率是积性函数，可以乘在一起。</p>
-
 <p>因此问题变成了，对于一个质因子唯一的n，如何算所求的期望。</p>
-
 <p>我们考虑dp[i][j]表示第i次操作后，质因子还剩j个的概率。</p>
-
 <p>显然dp[0][tot]=1，其中 p^tot = n,p为某个质因子。</p>
-
 <p>转移方程为：</p>
-
 <p>dp[i][j] = sum(dp[i-1][jj]) (j=&lt;jj&lt;=tot)</p>
-
 <p>然后最后结果的期望就是：sum(dp[k][j]*p^j) (0=&lt;j&lt;=tot)</p>
-
 <p>还有一点，由于题目的输出要求，需要用到费马小定理求个逆元。。。</p>
-
 <p>逆元相关的参考 <a href="https://blog.csdn.net/acdreamers/article/details/8220787">acdreamer的博客</a>。。。</p>
-
 <pre><code>#include &lt;bits/stdc++.h&gt;
 using namespace std;
 typedef long long LL;

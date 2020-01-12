@@ -226,34 +226,24 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li><a href="#leveldb简介">levelDB简介</a></li>
-<li><a href="#leveldb的安装">LevelDB的安装</a></li>
-<li><a href="#leveldb的使用">LevelDB的使用</a></li>
-<li><a href="#注意事项">注意事项</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#leveldb简介">levelDB简介</a></li>
+        <li><a href="#leveldb的安装">LevelDB的安装</a></li>
+        <li><a href="#leveldb的使用">LevelDB的使用</a></li>
+        <li><a href="#注意事项">注意事项</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
                 
-                
-
-<p>大三的时候看过一点levelDB的源码，不过没有怎么用过。</p>
-
+                <p>大三的时候看过一点levelDB的源码，不过没有怎么用过。</p>
 <p>最近有个需求是存人脸的feature到硬盘，似乎使用levelDB比较合适，因此来学习一下使用。</p>
-
 <p>先放参考资料。</p>
-
 <p>关于levelDB的语法，看<a href="https://github.com/google/leveldb/blob/master/doc/index.md">这里</a>就好了。</p>
-
 <p>以及由于caffe中使用了levelDB，因此也可以参考下caffe源码。不过caffe中对levelDB的使用是又封装了一层。</p>
-
 <p>具体可以参考：</p>
-
 <pre><code>#ifdef USE_LEVELDB
 #ifndef CAFFE_UTIL_DB_LEVELDB_HPP
 #define CAFFE_UTIL_DB_LEVELDB_HPP
@@ -633,13 +623,9 @@ int main(int argc, char** argv) {
   return 0;
 }
 </code></pre>
-
 <p>几个文件。。。感觉比看文档更有实际意义orz</p>
-
 <h3 id="leveldb简介">levelDB简介</h3>
-
 <p>Leveldb是google开源的一个高效率的K/V数据库.有如下特点：</p>
-
 <pre><code>  1. 首先，LevelDb是一个持久化存储的KV系统，和Redis这种内存型的KV系统不同，LevelDb不会像Redis一样狂吃内存，而是将大部分数据存储到磁盘上。
   2. 其次，LevleDb在存储数据时，是根据记录的key值有序存储的，就是说相邻的key值在存储文件中是依次顺序存储的，而应用可以自定义key大小比较函数，LevleDb会按照用户定义的比较函数依序存储这些记录。
   3. 再次，像大多数KV系统一样，LevelDb的操作接口很简单，基本操作包括写记录，读记录以及删除记录。也支持针对多条操作的原子批量操作。
@@ -647,32 +633,19 @@ int main(int argc, char** argv) {
   5. 除此外，LevelDb还支持数据压缩等操作，这对于减小存储空间以及增快IO效率都有直接的帮助。
   6. LevelDb性能非常突出，官方网站报道其随机写性能达到40万条记录每秒，而随机读性能达到6万条记录每秒。总体来说，LevelDb的写操作要大大快于读操作，而顺序读写操作则大大快于随机读写操作。
 </code></pre>
-
 <h3 id="leveldb的安装">LevelDB的安装</h3>
-
 <p>以ubuntu14.04为例，但实际上除了路径可能不同，其他部分是系统无关的。</p>
-
 <p><a href="https://github.com/google/leveldb">leveldb_github地址</a></p>
-
 <p>然后记得切换到指定tag</p>
-
 <p>可以使用git tag命令得到,然后用git checkout命令切换，我这里使用的是1.20版本</p>
-
 <p>之后直接执行make</p>
-
 <p>之后将头文件拷贝到系统路径下：</p>
-
 <pre><code>sudo cp -r include/leveldb /usr/include
 </code></pre>
-
 <p>编译之后分别会得到out-shared和out-static两个文件夹，分别是动态库和静态库</p>
-
 <p>我们进入out-shared文件夹，讲libleveldb.so*的三个文件（有两个是链接）拷贝到/usr/lib下</p>
-
 <p>然后用sudo ldconfig 命令将动态库加到缓存中。</p>
-
 <p>我们用如下代码测试一下：</p>
-
 <pre><code>#include &lt;iostream&gt;
 #include &lt;cassert&gt;
 #include &lt;cstdlib&gt;
@@ -700,31 +673,18 @@ int main(void)
     return 0;
 }
 </code></pre>
-
 <p>编译选项为：</p>
-
 <p>g++ mytest.cc -o mytest -lpthread -lleveldb</p>
-
 <p>如果运行得到jason，表示安装成功。</p>
-
 <h3 id="leveldb的使用">LevelDB的使用</h3>
-
 <p>一些基本操作可以参考<a href="https://github.com/google/leveldb/blob/master/doc/index.md">github文档</a></p>
-
 <p>不过发现levelDB的接口似乎只支持key和value都是string类型。。</p>
-
 <p>然而对于人脸提取feature,实际上需要的是string映射到float**</p>
-
 <p>,偶然发现caffe中使用了levelDB,</p>
-
 <p>发现它的做法是使用protobuf将数据序列化，然后再存储。</p>
-
 <p><a href="https://111qqz.com/wordpress/2018/04/protobuf/">protobuf学习笔记</a></p>
-
 <h3 id="注意事项">注意事项</h3>
-
 <p>记录一些踩坑的经历..</p>
-
 <p>如果有100条数据，想要每10条存一个数据库，那么每１０条执行一次DB::Open就行了&hellip;不然会报错在put那里，导致core dumped</p>
 
 

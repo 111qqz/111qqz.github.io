@@ -242,27 +242,18 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#std-async">std::async</a></li>
-<li><a href="#std-packaged-task">std::packaged_task</a></li>
-<li><a href="#std-promise">std::promise</a></li>
-<li><a href="#in-summary">In summary</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#stdasync">std::async</a></li>
+    <li><a href="#stdpackaged_task">std::packaged_task</a></li>
+    <li><a href="#stdpromise">std::promise</a></li>
+    <li><a href="#in-summary">In summary</a></li>
+  </ul>
 </nav>
                 
-                
-
-<p>把std::async,std::packaged_task,std::promise三个放在一起来说,是因为他们都可以返回一个std::future对象.简单来说,当某个线程需要等待一个特定的一次性事件(one-off event),它可以用一个&rdquo;future&rdquo;来表示这个事件.</p>
-
-<h2 id="std-async">std::async</h2>
-
+                <p>把std::async,std::packaged_task,std::promise三个放在一起来说,是因为他们都可以返回一个std::future对象.简单来说,当某个线程需要等待一个特定的一次性事件(one-off event),它可以用一个&quot;future&quot;来表示这个事件.</p>
+<h2 id="stdasync">std::async</h2>
 <p>有的时候可能你需要做一个花费事件比较长的计算,但是计算结果不是立刻需要.这个时候就可以用一个新的线程来做这个计算.这里比较关键的问题是如何将在新线程进行计算的结果传回到当前线程,因为std::thread并没有提供一个类似的机制.</p>
-
 <p>这个时候就需要std::async登场了.</p>
-
 <pre><code>#include &lt;future&gt;
 #include &lt;iostream&gt;
 int find_the_answer_to_ltuae();
@@ -274,9 +265,7 @@ do_other_stuff();
 std::cout&lt;&lt;&quot;The answer is &quot;&lt;&lt;the_answer.get()&lt;&lt;std::endl;
 }
 </code></pre>
-
 <p>当然也可以与向std::thread包装的thread function中传参数一样,向std::async中传参数,如下:</p>
-
 <pre><code>#include &lt;string&gt;
 #include &lt;future&gt;
 struct X
@@ -304,66 +293,59 @@ public:
   move_only(move_only const&amp;) = delete;
   move_only&amp; operator=(move_only&amp;&amp;);
   move_only&amp; operator=(move_only const&amp;) = delete;
-
+  
   void operator()();
 };
 auto f5=std::async(move_only());  // 调用tmp()，tmp是通过std::move(move_only())构造得到
 </code></pre>
-
 <p>此外,std:;async还有一个可选参数,值为std::launch::deferred或std::launch:async或std::launch::deferred|std::launch:async,第三种为默认参数.</p>
-
 <p>std::launch::async表示该task会<strong>立即</strong>在一个新的thread上执行.</p>
-
 <p>std::launch::deferred 表示该task不会被立刻执行,而是在调用get()或者wait()的时候才会执行.这里需要注意的是,调用get()或者wait()的线程,可以是和调用async()属于同一个线程,也可以属于不同线程.</p>
-
 <p>笼统来说,std::launch:deferred是一种更为灵活的方式.具体请参考<a href="https://en.cppreference.com/w/cpp/thread/async">cppreference_async</a></p>
-
-<h2 id="std-packaged-task">std::packaged_task</h2>
-
+<h2 id="stdpackaged_task">std::packaged_task</h2>
 <p>std::packaged_task有点类似std::function,将要在其他线程执行的对象封装了起来。</p>
-
 <pre><code>#include &lt;iostream&gt;
 #include &lt;cmath&gt;
 #include &lt;thread&gt;
 #include &lt;future&gt;
 #include &lt;functional&gt;
-
+ 
 // unique function to avoid disambiguating the std::pow overload set
 int f(int x, int y) { return std::pow(x,y); }
-
+ 
 void task_lambda()
 {
     std::packaged_task&lt;int(int,int)&gt; task([](int a, int b) {
         return std::pow(a, b); 
     });
     std::future&lt;int&gt; result = task.get_future();
-
+ 
     task(2, 9);
-
+ 
     std::cout &lt;&lt; &quot;task_lambda:\t&quot; &lt;&lt; result.get() &lt;&lt; '\n';
 }
-
+ 
 void task_bind()
 {
     std::packaged_task&lt;int()&gt; task(std::bind(f, 2, 11));
     std::future&lt;int&gt; result = task.get_future();
-
+ 
     task();
-
+ 
     std::cout &lt;&lt; &quot;task_bind:\t&quot; &lt;&lt; result.get() &lt;&lt; '\n';
 }
-
+ 
 void task_thread()
 {
     std::packaged_task&lt;int(int,int)&gt; task(f);
     std::future&lt;int&gt; result = task.get_future();
-
+ 
     std::thread task_td(std::move(task), 2, 10);
     task_td.join();
-
+ 
     std::cout &lt;&lt; &quot;task_thread:\t&quot; &lt;&lt; result.get() &lt;&lt; '\n';
 }
-
+ 
 int main()
 {
     task_lambda();
@@ -371,9 +353,7 @@ int main()
     task_thread();
 }
 </code></pre>
-
 <p>与std::async相比，std::packaged_task不会直接执行任务，而是需要显示调用，因此可以做到将执行函数的时机和获取future的时机分离</p>
-
 <pre><code>std::packaged_task&lt;int()&gt; task(sleep);
 
 auto f = task.get_future();
@@ -396,33 +376,22 @@ std::cout &lt;&lt; &quot;You can see this immediately!\n&quot;;
 // so f.get() can block up to 1 second.
 std::cout &lt;&lt; f.get() &lt;&lt; &quot;This will be shown after a second!\n&quot;;
 </code></pre>
-
-<h2 id="std-promise">std::promise</h2>
-
+<h2 id="stdpromise">std::promise</h2>
 <p>第一次用c++11写多线程就是用的promise<a href="https://111qqz.com/2018/08/c11-promise-future-leanrning-notes/">promise &amp;&amp; future leanrning notes</a></p>
-
 <p>个人认为std::promise与std::async或者std:;packaged_task最明显的区别是，它的值不是一个函数的返回值，而是可以通过set_value来设置，因此更加灵活。</p>
-
 <p>需要注意的是，<strong>std::promise不支持拷贝构造</strong>，因此需要使用std::move或者传promise的指针。</p>
-
 <h2 id="in-summary">In summary</h2>
-
+<!-- raw HTML omitted -->
 <blockquote>
-
-> 
-> 
-      * **async**：提供最高层次的抽象。如果你不需要控制线程的运行时机，就选这个。
-      * **packaged_task**：抽象层次比`async`低。如果你需要控制线程的运行时机，且线程执行的结果即目标结果时，选这个。
-      * **promise**：抽象层次最低。当你想在线程中设置目标结果的值，选这个。
-
 </blockquote>
-
+<pre><code>  * **async**：提供最高层次的抽象。如果你不需要控制线程的运行时机，就选这个。
+  * **packaged_task**：抽象层次比`async`低。如果你需要控制线程的运行时机，且线程执行的结果即目标结果时，选这个。
+  * **promise**：抽象层次最低。当你想在线程中设置目标结果的值，选这个。
+</code></pre>
+<!-- raw HTML omitted -->
 <p>参考资料:</p>
-
 <p><a href="https://segmentfault.com/a/1190000002706259">货比三家：C++ 中的 task based 并发</a></p>
-
 <p><a href="https://stackoverflow.com/questions/18143661/what-is-the-difference-between-packaged-task-and-async">What is the difference between packaged_task and async</a></p>
-
 <p><a href="https://en.cppreference.com/w/cpp/thread/promise">std::promise</a></p>
 
 

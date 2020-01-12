@@ -241,38 +241,29 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
+                <nav id="TableOfContents"></nav>
                 
-                
-                <p>起因是在看<CplusplusConcurrencyInAction_PracticalMultithreading>，里面讲到转移一个std::thread的ownership提到了std::move.</p>
-
+                <p>起因是在看&lt;CplusplusConcurrencyInAction_PracticalMultithreading&gt;，里面讲到转移一个std::thread的ownership提到了std::move.</p>
 <p>之前<a href="https://111qqz.com/2018/09/c11_ref_notes/">[C++11 ] std::ref&amp;&amp;std::reference_wrapper notes</a> 提到的情况是在我们想要用引用的时候却进行了拷贝，得到不符合期望的结果。现在的情况是，有些object或许是不支持拷贝构造的。比如std::unique_str,std::ifstream，这个时候如果我们需要传参数进去，就可以使用std::move来实现。比如下面这个例子:</p>
-
 <pre><code>void process_big_object(std::unique_ptr&lt;big_object&gt;);
 std::unique_ptr&lt;big_object&gt; p(new big_object);
 p-&gt;prepare_data(42);
 std::thread t(process_big_object,std::move(p));
 </code></pre>
-
 <p>当然这只是使用std::move的一种情形，即传递不允许拷贝构造的object作为参数。</p>
-
-<p><del>另外，std::move可以更有效率地传递资源。内容之后补orz</del></p>
-
+<p><!-- raw HTML omitted -->另外，std::move可以更有效率地传递资源。内容之后补orz<!-- raw HTML omitted --></p>
 <p>实际上std::move()的作用是传进去一个object,返回这个object的右值引用（<em>rvalue reference）</em></p>
-
 <p>首先区分左值和右值，这其实是一个c语言中就有的概念（作为区分，<strong>右值引用</strong>是C++11中新引入的概念）</p>
-
 <p>一般来说，右值是不能被取地址的值。在C++11之前，右值是不能被引用的。</p>
-
 <p>语法上为了区分C++11之前的引用（也就是左值引用&amp;）,右值引用的符号为&amp;&amp;</p>
-
 <pre><code>void process_value(int&amp; i) { 
  std::cout &lt;&lt; &quot;LValue processed: &quot; &lt;&lt; i &lt;&lt; std::endl; 
 } 
-
+ 
 void process_value(int&amp;&amp; i) { 
  std::cout &lt;&lt; &quot;RValue processed: &quot; &lt;&lt; i &lt;&lt; std::endl; 
 } 
-
+ 
 int main() { 
  int a = 0; 
  process_value(a); 
@@ -281,19 +272,12 @@ int main() {
 LValue processed: 0 
 RValue processed: 1
 </code></pre>
-
-<p>那么为什么要引入“右值引用”这个概念？ 主要有两个目的：<strong>完美转发(Perfect Forwarding)</strong>和<strong>转移语义(Move Sementics)</strong></p>
-
-<blockquote>转移语义可以将资源 ( 堆，系统对象等 ) 从一个对象转移到另一个对象，这样能够减少不必要的临时对象的创建、拷贝以及销毁。转移语义是和拷贝语义相对的，可以类比文件的剪切与拷贝，当我们将文件从一个目录拷贝到另一个目录时，速度比剪切慢很多。</blockquote>
-
+<p>那么为什么要引入“右值引用”这个概念？ 主要有两个目的：<strong>完美转发(Perfect Forwarding)<strong>和</strong>转移语义(Move Sementics)</strong></p>
+<!-- raw HTML omitted -->
 <p>完美转发，也叫精确传递，指的是“需要将一组参数原封不动的传递给另一个函数”。</p>
-
 <p>原封不动的含义是说:数值不变，左值/右值属性不变，const/non-const属性不变。</p>
-
 <p>在泛型函数中，这样的需求非常普遍。</p>
-
 <p>比如下面这个例子:</p>
-
 <pre><code>template &lt;typename T&gt; void forward_value(const T&amp; val) { 
  process_value(val); 
 } 
@@ -307,11 +291,8 @@ int a = 0;
  forward_value(b); // const int&amp; 
 forward_value(2); // int&amp;
 </code></pre>
-
-<p>在右值引用出现，模板的每个参数都必须重载两个类型，总的重载次数是指数级的orz，<del>警察听了想打人</del></p>
-
+<p>在右值引用出现，模板的每个参数都必须重载两个类型，总的重载次数是指数级的orz，<!-- raw HTML omitted -->警察听了想打人<!-- raw HTML omitted --></p>
 <p>然而有了右值引用，不管模板右多少个参数，我们只需要定义一次，接受一个右值引用的参数，就能够将所有的参数类型原封不动的传递给目标函数。</p>
-
 <pre><code>template &lt;typename T&gt; void forward_value(T&amp;&amp; val) { 
  process_value(val); 
 }
@@ -322,31 +303,29 @@ forward_value(a); // int&amp;
 forward_value(b); // const int&amp; 
 forward_value(2); // int&amp;&amp;
 </code></pre>
-
 <p>那么最后说回std::move. std::move的作用就是传入左值，返回右值引用，从而使用右值引用带来的好处（节省资源，实现完美转发等）</p>
-
 <pre><code>#include &lt;iostream&gt;
 #include &lt;utility&gt;
 #include &lt;vector&gt;
 #include &lt;string&gt;
-
+ 
 int main()
 {
     std::string str = &quot;Hello&quot;;
     std::vector&lt;std::string&gt; v;
-
+ 
     // 使用 push_back(const T&amp;) 重载，
     // 表示我们将带来复制 str 的成本
     v.push_back(str);
     std::cout &lt;&lt; &quot;After copy, str is \&quot;&quot; &lt;&lt; str &lt;&lt; &quot;\&quot;\n&quot;;
-
+ 
     // 使用右值引用 push_back(T&amp;&amp;) 重载，
     // 表示不复制字符串；而是
     // str 的内容被移动进 vector
     // 这个开销比较低，但也意味着 str 现在可能为空。
     v.push_back(std::move(str));
     std::cout &lt;&lt; &quot;After move, str is \&quot;&quot; &lt;&lt; str &lt;&lt; &quot;\&quot;\n&quot;;
-
+ 
     std::cout &lt;&lt; &quot;The contents of the vector are \&quot;&quot; &lt;&lt; v[0]
                                          &lt;&lt; &quot;\&quot;, \&quot;&quot; &lt;&lt; v[1] &lt;&lt; &quot;\&quot;\n&quot;;
 }
@@ -354,9 +333,7 @@ After copy, str is &quot;Hello&quot;
 After move, str is &quot;&quot;
 The contents of the vector are &quot;Hello&quot;, &quot;Hello&quot;
 </code></pre>
-
 <p>参考资料:</p>
-
 <pre><code>  * [Move Constructors and Move Assignment Operators (C++)](https://msdn.microsoft.com/en-us/library/dd293665.aspx)
   * [std::move](https://zh.cppreference.com/w/cpp/utility/move)
   * [cpluscplus_std::move](http://www.cplusplus.com/reference/utility/move/)

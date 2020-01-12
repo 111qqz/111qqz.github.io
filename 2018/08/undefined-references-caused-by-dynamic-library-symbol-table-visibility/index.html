@@ -229,46 +229,27 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p>编译某代码，发现报错某函数未定义的引用。该函数的是先前编译得到的动态库中。</p>
-
 <p>先去check了该函数的实现，还有接口与头文件中的声明是否统一。发现没有问题。</p>
-
 <p>然后怀疑.cpp文件没有被编译到，于是在该函数中添加</p>
-
-<p>#pragma message(&rdquo;******************************8&rdquo;)</p>
-
+<p>#pragma message(&quot;******************************8&rdquo;)</p>
 <p>发现的确被编译到了。</p>
-
 <p>使用nm来查看动态库中的符号表，发现也可以找到这个函数的符号。</p>
-
 <p>于是怀疑编译代码的时候没有链接到该动态库。</p>
-
 <p>于是在make的时候打印详细信息。make VERBOSE=1</p>
-
 <p>发现也的确链接了动态库&hellip;.</p>
-
 <p>见鬼了Orz</p>
-
 <p>然后用readelf -s 来查看动态库，惊讶得发现要找的那个符号的BIND怎么是LOCAL..也就是只有文件内可见。</p>
-
 <p>最后发现&hellip;是公司内部的工具和CMakeLists中的add_library冲突&hellip;</p>
-
 <p>虽然这个坑的解决方案没什么价值&hellip;不过因为这个坑了解了一些之前没有了解的部分，也算值得。</p>
-
 <p>关于动态库的符号可见性：</p>
-
 <p>控制的原因是，如果不控制，那么不同的cpp文件可能有相同的变量名字，如果把所有的符号都暴露，很可能在链接时产生冲突。 另外一个原因是，暴露没有必要的符号，会导致符号表的size变大，从而使得link时速度变慢。</p>
-
 <p>参考资料:</p>
-
 <p><a href="https://www.ibm.com/developerworks/aix/library/au-aix-symbol-visibility/index.html">Introduction to symbol visibility</a></p>
-
 <p><a href="http://linuxtools-rst.readthedocs.io/zh_CN/latest/tool/readelf.html">readelf elf文件格式分析</a></p>
-
-<p><a href="http://blog.fesnel.com/blog/2009/08/19/hiding-whats-exposed-in-a-shared-library/">Hiding what&rsquo;s exposed in a shared library</a></p>
-
+<p><a href="http://blog.fesnel.com/blog/2009/08/19/hiding-whats-exposed-in-a-shared-library/">Hiding what's exposed in a shared library</a></p>
 <p><a href="https://gcc.gnu.org/wiki/Visibility">Why is the new C++ visibility support so useful?</a></p>
 
 

@@ -229,21 +229,17 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p>想要修改tensorflow-slim 中 nets中的某个model,例如明明为kk_v2.py</p>
-
 <p>观察到train_image_classifier.py中调用模型的部分</p>
-
 <pre><code>network_fn = nets_factory.get_network_fn(
         FLAGS.model_name,
         num_classes=(dataset.num_classes - FLAGS.labels_offset),
         weight_decay=FLAGS.weight_decay,
         is_training=True)
 </code></pre>
-
 <p>调用了nets_factory.get_network_fn，get_network如下：</p>
-
 <pre><code>def get_network_fn(name, num_classes, weight_decay=0.0, is_training=False):
   &quot;&quot;&quot;Returns a network_fn such as `logits, end_points = network_fn(images)`.
 
@@ -274,11 +270,8 @@
 
   return network_fn
 </code></pre>
-
 <p>我们看到model name 是通过 networks_map映射到func的</p>
-
 <p>因此需要添加对于我们新的model,kk_v2的映射</p>
-
 <pre><code>networks_map = {'alexnet_v2': alexnet.alexnet_v2,
                 'cifarnet': cifarnet.cifarnet,
                 'overfeat': overfeat.overfeat,
@@ -303,9 +296,7 @@
                 'mobilenet_v1': mobilenet_v1.mobilenet_v1,
                }
 </code></pre>
-
 <p>由于train_image_classifier.py中有如下参数，</p>
-
 <pre><code>tf.app.flags.DEFINE_string(
     'preprocessing_name', None, 'The name of the preprocessing to use. If left '
     'as `None`, then the model_name flag is used.'
@@ -315,9 +306,7 @@
 
 preprocessing_name = FLAGS.preprocessing_name or FLAGS.model_name
 </code></pre>
-
 <p>因此还需要修改预处理的映射表</p>
-
 <pre><code> preprocessing_fn_map = {
       'cifarnet': cifarnet_preprocessing,
       'inception': inception_preprocessing,
@@ -343,9 +332,7 @@ preprocessing_name = FLAGS.preprocessing_name or FLAGS.model_name
       'vgg_19': vgg_preprocessing,
   }
 </code></pre>
-
 <p>还要修改arg_scopes_map，添加kk_v2的key</p>
-
 <pre><code>arg_scopes_map = {'alexnet_v2': alexnet.alexnet_v2_arg_scope,
                   'cifarnet': cifarnet.cifarnet_arg_scope,
                   'overfeat': overfeat.overfeat_arg_scope,

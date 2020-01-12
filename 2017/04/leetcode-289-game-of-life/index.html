@@ -225,44 +225,29 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
+                <nav id="TableOfContents"></nav>
                 
-                
-                <p>According to the <a href="https://en.wikipedia.org/wiki/Conways_Game_of_Life">Wikipedia&rsquo;s article</a>: &ldquo;The <strong>Game of Life</strong>, also known simply as <strong>Life</strong>, is a cellular automaton devised by the British mathematician John Horton Conway in 1970.&rdquo;</p>
-
+                <p>According to the <a href="https://en.wikipedia.org/wiki/Conways_Game_of_Life">Wikipedia's article</a>: &ldquo;The <strong>Game of Life</strong>, also known simply as <strong>Life</strong>, is a cellular automaton devised by the British mathematician John Horton Conway in 1970.&rdquo;</p>
 <p>Given a <em>board</em> with <em>m</em> by <em>n</em> cells, each cell has an initial state <em>live</em> (1) or <em>dead</em> (0). Each cell interacts with its <a href="https://en.wikipedia.org/wiki/Moore_neighborhood">eight neighbors</a> (horizontal, vertical, diagonal) using the following four rules (taken from the above Wikipedia article):</p>
-
 <pre><code>  1. Any live cell with fewer than two live neighbors dies, as if caused by under-population.
   2. Any live cell with two or three live neighbors lives on to the next generation.
   3. Any live cell with more than three live neighbors dies, as if by over-population..
   4. Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
 </code></pre>
-
 <p>Write a function to compute the next state (after one update) of the board given its current state.</p>
-
 <p><strong>Follow up</strong>:</p>
-
 <pre><code>  1. Could you solve it in-place? Remember that the board needs to be updated at the same time: You cannot update some cells first and then use their updated values to update other cells.
   2. In this question, we represent the board using a 2D array. In principle, the board is infinite, which would cause problems when the active area encroaches the border of the array. How would you address these problems?
 </code></pre>
-
 <p>题意：生命游戏。。。看到follow up本以为是提高篇。。不是题目要求。。。可是第一个又说 board要同时更新。。。这是要求吧。。。于是我就按照棋盘是二维环来写的。。。最后发现。。。棋盘是有限的。。。</p>
-
 <p>也就是两个follow up&hellip;要看1（同时变换）,不要看2（实际上棋盘是有限的。。）。。。这不是有毒吗。。。</p>
-
-<p><del>所以做leetcode最大的挑战是如何保持心平气和，不要被傻逼题目以及傻逼题目描述影响心情（</del></p>
-
+<p><!-- raw HTML omitted -->所以做leetcode最大的挑战是如何保持心平气和，不要被傻逼题目以及傻逼题目描述影响心情（<!-- raw HTML omitted --></p>
 <p>我直接写了棋盘是二维环的版本。。。注意的就是，八个方向遍历后记得去重，以及不能和起点相同。</p>
-
 <p>同时更新再加两个标记就好了。。。</p>
-
 <p>1代表活的，0代表死了</p>
-
 <p>-1代表刚才活的，现在死了</p>
-
 <p>-2代表刚才死的，现在活了。</p>
-
 <p>最后记得再变回来。。。</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2017年04月05日 星期三 18时52分29秒
@@ -299,14 +284,14 @@ public:
     set &lt; pair &lt; int ,int &gt; &gt; se;
 
     for ( int i = 0 ; i &lt; 8 ;  i++) //八个方向经过check以后可能有相同的orz...
-    {               //还可能遇到自己orz...
+    {				//还可能遇到自己orz...
         int nx = x + dx[i];
         int ny = y + dy[i];
        // nx = checkX(nx);
        // ny = checkY(ny);
         if (!check(nx,ny)) continue;
         if (nx==x&amp;&amp;ny==y) continue;
-//      cout&lt;&lt;&quot;nx:&quot;&lt;&lt;nx&lt;&lt;&quot; ny:&quot;&lt;&lt;ny&lt;&lt;&quot; maze:&quot;&lt;&lt;maze[nx][ny]&lt;&lt;endl;
+//	    cout&lt;&lt;&quot;nx:&quot;&lt;&lt;nx&lt;&lt;&quot; ny:&quot;&lt;&lt;ny&lt;&lt;&quot; maze:&quot;&lt;&lt;maze[nx][ny]&lt;&lt;endl;
         if (maze[nx][ny]==1||maze[nx][ny]==-1) se.insert(make_pair(nx,ny));
     }
     cnt = se.size();
@@ -315,7 +300,7 @@ public:
     else
     return 1;
 
-    }                           //1 -&gt; live ,0-&gt;dead
+    }						    //1 -&gt; live ,0-&gt;dead
     int dead( int x,int y,vector&lt;vector&lt;int&gt; &gt;&amp; maze) //-1&gt;刚才活的，现在死了， -2-&gt;刚才死的，现在活了
     {
     int cnt = 0 ;
@@ -328,7 +313,7 @@ public:
         //ny = checkY(ny);
         if (!check(nx,ny)) continue;
         if (nx==x&amp;&amp;ny==y) continue;
-//      printf(&quot;nx:%d ny:%d\n&quot;,nx,ny);
+//	    printf(&quot;nx:%d ny:%d\n&quot;,nx,ny);
         if (maze[nx][ny]==1||maze[nx][ny]==-1) se.insert(make_pair(nx,ny));
     }
     cnt = se.size();
@@ -346,7 +331,7 @@ public:
         for ( int j = 0 ;j &lt; m ; j++)
         {
         int tmp = board[i][j];
-//      cout&lt;&lt;&quot;val:&quot;&lt;&lt;tmp&lt;&lt;endl;
+//		cout&lt;&lt;&quot;val:&quot;&lt;&lt;tmp&lt;&lt;endl;
         if (tmp==1||tmp==-1)
         {
             board[i][j] = live(i,j,board);

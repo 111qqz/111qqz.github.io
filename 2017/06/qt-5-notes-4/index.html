@@ -229,111 +229,75 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p>des的基本搞定了。。。打包。。。</p>
-
 <p>在linux下打包成exe。。。。实在是。。没什么好办法的样子。。。</p>
-
 <p>嘛。转念一想。老师说是打包成可执行文件。。。没说一定是exe啊。。。</p>
-
 <p>然后也许我就零分了呢2333</p>
-
 <p><a href="https://drive.google.com/file/d/0B96LFHMWbpJ6a0VianV5M25hZE0/view?usp=sharing">des1.0</a></p>
-
 <p>好了。。我又跑到windows下装了个qt&hellip;安装包2.3G,记得要安装编译器&hellip;</p>
-
 <p>装好以后。。。开始打包。。。</p>
-
 <p>注意区分：</p>
-
 <p><strong>Qt Widgets Application 和 Qt Quick Application</strong></p>
-
 <p>我的是后者。。。打包方式略有不同。。。</p>
-
 <p>下面引用了详细步骤。。我来说下简略步骤好了。。。</p>
-
 <pre><code>  * 将creator选到release的部署模式。。然后编译。。。
   * 将exe文件单独拷贝出来，放到一个文件夹。。。
   * **运行qt的命令行（不是系统的命令行！)**
   * **在qt的命令行中运行windeployqt helloqml.exe --qmldir C:\Qt\Qt5.4.0\5.4\mingw491_32\qml（其中qmldir后面换为qml的真实路径）**
 </code></pre>
-
 <p>顺便吐槽这工具有点智障。。。文件夹选项不显示后缀名就找不到helloqml　　也是有毒。。。</p>
-
-<blockquote>Qt 官方开发环境使用的动态链接库方式，在发布生成的exe程序时，需要复制一大堆 dll，
-如果自己去复制dll，很可能丢三落四，导致exe在别的电脑里无法正常运行。
-因此 Qt 官方开发环境里自带了一个工具：windeployqt.exe。
-以官方 Qt 5.4.0+MinGW 开发环境为例，
-从开始菜单--》Qt 5.4.0--》5.4--》MinGW 4.9 (32-bit)--》Qt 5.4 for Desktop (MinGW 4.9 32 bit)，可以打开 Qt 命令行，从这里就可以执行 windeployqt 工具。
-
-集成开发环境 QtCreator 目前生成图形界面程序 exe 大致可以分为两类：
-Qt Widgets Application 和 Qt Quick Application。
-下面分别介绍这两类exe 的发布方式。
-
-1、Qt Widgets Application可执行程序发布方式
-首先用 QtCreator 新建一个 Qt Widgets Application 项目，直接用默认的 QMainWindow 程序就可以了，项目名字假定是 hellomw。
-然后以 Release 方式编译生成 exe 程序：
-![](http://imgsrc.baidu.com/forum/w580/sign=2f5a68e2b3fd5266a72b3c1c9b199799/00c755ee3d6d55fb1c6a122f68224f4a21a4dddf.jpg)
-
-
-生成的程序运行正常之后，找到项目的生成目录，比如 项目源码路径：
-C:\QtPros\hellomw\
-它的项目生成目录是
-C:\QtPros\build-hellomw-Desktop_Qt_5_4_0_MinGW_32bit-Release\
-进入这个文件夹，在进入它的子文件夹 release 里面，找到 hellomw.exe ，
-将这个exe 复制到一个新的单独的文件夹里用于发布，比如存到
-D:\hellomw\ 文件夹里面。
-
-然后从开始菜单打开 Qt 命令行，输入命令 ：
-cd /d D:\hellomw
-然后使用 windeployqt 工具命令：
-**windeployqt hellomw.exe**
-![](http://imgsrc.baidu.com/forum/w580/sign=964ae7c45766d0167e199e20a72ad498/7fbe316d55fbb2fbec873c1b4a4a20a44723dcdf.jpg)
-
-
-然后可以在 D:\hellomw 文件夹里看到 windeployqt 工具自动复制的插件文件夹
-和 dll文件、qm文件。这时候得到的就完整的 exe 程序发布集合，依赖关系都解决好了。
-![](http://imgsrc.baidu.com/forum/w580/sign=066c035fd5160924dc25a213e406359b/1b3d59fbb2fb4316ddb31e7325a4462308f7d3df.jpg)
-
-
-把 D:\hellomw 文件夹 打包就可以发布了，不用自己一个个找 dll 文件了。
-D:\hellomw 文件夹里的qm文件是多国语言翻译文件，不需要可以删了，
-其他的都保留。
-
-2、Qt Quick Application发布方式
-首先用 QtCreator 新建一个 Qt Quick Application 项目，直接用默认的项目模版，点击下一步生成项目，项目名字假定是 helloqml。
-然后以 Release 方式编译生成 exe 程序：
-![](http://imgsrc.baidu.com/forum/w580/sign=e3f7812f0c24ab18e016e13f05fbe69a/73abbefb43166d22fedb719d432309f79152d2df.jpg)
-
-
-然后找到项目的构建目录，比如项目源码目录 C:\QtPros\helloqml，
-它的构建目录是：
-C:\QtPros\build-helloqml-Desktop_Qt_5_4_0_MinGW_32bit-Release\
-进入这个目录，再进入 release 子文件夹，找到 helloqml.exe ，
-复制到一个新的单独的文件夹里面，比如 D:\helloqml\ 文件夹里面。
-
-然后从开始菜单打开 Qt 命令行，进入D:\helloqml\文件夹：
-cd /d D:\helloqml
-然后使用 windeployqt 工具命令：
-**windeployqt helloqml.exe --qmldir C:\Qt\Qt5.4.0\5.4\mingw491_32\qml**
-![](http://imgsrc.baidu.com/forum/w580/sign=6287581dae18972ba33a00c2d6cc7b9d/94ab4f166d224f4a9235171a0cf790529922d1df.jpg)
-
-
-注意不要跟烧包一样照抄上条命令，--qmldir 是指出 Qt 库里面的 qml 文件夹位置，
-上面命令里 C:\Qt\Qt5.4.0 是 Qt 官方开发环境安装的文件夹，
-C:\Qt\Qt5.4.0\5.4\mingw491_32 是Qt类库的目录（QTDIR），
-因此使用的 --qmldir 后面写的是 C:\Qt\Qt5.4.0\5.4\mingw491_32\qml
-读者Qt环境安装路径不一样，要根据实际情况修改！
-
-然后可以看到 D:\helloqml 文件夹里有一大堆文件，就是 QtQuick程序需要的依赖文件。
-将整个 D:\helloqml 文件夹 打包就可以发布出去，在别的电脑上使用。
-![](http://imgsrc.baidu.com/forum/w580/sign=24e1ca2904e9390156028d364bec54f9/5b4ede1b0ef41bd5f5569afd54da81cb39db3d05.jpg)
-
-
-这个 D:\helloqml 文件夹里的东西很多，看不懂就不要删，老老实实打包发布就行了。
-
-上面是最简单的程序发布，实际复杂程序可能还带一些图片文件、数据库文件、配置文件之类的，可以按自己需要添加这些文件到发布文件夹里面。</blockquote>
+<!-- raw HTML omitted -->
+<p>集成开发环境 QtCreator 目前生成图形界面程序 exe 大致可以分为两类：<br>
+Qt Widgets Application 和 Qt Quick Application。<br>
+下面分别介绍这两类exe 的发布方式。</p>
+<p>1、Qt Widgets Application可执行程序发布方式<br>
+首先用 QtCreator 新建一个 Qt Widgets Application 项目，直接用默认的 QMainWindow 程序就可以了，项目名字假定是 hellomw。<br>
+然后以 Release 方式编译生成 exe 程序：<br>
+<img src="http://imgsrc.baidu.com/forum/w580/sign=2f5a68e2b3fd5266a72b3c1c9b199799/00c755ee3d6d55fb1c6a122f68224f4a21a4dddf.jpg" alt=""></p>
+<p>生成的程序运行正常之后，找到项目的生成目录，比如 项目源码路径：<br>
+C:\QtPros\hellomw<br>
+它的项目生成目录是<br>
+C:\QtPros\build-hellomw-Desktop_Qt_5_4_0_MinGW_32bit-Release<br>
+进入这个文件夹，在进入它的子文件夹 release 里面，找到 hellomw.exe ，<br>
+将这个exe 复制到一个新的单独的文件夹里用于发布，比如存到<br>
+D:\hellomw\ 文件夹里面。</p>
+<p>然后从开始菜单打开 Qt 命令行，输入命令 ：<br>
+cd /d D:\hellomw<br>
+然后使用 windeployqt 工具命令：<br>
+<strong>windeployqt hellomw.exe</strong><br>
+<img src="http://imgsrc.baidu.com/forum/w580/sign=964ae7c45766d0167e199e20a72ad498/7fbe316d55fbb2fbec873c1b4a4a20a44723dcdf.jpg" alt=""></p>
+<p>然后可以在 D:\hellomw 文件夹里看到 windeployqt 工具自动复制的插件文件夹<br>
+和 dll文件、qm文件。这时候得到的就完整的 exe 程序发布集合，依赖关系都解决好了。<br>
+<img src="http://imgsrc.baidu.com/forum/w580/sign=066c035fd5160924dc25a213e406359b/1b3d59fbb2fb4316ddb31e7325a4462308f7d3df.jpg" alt=""></p>
+<p>把 D:\hellomw 文件夹 打包就可以发布了，不用自己一个个找 dll 文件了。<br>
+D:\hellomw 文件夹里的qm文件是多国语言翻译文件，不需要可以删了，<br>
+其他的都保留。</p>
+<p>2、Qt Quick Application发布方式<br>
+首先用 QtCreator 新建一个 Qt Quick Application 项目，直接用默认的项目模版，点击下一步生成项目，项目名字假定是 helloqml。<br>
+然后以 Release 方式编译生成 exe 程序：<br>
+<img src="http://imgsrc.baidu.com/forum/w580/sign=e3f7812f0c24ab18e016e13f05fbe69a/73abbefb43166d22fedb719d432309f79152d2df.jpg" alt=""></p>
+<p>然后找到项目的构建目录，比如项目源码目录 C:\QtPros\helloqml，<br>
+它的构建目录是：<br>
+C:\QtPros\build-helloqml-Desktop_Qt_5_4_0_MinGW_32bit-Release<br>
+进入这个目录，再进入 release 子文件夹，找到 helloqml.exe ，<br>
+复制到一个新的单独的文件夹里面，比如 D:\helloqml\ 文件夹里面。</p>
+<p>然后从开始菜单打开 Qt 命令行，进入D:\helloqml\文件夹：<br>
+cd /d D:\helloqml<br>
+然后使用 windeployqt 工具命令：<br>
+<strong>windeployqt helloqml.exe &ndash;qmldir C:\Qt\Qt5.4.0\5.4\mingw491_32\qml</strong><br>
+<img src="http://imgsrc.baidu.com/forum/w580/sign=6287581dae18972ba33a00c2d6cc7b9d/94ab4f166d224f4a9235171a0cf790529922d1df.jpg" alt=""></p>
+<p>注意不要跟烧包一样照抄上条命令，&ndash;qmldir 是指出 Qt 库里面的 qml 文件夹位置，<br>
+上面命令里 C:\Qt\Qt5.4.0 是 Qt 官方开发环境安装的文件夹，<br>
+C:\Qt\Qt5.4.0\5.4\mingw491_32 是Qt类库的目录（QTDIR），<br>
+因此使用的 &ndash;qmldir 后面写的是 C:\Qt\Qt5.4.0\5.4\mingw491_32\qml<br>
+读者Qt环境安装路径不一样，要根据实际情况修改！</p>
+<p>然后可以看到 D:\helloqml 文件夹里有一大堆文件，就是 QtQuick程序需要的依赖文件。<br>
+将整个 D:\helloqml 文件夹 打包就可以发布出去，在别的电脑上使用。<br>
+<img src="http://imgsrc.baidu.com/forum/w580/sign=24e1ca2904e9390156028d364bec54f9/5b4ede1b0ef41bd5f5569afd54da81cb39db3d05.jpg" alt=""></p>
+<p>这个 D:\helloqml 文件夹里的东西很多，看不懂就不要删，老老实实打包发布就行了。</p>
+<p>上面是最简单的程序发布，实际复杂程序可能还带一些图片文件、数据库文件、配置文件之类的，可以按自己需要添加这些文件到发布文件夹里面。<!-- raw HTML omitted --></p>
 
 
                 

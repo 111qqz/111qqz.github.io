@@ -229,24 +229,16 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=3642">hdu3642题目链接</a></p>
-
 <p>题意：给出若干个（1000）长方体，求<strong>至少交三次</strong>的空间的体积。</p>
-
 <p>尺寸为[x1,x2],[y1,y2],[z1,z2],其中x，y的坐标的绝对值不超过1E6,Z的坐标的绝对值不超过1E9.</p>
-
 <p>思路：</p>
-
 <p>线段树+扫描线。</p>
-
 <p>由于Z的坐标范围比较小，我们的做法是 利用“微分”的思想，将每个长方体，想成若干的高度为1的矩形（矩形片）</p>
-
 <p>因此就转化成了求矩形<strong>至少交三次的面积</strong></p>
-
 <p>其中和矩形交，也就是矩形至少交2次的面积比较类似，只不过线段树多维护一个至少三次覆盖的长度的域。</p>
-
 <pre><code>void PushUp(int l,int r,int rt)
 {
     //cout&lt;&lt;&quot;l:&quot;&lt;&lt;l&lt;&lt;&quot; r:&quot;&lt;&lt;r&lt;&lt;&quot; rt:&quot;&lt;&lt;rt&lt;&lt;&quot; id:&quot;&lt;&lt;id&lt;&lt;endl;
@@ -258,7 +250,7 @@
     if (tree[rt].cnt==2)
     {
     tree[rt].one = tree[rt].two = X[r+1]-X[l];
-
+    
     if (l==r) tree[rt].three = 0 ;
     else tree[rt].three = tree[rt&lt;&lt;1].one + tree[rt&lt;&lt;1|1].one;
 
@@ -285,15 +277,10 @@
     }
 }
 </code></pre>
-
 <p><strong>假设我们有一个长为5，宽为6，高为7的长方体</strong></p>
-
 <p><strong>那么我们就要将其拆成7个，长为5，宽为6的矩形</strong></p>
-
 <p>将所有长方体处理完之后，枚举高度，对于每一个高度，如果矩形大于等于三个，就做一个“矩形的三次面积交”操作，将答案累加。</p>
-
 <p>2A，PushUp的时候写错了一句。。。即如果父亲节点已经覆盖了两次，<strong>那么父亲节点被覆盖三次的是从左右儿子被覆盖一次的情况得来的</strong></p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2017年09月28日 星期四 14时18分35秒
@@ -372,7 +359,7 @@ void PushUp(int l,int r,int rt)
     if (tree[rt].cnt==2)
     {
     tree[rt].one = tree[rt].two = X[r+1]-X[l];
-
+    
     if (l==r) tree[rt].three = 0 ;
     else tree[rt].three = tree[rt&lt;&lt;1].one + tree[rt&lt;&lt;1|1].one;
 

@@ -229,28 +229,18 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=5763">hdu 5763 题目链接</a></p>
-
 <p>题意：给定两个字符串A和B，每个出现在A中的B(可以overlap)都有两种含义，问A串一共可能有多少种含义。</p>
-
 <p>思路：kmp+dp.</p>
-
 <p>考虑dp[i]为前i个字符（<strong>也就是从开始长度为i，注意不是字符串的下标为i</strong>）的含义数。</p>
-
 <p>我们考虑第i个字符对其他位置字符的贡献。</p>
-
 <p>首先第i位的含义数可以无条件得转移到i+1位。也就是dp[i+1]+=dp[i];</p>
-
 <p>此外，如果第i位是一个B串开始的位置，那么第i位对i+len2位就有贡献。也就是dp[i+len2]+=dp[i];</p>
-
 <p>初始化dp[0]=1，其他为0.</p>
-
 <p>剩下我们要做的就是处理出A串中的哪些位置是B串开始的位置。</p>
-
 <p>kmp处理下就好，用一个布尔数组标记。</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :2016年08月11日 星期四 11时07分24秒
@@ -313,7 +303,7 @@ void kmp( char *a,char *b)
     if (j==m)
     {
         v[i-m] = true;//长度为i的位置的下标是i-1,开始的位置是（i-1）+m+1,也就是i-m
-//      cout&lt;&lt;&quot;i:&quot;&lt;&lt;i&lt;&lt;&quot; i-m:&quot;&lt;&lt;i-m&lt;&lt;endl;
+//	    cout&lt;&lt;&quot;i:&quot;&lt;&lt;i&lt;&lt;&quot; i-m:&quot;&lt;&lt;i-m&lt;&lt;endl;
     }
     }
 }
@@ -335,15 +325,15 @@ int main()
         int len1 = strlen(a);
         int len2 = strlen(b);
         ms(dp,0);
-//      for ( int i = 0 ; i &lt; len1 ; i++) cout&lt;&lt;i&lt;&lt;&quot; &quot;&lt;&lt;v[i]&lt;&lt;endl;
-
+//	    for ( int i = 0 ; i &lt; len1 ; i++) cout&lt;&lt;i&lt;&lt;&quot; &quot;&lt;&lt;v[i]&lt;&lt;endl;
+	    
         dp[0] = 1; //dp[i]表示长度为i为止的方案数(注意是长度为i，不是字符串下标为i!!!)
         for ( int i = 0 ; i &lt; len1;  i++)  //这样考虑比较容易，我们考虑第i位的贡献。
-        {                   //第i位的贡献无论如何都可以传递到下一位。如果第i位是某个匹配开始的位置，还可以传递到i+len2-1的位置。
+        {					//第i位的贡献无论如何都可以传递到下一位。如果第i位是某个匹配开始的位置，还可以传递到i+len2-1的位置。
         dp[i+1] = (dp[i+1] + dp[i])%MOD;
         if (v[i]) dp[i+len2] = (dp[i+len2] + dp[i]) % MOD;
         }
-//      for ( int i = 0 ; i &lt;= len1 ; i++) cout&lt;&lt;i&lt;&lt;&quot; dp[i]:&quot;&lt;&lt;dp[i]&lt;&lt;endl;
+//	    for ( int i = 0 ; i &lt;= len1 ; i++) cout&lt;&lt;i&lt;&lt;&quot; dp[i]:&quot;&lt;&lt;dp[i]&lt;&lt;endl;
         printf(&quot;%d\n&quot;,dp[len1]%MOD);
     }
   #ifndef ONLINE_JUDGE  

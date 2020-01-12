@@ -225,26 +225,18 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
+                <nav id="TableOfContents"></nav>
                 
-                
-                <p>apt-get install build-essential
-    apt-get install bochs bochs-x nasm</p>
-
+                <p>apt-get install build-essential<br>
+apt-get install bochs bochs-x nasm</p>
 <p>此处下载的bochs应该是比较新的&hellip;如果之后遇到</p>
-
-<blockquote>failed assertion in init_idt :g_handlersizenoterr == g_handlersizeerr</blockquote>
-
+<!-- raw HTML omitted -->
 <p>这个错误，建议安装比较老的nasm版本，比如2.08.02<a href="http://www.nasm.us/pub/nasm/releasebuilds/2.08.02/">链接</a></p>
-
-<p>下载geekos-0.3软件包，地址为：
+<p>下载geekos-0.3软件包，地址为：<br>
 <a href="http://sourceforge.net/projects/geekos/files/">geekOS下载地址</a></p>
-
 <p>然后解压到~/work目录。</p>
-
 <p>然后进入到 /work/geekos-0.3.0/src/project0/build 目录下</p>
-
 <p><strong>之后的操作都是在这个目录下进行的。</strong></p>
-
 <pre><code>rkz2013@111qqz-ThinkPad-X200 ~/work/geekos-0.3.0/src/project0/build $ make depend
 Makefile:249: depend.mak: 没有那个文件或目录
 touch depend.mak
@@ -257,9 +249,7 @@ gcc -M -O -Wall  -Werror  -I../include -I../include/libc  \
         | perl -n -e 's,^(\S),common/$1,;print' \
         &gt;&gt; depend.mak
 </code></pre>
-
 <p>然后执行 make</p>
-
 <pre><code>rkz2013@111qqz-ThinkPad-X200 ~/work/geekos-0.3.0/src/project0/build $ make
 gcc -c -O -Wall  -Werror  -g -DGEEKOS -I../include ../src/geekos/idt.c -o geekos/idt.o
 gcc -c -O -Wall  -Werror  -g -DGEEKOS -I../include ../src/geekos/int.c -o geekos/int.o
@@ -279,17 +269,11 @@ In file included from ../src/geekos/gdt.c:11:0:
 cc1: all warnings being treated as errors
 make: *** [geekos/gdt.o] 错误 1
 </code></pre>
-
 <p>报错，原因是编译检查过于严格。。我们修改makefile文件，取消把warning当成错误看待。</p>
-
 <p>makefile 的路径就是当前路径，也就是：</p>
-
-<blockquote>rkz2013@111qqz-ThinkPad-X200 ~/work/geekos-0.3.0/src/project0/build $ vim Makefile</blockquote>
-
+<!-- raw HTML omitted -->
 <p>把149行的 -Werror 去掉。</p>
-
 <p>然后再次make</p>
-
 <pre><code>rkz2013@111qqz-ThinkPad-X200 ~/work/geekos-0.3.0/src/project0/build $ make
 gcc -c -O -Wall    -g -DGEEKOS -I../include ../src/geekos/gdt.c -o geekos/gdt.o
 In file included from ../src/geekos/gdt.c:11:0:
@@ -322,14 +306,10 @@ common/fmtout.o：在函数‘Format_Output’中：
 fmtout.c:(.text+0xa16)：对‘__stack_chk_fail’未定义的引用
 make: *** [geekos/kernel.exe] 错误 1
 </code></pre>
-
 <p>解决办法是把makefile文件中第148行添加编译选项</p>
-
-<blockquote>-fno-stack-protector</blockquote>
-
-<p>然后把makefile文件中的100行至109行修改为如下内容
+<!-- raw HTML omitted -->
+<p>然后把makefile文件中的100行至109行修改为如下内容<br>
 （修改了100行，106行，109行，条件编译什么的。。可能遇到依赖的库不全的情况。。。安装就好）</p>
-
 <pre><code>100 TARGET_CC := $(TARGET_CC_PREFIX)gcc -m32                                                  
 101 
 102 # Host C compiler.  This is used to compile programs to execute on                        
@@ -341,9 +321,7 @@ make: *** [geekos/kernel.exe] 错误 1
 108 # Target linker.  GNU ld is probably to only one that will work.                          
 109 TARGET_LD := $(TARGET_CC_PREFIX)ld  -m elf_i386
 </code></pre>
-
 <p>然后要把以前失败的清理干净。。重新编译。。。</p>
-
 <pre><code>rkz2013@111qqz-ThinkPad-X200 ~/work/geekos-0.3.0/src/project0/build $ make clean
 for d in geekos common libc user tools; do \
         (cd $d &amp;&amp; rm -f *); \
@@ -411,18 +389,13 @@ nasm -f bin \
         -o geekos/fd_boot.bin
 cat geekos/fd_boot.bin geekos/setup.bin geekos/kernel.bin &gt; fd.img
 </code></pre>
-
-<p>编译成功。。。
+<p>编译成功。。。<br>
 检查一下：</p>
-
 <pre><code>rkz2013@111qqz-ThinkPad-X200 ~/work/geekos-0.3.0/src/project0/build $ ls -a
 .  ..  .bochsrc  common  depend.mak  fd.img  geekos  libc  Makefile  tools  user
 </code></pre>
-
 <p>然后启动bochs</p>
-
 <p>报错：</p>
-
 <pre><code>rkz2013@111qqz-ThinkPad-X200 ~/work/geekos-0.3.0/src/project0/build $ bochs
 ========================================================================
                        Bochs x86 Emulator 2.4.6
@@ -436,11 +409,8 @@ cat geekos/fd_boot.bin geekos/setup.bin geekos/kernel.bin &gt; fd.img
 00000000000e[CTRL ] notify called, but no bxevent_callback function is registered
 00000000000i[CTRL ] quit_sim called with exit code 1
 </code></pre>
-
 <p>因为配置文件.bochsrc 太古老了。。。路径什么的都是错的。。。</p>
-
 <p>最终修改为如下：</p>
-
 <pre><code># An example .bochsrc file.
 # You will need to edit these lines to reflect your system.
 vgaromimage: file=/usr/share/vgabios/vgabios.bin
@@ -460,9 +430,7 @@ i440fxsupport: enabled=0
 # useful for debugging the kernel.
 #debug: action=report
 </code></pre>
-
 <p>然后继续启动。。报错：</p>
-
 <pre><code>========================================================================
                        Bochs x86 Emulator 2.4.6
              Build from CVS snapshot, on February 22, 2011
@@ -477,19 +445,13 @@ i440fxsupport: enabled=0
 00000000000i[     ] using log file ./bochs.out
 bochs-bin: symbol lookup error: /usr/lib/bochs/plugins/libbx_x.so: undefined symbol: XpmCreatePixmapFromData
 </code></pre>
-
-<p>这是由apt-get install bochs-x 得到的 libbx_x.so不完善造成的
+<p>这是由apt-get install bochs-x 得到的 libbx_x.so不完善造成的<br>
 解决办法： 换个显示方案。</p>
-
-<blockquote>sudo apt-get install bochs-sdl</blockquote>
-
+<!-- raw HTML omitted -->
 <p>然后在.bochsrc文件中添加</p>
-
-<blockquote>display_library: sdl</blockquote>
-
+<!-- raw HTML omitted -->
 <p>再次运行bochs  。。终于可以了。。。感动</p>
-
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2016/06/选区_120.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2016/06/选区_120.png" alt="选区_120" />
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2016/06/%E9%80%89%E5%8C%BA_120.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2016/06/%E9%80%89%E5%8C%BA_120.png" alt="选区_120"><br>
 </a></p>
 
 

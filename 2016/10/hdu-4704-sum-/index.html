@@ -233,70 +233,46 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=4704">题目链接</a></p>
-
 <p>题意：定义s(k)为将n分成k个正整数的划分数，给出n，问s(1) + s(2) + &hellip; + s(n-1) + s(n)是多少，结果9+7，其中n&lt;=10^100000。</p>
-
 <p>思路：首先化简要求的式子。</p>
-
 <p>根据隔板法_维基百科</p>
-
-<blockquote>现在有10个球，要放进3个盒子里
-
-> 
-> 
-        ●●●●●●●●●●
-> 
-
-隔2个板子，把10个球被隔开成3个部分
-
-> 
-> 
-        ●|●|●●●●●●●●、●|●●|●●●●●●●、●|●●●|●●●●●●、●|●●●●|●●●●●、●|●●●●●|●●●●、●|●●●●●●|●●●、......
-> 
-
-如此类推，10个球放进3个盒子的方法总数为{![{\binom {10-1}{3-1}}={\binom {9}{2}}=36](https://wikimedia.org/api/rest_v1/media/math/render/svg/551555038a784a1265b78d523a4ee4026f0b5c44)
-
-
-n个球放进k个盒子的方法总数为{![{\binom {n-1}{k-1}}](https://wikimedia.org/api/rest_v1/media/math/render/svg/5e653c24bf6314397550312c50710ff03a66645c)
-
-
-**问题等价于求{![x_{1}+x_{2}+...+x_{k}=n](https://wikimedia.org/api/rest_v1/media/math/render/svg/a5c0fc32b57eea5a661e3c7d5f45faef169ab2a0)
-的可行解数**，其中![x_{1},x_{2},...,x_{k}](https://wikimedia.org/api/rest_v1/media/math/render/svg/ee38ad75e8f6101636aadb3199e11fa206808b23)
-为[正整数](https://zh.wikipedia.org/wiki/)。</blockquote>
-
+<!-- raw HTML omitted -->
+<blockquote>
+</blockquote>
+<pre><code>    ●●●●●●●●●●
+</code></pre>
+<blockquote>
+</blockquote>
+<p>隔2个板子，把10个球被隔开成3个部分</p>
+<blockquote>
+</blockquote>
+<pre><code>    ●|●|●●●●●●●●、●|●●|●●●●●●●、●|●●●|●●●●●●、●|●●●●|●●●●●、●|●●●●●|●●●●、●|●●●●●●|●●●、......
+</code></pre>
+<blockquote>
+</blockquote>
+<p>如此类推，10个球放进3个盒子的方法总数为{<img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/551555038a784a1265b78d523a4ee4026f0b5c44" alt="{\binom {10-1}{3-1}}={\binom {9}{2}}=36"></p>
+<p>n个球放进k个盒子的方法总数为{<img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/5e653c24bf6314397550312c50710ff03a66645c" alt="{\binom {n-1}{k-1}}"></p>
+<p><strong>问题等价于求{<img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/a5c0fc32b57eea5a661e3c7d5f45faef169ab2a0" alt="x_{1}+x_{2}+&hellip;+x_{k}=n"><br>
+的可行解数</strong>，其中<img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/ee38ad75e8f6101636aadb3199e11fa206808b23" alt="x_{1},x_{2},&hellip;,x_{k}"><br>
+为<a href="https://zh.wikipedia.org/wiki/">正整数</a>。<!-- raw HTML omitted --></p>
 <p>于是问题转化成：</p>
-
-<blockquote>n个木棍，n-1个缝，
-
-分成1份则是C(n-1,0);
-
-分成2份则是C(n-1,1);
-
-分成3份则是C(n-1,2);
-
-...
-
-分成n份则是C(n-1,n-1);
-
-ans = sum( C(n-1,i) ) (0<=i<=n-1)
-
-=2^(n-1);</blockquote>
-
+<!-- raw HTML omitted -->
+<p>分成1份则是C(n-1,0);</p>
+<p>分成2份则是C(n-1,1);</p>
+<p>分成3份则是C(n-1,2);</p>
+<p>&hellip;</p>
+<p>分成n份则是C(n-1,n-1);</p>
+<p>ans = sum( C(n-1,i) ) (0&lt;=i&lt;=n-1)</p>
+<p>=2^(n-1);<!-- raw HTML omitted --></p>
 <p>这是我能理解的得到2^(n-1)的方式。。。</p>
-
 <p>看到有好多人说这个结论是显然的。。。求指教（说这是个结论记住就好的就算了23333）</p>
-
 <p>接下来，就是求A=2^(n-1)9+7的问题了。。。</p>
-
 <p>根据<strong>指数循环节公式</strong>A=2^((n-1)%(mod-1))*2^(mod-1)%mod (其中mod=1E9+7)</p>
-
 <p>由于gcd(2,1E9+7)=1,根据<strong>费马小定理</strong>2^(mod-1)%mod=1，因此A=2^((n-1)%(mod-1))</p>
-
 <p>然后快速幂搞之。</p>
-
 <pre><code>/* ***********************************************
 Author :111qqz
 Created Time :Wed 26 Oct 2016 06:22:39 PM CST

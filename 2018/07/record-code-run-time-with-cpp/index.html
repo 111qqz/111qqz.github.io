@@ -225,38 +225,36 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                
+                <nav id="TableOfContents"></nav>
                 
                 <p>以前用的办法太老土啦</p>
-
 <p>看到一个since C++11的方法，我觉得比较优雅</p>
-
 <pre><code>#include &lt;iostream&gt;
 #include &lt;chrono&gt;
 //#include &lt;ratio&gt;
 #include &lt;thread&gt;
-
+ 
 void f()
 {
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
-
+ 
 int main()
 {
     auto t1 = std::chrono::high_resolution_clock::now();
     f();
     auto t2 = std::chrono::high_resolution_clock::now();
-
+	
     // floating-point duration: no duration_cast needed
     std::chrono::duration&lt;double, std::milli&gt; fp_ms = t2 - t1;
-
+ 
     // integral duration: requires duration_cast
     auto int_ms = std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(t2 - t1);
-
+ 
     // converting integral duration to integral duration of shorter divisible time unit:
     // no duration_cast needed
     std::chrono::duration&lt;long, std::micro&gt; int_usec = int_ms;
-
+ 
     std::cout &lt;&lt; &quot;f() took &quot; &lt;&lt; fp_ms.count() &lt;&lt; &quot; ms, &quot;
               &lt;&lt; &quot;or &quot; &lt;&lt; int_ms.count() &lt;&lt; &quot; whole milliseconds &quot;
               &lt;&lt; &quot;(which is &quot; &lt;&lt; int_usec.count() &lt;&lt; &quot; whole microseconds)&quot; &lt;&lt; std::endl;
