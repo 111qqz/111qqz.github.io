@@ -230,7 +230,7 @@
                 <p>原文链接：<a href="https://discuss.codechef.com/questions/21385/a-tutorial-on-suffix-arrays">链接</a></p>
 <p>讲了后缀数组的概念，然后从最暴力的O(n<em>n</em>logn )的复杂度(O(n)用来比较字符串，O(nlogn)是排序的复杂度)逐步优化，依据各个串之间的关系，大概讲了倍增算法，以及给出了一篇The Skew Algorithm 的论文。</p>
 <p>文中实现的倍增算法的复杂度是O（Nlog2N）的。。是因为作者不会基数排序23333。</p>
-<p>This text will focus on the construction of Suffix Arrays, it will aim to explain what they are and what they are used for and hopefully some examples will be provided (it will be mainly simple applications so that the concepts don't get too attached to the theoretical explanation).</p>
+<p>This text will focus on the construction of Suffix Arrays, it will aim to explain what they are and what they are used for and hopefully some examples will be provided (it will be mainly simple applications so that the concepts don&rsquo;t get too attached to the theoretical explanation).</p>
 <p>As usual, this follows my somewhat recent series of tutorials in order to make the reference post with links as complete as possible!</p>
 <pre><code>  * **What is a Suffix Array?**
 </code></pre>
@@ -238,8 +238,8 @@
 <p>As a data structure, it is widely used in areas such as data compression, bioinformatics and, in general, in any area that deals with strings and string matching problems, so, as you can see, it is of great importance to know efficient algorithms to construct a suffix array for a given string.</p>
 <p>Please note that on this context, the name <a href="http://en.wikipedia.org/wiki/Suffix_computer_science">suffix</a> is the exact same thing as substring, as you can see from the wikipedia link provided.</p>
 <p>A suffix array will contain integers that represent the starting indexes of the all the suffixes of a given string, <strong>after</strong> the aforementioned suffixes are sorted.</p>
-<p>On some applications of suffix arrays, it is common to paddle the string with a special character (like #, @ or $) that is <strong>not</strong> present on the alphabet that is being used to represent the string and, as such, it's considered to be smaller than all the other characters. (The reason why these special characters are used will hopefully be clearer ahead in this text)</p>
-<p>And, as a picture it's worth more than a thousand words, below is a small scheme which represents the several suffixes of a string (on the left) along with the suffix array for the same string (on the right). The original string is <strong>attcatg$</strong>.</p>
+<p>On some applications of suffix arrays, it is common to paddle the string with a special character (like #, @ or $) that is <strong>not</strong> present on the alphabet that is being used to represent the string and, as such, it&rsquo;s considered to be smaller than all the other characters. (The reason why these special characters are used will hopefully be clearer ahead in this text)</p>
+<p>And, as a picture it&rsquo;s worth more than a thousand words, below is a small scheme which represents the several suffixes of a string (on the left) along with the suffix array for the same string (on the right). The original string is <strong>attcatg$</strong>.</p>
 <p>The above picture describes what we want to do, and our goal with this text will be to explore different ways of doing this in the hope of obtaining a good solution.</p>
 <p>We will enumerate some popular algorithms for this task and will actually implement some of them in C++ (as you will see, some of them are trivial to implement but can be too slow, while others have faster execution times at the cost of both implementation and memory complexity).</p>
 <pre><code>  * **The naive algorithm**
@@ -423,7 +423,7 @@ int main()
 <pre><code>  * **Constructing (and explaining) the LCP array**
 </code></pre>
 <p>The LCP array (Longest Common Prefix) is an auxiliary data structure to the suffix array. It stores the lengths of the longest common prefixes between pairs of consecutive suffixes in the suffix array.</p>
-<p>So, if one has built the Suffix Array, it's relatively simple to actually build the LCP array.</p>
+<p>So, if one has built the Suffix Array, it&rsquo;s relatively simple to actually build the LCP array.</p>
 <p>In fact, using once again <a href="https://discuss.codechef.com/users/387/gamabunta">@gamabunta</a>&lsquo;s amazing work, below there is the pseudo-code which allows one to efficiently find the LCP array:</p>
 <p>We can use the <strong>SortIndex</strong> array we constructed above to find the <strong>Longest Common Prefix</strong>, between any two prefixes.</p>
 <pre><code>/**********************************************/
@@ -441,10 +441,10 @@ FindLCP (x, y)
 <p>The <strong>LCP Array</strong> is the array of <strong>Longest Common Prefixes</strong> between the <strong>ith</strong> suffix and the <strong>(i-1)th</strong> suffix in the Suffix Array. The above algorithm needs to be called <strong>N</strong> times to build the <strong>LCP Array</strong> in a total of <strong>O(N log N)</strong> time.</p>
 <pre><code>  * **Moving on from here**
 </code></pre>
-<p>This post was actually the first long post I wrote about a subject which I'm not familiar with, <strong>AT ALL</strong>. This is always a risk I am also taking, but I tried to adhere only to the sub-topics I considered I mastered relatively well myself (at least, in theory, as I still don't think I could implement this correctly on a live contest or even a pratice problem&hellip; But, as I said many times, I'm here to work as hard as I can to learn as much as I can!)</p>
+<p>This post was actually the first long post I wrote about a subject which I&rsquo;m not familiar with, <strong>AT ALL</strong>. This is always a risk I am also taking, but I tried to adhere only to the sub-topics I considered I mastered relatively well myself (at least, in theory, as I still don&rsquo;t think I could implement this correctly on a live contest or even a pratice problem&hellip; But, as I said many times, I&rsquo;m here to work as hard as I can to learn as much as I can!)</p>
 <p>I hope that what I wrote is, at least, decent and I did it basically as a good way of gathering information which is very spread over many papers and websites online, so that when people read this post they will be able to grasp the ideas for the naive solution as well as for the improvement presented as a better solution.</p>
 <p>There are many interesting linear algorithms to &ldquo;attack&rdquo; this problem, with one of the most famous being the <a href="http://www.cs.umd.edu/class/fall2011/cmsc858s/SuffixArrays.pdf">Skew Algorithm</a>, which is lovely described on the link I provide here.</p>
-<p>Besides this, there are several other algorithms which are also linear that exploit the relationship between Suffix Trees and the Suffix Array and that use linear sorting algorithm like radix sort, but, which I sadly don't yet understand which makes me unable to discuss them here.</p>
+<p>Besides this, there are several other algorithms which are also linear that exploit the relationship between Suffix Trees and the Suffix Array and that use linear sorting algorithm like radix sort, but, which I sadly don&rsquo;t yet understand which makes me unable to discuss them here.</p>
 <p>However, I hope this little text does its job by at least gathering some useful information on a single post :)</p>
 <p>I am also learning as I write these texts and this has helped me a lot on my evolution as a coder and I hope I can keep contributing to give all my best to this incredible cmmunity :D</p>
 <p>Best regards,</p>

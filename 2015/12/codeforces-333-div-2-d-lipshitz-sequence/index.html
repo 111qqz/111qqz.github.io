@@ -231,7 +231,7 @@
 题意：见题目描述。<br>
 思路：我们很容易发现，l[h]函数其实就是在求区间斜率的最大值。哦不对，是斜率的绝对值的最大值。而且一个显而易见的结论是，斜率最大值一定是由相邻的点得到。画图可以很容易看出。</p>
 <!-- raw HTML omitted -->
-<p>In order to prove it properly, we'll consider three numbers <em>A__i</em>, <em>A__j</em>, <em>A__k</em> (<em>i</em> &lt; <em>j</em> &lt; <em>k</em>) and show that one of the numbers _L_1(<em>i</em>, <em>j</em>),_L_1(<em>j</em>, <em>k</em>) is  ≥ _L_1(<em>i</em>, <em>k</em>). W.l.o.g., we may assume <em>A__i</em> ≤ <em>A__k</em>. There are 3 cases depending on the position of <em>A__j</em> relative to <em>A__i</em>, <em>A__k</em>:</p>
+<p>In order to prove it properly, we&rsquo;ll consider three numbers <em>A__i</em>, <em>A__j</em>, <em>A__k</em> (<em>i</em> &lt; <em>j</em> &lt; <em>k</em>) and show that one of the numbers _L_1(<em>i</em>, <em>j</em>),_L_1(<em>j</em>, <em>k</em>) is  ≥ _L_1(<em>i</em>, <em>k</em>). W.l.o.g., we may assume <em>A__i</em> ≤ <em>A__k</em>. There are 3 cases depending on the position of <em>A__j</em> relative to <em>A__i</em>, <em>A__k</em>:</p>
 <blockquote>
 </blockquote>
 <pre><code>  * _A__j_ &gt; _A__i_, _A__k_ — we can see that _L_1(_i_, _j_) &gt; _L_1(_i_, _k_), since |_A__j_ - _A__i_| = _A__j_ - _A__i_ &gt; _A__k_ - _A__i_ = |_A__k_ - _A__i_| and _j_ - _i_ &lt; _k_ - _i_; we just need to divide those inequalities
@@ -249,7 +249,7 @@
 
     * _d_1_y_ + _d_2_y_ = _L_1(_i_, _j_)_d_1_x_ + _L_1(_j_, _k_)_d_2_x_ &lt; _L_1(_i_, _k_)_d_1_x_ + _L_1(_i_, _k_)_d_2_x_ = _L_1(_i_, _k_)(_d_1_x_ + _d_2_x_) = _d_1_y_ + _d_2_y_, which is a contradiction
 </code></pre>
-<p>We've just proved that to any _L_1 computed for two elements <em>A</em>[<em>i</em>], <em>A</em>[<em>k</em>] with <em>k</em> &gt; <em>i</em> + 1, we can replace one of <em>i</em>, <em>j</em> by a point _j_between them without decreasing _L_1; a sufficient amount of such operations will give us <em>k</em> = <em>i</em> + 1. Therefore, the max. _L_1can be found by only considering differences between adjacent points.<!-- raw HTML omitted --></p>
+<p>We&rsquo;ve just proved that to any _L_1 computed for two elements <em>A</em>[<em>i</em>], <em>A</em>[<em>k</em>] with <em>k</em> &gt; <em>i</em> + 1, we can replace one of <em>i</em>, <em>j</em> by a point _j_between them without decreasing _L_1; a sufficient amount of such operations will give us <em>k</em> = <em>i</em> + 1. Therefore, the max. _L_1can be found by only considering differences between adjacent points.<!-- raw HTML omitted --></p>
 <p>这样子就好做了很多。由于斜率绝对值的最大值一定在由相邻的两个点得到。而相邻两个点的横坐标差1，所以斜率的绝对值就变成了相邻元素差的最大值。因此我们可以预处理一个数组b，表示相邻元素的差的绝对值。</p>
 <p>接下来的问题就变成了如何求b的一段区间里的所有子区间的最大值的和。我们的思路是考虑这个区间里每个元素对答案的贡献。显然，对于b中越大的元素，它对答案的贡献会越多，因为会有更多包含它的区间以它为最大值。具体来讲，对于这个区间的每一个元素，我们可以分别向左和右边扩展，看最大能到哪里。</p>
 <p>比如3 4 3 8 2 7 1，对于8，左边可以到达3，与8的距离为3，右边可以到达1，与8的距离为3，那么8对答案的贡献为(3+1)*(3+1)<em>8，也就是说一共有4</em>4个区间的最大值为8.对于7，左边可以到2，距离7为1，右边可以到1，距离7长度为1，那么7对答案的贡献就是（1+1）×（1+1）*7，也就是有4个区间的最大值为7.分别为{2}，{2,7}，{7,1}，{2,7,1}</p>

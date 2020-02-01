@@ -230,7 +230,7 @@
     <li><a href="#花费了30小时终于搞定了orz">花费了30+小时，终于搞定了orz</a></li>
     <li><a href="#part-1-pc-bootstrap">Part 1: PC Bootstrap</a>
       <ul>
-        <li><a href="#the-pcs-physical-address-space">The PC's Physical Address Space</a></li>
+        <li><a href="#the-pcs-physical-address-space">The PC&rsquo;s Physical Address Space</a></li>
         <li><a href="#the-rom-bios">The ROM BIOS</a></li>
       </ul>
     </li>
@@ -255,7 +255,7 @@
                 
                 <h2 id="花费了30小时终于搞定了orz">花费了30+小时，终于搞定了orz</h2>
 <h2 id="part-1-pc-bootstrap">Part 1: PC Bootstrap</h2>
-<h3 id="the-pcs-physical-address-space">The PC's Physical Address Space</h3>
+<h3 id="the-pcs-physical-address-space">The PC&rsquo;s Physical Address Space</h3>
 <h4 id="80868088时代">8086/8088时代</h4>
 <pre><code>+------------------+  &lt;- 0x00100000 (1MB)
 |     BIOS ROM     |
@@ -324,7 +324,7 @@
 [f000:d15c]    0xfd15c: mov    x,x
 ...
 </code></pre>
-<p>如果看着觉得似懂非懂&hellip;不要慌，问题不大，因为这里不需要弄明白BIOS到底在干什么。不过建议先复习一下x86汇编，可以参考<a href="http://learn-assembly.blogspot.com/2009/04/general-registers-ax-bx-cx-and-dx.html">General Registers (AX, BX, CX, and DX)</a>，<a href="https://pdos.csail.mit.edu/6.828/2018/readings/i386/toc.htm">Intel 80386 Reference Programmer's Manual Table of Contents</a> 等内容。然后强烈推荐去稍微看一下<a href="ftp://ftp.gnu.org/old-gnu/Manuals/gdb/html_chapter/gdb_9.html#SEC56">gdb_examining data</a> 部分的教程，尤其是查看memory和register内容的章节，对搞清楚BIOS这里到底在干嘛大有裨益。<strong>(x [memory]来查看某个地址的内容，x/i [memory]将该地址的指令以人类可读的方式写出，p/x $[register] 来查看某个寄存器的值。）</strong></p>
+<p>如果看着觉得似懂非懂&hellip;不要慌，问题不大，因为这里不需要弄明白BIOS到底在干什么。不过建议先复习一下x86汇编，可以参考<a href="http://learn-assembly.blogspot.com/2009/04/general-registers-ax-bx-cx-and-dx.html">General Registers (AX, BX, CX, and DX)</a>，<a href="https://pdos.csail.mit.edu/6.828/2018/readings/i386/toc.htm">Intel 80386 Reference Programmer&rsquo;s Manual Table of Contents</a> 等内容。然后强烈推荐去稍微看一下<a href="ftp://ftp.gnu.org/old-gnu/Manuals/gdb/html_chapter/gdb_9.html#SEC56">gdb_examining data</a> 部分的教程，尤其是查看memory和register内容的章节，对搞清楚BIOS这里到底在干嘛大有裨益。<strong>(x [memory]来查看某个地址的内容，x/i [memory]将该地址的指令以人类可读的方式写出，p/x $[register] 来查看某个寄存器的值。）</strong></p>
 <p>那么BIOS大概做了什么呢？主要是建立<a href="https://en.wikipedia.org/wiki/Interrupt_descriptor_table">Interrupt descriptor table</a>（其实就是x86体系架构中断向量表的实现),初始化一些硬件设备，然后寻找一个&quot;bootable&quot;设备。如果找到了这样一个设备，BIOS就将该设备上的boot loader加载到内存，并将控制权交给boot loader.</p>
 <p>先明确几个概念。所谓boot loader,就是在加载OS前运行的一段程序。通常在硬盘的第一个sector里，因此这个sector也叫boot sector.至于我们更经常见到的<a href="https://en.wikipedia.org/wiki/Master_boot_record">master boot record(主引导记录)</a>，其实就是一种对于分区过的媒介的特殊的boot sector.</p>
 <p>顺便提一句，确定一个设备是否为&quot;bootable&quot;是通过 0x55和0xAA两个boot signature来决定的。具体来说，如果一个设备中的第0个sector的最后两个byte的值分别为0x55和0xAA,就认为这是一个bootable设备。可以参考<a href="https://wiki.osdev.org/Boot_Sequence">bool sequence</a></p>
@@ -638,10 +638,10 @@ inb(int port)
         return data;
 }
 </code></pre>
-<p>发现就是用c将汇编封装了一层。这个东西应该叫“inline assembly”，具体可以参考<a href="http://www.delorie.com/djgpp/doc/brennan/brennan_att_inline_djgpp.html">Brennan's Guide to Inline Assembly</a>　其中volatile关键字表示禁止gcc优化这段代码。</p>
+<p>发现就是用c将汇编封装了一层。这个东西应该叫“inline assembly”，具体可以参考<a href="http://www.delorie.com/djgpp/doc/brennan/brennan_att_inline_djgpp.html">Brennan&rsquo;s Guide to Inline Assembly</a>　其中volatile关键字表示禁止gcc优化这段代码。</p>
 <!-- raw HTML omitted -->
 <p><strong>asm</strong> <strong>volatile</strong> (&hellip;whatever&hellip;);</p>
-<p>However, I would like to point out that if your assembly's only purpose is to calculate the output registers, with no other side effects, you should leave off the <strong>volatile</strong> keyword so your statement will be processed into GCC's common subexpression elimination optimization.<!-- raw HTML omitted --></p>
+<p>However, I would like to point out that if your assembly&rsquo;s only purpose is to calculate the output registers, with no other side effects, you should leave off the <strong>volatile</strong> keyword so your statement will be processed into GCC&rsquo;s common subexpression elimination optimization.<!-- raw HTML omitted --></p>
 <p>注释上写的要&quot;boot  an ELF kernel image from the first IDE hard disk&rdquo;,那么，首先要知道什么是ELF.　ELF其实就是一种文件格式，全称为“Executable and Linkable Format”可以参考<a href="https://en.wikipedia.org/wiki/Executable_and_Linkable_Format#File_layout">Executable_and_Linkable_Format#File_layout</a>，建议通读这一部分，内容不多，不过对之后很有用。</p>
 <p>参考一下inc/elf.h文件,以及main.c中的注释，就可以整体上知道这段代码是在干什么了：将ELF格式的kernel image从硬盘读到内存中，并将控制权交给kernel image.</p>
 <pre><code>#ifndef JOS_INC_ELF_H
@@ -1357,7 +1357,7 @@ spin:
 <p>OS的kernel通常喜欢运行再较高地址的虚拟内存中，比如0xf0100000，为的是低地址留给用户程序。但是有的机器可能没有那么大的memory，因此不存在0xf0100000这个物理地址。因此这里需要做一个虚拟内存到物理内存的映射。在这个部分实验中，我们不需要至少地址映射是如何work的，只需要知道效果就好。</p>
 <p>具体来说，当CR0_PG被置为1之前，内存地址为物理内存地址(严格地说，其实是线性地址，不过在boot/boot.S中做了线性地址到物理地址的等价映射），当CRO_PG flag被置为1之后，地址就变成了虚拟内存地址。我们可以用gdb调试看一下发生了什么。</p>
 <!-- raw HTML omitted -->
-<p>What is the first instruction <em>after</em> the new mapping is established that would fail to work properly if the mapping weren't in place? Comment out the <code>movl x, %cr0</code> in kern/entry.S, trace into it, and see if you were right.<!-- raw HTML omitted --></p>
+<p>What is the first instruction <em>after</em> the new mapping is established that would fail to work properly if the mapping weren&rsquo;t in place? Comment out the <code>movl x, %cr0</code> in kern/entry.S, trace into it, and see if you were right.<!-- raw HTML omitted --></p>
 <p>先用b *0x10000c处设置断点，这个是JOS kernel开始运行的地址。然后单步几步，在movl x , %cr0处停留，也就是cr0_PG flag恰好也被制为1之前。观察一下0x00100000和0xf0100000的内容:</p>
 <pre><code>(gdb) x/8x 0xf0100000                                                                                                 
 0xf0100000 &lt;_start+4026531828&gt;: 0x00000000      0x00000000      0x00000000      0x00000000                                                                                 
@@ -1682,7 +1682,7 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
     cprintf(&quot;H%x Wo%s&quot;, 57616, &amp;i);
 </code></pre>
 </blockquote>
-<p>What is the output? Explain how this output is arrived at in the step-by-step manner of the previous exercise. <a href="http://web.cs.mun.ca/~michael/c/ascii-table.html">Here's an ASCII table</a> that maps bytes to characters.</p>
+<p>What is the output? Explain how this output is arrived at in the step-by-step manner of the previous exercise. <a href="http://web.cs.mun.ca/~michael/c/ascii-table.html">Here&rsquo;s an ASCII table</a> that maps bytes to characters.</p>
 <p>The output depends on that fact that the x86 is little-endian. If the x86 were instead big-endian what would you set <code>i</code> to in order to yield the same output? Would you need to change <code>57616</code> to a different value?<!-- raw HTML omitted --></p>
 <p>输出结果为  &ldquo;He110 World&rdquo; 前半部分的e110就是57616的十六进制表示。后半部分将unsiged int i 当成unsigned char类型输出，十六进制64,6c,72对应的字符分别为‘d’,‘l’,&lsquo;r&rsquo;.</p>
 <p>然后先复习一下字节序。<strong>整数类型static_cast不会有字节序问题，指针++和&ndash;操作不涉及cast和字节序问题。把指针类型reinterpret_cast才会有字节序问题</strong>，例如：</p>
@@ -1692,7 +1692,7 @@ printf(&quot;%x %x %x %x\n&quot;,c[0],c[1],c[2],c[3]);
 //小端输出:78 56 34 12
 //大端输出:12 34 56 78
 </code></pre>
-<p>由于x86体系架构字节序为little-endian,因此实际输出为'r&rsquo;,&lsquo;l&rsquo;,&lsquo;d&rsquo;.</p>
+<p>由于x86体系架构字节序为little-endian,因此实际输出为&rsquo;r&rsquo;,&lsquo;l&rsquo;,&lsquo;d&rsquo;.</p>
 <p>如果x86体系架构为large-endian,那么i的值应该改为0x00726c64，以实现相同的输出结果。</p>
 <p>57616不需要做修改，因为整数类型staic_cast不存在字节序问题。</p>
 <!-- raw HTML omitted -->
@@ -1741,7 +1741,7 @@ f0100031:       bc 00 00 11 f0          mov    $0xf0110000,%esp
 </code></pre>
 <p>最后一个问题，由于x86体系架构下栈是向下增长的。因此stack pointer初始指向这段保留区域的大地址端（也就是上面)</p>
 <!-- raw HTML omitted -->
-<p>Note that, for this exercise to work properly, you should be using the patched version of QEMU available on the <a href="https://pdos.csail.mit.edu/6.828/2018/tools.html">tools</a> page or on Athena. Otherwise, you'll have to manually translate all breakpoint and memory addresses to linear addresses.<!-- raw HTML omitted --></p>
+<p>Note that, for this exercise to work properly, you should be using the patched version of QEMU available on the <a href="https://pdos.csail.mit.edu/6.828/2018/tools.html">tools</a> page or on Athena. Otherwise, you&rsquo;ll have to manually translate all breakpoint and memory addresses to linear addresses.<!-- raw HTML omitted --></p>
 <p>test_backtrace的入口地址在0xf0100040,在这里设置断点，然后最后的输出结果如下:</p>
 <pre><code>entering test_backtrace 5
 entering test_backtrace 4
@@ -1848,7 +1848,7 @@ Stack backtrace:
 K&gt; 
 </code></pre>
 </blockquote>
-<p>Each line gives the file name and line within that file of the stack frame's eip, followed by the name of the function and the offset of the eip from the first instruction of the function (e.g., monitor+106 means the return eip is 106 bytes past the beginning of monitor).</p>
+<p>Each line gives the file name and line within that file of the stack frame&rsquo;s eip, followed by the name of the function and the offset of the eip from the first instruction of the function (e.g., monitor+106 means the return eip is 106 bytes past the beginning of monitor).</p>
 <p>Be sure to print the file and function names on a separate line, to avoid confusing the grading script.</p>
 <p>Tip: printf format strings provide an easy, albeit obscure, way to print non-null-terminated strings like those in STABS tables. <code>printf(&quot;%.*s&quot;, length, string)</code> prints at most <code>length</code> characters of <code>string</code>. Take a look at the printf man page to find out why this works.</p>
 <p>You may find that some functions are missing from the backtrace. For example, you will probably see a call to <code>monitor()</code> but not to <code>runcmd()</code>. This is because the compiler in-lines some function calls. Other optimizations may cause you to see unexpected line numbers. If you get rid of the -O2 fromGNUMakefile, the backtraces may make more sense (but your kernel will run more slowly).<!-- raw HTML omitted --></p>

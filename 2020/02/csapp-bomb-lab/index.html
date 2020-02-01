@@ -15,9 +15,9 @@
     
 
     
-    <meta name="title" content="BZOJ 1624: [Usaco2008 Open] Clear And Present Danger 寻宝之路 (Floyd)" />
-    <meta property="og:title" content="BZOJ 1624: [Usaco2008 Open] Clear And Present Danger 寻宝之路 (Floyd)" />
-    <meta property="twitter:title" content="BZOJ 1624: [Usaco2008 Open] Clear And Present Danger 寻宝之路 (Floyd)" />
+    <meta name="title" content="【施工中】CSAPP bomb lab" />
+    <meta property="og:title" content="【施工中】CSAPP bomb lab" />
+    <meta property="twitter:title" content="【施工中】CSAPP bomb lab" />
     
 
     
@@ -34,9 +34,9 @@
     <meta name="keyword"  content="ACM,111qqz,商汤科技,hust,华中科技大学">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>BZOJ 1624: [Usaco2008 Open] Clear And Present Danger 寻宝之路 (Floyd)-111qqz的小窝</title>
+    <title>【施工中】CSAPP bomb lab-111qqz的小窝</title>
 
-    <link rel="canonical" href="/2016/04/bzoj1624/">
+    <link rel="canonical" href="/2020/02/csapp-bomb-lab/">
 
     <link rel="stylesheet" href="/css/iDisqus.min.css"/>
 	
@@ -186,12 +186,12 @@
                 <div class="post-heading">
                     <div class="tags">
                         
-                        <a class="tag" href="/tags/floyd" title="floyd">
-                            floyd
+                        <a class="tag" href="/tags/csapp" title="csapp">
+                            csapp
                         </a>
                         
                     </div>
-                    <h1>BZOJ 1624: [Usaco2008 Open] Clear And Present Danger 寻宝之路 (Floyd)</h1>
+                    <h1>【施工中】CSAPP bomb lab</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
 			Posted by 
@@ -199,7 +199,7 @@
 			    111qqz
 			 
 			on 
-			Sunday, April 3, 2016
+			Saturday, February 1, 2020
                         
                     </span>
                 </div>
@@ -227,124 +227,217 @@
                 </header>
                 <nav id="TableOfContents">
   <ul>
-    <li><a href="#1624-usaco2008-open-clear-and-present-danger-寻宝之路">1624: [Usaco2008 Open] Clear And Present Danger 寻宝之路</a></li>
-    <li><a href="#description">Description</a></li>
-    <li><a href="#input">Input</a></li>
-    <li><a href="#output">Output</a></li>
-    <li><a href="#sample-input">Sample Input</a></li>
-    <li><a href="#sample-output">Sample Output</a></li>
-    <li><a href="#hint">HINT</a></li>
-    <li><a href="#source">Source</a></li>
+    <li><a href="#背景">背景</a></li>
+    <li><a href="#拆除phase-1">拆除phase 1</a></li>
   </ul>
 </nav>
                 
-                <h2 id="1624-usaco2008-open-clear-and-present-danger-寻宝之路">1624: [Usaco2008 Open] Clear And Present Danger 寻宝之路</h2>
-<p>Time Limit: 5 Sec  Memory Limit: 64 MB<br>
-Submit: 507  Solved: 345<br>
-[<a href="http://www.lydsy.com/JudgeOnline/submitpage.php?id=1624">Submit</a>][<a href="http://www.lydsy.com/JudgeOnline/problemstatus.php?id=1624">Status</a>][<a href="http://www.lydsy.com/JudgeOnline/bbs.php?id=1624">Discuss</a>]</p>
-<h2 id="description">Description</h2>
-<p>    农夫约翰正驾驶一条小艇在牛勒比海上航行．</p>
-<p>    海上有N(1≤N≤100)个岛屿，用1到N编号．约翰从1号小岛出发，最后到达N号小岛．一</p>
-<p>张藏宝图上说，如果他的路程上经过的小岛依次出现了Ai，A2，…，AM(2≤M≤10000)这样的序列（不一定相邻），那他最终就能找到古老的宝藏．  但是，由于牛勒比海有海盗出没．约翰知道任意两个岛屿之间的航线上海盗出没的概率，他用一个危险指数Dij(0≤Dij≤100000)来描述．他希望他的寻宝活动经过的航线危险指数之和最小．那么，在找到宝藏的前提下，这个最小的危险指数是多少呢？</p>
-<h2 id="input">Input</h2>
-<p>    第1行输入N和M，之后M行一行一个整数表示A序列，之后输入一个NxN的方阵，表示两两岛屿之间航线的危险指数．数据保证Dij=Dji，Dii=0．</p>
-<h2 id="output">Output</h2>
-<p>    最小的危险指数和．</p>
-<h2 id="sample-input">Sample Input</h2>
-<p>3 4<br>
-1<br>
-2<br>
-1<br>
-3<br>
-0 5 1<br>
-5 0 2<br>
-1 2 0</p>
-<p>INPUT DETAILS:</p>
-<p>There are 3 islands and the treasure map requires Farmer John to<br>
-visit a sequence of 4 islands in order: island 1, island 2, island<br>
-1 again, and finally island 3. The danger ratings of the paths are<br>
-given: the paths (1, 2); (2, 3); (3, 1) and the reverse paths have<br>
-danger ratings of 5, 2, and 1, respectively.</p>
-<h2 id="sample-output">Sample Output</h2>
-<p>7</p>
-<p>OUTPUT DETAILS:</p>
-<p>He can get the treasure with a total danger of 7 by traveling in<br>
-the sequence of islands 1, 3, 2, 3, 1, and 3. The cow map&rsquo;s requirement<br>
-(1, 2, 1, and 3) is satisfied by this route. We avoid the path<br>
-between islands 1 and 2 because it has a large danger rating.</p>
-<h2 id="hint">HINT</h2>
-<h2 id="source">Source</h2>
-<p><a href="http://www.lydsy.com/JudgeOnline/problemset.php?search=Silver">Silver</a></p>
-<p>思路：可以把危险指数看成距离，于是floyd一下就好咯</p>
-<pre><code>/* ***********************************************
-Author :111qqz
-Created Time :2016年04月04日 星期一 02时54分18秒
-File Name :code/bzoj/1624.cpp
-************************************************ */
+                <h2 id="背景">背景</h2>
+<p>疫情肆虐,在家百无聊赖,于是开始拆炸弹.<br>
+炸弹分为6个阶段,每个阶段必须输入一个特定的字符串,否则炸弹就会爆炸.<br>
+提供给我们的是一个.c文件和一个linux可执行文件bomb</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c">
+<span style="color:#75715e">/***************************************************************************
+</span><span style="color:#75715e"> * Dr. Evil&#39;s Insidious Bomb, Version 1.1
+</span><span style="color:#75715e"> * Copyright 2011, Dr. Evil Incorporated. All rights reserved.
+</span><span style="color:#75715e"> *
+</span><span style="color:#75715e"> * LICENSE:
+</span><span style="color:#75715e"> *
+</span><span style="color:#75715e"> * Dr. Evil Incorporated (the PERPETRATOR) hereby grants you (the
+</span><span style="color:#75715e"> * VICTIM) explicit permission to use this bomb (the BOMB).  This is a
+</span><span style="color:#75715e"> * time limited license, which expires on the death of the VICTIM.
+</span><span style="color:#75715e"> * The PERPETRATOR takes no responsibility for damage, frustration,
+</span><span style="color:#75715e"> * insanity, bug-eyes, carpal-tunnel syndrome, loss of sleep, or other
+</span><span style="color:#75715e"> * harm to the VICTIM.  Unless the PERPETRATOR wants to take credit,
+</span><span style="color:#75715e"> * that is.  The VICTIM may not distribute this bomb source code to
+</span><span style="color:#75715e"> * any enemies of the PERPETRATOR.  No VICTIM may debug,
+</span><span style="color:#75715e"> * reverse-engineer, run &#34;strings&#34; on, decompile, decrypt, or use any
+</span><span style="color:#75715e"> * other technique to gain knowledge of and defuse the BOMB.  BOMB
+</span><span style="color:#75715e"> * proof clothing may not be worn when handling this program.  The
+</span><span style="color:#75715e"> * PERPETRATOR will not apologize for the PERPETRATOR&#39;s poor sense of
+</span><span style="color:#75715e"> * humor.  This license is null and void where the BOMB is prohibited
+</span><span style="color:#75715e"> * by law.
+</span><span style="color:#75715e"> ***************************************************************************/</span>
 
-#include &lt;cstdio&gt;
-#include &lt;cstring&gt;
-#include &lt;iostream&gt;
-#include &lt;algorithm&gt;
-#include &lt;vector&gt;
-#include &lt;queue&gt;
-#include &lt;set&gt;
-#include &lt;map&gt;
-#include &lt;string&gt;
-#include &lt;cmath&gt;
-#include &lt;cstdlib&gt;
-#include &lt;ctime&gt;
-#define fst first
-#define sec second
-#define lson l,m,rt&lt;&lt;1
-#define rson m+1,r,rt&lt;&lt;1|1
-#define ms(a,x) memset(a,x,sizeof(a))
-typedef long long LL;
-#define pi pair &lt; int ,int &gt;
-#define MP make_pair
+<span style="color:#75715e">#</span><span style="color:#75715e">include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span><span style="color:#75715e">#</span><span style="color:#75715e">include</span> <span style="color:#75715e">&lt;stdlib.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span><span style="color:#75715e">#</span><span style="color:#75715e">include</span> <span style="color:#75715e">&#34;support.h&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span><span style="color:#75715e">#</span><span style="color:#75715e">include</span> <span style="color:#75715e">&#34;phases.h&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">/* 
+</span><span style="color:#75715e"> * Note to self: Remember to erase this file so my victims will have no
+</span><span style="color:#75715e"> * idea what is going on, and so they will all blow up in a
+</span><span style="color:#75715e"> * spectaculary fiendish explosion. -- Dr. Evil 
+</span><span style="color:#75715e"> */</span>
 
-using namespace std;
-const double eps = 1E-8;
-const int dx4[4]={1,0,0,-1};
-const int dy4[4]={0,-1,1,0};
-const int inf = 0x3f3f3f3f;
-const int N=105;
-int d[N][N];
-int n,m;
-int a[10005];
-int main()
+FILE <span style="color:#f92672">*</span>infile;
+
+<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span> argc, <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>argv[])
 {
-    #ifndef  ONLINE_JUDGE 
-    freopen(&quot;code/in.txt&quot;,&quot;r&quot;,stdin);
-  #endif
+    <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>input;
 
-    ios::sync_with_stdio(false);
-    cin&gt;&gt;n&gt;&gt;m;
-    a[0]=1;
-    a[m+1]=n;
-    for ( int i = 1 ; i &lt;= m ; i++) cin&gt;&gt;a[i];
+    <span style="color:#75715e">/* Note to self: remember to port this bomb to Windows and put a 
+</span><span style="color:#75715e">     * fantastic GUI on it. */</span>
+
+    <span style="color:#75715e">/* When run with no arguments, the bomb reads its input lines 
+</span><span style="color:#75715e">     * from standard input. */</span>
+    <span style="color:#66d9ef">if</span> (argc <span style="color:#f92672">=</span><span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>) {  
+	infile <span style="color:#f92672">=</span> stdin;
+    } 
+
+    <span style="color:#75715e">/* When run with one argument &lt;file&gt;, the bomb reads from &lt;file&gt; 
+</span><span style="color:#75715e">     * until EOF, and then switches to standard input. Thus, as you 
+</span><span style="color:#75715e">     * defuse each phase, you can add its defusing string to &lt;file&gt; and
+</span><span style="color:#75715e">     * avoid having to retype it. */</span>
+    <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (argc <span style="color:#f92672">=</span><span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>) {
+	<span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>(infile <span style="color:#f92672">=</span> fopen(argv[<span style="color:#ae81ff">1</span>], <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">r</span><span style="color:#e6db74">&#34;</span>))) {
+	    printf(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">%s: Error: Couldn&#39;t open %s</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, argv[<span style="color:#ae81ff">0</span>], argv[<span style="color:#ae81ff">1</span>]);
+	    exit(<span style="color:#ae81ff">8</span>);
+	}
+    }
+
+    <span style="color:#75715e">/* You can&#39;t call the bomb with more than 1 command line argument. */</span>
+    <span style="color:#66d9ef">else</span> {
+	printf(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Usage: %s [&lt;input_file&gt;]</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, argv[<span style="color:#ae81ff">0</span>]);
+	exit(<span style="color:#ae81ff">8</span>);
+    }
+
+    <span style="color:#75715e">/* Do all sorts of secret stuff that makes the bomb harder to defuse. */</span>
+    initialize_bomb();
+
+    printf(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Welcome to my fiendish little bomb. You have 6 phases with</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+    printf(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">which to blow yourself up. Have a nice day!</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+
+    <span style="color:#75715e">/* Hmm...  Six phases must be more secure than one phase! */</span>
+    input <span style="color:#f92672">=</span> read_line();             <span style="color:#75715e">/* Get input                   */</span>
+    phase_1(input);                  <span style="color:#75715e">/* Run the phase               */</span>
+    phase_defused();                 <span style="color:#75715e">/* Drat!  They figured it out!
+</span><span style="color:#75715e">				      * Let me know how they did it. */</span>
+    printf(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Phase 1 defused. How about the next one?</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+
+    <span style="color:#75715e">/* The second phase is harder.  No one will ever figure out
+</span><span style="color:#75715e">     * how to defuse this... */</span>
+    input <span style="color:#f92672">=</span> read_line();
+    phase_2(input);
+    phase_defused();
+    printf(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">That&#39;s number 2.  Keep going!</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+
+    <span style="color:#75715e">/* I guess this is too easy so far.  Some more complex code will
+</span><span style="color:#75715e">     * confuse people. */</span>
+    input <span style="color:#f92672">=</span> read_line();
+    phase_3(input);
+    phase_defused();
+    printf(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Halfway there!</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+
+    <span style="color:#75715e">/* Oh yeah?  Well, how good is your math?  Try on this saucy problem! */</span>
+    input <span style="color:#f92672">=</span> read_line();
+    phase_4(input);
+    phase_defused();
+    printf(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">So you got that one.  Try this one.</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
     
-    for ( int i = 1 ; i &lt;= n ; i++) 
-        for ( int j = 1 ; j &lt;= n ; j++) cin&gt;&gt;d[i][j];
-	
-    for ( int k = 1 ; k &lt;= n ; k++)
-        for ( int i = 1 ; i &lt;= n ; i++)
-        for ( int j = 1 ; j &lt;= n ; j++)
-            d[i][j] = min(d[i][j],d[i][k]+d[k][j]);
+    <span style="color:#75715e">/* Round and &#39;round in memory we go, where we stop, the bomb blows! */</span>
+    input <span style="color:#f92672">=</span> read_line();
+    phase_5(input);
+    phase_defused();
+    printf(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Good work!  On to the next...</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
 
-    int ans = 0 ;
-    for ( int i = 1 ; i &lt;= m+1 ; i++)
-        ans +=d[a[i-1]][a[i]];
+    <span style="color:#75715e">/* This phase will never be used, since no one will get past the
+</span><span style="color:#75715e">     * earlier ones.  But just in case, make this one extra hard. */</span>
+    input <span style="color:#f92672">=</span> read_line();
+    phase_6(input);
+    phase_defused();
 
-    cout&lt;&lt;ans&lt;&lt;endl;
+    <span style="color:#75715e">/* Wow, they got it!  But isn&#39;t something... missing?  Perhaps
+</span><span style="color:#75715e">     * something they overlooked?  Mua ha ha ha ha! */</span>
     
-  #ifndef ONLINE_JUDGE  
-  fclose(stdin);
-  #endif
-    return 0;
+    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
 }
-</code></pre>
 
+</code></pre></div><p>好了.开始用gdb拆炸弹.</p>
+<h2 id="拆除phase-1">拆除phase 1</h2>
+<p>首先看一下phase_1函数的反汇编代码:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-GAS" data-lang="GAS">
+<span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) <span style="color:#66d9ef">disas</span> <span style="color:#66d9ef">phase_1</span>
+<span style="color:#a6e22e">Dump</span> <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">assembler</span> <span style="color:#66d9ef">code</span> <span style="color:#66d9ef">for</span> <span style="color:#66d9ef">function</span> <span style="color:#66d9ef">phase_1</span>:
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000400ee0</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">0</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:     <span style="color:#66d9ef">sub</span>    <span style="color:#66d9ef">$0x8</span>,%rsp
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000400ee4</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">4</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:     <span style="color:#66d9ef">mov</span>    <span style="color:#66d9ef">$0x402400</span>,%esi
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000400ee9</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">9</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:     <span style="color:#66d9ef">callq</span>  <span style="color:#ae81ff">0x401338</span> &lt;<span style="color:#66d9ef">strings_not_equal</span>&gt;
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000400eee</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">14</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">test</span>   %eax,%eax
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000400ef0</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">16</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">je</span>     <span style="color:#ae81ff">0x400ef7</span> &lt;<span style="color:#66d9ef">phase_1</span>+<span style="color:#ae81ff">23</span>&gt;
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000400ef2</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">18</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">callq</span>  <span style="color:#ae81ff">0x40143a</span> &lt;<span style="color:#66d9ef">explode_bomb</span>&gt;
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000400ef7</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">23</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">add</span>    <span style="color:#66d9ef">$0x8</span>,%rsp
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000400efb</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">27</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">retq</span>   
+<span style="color:#66d9ef">End</span> <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">assembler</span> <span style="color:#66d9ef">dump.</span>
+
+</code></pre></div><p>可以看到phase_1函数通过调用strings_not_equal函数判断两个字符串是否相等,如果不相等就跳到explode_bomb炸掉,否则返回到main函数的执行流.</p>
+<p>接下来我们看一下strings_not_equal,暂时省略中间无关的部分.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-GAS" data-lang="GAS">
+<span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) <span style="color:#66d9ef">disas</span> <span style="color:#66d9ef">strings_not_equal</span>
+<span style="color:#a6e22e">Dump</span> <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">assembler</span> <span style="color:#66d9ef">code</span> <span style="color:#66d9ef">for</span> <span style="color:#66d9ef">function</span> <span style="color:#66d9ef">strings_not_equal</span>:
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000401338</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">0</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:     <span style="color:#66d9ef">push</span>   %r12
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x000000000040133a</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">2</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:     <span style="color:#66d9ef">push</span>   %rbp
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x000000000040133b</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">3</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:     <span style="color:#66d9ef">push</span>   %rbx
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x000000000040133c</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">4</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:     <span style="color:#66d9ef">mov</span>    %rdi,%rbx
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x000000000040133f</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">7</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:     <span style="color:#66d9ef">mov</span>    %rsi,%rbp
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000401342</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">10</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">callq</span>  <span style="color:#ae81ff">0x40131b</span> &lt;<span style="color:#66d9ef">string_length</span>&gt;
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000401347</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">15</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">mov</span>    %eax,%r12d
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x000000000040134a</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">18</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">mov</span>    %rbp,%rdi
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x000000000040134d</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">21</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">callq</span>  <span style="color:#ae81ff">0x40131b</span> &lt;<span style="color:#66d9ef">string_length</span>&gt;
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000401352</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">26</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">mov</span>    <span style="color:#66d9ef">$0x1</span>,%edx
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000401357</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">31</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">cmp</span>    %eax,%r12d
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x000000000040135a</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">34</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">jne</span>    <span style="color:#ae81ff">0x40139b</span> &lt;<span style="color:#66d9ef">strings_not_equal</span>+<span style="color:#ae81ff">99</span>&gt;
+    <span style="color:#a6e22e">...</span>
+    <span style="color:#a6e22e">...</span>
+    <span style="color:#a6e22e">...</span>
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x000000000040139b</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">99</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">mov</span>    %edx,%eax
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x000000000040139d</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">101</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:   <span style="color:#66d9ef">pop</span>    %rbx
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x000000000040139e</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">102</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:   <span style="color:#66d9ef">pop</span>    %rbp
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x000000000040139f</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">103</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:   <span style="color:#66d9ef">pop</span>    %r12
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x00000000004013a1</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">105</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:   <span style="color:#66d9ef">retq</span> 
+</code></pre></div><p>我们可以看到这里似乎是通过string_length函数求了两个字符串的长度,以此来比较两个函数是否相等.<br>
+求字符串长度总需要知道字符串是什么吧? 有戏. 我们再看一下string_length 函数</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-GAS" data-lang="GAS">
+<span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) <span style="color:#66d9ef">disas</span> <span style="color:#66d9ef">string_length</span>
+<span style="color:#a6e22e">Dump</span> <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">assembler</span> <span style="color:#66d9ef">code</span> <span style="color:#66d9ef">for</span> <span style="color:#66d9ef">function</span> <span style="color:#66d9ef">string_length</span>:
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x000000000040131b</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">0</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:     <span style="color:#66d9ef">cmpb</span>   <span style="color:#66d9ef">$0x0</span>,(%rdi)
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x000000000040131e</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">3</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:     <span style="color:#66d9ef">je</span>     <span style="color:#ae81ff">0x401332</span> &lt;<span style="color:#66d9ef">string_length</span>+<span style="color:#ae81ff">23</span>&gt;
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000401320</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">5</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:     <span style="color:#66d9ef">mov</span>    %rdi,%rdx
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000401323</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">8</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:     <span style="color:#66d9ef">add</span>    <span style="color:#66d9ef">$0x1</span>,%rdx
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000401327</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">12</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">mov</span>    %edx,%eax
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000401329</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">14</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">sub</span>    %edi,%eax
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x000000000040132b</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">16</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">cmpb</span>   <span style="color:#66d9ef">$0x0</span>,(%rdx)
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x000000000040132e</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">19</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">jne</span>    <span style="color:#ae81ff">0x401323</span> &lt;<span style="color:#66d9ef">string_length</span>+<span style="color:#ae81ff">8</span>&gt;
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000401330</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">21</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">repz</span> <span style="color:#66d9ef">retq</span> 
+   <span style="color:#ae81ff">0x0000000000401332</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">23</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">mov</span>    <span style="color:#66d9ef">$0x0</span>,%eax
+   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000401337</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">28</span><span style="color:#960050;background-color:#1e0010">&gt;</span>:    <span style="color:#66d9ef">retq</span>   
+<span style="color:#66d9ef">End</span> <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">assembler</span> <span style="color:#66d9ef">dump.</span>
+
+</code></pre></div><p>可以看出,该函数先判断字符串是否为空,然后根据c style 字符串末尾的&rsquo;\0'作为循环的终止条件得到字符串的长度.</p>
+<p>显然,字符串内容存储在 寄存器 rdi的值所在的地址.</p>
+<p>我们在string_length 函数开始的位置设置断点,得到两个字符串.第一个为用户输入的字符串,第二个就是phase_1 过关需要的字符串,问题解决!</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-GAS" data-lang="GAS">
+<span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) <span style="color:#66d9ef">b</span> <span style="color:#66d9ef">string_length</span>
+<span style="color:#a6e22e">Breakpoint</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">at</span> <span style="color:#ae81ff">0x40131b</span>
+<span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) <span style="color:#66d9ef">c</span>
+<span style="color:#a6e22e">The</span> <span style="color:#66d9ef">program</span> <span style="color:#66d9ef">is</span> <span style="color:#66d9ef">not</span> <span style="color:#66d9ef">being</span> <span style="color:#66d9ef">run.</span>
+<span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) <span style="color:#66d9ef">r</span>
+<span style="color:#a6e22e">Starting</span> <span style="color:#66d9ef">program</span>: <span style="color:#960050;background-color:#1e0010">/</span><span style="color:#66d9ef">home</span><span style="color:#960050;background-color:#1e0010">/</span><span style="color:#66d9ef">coder</span><span style="color:#960050;background-color:#1e0010">/</span><span style="color:#66d9ef">workspace</span><span style="color:#960050;background-color:#1e0010">/</span><span style="color:#66d9ef">csapp-lab</span><span style="color:#960050;background-color:#1e0010">/</span><span style="color:#66d9ef">bomblab</span><span style="color:#960050;background-color:#1e0010">/</span><span style="color:#66d9ef">bomb</span> 
+<span style="color:#66d9ef">Welcome</span> <span style="color:#66d9ef">to</span> <span style="color:#66d9ef">my</span> <span style="color:#66d9ef">fiendish</span> <span style="color:#66d9ef">little</span> <span style="color:#66d9ef">bomb.</span> <span style="color:#66d9ef">You</span> <span style="color:#66d9ef">have</span> <span style="color:#ae81ff">6</span> <span style="color:#66d9ef">phases</span> <span style="color:#66d9ef">with</span>
+<span style="color:#a6e22e">which</span> <span style="color:#66d9ef">to</span> <span style="color:#66d9ef">blow</span> <span style="color:#66d9ef">yourself</span> <span style="color:#66d9ef">up.</span> <span style="color:#66d9ef">Have</span> <span style="color:#66d9ef">a</span> <span style="color:#66d9ef">nice</span> <span style="color:#66d9ef">day</span>!
+<span style="color:#a6e22e">hello</span> <span style="color:#66d9ef">from</span> <span style="color:#ae81ff">111</span><span style="color:#66d9ef">qqz</span> 
+
+<span style="color:#66d9ef">Breakpoint</span> <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0x000000000040131b</span> <span style="color:#66d9ef">in</span> <span style="color:#66d9ef">string_length</span> ()
+<span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) <span style="color:#66d9ef">print</span> (<span style="color:#66d9ef">char</span> *) <span style="color:#66d9ef">$rdi</span>
+<span style="color:#a6e22e">$1</span> <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#ae81ff">0x603780</span> &lt;<span style="color:#66d9ef">input_strings</span>&gt; <span style="color:#960050;background-color:#1e0010">&#34;</span><span style="color:#66d9ef">hello</span> <span style="color:#66d9ef">from</span> <span style="color:#ae81ff">111</span><span style="color:#66d9ef">qqz</span> <span style="color:#960050;background-color:#1e0010">&#34;</span>
+<span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) <span style="color:#66d9ef">c</span>
+<span style="color:#a6e22e">Continuing.</span>
+
+<span style="color:#a6e22e">Breakpoint</span> <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0x000000000040131b</span> <span style="color:#66d9ef">in</span> <span style="color:#66d9ef">string_length</span> ()
+<span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) <span style="color:#66d9ef">print</span> (<span style="color:#66d9ef">char</span> *) <span style="color:#66d9ef">$rdi</span>
+<span style="color:#a6e22e">$2</span> <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#ae81ff">0x402400</span> <span style="color:#960050;background-color:#1e0010">&#34;</span><span style="color:#66d9ef">Border</span> <span style="color:#66d9ef">relations</span> <span style="color:#66d9ef">with</span> <span style="color:#66d9ef">Canada</span> <span style="color:#66d9ef">have</span> <span style="color:#66d9ef">never</span> <span style="color:#66d9ef">been</span> <span style="color:#66d9ef">better.</span><span style="color:#960050;background-color:#1e0010">&#34;</span>
+<span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) 
+
+</code></pre></div>
 
                 
                 
@@ -392,15 +485,10 @@ int main()
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2016/04/bzoj1623/" data-toggle="tooltip" data-placement="top" title="BZOJ 1623: [Usaco2008 Open]Cow Cars 奶牛飞车 (贪心)">&larr;
+                        <a href="/2020/01/caffe-source-code-analysis-part3" data-toggle="tooltip" data-placement="top" title="caffe 源码学习笔记(3) Net">&larr;
                             Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/2016/04/bzoj1626/" data-toggle="tooltip" data-placement="top" title="BZOJ 1626: [Usaco2007 Dec]Building Roads 修建道路 (MST)">Next
-                            Post &rarr;</a>
-                    </li>
                     
                 </ul>
 
