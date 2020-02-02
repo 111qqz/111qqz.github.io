@@ -439,34 +439,6 @@ FILE <span style="color:#f92672">*</span>infile;
 <span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) 
 
 </code></pre></div><h2 id="拆除phase-2">拆除phase 2</h2>
-<p>rdx=1,rdx是读入6个数中的第一个.</p>
-<p>read_six_numbers函数结束后,读取的六个数的位置分别在:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-GAS" data-lang="GAS"><span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) <span style="color:#66d9ef">print</span> *(<span style="color:#66d9ef">int</span> *) (<span style="color:#66d9ef">$rsp</span>)
-<span style="color:#a6e22e">$11</span> <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#ae81ff">123</span>
-<span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) <span style="color:#66d9ef">print</span> *(<span style="color:#66d9ef">int</span> *) (<span style="color:#66d9ef">$rsp</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">4</span>)
-<span style="color:#a6e22e">$12</span> <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#ae81ff">4</span>
-<span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) <span style="color:#66d9ef">print</span> *(<span style="color:#66d9ef">int</span> *) (<span style="color:#66d9ef">$rsp</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">8</span>)
-<span style="color:#a6e22e">$13</span> <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#ae81ff">5</span>
-<span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) <span style="color:#66d9ef">print</span> *(<span style="color:#66d9ef">int</span> *) (<span style="color:#66d9ef">$rsp</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">12</span>)
-<span style="color:#a6e22e">$14</span> <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#ae81ff">6</span>
-<span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) <span style="color:#66d9ef">print</span> *(<span style="color:#66d9ef">int</span> *) (<span style="color:#66d9ef">$rsp</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">16</span>)
-<span style="color:#a6e22e">$15</span> <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#ae81ff">7</span>
-<span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) <span style="color:#66d9ef">print</span> *(<span style="color:#66d9ef">int</span> *) (<span style="color:#66d9ef">$rsp</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">20</span>)
-<span style="color:#a6e22e">$16</span> <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#ae81ff">8</span>
-
-
-</code></pre></div><p>rsi     rdx<br>
-rsi+4   rcx<br>
-rsi+20  rax</p>
-<p>$0x4025c3 的地址内容为&rdquo;%d %d %d %d %d %d&rdquo;,说明读入的六个数都是int 类型</p>
-<p>再read_six_numbers函数内:<br>
-(rsp+8)的内容为rsi+20<br>
-(rsp)的内容为rsi+16</p>
-<p>r9 = rsi+12<br>
-r8 = rsi + 8</p>
-<p>rsi的值为 0x7fffffffdae0</p>
-<p>第二个数为第一个数的2倍,因此前两个数为1 2</p>
-<p>rbp的值大概率是EOF之类,用来表征stdin读入的结束.</p>
 <p>接下来开始解决第二阶段.</p>
 <p>看一下phase_2 的反汇编代码:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-GAS" data-lang="GAS">
@@ -532,13 +504,15 @@ r8 = rsi + 8</p>
 
 </code></pre></div><p>可以得出,读入的六个值的类型都为int.</p>
 <p>从read_six_numbers的 [+0, +32] 部分的代码可以得出,读取的六个数的存储位置. 依次为:</p>
-<p>%rsi     %rdx</p>
-<p>%rsi+4   %rcx</p>
-<p>%rsi+8   %r8</p>
-<p>%rsi+12  %r9</p>
-<p>%rsi+16  (%rsp) 或者 %rax</p>
-<p>%rsi+20  (%rsp +8)</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-GAS" data-lang="GAS">
+<span style="color:#960050;background-color:#1e0010">%</span><span style="color:#a6e22e">rsi</span>     %rdx
+<span style="color:#960050;background-color:#1e0010">%</span><span style="color:#a6e22e">rsi</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">4</span>   %rcx
+<span style="color:#960050;background-color:#1e0010">%</span><span style="color:#a6e22e">rsi</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">8</span>   %r8
+<span style="color:#960050;background-color:#1e0010">%</span><span style="color:#a6e22e">rsi</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">12</span>  %r9
+<span style="color:#960050;background-color:#1e0010">%</span><span style="color:#a6e22e">rsi</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">16</span>  (%rsp) <span style="color:#960050;background-color:#1e0010">或</span><span style="color:#960050;background-color:#1e0010">者</span> %rax
+<span style="color:#960050;background-color:#1e0010">%</span><span style="color:#a6e22e">rsi</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">20</span>  (%rsp <span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">8</span>)
+
+
 <span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) <span style="color:#66d9ef">print</span> <span style="color:#960050;background-color:#1e0010">/</span><span style="color:#66d9ef">x</span> <span style="color:#66d9ef">$rdx</span>
 <span style="color:#a6e22e">$171</span> <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#ae81ff">0x7fffffffdae0</span>
 <span style="color:#960050;background-color:#1e0010">(</span><span style="color:#a6e22e">gdb</span>) <span style="color:#66d9ef">print</span> <span style="color:#960050;background-color:#1e0010">/</span><span style="color:#66d9ef">x</span> <span style="color:#66d9ef">$rcx</span>
