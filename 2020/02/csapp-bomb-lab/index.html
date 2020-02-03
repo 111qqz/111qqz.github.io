@@ -806,29 +806,10 @@ FILE <span style="color:#f92672">*</span>infile;
 <p>给定的字符串为&quot;flyers&rdquo;,找出这6个字符再候选字符串中的位置</p>
 <p>分别为  9,15,14,5,6,7<br>
 写成十六进制就是  0x9,0xf,0xe,0x5,0x6,0x7</p>
-<p>movzbl (%rbx,%rax,1),%ecx 中 %ecx存储的是用户读入字符串的第一个字符.<br>
-%cl,(%rsp) 中,由于%ecx存储的是ascii码值,因此一个字节就可以存储,就是%cl</p>
-<p>mov    %cl,(%rsp)<br>
-mov    (%rsp),%rdx</p>
-<p>现在 %rdx 存储的就是读入字符串的第一个字符</p>
-<p>and    $0xf,%edx</p>
-<p>然后吧该字符和  1111取and,得到%edx取后四个二进制位的值. 范围在0..15</p>
-<p>movzbl 0x4024b0(%rdx),%edx</p>
-<p>后,%edx的值变成了  (0x4024b0+%edx) 位置字符串的第一个字符.</p>
-<p>mov    %dl,0x10(%rsp,%rax,1)</p>
-<p>然后把该字符放在 (%rsp+0x10)的内存地址.</p>
-<p>maduiersnfotvbylSo you think you can stop the bomb with ctrl-c, do you?</p>
-<p>由于位置是和0xf and后的结果,因此候选字符串为 &ldquo;maduiersnfotvbyl&rdquo;<br>
-因此这段循环做的就是从该候选字符串中挑选6个字符,组成的新的字符串拷贝到(%rsp+0x10) 位置.</p>
-<p>movb   $0x0,0x16(%rsp)</p>
-<p>相当于再字符串末尾放了个终止符 &lsquo;\0&rsquo;</p>
-<p>mov    $0x40245e,%esi</p>
-<p>%esi 存储的是 &ldquo;flyers&rdquo;</p>
-<p>因此对应的位置为  9,15,14,5,6,7<br>
-写成十六进制就是  0x9,0xf,0xe,0x5,0x6,0x7<br>
-查看ascii表,找到最后一位是这些值的ascii码<br>
-其中一种答案为:</p>
+<p>查看ascii表,找到6个最后的十六进制值为上述值的ascii 码,就是答案.</p>
+<p>显然,答案有多种. 其中一种答案为:</p>
 <p>ionefg</p>
+<p>问题解决!</p>
 
 
                 
