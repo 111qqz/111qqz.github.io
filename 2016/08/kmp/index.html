@@ -15,9 +15,9 @@
     
 
     
-    <meta name="title" content="KMP算法学习" />
-    <meta property="og:title" content="KMP算法学习" />
-    <meta property="twitter:title" content="KMP算法学习" />
+    <meta name="title" content="KMP与最小覆盖子串" />
+    <meta property="og:title" content="KMP与最小覆盖子串" />
+    <meta property="twitter:title" content="KMP与最小覆盖子串" />
     
 
     
@@ -34,7 +34,7 @@
     <meta name="keyword"  content="ACM,111qqz,商汤科技,hust,华中科技大学">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>KMP算法学习-111qqz的小窝</title>
+    <title>KMP与最小覆盖子串-111qqz的小窝</title>
 
     <link rel="canonical" href="/2016/08/kmp/">
 
@@ -190,8 +190,12 @@
                             kmp
                         </a>
                         
+                        <a class="tag" href="/tags/%E6%9C%80%E5%B0%8F%E8%A6%86%E7%9B%96%E5%AD%90%E4%B8%B2" title="最小覆盖子串">
+                            最小覆盖子串
+                        </a>
+                        
                     </div>
-                    <h1>KMP算法学习</h1>
+                    <h1>KMP与最小覆盖子串</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
 			Posted by 
@@ -199,7 +203,7 @@
 			    111qqz
 			 
 			on 
-			Monday, August 8, 2016
+			Wednesday, August 10, 2016
                         
                     </span>
                 </div>
@@ -227,134 +231,22 @@
                 </header>
                 <nav id="TableOfContents"></nav>
                 
-                <p><strong>20170801update:当时竟然没有强调next函数的含义？</strong></p>
-<p>next[i]的含义是,i之前的整个前缀中，最长的该前缀的前缀和后缀相同的长度。</p>
-<p>看图：</p>
-<p><img src="http://img.blog.csdn.net/20140725231726921" alt=""></p>
-<p>KMP感觉是我学到现在最难懂的一个算法了QAQ<br>
-为什么你们都那么强啊，看几个小时就看懂了&hellip;</p>
-<p>先放一波我觉得值得看的资料：<br>
-<a href="http://www.mathcs.emory.edu/~cheung/Courses/323/Syllabus/Text/Matching-KMP1.html">kmp算法讲解</a>（配图比较全&hellip;.）<br>
-<a href="http://jakeboxer.com/blog/2009/12/13/the-knuth-morris-pratt-algorithm-in-my-own-words/">kmp学习资料2</a></p>
-<p>说下我对kmp算法的理解：</p>
-<p>理解kmp算法大概分成两个部分。</p>
-<p><strong>一部分是理解一个naive的kmp算法，可以叫&quot;fast slide&rdquo; algorithm</strong></p>
-<p>思想大概就是，当mismatch发生时，我们并不是一无所有，而是知道在mismatch发生前所匹配的字符的信息的。</p>
-<p><img src="http://www.mathcs.emory.edu/~cheung/Courses/323/Syllabus/Text/FIGS/KMP/KMP03a.gif" alt=""></p>
-<p>然后知道这些信息我们可以做什么呢？</p>
-<p>先观察一下最最暴力的求解字符串匹配的算法：</p>
-<pre><code>//***********************************************************
-//brute force 
- n = T.length();
-      m = P.length();
-
-      i0 = 0;              // Line P up with the first character of T       
-      i = 0;               // Start matching with first char in T
-      j = 0;               // Start matching with first char in P
-
-      while ( i &lt; n )     // Not all characters used
-      {
-         if ( T[i] == P[j] )
-         {
-            /* ===============================================
-           T[i] and P[j] match ==&gt; try next pair
-           =============================================== */
-            i++;           // Match next pair
-            j++;
-
-            if ( j == m )
-               return ( i0 );    // Match found at position i0 !!!
-         }
-         else
-         {  /* ===========================================
-               T[i] ≠ P[j]:
-                  1. Slide P up 1 position
-          2. restart from beginning of string
-               =========================================== */
-            i0 = i0 + 1;   // Slide pattern P one character further
-
-            i  = i0;       // Restart matching at position i0 in T
-            j  = 0;        // Restart matching at position 0 in P
-         }
-      }
-
-      return -1;           // Return not found
-   }
-</code></pre>
-<p>这个算法低效在，当mismatch发生时，我只是往前移动了一个字符。</p>
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2016/08/Screenshot-from-2016-08-08-21-03-22.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2016/08/Screenshot-from-2016-08-08-21-03-22.png" alt="Screenshot from 2016-08-08 21-03-22"><br>
-</a></p>
-<p>因此我们定义了 maxoverlap函数。。</p>
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2016/08/Screenshot-from-2016-08-08-21-05-51.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2016/08/Screenshot-from-2016-08-08-21-05-51.png" alt="Screenshot from 2016-08-08 21-05-51"><br>
-</a></p>
-<p><strong>需要特别强调的是：</strong></p>
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2016/08/Screenshot-from-2016-08-08-21-08-22.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2016/08/Screenshot-from-2016-08-08-21-08-22.png" alt="Screenshot from 2016-08-08 21-08-22"><br>
-</a></p>
-<p>这样我们就可以利用maxoverlap函数来优化当mismatch发生的时候，移动的过程。</p>
-<pre><code>  KMP( T,  P )
-   {
-      int i0, i, j, m, n;
-
-      n = T.length();
-      m = P.length();
-
-      i0 = 0;              // Line P up with the first character of T
-      i = 0;               // Start matching with first char in T
-      j = 0;               // Start matching with first char in P
-
-      while ( i &lt; n )     // Not all characters used
-      {
-         if ( T[i] == P[j] )
-         {
-            i++;           // Match next pair
-            j++;
-
-            if ( j == m )
-               return ( i0 );    // Match found atposition i0 !!!
-         }
-         else
-         {  /* ===========================================
-           T[i] ≠ P[j]
-               =========================================== */
-
-             if ( j == 0 )
-         {  /* ==============================================
-               First character already mismatched
-           We have NO prefix info. to work with...
-           =============================================== */
-            i0++;        // Just slide P 1 character over
-        i = i0;      //
-        j = 0;
-             }
-         else
-             {
-            prefix = P[ 0..(j-1) ];  // Prefix of pattern at the mismatch    
-
-            k = MaxOverlap( prefix );
-
-            j = k;
-            i0 = (i - j);
-        // i is unchanged !
-             }
-         }
-      }
-
-      return -1;           // No match found
-   }
-</code></pre>
-<p>这样我们就得到了**&ldquo;fast slide&rdquo; algorithm算法**</p>
-<p>但是。。。能不能再给力一点呢</p>
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2016/08/%E5%86%8D%E7%BB%99%E5%8A%9B%E4%B8%80%E7%82%B9.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2016/08/%E5%86%8D%E7%BB%99%E5%8A%9B%E4%B8%80%E7%82%B9.png" alt="再给力一点"><br>
-</a></p>
-<p>我们发现，上述代码中，我们每次都要计算一次maxoverlap函数&hellip;</p>
-<p>但是。 。一个字符串。。。它的子串个数是有限的。。。</p>
-<p>我们能不能加速这个过程呢。。。</p>
-<p>很容易想到预处理一波。。。</p>
-<p>也就是求所谓的failure function ,中文应该叫失配函数&hellip;</p>
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2016/08/Screenshot-from-2016-08-08-21-19-04.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2016/08/Screenshot-from-2016-08-08-21-19-04.png" alt="Screenshot from 2016-08-08 21-19-04"><br>
-</a></p>
-<p><strong>所以第二部分就是如何快速求出失配函数</strong></p>
-<p><strong>这也是我认为的kmp算法最精(nan)髓(dong)的地方。</strong></p>
+                <p><a href="http://blog.csdn.net/fjsd155/article/details/6866991">参考资料</a>（本文大部分是参考这篇博客，附带一些证明步骤的解释）<br>
+首先明确一些概念：<br>
+<strong>最小覆盖子串</strong>：对于某个字符串s，它的最小覆盖子串指的是长度最小的子串p，p满足通过自身的多次连接得到q，最后能够使s成为q的子串。<br>
+比如：<br>
+对于s=&quot;abcab&rdquo;，它的最小覆盖子串p=&quot;abc&rdquo;，因为p通过在它后面再接上一个p（即重叠0个字符），可以得到q=&quot;abcabc&rdquo;，此时s是q的子串。<br>
+对于s=&quot;ababab&rdquo;，它的最小覆盖子串为p=&quot;ab&rdquo;。</p>
+<p><strong>pre[i]（或next[i]）的实质是串str[1..i]的最长且小于i的“相等前、后缀”分别为str[1..pre[i]]（前缀）与str[(i-pre[i]+1)..i]（后缀），通俗讲就是：使str[1..i]前k个字母与后k个字母相等的最大k值。</strong></p>
+<p><strong>结论先行：最小覆盖子串（串尾多一小段时，用前缀覆盖）长度为n-next[n]（n-pre[n]），其中n为串长，串的最后一位为为s[n-1].</strong></p>
+<p>证明分两部分：</p>
+<p><strong>１－长为n-next[n]的前缀必为覆盖子串。</strong></p>
+<p>当next[n]&lt;n-next[n]时，如图a，长为next[n]的前缀A与长为next[n]的后缀B相等，故长为n-next[n]的前缀C必覆盖后缀B；</p>
+<p><img src="http://hi.csdn.net/attachment/201110/12/0_1318409624ugQu.gif" alt=""></p>
+<p>当next[n]&gt;n-next[n]时，如图b，将原串X向后移n-next[n]个单位得到Y串，根据next的定义，知长为next[n]的后缀串A与长为前缀串B相等，X串中的长为n-next[n]的前缀C与Y串中的前缀D相等，而X串中的串E又与Y串中的D相等……可见X串中的长为n-next[n]的前缀C可覆盖全串（<strong>其实是一个不断的等价交换的过程，用同样的方法可以证明每两个相邻的相等，所以可以覆盖全串</strong>）</p>
+<p><img src="http://hi.csdn.net/attachment/201110/12/0_13184096821133.gif" alt=""></p>
+<p><strong>２－长为n-next[n]的前缀是最短的。</strong></p>
+<p>如图c，串A是长为n-next[n]的前缀，串B是长为next[n]的后缀，假设存在长度小于n-next[n]的前缀C能覆盖全串，则将原串X截去前面一段C，得到新串Ｙ，则Ｙ必与原串长度大于next[n]的前缀相等，与next数组的定义（使str[1..i]前k个字母与后k个字母相等的最大k值。）矛盾。得证！有人问，为什么Ｙ与原串长大于next[n]的前缀相等？由假设知原串的构成必为CCC……E（E为C的前缀），串Ｙ的构成必为CC……E（比原串少一个Ｃ），懂了吧！</p>
 
 
                 
@@ -403,42 +295,37 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2016/08/whust-2016-1-d-zhenya-moves-from-the-dormitory-/" data-toggle="tooltip" data-placement="top" title="whust 2016 #1 D Zhenya moves from the dormitory (贪心，模拟)">&larr;
+                        <a href="/2016/08/poj-2752/" data-toggle="tooltip" data-placement="top" title="poj 2752 Seek the Name, Seek the Fame (kmp 理解nxt函数)">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/2016/08/2016-Tanabata/" data-toggle="tooltip" data-placement="top" title="2016七夕，关于爱情的随想">Next
+                        <a href="/2016/08/poj-2185/" data-toggle="tooltip" data-placement="top" title="poj 2185 Milking Grid (最小覆盖子矩形，kmp)">Next
                             Post &rarr;</a>
                     </li>
                     
                 </ul>
 
                 
-<div id="disqus-comment"></div>
 
-<div id="disqus_thread"></div>
-<script type="application/javascript">
-    var disqus_config = function () {
-    
-    
-    
-    };
-    (function() {
-        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
-            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
-            return;
-        }
-        var d = document, s = d.createElement('script'); s.async = true;
-        s.src = '//' + "111qqz" + '.disqus.com/embed.js';
-        s.setAttribute('data-timestamp', +new Date());
-        (d.head || d.body).appendChild(s);
-    })();
+
+
+<div id="git-comments"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://ihtcboy.com/script/gitment.browser.js"></script>
+<script>
+  var gitment = new Gitment({
+    id: decodeURI(window.location.pathname),  
+    owner: '111qqz',
+    repo: '111qqz.github.io',
+    oauth: {
+      client_id: '8839ce5e58d5197e2490',
+      client_secret: '2d475a8a7e27a8b509847a6c60f692b8cbaa274e',
+    }
+  })
+  gitment.render('git-comments')
 </script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
 
 
             </div>
@@ -1382,21 +1269,6 @@
 </article>
 
 
-<div id="git-comments"></div>
-<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
-<script src="https://ihtcboy.com/script/gitment.browser.js"></script>
-<script>
-  var gitment = new Gitment({
-    id: decodeURI(window.location.pathname),  
-    owner: '111qqz',
-    repo: '111qqz.github.io',
-    oauth: {
-      client_id: '8839ce5e58d5197e2490',
-      client_secret: '2d475a8a7e27a8b509847a6c60f692b8cbaa274e',
-    }
-  })
-  gitment.render('git-comments')
-</script>
 
 
 
