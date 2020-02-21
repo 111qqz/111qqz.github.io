@@ -15,9 +15,9 @@
     
 
     
-    <meta name="title" content="矩阵加速线性递推式（转载）" />
-    <meta property="og:title" content="矩阵加速线性递推式（转载）" />
-    <meta property="twitter:title" content="矩阵加速线性递推式（转载）" />
+    <meta name="title" content="矩阵学习笔记" />
+    <meta property="og:title" content="矩阵学习笔记" />
+    <meta property="twitter:title" content="矩阵学习笔记" />
     
 
     
@@ -34,7 +34,7 @@
     <meta name="keyword"  content="ACM,111qqz,商汤科技,hust,华中科技大学">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>矩阵加速线性递推式（转载）-111qqz的小窝</title>
+    <title>矩阵学习笔记-111qqz的小窝</title>
 
     <link rel="canonical" href="/2016/10/">
 
@@ -191,7 +191,7 @@
                         </a>
                         
                     </div>
-                    <h1>矩阵加速线性递推式（转载）</h1>
+                    <h1>矩阵学习笔记</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
 			Posted by 
@@ -225,82 +225,10 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                <nav id="TableOfContents">
-  <ul>
-    <li><a href="#快速求解多项递推式">快速求解多项递推式</a></li>
-  </ul>
-</nav>
+                <nav id="TableOfContents"></nav>
                 
-                <p>找到了篇四年前空间中的旧文，也是有点感动2333.</p>
-<!-- raw HTML omitted -->
-<h2 id="快速求解多项递推式">快速求解多项递推式</h2>
-<p>问题描述:</p>
-<p>已知 F(n) = AF(n-1) + BF(n-2) + CF(n-3)+&hellip;..</p>
-<p>求解 F(n)%P</p>
-<p>分析:</p>
-<p>＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊</p>
-<p>如果n的值不大,一般来说在1000000之内,则可以考虑直接递推求解,只要预先花O(n)时间复杂度,可打出一张表,运行时直接查表就可以了.</p>
-<p>另一方面,如果n值可能很大,如10^9,用这种方法无论是在内存还是时间上开销都太大,根本无法满足.本文将介绍一种与矩阵相关的高效通用算法.</p>
-<p>举个例子:</p>
-<p>＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊</p>
-<p>如果我们已知一个序列的前两项为a0,a1,递推关系为:F(n) = AF(n-1)+BF(n-2)</p>
-<p>令矩阵 M = | 0   1 |         M(1) = | a0 |</p>
-<p>| B A |                     | a1 |</p>
-<p>N = M * M(1) =   |    a1           |</p>
-<p>| A<em>a1+B</em>a0 |</p>
-<p>而 A<em>a1+B</em>a0 刚好就是 a2 !</p>
-<p>设     M(n) =    |   a(n-1) |</p>
-<p>|    an     |</p>
-<p>N = M * M(n) =     |    an              |</p>
-<p>| A<em>an+B</em>a(n-1)|</p>
-<p>很显然, A<em>an+B</em>a(n-1) 就是 a(n+1)</p>
-<p>矩阵M(n)的第二个元素对应F(n),只要在前一个矩阵基础上左乘一个矩阵M就可以得到下一项F(n+1).这样把递推转化成了矩阵的乘法运算．</p>
-<p>M^(n-1)*M1 =      |   F(n-1) |</p>
-<p>|    F(n)   |</p>
-<p>因此该问题就转化成了求解一个矩阵的n次方．</p>
-<p>＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊</p>
-<p>同理，对于一个涉及三项的递推式F(n) = AF(n-1)+BF(n-2)+CF(n-3)</p>
-<p>只要令　 M =       | 0   1   0 |         M(1) =  | a0 |</p>
-<p>| 0    0 1 |                       | a1 |</p>
-<p>| C   B A |                      | a2 |</p>
-<p>推导过程和上面类似，可以自己推导一下，也会得到如下的结论：</p>
-<p>M^(n-1)*M1 =         |   F(n-1) |</p>
-<p>|    F(n)    |</p>
-<p>|    F(n+1) |</p>
-<p>同样将问题转化成了解一个矩阵的n次方．</p>
-<p>＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊</p>
-<p>一般化：</p>
-<p>M　阵的建立：若一共有 m　个递推式，则建一个m行m列的矩阵，让第m行从右到左依次是递推项的系数A,B,C&hellip;..，在除第一列和最后一行的剩余矩阵的主对角线上写1,其余所有的都写0.</p>
-<p>M(1)   阵的建立：该矩阵是 m 行一列阵，其值分别为F(0),F(1)&hellip;F(m-1)</p>
-<p>结论的形式和上面的结论都差不多．</p>
-<p>为什么要这样设定 M 和 M(1), 设定M(1)很好理解，关键是M, 只要你把两个矩阵乘起来，你就会发现其中的奥妙所在．</p>
-<p>＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊</p>
-<p>要求一个矩阵的n次方，线性代数里面有相应的方法．</p>
-<p>很实用的一个算法是二进制扫描法．(刘汝佳&lt;算法艺术与信息学竞赛&gt;P224)</p>
-<p>总的时间复杂度约为O(log2(n))</p>
-<p>这样一个很大的数n也能在很短的时间内算出来．</p>
-<p>＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊</p>
-<p>二进制扫描法：</p>
-<p>1.将n转化为二进制　n = bjb(j-1)&hellip;b2b1b0 bi = 0或1</p>
-<p>2.M^2 = M*M   M^4 = (M^2)^2</p>
-<p>这样可以得到 M 的1,2,4,8&hellip;2^32次方记为,M0,M1,M2,M3..M32．</p>
-<p>3.M^n = (bj<em>Mj)</em>(b(j-1)<em>M(j-1))</em>&hellip;<em>(b2</em>M2)<em>(b1</em>M1)<em>(b0</em>M0)</p>
-<p>若bi=1,则乘Ｍj;bj=0,则不乘</p>
-<p>因为有　M^(a+b) = M^a*M^b</p>
-<p>例：n = 9 = 1001(2) = 1000+0+0+1(2)</p>
-<p>M^9 = M^(1000+0+0+1) = M^1000*M^1</p>
-<p>= M3*M0</p>
-<p>4.模运算有这样的性质: (a<em>b)%c = [(a%c)</em>(b%c)]%c</p>
-<p>＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊</p>
-<p>练习:</p>
-<p>SOJ:   cs.scu.edu.cn/soj</p>
-<p>2984 Fibonacci</p>
-<p>2385 Fibonacci Problem Again</p>
-<p>2129 Sequence</p>
-<p>1826 Number Sequence</p>
-<p>3083 windy&rsquo;s cake III(只用到了二进制扫描法)</p>
-<p>  阿宽补充:tyvj p1947 p1155 </p>
-<p>Powered by baoer</p>
+                <p>参考资料：</p>
+<p><a href="http://www.matrix67.com/blog/archives/276">十个利用矩阵乘法解决的经典题目</a></p>
 
 
                 
@@ -349,13 +277,13 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2016/10//" data-toggle="tooltip" data-placement="top" title="矩阵学习笔记">&larr;
+                        <a href="/2016/10/hdu-1573/" data-toggle="tooltip" data-placement="top" title="hdu 1573 X问题 (exgcd求解一般线性同余方程组解的个数)">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/2016/10/poj-3070-fibonacci/" data-toggle="tooltip" data-placement="top" title="poj 3070 Fibonacci (矩阵加速线性递推式)">Next
+                        <a href="/2016/10//" data-toggle="tooltip" data-placement="top" title="矩阵加速线性递推式（转载）">Next
                             Post &rarr;</a>
                     </li>
                     
@@ -1335,7 +1263,7 @@
   var gitment = new Gitment({
     id: decodeURI(window.location.pathname),  
     owner: '111qqz',
-    repo: 'hugo-blog',
+    repo: '111qqz.github.io',
     oauth: {
       client_id: '8839ce5e58d5197e2490',
       client_secret: '2d475a8a7e27a8b509847a6c60f692b8cbaa274e',
