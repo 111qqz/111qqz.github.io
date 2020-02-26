@@ -15,9 +15,9 @@
     
 
     
-    <meta name="title" content="2020 to do List" />
-    <meta property="og:title" content="2020 to do List" />
-    <meta property="twitter:title" content="2020 to do List" />
+    <meta name="title" content="【施工中】CSAPP archlab" />
+    <meta property="og:title" content="【施工中】CSAPP archlab" />
+    <meta property="twitter:title" content="【施工中】CSAPP archlab" />
     
 
     
@@ -34,9 +34,9 @@
     <meta name="keyword"  content="ACM,111qqz,商汤科技,hust,华中科技大学">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>2020 to do List-111qqz的小窝</title>
+    <title>【施工中】CSAPP archlab-111qqz的小窝</title>
 
-    <link rel="canonical" href="/2020/02/2020-to-do-list">
+    <link rel="canonical" href="/2020/02/csapp-archlab/">
 
     <link rel="stylesheet" href="/css/iDisqus.min.css"/>
 	
@@ -186,8 +186,12 @@
                 <div class="post-heading">
                     <div class="tags">
                         
+                        <a class="tag" href="/tags/csapp" title="CSAPP">
+                            CSAPP
+                        </a>
+                        
                     </div>
-                    <h1>2020 to do List</h1>
+                    <h1>【施工中】CSAPP archlab</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
 			Posted by 
@@ -195,7 +199,7 @@
 			    111qqz
 			 
 			on 
-			Friday, February 21, 2020
+			Wednesday, February 26, 2020
                         
                     </span>
                 </div>
@@ -221,16 +225,233 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                <nav id="TableOfContents"></nav>
+                <nav id="TableOfContents">
+  <ul>
+    <li><a href="#背景">背景</a></li>
+    <li><a href="#准备工作">准备工作</a>
+      <ul>
+        <li><a href="#use-tk8586-or-above-will-not-compile">use tk<=8.5,8.6 or above will not compile</a></li>
+        <li><a href="#modify-the-corresponding-header-file-in-seqssimc-and-pipepsimc-assmue-tk85-header-file-is-located-in-usrlocaltk85">Modify the corresponding header file in seq/ssim.c and pipe/psim.c (assmue tk8.5 header file is located in /usr/local/tk8.5)</a></li>
+        <li><a href="#modify-makefile-in-sim">modify Makefile in sim</a></li>
+        <li><a href="#comment-matherr-in-seqssimc-and-pipepsimc">comment matherr in seq/ssim.c and pipe/psim.c</a></li>
+      </ul>
+    </li>
+    <li><a href="#part-a">PART A</a>
+      <ul>
+        <li><a href="#iteratively-sum-linked-list-elements">Iteratively sum linked list elements</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
                 
-                <p>就..终于再次出现了to do list. 原因是之前一直不知道如何置顶文章&hellip;.</p>
-<p>竟然一下子就2020年了&hellip;</p>
+                <h2 id="背景">背景</h2>
+<p>CSAPP:3e第四章配套的实验。 第四章是讲处理器架构的，章节的重点是实现一个六阶段流水线。</p>
+<p>lab的内容也是，需要实现一个Y86-64的流水线，并进行性能调优。</p>
+<h2 id="准备工作">准备工作</h2>
+<p>材料里面sim.tar解压之后，有可能是没办法编译通过的。<br>
+原因是tk（a windowing toolkit ）在8.5版本的时候废弃了某个接口，与8.6版本不兼容。</p>
+<p>因此需要安装tk 8.5或者更低的版本。 在archlinux/manjaro下可以通过aur安装tk85.</p>
+<h3 id="use-tk8586-or-above-will-not-compile">use tk&lt;=8.5,8.6 or above will not compile</h3>
+<h3 id="modify-the-corresponding-header-file-in-seqssimc-and-pipepsimc-assmue-tk85-header-file-is-located-in-usrlocaltk85">Modify the corresponding header file in seq/ssim.c and pipe/psim.c (assmue tk8.5 header file is located in /usr/local/tk8.5)</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">
+<span style="color:#75715e">#</span><span style="color:#75715e">ifdef HAS_GUI</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span><span style="color:#75715e">#</span><span style="color:#75715e">include</span> <span style="color:#75715e">&lt;tk8.5/tk.h&gt;  // #include &lt;tk/tk.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span><span style="color:#75715e">#</span><span style="color:#75715e">endif </span><span style="color:#75715e">/* HAS_GUI */</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+
+
+</code></pre></div><h3 id="modify-makefile-in-sim">modify Makefile in sim</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mak" data-lang="mak">
+
+
+<span style="color:#75715e"># Comment this out if you don&#39;t have Tcl/Tk on your system
+</span><span style="color:#75715e"></span>
+GUIMODE<span style="color:#f92672">=</span>-DHAS_GUI 
+
+<span style="color:#75715e"># Modify the following line so that gcc can find the libtcl.so and
+</span><span style="color:#75715e"></span><span style="color:#75715e"># libtk.so libraries on your system. You may need to use the -L option
+</span><span style="color:#75715e"></span><span style="color:#75715e"># to tell gcc which directory to look in. Comment this out if you
+</span><span style="color:#75715e"></span><span style="color:#75715e"># don&#39;t have Tcl/Tk.
+</span><span style="color:#75715e"></span>
+TKLIBS<span style="color:#f92672">=</span>-L/usr/lib/tcl8.5/ -ltk -ltcl
+
+<span style="color:#75715e"># Modify the following line so that gcc can find the tcl.h and tk.h
+</span><span style="color:#75715e"></span><span style="color:#75715e"># header files on your system. Comment this out if you don&#39;t have
+</span><span style="color:#75715e"></span><span style="color:#75715e"># Tcl/Tk.
+</span><span style="color:#75715e"></span>
+TKINC<span style="color:#f92672">=</span>-isystem /usr/include/tcl8.5/
+
+
+
+</code></pre></div><h3 id="comment-matherr-in-seqssimc-and-pipepsimc">comment matherr in seq/ssim.c and pipe/psim.c</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">
+<span style="color:#75715e">/* Hack for SunOS */</span>
+<span style="color:#75715e">// extern int matherr();
+</span><span style="color:#75715e"></span><span style="color:#75715e">// int *tclDummyMathPtr = (int *) matherr;
+</span><span style="color:#75715e"></span>
+
+
+</code></pre></div><h2 id="part-a">PART A</h2>
+<h3 id="iteratively-sum-linked-list-elements">Iteratively sum linked list elements</h3>
+<p>要求写一段y86-64的汇编代码，实现对一个链表元素求和，也就是如下c语言的相同功能代码。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c">
+<span style="color:#75715e">/* sum_list - Sum the elements of a linked list */</span>
+<span style="color:#66d9ef">long</span> <span style="color:#a6e22e">sum_list</span>(list_ptr ls)
+{
+    <span style="color:#66d9ef">long</span> val <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+    <span style="color:#66d9ef">while</span> (ls) {
+	val <span style="color:#f92672">+</span><span style="color:#f92672">=</span> ls<span style="color:#f92672">-</span><span style="color:#f92672">&gt;</span>val;
+	ls <span style="color:#f92672">=</span> ls<span style="color:#f92672">-</span><span style="color:#f92672">&gt;</span>next;
+    }
+    <span style="color:#66d9ef">return</span> val;
+}
+
+
+</code></pre></div><p>我们可以先瞅瞅这段c代码被汇编成x86-64的汇编代码是什么样。记得编译选项要 gcc -S -Og，不然默认的优化选项可能不是很容易明白。</p>
+<p>得到</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-GAS" data-lang="GAS">
+sum_list:
+.LFB0:
+	<span style="color:#a6e22e">.cfi_startproc</span>
+	<span style="color:#a6e22e">movl</span>	<span style="color:#66d9ef">$0</span>, %eax
+.L2:
+	<span style="color:#a6e22e">testq</span>	%rdi, %rdi
+	<span style="color:#a6e22e">je</span>	<span style="color:#66d9ef">.L4</span>
+	<span style="color:#a6e22e">addq</span>	(%rdi), %rax
+	<span style="color:#a6e22e">movq</span>	<span style="color:#ae81ff">8</span>(%rdi), %rdi
+	<span style="color:#a6e22e">jmp</span>	<span style="color:#66d9ef">.L2</span>
+.L4:
+	<span style="color:#a6e22e">ret</span>
+
+
+</code></pre></div><p>同时，我们可以参考CSAPP:3e Figure 4.7 Y86-64的代码示例</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-GAS" data-lang="GAS"><span style="color:#75715e"># Execution begins at address 0
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">.pos</span> <span style="color:#ae81ff">0</span>
+<span style="color:#a6e22e">irmovq</span> <span style="color:#66d9ef">stack</span>, %rsp
+<span style="color:#75715e"># Set up stack pointer
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">call</span> <span style="color:#66d9ef">main</span>
+<span style="color:#75715e"># Execute main program
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">halt</span>
+<span style="color:#75715e"># Terminate program
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e"># Array of 4 elements
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">.align</span> <span style="color:#ae81ff">8</span>
+array:
+<span style="color:#a6e22e">.quad</span> <span style="color:#ae81ff">0x000d000d000d</span>
+<span style="color:#a6e22e">.quad</span> <span style="color:#ae81ff">0x00c000c000c0</span>
+<span style="color:#a6e22e">.quad</span> <span style="color:#ae81ff">0x0b000b000b00</span>
+<span style="color:#a6e22e">.quad</span> <span style="color:#ae81ff">0xa000a000a000</span>
+
+main:
+<span style="color:#a6e22e">irmovq</span> <span style="color:#66d9ef">array</span>,%rdi
+<span style="color:#a6e22e">irmovq</span> <span style="color:#66d9ef">$4</span>,%rsi
+<span style="color:#a6e22e">call</span> <span style="color:#66d9ef">sum</span>
+<span style="color:#a6e22e">ret</span>
+<span style="color:#75715e"># sum(array, 4)
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e"># long sum(long *start, long count)
+</span><span style="color:#75715e"></span><span style="color:#75715e"># start in %rdi, count in %rsi
+</span><span style="color:#75715e"></span>sum:
+<span style="color:#a6e22e">irmovq</span> <span style="color:#66d9ef">$8</span>,%r8
+<span style="color:#75715e"># Constant 8
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">irmovq</span> <span style="color:#66d9ef">$1</span>,%r9
+<span style="color:#75715e"># Constant 1
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">xorq</span> %rax,%rax
+<span style="color:#75715e"># sum = 0
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">andq</span> %rsi,%rsi
+<span style="color:#75715e"># Set CC
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">jmp</span>
+<span style="color:#a6e22e">test</span>
+<span style="color:#75715e"># Goto test
+</span><span style="color:#75715e"></span>loop:
+<span style="color:#a6e22e">mrmovq</span> (%rdi),%r10
+<span style="color:#75715e"># Get *start
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">addq</span> %r10,%rax
+<span style="color:#75715e"># Add to sum
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">addq</span> %r8,%rdi
+<span style="color:#75715e"># start++
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">subq</span> %r9,%rsi
+<span style="color:#75715e"># count--. Set CC
+</span><span style="color:#75715e"></span>test:
+<span style="color:#a6e22e">jne</span>
+<span style="color:#a6e22e">loop</span>
+<span style="color:#75715e"># Stop when 0
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">ret</span>
+<span style="color:#75715e"># Return
+</span><span style="color:#75715e"></span><span style="color:#75715e"># Stack starts here and grows to lower addresses
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">.pos</span> <span style="color:#ae81ff">0x200</span>
+stack:
+
+<span style="color:#960050;background-color:#1e0010">`</span><span style="color:#960050;background-color:#1e0010">`</span><span style="color:#960050;background-color:#1e0010">`</span><span style="color:#a6e22e">GAS</span>
+
+<span style="color:#960050;background-color:#1e0010">比</span><span style="color:#960050;background-color:#1e0010">较</span><span style="color:#960050;background-color:#1e0010">容</span><span style="color:#960050;background-color:#1e0010">易</span><span style="color:#960050;background-color:#1e0010">得</span><span style="color:#960050;background-color:#1e0010">到</span><span style="color:#960050;background-color:#1e0010">，</span><span style="color:#960050;background-color:#1e0010">我</span><span style="color:#960050;background-color:#1e0010">们</span><span style="color:#960050;background-color:#1e0010">需</span><span style="color:#960050;background-color:#1e0010">要</span><span style="color:#960050;background-color:#1e0010">的</span>sum_list函数的Y86-64代码是:
+
+<span style="color:#960050;background-color:#1e0010">`</span><span style="color:#960050;background-color:#1e0010">`</span><span style="color:#960050;background-color:#1e0010">`</span><span style="color:#a6e22e">GAS</span>
+
+    <span style="color:#a6e22e">.pos</span> <span style="color:#ae81ff">0</span>
+    <span style="color:#a6e22e">irmovq</span> <span style="color:#66d9ef">stack</span>, %rsp  <span style="color:#75715e"># Set up stack pointer
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">call</span> <span style="color:#66d9ef">main</span> <span style="color:#75715e"># Execute main function
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">halt</span>
+
+<span style="color:#75715e"># Sample linked list
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">.align</span> <span style="color:#ae81ff">8</span>
+ele1:
+    <span style="color:#a6e22e">.quad</span> <span style="color:#ae81ff">0x00a</span>
+    <span style="color:#a6e22e">.quad</span> <span style="color:#66d9ef">ele2</span>
+ele2:
+    <span style="color:#a6e22e">.quad</span> <span style="color:#ae81ff">0x0b0</span>
+    <span style="color:#a6e22e">.quad</span> <span style="color:#66d9ef">ele3</span>
+ele3:
+    <span style="color:#a6e22e">.quad</span> <span style="color:#ae81ff">0xc00</span>
+    <span style="color:#a6e22e">.quad</span> <span style="color:#ae81ff">0</span>
+
+
+main:
+    <span style="color:#a6e22e">irmovq</span> <span style="color:#66d9ef">ele1</span>,%rdi
+    <span style="color:#a6e22e">call</span> <span style="color:#66d9ef">sum_list</span>
+    <span style="color:#a6e22e">ret</span>
+
+sum_list:
+    <span style="color:#a6e22e">irmovq</span> <span style="color:#66d9ef">$0</span>, %rax 
+<span style="color:#66d9ef">loop</span>:
+    <span style="color:#a6e22e">andq</span>  %rdi, %rdi
+    <span style="color:#a6e22e">je</span> <span style="color:#66d9ef">finish</span>
+    <span style="color:#a6e22e">mrmovq</span> (%rdi),%r8
+    <span style="color:#a6e22e">addq</span> %r8, %rax
+    <span style="color:#a6e22e">mrmovq</span> <span style="color:#ae81ff">8</span>(%rdi), %rdi
+    <span style="color:#a6e22e">jmp</span> <span style="color:#66d9ef">loop</span>
+finish:
+    <span style="color:#a6e22e">ret</span>
+
+<span style="color:#a6e22e">.pos</span> <span style="color:#ae81ff">0x200</span>
+stack:
+
+</code></pre></div><p>这里有几点要注意:</p>
 <ul>
-<li>学习模型量化</li>
-<li>学习onnx</li>
-<li>CSAPP（随缘</li>
-<li>ai system 课程</li>
+<li>Y86-64的代码最后必须有空行</li>
+<li>Y86-64的cpu中，ALU的输入不能是立即数，因此如果操作数有立即数，需要先将立即数mov到寄存器中。</li>
+<li>与上一条类似，Y86-64的ALU的输入不能是内存中的地址，因此如果操作数有内存中的地址，需要先将改地址的内容mov到寄存器中。</li>
+<li>Y86-64的mov根据操作数的不同类别分了不同的指令，但是没有根据操作数的size来区分不同指令。</li>
+<li>Y86-64在ALU做完操作之后会自动设置相应的condition code(CC)</li>
 </ul>
+<p>那么如何验证正确性呢？</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">
+$  ./yas sum.ys
+$  ./yis sum.yo
+
+</code></pre></div><p>得到结果:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-GAS" data-lang="GAS">
+<span style="color:#a6e22e">Stopped</span> <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">28</span> <span style="color:#66d9ef">steps</span> <span style="color:#66d9ef">at</span> <span style="color:#66d9ef">PC</span> <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#ae81ff">0x13</span>.  <span style="color:#66d9ef">Status</span> <span style="color:#960050;background-color:#1e0010">&#39;</span><span style="color:#66d9ef">HLT</span><span style="color:#960050;background-color:#1e0010">&#39;</span>, <span style="color:#66d9ef">CC</span> <span style="color:#66d9ef">Z</span><span style="color:#960050;background-color:#1e0010">=</span><span style="color:#ae81ff">1</span> <span style="color:#66d9ef">S</span><span style="color:#960050;background-color:#1e0010">=</span><span style="color:#ae81ff">0</span> <span style="color:#66d9ef">O</span><span style="color:#960050;background-color:#1e0010">=</span><span style="color:#ae81ff">0</span>
+<span style="color:#a6e22e">Changes</span> <span style="color:#66d9ef">to</span> <span style="color:#66d9ef">registers</span>:
+<span style="color:#960050;background-color:#1e0010">%</span>rax:   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000000000</span>      <span style="color:#ae81ff">0x0000000000000cba</span>
+<span style="color:#960050;background-color:#1e0010">%</span>rsp:   <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000000000</span>      <span style="color:#ae81ff">0x0000000000000200</span>
+<span style="color:#960050;background-color:#1e0010">%</span>r8:    <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000000000</span>      <span style="color:#ae81ff">0x0000000000000c00</span>
+
+<span style="color:#a6e22e">Changes</span> <span style="color:#66d9ef">to</span> <span style="color:#66d9ef">memory</span>:
+<span style="color:#960050;background-color:#1e0010">0</span>x01f0: <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000000000</span>      <span style="color:#ae81ff">0x000000000000005b</span>
+<span style="color:#960050;background-color:#1e0010">0</span>x01f8: <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000000000</span>      <span style="color:#ae81ff">0x0000000000000013</span>
+
+</code></pre></div><p>%rax中存放的结果为0xcba,结果正确。</p>
 
 
                 
@@ -279,10 +500,15 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2020/02/csapp-archlab/" data-toggle="tooltip" data-placement="top" title="【施工中】CSAPP archlab">&larr;
+                        <a href="/2020/02/csapp-attacklab/" data-toggle="tooltip" data-placement="top" title="【施工完成】CSAPP attacklab">&larr;
                             Previous Post</a>
                     </li>
                     
+                    
+                    <li class="next">
+                        <a href="/2020/02/2020-to-do-list" data-toggle="tooltip" data-placement="top" title="2020 to do List">Next
+                            Post &rarr;</a>
+                    </li>
                     
                 </ul>
 
