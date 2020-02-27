@@ -239,6 +239,8 @@
     <li><a href="#part-a">PART A</a>
       <ul>
         <li><a href="#iteratively-sum-linked-list-elements">Iteratively sum linked list elements</a></li>
+        <li><a href="#recursively-sum-linked-list-elements">Recursively sum linked list elements</a></li>
+        <li><a href="#copy-a-source-block-to-a-destination-block">Copy a source block to a destination block</a></li>
       </ul>
     </li>
   </ul>
@@ -448,7 +450,110 @@ $  ./yis sum.yo
 <span style="color:#960050;background-color:#1e0010">0</span>x01f8: <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">x0000000000000000</span>      <span style="color:#ae81ff">0x0000000000000013</span>
 
 </code></pre></div><p>%rax中存放的结果为0xcba,结果正确。</p>
+<h3 id="recursively-sum-linked-list-elements">Recursively sum linked list elements</h3>
+<p>思路和上面类似，不多说了。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-GAS" data-lang="GAS">
+    <span style="color:#a6e22e">.pos</span> <span style="color:#ae81ff">0</span>
+    <span style="color:#a6e22e">irmovq</span> <span style="color:#66d9ef">stack</span>, %rsp  <span style="color:#75715e"># Set up stack pointer
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">call</span> <span style="color:#66d9ef">main</span> <span style="color:#75715e"># Execute main function
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">halt</span>
 
+<span style="color:#75715e"># Sample linked list
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">.align</span> <span style="color:#ae81ff">8</span>
+ele1:
+    <span style="color:#a6e22e">.quad</span> <span style="color:#ae81ff">0x00a</span>
+    <span style="color:#a6e22e">.quad</span> <span style="color:#66d9ef">ele2</span>
+ele2:
+    <span style="color:#a6e22e">.quad</span> <span style="color:#ae81ff">0x0b0</span>
+    <span style="color:#a6e22e">.quad</span> <span style="color:#66d9ef">ele3</span>
+ele3:
+    <span style="color:#a6e22e">.quad</span> <span style="color:#ae81ff">0xc00</span>
+    <span style="color:#a6e22e">.quad</span> <span style="color:#ae81ff">0</span>
+
+
+main:
+    <span style="color:#a6e22e">irmovq</span> <span style="color:#66d9ef">ele1</span>,%rdi
+    <span style="color:#a6e22e">call</span> <span style="color:#66d9ef">rsum_list</span>
+    <span style="color:#a6e22e">ret</span>
+
+rsum_list:
+    <span style="color:#a6e22e">andq</span>  %rdi, %rdi
+    <span style="color:#a6e22e">je</span> <span style="color:#66d9ef">finish</span>
+    <span style="color:#a6e22e">pushq</span> %rbx
+    <span style="color:#a6e22e">mrmovq</span> (%rdi),%rbx     <span style="color:#75715e"># val
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">mrmovq</span> <span style="color:#ae81ff">8</span>(%rdi), %rdi   <span style="color:#75715e"># ls-&gt;next
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">call</span> <span style="color:#66d9ef">rsum_list</span>
+    <span style="color:#a6e22e">addq</span> %rbx, %rax
+    <span style="color:#a6e22e">popq</span> %rbx
+    <span style="color:#a6e22e">ret</span> 
+
+<span style="color:#66d9ef">finish</span>:
+    <span style="color:#a6e22e">irmovq</span> <span style="color:#66d9ef">$0</span>, %rax 
+    <span style="color:#66d9ef">ret</span>
+
+<span style="color:#a6e22e">.pos</span> <span style="color:#ae81ff">0x200</span>
+stack:
+
+
+
+
+</code></pre></div><h3 id="copy-a-source-block-to-a-destination-block">Copy a source block to a destination block</h3>
+<p>注意有三个参数，按照x86-64调用惯例，三个参数依次放入寄存器:</p>
+<p>%rdi,%rsi,%rdx</p>
+<p><img src="https://i.loli.net/2020/02/28/PNsgDbqRGU793Hm.png" alt="x86-64调用惯例.png"></p>
+<p>除此以外没什么需要注意的。。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-GAS" data-lang="GAS">
+    <span style="color:#a6e22e">.pos</span> <span style="color:#ae81ff">0</span>
+    <span style="color:#a6e22e">irmovq</span> <span style="color:#66d9ef">stack</span>, %rsp  <span style="color:#75715e"># Set up stack pointer
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">call</span> <span style="color:#66d9ef">main</span> <span style="color:#75715e"># Execute main function
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">halt</span>
+
+<span style="color:#a6e22e">.align</span> <span style="color:#ae81ff">8</span>
+<span style="color:#75715e"># Source block
+</span><span style="color:#75715e"></span>src:
+    <span style="color:#a6e22e">.quad</span> <span style="color:#ae81ff">0x00a</span>
+    <span style="color:#a6e22e">.quad</span> <span style="color:#ae81ff">0x0b0</span>
+    <span style="color:#a6e22e">.quad</span> <span style="color:#ae81ff">0xc00</span>
+<span style="color:#75715e"># Destination block
+</span><span style="color:#75715e"></span>dest:
+    <span style="color:#a6e22e">.quad</span> <span style="color:#ae81ff">0x111</span>
+    <span style="color:#a6e22e">.quad</span> <span style="color:#ae81ff">0x222</span>
+    <span style="color:#a6e22e">.quad</span> <span style="color:#ae81ff">0x333</span>
+
+
+main:
+    <span style="color:#a6e22e">irmovq</span> <span style="color:#66d9ef">src</span>,%rdi
+    <span style="color:#a6e22e">irmovq</span> <span style="color:#66d9ef">dest</span>,%rsi
+    <span style="color:#a6e22e">irmovq</span> <span style="color:#66d9ef">$3</span>,%rdx
+
+    <span style="color:#a6e22e">call</span> <span style="color:#66d9ef">copy_block</span>
+    <span style="color:#a6e22e">ret</span>
+
+copy_block:
+    <span style="color:#a6e22e">irmovq</span> <span style="color:#66d9ef">$8</span>,%r8
+    <span style="color:#a6e22e">irmovq</span> <span style="color:#66d9ef">$1</span>,%r9
+    <span style="color:#a6e22e">irmovq</span> <span style="color:#66d9ef">$0</span>, %rcx 
+<span style="color:#66d9ef">loop</span>:
+    <span style="color:#a6e22e">andq</span>  %rdx, %rdx
+    <span style="color:#a6e22e">jle</span> <span style="color:#66d9ef">finish</span>
+    <span style="color:#a6e22e">mrmovq</span> (%rdi),%rax
+    <span style="color:#a6e22e">rmmovq</span> %rax,(%rsi)
+    <span style="color:#a6e22e">xorq</span> %rax,%rcx
+    <span style="color:#a6e22e">subq</span> %r9, %rdx
+    <span style="color:#a6e22e">addq</span> %r8,%rdi
+    <span style="color:#a6e22e">addq</span> %r8,%rsi
+    <span style="color:#a6e22e">jmp</span> <span style="color:#66d9ef">loop</span>
+finish:
+    <span style="color:#a6e22e">rrmovq</span>  %rcx,%rax
+    <span style="color:#a6e22e">ret</span>
+
+<span style="color:#a6e22e">.pos</span> <span style="color:#ae81ff">0x200</span>
+stack:
+
+
+
+
+</code></pre></div>
 
                 
                 
