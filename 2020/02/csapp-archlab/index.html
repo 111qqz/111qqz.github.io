@@ -243,7 +243,13 @@
         <li><a href="#copy-a-source-block-to-a-destination-block">Copy a source block to a destination block</a></li>
       </ul>
     </li>
-    <li><a href="#part-b">PART B</a></li>
+    <li><a href="#part-b">PART B</a>
+      <ul>
+        <li><a href="#要求">要求</a></li>
+        <li><a href="#实现">实现</a></li>
+        <li><a href="#测试">测试</a></li>
+      </ul>
+    </li>
   </ul>
 </nav>
                 
@@ -555,6 +561,7 @@ stack:
 
 
 </code></pre></div><h2 id="part-b">PART B</h2>
+<h3 id="要求">要求</h3>
 <p>part B要求扩展 SEQ processor 来实现iadd指令，也就是支持立即数的加法指令。具体的要求可以参考CSAPP:3e的Homework problems 4.51 and 4.52</p>
 <blockquote>
 <p>4.51 ◆<br>
@@ -575,6 +582,7 @@ and how to test it.</p>
 <img src="https://i.loli.net/2020/02/29/ae4cUnPl9yWNLS6.png" alt="Y86-64指令描述.png"></p>
 <p>Practice Problem 4.3<br>
 <img src="https://i.loli.net/2020/02/29/jIgOynPMzfAxWoK.png" alt="practice_4.3.png"></p>
+<h3 id="实现">实现</h3>
 <p>先写出iaddq的stage描述:</p>
 <p>iaddq V,rB</p>
 <ul>
@@ -682,8 +690,76 @@ word alufun <span style="color:#f92672">=</span> [
 bool set_cc <span style="color:#f92672">=</span> <span style="color:#66d9ef">icode</span> <span style="color:#66d9ef">in</span> { <span style="color:#66d9ef">IOPQ</span>,<span style="color:#66d9ef">IIADDQ</span> }<span style="color:#960050;background-color:#1e0010">;</span>
 
 
-</code></pre></div><p>测试显示<br>
-“ISA Check Succeeds”,说明结果没问题。</p>
+</code></pre></div><h3 id="测试">测试</h3>
+<p>在benchmark上测试</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">
+➜  y86-code git:<span style="color:#f92672">(</span>master<span style="color:#f92672">)</span> ✗ make testssim
+../seq/ssim -t asum.yo &gt; asum.seq
+../seq/ssim -t asumr.yo &gt; asumr.seq
+../seq/ssim -t cjr.yo &gt; cjr.seq
+../seq/ssim -t j-cc.yo &gt; j-cc.seq
+../seq/ssim -t poptest.yo &gt; poptest.seq
+../seq/ssim -t pushquestion.yo &gt; pushquestion.seq
+../seq/ssim -t pushtest.yo &gt; pushtest.seq
+../seq/ssim -t prog1.yo &gt; prog1.seq
+../seq/ssim -t prog2.yo &gt; prog2.seq
+../seq/ssim -t prog3.yo &gt; prog3.seq
+../seq/ssim -t prog4.yo &gt; prog4.seq
+../seq/ssim -t prog5.yo &gt; prog5.seq
+../seq/ssim -t prog6.yo &gt; prog6.seq
+../seq/ssim -t prog7.yo &gt; prog7.seq
+../seq/ssim -t prog8.yo &gt; prog8.seq
+../seq/ssim -t ret-hazard.yo &gt; ret-hazard.seq
+grep <span style="color:#e6db74">&#34;ISA Check&#34;</span> *.seq
+asumr.seq:ISA Check Succeeds
+asum.seq:ISA Check Succeeds
+cjr.seq:ISA Check Succeeds
+j-cc.seq:ISA Check Succeeds
+poptest.seq:ISA Check Succeeds
+prog1.seq:ISA Check Succeeds
+prog2.seq:ISA Check Succeeds
+prog3.seq:ISA Check Succeeds
+prog4.seq:ISA Check Succeeds
+prog5.seq:ISA Check Succeeds
+prog6.seq:ISA Check Succeeds
+prog7.seq:ISA Check Succeeds
+prog8.seq:ISA Check Succeeds
+pushquestion.seq:ISA Check Succeeds
+pushtest.seq:ISA Check Succeeds
+ret-hazard.seq:ISA Check Succeeds
+rm asum.seq asumr.seq cjr.seq j-cc.seq poptest.seq pushquestion.seq pushtest.seq prog1.seq prog2.seq prog3.seq prog4.seq prog5.seq prog6.seq prog7.seq prog8.seq ret-hazard.seq
+
+</code></pre></div><p>执行回归测试</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">
+➜  ptest git:<span style="color:#f92672">(</span>master<span style="color:#f92672">)</span> ✗ make SIM<span style="color:#f92672">=</span>../seq/ssim
+./optest.pl -s ../seq/ssim 
+Simulating with ../seq/ssim
+  All <span style="color:#ae81ff">49</span> ISA Checks Succeed
+./jtest.pl -s ../seq/ssim 
+Simulating with ../seq/ssim
+  All <span style="color:#ae81ff">64</span> ISA Checks Succeed
+./ctest.pl -s ../seq/ssim 
+Simulating with ../seq/ssim
+  All <span style="color:#ae81ff">22</span> ISA Checks Succeed
+./htest.pl -s ../seq/ssim 
+Simulating with ../seq/ssim
+  All <span style="color:#ae81ff">600</span> ISA Checks Succeed
+➜  ptest git:<span style="color:#f92672">(</span>master<span style="color:#f92672">)</span> ✗ make SIM<span style="color:#f92672">=</span>../seq/ssim TFLAGS<span style="color:#f92672">=</span>-i
+./optest.pl -s ../seq/ssim -i
+Simulating with ../seq/ssim
+  All <span style="color:#ae81ff">58</span> ISA Checks Succeed
+./jtest.pl -s ../seq/ssim -i
+Simulating with ../seq/ssim
+  All <span style="color:#ae81ff">96</span> ISA Checks Succeed
+./ctest.pl -s ../seq/ssim -i
+Simulating with ../seq/ssim
+  All <span style="color:#ae81ff">22</span> ISA Checks Succeed
+./htest.pl -s ../seq/ssim -i
+Simulating with ../seq/ssim
+  All <span style="color:#ae81ff">756</span> ISA Checks Succeed
+
+
+</code></pre></div><p>全部都是&rdquo; ISA Checks Succeed&rdquo;，说明结果应该OK</p>
 
 
                 
