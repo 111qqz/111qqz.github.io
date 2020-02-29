@@ -243,6 +243,7 @@
         <li><a href="#copy-a-source-block-to-a-destination-block">Copy a source block to a destination block</a></li>
       </ul>
     </li>
+    <li><a href="#part-b">PART B</a></li>
   </ul>
 </nav>
                 
@@ -553,7 +554,137 @@ stack:
 
 
 
-</code></pre></div>
+</code></pre></div><h2 id="part-b">PART B</h2>
+<p>part B要求扩展 SEQ processor 来实现iadd指令，也就是支持立即数的加法指令。具体的要求可以参考CSAPP:3e的Homework problems 4.51 and 4.52</p>
+<blockquote>
+<p>4.51 ◆<br>
+Practice Problem 4.3 introduced the iaddq instruction to add immediate data to a<br>
+register. Describe the computations performed to implement this instruction. Use<br>
+the computations for irmovq and OPq (Figure 4.18) as a guide.</p>
+</blockquote>
+<blockquote>
+<p>4.52 ◆◆<br>
+The file seq-full.hcl contains the HCL description for SEQ, along with the<br>
+declaration of a constant IIADDQ having hexadecimal value C, the instruction code<br>
+for iaddq. Modify the HCL descriptions of the control logic blocks to implement<br>
+the iaddq instruction, as described in Practice Problem 4.3 and Problem 4.51. See<br>
+the lab material for directions on how to generate a simulator for your solution<br>
+and how to test it.</p>
+</blockquote>
+<p>Figure 4.18<br>
+<img src="https://i.loli.net/2020/02/29/ae4cUnPl9yWNLS6.png" alt="Y86-64指令描述.png"></p>
+<p>Practice Problem 4.3<br>
+<img src="https://i.loli.net/2020/02/29/jIgOynPMzfAxWoK.png" alt="practice_4.3.png"></p>
+<p>先写出iaddq的stage描述:</p>
+<p>iaddq V,rB</p>
+<ul>
+<li>Fetch
+<ul>
+<li>icode:ifun  &lt;&ndash; M1[PC]</li>
+<li>rA:rB       &lt;&ndash; M1[PC+1]</li>
+<li>valC        &lt;&ndash; M8[PC+2]</li>
+<li>valP        &lt;&ndash; PC+10</li>
+</ul>
+</li>
+<li>Decode
+<ul>
+<li>valB        &lt;&ndash; R[rB]</li>
+</ul>
+</li>
+<li>Execute
+<ul>
+<li>valE        &lt;&ndash; valB + valC</li>
+</ul>
+</li>
+<li>Memory</li>
+<li>Write back
+<ul>
+<li>R[rB]       &lt;&ndash; valE</li>
+</ul>
+</li>
+<li>PC update
+<ul>
+<li>PC          &lt;&ndash; valP</li>
+</ul>
+</li>
+</ul>
+<p>然后修改seq-full.hcl。 参考IOPQ 和IIRMOVQ 来实现还是比较容易的。<br>
+下面把修改过的位置放了出来:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-hcl" data-lang="hcl"><span style="color:#75715e">
+</span><span style="color:#75715e">################ Fetch Stage     ###################################
+</span><span style="color:#75715e"></span>
+bool instr_valid <span style="color:#f92672">=</span> <span style="color:#66d9ef">icode</span> <span style="color:#66d9ef">in</span> 
+	{ <span style="color:#66d9ef">INOP</span>, <span style="color:#66d9ef">IHALT</span>, <span style="color:#66d9ef">IRRMOVQ</span>, <span style="color:#66d9ef">IIRMOVQ</span>, <span style="color:#66d9ef">IRMMOVQ</span>, <span style="color:#66d9ef">IMRMOVQ</span>,
+	       <span style="color:#66d9ef">IOPQ</span>, <span style="color:#66d9ef">IIADDQ</span>, <span style="color:#66d9ef">IJXX</span>, <span style="color:#66d9ef">ICALL</span>, <span style="color:#66d9ef">IRET</span>, <span style="color:#66d9ef">IPUSHQ</span>, <span style="color:#66d9ef">IPOPQ</span> }<span style="color:#960050;background-color:#1e0010">;</span>  
+             
+
+<span style="color:#960050;background-color:#1e0010">/</span><span style="color:#960050;background-color:#1e0010">/</span> <span style="color:#66d9ef">Does</span> <span style="color:#66d9ef">fetched</span> <span style="color:#66d9ef">instruction</span> <span style="color:#66d9ef">require</span> <span style="color:#66d9ef">a</span> <span style="color:#66d9ef">regid</span> <span style="color:#66d9ef">byte</span><span style="color:#960050;background-color:#1e0010">?</span>   
+bool need_regids <span style="color:#f92672">=</span>
+	<span style="color:#66d9ef">icode</span> <span style="color:#66d9ef">in</span> { <span style="color:#66d9ef">IRRMOVQ</span>, <span style="color:#66d9ef">IOPQ</span>, <span style="color:#66d9ef">IIADDQ</span>, <span style="color:#66d9ef">IPUSHQ</span>, <span style="color:#66d9ef">IPOPQ</span>, 
+		     <span style="color:#66d9ef">IIRMOVQ</span>, <span style="color:#66d9ef">IRMMOVQ</span>, <span style="color:#66d9ef">IMRMOVQ</span> }<span style="color:#960050;background-color:#1e0010">;</span>
+
+
+<span style="color:#960050;background-color:#1e0010">/</span><span style="color:#960050;background-color:#1e0010">/</span> <span style="color:#66d9ef">Does</span> <span style="color:#66d9ef">fetched</span> <span style="color:#66d9ef">instruction</span> <span style="color:#66d9ef">require</span> <span style="color:#66d9ef">a</span> <span style="color:#66d9ef">constant</span> <span style="color:#66d9ef">word</span><span style="color:#960050;background-color:#1e0010">?</span>
+bool need_valC <span style="color:#f92672">=</span>
+	<span style="color:#66d9ef">icode</span> <span style="color:#66d9ef">in</span> { <span style="color:#66d9ef">IIRMOVQ</span>, <span style="color:#66d9ef">IIADDQ</span>,<span style="color:#66d9ef">IRMMOVQ</span>, <span style="color:#66d9ef">IMRMOVQ</span>, <span style="color:#66d9ef">IJXX</span>, <span style="color:#66d9ef">ICALL</span> }<span style="color:#960050;background-color:#1e0010">;</span>
+
+
+<span style="color:#960050;background-color:#1e0010">/</span><span style="color:#960050;background-color:#1e0010">/</span><span style="color:#75715e"> ################ Decode Stage    ###################################
+</span><span style="color:#75715e"></span>
+
+<span style="color:#960050;background-color:#1e0010">/</span><span style="color:#960050;background-color:#1e0010">/</span> <span style="color:#66d9ef">What</span> <span style="color:#66d9ef">register</span> <span style="color:#66d9ef">should</span> <span style="color:#66d9ef">be</span> <span style="color:#66d9ef">used</span> <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">the</span> <span style="color:#66d9ef">B</span> <span style="color:#66d9ef">source</span><span style="color:#960050;background-color:#1e0010">?</span>
+word srcB <span style="color:#f92672">=</span> [
+	<span style="color:#66d9ef">icode</span> <span style="color:#66d9ef">in</span> { <span style="color:#66d9ef">IOPQ</span>, <span style="color:#66d9ef">IIADDQ</span>, <span style="color:#66d9ef">IRMMOVQ</span>, <span style="color:#66d9ef">IMRMOVQ</span>  } <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#66d9ef">rB</span><span style="color:#960050;background-color:#1e0010">;</span>
+	<span style="color:#66d9ef">icode</span> <span style="color:#66d9ef">in</span> { <span style="color:#66d9ef">IPUSHQ</span>, <span style="color:#66d9ef">IPOPQ</span>, <span style="color:#66d9ef">ICALL</span>, <span style="color:#66d9ef">IRET</span> } <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#66d9ef">RRSP</span><span style="color:#960050;background-color:#1e0010">;</span>
+	<span style="color:#ae81ff">1</span> <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#66d9ef">RNONE</span><span style="color:#960050;background-color:#1e0010">;</span><span style="color:#75715e">  # Don&#39;t need register
+</span><span style="color:#75715e"></span>]<span style="color:#960050;background-color:#1e0010">;</span>
+
+
+<span style="color:#960050;background-color:#1e0010">/</span><span style="color:#960050;background-color:#1e0010">/</span> <span style="color:#66d9ef">What</span> <span style="color:#66d9ef">register</span> <span style="color:#66d9ef">should</span> <span style="color:#66d9ef">be</span> <span style="color:#66d9ef">used</span> <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">the</span> <span style="color:#66d9ef">E</span> <span style="color:#66d9ef">destination</span><span style="color:#960050;background-color:#1e0010">?</span>
+word dstE <span style="color:#f92672">=</span> [
+	<span style="color:#66d9ef">icode</span> <span style="color:#66d9ef">in</span> { <span style="color:#66d9ef">IRRMOVQ</span> } <span style="color:#960050;background-color:#1e0010">&amp;</span><span style="color:#960050;background-color:#1e0010">&amp;</span> <span style="color:#66d9ef">Cnd</span> <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#66d9ef">rB</span><span style="color:#960050;background-color:#1e0010">;</span>
+	<span style="color:#66d9ef">icode</span> <span style="color:#66d9ef">in</span> { <span style="color:#66d9ef">IIRMOVQ</span>, <span style="color:#66d9ef">IOPQ</span>,<span style="color:#66d9ef">IIADDQ</span>} <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#66d9ef">rB</span><span style="color:#960050;background-color:#1e0010">;</span>
+	<span style="color:#66d9ef">icode</span> <span style="color:#66d9ef">in</span> { <span style="color:#66d9ef">IPUSHQ</span>, <span style="color:#66d9ef">IPOPQ</span>, <span style="color:#66d9ef">ICALL</span>, <span style="color:#66d9ef">IRET</span> } <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#66d9ef">RRSP</span><span style="color:#960050;background-color:#1e0010">;</span>
+	<span style="color:#ae81ff">1</span> <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#66d9ef">RNONE</span><span style="color:#960050;background-color:#1e0010">;</span><span style="color:#75715e">  # Don&#39;t write any register
+</span><span style="color:#75715e"></span>]<span style="color:#960050;background-color:#1e0010">;</span>
+
+<span style="color:#960050;background-color:#1e0010">/</span><span style="color:#960050;background-color:#1e0010">/</span><span style="color:#75715e"> ################ Execute Stage   ###################################
+</span><span style="color:#75715e"></span>
+
+
+<span style="color:#960050;background-color:#1e0010">/</span><span style="color:#960050;background-color:#1e0010">/</span> <span style="color:#66d9ef">Select</span> <span style="color:#66d9ef">input</span> <span style="color:#66d9ef">A</span> <span style="color:#66d9ef">to</span> <span style="color:#66d9ef">ALU</span>
+word aluA <span style="color:#f92672">=</span> [
+	<span style="color:#66d9ef">icode</span> <span style="color:#66d9ef">in</span> { <span style="color:#66d9ef">IRRMOVQ</span>, <span style="color:#66d9ef">IOPQ</span> } <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#66d9ef">valA</span><span style="color:#960050;background-color:#1e0010">;</span>
+	<span style="color:#66d9ef">icode</span> <span style="color:#66d9ef">in</span> { <span style="color:#66d9ef">IIRMOVQ</span>, <span style="color:#66d9ef">IRMMOVQ</span>, <span style="color:#66d9ef">IMRMOVQ</span>, <span style="color:#66d9ef">IIADDQ</span> } <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#66d9ef">valC</span><span style="color:#960050;background-color:#1e0010">;</span>
+	<span style="color:#66d9ef">icode</span> <span style="color:#66d9ef">in</span> { <span style="color:#66d9ef">ICALL</span>, <span style="color:#66d9ef">IPUSHQ</span> } <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#960050;background-color:#1e0010">-</span><span style="color:#ae81ff">8</span><span style="color:#960050;background-color:#1e0010">;</span>
+	<span style="color:#66d9ef">icode</span> <span style="color:#66d9ef">in</span> { <span style="color:#66d9ef">IRET</span>, <span style="color:#66d9ef">IPOPQ</span> } <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#ae81ff">8</span><span style="color:#960050;background-color:#1e0010">;</span><span style="color:#75715e">
+</span><span style="color:#75715e">	# Other instructions don&#39;t need ALU
+</span><span style="color:#75715e"></span>]<span style="color:#960050;background-color:#1e0010">;</span>
+
+
+<span style="color:#960050;background-color:#1e0010">/</span><span style="color:#960050;background-color:#1e0010">/</span> <span style="color:#66d9ef">Select</span> <span style="color:#66d9ef">input</span> <span style="color:#66d9ef">B</span> <span style="color:#66d9ef">to</span> <span style="color:#66d9ef">ALU</span>
+word aluB <span style="color:#f92672">=</span> [
+	<span style="color:#66d9ef">icode</span> <span style="color:#66d9ef">in</span> { <span style="color:#66d9ef">IRMMOVQ</span>, <span style="color:#66d9ef">IMRMOVQ</span>, <span style="color:#66d9ef">IOPQ</span>, <span style="color:#66d9ef">IIADDQ</span>, <span style="color:#66d9ef">ICALL</span>, 
+		      <span style="color:#66d9ef">IPUSHQ</span>, <span style="color:#66d9ef">IRET</span>, <span style="color:#66d9ef">IPOPQ</span> } <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#66d9ef">valB</span><span style="color:#960050;background-color:#1e0010">;</span>
+	<span style="color:#66d9ef">icode</span> <span style="color:#66d9ef">in</span> { <span style="color:#66d9ef">IRRMOVQ</span>, <span style="color:#66d9ef">IIRMOVQ</span> } <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#ae81ff">0</span><span style="color:#960050;background-color:#1e0010">;</span><span style="color:#75715e">
+</span><span style="color:#75715e">	# Other instructions don&#39;t need ALU
+</span><span style="color:#75715e"></span>]<span style="color:#960050;background-color:#1e0010">;</span>
+
+
+<span style="color:#960050;background-color:#1e0010">/</span><span style="color:#960050;background-color:#1e0010">/</span> <span style="color:#66d9ef">Set</span> <span style="color:#66d9ef">the</span> <span style="color:#66d9ef">ALU</span> <span style="color:#66d9ef">function</span>
+word alufun <span style="color:#f92672">=</span> [
+	icode <span style="color:#f92672">=</span><span style="color:#f92672">=</span> <span style="color:#66d9ef">IOPQ</span> <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#66d9ef">ifun</span><span style="color:#960050;background-color:#1e0010">;</span>
+	<span style="color:#ae81ff">1</span> <span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#66d9ef">ALUADD</span><span style="color:#960050;background-color:#1e0010">;</span>
+]<span style="color:#960050;background-color:#1e0010">;</span>
+
+
+<span style="color:#960050;background-color:#1e0010">/</span><span style="color:#960050;background-color:#1e0010">/</span> <span style="color:#66d9ef">Should</span> <span style="color:#66d9ef">the</span> <span style="color:#66d9ef">condition</span> <span style="color:#66d9ef">codes</span> <span style="color:#66d9ef">be</span> <span style="color:#66d9ef">updated</span><span style="color:#960050;background-color:#1e0010">?</span>
+bool set_cc <span style="color:#f92672">=</span> <span style="color:#66d9ef">icode</span> <span style="color:#66d9ef">in</span> { <span style="color:#66d9ef">IOPQ</span>,<span style="color:#66d9ef">IIADDQ</span> }<span style="color:#960050;background-color:#1e0010">;</span>
+
+
+</code></pre></div><p>测试显示<br>
+“ISA Check Succeeds”,说明结果没问题。</p>
+
 
                 
                 
