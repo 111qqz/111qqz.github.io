@@ -230,13 +230,13 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-  <ul>
+  <ol>
     <li>
-      <ul>
+      <ol>
         <li></li>
-      </ul>
+      </ol>
     </li>
-  </ul>
+  </ol>
 </nav>
                 
                 <p>参考资料：</p>
@@ -244,7 +244,7 @@
 <p><a href="http://coolshell.cn/articles/9070.html">awk简明教程</a></p>
 <p>awk是一门比较古老但是很好用的文本处理工具（语言?）</p>
 <p>语法还是很好懂的。。。转载了一篇文章。。。算是简明手册？ 不过台词有点糟糕orz</p>
-<!-- raw HTML omitted -->
+<blockquote>有一些网友看了前两天的《[Linux下应该知道的技巧](http://coolshell.cn/articles/8883.html)》希望我能教教他们用awk和sed，所以，出现了这篇文章。我估计这些80后的年轻朋友可能对awk/sed这类上古神器有点陌生了，所以需要我这个老家伙来炒炒冷饭。**况且，AWK是贝尔实验室1977年搞出来的文本出现神器，今年是蛇年，是AWK的本命年，而且年纪和我相仿，所以非常有必要为他写篇文章**。
 <p>之所以叫AWK是因为其取了三位创始人 <a href="http://en.wikipedia.org/wiki/Alfred_Aho">Alfred Aho</a>，<a href="http://en.wikipedia.org/wiki/Peter_J._Weinberger">Peter Weinberger</a>, 和 <a href="http://en.wikipedia.org/wiki/Brian_Kernighan">Brian Kernighan</a> 的Family Name的首字符。要学AWK，就得提一提AWK的一本相当经典的书《<a href="http://plan9.bell-labs.com/cm/cs/awkbook/">The AWK Programming Language</a>》，它在<a href="http://book.douban.com/subject/1876898/">豆瓣上的评分</a>是9.4分！在<a href="http://www.amazon.cn/mn/detailApp/?asin=020107981X">亚马逊上居然卖1022.30元</a>。</p>
 <p>我在这里的教程并不想面面俱到，本文和我之前的<a href="http://coolshell.cn/articles/8460.html">Go语言简介</a>一样，全是示例，基本无废话。</p>
 <p><strong>我只想达到两个目的：</strong></p>
@@ -356,77 +356,111 @@ Local-Address        Foreign-Address      State
 <h5 id="内建变量"><strong>内建变量</strong></h5>
 </blockquote>
 <p>说到了内建变量，我们可以来看看awk的一些内建变量：</p>
-<!-- raw HTML omitted -->
+<table cellpadding="4" cellspacing="1" border="0" >
+<tbody >
+<tr >
 <blockquote>
-<!-- raw HTML omitted -->
+<td bgcolor="#ffffff" >$0
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td bgcolor="#ffffff" >当前记录（这个变量中存放着整个行的内容）
+</td>
 </blockquote>
-<!-- raw HTML omitted -->
+</tr>
+<tr >
 <blockquote>
-<!-- raw HTML omitted -->
-</blockquote>
-<blockquote>
-<!-- raw HTML omitted -->
-</blockquote>
-<!-- raw HTML omitted -->
-<blockquote>
-<!-- raw HTML omitted -->
+<td bgcolor="#ffffff" >$1~$n
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td bgcolor="#ffffff" >当前记录的第n个字段，字段间由FS分隔
+</td>
 </blockquote>
-<!-- raw HTML omitted -->
+</tr>
+<tr >
 <blockquote>
-<!-- raw HTML omitted -->
-</blockquote>
-<blockquote>
-<!-- raw HTML omitted -->
-</blockquote>
-<!-- raw HTML omitted -->
-<blockquote>
-<!-- raw HTML omitted -->
+<td bgcolor="#ffffff" >FS
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td bgcolor="#ffffff" >输入字段分隔符 默认是空格或Tab
+</td>
 </blockquote>
-<!-- raw HTML omitted -->
+</tr>
+<tr >
 <blockquote>
-<!-- raw HTML omitted -->
-</blockquote>
-<blockquote>
-<!-- raw HTML omitted -->
-</blockquote>
-<!-- raw HTML omitted -->
-<blockquote>
-<!-- raw HTML omitted -->
+<td bgcolor="#ffffff" >NF
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td bgcolor="#ffffff" >当前记录中的字段个数，就是有多少列
+</td>
 </blockquote>
-<!-- raw HTML omitted -->
+</tr>
+<tr >
 <blockquote>
-<!-- raw HTML omitted -->
-</blockquote>
-<blockquote>
-<!-- raw HTML omitted -->
-</blockquote>
-<!-- raw HTML omitted -->
-<blockquote>
-<!-- raw HTML omitted -->
+<td bgcolor="#ffffff" >NR
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td bgcolor="#ffffff" >已经读出的记录数，就是行号，从1开始，如果有多个文件话，这个值也是不断累加中。
+</td>
 </blockquote>
-<!-- raw HTML omitted -->
+</tr>
+<tr >
 <blockquote>
-<!-- raw HTML omitted -->
+<td bgcolor="#ffffff" >FNR
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td bgcolor="#ffffff" >当前记录数，与NR不同的是，这个值会是各个文件自己的行号
+</td>
 </blockquote>
-<!-- raw HTML omitted -->
+</tr>
+<tr >
+<blockquote>
+<td bgcolor="#ffffff" >RS
+</td>
+</blockquote>
+<blockquote>
+<td bgcolor="#ffffff" >输入的记录分隔符， 默认为换行符
+</td>
+</blockquote>
+</tr>
+<tr >
+<blockquote>
+<td bgcolor="#ffffff" >OFS
+</td>
+</blockquote>
+<blockquote>
+<td bgcolor="#ffffff" >输出字段分隔符， 默认也是空格
+</td>
+</blockquote>
+</tr>
+<tr >
+<blockquote>
+<td bgcolor="#ffffff" >ORS
+</td>
+</blockquote>
+<blockquote>
+<td bgcolor="#ffffff" >输出的记录分隔符，默认为换行符
+</td>
+</blockquote>
+</tr>
+<tr >
+<blockquote>
+<td bgcolor="#ffffff" >FILENAME
+</td>
+</blockquote>
+<blockquote>
+<td bgcolor="#ffffff" >当前输入文件的名字
+</td>
+</blockquote>
+</tr>
+</tbody>
+</table>
+怎么使用呢，比如：我们如果要输出行号：
 <blockquote>
 <pre><code>$ awk '$3==0 &amp;&amp; $6==&quot;ESTABLISHED&quot; || NR==1 {printf &quot;s %s %-20s %-20s %s\n&quot;,NR, FNR, $4,$5,$6}' netstat.txt
 01 1 Local-Address        Foreign-Address      State
@@ -745,7 +779,7 @@ Bob     2415    40      62      72
 <blockquote>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+</blockquote>
 </blockquote>
 <p>sad</p>
 
@@ -1246,6 +1280,8 @@ Bob     2415    40      62      72
                         <a href="/tags/tensorflow" title="tensorflow">
                             tensorflow
                         </a>
+                        
+                        
                         
                         
                         

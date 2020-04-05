@@ -239,34 +239,39 @@
 <p>题意：给出k个方程，形式为 x==r1,求最小的正数x，无解输出-1.</p>
 <p>思路：首先很容易让人联想到crt.</p>
 <p><strong>然而crt的使用条件是，所有的m(也就是这道题中的a)两两互质，这道题并不满足，因此不能使用crt.</strong></p>
-<!-- raw HTML omitted -->
-<p>首先，我们看两个式子的情况<br>
-X mod m1=r1……………………………………………………………(1)<br>
-X mod m2=r2……………………………………………………………(2)<br>
-则有<br>
-X=m1<em>k1+r1………………………………………………………………(</em>)<br>
-X=m2<em>k2+r2<br>
-那么 m1</em>k1+r1=m2<em>k2+r2<br>
-整理，得<br>
-m1</em>k1-m2*k2=r2-r1<br>
-令(a,b,x,y,m)=(m1,m2,k1,k2,r2-r1)，原式变成<br>
-ax+by=m<br>
-熟悉吧？此时，因为GCD(a,b)=1不一定成立，GCD(a,b) | m 也就不一定成立。所以应该先判 若 GCD(a,b) | m 不成立，则方程无解。（<strong>理论依据：裴蜀定理</strong>）<br>
+<blockquote>X mod m1=r1
+X mod m2=r2
+...
+...
+...
+X mod mn=rn
+<p>首先，我们看两个式子的情况
+X mod m1=r1……………………………………………………………(1)
+X mod m2=r2……………………………………………………………(2)
+则有
+X=m1<em>k1+r1………………………………………………………………(</em>)
+X=m2<em>k2+r2
+那么 m1</em>k1+r1=m2<em>k2+r2
+整理，得
+m1</em>k1-m2*k2=r2-r1
+令(a,b,x,y,m)=(m1,m2,k1,k2,r2-r1)，原式变成
+ax+by=m
+熟悉吧？此时，因为GCD(a,b)=1不一定成立，GCD(a,b) | m 也就不一定成立。所以应该先判 若 GCD(a,b) | m 不成立，则方程无解。（<strong>理论依据：裴蜀定理</strong>）
 否则，继续往下。</p>
-<p>解出(x,y)，将k1=x反代回（<em>），得到X。<br>
-于是X就是这两个方程的一个特解，通解就是 X'=X+k</em>LCM(m1,m2)<br>
-这个式子再一变形，得 X&rsquo; mod LCM(m1,m2)=X<br>
-这个方程一出来，说明我们实现了(1)(2)两个方程的合并。<br>
-令 M=LCM(m1,m2)，<!-- raw HTML omitted -->R=r2-r1 <!-- raw HTML omitted --> （<strong>注意这里原博客写错了，应该为R=x*m1+r1</strong>）<br>
+<p>解出(x,y)，将k1=x反代回（<em>），得到X。
+于是X就是这两个方程的一个特解，通解就是 X'=X+k</em>LCM(m1,m2)
+这个式子再一变形，得 X&rsquo; mod LCM(m1,m2)=X
+这个方程一出来，说明我们实现了(1)(2)两个方程的合并。
+令 M=LCM(m1,m2)，<del>R=r2-r1 </del> （<strong>注意这里原博客写错了，应该为R=x*m1+r1</strong>）
 就可将合并后的方程记为 X mod M = R。</p>
-<p>然后，扩展到n个方程。<br>
-用合并后的方程再来和其他的方程按这样的方式进行合并，最后就能只剩下一个方程 X mod M=R，其中 M=LCM(m1,m2,&hellip;,mn)。<br>
+<p>然后，扩展到n个方程。
+用合并后的方程再来和其他的方程按这样的方式进行合并，最后就能只剩下一个方程 X mod M=R，其中 M=LCM(m1,m2,&hellip;,mn)。
 那么，X便是原模线性方程组的一个特解，通解为 X'=X+k*M。</p>
 <p>如果，要得到X的最小正整数解，就还是原来那个方法：</p>
-<p>X%=M;<br>
-if (X&lt;0) X+=M;<!-- raw HTML omitted --></p>
+<p>X%=M;
+if (X&lt;0) X+=M;</blockquote></p>
 <p><a href="http://www.cnblogs.com/Missa/archive/2013/06/01/3112536.html">参考博客</a></p>
-<p>这篇题解是我看了那么多讲得最清楚的一篇了&hellip;.虽然证明的那个地方笔误了。。。好在对照下代码就看出来了（<!-- raw HTML omitted -->个鬼，我问了好几个人，想到现在。。。最后发现是笔误。好气啊<!-- raw HTML omitted -->）</p>
+<p>这篇题解是我看了那么多讲得最清楚的一篇了&hellip;.虽然证明的那个地方笔误了。。。好在对照下代码就看出来了（<del>个鬼，我问了好几个人，想到现在。。。最后发现是笔误。好气啊</del>）</p>
 <p>这道题实际上给出了解线性同余方程组的一般做法（即，不要求所有的m两两互质）</p>
 <p>这种做法的理论依据是扩展欧几里得算法，和中国剩余定理没什么关系&hellip;</p>
 <p>不过既然都是解线性同余方程组。。。非要把这种做法叫什么ex_crt&hellip;我也不是很反对&hellip;.</p>
@@ -851,6 +856,8 @@ int main()
                         <a href="/tags/tensorflow" title="tensorflow">
                             tensorflow
                         </a>
+                        
+                        
                         
                         
                         

@@ -226,16 +226,16 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-  <ul>
+  <ol>
     <li><a href="#创建一个cluster">创建一个cluster</a>
-      <ul>
+      <ol>
         <li><a href="#创建-一个tftrainclusterspec来描述cluster中的全部tasks">创建 一个 tf.train.ClusterSpec 来描述cluster中的全部tasks</a></li>
         <li><a href="#在每一个task中创建一个tftrainserver的实例">在每一个task中创建一个tf.train.Server的实例</a></li>
-      </ul>
+      </ol>
     </li>
     <li><a href="#在你的模型中指定分布式设备">在你的模型中指定分布式设备</a></li>
     <li><a href="#replicated-training">Replicated training</a></li>
-  </ul>
+  </ol>
 </nav>
                 
                 <p>感觉资料不是很多，先收集资料好了。</p>
@@ -246,7 +246,7 @@
 <p><a href="https://stackoverflow.com/questions/41480149/how-does-ps-work-in-distribute-tensorflow">SO_How does ps work in distribute Tensorflow?</a></p>
 <p>update:在多个nodes（机）上跑。。。tf默认是异步更新的。。。同步的话。。大概需要syncreplicasoptimizer?</p>
 <p>来直观感受下，不同task的之间并不同步</p>
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2017/08/%E6%B7%B1%E5%BA%A6%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20170815095908.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2017/08/%E6%B7%B1%E5%BA%A6%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20170815095908.png" alt=""><br>
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2017/08/%E6%B7%B1%E5%BA%A6%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20170815095908.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2017/08/%E6%B7%B1%E5%BA%A6%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20170815095908.png" alt="" />
 </a></p>
 <h2 id="创建一个cluster">创建一个cluster</h2>
 <p>每一个task唯一对应一个server,server中有一个master，还有若干个worker</p>
@@ -257,14 +257,14 @@
 <p>task的集合中的元素，job是task的（不相交？）子集，cluster是task的全集。</p>
 <p>（<strong>似乎要求所有job的交为空，所有job的补为全集，也就是似乎不能越过job直接到taks(?)</strong>）</p>
 <p>如下图：</p>
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2017/08/%E6%B7%B1%E5%BA%A6%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20170808105038.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2017/08/%E6%B7%B1%E5%BA%A6%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20170808105038.png" alt=""><br>
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2017/08/%E6%B7%B1%E5%BA%A6%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20170808105038.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2017/08/%E6%B7%B1%E5%BA%A6%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20170808105038.png" alt="" />
 </a></p>
-<!-- raw HTML omitted -->
+<blockquote>_A TensorFlow "cluster" is a set of "tasks" that participate in the distributed execution of a TensorFlow graph. Each task is associated with a TensorFlow "server", which contains a "master" that can be used to create sessions, and a "worker" that executes operations in the graph. A cluster can also be divided into one or more "jobs", where each job contains one or more tasks._</blockquote>
 <p>通常不同的task运行在不同的machine上，不过也可以运行在同一个machine的不同device上（比如一个机器的多个gpu)</p>
 <p>为了创建一个cluster，要做如下步骤：</p>
 <h3 id="创建-一个tftrainclusterspec来描述cluster中的全部tasks"><strong>创建 一个 <code>tf.train.ClusterSpec</code> 来描述cluster中的全部tasks</strong></h3>
 <p>cluster通过一个dictionary将job(task) map到网络地址，我们将这个地址传递给 tf.train.ClusterSpec 构造器，看如下例子：</p>
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2017/08/%E6%B7%B1%E5%BA%A6%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20170808112735.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2017/08/%E6%B7%B1%E5%BA%A6%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20170808112735.png" alt=""><br>
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2017/08/%E6%B7%B1%E5%BA%A6%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20170808112735.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2017/08/%E6%B7%B1%E5%BA%A6%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20170808112735.png" alt="" />
 </a></p>
 <p>我们观察到，<strong>task的id是0-base，按照dictionary中的key的顺序自动递增编号的。</strong></p>
 <h3 id="在每一个task中创建一个tftrainserver的实例">在每一个task中创建一个<code>tf.train.Server的实例</code></h3>
@@ -302,9 +302,9 @@ with tf.Session(&quot;grpc://worker7.example.com:2222&quot;) as sess:
 <p> 在上面的代码中，变量被创建在了ps 上的两个task,模型的计算密集不问被创建在了worker上 。</p>
 <p><strong>tensorflow会插入合适的传输（组件）来（自动地）保证ps和worker的通信（fordward pass时从ps到worker，apply gradients时从worker到ps)</strong></p>
 <p>大概就是下面这个图的过程：</p>
-<p><img src="https://www.tensorflow.org/images/graph_split2.svg" alt="Partitioned Graph"></p>
+<p><img src="https://www.tensorflow.org/images/graph_split2.svg" alt="Partitioned Graph" /></p>
 <p>上面SO的链接中提到了：</p>
-<!-- raw HTML omitted -->
+<blockquote>Anyway, both "worker" and "ps" are _tasks_ (or _jobs_ rather, which are just groups of _tasks_), so they're really no different. The difference is what they're supposed to be used for. The idea is that state (e.g. `tf.Variable`) should be on the parameter servers, while operations for calculating state should be on the workers. Instead of achieving this by calling `tf.device` manually everywhere, a helper function named [`tf.train.replica_device_setter`](https://www.tensorflow.org/api_docs/python/train/distributed_execution#replica_device_setter) is used that sets a `tf.Variable`'s device to a parameter server, and the other operations to a worker.
 <p><code>server.join()</code> just means that parameter servers will wait on the workers, instead of terminating their client processes immediately.</p>
 <blockquote>
 <pre><code>with tf.device(tf.replica_device_setter(
@@ -315,7 +315,7 @@ with tf.Session(&quot;grpc://worker7.example.com:2222&quot;) as sess:
   train_op = ... # Automatically assigned to the worker.
 </code></pre>
 </blockquote>
-<!-- raw HTML omitted -->
+</blockquote>
 <p>和我之前的理解基本一致，不过重点是里面提到了名字叫 <a href="https://www.tensorflow.org/api_docs/python/tf/train/replica_device_setter">tf.train.replica_device_setter</a> 的函数，推荐使用这个函数去指定分布式设备，而不是手动指定。</p>
 <h2 id="replicated-training">Replicated training</h2>
 <p>一种常见的训练方式叫做“数据并行”，涉及到在一个worker中的多个tasks在不同的mini-batch数据上训练同一个模型，然后更新存放在ps中的共享参数。在tensorflow中完成这样的结构有很多方法，我们构建了一些库去简化replicated trainning的操作，可能的方法如下：</p>
@@ -822,6 +822,8 @@ with tf.Session(&quot;grpc://worker7.example.com:2222&quot;) as sess:
                         <a href="/tags/tensorflow" title="tensorflow">
                             tensorflow
                         </a>
+                        
+                        
                         
                         
                         

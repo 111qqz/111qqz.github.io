@@ -227,97 +227,97 @@
                 </header>
                 <nav id="TableOfContents"></nav>
                 
-                <p>**这是一个求一个排序的下一个排列的函数，可以遍历全排列,要包含头文件<br>
+                <p>**这是一个求一个排序的下一个排列的函数，可以遍历全排列,要包含头文件<br />
 下面是以前的笔记  与之完全相反的函数还有prev_permutation</p>
 <p>(1) int 类型的next_permutation</p>
-<p>int main()<br>
-{<br>
-int a[3];<br>
-a[0]=1;a[1]=2;a[2]=3;<br>
-do<br>
-{<br>
+<p>int main()<br />
+{<br />
+int a[3];<br />
+a[0]=1;a[1]=2;a[2]=3;<br />
+do<br />
+{<br />
 cout&lt;} while (next_permutation(a,a+3)); //参数3指的是要进行排列的长度</p>
 <p>//如果存在a之后的排列，就返回true。如果a是最后一个排列没有后继，返回false，每执行一次，a就变成它的后继</p>
 <p>}</p>
 <p>输出：</p>
-<p>1 2 3<br>
-1 3 2<br>
-2 1 3<br>
-2 3 1<br>
-3 1 2<br>
+<p>1 2 3<br />
+1 3 2<br />
+2 1 3<br />
+2 3 1<br />
+3 1 2<br />
 3 2 1</p>
-<p>如果改成 while(next_permutation(a,a+2));<br>
-则输出：<br>
-1 2 3<br>
+<p>如果改成 while(next_permutation(a,a+2));<br />
+则输出：<br />
+1 2 3<br />
 2 1 3</p>
-<p>只对前两个元素进行字典排序<br>
+<p>只对前两个元素进行字典排序<br />
 显然，如果改成 while(next_permutation(a,a+1)); 则只输出：1 2 3</p>
 <p>若排列本来就是最大的了没有后继，则next_permutation执行后，会对排列进行字典升序排序,相当于循环</p>
-<p>int list[3]={3,2,1};<br>
-next_permutation(list,list+3);<br>
-cout&lt;<br>
+<p>int list[3]={3,2,1};<br />
+next_permutation(list,list+3);<br />
+cout&lt;<br />
 //输出: 1 2 3</p>
 <p>(2) char 类型的next_permutation</p>
-<p>int main()<br>
-{<br>
-char ch[205];<br>
+<p>int main()<br />
+{<br />
+char ch[205];<br />
 cin &raquo; ch;</p>
-<p>sort(ch, ch + strlen(ch) );<br>
-//该语句对输入的数组进行字典升序排序。如输入9874563102 cout&lt;<br>
-char *first = ch;<br>
+<p>sort(ch, ch + strlen(ch) );<br />
+//该语句对输入的数组进行字典升序排序。如输入9874563102 cout&lt;<br />
+char *first = ch;<br />
 char *last = ch + strlen(ch);</p>
-<p>do {<br>
-cout&laquo; ch &laquo; endl;<br>
-}while(next_permutation(first, last));<br>
-return 0;<br>
+<p>do {<br />
+cout&laquo; ch &laquo; endl;<br />
+}while(next_permutation(first, last));<br />
+return 0;<br />
 }</p>
-<p>//这样就不必事先知道ch的大小了，是把整个ch字符串全都进行排序<br>
-//若采用 while(next_permutation(ch,ch+5)); 如果只输入1562，就会产生错误，因为ch中第五个元素指向未知<br>
+<p>//这样就不必事先知道ch的大小了，是把整个ch字符串全都进行排序<br />
+//若采用 while(next_permutation(ch,ch+5)); 如果只输入1562，就会产生错误，因为ch中第五个元素指向未知<br />
 //若要整个字符串进行排序，参数5指的是数组的长度，不含结束符</p>
 <p>(3) string 类型的next_permutation</p>
-<p>int main()<br>
-{<br>
-string line;<br>
-while(cin&raquo;line&amp;&amp;line;!=&rdquo;#&quot;)<br>
-{<br>
-if(next_permutation(line.begin(),line.end())) //从当前输入位置开始<br>
-cout&lt; else cout&laquo;&quot;Nosuccesorn&rdquo;;<br>
-}<br>
+<p>int main()<br />
+{<br />
+string line;<br />
+while(cin&raquo;line&amp;&amp;line;!=&rdquo;#&quot;)<br />
+{<br />
+if(next_permutation(line.begin(),line.end())) //从当前输入位置开始<br />
+cout&lt; else cout&laquo;&quot;Nosuccesorn&rdquo;;<br />
+}<br />
 }</p>
-<p>int main()<br>
-{<br>
-string line;<br>
-while(cin&raquo;line&amp;&amp;line;!=&rdquo;#&quot;)<br>
-{<br>
-sort(line.begin(),line.end());//全排列<br>
-cout&lt; while(next_permutation(line.begin(),line.end()))<br>
-cout&lt;}<br>
+<p>int main()<br />
+{<br />
+string line;<br />
+while(cin&raquo;line&amp;&amp;line;!=&rdquo;#&quot;)<br />
+{<br />
+sort(line.begin(),line.end());//全排列<br />
+cout&lt; while(next_permutation(line.begin(),line.end()))<br />
+cout&lt;}<br />
 }</p>
 <p>next_permutation 自定义比较函数</p>
-<p>#include //poj 1256 Anagram<br>
-#include<br>
-#include<br>
-using namespace std;<br>
-int cmp(char a,char b) //&lsquo;A'&lt;'a'&lt;'B'&lt;'b'&lt;&hellip;&lt;'Z'&lt;'z&rsquo;.<br>
-{<br>
-if(tolower(a)!=tolower(b))<br>
-return tolower(a) else<br>
-return a}<br>
-int main()<br>
-{<br>
-char ch[20];<br>
-int n;<br>
-cin&raquo;n;<br>
-while(n&ndash;)<br>
-{<br>
-scanf(&quot;%s&rdquo;,ch);<br>
-sort(ch,ch+strlen(ch),cmp);<br>
-do<br>
-{<br>
-printf(&quot;%sn&rdquo;,ch);<br>
-}while(next_permutation(ch,ch+strlen(ch),cmp));<br>
-}<br>
-return 0;<br>
+<p>#include //poj 1256 Anagram<br />
+#include<br />
+#include<br />
+using namespace std;<br />
+int cmp(char a,char b) //&lsquo;A'&lt;'a'&lt;'B'&lt;'b'&lt;&hellip;&lt;'Z'&lt;'z&rsquo;.<br />
+{<br />
+if(tolower(a)!=tolower(b))<br />
+return tolower(a) else<br />
+return a}<br />
+int main()<br />
+{<br />
+char ch[20];<br />
+int n;<br />
+cin&raquo;n;<br />
+while(n&ndash;)<br />
+{<br />
+scanf(&quot;%s&rdquo;,ch);<br />
+sort(ch,ch+strlen(ch),cmp);<br />
+do<br />
+{<br />
+printf(&quot;%sn&rdquo;,ch);<br />
+}while(next_permutation(ch,ch+strlen(ch),cmp));<br />
+}<br />
+return 0;<br />
 }**</p>
 
 
@@ -817,6 +817,8 @@ return 0;<br>
                         <a href="/tags/tensorflow" title="tensorflow">
                             tensorflow
                         </a>
+                        
+                        
                         
                         
                         

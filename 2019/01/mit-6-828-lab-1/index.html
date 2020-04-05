@@ -226,31 +226,31 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-  <ul>
+  <ol>
     <li><a href="#花费了30小时终于搞定了orz">花费了30+小时，终于搞定了orz</a></li>
     <li><a href="#part-1-pc-bootstrap">Part 1: PC Bootstrap</a>
-      <ul>
+      <ol>
         <li><a href="#the-pcs-physical-address-space">The PC&rsquo;s Physical Address Space</a></li>
         <li><a href="#the-rom-bios">The ROM BIOS</a></li>
-      </ul>
+      </ol>
     </li>
     <li><a href="#part-2-the-boot-loader">Part 2: The Boot Loader</a>
-      <ul>
+      <ol>
         <li><a href="#real-mode--protected-mode">real mode / protected mode</a></li>
         <li><a href="#bootboots文件在干什么">boot/boot.S文件在干什么</a></li>
         <li><a href="#bootmainc这个文件在干什么">boot/main.c这个文件在干什么</a></li>
         <li><a href="#loading-the-kernel">Loading the Kernel</a></li>
         <li><a href="#elf文件">ELF文件</a></li>
-      </ul>
+      </ol>
     </li>
     <li><a href="#part-3-the-kernel">Part 3: The Kernel</a>
-      <ul>
+      <ol>
         <li><a href="#using-virtual-memory-to-work-around-position-dependence">Using virtual memory to work around position dependence</a></li>
         <li><a href="#formatted-printing-to-the-console">Formatted Printing to the Console</a></li>
         <li><a href="#the-stack">The Stack</a></li>
-      </ul>
+      </ol>
     </li>
-  </ul>
+  </ol>
 </nav>
                 
                 <h2 id="花费了30小时终于搞定了orz">花费了30+小时，终于搞定了orz</h2>
@@ -271,11 +271,13 @@
 +------------------+  &lt;- 0x00000000
 </code></pre>
 <p>由于8086/8088只有20跟地址线，因此物理内存空间就是2^20=1MB.地址空间从0x00000到0xFFFFF.其中从0x00000开始的640k空间被称为&quot;low memory&rdquo;，是PC真正能使用的RAM。从 0xA0000 到 0xFFFFF　的384k的non-volatile memory被硬件保留，用作video display buffers和BIOS等。</p>
-<!-- raw HTML omitted -->
+<!-- more -->
 <h4 id="8028680386时代及以后">80286/80386时代及以后</h4>
 <p>为了保持向后兼容，因此0-1MB的空间还是和原来保持一致。因此地址空间似乎存在一个“洞”（为什么我觉得其实是两个“洞”。。。不是空着的才叫“洞”吗），PC能使用的RAM被这个“洞”（也就是0xA0000 到 0xFFFFF)分成了0x00000000到0x000BFFFF的640k和 0x00100000到0xFFFFFFFF两部分。</p>
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
+<table align="center" >
+<tbody >
+<tr >
+<td >
 <pre><code>+------------------+  &lt;- 0xFFFFFFFF (4GB)
 |      32-bit      |
 |  memory mapped   |
@@ -306,7 +308,11 @@
 |                  |
 +------------------+  &lt;- 0x00000000
 </code></pre>
-<!-- raw HTML omitted -->
+</td>
+</tr>
+</tbody>
+</table>
+此外，在地址空间的最上面一部分，通常被BIOS保留用于 32-bit PCI devices的memory mapped. memory mapped是对于memory和I/O设备使用相同的地址空间的一种I/O寻址方式。具体可以参考[Memory-mapped I/O](https://en.wikipedia.org/wiki/Memory-mapped_I/O)。PCI设备具体可以参考[PCI_Express](https://en.wikipedia.org/wiki/PCI_Express)和[深入PCI与PCIe之一：硬件篇](https://zhuanlan.zhihu.com/p/26172972)
 <p>目前处理器已经可以支持超过4GB大小的内存空间。因此为了保持后向兼容性，地址空间又会多一个&quot;洞&rdquo;。</p>
 <h3 id="the-rom-bios">The ROM BIOS</h3>
 <p>用qemu模拟启动，观察到进入BIOS执行的第一条命令为</p>
@@ -340,7 +346,7 @@
   *  32-bit Protected Mode 　登场于intel 80386处理器。比起80286,使用的寄存器是32-bit的，因此segment size 增大到4GB(2^32). 同时，由于segment size不再像64k那么小，以前的一整个segment要么都在memory中，要么都在disk中的策略就变得不太科学了。因此引入[paging](https://en.wikipedia.org/wiki/Paging) 机制，将segment分成尺寸更小的page。允许segment中的一部分在memory中。关于paging可以参考[OSTEP](http://pages.cs.wisc.edu/~remzi/OSTEP/)的18章。
 </code></pre>
 <p>这里值得一提的是，对于支持protected mode的cpu,启动时为了保持向后兼容，仍然会以real mode启动，之后再切换到protected mode.</p>
-<!-- raw HTML omitted -->
+<blockquote>_When a processor that supports x86 protected mode is powered on, it begins executing instructions in [real mode](https://en.wikipedia.org/wiki/Real_mode), in order to maintain [backward compatibility](https://en.wikipedia.org/wiki/Backward_compatibility) with earlier x86 processors.[[4]](https://en.wikipedia.org/wiki/Protected_mode#cite_note-Real_mode_on_powered_on-4) Protected mode may only be entered after the system software sets up one descriptor table and enables the Protection Enable (PE) [bit](https://en.wikipedia.org/wiki/Bit) in the [control register](https://en.wikipedia.org/wiki/Control_register) 0 (CR0)_</blockquote>
 <h3 id="bootboots文件在干什么">boot/boot.S文件在干什么</h3>
 <pre><code>#include &lt;inc/mmu.h&gt;
 
@@ -429,7 +435,7 @@ gdtdesc:
 </code></pre>
 <p>第一次看到这段代码的时候感觉Enable A20这一部分比较喵(ling)喵(ren)喵(fei)喵(jie)</p>
 <p>可以参考<a href="https://www.win.tue.nl/~aeb/linux/kbd/A20.html">A20 - a pain from the past</a>。重点是</p>
-<!-- raw HTML omitted -->
+<blockquote>One sets the output port of the keyboard controller by first writing 0xd1 to port 0x64, and the the desired value of the output port to port 0x60. One usually sees the values 0xdd and 0xdf used to disable/enable A20.</blockquote>
 <p>然后比较让人疑惑的可能是&quot;bootstrap GDT”这部分。参考<a href="http://flint.cs.yale.edu/cs421/papers/x86-asm/asm.html">cs421 x86 Assembly Guide</a>尤其是:</p>
 <pre><code>.data		
 var:		
@@ -453,9 +459,9 @@ the ASCII character values for hello followed by a nul (0) byte. */
 <p>知道gdtdesc部分做的事情是，在gdtdesc这个位置定义了一个word类型（２字节）的变量，值为0x17,参考注释也就是gdt定义的那一段的size大小。然后在gdtdsec+2这个位置定义了long类型(4字节)的gdt地址.</p>
 <p>这里gdt和gdtdesc都是&quot;label&rdquo;，label其实就是标记了一个内存地址，方便使用。</p>
 <p>具体来说，一个“label”的值，是其之后的第一条instruction的内存地址。</p>
-<!-- raw HTML omitted -->
+<blockquote>We use the notation <label> to refer to labeled locations in the program text. Labels can be inserted anywhere in x86 assembly code text by entering a label name followed by a colon. For example,
 <blockquote>
-<!-- raw HTML omitted -->
+<blockquote>
 </blockquote>
 <blockquote>
 <blockquote>
@@ -466,7 +472,10 @@ begin:
 </code></pre>
 </blockquote>
 </blockquote>
-<!-- raw HTML omitted -->
+</blockquote>
+> 
+> 
+The second instruction in this code fragment is labeled begin. Elsewhere in the code, we can refer to the memory location that this instruction is located at in memory using the more convenient symbolic name begin. This label is just a convenient way of expressing the location instead of its 32-bit value.</blockquote>
 <p>然后是关于gdt部分，SEG看起来是个宏，我们看到inc/mmu.h这个文件中相关的部分，豁然开朗。</p>
 <pre><code>#ifdef __ASSEMBLER__
 
@@ -487,7 +496,7 @@ begin:
 <p>我们看到代码最开始有一个CR0_PE_ON,值为0x1.之后就是在计算cr0 = cr0 | 0x1，按照注释说这样就可以把保护模式打开了。理解到这里其实就ok，不过我还是想多说两句。　Control register是用来控制cpu行为的寄存器。cr0是x86体系架构的<a href="https://en.wikipedia.org/wiki/Control_register">Control register</a>中的一个。cr0是32bit的寄存器，其中一些bit上有名称以及固定的作用。比如对于位置bit 0,该位置的名称是&quot;Protected Mode Enable&rdquo;，简称为PE,当该位置值为1,表示保护模式被打开。</p>
 <p>最后一个小细节是&rdquo;.globl start&rdquo;。&quot;.globl&quot;是什么含义？为什么要把start这个label定义成global的？可以参考<a href="https://stackoverflow.com/questions/17898989/what-is-global-start-in-assembly-language">What is global _start in assembly language?</a>　用人话说就是定义成.globl的lable会被导出到生成的.o文件中，不然linker找不到这个符号。由于start是这个boot.S文件的entry point，因此需要linker看到。</p>
 <p>最后，从全局来看，boot.S这个文件做了什么呢？　其实上面一个小节中已经提到了。</p>
-<!-- raw HTML omitted -->
+<blockquote>_When a processor that supports x86 protected mode is powered on, it begins executing instructions in [real mode](https://en.wikipedia.org/wiki/Real_mode), in order to maintain [backward compatibility](https://en.wikipedia.org/wiki/Backward_compatibility) with earlier x86 processors.[[4]](https://en.wikipedia.org/wiki/Protected_mode#cite_note-Real_mode_on_powered_on-4) Protected mode may only be entered after the system software sets up one descriptor table and enables the Protection Enable (PE) [bit](https://en.wikipedia.org/wiki/Bit) in the [control register](https://en.wikipedia.org/wiki/Control_register) 0 (CR0)_</blockquote>
 <h3 id="bootmainc这个文件在干什么">boot/main.c这个文件在干什么</h3>
 <pre><code>#include &lt;inc/x86.h&gt;                                                                                                                                                                          
 #include &lt;inc/elf.h&gt;                                                                                                                                                                          
@@ -639,9 +648,9 @@ inb(int port)
 }
 </code></pre>
 <p>发现就是用c将汇编封装了一层。这个东西应该叫“inline assembly”，具体可以参考<a href="http://www.delorie.com/djgpp/doc/brennan/brennan_att_inline_djgpp.html">Brennan&rsquo;s Guide to Inline Assembly</a>　其中volatile关键字表示禁止gcc优化这段代码。</p>
-<!-- raw HTML omitted -->
+<blockquote>If your assembly statement _must_ execute where you put it, (i.e. must not be moved out of a loop as an optimization), put the keyword **volatile** after **asm** and before the ()'s. To be ultra-careful, use
 <p><strong>asm</strong> <strong>volatile</strong> (&hellip;whatever&hellip;);</p>
-<p>However, I would like to point out that if your assembly&rsquo;s only purpose is to calculate the output registers, with no other side effects, you should leave off the <strong>volatile</strong> keyword so your statement will be processed into GCC&rsquo;s common subexpression elimination optimization.<!-- raw HTML omitted --></p>
+<p>However, I would like to point out that if your assembly&rsquo;s only purpose is to calculate the output registers, with no other side effects, you should leave off the <strong>volatile</strong> keyword so your statement will be processed into GCC&rsquo;s common subexpression elimination optimization.</blockquote></p>
 <p>注释上写的要&quot;boot  an ELF kernel image from the first IDE hard disk&rdquo;,那么，首先要知道什么是ELF.　ELF其实就是一种文件格式，全称为“Executable and Linkable Format”可以参考<a href="https://en.wikipedia.org/wiki/Executable_and_Linkable_Format#File_layout">Executable_and_Linkable_Format#File_layout</a>，建议通读这一部分，内容不多，不过对之后很有用。</p>
 <p>参考一下inc/elf.h文件,以及main.c中的注释，就可以整体上知道这段代码是在干什么了：将ELF格式的kernel image从硬盘读到内存中，并将控制权交给kernel image.</p>
 <pre><code>#ifndef JOS_INC_ELF_H
@@ -1198,34 +1207,34 @@ The target architecture is assumed to be i386
 <p>可是这还没有加载boot loader啊..怎么就进入protected mode了呢。。参考<a href="https://stackoverflow.com/questions/5211541/bootloader-switching-processor-to-protected-mode">bootloader - switching processor to protected mode</a>，发现有些BIOS在实现的时候，会在加载boot loader之前，先短暂进入保护模式，目的可能是为了使用在保护模式下的一些特性(比如32-bit的register)，然后在进入bootloader之前，再切换回实模式。 以及据某6.828学习群大佬说&hellip;在进入boot loader之前进入保护模式的方法和boot loader中进入保护模式的方法是不一样的&hellip;进入保护模式的方法一共有四种&hellip; 感觉太过细节，暂且不去关心了。</p>
 <p>第26行之后的代码&hellip;抱歉我也不是很懂&hellip;看起来无关紧要，如果之后发现这段是重要的再说。</p>
 <p>来回答一下几个问题吧。</p>
-<!-- raw HTML omitted -->
+<blockquote>
 <blockquote>
 </blockquote>
 <pre><code>  * At what point does the processor start executing 32-bit code? What exactly causes the switch from 16- to 32-bit mode?
 </code></pre>
-<!-- raw HTML omitted -->
-<p>开始执行32-bit code是从位置0x7c32,执行的命令为mov    $0x10,%ax<br>
+</blockquote>
+<p>开始执行32-bit code是从位置0x7c32,执行的命令为mov    $0x10,%ax
 从16-bit mode转化到32-bit mode是将control register 0 的 第1位(PE)设置为1导致的。</p>
-<!-- raw HTML omitted -->
+<blockquote>
 <blockquote>
 </blockquote>
 <pre><code>  * What is the _last_ instruction of the boot loader executed, and what is the _first_ instruction of the kernel it just loaded?
 </code></pre>
-<!-- raw HTML omitted -->
+</blockquote>
 <p>boot loader执行的最后一条指令是0x7d61:      call   <em>0x10018  ,对应的c语言代码是 ((void (</em>)(void)) (ELFHDR-&gt;e_entry))();   kernel加载后执行的第一条指令为 movw   $0x1234,0x472</p>
-<!-- raw HTML omitted -->
+<blockquote>
 <blockquote>
 </blockquote>
 <pre><code>  * _Where_ is the first instruction of the kernel?
 </code></pre>
-<!-- raw HTML omitted -->
+</blockquote>
 <p>kernel的第一条指令的地址为0x10000c</p>
-<!-- raw HTML omitted -->
+<blockquote>
 <blockquote>
 </blockquote>
 <pre><code>  * How does the boot loader decide how many sectors it must read in order to fetch the entire kernel from disk? Where does it find this information?
 </code></pre>
-<!-- raw HTML omitted -->
+</blockquote>
 <p>boot loader先读一小部分kernel，具体来说是8个sector，也就是1 page,对应的代码为 readseg((uint32_t) ELFHDR, SECTSIZE*8, 0); 然后读进来的这部分里面包含了整个kernel有多大的信息，这些信息存储在inc/elf.h文件中。</p>
 <h3 id="loading-the-kernel">Loading the Kernel</h3>
 <p>练习4提到了要熟悉c语言的指针..去看了下推荐的&rdquo;<em>The C Programming Language</em> &ldquo;..发现真是一本非常棒的入门书&hellip;之前还以为是像《算法导论》一样只可远观的大部头&hellip;可惜已经不适初学者了&hellip; 练习4中给出了一段使用c语言指针的代码，第5个输出要注意一下大小端&hellip;</p>
@@ -1305,7 +1314,7 @@ Idx Name          Size      VMA       LMA       File off  Algn
 </code></pre>
 <p>其中size是这个section的大小，VMA (Virtual Memory Address，6.828中叫link address) 是section开始执行时所在的memory address,LMA (Load Memory Address)是这个section被加载到memory中所处的位置。通常这两个地址是一样的。</p>
 <p>boot loader使用elf文件中的program header来决定如何记载section, program header指明了ELF文件的哪一部分需要记载到memory中，以及加载到memory的什么位置。我们可以用bjdump -x obj/kern/kernel查看ELF的全部header文件</p>
-<!-- raw HTML omitted -->
+<blockquote>练习5 Trace through the first few instructions of the boot loader again and identify the first instruction that would "break" or otherwise do the wrong thing if you were to get the boot loader's link address wrong. Then change the link address in boot/Makefrag to something wrong, run make clean, recompile the lab with make, and trace into the boot loader again to see what happens. Don't forget to change the link address back and make clean again afterward!</blockquote>
 <p>把boot loader的link address从0x7c00改成了0x9c00&hellip; 然后进入gdb单步调试。</p>
 <p>发现lgdtw的参数出现了负数 [ 0:7c1e] =&gt; 0x7c1e: lgdtw -0x639c  ，然后继续执行，到[ 0:7c2d] =&gt; 0x7c2d: ljmp $0x8,$0x9c32  ,发生了crash.</p>
 <p>我们观察到生成的boot.asm文件，地址确实是从0x9c00开始了。</p>
@@ -1338,7 +1347,7 @@ spin:
     9c4a:       eb fe                   jmp    9c4a &lt;spin&gt;
 </code></pre>
 <p>但是实际上。。BIOS仍然把boot loader记载到了0x7c00&hellip;.这是约定俗成吗？ BIOS无视Boot loader的link address，直接加载到0x7c00?   没有找到相关资料，有待进一步探寻。</p>
-<!-- raw HTML omitted -->
+<blockquote>练习6 Reset the machine (exit QEMU/GDB and start them again). Examine the 8 words of memory at 0x00100000 at the point the BIOS enters the boot loader, and then again at the point the boot loader enters the kernel. Why are they different? What is there at the second breakpoint? (You do not really need to use QEMU to answer this question. Just think.)</blockquote>
 <p>这个问题是问，BIOS进入boot loader时（也就是在0x7c00时）和boot loader进入kernel时(0x10000c)，地址0x00100000开始的8个word单位的值，为什么不同。</p>
 <p>0x7c00时，0x00100000处的8个word的值都为0&hellip;</p>
 <p>在0x10000c时，0x00100000处的值翻译成指令之后是：</p>
@@ -1356,8 +1365,8 @@ spin:
 <h3 id="using-virtual-memory-to-work-around-position-dependence">Using virtual memory to work around position dependence</h3>
 <p>OS的kernel通常喜欢运行再较高地址的虚拟内存中，比如0xf0100000，为的是低地址留给用户程序。但是有的机器可能没有那么大的memory，因此不存在0xf0100000这个物理地址。因此这里需要做一个虚拟内存到物理内存的映射。在这个部分实验中，我们不需要至少地址映射是如何work的，只需要知道效果就好。</p>
 <p>具体来说，当CR0_PG被置为1之前，内存地址为物理内存地址(严格地说，其实是线性地址，不过在boot/boot.S中做了线性地址到物理地址的等价映射），当CRO_PG flag被置为1之后，地址就变成了虚拟内存地址。我们可以用gdb调试看一下发生了什么。</p>
-<!-- raw HTML omitted -->
-<p>What is the first instruction <em>after</em> the new mapping is established that would fail to work properly if the mapping weren&rsquo;t in place? Comment out the <code>movl x, %cr0</code> in kern/entry.S, trace into it, and see if you were right.<!-- raw HTML omitted --></p>
+<blockquote>Exercise 7.  Use QEMU and GDB to trace into the JOS kernel and stop at the `movl x, %cr0`. Examine memory at 0x00100000 and at 0xf0100000. Now, single step over that instruction using the stepi GDB command. Again, examine memory at 0x00100000 and at 0xf0100000. Make sure you understand what just happened.
+<p>What is the first instruction <em>after</em> the new mapping is established that would fail to work properly if the mapping weren&rsquo;t in place? Comment out the <code>movl x, %cr0</code> in kern/entry.S, trace into it, and see if you were right.</blockquote></p>
 <p>先用b *0x10000c处设置断点，这个是JOS kernel开始运行的地址。然后单步几步，在movl x , %cr0处停留，也就是cr0_PG flag恰好也被制为1之前。观察一下0x00100000和0xf0100000的内容:</p>
 <pre><code>(gdb) x/8x 0xf0100000                                                                                                 
 0xf0100000 &lt;_start+4026531828&gt;: 0x00000000      0x00000000      0x00000000      0x00000000                                                                                 
@@ -1395,12 +1404,12 @@ x/8i 0x00100000                                                                 
 </code></pre>
 <p>可以观察到，在cx0_PG flag被置为1之前，地址0xf0100000处是一片虚无。</p>
 <p>置为1之后，地址0xf0100000处的内容和0x00100000处的内容一致。需要注意，此时这两个地址都是虚拟内存地址了。具体来说</p>
-<!-- raw HTML omitted -->
+<blockquote>Once `CR0_PG` is set, memory references are virtual addresses that get translated by the virtual memory hardware to physical addresses. `entry_pgdir` translates virtual addresses in the range 0xf0000000 through 0xf0400000 to physical addresses 0x00000000 through 0x00400000, as well as virtual addresses 0x00000000 through 0x00400000 to physical addresses 0x00000000 through 0x00400000</blockquote>
 <p>然后我们注释掉<code>movl x, %cr0</code> in kern/entry.S</p>
 <p>再次用gdb调试，发现0x10002a: jmp *x  crash了。 原因显然是由于没有开启保护模式，eax的地址值不合法。</p>
 <h3 id="formatted-printing-to-the-console">Formatted Printing to the Console</h3>
 <p>printf的格式化输出并不是天生就有的，首先阅读一下相关的几个代码。kern/printf.c, kern/console.c和lib/printfmt.c</p>
-<!-- raw HTML omitted -->
+<blockquote>Exercise 8. We have omitted a small fragment of code - the code necessary to print octal numbers using patterns of the form "%o". Find and fill in this code fragment.</blockquote>
 <p>很简单，修改之后代码为</p>
 <pre><code>case 'o':
             // Replace this with your code.
@@ -1409,14 +1418,14 @@ x/8i 0x00100000                                                                 
             goto number;
 </code></pre>
 <p>接下来来回答几个问题</p>
-<!-- raw HTML omitted -->
+<blockquote>
 <blockquote>
 </blockquote>
 <pre><code>  1. Explain the interface between printf.c and console.c. Specifically, what function does console.c export? How is this function used by printf.c?
 </code></pre>
-<!-- raw HTML omitted -->
+</blockquote>
 <p>printf.c与console.c的接口是console.c中的cputchar()，作用是向console中打印一个字符。printf.c在patch()函数中使用了cputchar()</p>
-<!-- raw HTML omitted -->
+<blockquote>2.Explain the following from console.c:
 <blockquote>
 <pre><code>if (crt_pos &gt;= CRT_SIZE) {
          int i;
@@ -1427,9 +1436,9 @@ x/8i 0x00100000                                                                 
 }
 </code></pre>
 </blockquote>
-<!-- raw HTML omitted -->
+</blockquote>
 <p>这段代码很显然，含义是屏幕的字符数超过了屏幕能显示的最大数目的情况下，将第二行到最后一行的字符整体上移一行（这样原先的第一行就被覆盖了），然后将最后一行的内容清空（因为已经上移到倒数第二行了)   应该是类似屏幕滚动的效果</p>
-<!-- raw HTML omitted -->
+<blockquote>3. For the following questions you might wish to consult the notes for Lecture 2. These notes cover GCC's calling convention on the x86.
 <p>Trace the execution of the following code step-by-step:</p>
 <blockquote>
 <pre><code>int x = 1, y = 3, z = 4;
@@ -1683,7 +1692,7 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 </code></pre>
 </blockquote>
 <p>What is the output? Explain how this output is arrived at in the step-by-step manner of the previous exercise. <a href="http://web.cs.mun.ca/~michael/c/ascii-table.html">Here&rsquo;s an ASCII table</a> that maps bytes to characters.</p>
-<p>The output depends on that fact that the x86 is little-endian. If the x86 were instead big-endian what would you set <code>i</code> to in order to yield the same output? Would you need to change <code>57616</code> to a different value?<!-- raw HTML omitted --></p>
+<p>The output depends on that fact that the x86 is little-endian. If the x86 were instead big-endian what would you set <code>i</code> to in order to yield the same output? Would you need to change <code>57616</code> to a different value?</blockquote></p>
 <p>输出结果为  &ldquo;He110 World&rdquo; 前半部分的e110就是57616的十六进制表示。后半部分将unsiged int i 当成unsigned char类型输出，十六进制64,6c,72对应的字符分别为‘d’,‘l’,&lsquo;r&rsquo;.</p>
 <p>然后先复习一下字节序。<strong>整数类型static_cast不会有字节序问题，指针++和&ndash;操作不涉及cast和字节序问题。把指针类型reinterpret_cast才会有字节序问题</strong>，例如：</p>
 <pre><code>int a = 0x12345678
@@ -1695,17 +1704,17 @@ printf(&quot;%x %x %x %x\n&quot;,c[0],c[1],c[2],c[3]);
 <p>由于x86体系架构字节序为little-endian,因此实际输出为&rsquo;r&rsquo;,&lsquo;l&rsquo;,&lsquo;d&rsquo;.</p>
 <p>如果x86体系架构为large-endian,那么i的值应该改为0x00726c64，以实现相同的输出结果。</p>
 <p>57616不需要做修改，因为整数类型staic_cast不存在字节序问题。</p>
-<!-- raw HTML omitted -->
+<blockquote>5.In the following code, what is going to be printed after `'y='`? (note: the answer is not a specific value.) Why does this happen?
 <blockquote>
 <pre><code>    cprintf(&quot;x=%d y=%d&quot;, 3);
 </code></pre>
 </blockquote>
-<!-- raw HTML omitted -->
+</blockquote>
 <p>x的结果就是3，y的输出是没意义的一个整数。原因是，这句话会发生当va_list中没有下一个变量时，仍然使用va_arg去取下一个变量。而根据<a href="http://en.cppreference.com/w/cpp/utility/variadic/va_arg">va_arg</a>，此时的行为是undefined behaviour.</p>
-<!-- raw HTML omitted -->
-<p>感觉如果知识修改cprintf来达到目的有点难？ 因为压栈顺序和之前相反了，那么va_arg这个宏需要修改一下&hellip;或者，添加一个buffer，不是一次处理一个参数，而是先将参数全部读取，然后调换顺序，之后再进行处理。<!-- raw HTML omitted --></p>
+<blockquote>6.Let's say that GCC changed its calling convention so that it pushed arguments on the stack in declaration order, so that the last argument is pushed last. How would you have to change `cprintf` or its interface so that it would still be possible to pass it a variable number of arguments?
+<p>感觉如果知识修改cprintf来达到目的有点难？ 因为压栈顺序和之前相反了，那么va_arg这个宏需要修改一下&hellip;或者，添加一个buffer，不是一次处理一个参数，而是先将参数全部读取，然后调换顺序，之后再进行处理。</blockquote></p>
 <h3 id="the-stack">The Stack</h3>
-<!-- raw HTML omitted -->
+<blockquote>Exercise 9. Determine where the kernel initializes its stack, and exactly where in memory its stack is located. How does the kernel reserve space for its stack? And at which "end" of this reserved area is the stack pointer initialized to point to?</blockquote>
 <p>参考obj/kernel.asm</p>
 <pre><code>f010002c &lt;relocated&gt;:
 relocated:
@@ -1740,8 +1749,8 @@ f0100031:       bc 00 00 11 f0          mov    $0xf0110000,%esp
 #define MMIOBASE	(MMIOLIM - PTSIZE)
 </code></pre>
 <p>最后一个问题，由于x86体系架构下栈是向下增长的。因此stack pointer初始指向这段保留区域的大地址端（也就是上面)</p>
-<!-- raw HTML omitted -->
-<p>Note that, for this exercise to work properly, you should be using the patched version of QEMU available on the <a href="https://pdos.csail.mit.edu/6.828/2018/tools.html">tools</a> page or on Athena. Otherwise, you&rsquo;ll have to manually translate all breakpoint and memory addresses to linear addresses.<!-- raw HTML omitted --></p>
+<blockquote>Exercise 10. To become familiar with the C calling conventions on the x86, find the address of the `test_backtrace` function in obj/kern/kernel.asm, set a breakpoint there, and examine what happens each time it gets called after the kernel starts. How many 32-bit words does each recursive nesting level of `test_backtrace` push on the stack, and what are those words?
+<p>Note that, for this exercise to work properly, you should be using the patched version of QEMU available on the <a href="https://pdos.csail.mit.edu/6.828/2018/tools.html">tools</a> page or on Athena. Otherwise, you&rsquo;ll have to manually translate all breakpoint and memory addresses to linear addresses.</blockquote></p>
 <p>test_backtrace的入口地址在0xf0100040,在这里设置断点，然后最后的输出结果如下:</p>
 <pre><code>entering test_backtrace 5
 entering test_backtrace 4
@@ -1799,8 +1808,8 @@ f010009c:       c3                      ret
 </code></pre>
 <p>分别是参数x,ebp和ebx. 参数x和ebp的压栈是常规操作，就不解释了。ebx的压栈可能有些疑问，可以参考<a href="https://stackoverflow.com/questions/9797335/why-are-these-registers-pushed-to-stack">Why are these registers pushed to stack?</a></p>
 <p>下一个练习:</p>
-<!-- raw HTML omitted -->
-<p>If you use <code>read_ebp()</code>, note that GCC may generate &ldquo;optimized&rdquo; code that calls <code>read_ebp()</code> _before_<code>mon_backtrace()</code>'s function prologue, which results in an incomplete stack trace (the stack frame of the most recent function call is missing). While we have tried to disable optimizations that cause this reordering, you may want to examine the assembly of <code>mon_backtrace()</code> and make sure the call to<code>read_ebp()</code> is happening after the function prologue.<!-- raw HTML omitted --></p>
+<blockquote>Exercise 11. Implement the backtrace function as specified above. Use the same format as in the example, since otherwise the grading script will be confused. When you think you have it working right, run make grade to see if its output conforms to what our grading script expects, and fix it if it doesn't. _After_ you have handed in your Lab 1 code, you are welcome to change the output format of the backtrace function any way you like.
+<p>If you use <code>read_ebp()</code>, note that GCC may generate &ldquo;optimized&rdquo; code that calls <code>read_ebp()</code> _before_<code>mon_backtrace()</code>'s function prologue, which results in an incomplete stack trace (the stack frame of the most recent function call is missing). While we have tried to disable optimizations that cause this reordering, you may want to examine the assembly of <code>mon_backtrace()</code> and make sure the call to<code>read_ebp()</code> is happening after the function prologue.</blockquote></p>
 <p>这个练习主要参考<a href="https://111qqz.com/2019/01/x86-calling-conventions/">x86-calling-conventions</a>, 主要是需要知道ebp的内容是上一个stack frame中的ebp,以及ebp+4是返回地址,ebp+8是第一个参数，还有ebp的初始值是0.</p>
 <p>最后的实现为:</p>
 <pre><code>int
@@ -1824,7 +1833,7 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 }
 </code></pre>
 <p>然后是最后一个练习:</p>
-<!-- raw HTML omitted -->
+<blockquote>Exercise 12. Modify your stack backtrace function to display, for each eip, the function name, source file name, and line number corresponding to that eip.
 <p>In <code>debuginfo_eip</code>, where do _<em>STAB</em>* come from? This question has a long answer; to help you to discover the answer, here are some things you might want to do:</p>
 <blockquote>
 </blockquote>
@@ -1851,7 +1860,7 @@ K&gt;
 <p>Each line gives the file name and line within that file of the stack frame&rsquo;s eip, followed by the name of the function and the offset of the eip from the first instruction of the function (e.g., monitor+106 means the return eip is 106 bytes past the beginning of monitor).</p>
 <p>Be sure to print the file and function names on a separate line, to avoid confusing the grading script.</p>
 <p>Tip: printf format strings provide an easy, albeit obscure, way to print non-null-terminated strings like those in STABS tables. <code>printf(&quot;%.*s&quot;, length, string)</code> prints at most <code>length</code> characters of <code>string</code>. Take a look at the printf man page to find out why this works.</p>
-<p>You may find that some functions are missing from the backtrace. For example, you will probably see a call to <code>monitor()</code> but not to <code>runcmd()</code>. This is because the compiler in-lines some function calls. Other optimizations may cause you to see unexpected line numbers. If you get rid of the -O2 fromGNUMakefile, the backtraces may make more sense (but your kernel will run more slowly).<!-- raw HTML omitted --></p>
+<p>You may find that some functions are missing from the backtrace. For example, you will probably see a call to <code>monitor()</code> but not to <code>runcmd()</code>. This is because the compiler in-lines some function calls. Other optimizations may cause you to see unexpected line numbers. If you get rid of the -O2 fromGNUMakefile, the backtraces may make more sense (but your kernel will run more slowly).</blockquote></p>
 <p>需要先了解一下stab,简单来说是一种调试数据格式。具体可以参考<a href="https://en.wikipedia.org/wiki/Stabs">stabs</a> 和 <a href="https://www.ibm.com/developerworks/cn/opensource/os-debugging/">调试 DWARF 和 STAB 格式</a> 。</p>
 <p>objdump -h obj/kern/kernel的输出为</p>
 <pre><code>obj/kern/kernel:     file format elf32-i386
@@ -2071,7 +2080,7 @@ Welcome to the JOS kernel monitor!
 <p>至此，我们完成了lab1的全部内容。完结撒花～</p>
 <p>虽然做了三十个小时&hellip;不过真的收获蛮多，感觉像是在玩解谜游戏，线索就是每个练习前后的那些问题。</p>
 <p><a href="http://dict.youdao.com/search?q=routline&amp;keyfrom=chrome.extension">routline</a> <a href="http://www.youdao.com/search?q=routline&amp;ue=utf8&amp;keyfrom=chrome.extension">详细</a>X</p>
-<p>  没有英汉互译结果<br>
+<p>  没有英汉互译结果
 <a href="http://www.youdao.com/search?q=routline&amp;ue=utf8&amp;keyfrom=chrome.extension">请尝试网页搜索</a></p>
 
 
@@ -2571,6 +2580,8 @@ Welcome to the JOS kernel monitor!
                         <a href="/tags/tensorflow" title="tensorflow">
                             tensorflow
                         </a>
+                        
+                        
                         
                         
                         

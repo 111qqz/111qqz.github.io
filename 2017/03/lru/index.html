@@ -234,13 +234,13 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-  <ul>
+  <ol>
     <li>
-      <ul>
+      <ol>
         <li></li>
-      </ul>
+      </ol>
     </li>
-  </ul>
+  </ol>
 </nav>
                 
                 <p><a href="http://www.cnblogs.com/-OYK/archive/2012/12/05/2803317.html">参考博客</a></p>
@@ -250,7 +250,7 @@
 <p>LRU（Least recently used，最近最少使用）算法根据数据的历史访问记录来进行淘汰数据，其核心思想是“如果数据最近被访问过，那么将来被访问的几率也更高”。</p>
 <h5 id="12实现">1.2. 实现</h5>
 <p>最常见的实现是使用一个链表保存缓存数据，详细算法实现如下：</p>
-<p><img src="http://my.csdn.net/uploads/201205/24/1337859321_3597.png" alt=""></p>
+<p><img src="http://my.csdn.net/uploads/201205/24/1337859321_3597.png" alt="" /></p>
 <p>1. 新数据插入到链表头部；</p>
 <p>2. 每当缓存命中（即缓存数据被访问），则将数据移到链表头部；</p>
 <p>3. 当链表满的时候，将链表尾部的数据丢弃。</p>
@@ -266,7 +266,7 @@
 <p>LRU-K中的K代表最近使用的次数，因此LRU可以认为是LRU-1。LRU-K的主要目的是为了解决LRU算法“缓存污染”的问题，其核心思想是将“最近使用过1次”的判断标准扩展为“最近使用过K次”。</p>
 <h5 id="22实现">2.2. 实现</h5>
 <p>相比LRU，LRU-K需要多维护一个队列，用于记录所有缓存数据被访问的历史。只有当数据的访问次数达到K次的时候，才将数据放入缓存。当需要淘汰数据时，LRU-K会淘汰第K次访问时间距当前时间最大的数据。详细实现如下：</p>
-<p><img src="http://my.csdn.net/uploads/201205/24/1337859332_7838.png" alt=""></p>
+<p><img src="http://my.csdn.net/uploads/201205/24/1337859332_7838.png" alt="" /></p>
 <p>1. 数据第一次被访问，加入到访问历史列表；</p>
 <p>2. 如果数据在访问历史列表里后没有达到K次访问，则按照一定规则（FIFO，LRU）淘汰；</p>
 <p>3. 当访问历史队列中的数据访问次数达到K次后，将数据索引从历史队列删除，将数据移到缓存队列中，并缓存此数据，缓存队列重新按照时间排序；</p>
@@ -286,7 +286,7 @@
 <p>Two queues（以下使用2Q代替）算法类似于LRU-2，不同点在于2Q将LRU-2算法中的访问历史队列（注意这不是缓存数据的）改为一个FIFO缓存队列，即：2Q算法有两个缓存队列，一个是FIFO队列，一个是LRU队列。</p>
 <h5 id="32实现">3.2. 实现</h5>
 <p>当数据第一次访问时，2Q算法将数据缓存在FIFO队列里面，当数据第二次被访问时，则将数据从FIFO队列移到LRU队列里面，两个队列各自按照自己的方法淘汰数据。详细实现如下：</p>
-<p><img src="http://my.csdn.net/uploads/201205/24/1337859339_6844.png" alt=""></p>
+<p><img src="http://my.csdn.net/uploads/201205/24/1337859339_6844.png" alt="" /></p>
 <p>1. 新访问的数据插入到FIFO队列；</p>
 <p>2. 如果数据在FIFO队列中一直没有被再次访问，则最终按照FIFO规则淘汰；</p>
 <p>3. 如果数据在FIFO队列中被再次访问，则将数据移到LRU队列头部；</p>
@@ -307,7 +307,7 @@
 <h5 id="42实现">4.2. 实现</h5>
 <p>MQ算法将缓存划分为多个LRU队列，每个队列对应不同的访问优先级。访问优先级是根据访问次数计算出来的，例如</p>
 <p>详细的算法结构图如下，Q0，Q1&hellip;.Qk代表不同的优先级队列，Q-history代表从缓存中淘汰数据，但记录了数据的索引和引用次数的队列：</p>
-<p><img src="http://my.csdn.net/uploads/201205/24/1337859354_3696.png" alt=""></p>
+<p><img src="http://my.csdn.net/uploads/201205/24/1337859354_3696.png" alt="" /></p>
 <p>如上图，算法详细描述如下：</p>
 <p>1. 新插入的数据放入Q0；</p>
 <p>2. 每个队列按照LRU管理数据；</p>
@@ -326,15 +326,35 @@
 <p>注：虽然MQ的队列看起来数量比较多，但由于所有队列之和受限于缓存容量的大小，因此这里多个队列长度之和和一个LRU队列是一样的，因此队列扫描性能也相近。</p>
 <h4 id="5lru类算法对比">5. LRU类算法对比</h4>
 <p>由于不同的访问模型导致命中率变化较大，此处对比仅基于理论定性分析，不做定量分析。</p>
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
+<table align="center" >
+<tbody >
+<tr >
+<td valign="center" >对比点
+</td>
+<td valign="center" >对比
+</td>
+</tr>
+<tr >
+<td valign="center" >命中率
+</td>
+<td valign="center" >LRU-2 > MQ(2) > 2Q > LRU
+</td>
+</tr>
+<tr >
+<td valign="center" >复杂度
+</td>
+<td valign="center" >LRU-2 > MQ(2) > 2Q > LRU
+</td>
+</tr>
+<tr >
+<td valign="center" >代价
+</td>
+<td valign="center" >LRU-2  > MQ(2) > 2Q > LRU
+</td>
+</tr>
+</tbody>
+</table>
+实际应用中需要根据业务的需求和对数据的访问情况进行选择，并不是命中率越高越好。例如：虽然LRU看起来命中率会低一些，且存在”缓存污染“的问题，但由于其简单和代价小，实际应用中反而应用更多。
 <p>java中最简单的LRU算法实现，就是利用jdk的LinkedHashMap，覆写其中的removeEldestEntry(Map.Entry)方法即可</p>
 <p>如果你去看LinkedHashMap的源码可知，LRU算法是通过双向链表来实现，当某个位置被命中，通过调整链表的指向将该位置调整到头位置，新加入的内容直接放在链表头，如此一来，最近被命中的内容就向链表头移动，需要替换时，链表最后的位置就是最近最少使用的位置。</p>
 <pre><code>import java.util.ArrayList; 
@@ -1082,6 +1102,8 @@ public class LRUCache {
                         <a href="/tags/tensorflow" title="tensorflow">
                             tensorflow
                         </a>
+                        
+                        
                         
                         
                         

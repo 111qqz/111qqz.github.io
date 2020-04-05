@@ -226,17 +226,17 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-  <ul>
+  <ol>
     <li>
-      <ul>
+      <ol>
         <li><a href="#2019年2月24完成了除了challenge以外的全部练习和问题-总共花费15个小时">2019年2月24:完成了除了"Challenge"以外的全部练习和问题. 总共花费15个小时.</a></li>
         <li><a href="#2019年2月26完成challenge-2应该是最简单的一个orz只花了不到一个小时">2019年2月26:完成"Challenge 2&rdquo;(应该是最简单的一个orz，只花了不到一个小时)</a></li>
-      </ul>
+      </ol>
     </li>
     <li><a href="#part-1-physical-page-management">Part 1: Physical Page Management</a></li>
     <li><a href="#part-2-virtual-memory">Part 2: Virtual Memory</a></li>
     <li><a href="#part-3-kernel-address-space">Part 3: Kernel Address Space</a></li>
-  </ul>
+  </ol>
 </nav>
                 
                 <h3 id="2019年2月24完成了除了challenge以外的全部练习和问题-总共花费15个小时">2019年2月24:完成了除了&quot;Challenge&quot;以外的全部练习和问题. 总共花费15个小时.</h3>
@@ -244,14 +244,14 @@
 <h2 id="part-1-physical-page-management">Part 1: Physical Page Management</h2>
 <p>操作系统必须时刻追踪哪些物理内存在使用，哪些物理内存没有在使用。</p>
 <p>一个问题是，</p>
-<!-- raw HTML omitted -->
-<p>boot_alloc()<br>
-mem_init() (only up to the call to check_page_free_list(1))<br>
-page_init()<br>
-page_alloc()<br>
+<blockquote>Ex 1. In the file kern/pmap.c, you must implement code for the following functions (probably in the order given).
+<p>boot_alloc()
+mem_init() (only up to the call to check_page_free_list(1))
+page_init()
+page_alloc()
 page_free()</p>
-<p>check_page_free_list() and check_page_alloc() test your physical page allocator. You should boot JOS and see whether check_page_alloc() reports success. Fix your code so that it passes. You may find it helpful to add your own assert()s to verify that your assumptions are correct.<!-- raw HTML omitted --></p>
-<!-- raw HTML omitted -->
+<p>check_page_free_list() and check_page_alloc() test your physical page allocator. You should boot JOS and see whether check_page_alloc() reports success. Fix your code so that it passes. You may find it helpful to add your own assert()s to verify that your assumptions are correct.</blockquote></p>
+<!-- more -->
 <p>练习1要求写一个physical page allocator。我们先看第一个函数boot_alloc()</p>
 <pre><code>// This simple physical memory allocator is used only while JOS is setting
 // up its virtual memory system.  page_alloc() is the real allocator.
@@ -298,7 +298,12 @@ boot_alloc(uint32_t n)
 <p>kernel启动时需要将物理地址映射到虚拟地址，而我们需要一个page table来记录这种映射关系。但是创建一个page table涉及到为page table所在的page分配空间&hellip;而为一个page分配空间需要在将物理地址映射到虚拟地址以后。。</p>
 <p>解决办法是，使用一个单独的page allocator，在一个固定的位置allocate memory. 然后在这部分去做初始化的工作。</p>
 <p>参考xv6-book:</p>
-<!-- raw HTML omitted -->
+<blockquote>There is a bootstrap problem: all of physical memory must be mapped in order
+for the allocator to initialize the free list, but creating a page table with those mappings
+involves allocating page-table pages. xv6 solves this problem by using a separate page
+allocator during entry, which allocates memory just after the end of the kernel’s data
+segment. This allocator does not support freeing and is limited by the 4 MB mapping
+in the entrypgdir, but that is sufficient to allocate the first kernel page table.</blockquote>
 <p>这个函数有两个难点，第一个是，如何才能&quot;allocate memory&rdquo;? 说到&quot;allocate memory&quot;总是想到malloc&hellip;但是现在我们什么都没有&hellip;</p>
 <p>然而实际上很简单（虽然我卡了好一会。。。），我们只要计算出第一个虚拟地址就好了。根据注释， magic symbol ‘end’位于没有被任何kernel code或全局变量占用的虚拟地址的起始位置。</p>
 <p>第二个是，如何确定何时空间不够？ 我们观察函数i386_detect_memory</p>
@@ -468,19 +473,19 @@ page_free(struct PageInfo *pp)
 <p>liner address 是virtual address经过segment translation 得到的.</p>
 <p><strong><em>Physical addresses</em></strong> 是 linear addresses 经过paging得到的.</p>
 <p>具体来说:</p>
-<!-- raw HTML omitted -->
+<blockquote>**_Virtual addresses_** are used by an application program. They consist of a 16-bit selector and a 32-bit offset. In the flat memory model, the selectors are preloaded into segment registers CS, DS, SS, and ES, which all refer to the same linear address. They need not be considered by the application. Addresses are simply 32-bit near pointers.
 <p><strong><em>Linear addresses</em></strong> are calculated from virtual addresses by segment translation. The base of the segment referred to by the selector is added to the virtual offset, giving a 32-bit linear address.** Under RTTarget-32, virtual offsets are equal to linear addresses since the base of all code and data segments is 0.**</p>
-<p><strong><em>Physical addresses</em></strong> are calculated from linear addresses through paging. The linear address is used as an index into the Page Table where the CPU locates the corresponding physical address. If paging is not enabled, linear addresses are always equal to physical addresses. Under RTTarget-32, linear addresses are equal to physical addresses except for remapped RAM regions<!-- raw HTML omitted --></p>
+<p><strong><em>Physical addresses</em></strong> are calculated from linear addresses through paging. The linear address is used as an index into the Page Table where the CPU locates the corresponding physical address. If paging is not enabled, linear addresses are always equal to physical addresses. Under RTTarget-32, linear addresses are equal to physical addresses except for remapped RAM regions</blockquote></p>
 <p>放几张重要的图:</p>
-<p><img src="https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig5-2.gif" alt=""></p>
-<p><img src="https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig5-8.gif" alt=""></p>
-<p><img src="https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig5-9.gif" alt=""></p>
-<p><img src="https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig5-10.gif" alt=""></p>
-<p><img src="https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig5-12.gif" alt=""></p>
+<p><img src="https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig5-2.gif" alt="" /></p>
+<p><img src="https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig5-8.gif" alt="" /></p>
+<p><img src="https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig5-9.gif" alt="" /></p>
+<p><img src="https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig5-10.gif" alt="" /></p>
+<p><img src="https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig5-12.gif" alt="" /></p>
 <p>详细情况可以参考<a href="https://pdos.csail.mit.edu/6.828/2018/readings/i386/c05.htm">Intel 80386 Reference Programmer&rsquo;s Manual Chapter 5 Memory Management</a>  建议通读,非常短,却又把最重要的内容都讲清楚了.</p>
 <p>练习3和question 1都比较水,不说了.</p>
 <p>接下来说练习4</p>
-<!-- raw HTML omitted -->
+<blockquote>ex4 In the file kern/pmap.c, you must implement code for the following functions.
 <blockquote>
 <pre><code>        pgdir_walk()
         boot_map_region()
@@ -489,14 +494,14 @@ page_free(struct PageInfo *pp)
         page_insert()
 </code></pre>
 </blockquote>
-<p><code>check_page()</code>, called from <code>mem_init()</code>, tests your page table management routines. You should make sure it reports success before proceeding.<!-- raw HTML omitted --></p>
+<p><code>check_page()</code>, called from <code>mem_init()</code>, tests your page table management routines. You should make sure it reports success before proceeding.</blockquote></p>
 <p>比较重要的是mmu.h文件,里面有很多有用的宏.</p>
 <p>由于要把所有函数都实现完成才能跑通&hellip;所以比之前的练习稍微困难了一点&hellip;</p>
 <p>首先是pgdir_walk函数的实现. 实现的时候有几个地方需要考虑.</p>
 <p>第一个是根据注释&rdquo;<em>The relevant page table page might not exist yet</em>.&rdquo;</p>
 <p>那么如何判断一个page是否存在?答案是使用present bit,** (*pgdir_entry &amp; PTE_P)为True则表示一个page存在.**</p>
 <p>第二个是create一个page的时候,需要两部分. page frame address和<strong>各种权限位</strong>.  page_alloc返回的是PageInfo* ,可以用page2pa得到对应的物理地址.</p>
-<p>权限位的设置可以参考<a href="https://pdos.csail.mit.edu/6.828/2018/readings/i386/s06_04.htm">6.4 Page-Level Protection</a>  或者下图<img src="https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig6-10.gif" alt=""></p>
+<p>权限位的设置可以参考<a href="https://pdos.csail.mit.edu/6.828/2018/readings/i386/s06_04.htm">6.4 Page-Level Protection</a>  或者下图<img src="https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig6-10.gif" alt="" /></p>
 <p>然后第三点,返回的是一个pointer,必须是VA,需要做相应的转换.</p>
 <pre><code>// Given 'pgdir', a pointer to a page directory, pgdir_walk returns
 // a pointer to the page table entry (PTE) for linear address 'va'.
@@ -783,8 +788,8 @@ page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
  */
 </code></pre>
 <p>接下来看练习5,要求初始化kernel address space.</p>
-<!-- raw HTML omitted -->
-<p>Your code should now pass the <code>check_kern_pgdir()</code> and <code>check_page_installed_pgdir()</code> checks.<!-- raw HTML omitted --></p>
+<blockquote>Ex 5. Fill in the missing code in `mem_init()` after the call to `check_page()`.
+<p>Your code should now pass the <code>check_kern_pgdir()</code> and <code>check_page_installed_pgdir()</code> checks.</blockquote></p>
 <p>根据注释实现即可,没有什么难度(虽然因为写错个常数调了半天2333</p>
 <pre><code>boot_map_region(kern_pgdir,UPAGES,sizeof(struct PageInfo)*npages,PADDR(pages),PTE_U|PTE_P);
 boot_map_region(kern_pgdir,KSTACKTOP-KSTKSIZE,KSTKSIZE,PADDR(bootstack),PTE_W|PTE_P);
@@ -794,63 +799,131 @@ boot_map_region(kern_pgdir,KERNBASE,0xffffffff-KERNBASE,0,PTE_W | PTE_P);// kern
 <p>接下来来填表格,可以部分参考上面的layout图.</p>
 <pre><code>  2. **What entries (rows) in the page directory have been filled in at this point? What addresses do they map and where do they point? In other words, fill out this table as much as possible:**
 </code></pre>
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
+<table width="520" style="height: 363px;" border="1" >
+<tbody >
+<tr >
+<td align="center" >Entry
+</td>
+<td align="center" >Base Virtual Address
+</td>
+<td align="center" >Points to (logically):
+</td>
+</tr>
+<tr >
+<td >1023
+</td>
+<td style="text-align: center;" >0xff000000
+</td>
+<td >Page table for top 4MB of phys memory
+</td>
+</tr>
+<tr >
+<td >1022
+</td>
+<td style="text-align: center;" >0xfc000000
+</td>
+<td >Page table for top *  of phys memory
+</td>
+</tr>
+<tr >
+<td align="center" >.
+</td>
+<td >?
+</td>
+<td >?
+</td>
+</tr>
+<tr >
+<td align="center" >.
+</td>
+<td >?
+</td>
+<td >?
+</td>
+</tr>
+<tr >
+<td align="center" >.
+</td>
+<td >?
+</td>
+<td >?
+</td>
+</tr>
+<tr >
+<td align="center" >960
+</td>
+<td style="text-align: center;" >0xf0000000
+</td>
+<td style="text-align: center;" >kernel
+</td>
+</tr>
+<tr >
+<td align="center" >959
+</td>
+<td style="text-align: center;" >0xefc00000
+</td>
+<td style="text-align: center;" >cpu0's kernel stack(0xefff8000),cpu1's kernel stack(0xeffe8000)
+</td>
+</tr>
+<tr >
+<td align="center" >956
+</td>
+<td >
 <p>0xef000000</p>
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
+</td>
+<td style="text-align: center;" > npages of PageInfo(0xef000000)
+</td>
+</tr>
+<tr >
+<td align="center" >952
+</td>
+<td >
 <p>0xee000000</p>
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
+</td>
+<td style="text-align: center;" > bootstack
+</td>
+</tr>
+<tr >
+<td align="center" >.
+</td>
+<td >?
+</td>
+<td >?
+</td>
+</tr>
+<tr >
+<td >2
+</td>
+<td >0x00800000
+</td>
+<td >
 <p>Program Data &amp; Heap</p>
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
+</td>
+</tr>
+<tr >
+<td >1
+</td>
+<td >0x00400000
+</td>
+<td >
 <p>Empty Memory</p>
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
+</td>
+</tr>
+<tr >
+<td >0
+</td>
+<td >0x00000000
+</td>
+<td >
 <p>Empty Memory</p>
-<!-- raw HTML omitted -->
+</td>
+</tr>
+</tbody>
+</table>
 <p>接下来回答几个问题:</p>
 <p><strong>3.We have placed the kernel and user environment in the same address space. Why will user programs not be able to read or write the kernel&rsquo;s memory? What specific mechanisms protect the kernel memory?</strong></p>
 <p>对于JOS来说,主要就是&quot;page-level protection&quot;在起作用. 具体来说,就是PTE_W还有PTE_U两个bit.</p>
-<p><a href="https://111qqz.com/wp-content/uploads/2019/02/page-level-protection.png"><img src="https://111qqz.com/wp-content/uploads/2019/02/page-level-protection.png" alt=""><br>
+<p><a href="https://111qqz.com/wp-content/uploads/2019/02/page-level-protection.png"><img src="https://111qqz.com/wp-content/uploads/2019/02/page-level-protection.png" alt="" />
 </a></p>
 <p><strong>4.What is the maximum amount of physical memory that this operating system can support? Why?</strong></p>
 <p>最大能支持256MB.因为KERNBASE到4GB之间只有这么大的空间.</p>
@@ -864,7 +937,7 @@ boot_map_region(kern_pgdir,KERNBASE,0xffffffff-KERNBASE,0,PTE_W | PTE_P);// kern
 <p>jmp    *x 之后EIP才在KERNBASE地址以上运行. 开了paging却还可以在地地址执行的原因是VA[0,4MB)也被映射到了PA[0,4MB)</p>
 <p>这是必要的,原因参见Lab1 &ldquo;Operating system kernels often like to be linked and run at very high <em>virtual address</em>, such as 0xf0100000, in order to leave the lower part of the processor&rsquo;s virtual address space for user programs to use.&rdquo;</p>
 <p>那么到现在为止,挑战以外的题目就全部完成了.</p>
-<!-- raw HTML omitted -->
+<blockquote>Challenge! Extend the JOS kernel monitor with commands to:
 <blockquote>
 </blockquote>
 <pre><code>  * Display in a useful and easy-to-read format all of the physical page mappings (or lack thereof) that apply to a particular range of virtual/linear addresses in the currently active address space. For example, you might enter 'showmappings 0x3000 0x5000' to display the physical page mappings and corresponding permission bits that apply to the pages at virtual addresses 0x3000, 0x4000, and 0x5000.
@@ -872,7 +945,7 @@ boot_map_region(kern_pgdir,KERNBASE,0xffffffff-KERNBASE,0,PTE_W | PTE_P);// kern
   * Dump the contents of a range of memory given either a virtual or physical address range. Be sure the dump code behaves correctly when the range extends across page boundaries!
   * Do anything else that you think might be useful later for debugging the kernel. (There's a good chance it will be!)
 </code></pre>
-<!-- raw HTML omitted -->
+</blockquote>
 <p>迫于太菜了。。。选了这个可能是最简单的题目。。。实现也很无脑。。。就是模拟</p>
 <pre><code>// Simple command-line kernel monitor useful for
 // controlling the kernel and exploring the system interactively.
@@ -1240,7 +1313,7 @@ monitor(struct Trapframe *tf)
     }
 }
 </code></pre>
-<!-- raw HTML omitted -->
+<blockquote></blockquote>
 <p><a href="http://fanyi.youdao.com/translate?i=Wehaveplacedthekernelanduserenvironmentinthesameaddressspace.Whywilluserprogramsnotbeabletoreadorwritethekernel'smemoryWhatspecificmechanismsprotectthekernelmemory&amp;keyfrom=chrome">有道词典</a></p>
 <p>We have placed &hellip;</p>
 <p><a href="http://fanyi.youdao.com/translate?i=Wehaveplacedthekernelanduserenvironmentinthesameaddressspace.Whywilluserprogramsnotbeabletoreadorwritethekernel'smemoryWhatspecificmechanismsprotectthekernelmemory&amp;smartresult=dict&amp;keyfrom=chrome.extension">详细</a>X</p>
@@ -1743,6 +1816,8 @@ monitor(struct Trapframe *tf)
                         <a href="/tags/tensorflow" title="tensorflow">
                             tensorflow
                         </a>
+                        
+                        
                         
                         
                         

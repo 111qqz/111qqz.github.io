@@ -226,21 +226,21 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-  <ul>
+  <ol>
     <li>
-      <ul>
+      <ol>
         <li><a href="#前言">前言：</a></li>
         <li><a href="#1-基本思想">1. 基本思想</a></li>
         <li><a href="#2-局部敏感哈希lsh">2. 局部敏感哈希LSH</a></li>
         <li><a href="#3-文档相似度计算"> 3. 文档相似度计算</a></li>
-      </ul>
+      </ol>
     </li>
-  </ul>
+  </ol>
 </nav>
                 
                 <h3 id="前言">前言：</h3>
 <p>其实有了前文simhash算法的基础，局部敏感hash算法已经不存在理解上的问题了吧。。。毕竟simhash算法应该是局部敏感哈希算法的一种。。所以我就直接转载几篇我认为比较好的文档结合一下好了。。。会把比较重要的概念或者定义标记重点。</p>
-<!-- raw HTML omitted -->
+<blockquote>局部敏感哈希(Locality Sensitive Hashing，LSH)算法是我在前一段时间找工作时接触到的一种衡量文本相似度的算法。局部敏感哈希是近似最近邻搜索算法中最流行的一种，它有坚实的理论依据并且在高维数据空间中表现优异。它的主要作用就是从海量的数据中挖掘出相似的数据，可以具体应用到文本相似度检测、网页搜索等领域。
 <blockquote>
 <h3 id="1-基本思想">1. 基本思想</h3>
 </blockquote>
@@ -271,126 +271,166 @@
 <h4 id="31-shingling">　　3.1 Shingling</h4>
 </blockquote>
 <p>假设现在有4个网页，我们将它们分别进行Shingling（将待查询的字符串集进行映射，映射到一个集合里，如字符串“abcdeeee&rdquo;, 映射到集合”(a,b,c,d,e)&quot;, 注意集合中元素是无重复的，这一步骤就叫做Shingling, 意即构建文档中的短字符串集合，即shingle集合。），得到如下的特征矩阵：</p>
-<p><img src="http://img.blog.csdn.net/20140830165556362" alt=""></p>
+<p><img src="http://img.blog.csdn.net/20140830165556362" alt="" /></p>
 <p>其中“1”代表对应位置的Shingles在文档中出现过，“0”则代表没有出现过。</p>
 <p>在衡量文档的相似度中，我们有很多的方法去完成，比如利用欧式距离、编辑距离、余弦距离、Jaccard距离等来进行相似度的度量。在这里我们运用Jaccard相似度。接下来我们就要去找一种哈希函数，使得在hash后尽量还能保持这些文档之间的Jaccard相似度，即：</p>
-<p><img src="http://img.blog.csdn.net/20140830170203109" alt=""></p>
+<p><img src="http://img.blog.csdn.net/20140830170203109" alt="" /></p>
 <p>我们的目标就是找到这样一种哈希函数，如果原来文档的Jaccard相似度高，那么它们的hash值相同的概率高，如果原来文档的Jaccard相似度低，那么它们的hash值不相同的概率高，我们称之为Min-hashing(最小哈希)。</p>
 <blockquote>
 <h4 id="32-min-hashing">　　3.2 Min-hashing</h4>
 </blockquote>
 <p>Min-hashing定义为：特征矩阵按行进行一个随机的排列后，第一个列值为1的行的行号。举例说明如下，假设之前的特征矩阵按行进行的一个随机排列如下：</p>
-<!-- raw HTML omitted -->
+<table cellpadding="0" cellspacing="0" border="0" >
+<tbody >
+<tr >
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="82" valign="top" >元素
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="48" valign="top" >S1
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="65" valign="top" >S2
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="65" valign="top" >S3
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="65" valign="top" >S4
+</td>
 </blockquote>
-<!-- raw HTML omitted -->
+</tr>
+<tr >
 <blockquote>
-<!-- raw HTML omitted -->
-</blockquote>
-<blockquote>
-<!-- raw HTML omitted -->
-</blockquote>
-<blockquote>
-<!-- raw HTML omitted -->
+<td width="82" valign="top" >他
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="48" valign="top" >0
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
-</blockquote>
-<!-- raw HTML omitted -->
-<blockquote>
-<!-- raw HTML omitted -->
+<td width="65" valign="top" >0
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="65" valign="top" >1
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="65" valign="top" >0
+</td>
+</blockquote>
+</tr>
+<tr >
+<blockquote>
+<td width="82" valign="top" >成功
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="48" valign="top" >0
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
-</blockquote>
-<!-- raw HTML omitted -->
-<blockquote>
-<!-- raw HTML omitted -->
+<td width="65" valign="top" >0
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="65" valign="top" >1
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="65" valign="top" >1
+</td>
+</blockquote>
+</tr>
+<tr >
+<blockquote>
+<td width="82" valign="top" >我
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="48" valign="top" >1
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
-</blockquote>
-<!-- raw HTML omitted -->
-<blockquote>
-<!-- raw HTML omitted -->
+<td width="65" valign="top" >0
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="65" valign="top" >0
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="65" valign="top" >0
+</td>
+</blockquote>
+</tr>
+<tr >
+<blockquote>
+<td width="82" valign="top" >减肥
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="48" valign="top" >1
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
-</blockquote>
-<!-- raw HTML omitted -->
-<blockquote>
-<!-- raw HTML omitted -->
+<td width="65" valign="top" >0
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="65" valign="top" >1
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="65" valign="top" >1
+</td>
+</blockquote>
+</tr>
+<tr >
+<blockquote>
+<td width="82" valign="top" >要
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="48" valign="top" >0
+</td>
 </blockquote>
 <blockquote>
-<!-- raw HTML omitted -->
+<td width="65" valign="top" >1
+</td>
 </blockquote>
-<!-- raw HTML omitted -->
+<blockquote>
+<td width="65" valign="top" >0
+</td>
+</blockquote>
+<blockquote>
+<td width="65" valign="top" >1
+</td>
+</blockquote>
+</tr>
+</tbody>
+</table>
+最小哈希值：h(S1)=3，h(S2)=5，h(S3)=1，h(S4)=2.
 <p>为什么定义最小hash？事实上，两列的最小hash值就是这两列的Jaccard相似度的一个估计，换句话说，两列最小hash值同等的概率与其相似度相等，即P(h(Si)=h(Sj)) = sim(Si,Sj)。为什么会相等？我们考虑Si和Sj这两列，它们所在的行的所有可能结果可以分成如下三类：</p>
 <p>（1）A类：两列的值都为1；</p>
 <p>（2）B类：其中一列的值为0，另一列的值为1；</p>
 <p>（3）C类：两列的值都为0.</p>
 <p>特征矩阵相当稀疏，导致大部分的行都属于C类，但只有A、B类行的决定sim(Si,Sj)，假定A类行有a个，B类行有b个，那么sim(si,sj)=a/(a+b)。现在我们只需要证明对矩阵行进行随机排列，两个的最小hash值相等的概率P(h(Si)=h(Sj))=a/(a+b)，如果我们把C类行都删掉，那么第一行不是A类行就是B类行，如果第一行是A类行那么h(Si)=h(Sj)，因此P(h(Si)=h(Sj))=P(删掉C类行后，第一行为A类)=A类行的数目/所有行的数目=a/(a+b)，这就是最小hash的神奇之处。</p>
 <p>Min-hashing的具体做法可以根据如下进行表述：</p>
-<p><img src="http://img.blog.csdn.net/20140830171313030" alt=""></p>
+<p><img src="http://img.blog.csdn.net/20140830171313030" alt="" /></p>
 <p>返回到我们的实例，我们首先生成一堆随机置换，把特征矩阵的每一行进行置换，然后hash function就定义为把一个列C hash成一个这样的值：就是在置换后的列C上，第一个值为1的行的行号。如下图所示：</p>
-<p><img src="http://img.blog.csdn.net/20140830173451155" alt=""></p>
+<p><img src="http://img.blog.csdn.net/20140830173451155" alt="" /></p>
 <blockquote>
 <p>　　图中展示了三个置换，就是彩色的那三个，我现在解释其中的一个，另外两个同理。比如现在看蓝色的那个置换，置换后的Signature Matrix为：</p>
 </blockquote>
 <blockquote>
-<p><img src="http://img.blog.csdn.net/20140830173034426" alt=""></p>
+<p><img src="http://img.blog.csdn.net/20140830173034426" alt="" /></p>
 </blockquote>
 <blockquote>
 </blockquote>
@@ -400,7 +440,7 @@
 <p>　　然后看第一列的第一个是1的行是第几行，是第2行，同理再看二三四列，分别是1，2，1，因此这四列（四个document）在这个置换下，被哈希成了2，1，2，1，就是右图中的蓝色部分，也就相当于每个document现在是1维。再通过另外两个置换然后再hash，又得到右边的另外两行，于是最终结果是每个document从7维降到了3维。我们来看看降维后的相似度情况，就是右下角那个表，给出了降维后的document两两之间的相似性。可以看出，还是挺准确的，回想一下刚刚说的：希望原来documents的Jaccard相似度高，那么它们的hash值相同的概率高，如果原来documents的Jaccard相似度低，那么它们的hash值不相同的概率高，如何进行概率上的保证？Min-Hashing有个惊人的性质：</p>
 </blockquote>
 <blockquote>
-<p><img src="http://img.blog.csdn.net/20140830173817980" alt=""></p>
+<p><img src="http://img.blog.csdn.net/20140830173817980" alt="" /></p>
 </blockquote>
 <blockquote>
 </blockquote>
@@ -423,7 +463,7 @@
 </blockquote>
 <blockquote>
 </blockquote>
-<!-- raw HTML omitted -->
+</blockquote>
 
 
                 
@@ -922,6 +962,8 @@
                         <a href="/tags/tensorflow" title="tensorflow">
                             tensorflow
                         </a>
+                        
+                        
                         
                         
                         

@@ -230,23 +230,23 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-  <ul>
+  <ol>
     <li>
-      <ul>
+      <ol>
         <li><a href="#what-do-we-need">What do we need ?</a></li>
         <li><a href="#a-note-on-that-5th-statement">A note on that 5th statement</a></li>
         <li><a href="#lets-write-somecode">Let’s write some code</a></li>
         <li><a href="#notes-on-front-end-part">Notes on Front-End Part</a></li>
-      </ul>
+      </ol>
     </li>
-  </ul>
+  </ol>
 </nav>
                 
                 <p>在meidum上看到一篇很赞的文章&hellip;无奈关键部分一律无法加载出来&hellip;挂了梯子也不行，很心塞&hellip;刚刚突然发现加载出来了&hellip;以防之后再次无法访问，所以搬运过来．</p>
 <p>There are couple of articles on how to integrate Scrapy into a Django Application (or vice versa?). But most of them don’t cover a full complete example that includes triggering spiders from Django views. Since this is a web application, that must be our main goal.</p>
 <h3 id="what-do-we-need">What do we need ?</h3>
 <p>Before we start, it is better to specify what we want and how we want it. Check this diagram:</p>
-<p><img src="https://cdn-images-1.medium.com/max/1000/1*ZzTm-J_UgiuSoQtRmUoE9g.png" alt=""></p>
+<p><img src="https://cdn-images-1.medium.com/max/1000/1*ZzTm-J_UgiuSoQtRmUoE9g.png" alt="" /></p>
 <p>It shows how our app should work</p>
 <pre><code>  * Client sends a request with a URL to crawl it. (1)
   * Django triggets scrapy to run  a spider to crawl that URL. (2)
@@ -259,7 +259,7 @@
 <p><strong><code>Django</code></strong> fetches that data from database and return it to <strong><code>Client</code></strong>. (5)</p>
 <p><code>Neither Django nor client</code> don’t know when <code>Scrapy</code> completes crawling. There is a callback method named <code>pipeline_closed,</code> but it belongs to Scrapy project. We can’t return a response from Scrapy <code>pipelines</code>. We use that method only to save extracted data into database.</p>
 <p>Well eventually, in somewhere, we have to tell the client :</p>
-<!-- raw HTML omitted -->
+<blockquote>Hey! Crawling completed and i am sending you crawled data here.</blockquote>
 <p>There are two possible ways of this (<em>Please comment if you discover more</em>):</p>
 <p>We can either use <code>web sockets</code> to inform client when crawling completed.</p>
 <p>Or,</p>
@@ -434,7 +434,7 @@ csvfeed
 xmlfeed
 </code></pre>
 <p>Now we should have a folder structure like this:</p>
-<p><img src="https://cdn-images-1.medium.com/max/1000/1*CYNVpLHx8H6gMSkXkD91BQ.png" alt=""></p>
+<p><img src="https://cdn-images-1.medium.com/max/1000/1*CYNVpLHx8H6gMSkXkD91BQ.png" alt="" /></p>
 <h4 id="connecting-scrapy-todjango">Connecting Scrapy to Django</h4>
 <p>In order to have access Django models from Scrapy, we need to connect them together. Go to <code>settings.py</code> file under <code>scrapy_app/scrapy_app/</code> and put:</p>
 <pre><code>import os
@@ -484,7 +484,7 @@ django.setup()
 </code></pre>
 <p>Above is <code>icrawler.py</code> file from <code>scrapy_app/scrapy_app/spiders</code>. Attention to <code>__init__</code> method. It is important. If we want to make a method or property dynamic, we need to define it under <code>__init__</code> method, so we can pass arguments from Django and use them here.</p>
 <p>We also need to create a <code>Item Pipeline</code> for our scrapy project. Pipeline is a class for making actions over scraped items. From <a href="https://doc.scrapy.org/en/latest/topics/item-pipeline.html">documentation</a>:</p>
-<!-- raw HTML omitted -->
+<blockquote>Typical uses of item pipelines are:</blockquote>
 <pre><code>  * cleansing HTML data
   * validating scraped data (checking that the items contain certain fields)
   * checking for duplicates (and dropping them)
@@ -523,7 +523,7 @@ ITEM_PIPELINES = {
     'scrapy_app.pipelines.ScrapyAppPipeline': 300,
 }
 </code></pre>
-<!-- raw HTML omitted -->
+<blockquote>Don’t forget to restart `scraypd` if it is working.</blockquote>
 <p>This scrapy project basically,</p>
 <pre><code>  * Crawls a website (comes from Django view)
   * Extract all URLs from website
@@ -1118,6 +1118,8 @@ ITEM_PIPELINES = {
                         <a href="/tags/tensorflow" title="tensorflow">
                             tensorflow
                         </a>
+                        
+                        
                         
                         
                         

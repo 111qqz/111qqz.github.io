@@ -320,11 +320,11 @@ int main(void)
   * nvcc是cuda C++ 的编译器，其将source code分成**host code**和**device code**两部分。前者通过c++编译器编译，后者通过nvidia编译器编译。
 </code></pre>
 <p>关于devide code 和 host code，参考下图。</p>
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-145751.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-145751.png" alt=""><br>
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-145751.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-145751.png" alt="" />
 </a></p>
 <p>现在我们单线程地跑了一个cuda kernel, 接下来是如何使它并行.关键在于&laquo;&lt;1,1&raquo;&gt;这部分。</p>
-<p>这行代码告诉了cuda runtime 有多少个并行的线程要被执行。<br>
-这里有2个参数，不过我们可以先改变第二个，也就是一个线程block中线程的个数。<br>
+<p>这行代码告诉了cuda runtime 有多少个并行的线程要被执行。
+这里有2个参数，不过我们可以先改变第二个，也就是一个线程block中线程的个数。
 cuda GPu的kernel 使用的blocks中线程的个数应该是32的倍数（后面会解释32代表什么），所以256看起来很合理。</p>
 <pre><code>#include &lt;cstdio&gt;
 #include &lt;iostream&gt;
@@ -377,14 +377,14 @@ int main(void)
     return 0;
 }
 </code></pre>
-<p>不过如果只是修改了&laquo;&lt;1,1&raquo;&gt; 到  &laquo;&lt;1,256&raquo;&gt;<br>
-那实际上是对于每个线程都算了整个array的相加，而没有将整个计算任务分给多个并行的线程。<br>
-为了解决这个问题，我们需要修改kernel的代码。<br>
-cuda C++ 提供了关键字，允许kernel得到正要执行的thread是哪一个<br>
-threadIdx.x  表示当前运行的thread是block中的哪一个<br>
+<p>不过如果只是修改了&laquo;&lt;1,1&raquo;&gt; 到  &laquo;&lt;1,256&raquo;&gt;
+那实际上是对于每个线程都算了整个array的相加，而没有将整个计算任务分给多个并行的线程。
+为了解决这个问题，我们需要修改kernel的代码。
+cuda C++ 提供了关键字，允许kernel得到正要执行的thread是哪一个
+threadIdx.x  表示当前运行的thread是block中的哪一个
 blockDim.x 表示block中的线程个数</p>
 <p>关于threadIdx.x等 下标问题，参考下图。</p>
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-151308.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-151308.png" alt=""><br>
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-151308.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-151308.png" alt="" />
 </a></p>
 <p>我们需要观察到使用cuda的方法之后时间的变化。</p>
 <p>可以使用nvprof命令</p>
@@ -428,11 +428,11 @@ Time(%)      Time     Calls       Avg       Min       Max  Name
 <p><strong>在一个block中共享的data,对于其他block是不可见的。</strong></p>
 <p>我们不妨考虑一个例子，有2个数组a,b</p>
 <p>进行如下运算：</p>
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-210339.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-210339.png" alt=""><br>
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-210339.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-210339.png" alt="" />
 </a></p>
 <p>为了加快运行速度，我们还是考虑多线程的办法。</p>
 <p>让每一个线程处理一个输出。</p>
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-095804.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-095804.png" alt=""><br>
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-095804.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-095804.png" alt="" />
 </a></p>
 <p>然而我们发现，in中除了边界元素，每一个元素都被读了7次。</p>
 <p>这显然是没有必要的。</p>
@@ -442,7 +442,7 @@ Time(%)      Time     Calls       Avg       Min       Max  Name
 <p>然而这样就可以了吗。。</p>
 <p>由于线程的访问顺序是不固定的(?</p>
 <p>会发生如下的问题：</p>
-<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-100824.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-100824.png" alt=""><br>
+<p><a href="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-100824.png"><img src="https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-100824.png" alt="" />
 </a></p>
 <p>解决办法很无脑。。。因为cuda并没有想象中得那么底层。。。</p>
 <p>就是使用__syncthreads(); 来同步一个block中的所有进程。。。</p>
@@ -526,9 +526,9 @@ int main(void)
     return 0;
 }
 </code></pre>
-<p>需要特别强调的是，cuda代码的debug问题，很多错误，不用特定的工具查看是不会显示的。<br>
-以及，虽然cuda代码是在c++上添加了一些东西，但是device code部分用的是nvidia的编译器。<br>
-所以c/cpp中，对于访问非法内存不敏感的特点，在cuda代码中不存在（我猜是因为编译器&hellip;）<br>
+<p>需要特别强调的是，cuda代码的debug问题，很多错误，不用特定的工具查看是不会显示的。
+以及，虽然cuda代码是在c++上添加了一些东西，但是device code部分用的是nvidia的编译器。
+所以c/cpp中，对于访问非法内存不敏感的特点，在cuda代码中不存在（我猜是因为编译器&hellip;）
 <strong>在访问之前，一定要check访问地址合法性。。。。</strong></p>
 <p><strong>在访问之前，一定要check访问地址合法性。。。。</strong></p>
 <p><strong>在访问之前，一定要check访问地址合法性。。。。</strong></p>
@@ -1030,6 +1030,8 @@ int main(void)
                         <a href="/tags/tensorflow" title="tensorflow">
                             tensorflow
                         </a>
+                        
+                        
                         
                         
                         

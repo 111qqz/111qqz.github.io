@@ -226,121 +226,126 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-  <ul>
+  <ol>
     <li><a href="#blob-整体介绍">blob 整体介绍</a>
-      <ul>
+      <ol>
         <li><a href="#blob的含义及目的">blob的含义及目的</a></li>
         <li><a href="#blob的表示">blob的表示</a></li>
-      </ul>
+      </ol>
     </li>
     <li><a href="#blob-实现细节">blob 实现细节</a></li>
-  </ul>
+  </ol>
 </nav>
                 
-                <p>迫于生计，开始看caffe代码。<br>
+                <p>迫于生计，开始看caffe代码。
 会侧重于分析inference部分。</p>
 <h2 id="blob-整体介绍">blob 整体介绍</h2>
 <h3 id="blob的含义及目的">blob的含义及目的</h3>
-<p>blob在逻辑上表示的就是所谓的tensor,blob是tensor在caffe中的叫法。<br>
-在框架层面上，blob的意义在于对数据进行封装，提供统一的接口。<br>
-这里的数据包含训练/inference时用的数据，也包含模型参数，导数等数据。<br>
+<p>blob在逻辑上表示的就是所谓的tensor,blob是tensor在caffe中的叫法。
+在框架层面上，blob的意义在于对数据进行封装，提供统一的接口。
+这里的数据包含训练/inference时用的数据，也包含模型参数，导数等数据。
 深度学习离不开在GPU上的计算。 blob对数据的封装使得用户不必关心和cuda有关的数据传输细节。</p>
 <h3 id="blob的表示">blob的表示</h3>
-<p>对于图像数据，blob通常为４-dim，也就是<strong>N*C*H*W</strong><br>
-其中N表示number,也就是batch_num<br>
-C表示channel<br>
-H表示height<br>
+<p>对于图像数据，blob通常为４-dim，也就是<strong>N*C*H*W</strong>
+其中N表示number,也就是batch_num
+C表示channel
+H表示height
 W表示width</p>
 <p>在内存中，blob是按照&quot;C-contiguous fashion&quot;存储的，也就是&quot;row-major &quot;</p>
 <p>因此，位于(n,c,h,w)的下标在OS中的位置是　((n * C + c) * H + h) * W + w.</p>
 <p>在代码blob.hpp中，我们也可以看到名为offset的函数是其对应的实现。</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">  <span style="color:#66d9ef">inline</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">offset</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> n, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> c <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> h <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>,
-      <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> w <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>) <span style="color:#66d9ef">const</span> {
-    CHECK_GE(n, <span style="color:#ae81ff">0</span>);
+<pre><code class="language-c++">  inline int offset(const int n, const int c = 0, const int h = 0,
+      const int w = 0) const {
+    CHECK_GE(n, 0);
     CHECK_LE(n, num());
-    CHECK_GE(channels(), <span style="color:#ae81ff">0</span>);
+    CHECK_GE(channels(), 0);
     CHECK_LE(c, channels());
-    CHECK_GE(height(), <span style="color:#ae81ff">0</span>);
+    CHECK_GE(height(), 0);
     CHECK_LE(h, height());
-    CHECK_GE(width(), <span style="color:#ae81ff">0</span>);
+    CHECK_GE(width(), 0);
     CHECK_LE(w, width());
-    <span style="color:#66d9ef">return</span> ((n <span style="color:#f92672">*</span> channels() <span style="color:#f92672">+</span> c) <span style="color:#f92672">*</span> height() <span style="color:#f92672">+</span> h) <span style="color:#f92672">*</span> width() <span style="color:#f92672">+</span> w;
+    return ((n * channels() + c) * height() + h) * width() + w;
   }
-  <span style="color:#75715e">//  给一个indices,计算这是第几个值。
-</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">inline</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">offset</span>(<span style="color:#66d9ef">const</span> vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span><span style="color:#f92672">&amp;</span> indices) <span style="color:#66d9ef">const</span> {
+  //  给一个indices,计算这是第几个值。
+  inline int offset(const vector&lt;int&gt;&amp; indices) const {
     CHECK_LE(indices.size(), num_axes());
-    <span style="color:#66d9ef">int</span> offset <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
-    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> num_axes(); <span style="color:#f92672">+</span><span style="color:#f92672">+</span>i) {
-      offset <span style="color:#f92672">*</span><span style="color:#f92672">=</span> shape(i);
-      <span style="color:#66d9ef">if</span> (indices.size() <span style="color:#f92672">&gt;</span> i) {
-        CHECK_GE(indices[i], <span style="color:#ae81ff">0</span>);
+    int offset = 0;
+    for (int i = 0; i &lt; num_axes(); ++i) {
+      offset *= shape(i);
+      if (indices.size() &gt; i) {
+        CHECK_GE(indices[i], 0);
         CHECK_LT(indices[i], shape(i));
-        offset <span style="color:#f92672">+</span><span style="color:#f92672">=</span> indices[i];
+        offset += indices[i];
       }
     }
-    <span style="color:#66d9ef">return</span> offset;
+    return offset;
   }
-</code></pre></div><p>需要说明的是，存在一个overload的offset的原因是，对于常见的图像任务，blob是四维的，但是blob也可以是其他数目的维度。</p>
+</code></pre>
+<p>需要说明的是，存在一个overload的offset的原因是，对于常见的图像任务，blob是四维的，但是blob也可以是其他数目的维度。</p>
 <p>后面我们可以看到，很多函数都有一个overload的版本，一个版本是适用于经典的图像任务，另外一个版本是适用于更一般的任务。</p>
 <h2 id="blob-实现细节">blob 实现细节</h2>
 <p>我们注意到，对于data,diff等数据，blob除了区分了在CPU还是GPU上，还区分了数据是否可以改变:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">const</span> Dtype<span style="color:#f92672">*</span> <span style="color:#a6e22e">cpu_data</span>() <span style="color:#66d9ef">const</span>;
-Dtype<span style="color:#f92672">*</span> <span style="color:#a6e22e">mutable_cpu_data</span>();
-</code></pre></div><p>这样设计的原因是，blob中包含了GPU和CPU上的数据，为了尽可能减少不必要的数据传输，我们可以在确定不会修改数据的情况下使用const版本</p>
+<pre><code class="language-c++">const Dtype* cpu_data() const;
+Dtype* mutable_cpu_data();
+</code></pre>
+<p>这样设计的原因是，blob中包含了GPU和CPU上的数据，为了尽可能减少不必要的数据传输，我们可以在确定不会修改数据的情况下使用const版本</p>
 <p>同时，区分可变数据和不可变数据也有助于减少bug.</p>
-<p>需要注意的是,blob class是禁止copy和assign的。<br>
-在C++11及以后，这可以通过将相应的copy control member 设置为&quot;=delete&quot;来实现<br>
+<p>需要注意的是,blob class是禁止copy和assign的。
+在C++11及以后，这可以通过将相应的copy control member 设置为&quot;=delete&quot;来实现
 而在c++11之前，是通过将这些函数这只为private实现的。</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">#</span><span style="color:#75715e">define DISABLE_COPY_AND_ASSIGN(classname) \</span><span style="color:#75715e">
-</span><span style="color:#75715e"></span><span style="color:#75715e">private:\</span><span style="color:#75715e">
-</span><span style="color:#75715e"></span><span style="color:#75715e">  classname(const classname&amp;);\</span><span style="color:#75715e">
-</span><span style="color:#75715e"></span><span style="color:#75715e">  classname&amp; operator=(const classname&amp;)</span><span style="color:#75715e">
-</span></code></pre></div><p>此外，我们可以重点看一下reshape 函数</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">template</span> <span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> Dtype<span style="color:#f92672">&gt;</span>
-<span style="color:#66d9ef">void</span> Blob<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span><span style="color:#f92672">:</span><span style="color:#f92672">:</span>Reshape(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> num, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> channels, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> height,
-    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> width) {
-  vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> shape(<span style="color:#ae81ff">4</span>);
-  shape[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> num;
-  shape[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> channels;
-  shape[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> height;
-  shape[<span style="color:#ae81ff">3</span>] <span style="color:#f92672">=</span> width;
+<pre><code class="language-c++">#define DISABLE_COPY_AND_ASSIGN(classname) \
+private:\
+  classname(const classname&amp;);\
+  classname&amp; operator=(const classname&amp;)
+</code></pre>
+<p>此外，我们可以重点看一下reshape 函数</p>
+<pre><code class="language-c++">template &lt;typename Dtype&gt;
+void Blob&lt;Dtype&gt;::Reshape(const int num, const int channels, const int height,
+    const int width) {
+  vector&lt;int&gt; shape(4);
+  shape[0] = num;
+  shape[1] = channels;
+  shape[2] = height;
+  shape[3] = width;
   Reshape(shape);
 }
 
-<span style="color:#66d9ef">template</span> <span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> Dtype<span style="color:#f92672">&gt;</span>
-<span style="color:#66d9ef">void</span> Blob<span style="color:#f92672">&lt;</span>Dtype<span style="color:#f92672">&gt;</span><span style="color:#f92672">:</span><span style="color:#f92672">:</span>Reshape(<span style="color:#66d9ef">const</span> vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span><span style="color:#f92672">&amp;</span> shape) {
+template &lt;typename Dtype&gt;
+void Blob&lt;Dtype&gt;::Reshape(const vector&lt;int&gt;&amp; shape) {
   CHECK_LE(shape.size(), kMaxBlobAxes);
-  count_ <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+  count_ = 1;
   shape_.resize(shape.size());
-  <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>shape_data_ <span style="color:#f92672">|</span><span style="color:#f92672">|</span> shape_data_<span style="color:#f92672">-</span><span style="color:#f92672">&gt;</span>size() <span style="color:#f92672">&lt;</span> shape.size() <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">int</span>)) {
-    shape_data_.reset(<span style="color:#66d9ef">new</span> SyncedMemory(shape.size() <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">int</span>)));
+  if (!shape_data_ || shape_data_-&gt;size() &lt; shape.size() * sizeof(int)) {
+    shape_data_.reset(new SyncedMemory(shape.size() * sizeof(int)));
   }
-  <span style="color:#66d9ef">int</span><span style="color:#f92672">*</span> shape_data <span style="color:#f92672">=</span> <span style="color:#66d9ef">static_cast</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">*</span><span style="color:#f92672">&gt;</span>(shape_data_<span style="color:#f92672">-</span><span style="color:#f92672">&gt;</span>mutable_cpu_data());
-  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> shape.size(); <span style="color:#f92672">+</span><span style="color:#f92672">+</span>i) {
-    CHECK_GE(shape[i], <span style="color:#ae81ff">0</span>);
-    <span style="color:#66d9ef">if</span> (count_ <span style="color:#f92672">!</span><span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>) {
-      CHECK_LE(shape[i], INT_MAX <span style="color:#f92672">/</span> count_) <span style="color:#f92672">&lt;</span><span style="color:#f92672">&lt;</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">blob size exceeds INT_MAX</span><span style="color:#e6db74">&#34;</span>;
+  int* shape_data = static_cast&lt;int*&gt;(shape_data_-&gt;mutable_cpu_data());
+  for (int i = 0; i &lt; shape.size(); ++i) {
+    CHECK_GE(shape[i], 0);
+    if (count_ != 0) {
+      CHECK_LE(shape[i], INT_MAX / count_) &lt;&lt; &quot;blob size exceeds INT_MAX&quot;;
     }
-    count_ <span style="color:#f92672">*</span><span style="color:#f92672">=</span> shape[i];
-    shape_[i] <span style="color:#f92672">=</span> shape[i];
-    shape_data[i] <span style="color:#f92672">=</span> shape[i];
+    count_ *= shape[i];
+    shape_[i] = shape[i];
+    shape_data[i] = shape[i];
   }
-  <span style="color:#66d9ef">if</span> (count_ <span style="color:#f92672">&gt;</span> capacity_) {
-    capacity_ <span style="color:#f92672">=</span> count_;
-    data_.reset(<span style="color:#66d9ef">new</span> SyncedMemory(capacity_ <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(Dtype)));
-    diff_.reset(<span style="color:#66d9ef">new</span> SyncedMemory(capacity_ <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(Dtype)));
+  if (count_ &gt; capacity_) {
+    capacity_ = count_;
+    data_.reset(new SyncedMemory(capacity_ * sizeof(Dtype)));
+    diff_.reset(new SyncedMemory(capacity_ * sizeof(Dtype)));
   }
 }
-</code></pre></div><p>和之前的offset该函数相同，仍然是两个版本。<br>
+</code></pre>
+<p>和之前的offset该函数相同，仍然是两个版本。
 这里值得注意的是，其一是如果有不同接口的多个overload 函数，往往只有一个函数做了真正的工作，而其他函数都是调用该函数来完成。</p>
-<p>此外，caffe中使用了shared_ptr来管理数据<br>
+<p>此外，caffe中使用了shared_ptr来管理数据
 当reshape后需要分配新的内存时，</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">  <span style="color:#66d9ef">if</span> (count_ <span style="color:#f92672">&gt;</span> capacity_) {
-    capacity_ <span style="color:#f92672">=</span> count_;
-    data_.reset(<span style="color:#66d9ef">new</span> SyncedMemory(capacity_ <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(Dtype)));
-    diff_.reset(<span style="color:#66d9ef">new</span> SyncedMemory(capacity_ <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(Dtype)));
+<pre><code class="language-c++">  if (count_ &gt; capacity_) {
+    capacity_ = count_;
+    data_.reset(new SyncedMemory(capacity_ * sizeof(Dtype)));
+    diff_.reset(new SyncedMemory(capacity_ * sizeof(Dtype)));
   }
-</code></pre></div>
+</code></pre>
+
 
                 
                 
@@ -838,6 +843,8 @@ Dtype<span style="color:#f92672">*</span> <span style="color:#a6e22e">mutable_cp
                         <a href="/tags/tensorflow" title="tensorflow">
                             tensorflow
                         </a>
+                        
+                        
                         
                         
                         

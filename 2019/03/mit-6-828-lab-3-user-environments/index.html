@@ -226,89 +226,91 @@
                     <h2>TOC</h2>
                 </header>
                 <nav id="TableOfContents">
-  <ul>
+  <ol>
     <li><a href="#part-a-user-environments-and-exception-handling">Part A: User Environments and Exception Handling</a>
-      <ul>
+      <ol>
         <li><a href="#allocating-the-environments-array">Allocating the Environments Array</a></li>
         <li><a href="#creating-and-running-environments">Creating and Running Environments</a></li>
-      </ul>
+      </ol>
     </li>
-  </ul>
+  </ol>
 </nav>
                 
                 <p>JOS的environments基本可以理解成&quot;process&quot;进程的同义词，但是由于&quot;process&quot;是一个unix术语，因此使用environment这个词．</p>
 <h2 id="part-a-user-environments-and-exception-handling">Part A: User Environments and Exception Handling</h2>
 <p>查看　kern/env.c文件，看到三个全局变量:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c">    <span style="color:#66d9ef">struct</span> Env <span style="color:#f92672">*</span>envs <span style="color:#f92672">=</span> NULL;		<span style="color:#75715e">// All environments
-</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">struct</span> Env <span style="color:#f92672">*</span>curenv <span style="color:#f92672">=</span> NULL;		<span style="color:#75715e">// The current env
-</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">struct</span> Env <span style="color:#f92672">*</span>env_free_list;	<span style="color:#75715e">// Free environment list
-</span></code></pre></div><p>envs会在JOS启动后会指向一个Env structures的数组，表示JOS中的全部environments. 理论上，JOS kernel最多能支持NENV个同时运行的environments.　但是实际上不会远不会达到这个数量．</p>
+<pre><code class="language-c">    struct Env *envs = NULL;		// All environments
+    struct Env *curenv = NULL;		// The current env
+    static struct Env *env_free_list;	// Free environment list
+</code></pre>
+<p>envs会在JOS启动后会指向一个Env structures的数组，表示JOS中的全部environments. 理论上，JOS kernel最多能支持NENV个同时运行的environments.　但是实际上不会远不会达到这个数量．</p>
 <p>env_free_list是一个链表结构，用来存放当前没有在运行的Env structure.. 和page_free_list　类似．</p>
 <p>curenv表示的是当前正在运行的environment,当JOS刚刚启动，第一个environment运行之前，curenv的值为NULL.</p>
-<!-- raw HTML omitted -->
+<!-- more -->
 <p>接下来我们来阅读一下inc/env.h文件</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c">    
-    <span style="color:#75715e">/* See COPYRIGHT for copyright information. */</span>
+<pre><code class="language-c">    
+    /* See COPYRIGHT for copyright information. */
     
-    <span style="color:#75715e">#</span><span style="color:#75715e">ifndef JOS_INC_ENV_H</span><span style="color:#75715e">
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">#</span><span style="color:#75715e">define JOS_INC_ENV_H</span><span style="color:#75715e">
-</span><span style="color:#75715e"></span>    
-    <span style="color:#75715e">#</span><span style="color:#75715e">include</span> <span style="color:#75715e">&lt;inc/types.h&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">#</span><span style="color:#75715e">include</span> <span style="color:#75715e">&lt;inc/trap.h&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">#</span><span style="color:#75715e">include</span> <span style="color:#75715e">&lt;inc/memlayout.h&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e"></span>    
-    <span style="color:#66d9ef">typedef</span> int32_t envid_t;
+    #ifndef JOS_INC_ENV_H
+    #define JOS_INC_ENV_H
     
-    <span style="color:#75715e">// An environment ID &#39;envid_t&#39; has three parts:
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// +1+---------------21-----------------+--------10--------+
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// |0|          Uniqueifier             |   Environment    |
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// | |                                  |      Index       |
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// +------------------------------------+------------------+
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">//                                       \--- ENVX(eid) --/
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// The environment index ENVX(eid) equals the environment&#39;s index in the
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// &#39;envs[]&#39; array.  The uniqueifier distinguishes environments that were
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// created at different times, but share the same environment index.
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// All real environments are greater than 0 (so the sign bit is zero).
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// envid_ts less than 0 signify errors.  The envid_t == 0 is special, and
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// stands for the current environment.
-</span><span style="color:#75715e"></span>    
-    <span style="color:#75715e">#</span><span style="color:#75715e">define LOG2NENV		10</span><span style="color:#75715e">
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">#</span><span style="color:#75715e">define NENV			(1 &lt;&lt; LOG2NENV)</span><span style="color:#75715e">
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">#</span><span style="color:#75715e">define ENVX(envid)		((envid) &amp; (NENV - 1))</span><span style="color:#75715e">
-</span><span style="color:#75715e"></span>    
-    <span style="color:#75715e">// Values of env_status in struct Env
-</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">enum</span> {
-    	ENV_FREE <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>,
+    #include &lt;inc/types.h&gt;
+    #include &lt;inc/trap.h&gt;
+    #include &lt;inc/memlayout.h&gt;
+    
+    typedef int32_t envid_t;
+    
+    // An environment ID 'envid_t' has three parts:
+    //
+    // +1+---------------21-----------------+--------10--------+
+    // |0|          Uniqueifier             |   Environment    |
+    // | |                                  |      Index       |
+    // +------------------------------------+------------------+
+    //                                       \--- ENVX(eid) --/
+    //
+    // The environment index ENVX(eid) equals the environment's index in the
+    // 'envs[]' array.  The uniqueifier distinguishes environments that were
+    // created at different times, but share the same environment index.
+    //
+    // All real environments are greater than 0 (so the sign bit is zero).
+    // envid_ts less than 0 signify errors.  The envid_t == 0 is special, and
+    // stands for the current environment.
+    
+    #define LOG2NENV		10
+    #define NENV			(1 &lt;&lt; LOG2NENV)
+    #define ENVX(envid)		((envid) &amp; (NENV - 1))
+    
+    // Values of env_status in struct Env
+    enum {
+    	ENV_FREE = 0,
     	ENV_DYING,
     	ENV_RUNNABLE,
     	ENV_RUNNING,
     	ENV_NOT_RUNNABLE
     };
     
-    <span style="color:#75715e">// Special environment types
-</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">enum</span> EnvType {
-    	ENV_TYPE_USER <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>,
+    // Special environment types
+    enum EnvType {
+    	ENV_TYPE_USER = 0,
     };
     
-    <span style="color:#66d9ef">struct</span> Env {
-    	<span style="color:#66d9ef">struct</span> Trapframe env_tf;	<span style="color:#75715e">// Saved registers
-</span><span style="color:#75715e"></span>    	<span style="color:#66d9ef">struct</span> Env <span style="color:#f92672">*</span>env_link;		<span style="color:#75715e">// Next free Env
-</span><span style="color:#75715e"></span>    	envid_t env_id;			<span style="color:#75715e">// Unique environment identifier
-</span><span style="color:#75715e"></span>    	envid_t env_parent_id;		<span style="color:#75715e">// env_id of this env&#39;s parent
-</span><span style="color:#75715e"></span>    	<span style="color:#66d9ef">enum</span> EnvType env_type;		<span style="color:#75715e">// Indicates special system environments
-</span><span style="color:#75715e"></span>    	<span style="color:#66d9ef">unsigned</span> env_status;		<span style="color:#75715e">// Status of the environment
-</span><span style="color:#75715e"></span>    	uint32_t env_runs;		<span style="color:#75715e">// Number of times environment has run
-</span><span style="color:#75715e"></span>    
-    	<span style="color:#75715e">// Address space
-</span><span style="color:#75715e"></span>    	pde_t <span style="color:#f92672">*</span>env_pgdir;		<span style="color:#75715e">// Kernel virtual address of page dir
-</span><span style="color:#75715e"></span>    };
+    struct Env {
+    	struct Trapframe env_tf;	// Saved registers
+    	struct Env *env_link;		// Next free Env
+    	envid_t env_id;			// Unique environment identifier
+    	envid_t env_parent_id;		// env_id of this env's parent
+    	enum EnvType env_type;		// Indicates special system environments
+    	unsigned env_status;		// Status of the environment
+    	uint32_t env_runs;		// Number of times environment has run
     
-    <span style="color:#75715e">#</span><span style="color:#75715e">endif </span><span style="color:#75715e">// !JOS_INC_ENV_H
-</span><span style="color:#75715e"></span>    
-</code></pre></div><pre><code>  * **env_tf**:　用来在切换环境时保存各种register的值，以便之后恢复现场．
+    	// Address space
+    	pde_t *env_pgdir;		// Kernel virtual address of page dir
+    };
+    
+    #endif // !JOS_INC_ENV_H
+    
+</code></pre>
+<pre><code>  * **env_tf**:　用来在切换环境时保存各种register的值，以便之后恢复现场．
   * **env_link**:　用于构成一个链表结构，指向喜爱一个空闲的 environment.
   * **env_id**: 用于唯一标识使用当前这个Env structure（也就是envs数组中的某个位置）的environment的ID.当这个environment终止时，**envs数组中的用一个位置可能会被re-allocate一个新的environment,但是env_id是不同的．**虽然env_id不同，但是env_id的最后10bit是用来标识在envs的下标的，如果使用的是envs数组中的同一个位置，这部分是相同的．具体可以参考inc/env.h．
   * **env_parent_id**:　创建这个environment的environment 的env_id. 就是父进程id...
@@ -325,16 +327,16 @@
   * **env_pgdir: 当前这个environment的page directory.**
 </code></pre>
 <h3 id="allocating-the-environments-array">Allocating the Environments Array</h3>
-<!-- raw HTML omitted -->
-<p>You should run your code and make sure <code>check_kern_pgdir()</code> succeeds.<!-- raw HTML omitted --></p>
+<blockquote>Modify `mem_init()` in kern/pmap.c to allocate and map the `envs` array. This array consists of exactly `NENV` instances of the `Env` structure allocated much like how you allocated the `pages` array. Also like the `pages` array, the memory backing `envs`should also be mapped user read-only at `UENVS` (defined in inc/memlayout.h) so user processes can read from this array.
+<p>You should run your code and make sure <code>check_kern_pgdir()</code> succeeds.</blockquote></p>
 <p>和mem_init中申请pages的空间是一样的．</p>
 <pre><code>envs = (struct Env *)boot_alloc(sizeof(struct Env*)*NENV);
 </code></pre>
-<p><!-- raw HTML omitted -->后面有空再写<!-- raw HTML omitted --></p>
+<p><del>后面有空再写</del></p>
 <h3 id="creating-and-running-environments">Creating and Running Environments</h3>
 <p>由于现在JOS还没有一个文件系统，因此将可执行文件以ELF格式嵌入到kernel中．</p>
 <p>练习２：</p>
-<!-- raw HTML omitted -->
+<blockquote>In the file env.c, finish coding the following functions:
 <blockquote>
 </blockquote>
 <pre><code>`env_init()`
@@ -391,7 +393,7 @@
   panic(&quot;env_alloc: %e&quot;, r);
 </code></pre>
 </blockquote>
-<p>will panic with the message &ldquo;env_alloc: out of memory&rdquo;.<!-- raw HTML omitted --></p>
+<p>will panic with the message &ldquo;env_alloc: out of memory&rdquo;.</blockquote></p>
 <p>env_init()是这些函数中最简单的一个，只需要注意为了保证env_free_list的顺序和envs array的相同，需要倒序遍历．</p>
 <pre><code>// Mark all environments in 'envs' as free, set their env_ids to 0,
 // and insert them into the env_free_list.
@@ -1228,6 +1230,8 @@ args_exist:
                         <a href="/tags/tensorflow" title="tensorflow">
                             tensorflow
                         </a>
+                        
+                        
                         
                         
                         

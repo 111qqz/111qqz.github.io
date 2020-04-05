@@ -251,7 +251,7 @@ p-&gt;prepare_data(42);
 std::thread t(process_big_object,std::move(p));
 </code></pre>
 <p>当然这只是使用std::move的一种情形，即传递不允许拷贝构造的object作为参数。</p>
-<p><!-- raw HTML omitted -->另外，std::move可以更有效率地传递资源。内容之后补orz<!-- raw HTML omitted --></p>
+<p><del>另外，std::move可以更有效率地传递资源。内容之后补orz</del></p>
 <p>实际上std::move()的作用是传进去一个object,返回这个object的右值引用（<em>rvalue reference）</em></p>
 <p>首先区分左值和右值，这其实是一个c语言中就有的概念（作为区分，<strong>右值引用</strong>是C++11中新引入的概念）</p>
 <p>一般来说，右值是不能被取地址的值。在C++11之前，右值是不能被引用的。</p>
@@ -273,7 +273,7 @@ LValue processed: 0
 RValue processed: 1
 </code></pre>
 <p>那么为什么要引入“右值引用”这个概念？ 主要有两个目的：<strong>完美转发(Perfect Forwarding)<strong>和</strong>转移语义(Move Sementics)</strong></p>
-<!-- raw HTML omitted -->
+<blockquote>转移语义可以将资源 ( 堆，系统对象等 ) 从一个对象转移到另一个对象，这样能够减少不必要的临时对象的创建、拷贝以及销毁。转移语义是和拷贝语义相对的，可以类比文件的剪切与拷贝，当我们将文件从一个目录拷贝到另一个目录时，速度比剪切慢很多。</blockquote>
 <p>完美转发，也叫精确传递，指的是“需要将一组参数原封不动的传递给另一个函数”。</p>
 <p>原封不动的含义是说:数值不变，左值/右值属性不变，const/non-const属性不变。</p>
 <p>在泛型函数中，这样的需求非常普遍。</p>
@@ -291,7 +291,7 @@ int a = 0;
  forward_value(b); // const int&amp; 
 forward_value(2); // int&amp;
 </code></pre>
-<p>在右值引用出现，模板的每个参数都必须重载两个类型，总的重载次数是指数级的orz，<!-- raw HTML omitted -->警察听了想打人<!-- raw HTML omitted --></p>
+<p>在右值引用出现，模板的每个参数都必须重载两个类型，总的重载次数是指数级的orz，<del>警察听了想打人</del></p>
 <p>然而有了右值引用，不管模板右多少个参数，我们只需要定义一次，接受一个右值引用的参数，就能够将所有的参数类型原封不动的传递给目标函数。</p>
 <pre><code>template &lt;typename T&gt; void forward_value(T&amp;&amp; val) { 
  process_value(val); 
@@ -839,6 +839,8 @@ The contents of the vector are &quot;Hello&quot;, &quot;Hello&quot;
                         <a href="/tags/tensorflow" title="tensorflow">
                             tensorflow
                         </a>
+                        
+                        
                         
                         
                         
