@@ -229,7 +229,6 @@
   <ol>
     <li><a href="#背景">背景</a>
       <ol>
-        <li><a href="#概述">概述</a></li>
         <li><a href="#rcnn">rcnn</a></li>
         <li><a href="#fast-rcnn">fast rcnn</a></li>
         <li><a href="#faster-rcnn">faster rcnn</a></li>
@@ -241,10 +240,14 @@
 </nav>
                 
                 <h2 id="背景">背景</h2>
-<h3 id="概述">概述</h3>
+<p>2019年对了好几次faster rcnn，第一次是赛事之窗项目和北京的同事，对齐sdk和训练的实现。
+第二次是被tensorRT4和tensorRT5之间默认参数不一致的问题坑了一下。
+第三次是被caffe proto中roi align 的默认参数坑了。</p>
+<p>虽然debug了这么多次，踩了一堆坑，但是一段时间不用，细节就会慢慢不记得了。因此来记录一下。</p>
+<hr />
 <p>faster rcnn，是一种&quot;two stage&quot;的目标检测算法。</p>
 <p>所谓&quot;two stage&rdquo;，是说在实际进行目标检测之前，先会通过某种&quot;region proposals&rdquo; algorithm，来获得一定数量的RoI(Regions of Interest),我们下一阶段要检测的obejct有极大可能被包含在这些RoI. 这种&quot;Region based&quot;的方法是对基于&quot;sliding windows&quot;方法的极大改进，因为不需要遍历每一个可能的位置以及crop大小，只需要对这些RoI进行检测，有效地减小了计算量。</p>
-<p>下面简单说一下这一类&quot;Region based&quot;方法的历史脉络，介绍一下Rcnn和Fast Rcnn方法。</p>
+<p>下面简单说一下这一类&quot;Region based&quot;方法的历史脉络</p>
 <h3 id="rcnn">rcnn</h3>
 <p>RCNN的做法是通过一种传统方法&quot;selective search&quot;来得到若干RoI,然后把每一个RoI，后面接CNN进行后续的检测。 显然，这个方法的问题在于计算量非常大。</p>
 <blockquote>
