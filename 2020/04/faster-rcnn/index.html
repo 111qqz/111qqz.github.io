@@ -240,6 +240,7 @@
         <li><a href="#rpn-网络结构">RPN 网络结构</a></li>
       </ol>
     </li>
+    <li><a href="#roi-pooling和roi-align-pooling">ROI Pooling和ROI Align Pooling</a></li>
     <li><a href="#参考链接">参考链接</a></li>
   </ol>
 </nav>
@@ -339,6 +340,7 @@ assign_targets_to_anchors和compute_loss 两个函数的代码。</p>
 <li>post_nms_top_n. nms之后保留的proposals个数</li>
 </ul>
 <p>（某足球项目，nms还有decode_box 这里的bug和北京的同事联调了半个月才全部解决Orz.. 醉生梦死的经历。 这部分实现其实细节还挺多的，又没有统一的标准，很容易造成误差&hellip; 下次有机会讲一下。</p>
+<p><strong>然后forward函数就相当于某些框架中的(比如caffe)proposal layer.</strong></p>
 <pre><code class="language-python">
 class RegionProposalNetwork(torch.nn.Module):
     &quot;&quot;&quot;
@@ -532,9 +534,218 @@ class RegionProposalNetwork(torch.nn.Module):
         return boxes, losses
 
 </code></pre>
+<h2 id="roi-pooling和roi-align-pooling">ROI Pooling和ROI Align Pooling</h2>
+<p>接下来介绍一下ROI Pooling，以及对它的改进 ROI Align Pooling</p>
+<p>为什么需要ROI Pooling? 原因是在经过RPN网络后，得到的proposals的尺寸是不统一的。而CNN网络需要固定尺寸的输入。</p>
+<p><img src="https://i.loli.net/2020/04/06/BzR6ZM94rIvonlN.png" alt="roipooling.png" /></p>
+<p>举个例子，上面8<em>8的的featrue map和7*5的proposal,希望得到2*2的输出。
+但是没办法整除，roi pooling的做法是，直接取整，把7分成3,4两部分，把5分成2和3两部分。
+然后在这四个区域做pooling，得到2</em>2的尺寸。</p>
+<p>这部分torchvision的pytorch实现里面混合了mask rcnn还有其他关键点算法，不太直观，可以参考caffe的roi pooling layer.</p>
+<p>可以看到里面ceil和floor 的取整操作。</p>
+<pre><code class="language-c++">
+template &lt;typename Dtype&gt;
+void ROIPoolingLayer&lt;Dtype&gt;::Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
+  const Dtype* bottom_rois = bottom[1]-&gt;cpu_data();
+  // Number of ROIs
+  int num_rois = bottom[1]-&gt;num();
+  int batch_size = bottom[0]-&gt;num();
+  int top_count = top[0]-&gt;count();
+  Dtype* top_data = top[0]-&gt;mutable_cpu_data();
+  caffe_set(top_count, Dtype(-FLT_MAX), top_data);
+  int* argmax_data = max_idx_.mutable_cpu_data();
+  caffe_set(top_count, -1, argmax_data);
+
+  // For each ROI R = [batch_index x1 y1 x2 y2]: max pool over R
+  for (int n = 0; n &lt; num_rois; ++n) {
+    int roi_batch_ind = bottom_rois[0];
+    int roi_start_w = round(bottom_rois[1] * spatial_scale_);
+    int roi_start_h = round(bottom_rois[2] * spatial_scale_);
+    int roi_end_w = round(bottom_rois[3] * spatial_scale_);
+    int roi_end_h = round(bottom_rois[4] * spatial_scale_);
+    CHECK_GE(roi_batch_ind, 0);
+    CHECK_LT(roi_batch_ind, batch_size);
+
+    int roi_height = max(roi_end_h - roi_start_h + 1, 1);
+    int roi_width = max(roi_end_w - roi_start_w + 1, 1);
+    const Dtype bin_size_h = static_cast&lt;Dtype&gt;(roi_height)
+                             / static_cast&lt;Dtype&gt;(pooled_height_);
+    const Dtype bin_size_w = static_cast&lt;Dtype&gt;(roi_width)
+                             / static_cast&lt;Dtype&gt;(pooled_width_);
+
+    const Dtype* batch_data = bottom_data + bottom[0]-&gt;offset(roi_batch_ind);
+
+    for (int c = 0; c &lt; channels_; ++c) {
+      for (int ph = 0; ph &lt; pooled_height_; ++ph) {
+        for (int pw = 0; pw &lt; pooled_width_; ++pw) {
+          // Compute pooling region for this output unit:
+          //  start (included) = floor(ph * roi_height / pooled_height_)
+          //  end (excluded) = ceil((ph + 1) * roi_height / pooled_height_)
+          int hstart = static_cast&lt;int&gt;(floor(static_cast&lt;Dtype&gt;(ph)
+                                              * bin_size_h));
+          int wstart = static_cast&lt;int&gt;(floor(static_cast&lt;Dtype&gt;(pw)
+                                              * bin_size_w));
+          int hend = static_cast&lt;int&gt;(ceil(static_cast&lt;Dtype&gt;(ph + 1)
+                                           * bin_size_h));
+          int wend = static_cast&lt;int&gt;(ceil(static_cast&lt;Dtype&gt;(pw + 1)
+                                           * bin_size_w));
+
+          hstart = min(max(hstart + roi_start_h, 0), height_);
+          hend = min(max(hend + roi_start_h, 0), height_);
+          wstart = min(max(wstart + roi_start_w, 0), width_);
+          wend = min(max(wend + roi_start_w, 0), width_);
+
+          bool is_empty = (hend &lt;= hstart) || (wend &lt;= wstart);
+
+          const int pool_index = ph * pooled_width_ + pw;
+          if (is_empty) {
+            top_data[pool_index] = 0;
+            argmax_data[pool_index] = -1;
+          }
+
+          for (int h = hstart; h &lt; hend; ++h) {
+            for (int w = wstart; w &lt; wend; ++w) {
+              const int index = h * width_ + w;
+              if (batch_data[index] &gt; top_data[pool_index]) {
+                top_data[pool_index] = batch_data[index];
+                argmax_data[pool_index] = index;
+              }
+            }
+          }
+        }
+      }
+      // Increment all data pointers by one channel
+      batch_data += bottom[0]-&gt;offset(0, 1);
+      top_data += top[0]-&gt;offset(0, 1);
+      argmax_data += max_idx_.offset(0, 1);
+    }
+    // Increment ROI data pointer
+    bottom_rois += bottom[1]-&gt;offset(1);
+  }
+}
+
+
+
+</code></pre>
+<p>这个办法简单粗暴，而且很容易意识到，这样取整对真实的信息产生了偏差。大物体可能还好说，小物体的话这个问题就会比较严重。</p>
+<p>因此在<a href="https://arxiv.org/abs/1703.06870">Mask R-CNN</a> 提出了一种改进办法，称之为&quot;RoI Align Pooling&rdquo;.</p>
+<p>思路是说，如果不能整除，那么不取整，而是通过插值等手段近似出那个不整的点的值。</p>
+<p>代码可以参考caffe的GPU实现:</p>
+<pre><code class="language-c++">
+template &lt;typename T&gt;
+__global__ void RoIAlignForwardKernel(
+    const int nthreads,
+    const T* bottom_data,
+    const T spatial_scale,
+    const bool position_sensitive,
+    const int channels,
+    const int height,
+    const int width,
+    const int pooled_height,
+    const int pooled_width,
+    const int sampling_ratio,
+    const int num_roi_per_image,
+    const T* bottom_rois,
+    T* top_data) {
+  CUDA_KERNEL_LOOP(index, nthreads) {
+    // (n, c, ph, pw) is an element in the pooled output
+    int pw = index % pooled_width;
+    int ph = (index / pooled_width) % pooled_height;
+    int c = (index / pooled_width / pooled_height) % channels;
+    int n = index / pooled_width / pooled_height / channels;
+
+//    const T* offset_bottom_rois = bottom_rois + n * 5;
+    const T* offset_bottom_rois = bottom_rois + n * 4;
+    int roi_batch_ind = n / num_roi_per_image;
+
+    // Do not using rounding; this implementation detail is critical
+    T roi_start_w = offset_bottom_rois[0] * spatial_scale;
+    T roi_start_h = offset_bottom_rois[1] * spatial_scale;
+    T roi_end_w = offset_bottom_rois[2] * spatial_scale;
+    T roi_end_h = offset_bottom_rois[3] * spatial_scale;
+    // T roi_start_w = round(offset_bottom_rois[1] * spatial_scale);
+    // T roi_start_h = round(offset_bottom_rois[2] * spatial_scale);
+    // T roi_end_w = round(offset_bottom_rois[3] * spatial_scale);
+    // T roi_end_h = round(offset_bottom_rois[4] * spatial_scale);
+
+    // Force malformed ROIs to be 1x1
+    T roi_width = max(roi_end_w - roi_start_w, (T)1.);
+    T roi_height = max(roi_end_h - roi_start_h, (T)1.);
+    T bin_size_h = static_cast&lt;T&gt;(roi_height) / static_cast&lt;T&gt;(pooled_height);
+    T bin_size_w = static_cast&lt;T&gt;(roi_width) / static_cast&lt;T&gt;(pooled_width);
+
+    int c_unpooled = c;
+    int channels_unpooled = channels;
+    if (position_sensitive) {
+      c_unpooled = c * pooled_height * pooled_width + ph * pooled_width + pw;
+      channels_unpooled = channels * pooled_height * pooled_width;
+    }
+    const T* offset_bottom_data =
+        bottom_data + (roi_batch_ind * channels_unpooled + c_unpooled)
+            * height * width;
+
+    // We use roi_bin_grid to sample the grid and mimic integral
+    int roi_bin_grid_h = (sampling_ratio &gt; 0)
+                         ? sampling_ratio
+                         : ceil(roi_height / pooled_height);  // e.g., = 2
+    int roi_bin_grid_w =
+        (sampling_ratio &gt; 0) ? sampling_ratio : ceil(roi_width / pooled_width);
+
+    // We do average (integral) pooling inside a bin
+    const T count = roi_bin_grid_h * roi_bin_grid_w;  // e.g. = 4
+
+    T output_val = 0.;
+    for (int iy = 0; iy &lt; roi_bin_grid_h; iy++) {  // e.g., iy = 0, 1
+      const T y = roi_start_h + ph * bin_size_h +
+          static_cast&lt;T&gt;(iy + .5f) * bin_size_h /
+              static_cast&lt;T&gt;(roi_bin_grid_h);  // e.g., 0.5, 1.5
+      for (int ix = 0; ix &lt; roi_bin_grid_w; ix++) {
+        const T x = roi_start_w + pw * bin_size_w +
+            static_cast&lt;T&gt;(ix + .5f) * bin_size_w /
+                static_cast&lt;T&gt;(roi_bin_grid_w);
+
+        T val = bilinear_interpolate(
+            offset_bottom_data, height, width, y, x, index);
+        output_val += val;
+      }
+    }
+    output_val /= count;
+
+    top_data[index] = output_val;
+  }
+}
+
+
+</code></pre>
+<p>这里面有一个坑是，roi align layer有个参数叫num_roi_per_image</p>
+<pre><code class="language-protobuf">
+message RoIAlignParameter {
+  optional uint32 pooled_h = 1 [default = 0];
+  optional uint32 pooled_w = 2 [default = 0];
+  optional float spatial_scale = 3 [default = 1];
+  optional int32 sample_ratio = 4 [default = -1];
+  optional bool position_sensitive = 5 [default = false];
+  optional uint32 num_roi_per_image = 6 [default = 300];
+}
+
+
+</code></pre>
+<p>然后这东西是有一个默认值300的。 因为在roialign之前的proposal layer的post_nms的值一般是300. 所以一般不会有什么影响。
+但是如果nms之后的roi数量小于300,而num_roi_per_image又是默认300的话，就会把后面图片的roi分给第一张图，导致结果错误。</p>
+<p>具体请参考<a href="https://111qqz.github.io/2019/12/debug-faster-rcnn-once-again/">记一次faster-rcnn debug记录</a></p>
 <h2 id="参考链接">参考链接</h2>
 <ul>
-<li><a href="https://arxiv.org/abs/1506.01497">Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks</a></li>
+<li>
+<p><a href="https://arxiv.org/abs/1506.01497">Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks</a></p>
+</li>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/73138740">ROI Pooling和ROI Align</a></p>
+</li>
+<li>
+<p><a href="https://arxiv.org/abs/1703.06870">Mask R-CNN</a></p>
+</li>
 </ul>
 
 
