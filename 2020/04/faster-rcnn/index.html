@@ -234,7 +234,12 @@
         <li><a href="#faster-rcnn">faster rcnn</a></li>
       </ol>
     </li>
-    <li><a href="#region-proposal-networkrpn">Region proposal network(RPN)</a></li>
+    <li><a href="#region-proposal-networkrpn">Region proposal network(RPN)</a>
+      <ol>
+        <li><a href="#anchor">anchor</a></li>
+        <li><a href="#rpn-网络结构">RPN 网络结构</a></li>
+      </ol>
+    </li>
     <li><a href="#参考链接">参考链接</a></li>
   </ol>
 </nav>
@@ -262,7 +267,271 @@
 <p>放一张结构图，非常清楚。
 <img src="https://i.loli.net/2020/04/05/3PV9M287obyiWhv.png" alt="rcnn系列结构图.png" /></p>
 <h2 id="region-proposal-networkrpn">Region proposal network(RPN)</h2>
-<p>未完待续</p>
+<h3 id="anchor">anchor</h3>
+<p>介绍RPN网络首先就要介绍一下anchor.</p>
+<p>（被坑过一次，某个足球项目上，training和inference用的anchor竟然是不一致的。。）</p>
+<p>其实anchor这个概念很简单，用大白话说就是，根据要检测的物体的形状（高矮胖瘦等），<strong>预先</strong> 设置一些不同尺寸（高矮胖瘦）的粗略的框，然后对这些框做一个二分类，判断前景还是背景，同时做bbox regression 来微调坐标，最终得到proposals.</p>
+<p>设置anchor的思路其实就是修改了proposals的默认位置为生成的anchors的位置。对这些anchors进行微调总要比从零开始生成容易得多。</p>
+<p>要注意的是，anchors是在进入网络前预先生成的。
+实际项目中，通常设置长宽比为[1:1,2:1,1:2]三种比例，然后通过 <a href="https://github.com/rbgirshick/py-faster-rcnn/blob/master/lib/rpn/generate_anchors.py">generate_anchors.py</a> 来生成anchors.</p>
+<h3 id="rpn-网络结构">RPN 网络结构</h3>
+<p><img src="https://i.loli.net/2020/04/06/PjJhbluRQUBWr1T.png" alt="rpn结构.png" /></p>
+<p>最下面的conv feature map是经过一段CNN得到的，这部分和fast rcnn是类似的。</p>
+<p>这一段CNN是RPN和后面的detector共用的。</p>
+<p>然后用一个n*n的滑动窗口(原paper中用的3*3，其实就是做了个3*3的卷积)，得到256维的feature(是因为这个conv feature map的深度是256). 然后对于cls和reg 分别做两个fc,输入分别为2和4. 由于一共有k个anchor，因此一共输入2k个scores和4k个coordinates.</p>
+<p>最初我的一个疑惑是，为什么这里要做softmax二分类呢？ 为什么要关心背景的置信度呢？</p>
+<p>原文中的解释是:</p>
+<blockquote>
+<p>For simplicity we implement the cls layer as a two-class
+softmax layer. Alternatively, one may use logistic regression to
+produce k scores.</p>
+</blockquote>
+<p>实际上，torchvision中rpn的时间就是使用了logistic来计算k个score. 代码如下:</p>
+<pre><code class="language-python">
+
+class RPNHead(nn.Module):
+    &quot;&quot;&quot;
+    Adds a simple RPN Head with classification and regression heads
+    Arguments:
+        in_channels (int): number of channels of the input feature
+        num_anchors (int): number of anchors to be predicted
+    &quot;&quot;&quot;
+
+    def __init__(self, in_channels, num_anchors):
+        super(RPNHead, self).__init__()
+        self.conv = nn.Conv2d(
+            in_channels, in_channels, kernel_size=3, stride=1, padding=1
+        )
+        self.cls_logits = nn.Conv2d(in_channels, num_anchors, kernel_size=1, stride=1)
+        self.bbox_pred = nn.Conv2d(
+            in_channels, num_anchors * 4, kernel_size=1, stride=1
+        )
+
+        for l in self.children():
+            torch.nn.init.normal_(l.weight, std=0.01)
+            torch.nn.init.constant_(l.bias, 0)
+
+    def forward(self, x):
+        # type: (List[Tensor])
+        logits = []
+        bbox_reg = []
+        for feature in x:
+            t = F.relu(self.conv(feature))
+            logits.append(self.cls_logits(t))
+            bbox_reg.append(self.bbox_pred(t))
+        return logits, bbox_reg
+</code></pre>
+<p>可以看到 self.cls_logits的输出是num_anchors 个。</p>
+<p>如果是使用softmax来得到2k个score,这里还有一个坑是softmax的维度</p>
+<blockquote>
+<p>&ldquo;Number of labels must match number of predictions; &quot;
+&ldquo;e.g., if softmax axis == 1 and prediction shape is (N, C, H, W), &quot;
+&ldquo;label count (number of labels) must be N*H*W, &quot;
+&ldquo;with integer values in {0, 1, &hellip;, C-1}.&quot;;</p>
+</blockquote>
+<p>所以经常要在softmax前后进行reshape
+把[1, 2x9, H, W] 变成 [1, 2, 9xH, W]。“腾空”出来一个维度以便softmax分类，之后再reshape回复原状。</p>
+<p>接下来我们整体看一下RPN的pytorch实现。 由于我们不关心training的过程，为了代码的整洁，这里省略了
+assign_targets_to_anchors和compute_loss 两个函数的代码。</p>
+<p>这个代码的核心在于 filter_proposals 这个函数，相当于对proposals做一些后处理。比如去掉出了边界框的，去掉太小的proposals,然后根据NMS来再去掉一些。 这里有几个参数要注意:</p>
+<ul>
+<li>pre_nms_top_n. 在进行nms之前保留的proposals个数</li>
+<li>post_nms_top_n. nms之后保留的proposals个数</li>
+</ul>
+<p>（某足球项目，nms还有decode_box 这里的bug和北京的同事联调了半个月才全部解决Orz.. 醉生梦死的经历。 这部分实现其实细节还挺多的，又没有统一的标准，很容易造成误差&hellip; 下次有机会讲一下。</p>
+<pre><code class="language-python">
+class RegionProposalNetwork(torch.nn.Module):
+    &quot;&quot;&quot;
+    Implements Region Proposal Network (RPN).
+    Arguments:
+        anchor_generator (AnchorGenerator): module that generates the anchors for a set of feature
+            maps.
+        head (nn.Module): module that computes the objectness and regression deltas
+        fg_iou_thresh (float): minimum IoU between the anchor and the GT box so that they can be
+            considered as positive during training of the RPN.
+        bg_iou_thresh (float): maximum IoU between the anchor and the GT box so that they can be
+            considered as negative during training of the RPN.
+        batch_size_per_image (int): number of anchors that are sampled during training of the RPN
+            for computing the loss
+        positive_fraction (float): proportion of positive anchors in a mini-batch during training
+            of the RPN
+        pre_nms_top_n (Dict[int]): number of proposals to keep before applying NMS. It should
+            contain two fields: training and testing, to allow for different values depending
+            on training or evaluation
+        post_nms_top_n (Dict[int]): number of proposals to keep after applying NMS. It should
+            contain two fields: training and testing, to allow for different values depending
+            on training or evaluation
+        nms_thresh (float): NMS threshold used for postprocessing the RPN proposals
+    &quot;&quot;&quot;
+    __annotations__ = {
+        'box_coder': det_utils.BoxCoder,
+        'proposal_matcher': det_utils.Matcher,
+        'fg_bg_sampler': det_utils.BalancedPositiveNegativeSampler,
+        'pre_nms_top_n': Dict[str, int],
+        'post_nms_top_n': Dict[str, int],
+    }
+
+    def __init__(self,
+                 anchor_generator,
+                 head,
+                 #
+                 fg_iou_thresh, bg_iou_thresh,
+                 batch_size_per_image, positive_fraction,
+                 #
+                 pre_nms_top_n, post_nms_top_n, nms_thresh):
+        super(RegionProposalNetwork, self).__init__()
+        self.anchor_generator = anchor_generator
+        self.head = head
+        self.box_coder = det_utils.BoxCoder(weights=(1.0, 1.0, 1.0, 1.0))
+
+        # used during training
+        self.box_similarity = box_ops.box_iou
+
+        self.proposal_matcher = det_utils.Matcher(
+            fg_iou_thresh,
+            bg_iou_thresh,
+            allow_low_quality_matches=True,
+        )
+
+        self.fg_bg_sampler = det_utils.BalancedPositiveNegativeSampler(
+            batch_size_per_image, positive_fraction
+        )
+        # used during testing
+        self._pre_nms_top_n = pre_nms_top_n
+        self._post_nms_top_n = post_nms_top_n
+        self.nms_thresh = nms_thresh
+        self.min_size = 1e-3
+
+    def pre_nms_top_n(self):
+        if self.training:
+            return self._pre_nms_top_n['training']
+        return self._pre_nms_top_n['testing']
+
+    def post_nms_top_n(self):
+        if self.training:
+            return self._post_nms_top_n['training']
+        return self._post_nms_top_n['testing']
+
+    def assign_targets_to_anchors(self, anchors, targets):
+        # type: (List[Tensor], List[Dict[str, Tensor]])
+        pass
+    def _get_top_n_idx(self, objectness, num_anchors_per_level):
+        # type: (Tensor, List[int])
+        r = []
+        offset = 0
+        for ob in objectness.split(num_anchors_per_level, 1):
+            if torchvision._is_tracing():
+                num_anchors, pre_nms_top_n = _onnx_get_num_anchors_and_pre_nms_top_n(ob, self.pre_nms_top_n())
+            else:
+                num_anchors = ob.shape[1]
+                pre_nms_top_n = min(self.pre_nms_top_n(), num_anchors)
+            _, top_n_idx = ob.topk(pre_nms_top_n, dim=1)
+            r.append(top_n_idx + offset)
+            offset += num_anchors
+        return torch.cat(r, dim=1)
+
+    def filter_proposals(self, proposals, objectness, image_shapes, num_anchors_per_level):
+        # type: (Tensor, Tensor, List[Tuple[int, int]], List[int])
+        num_images = proposals.shape[0]
+        device = proposals.device
+        # do not backprop throught objectness
+        objectness = objectness.detach()
+        objectness = objectness.reshape(num_images, -1)
+
+        levels = [
+            torch.full((n,), idx, dtype=torch.int64, device=device)
+            for idx, n in enumerate(num_anchors_per_level)
+        ]
+        levels = torch.cat(levels, 0)
+        levels = levels.reshape(1, -1).expand_as(objectness)
+
+        # select top_n boxes independently per level before applying nms
+        top_n_idx = self._get_top_n_idx(objectness, num_anchors_per_level)
+
+        image_range = torch.arange(num_images, device=device)
+        batch_idx = image_range[:, None]
+
+        objectness = objectness[batch_idx, top_n_idx]
+        levels = levels[batch_idx, top_n_idx]
+        proposals = proposals[batch_idx, top_n_idx]
+
+        final_boxes = []
+        final_scores = []
+        for boxes, scores, lvl, img_shape in zip(proposals, objectness, levels, image_shapes):
+            boxes = box_ops.clip_boxes_to_image(boxes, img_shape)
+            keep = box_ops.remove_small_boxes(boxes, self.min_size)
+            boxes, scores, lvl = boxes[keep], scores[keep], lvl[keep]
+            # non-maximum suppression, independently done per level
+            keep = box_ops.batched_nms(boxes, scores, lvl, self.nms_thresh)
+            # keep only topk scoring predictions
+            keep = keep[:self.post_nms_top_n()]
+            boxes, scores = boxes[keep], scores[keep]
+            final_boxes.append(boxes)
+            final_scores.append(scores)
+        return final_boxes, final_scores
+
+    def compute_loss(self, objectness, pred_bbox_deltas, labels, regression_targets):
+        # type: (Tensor, Tensor, List[Tensor], List[Tensor])
+        &quot;&quot;&quot;
+        Arguments:
+            objectness (Tensor)
+            pred_bbox_deltas (Tensor)
+            labels (List[Tensor])
+            regression_targets (List[Tensor])
+        Returns:
+            objectness_loss (Tensor)
+            box_loss (Tensor)
+        &quot;&quot;&quot;
+
+       pass 
+    def forward(self, images, features, targets=None):
+        # type: (ImageList, Dict[str, Tensor], Optional[List[Dict[str, Tensor]]])
+        &quot;&quot;&quot;
+        Arguments:
+            images (ImageList): images for which we want to compute the predictions
+            features (List[Tensor]): features computed from the images that are
+                used for computing the predictions. Each tensor in the list
+                correspond to different feature levels
+            targets (List[Dict[Tensor]]): ground-truth boxes present in the image (optional).
+                If provided, each element in the dict should contain a field `boxes`,
+                with the locations of the ground-truth boxes.
+        Returns:
+            boxes (List[Tensor]): the predicted boxes from the RPN, one Tensor per
+                image.
+            losses (Dict[Tensor]): the losses for the model during training. During
+                testing, it is an empty dict.
+        &quot;&quot;&quot;
+        # RPN uses all feature maps that are available
+        features = list(features.values())
+        objectness, pred_bbox_deltas = self.head(features)
+        anchors = self.anchor_generator(images, features)
+
+        num_images = len(anchors)
+        num_anchors_per_level_shape_tensors = [o[0].shape for o in objectness]
+        num_anchors_per_level = [s[0] * s[1] * s[2] for s in num_anchors_per_level_shape_tensors]
+        objectness, pred_bbox_deltas = \
+            concat_box_prediction_layers(objectness, pred_bbox_deltas)
+        # apply pred_bbox_deltas to anchors to obtain the decoded proposals
+        # note that we detach the deltas because Faster R-CNN do not backprop through
+        # the proposals
+        proposals = self.box_coder.decode(pred_bbox_deltas.detach(), anchors)
+        proposals = proposals.view(num_images, -1, 4)
+        boxes, scores = self.filter_proposals(proposals, objectness, images.image_sizes, num_anchors_per_level)
+
+        losses = {}
+        if self.training:
+            assert targets is not None
+            labels, matched_gt_boxes = self.assign_targets_to_anchors(anchors, targets)
+            regression_targets = self.box_coder.encode(matched_gt_boxes, anchors)
+            loss_objectness, loss_rpn_box_reg = self.compute_loss(
+                objectness, pred_bbox_deltas, labels, regression_targets)
+            losses = {
+                &quot;loss_objectness&quot;: loss_objectness,
+                &quot;loss_rpn_box_reg&quot;: loss_rpn_box_reg,
+            }
+        return boxes, losses
+
+</code></pre>
 <h2 id="参考链接">参考链接</h2>
 <ul>
 <li><a href="https://arxiv.org/abs/1506.01497">Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks</a></li>
