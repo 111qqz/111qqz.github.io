@@ -97,36 +97,17 @@
                         <a href="/">Home</a>
                     </li>
                     
-                    <li>
-                        <a href="/categories/acm">acm</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/c&#43;&#43;">c&#43;&#43;</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/deep-learning">deep-learning</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E4%BC%98%E5%8C%96">优化</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E5%85%B6%E4%BB%96">其他</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E9%9A%8F%E7%AC%94%E6%9D%82%E8%B0%88">随笔杂谈</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E9%9D%A2%E8%AF%95">面试</a>
-                    </li>
                     
                     
 		    
+                        <li><a href="/categories/acm/">ACM-ICPC</a></li>
+                    
+                        <li><a href="/categories/deep-learning/">深度学习</a></li>
+                    
+                        <li><a href="/categories/mooc/">公开课</a></li>
+                    
+                        <li><a href="/categories/%e5%85%b6%e4%bb%96/">其他</a></li>
+                    
                         <li><a href="/top/about/">ABOUT</a></li>
                     
 
@@ -238,15 +219,14 @@
     <li>
       <ol>
         <li><a href="#还有一种母函数的做法先得到每种价值有多种种方法然后从总价值一半向下找到第一个方案数非0的价值就是答案">还有一种母函数的做法：先得到每种价值有多种种方法，然后从总价值一半向下找到第一个方案数非0的价值，就是答案。</a></li>
-        <li><a href="#_注意数组开小不一定是retleware都有可能_">注意。。。数组开小不一定是re&hellip;tle,wa,re都有可能</a></li>
-        <li><a href="#_注意数组开小不一定是retleware都有可能_-1">注意。。。数组开小不一定是re&hellip;tle,wa,re都有可能</a></li>
+        <li><a href="#_注意数组开小不一定是retleware都有可能_"><em><strong>注意。。。数组开小不一定是re&hellip;tle,wa,re都有可能</strong></em></a></li>
+        <li><a href="#_注意数组开小不一定是retleware都有可能_-1"><em><strong>注意。。。数组开小不一定是re&hellip;tle,wa,re都有可能</strong></em></a></li>
       </ol>
     </li>
   </ol>
 </nav>
                 
-                <h1 id="big-event-in-hdu">Big Event in HDU</h1>
-<p>**Time Limit: 10000/5000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+                <p>**Time Limit: 10000/5000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
 Total Submission(s): 26534    Accepted Submission(s): 9332
 **</p>
 <p>Problem Description</p>
@@ -269,8 +249,6 @@ A test case starting with a negative integer terminates input and this test case
 <p>Sample Output</p>
 <p>20 10
 40 40</p>
-<p>Author</p>
-<p>lcy</p>
 <p>背包。</p>
 <p>所有的设备不是放在第一部分，就是要放在第二部分。</p>
 <p>那么对于第一部分，或者第二部分，每一个设备就只有放和不放两种情况。</p>
@@ -278,157 +256,167 @@ A test case starting with a negative integer terminates input and this test case
 <p>然后脑抽看到第一部分可以大于一半，觉得这么想是错的。。。</p>
 <p>实际上并不是，因为第二部分总要比第一部分小，所以第二部分是不可能大于一半的。</p>
 <p>所以我们对于第二部分做01背包。</p>
-<pre><code>/* ***********************************************
-Author :111qqz
-Created Time :2016年02月22日 星期一 22时52分26秒
-File Name :code/hdu/1171.cpp
-************************************************ */
+<pre><code class="language-c++">
 
-#include &lt;iostream&gt;
-#include &lt;algorithm&gt;
-#include &lt;cstring&gt;
-#include &lt;cstdio&gt;
-#include &lt;cmath&gt;
-
-using namespace std;
-const int N=3E6+5;
-int a[N],dp[N];
-int n,x,y;
-int tmp;
-int sum;
-
-void solve(int value ,int cost)
-{
-    for ( int i = sum/2 ; i &gt;= cost ; i--)
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月22日 星期一 22时52分26秒
+    File Name :code/hdu/1171.cpp
+    ************************************************ */
+    
+    #include &lt;iostream&gt;
+    #include &lt;algorithm&gt;
+    #include &lt;cstring&gt;
+    #include &lt;cstdio&gt;
+    #include &lt;cmath&gt;
+    
+    using namespace std;
+    const int N=3E6+5;
+    int a[N],dp[N];
+    int n,x,y;
+    int tmp;
+    int sum;
+    
+    void solve(int value ,int cost)
     {
-        dp [i] = max(dp[i],dp[i-cost]+value);
-    }
-
-}
-
-int main()
-{
-    while (scanf(&quot;%d&quot;,&amp;n)!=EOF)
-    {
-        if( n&lt;0 ) break;
-        memset(dp,0,sizeof(dp));
-        memset(a,0,sizeof(a));
-        tmp = 1;
-        sum = 0;
-        for ( int i = 1 ; i &lt;= n ; i++ )
+        for ( int i = sum/2 ; i &gt;= cost ; i--)
         {
-            scanf(&quot;%d %d&quot;,&amp;x,&amp;y);
-            sum = sum +x*y;
-            for ( int j =1 ; j &lt;= y ; j++)
-            {
-                a[tmp] = x;
-                tmp++;
-            }
+            dp [i] = max(dp[i],dp[i-cost]+value);
         }
-        for ( int i = 1 ; i &lt;= tmp ; i++)
-            solve (a[i],a[i]);
-        printf(&quot;%d %d\n&quot;,sum-dp[sum/2],dp[sum/2]);
+    
+    }
+    
+    int main()
+    {
+        while (scanf(&quot;%d&quot;,&amp;n)!=EOF)
+        {
+            if( n&lt;0 ) break;
+            memset(dp,0,sizeof(dp));
+            memset(a,0,sizeof(a));
+            tmp = 1;
+            sum = 0;
+            for ( int i = 1 ; i &lt;= n ; i++ )
+            {
+                scanf(&quot;%d %d&quot;,&amp;x,&amp;y);
+                sum = sum +x*y;
+                for ( int j =1 ; j &lt;= y ; j++)
+                {
+                    a[tmp] = x;
+                    tmp++;
+                }
+            }
+            for ( int i = 1 ; i &lt;= tmp ; i++)
+                solve (a[i],a[i]);
+            printf(&quot;%d %d\n&quot;,sum-dp[sum/2],dp[sum/2]);
+        }
+    
+        return 0;
     }
 
-    return 0;
-}
+
 </code></pre>
 <h3 id="还有一种母函数的做法先得到每种价值有多种种方法然后从总价值一半向下找到第一个方案数非0的价值就是答案">还有一种母函数的做法：先得到每种价值有多种种方法，然后从总价值一半向下找到第一个方案数非0的价值，就是答案。</h3>
 <p><em><strong>注意。。。数组开小不一定是re&hellip;tle,wa,re都有可能</strong></em></p>
 <h3 id="_注意数组开小不一定是retleware都有可能_"><em><strong>注意。。。数组开小不一定是re&hellip;tle,wa,re都有可能</strong></em></h3>
 <h3 id="_注意数组开小不一定是retleware都有可能_-1"><em><strong>注意。。。数组开小不一定是re&hellip;tle,wa,re都有可能</strong></em></h3>
-<pre><code>/* ***********************************************
-Author :111qqz
-Created Time :2016年02月25日 星期四 23时08分48秒
-File Name :code/hdu/_1171.cpp
-************************************************ */
-
-#include &lt;cstdio&gt;
-#include &lt;cstring&gt;
-#include &lt;iostream&gt;
-#include &lt;algorithm&gt;
-#include &lt;vector&gt;
-#include &lt;queue&gt;
-#include &lt;set&gt;
-#include &lt;map&gt;
-#include &lt;string&gt;
-#include &lt;cmath&gt;
-#include &lt;cstdlib&gt;
-#include &lt;ctime&gt;
-#define fst first
-#define sec second
-#define lson l,m,rt&lt;&lt;1
-#define rson m+1,r,rt&lt;&lt;1|1
-#define ms(a,x) memset(a,x,sizeof(a))
-typedef long long LL;
-#define pi pair &lt; int ,int &gt;
-#define MP make_pair
-
-using namespace std;
-const double eps = 1E-8;
-const int dx4[4]={1,0,0,-1};
-const int dy4[4]={0,-1,1,0};
-const int inf = 0x3f3f3f3f;
-const int N=3E5+7;
-int n;
-int a[N],tmp[N];
-int v[55],num[55];
-int main()
-{
-    #ifndef  ONLINE_JUDGE 
-    freopen(&quot;code/in.txt&quot;,&quot;r&quot;,stdin);
-  #endif
-
-    while (scanf(&quot;%d&quot;,&amp;n))
+<pre><code class="language-c++">
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月25日 星期四 23时08分48秒
+    File Name :code/hdu/_1171.cpp
+    ************************************************ */
+    
+    #include &lt;cstdio&gt;
+    #include &lt;cstring&gt;
+    #include &lt;iostream&gt;
+    #include &lt;algorithm&gt;
+    #include &lt;vector&gt;
+    #include &lt;queue&gt;
+    #include &lt;set&gt;
+    #include &lt;map&gt;
+    #include &lt;string&gt;
+    #include &lt;cmath&gt;
+    #include &lt;cstdlib&gt;
+    #include &lt;ctime&gt;
+    #define fst first
+    #define sec second
+    #define lson l,m,rt&lt;&lt;1
+    #define rson m+1,r,rt&lt;&lt;1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair &lt; int ,int &gt;
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=3E5+7;
+    int n;
+    int a[N],tmp[N];
+    int v[55],num[55];
+    int main()
     {
-        if (n&lt;0) break;
-
-        for ( int i =  1 ; i &lt;= n ; i++)
-        {
-        scanf(&quot;%d %d&quot;,&amp;v[i],&amp;num[i]);
-        }
-
-        ms(a,0);
-        for ( int i = 0 ; i &lt;= num[1]*v[1] ; i+=v[1])
-        {
-        a[i] = 1;
-        }
-
-        int cur = num[1]*v[1];
-        for ( int i = 2 ; i &lt;= n ; i++)
-        {
-        for ( int j = 0 ; j &lt;= cur ;  j++)
-        {
-            for ( int k = 0 ; k&lt;=num[i]*v[i] ; k +=v[i] )
-            {
-            tmp[j+k] += a[j];
-            }
-        }
-
-        cur += num[i]*v[i];
-
-        for ( int j = 0 ; j &lt;= cur ; j++)
-        {
-            a[j] = tmp[j];
-            tmp[j] = 0 ;
-        }
-        }
-
-        for ( int i = cur/2 ; i &gt;= 0 ; i--)
-        {
-        if (a[i]!=0)
-        {
-            printf(&quot;%d %d\n&quot;,cur-i,i);
-            break;
-        }
-        }
+    	#ifndef  ONLINE_JUDGE 
+    	freopen(&quot;code/in.txt&quot;,&quot;r&quot;,stdin);
+      #endif
+    
+    	while (scanf(&quot;%d&quot;,&amp;n))
+    	{
+    	    if (n&lt;0) break;
+    
+    	    for ( int i =  1 ; i &lt;= n ; i++)
+    	    {
+    		scanf(&quot;%d %d&quot;,&amp;v[i],&amp;num[i]);
+    	    }
+    
+    	    ms(a,0);
+    	    for ( int i = 0 ; i &lt;= num[1]*v[1] ; i+=v[1])
+    	    {
+    		a[i] = 1;
+    	    }
+    
+    	    int cur = num[1]*v[1];
+    	    for ( int i = 2 ; i &lt;= n ; i++)
+    	    {
+    		for ( int j = 0 ; j &lt;= cur ;  j++)
+    		{
+    		    for ( int k = 0 ; k&lt;=num[i]*v[i] ; k +=v[i] )
+    		    {
+    			tmp[j+k] += a[j];
+    		    }
+    		}
+    
+    		cur += num[i]*v[i];
+    
+    		for ( int j = 0 ; j &lt;= cur ; j++)
+    		{
+    		    a[j] = tmp[j];
+    		    tmp[j] = 0 ;
+    		}
+    	    }
+    
+    	    for ( int i = cur/2 ; i &gt;= 0 ; i--)
+    	    {
+    		if (a[i]!=0)
+    		{
+    		    printf(&quot;%d %d\n&quot;,cur-i,i);
+    		    break;
+    		}
+    	    }
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
     }
+    
 
-  #ifndef ONLINE_JUDGE  
-  fclose(stdin);
-  #endif
-    return 0;
-}
+
 </code></pre>
 
 
@@ -589,6 +577,10 @@ int main()
                         
                         
                         
+                        <a href="/tags/caffe" title="caffe">
+                            caffe
+                        </a>
+                        
                         
                         
                         
@@ -733,6 +725,10 @@ int main()
                         
                         
                         
+                        
+                        
+                        
+                        
                         <a href="/tags/km" title="km">
                             km
                         </a>
@@ -832,6 +828,8 @@ int main()
                         <a href="/tags/number-theory" title="number-theory">
                             number-theory
                         </a>
+                        
+                        
                         
                         
                         
@@ -1281,6 +1279,8 @@ int main()
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E6%A8%A1%E6%8B%9F" title="模拟">
                             模拟
                         </a>
@@ -1493,7 +1493,7 @@ int main()
 		    
                     
                     <li>
-                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                        <a target="_blank" href="/img/wechat.jpg">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
@@ -1512,19 +1512,10 @@ int main()
                     </li>
 		    
                     
-                    <li>
-                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
-                            <span class="fa-stack fa-lg">
-                                <i class="fa fa-circle fa-stack-2x"></i>
-                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
-                            </span>
-                        </a>
-                    </li>
-		    
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy; 111qqz的小窝 2020
+                    Copyright &copy; 111qqz的小窝 2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

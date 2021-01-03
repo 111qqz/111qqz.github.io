@@ -15,9 +15,9 @@
     
 
     
-    <meta name="title" content="莫队算法总结" />
-    <meta property="og:title" content="莫队算法总结" />
-    <meta property="twitter:title" content="莫队算法总结" />
+    <meta name="title" content="普通型母函数总结" />
+    <meta property="og:title" content="普通型母函数总结" />
+    <meta property="twitter:title" content="普通型母函数总结" />
     
 
     
@@ -34,7 +34,7 @@
     <meta name="keyword"  content="ACM,111qqz,商汤科技,hust,华中科技大学">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>莫队算法总结-111qqz的小窝</title>
+    <title>普通型母函数总结-111qqz的小窝</title>
 
     <link rel="canonical" href="/2016/02/">
 
@@ -97,36 +97,17 @@
                         <a href="/">Home</a>
                     </li>
                     
-                    <li>
-                        <a href="/categories/acm">acm</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/c&#43;&#43;">c&#43;&#43;</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/deep-learning">deep-learning</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E4%BC%98%E5%8C%96">优化</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E5%85%B6%E4%BB%96">其他</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E9%9A%8F%E7%AC%94%E6%9D%82%E8%B0%88">随笔杂谈</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E9%9D%A2%E8%AF%95">面试</a>
-                    </li>
                     
                     
 		    
+                        <li><a href="/categories/acm/">ACM-ICPC</a></li>
+                    
+                        <li><a href="/categories/deep-learning/">深度学习</a></li>
+                    
+                        <li><a href="/categories/mooc/">公开课</a></li>
+                    
+                        <li><a href="/categories/%e5%85%b6%e4%bb%96/">其他</a></li>
+                    
                         <li><a href="/top/about/">ABOUT</a></li>
                     
 
@@ -186,12 +167,12 @@
                 <div class="post-heading">
                     <div class="tags">
                         
-                        <a class="tag" href="/tags/%E8%8E%AB%E9%98%9F%E7%AE%97%E6%B3%95" title="莫队算法">
-                            莫队算法
+                        <a class="tag" href="/tags/%E6%AF%8D%E5%87%BD%E6%95%B0" title="母函数">
+                            母函数
                         </a>
                         
                     </div>
-                    <h1>莫队算法总结</h1>
+                    <h1>普通型母函数总结</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
 			Posted by 
@@ -199,7 +180,7 @@
 			    111qqz
 			 
 			on 
-			Wednesday, February 17, 2016
+			Saturday, February 27, 2016
                         
                     </span>
                 </div>
@@ -227,15 +208,70 @@
                 </header>
                 <nav id="TableOfContents"></nav>
                 
-                <p>写了几道莫队，总结下。
-目前只会区间莫队。。树上莫队以后再补。</p>
-<p><a href="http://blog.csdn.net/bossup/article/details/39236275">莫队算法学习</a></p>
-<p>说说我自己的理解：
-莫队算法是一类用来处理离线静态区间问题的算法。
-必须是离线，而且对区间没有修改。
-还要满足，如果我们知道区间[l,r]的答案，那么知道区间[l-1,r],[l+1,r],[l,r-1],[l,r+1]的答案都是平凡的。。也就是O(1)可以实现才可以。</p>
-<p>本质的话。。感觉就是分块+暴力？ 通过离线操作，把查询按照某种顺序均分使得复杂度降低。</p>
-<p>除了bzoj的权限题。。。区间莫队基本都A掉了。</p>
+                <p>从这里<a href="http://www.wutianqi.com/?p=596">母函数（Generating function）详解</a>学习了普通型母函数</p>
+<pre><code>#include &lt;iostream&gt;
+using namespace std;
+// Author: Tanky Woo
+// www.wutianqi.com
+const int _max = 10001; 
+// c1是保存各项质量砝码可以组合的数目
+// c2是中间量，保存没一次的情况
+int c1[_max], c2[_max];   
+int main()
+{	//int n,i,j,k;
+    int nNum;   // 
+    int i, j, k;
+ 
+    while(cin &gt;&gt; nNum)
+    {
+        for(i=0; i&lt;=nNum; ++i)   // ---- ①
+        {
+            c1[i] = 1;
+            c2[i] = 0;
+        }
+        for(i=2; i&lt;=nNum; ++i)   // ----- ②
+        {
+ 
+            for(j=0; j&lt;=nNum; ++j)   // ----- ③
+                for(k=0; k+j&lt;=nNum; k+=i)  // ---- ④
+                {
+                    c2[j+k] += c1[j];
+                }
+            for(j=0; j&lt;=nNum; ++j)     // ---- ⑤
+            {
+                c1[j] = c2[j];
+                c2[j] = 0;
+            }
+        }
+        cout &lt;&lt; c1[nNum] &lt;&lt; endl;
+    }
+    return 0;
+}
+</code></pre>
+<p><em>① 、首先对c1初始化，由第一个表达式(1+x+x^2+..x^n)初始化，把质量从0到n的所有砝码都初始化为1.</em></p>
+<p><em>② 、 i从2到n遍历，这里i就是指第i个表达式，上面给出的第二种母函数关系式里，每一个括号括起来的就是一个表达式。</em></p>
+<p><em>③、j 从0到n遍历，这里j就是(前面i個表达式累乘的表达式)里第j个变量，(这里感谢一下seagg朋友给我指出的错误，大家可以看下留言处的讨论)。如(1+x)(1+x^2)(1+x^3)，j先指示的是1和x的系数，i=2执行完之后变为</em></p>
+<p><em>（1+x+x^2+x^3）(1+x^3)，这时候j应该指示的是合并后的第一个括号的四个变量的系数。</em></p>
+<p><em>④ 、 k表示的是第j个指数，所以k每次增i（因为第i个表达式的增量是i）。</em></p>
+<p><em>⑤ 、把c2的值赋给c1,而把c2初始化为0，因为c2每次是从一个表达式中开始的。</em></p>
+<p>讲得不错，之前第三点注释有问题没想到现在已经改过来了2333.</p>
+<p>说说我的理解：母函数其实形式上就是函数&hellip;但是关注的是系数。。就像一排挂衣架一样。</p>
+<p>普通型母函数的作用就是通过模拟多项式乘法的方式解决一类组合计数问题。</p>
+<p>一般能由普通型母函数解决的问题也能由dp或者递推来解决，但是母函数可能更容易理解（对我个人来说</p>
+<p>这类问题呢，一般有如下几种问法。</p>
+<p>一种是对于每类物品的个数，可能每类个数有限，也可能无限。</p>
+<p>如果无限个，那么就根据n的大小作为一个循环的上限，因为n+1以及以后的指数肯定对答案没有贡献。</p>
+<p>比如这道题： <a href="https://111qqz.com/wordpress/2016/02/hdu1028/">hdu1028解题报告</a></p>
+<p>如果每类都有限，那么就根据每类物品作为上限。这时j那一层循环要不断累加（变量cur）当前能得到的最大价值（也就是多项式的最大指数） 比如这道<a href="https://111qqz.com/wordpress/2016/02/hdu1085/">hdu1085解题报告</a>
+也可能不仅要求上限，还要求有下限，也就是要求每类物品的个数必须在一个范围内。比如这道<a href="https://111qqz.com/wordpress/2016/02/hdu2152/">hdu2152解题报告</a></p>
+<p>也可能两种要同时考虑。比如这道<a href="https://111qqz.com/wordpress/2016/02/hdu2082/">hdu2082解题报告</a> 不过如果就算把所有数量算上也不会太大（数组存不下）的话，不考虑也可以（我懒）</p>
+<p>还有，每种元素并不一定像整数拆分一样是连续的，可能像硬币问题一样只有1分，2分，5分的硬币，或者只能是平方数<a href="https://111qqz.com/wordpress/2016/02/hdu1398/">hdu1398解题报告</a> 只能是素数<a href="https://111qqz.com/wordpress/2016/02/hdu-2189-512--/">hdu2189解题报告</a></p>
+<p>还有一点，不一定所有元素对答案都是正的贡献，也可能是负的贡献。 这类问题主要是和天平有关。给你若干砝码，问你能称量出多少的重量。由于砝码可以放左边也可以放右边，所以每个对答案有正负两种贡献（不放就是没贡献）
+比如这道<a href="https://111qqz.com/wordpress/2016/02/hdu1709/">hdu1709解题报告</a>和这道<a href="https://111qqz.com/wordpress/2016/02/hdu5616/">hdu5616解题报告</a></p>
+<p>最后就是稍微难一点的一类问题：对单个元素的个数没有限制，但是对所有元素的总个数有限制。这类题我们需要增加一维。现在用a[i][j]表示由j个元素组成价值为i的方案数。具体见这里：<a href="https://111qqz.com/wordpress/2016/02/hdu2069/">hdu2069解题报告</a></p>
+<p>20160303 update: 还有一种当个数特别多。。以至于不可能通过循环来实现的情况。需要通过泰勒展开来化简。比较经常用的一个式子是 <strong>1+x+x^2+..+x^n=(1-x^(n+1))(1-x)</strong></p>
+<p>比如这道题：
+<a href="https://111qqz.com/wordpress/2016/03/cf451e/">codeforces451EDevu and Flowers解题报告</a></p>
 
 
                 
@@ -284,13 +320,13 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2016/02/nbut1457/" data-toggle="tooltip" data-placement="top" title="nbut 1457 Sona">&larr;
+                        <a href="/2016/02/hdu1284/" data-toggle="tooltip" data-placement="top" title="hdu 1284 铅笔兑换问题（母函数）">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/2016/02/cf614c/" data-toggle="tooltip" data-placement="top" title="codeforces #339 div 2 C. Peter and Snow Blower">Next
+                        <a href="/2016/02/hdu1521/" data-toggle="tooltip" data-placement="top" title="hdu 1521 排列组合 （指数型母函数模板题）">Next
                             Post &rarr;</a>
                     </li>
                     
@@ -394,6 +430,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/caffe" title="caffe">
+                            caffe
+                        </a>
                         
                         
                         
@@ -539,6 +579,10 @@
                         
                         
                         
+                        
+                        
+                        
+                        
                         <a href="/tags/km" title="km">
                             km
                         </a>
@@ -638,6 +682,8 @@
                         <a href="/tags/number-theory" title="number-theory">
                             number-theory
                         </a>
+                        
+                        
                         
                         
                         
@@ -1087,6 +1133,8 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E6%A8%A1%E6%8B%9F" title="模拟">
                             模拟
                         </a>
@@ -1299,7 +1347,7 @@
 		    
                     
                     <li>
-                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                        <a target="_blank" href="/img/wechat.jpg">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
@@ -1318,19 +1366,10 @@
                     </li>
 		    
                     
-                    <li>
-                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
-                            <span class="fa-stack fa-lg">
-                                <i class="fa fa-circle fa-stack-2x"></i>
-                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
-                            </span>
-                        </a>
-                    </li>
-		    
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy; 111qqz的小窝 2020
+                    Copyright &copy; 111qqz的小窝 2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

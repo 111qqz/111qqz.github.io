@@ -97,36 +97,17 @@
                         <a href="/">Home</a>
                     </li>
                     
-                    <li>
-                        <a href="/categories/acm">acm</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/c&#43;&#43;">c&#43;&#43;</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/deep-learning">deep-learning</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E4%BC%98%E5%8C%96">优化</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E5%85%B6%E4%BB%96">其他</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E9%9A%8F%E7%AC%94%E6%9D%82%E8%B0%88">随笔杂谈</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E9%9D%A2%E8%AF%95">面试</a>
-                    </li>
                     
                     
 		    
+                        <li><a href="/categories/acm/">ACM-ICPC</a></li>
+                    
+                        <li><a href="/categories/deep-learning/">深度学习</a></li>
+                    
+                        <li><a href="/categories/mooc/">公开课</a></li>
+                    
+                        <li><a href="/categories/%e5%85%b6%e4%bb%96/">其他</a></li>
+                    
                         <li><a href="/top/about/">ABOUT</a></li>
                     
 
@@ -245,153 +226,155 @@
 <p>然后找到操作数最小的一组.</p>
 <p>字典序的话,只要是枚举的时候按照数的大小顺序就可以保证.</p>
 <p>学会了用memcpy函数.</p>
-<pre><code>#include&lt;iostream&gt;
-#include&lt;iomanip&gt;
-#include&lt;cstdio&gt;
-#include&lt;algorithm&gt;
-#include&lt;cmath&gt;
-#include&lt;cstring&gt;
-#include&lt;string&gt;
-#include&lt;map&gt;
-#include&lt;set&gt;
-#include&lt;queue&gt;
-#include&lt;vector&gt;
-#include&lt;stack&gt;
-#define y0 abc111qqz
-#define y1 hust111qqz
-#define yn hez111qqz
-#define j1 cute111qqz
-#define tm crazy111qqz
-#define lr dying111qqz
-using namespace std;
-#define REP(i, n) for (int i=0;i&lt;int(n);++i)  
-typedef long long LL;
-typedef unsigned long long ULL;
-const int N=20;
-int a[N][N],ans[N][N],op[N][N];
-int m,n;
-int dirx[10]={0,0,0,-1,1};
-int diry[10]={0,1,-1,0,0};
-int rec[N][N];
-void solve(int x,int y)
-{
-    for ( int i = 0 ; i &lt; 5 ; i++ )
+<pre><code class="language-c++">    
+    #include&lt;iostream&gt;
+    #include&lt;iomanip&gt;
+    #include&lt;cstdio&gt;
+    #include&lt;algorithm&gt;
+    #include&lt;cmath&gt;
+    #include&lt;cstring&gt;
+    #include&lt;string&gt;
+    #include&lt;map&gt;
+    #include&lt;set&gt;
+    #include&lt;queue&gt;
+    #include&lt;vector&gt;
+    #include&lt;stack&gt;
+    #define y0 abc111qqz
+    #define y1 hust111qqz
+    #define yn hez111qqz
+    #define j1 cute111qqz
+    #define tm crazy111qqz
+    #define lr dying111qqz
+    using namespace std;
+    #define REP(i, n) for (int i=0;i&lt;int(n);++i)  
+    typedef long long LL;
+    typedef unsigned long long ULL;
+    const int N=20;
+    int a[N][N],ans[N][N],op[N][N];
+    int m,n;
+    int dirx[10]={0,0,0,-1,1};
+    int diry[10]={0,1,-1,0,0};
+    int rec[N][N];
+    void solve(int x,int y)
     {
-      int newx = x + dirx[i];
-      int newy = y + diry[i];
-      if (newx&gt;=1&amp;&amp;newx&lt;=m&amp;&amp;newy&gt;=1&amp;&amp;newy&lt;=n)
-      {
-        a[newx][newy]=a[newx][newy]^1;
-      }
-    }
-}
-bool on (int x,int y)
-{
-    int res = a[x][y];
-    for ( int i = 0 ; i &lt; 5 ; i++ )
-    {
-      int newx = x + dirx[i];
-      int newy = y + diry[i];
-      if (newx&gt;=1&amp;&amp;newx&lt;=m&amp;&amp;newy&gt;=1&amp;&amp;newy&lt;=n)
-      {
-        res = res+op[newx][newy];
-      }
-
-    }
-    return res&amp;1;
-}
-int main()
-{
-    cin&gt;&gt;m&gt;&gt;n;
-    int mi = 9999999;
-    memset(rec,0,sizeof(rec));
-    for ( int i = 1 ; i &lt;= m ; i++ )
-    {
-      for (int j = 1 ; j &lt;= n ; j++)
-      {
-        cin&gt;&gt;a[i][j];
-      }
-    }
-    bool flag = false;
-    for ( int i = 0  ; i &lt; (1&lt;&lt;n); i++ )   //枚举第一行的好改变情况
-    {
-        int tmp=i;
-      int num=0;
-      memset(op,0,sizeof(op));
-        memset(ans,0,sizeof(ans));
-      int k = n;
-      while (tmp)
-      {
-        op[1][k]=tmp%2;
-        if (op[1][k]==1) num++;
-        tmp = tmp / 2;
-        k--;
-      }
-//	  cout&lt;&lt;&quot;********************&quot;&lt;&lt;endl;
-//	  for ( int i = 1 ; i &lt;= n ; i++)
-//	  {
-//		cout&lt;&lt;op[1][i]&lt;&lt;&quot; &quot;;
-//	  }
-//	  cout&lt;&lt;endl;
-//	  cout&lt;&lt;&quot;*************************&quot;&lt;&lt;endl;
-
-
-      for ( int j = 2 ; j &lt;= m ; j++ )
-      {
-        for ( int k = 1 ; k &lt;= n ; k++ )
+        for ( int i = 0 ; i &lt; 5 ; i++ )
         {
-            if (on(j-1,k))
-            {
-              op[j][k]=1;
-              num++;
-            }
+    	  int newx = x + dirx[i];
+    	  int newy = y + diry[i];
+    	  if (newx&gt;=1&amp;&amp;newx&lt;=m&amp;&amp;newy&gt;=1&amp;&amp;newy&lt;=n)
+    	  {
+    		a[newx][newy]=a[newx][newy]^1;
+    	  }
         }
-      }
-      bool ok = true;
-      for ( int j = 1 ; j &lt;= n ; j++ )
-      {
-        if (on(m,j))
-        {
-            ok=false;
-            break;
-        }
-      }
-      if (ok)
-      {
-        flag = true;
-        if (num&lt;mi)
-        {
-            mi = num;
-            memcpy(rec,op,sizeof(op));
-         //   for ( int j = 1 ; j &lt;= m ; j ++ )
-        //    {
-        //	  for ( int k = 1 ;  k &lt;= n ; k++ )
-        //	  {
-    //			rec[j][k]=ans[j][k];
-    //		  }
-//		    }
-        }
-      }
     }
-    if (flag)
+    bool on (int x,int y)
     {
-      for ( int i = 1 ; i &lt;= m ; i++ )
-      {
-        cout&lt;&lt;rec[i][1];
-        for ( int j = 2 ; j &lt;= n ; j++ )
+        int res = a[x][y];
+        for ( int i = 0 ; i &lt; 5 ; i++ )
         {
-            cout&lt;&lt;&quot; &quot;&lt;&lt;rec[i][j];
+    	  int newx = x + dirx[i];
+    	  int newy = y + diry[i];
+    	  if (newx&gt;=1&amp;&amp;newx&lt;=m&amp;&amp;newy&gt;=1&amp;&amp;newy&lt;=n)
+    	  {
+    		res = res+op[newx][newy];
+    	  }
+    
         }
-        cout&lt;&lt;endl;
-      }
+        return res&amp;1;
     }
-    else
+    int main()
     {
-      printf(&quot;IMPOSSIBLE\n&quot;);
+        cin&gt;&gt;m&gt;&gt;n;
+        int mi = 9999999;
+        memset(rec,0,sizeof(rec));
+        for ( int i = 1 ; i &lt;= m ; i++ )
+        {
+    	  for (int j = 1 ; j &lt;= n ; j++)
+    	  {
+    		cin&gt;&gt;a[i][j];
+    	  }
+        }
+        bool flag = false;
+        for ( int i = 0  ; i &lt; (1&lt;&lt;n); i++ )   //枚举第一行的好改变情况
+        {
+            int tmp=i;
+    	  int num=0;
+    	  memset(op,0,sizeof(op));
+            memset(ans,0,sizeof(ans));
+    	  int k = n;
+    	  while (tmp)
+    	  {
+    		op[1][k]=tmp%2;
+    		if (op[1][k]==1) num++;
+    		tmp = tmp / 2;
+    		k--;
+    	  }
+    //	  cout&lt;&lt;&quot;********************&quot;&lt;&lt;endl;
+    //	  for ( int i = 1 ; i &lt;= n ; i++)
+    //	  {
+    //		cout&lt;&lt;op[1][i]&lt;&lt;&quot; &quot;;
+    //	  }
+    //	  cout&lt;&lt;endl;
+    //	  cout&lt;&lt;&quot;*************************&quot;&lt;&lt;endl;
+    
+    
+    	  for ( int j = 2 ; j &lt;= m ; j++ )
+    	  {
+    		for ( int k = 1 ; k &lt;= n ; k++ )
+    		{
+    		    if (on(j-1,k))
+    		    {
+    			  op[j][k]=1;
+    			  num++;
+    		    }
+    		}
+    	  }
+    	  bool ok = true;
+    	  for ( int j = 1 ; j &lt;= n ; j++ )
+    	  {
+    		if (on(m,j))
+    		{
+    		    ok=false;
+    		    break;
+    		}
+    	  }
+    	  if (ok)
+    	  {
+    		flag = true;
+    		if (num&lt;mi)
+    		{
+    		    mi = num;
+    		    memcpy(rec,op,sizeof(op));
+    		 //   for ( int j = 1 ; j &lt;= m ; j ++ )
+    		//    {
+    		//	  for ( int k = 1 ;  k &lt;= n ; k++ )
+    		//	  {
+    	//			rec[j][k]=ans[j][k];
+    	//		  }
+    //		    }
+    		}
+    	  }
+        }
+        if (flag)
+        {
+    	  for ( int i = 1 ; i &lt;= m ; i++ )
+    	  {
+    		cout&lt;&lt;rec[i][1];
+    		for ( int j = 2 ; j &lt;= n ; j++ )
+    		{
+    		    cout&lt;&lt;&quot; &quot;&lt;&lt;rec[i][j];
+    		}
+    		cout&lt;&lt;endl;
+    	  }
+        }
+        else
+        {
+    	  printf(&quot;IMPOSSIBLE\n&quot;);
+        }
+    
+    	return 0;
     }
 
-    return 0;
-}
 </code></pre>
 
 
@@ -552,6 +535,10 @@ int main()
                         
                         
                         
+                        <a href="/tags/caffe" title="caffe">
+                            caffe
+                        </a>
+                        
                         
                         
                         
@@ -696,6 +683,10 @@ int main()
                         
                         
                         
+                        
+                        
+                        
+                        
                         <a href="/tags/km" title="km">
                             km
                         </a>
@@ -795,6 +786,8 @@ int main()
                         <a href="/tags/number-theory" title="number-theory">
                             number-theory
                         </a>
+                        
+                        
                         
                         
                         
@@ -1244,6 +1237,8 @@ int main()
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E6%A8%A1%E6%8B%9F" title="模拟">
                             模拟
                         </a>
@@ -1456,7 +1451,7 @@ int main()
 		    
                     
                     <li>
-                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                        <a target="_blank" href="/img/wechat.jpg">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
@@ -1475,19 +1470,10 @@ int main()
                     </li>
 		    
                     
-                    <li>
-                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
-                            <span class="fa-stack fa-lg">
-                                <i class="fa fa-circle fa-stack-2x"></i>
-                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
-                            </span>
-                        </a>
-                    </li>
-		    
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy; 111qqz的小窝 2020
+                    Copyright &copy; 111qqz的小窝 2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

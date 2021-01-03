@@ -97,36 +97,17 @@
                         <a href="/">Home</a>
                     </li>
                     
-                    <li>
-                        <a href="/categories/acm">acm</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/c&#43;&#43;">c&#43;&#43;</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/deep-learning">deep-learning</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E4%BC%98%E5%8C%96">优化</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E5%85%B6%E4%BB%96">其他</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E9%9A%8F%E7%AC%94%E6%9D%82%E8%B0%88">随笔杂谈</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E9%9D%A2%E8%AF%95">面试</a>
-                    </li>
                     
                     
 		    
+                        <li><a href="/categories/acm/">ACM-ICPC</a></li>
+                    
+                        <li><a href="/categories/deep-learning/">深度学习</a></li>
+                    
+                        <li><a href="/categories/mooc/">公开课</a></li>
+                    
+                        <li><a href="/categories/%e5%85%b6%e4%bb%96/">其他</a></li>
+                    
                         <li><a href="/top/about/">ABOUT</a></li>
                     
 
@@ -270,7 +251,7 @@
 |                  |
 +------------------+  &lt;- 0x00000000
 </code></pre>
-<p>由于8086/8088只有20跟地址线，因此物理内存空间就是2^20=1MB.地址空间从0x00000到0xFFFFF.其中从0x00000开始的640k空间被称为&quot;low memory&rdquo;，是PC真正能使用的RAM。从 0xA0000 到 0xFFFFF　的384k的non-volatile memory被硬件保留，用作video display buffers和BIOS等。</p>
+<p>由于8086/8088只有20跟地址线，因此物理内存空间就是2^20=1MB.地址空间从0x00000到0xFFFFF.其中从0x00000开始的640k空间被称为&quot;low memory&quot;，是PC真正能使用的RAM。从 0xA0000 到 0xFFFFF　的384k的non-volatile memory被硬件保留，用作video display buffers和BIOS等。</p>
 <!-- more -->
 <h4 id="8028680386时代及以后">80286/80386时代及以后</h4>
 <p>为了保持向后兼容，因此0-1MB的空间还是和原来保持一致。因此地址空间似乎存在一个“洞”（为什么我觉得其实是两个“洞”。。。不是空着的才叫“洞”吗），PC能使用的RAM被这个“洞”（也就是0xA0000 到 0xFFFFF)分成了0x00000000到0x000BFFFF的640k和 0x00100000到0xFFFFFFFF两部分。</p>
@@ -313,7 +294,7 @@
 </tbody>
 </table>
 此外，在地址空间的最上面一部分，通常被BIOS保留用于 32-bit PCI devices的memory mapped. memory mapped是对于memory和I/O设备使用相同的地址空间的一种I/O寻址方式。具体可以参考[Memory-mapped I/O](https://en.wikipedia.org/wiki/Memory-mapped_I/O)。PCI设备具体可以参考[PCI_Express](https://en.wikipedia.org/wiki/PCI_Express)和[深入PCI与PCIe之一：硬件篇](https://zhuanlan.zhihu.com/p/26172972)
-<p>目前处理器已经可以支持超过4GB大小的内存空间。因此为了保持后向兼容性，地址空间又会多一个&quot;洞&rdquo;。</p>
+<p>目前处理器已经可以支持超过4GB大小的内存空间。因此为了保持后向兼容性，地址空间又会多一个&quot;洞&quot;。</p>
 <h3 id="the-rom-bios">The ROM BIOS</h3>
 <p>用qemu模拟启动，观察到进入BIOS执行的第一条命令为</p>
 <pre><code>[f000:fff0]    0xffff0: ljmp   $0xf000,$0xe05b
@@ -457,7 +438,7 @@ str:
 the ASCII character values for hello followed by a nul (0) byte. */
 </code></pre>
 <p>知道gdtdesc部分做的事情是，在gdtdesc这个位置定义了一个word类型（２字节）的变量，值为0x17,参考注释也就是gdt定义的那一段的size大小。然后在gdtdsec+2这个位置定义了long类型(4字节)的gdt地址.</p>
-<p>这里gdt和gdtdesc都是&quot;label&rdquo;，label其实就是标记了一个内存地址，方便使用。</p>
+<p>这里gdt和gdtdesc都是&quot;label&quot;，label其实就是标记了一个内存地址，方便使用。</p>
 <p>具体来说，一个“label”的值，是其之后的第一条instruction的内存地址。</p>
 <blockquote>We use the notation <label> to refer to labeled locations in the program text. Labels can be inserted anywhere in x86 assembly code text by entering a label name followed by a colon. For example,
 <blockquote>
@@ -493,8 +474,8 @@ The second instruction in this code fragment is labeled begin. Elsewhere in the
 #else   // not __ASSEMBLER__
 </code></pre>
 <p>接下来不太明确的地方可能是cr0部分。</p>
-<p>我们看到代码最开始有一个CR0_PE_ON,值为0x1.之后就是在计算cr0 = cr0 | 0x1，按照注释说这样就可以把保护模式打开了。理解到这里其实就ok，不过我还是想多说两句。　Control register是用来控制cpu行为的寄存器。cr0是x86体系架构的<a href="https://en.wikipedia.org/wiki/Control_register">Control register</a>中的一个。cr0是32bit的寄存器，其中一些bit上有名称以及固定的作用。比如对于位置bit 0,该位置的名称是&quot;Protected Mode Enable&rdquo;，简称为PE,当该位置值为1,表示保护模式被打开。</p>
-<p>最后一个小细节是&rdquo;.globl start&rdquo;。&quot;.globl&quot;是什么含义？为什么要把start这个label定义成global的？可以参考<a href="https://stackoverflow.com/questions/17898989/what-is-global-start-in-assembly-language">What is global _start in assembly language?</a>　用人话说就是定义成.globl的lable会被导出到生成的.o文件中，不然linker找不到这个符号。由于start是这个boot.S文件的entry point，因此需要linker看到。</p>
+<p>我们看到代码最开始有一个CR0_PE_ON,值为0x1.之后就是在计算cr0 = cr0 | 0x1，按照注释说这样就可以把保护模式打开了。理解到这里其实就ok，不过我还是想多说两句。　Control register是用来控制cpu行为的寄存器。cr0是x86体系架构的<a href="https://en.wikipedia.org/wiki/Control_register">Control register</a>中的一个。cr0是32bit的寄存器，其中一些bit上有名称以及固定的作用。比如对于位置bit 0,该位置的名称是&quot;Protected Mode Enable&quot;，简称为PE,当该位置值为1,表示保护模式被打开。</p>
+<p>最后一个小细节是&quot;.globl start&quot;。&quot;.globl&quot;是什么含义？为什么要把start这个label定义成global的？可以参考<a href="https://stackoverflow.com/questions/17898989/what-is-global-start-in-assembly-language">What is global _start in assembly language?</a>　用人话说就是定义成.globl的lable会被导出到生成的.o文件中，不然linker找不到这个符号。由于start是这个boot.S文件的entry point，因此需要linker看到。</p>
 <p>最后，从全局来看，boot.S这个文件做了什么呢？　其实上面一个小节中已经提到了。</p>
 <blockquote>_When a processor that supports x86 protected mode is powered on, it begins executing instructions in [real mode](https://en.wikipedia.org/wiki/Real_mode), in order to maintain [backward compatibility](https://en.wikipedia.org/wiki/Backward_compatibility) with earlier x86 processors.[[4]](https://en.wikipedia.org/wiki/Protected_mode#cite_note-Real_mode_on_powered_on-4) Protected mode may only be entered after the system software sets up one descriptor table and enables the Protection Enable (PE) [bit](https://en.wikipedia.org/wiki/Bit) in the [control register](https://en.wikipedia.org/wiki/Control_register) 0 (CR0)_</blockquote>
 <h3 id="bootmainc这个文件在干什么">boot/main.c这个文件在干什么</h3>
@@ -651,7 +632,7 @@ inb(int port)
 <blockquote>If your assembly statement _must_ execute where you put it, (i.e. must not be moved out of a loop as an optimization), put the keyword **volatile** after **asm** and before the ()'s. To be ultra-careful, use
 <p><strong>asm</strong> <strong>volatile</strong> (&hellip;whatever&hellip;);</p>
 <p>However, I would like to point out that if your assembly&rsquo;s only purpose is to calculate the output registers, with no other side effects, you should leave off the <strong>volatile</strong> keyword so your statement will be processed into GCC&rsquo;s common subexpression elimination optimization.</blockquote></p>
-<p>注释上写的要&quot;boot  an ELF kernel image from the first IDE hard disk&rdquo;,那么，首先要知道什么是ELF.　ELF其实就是一种文件格式，全称为“Executable and Linkable Format”可以参考<a href="https://en.wikipedia.org/wiki/Executable_and_Linkable_Format#File_layout">Executable_and_Linkable_Format#File_layout</a>，建议通读这一部分，内容不多，不过对之后很有用。</p>
+<p>注释上写的要&quot;boot  an ELF kernel image from the first IDE hard disk&quot;,那么，首先要知道什么是ELF.　ELF其实就是一种文件格式，全称为“Executable and Linkable Format”可以参考<a href="https://en.wikipedia.org/wiki/Executable_and_Linkable_Format#File_layout">Executable_and_Linkable_Format#File_layout</a>，建议通读这一部分，内容不多，不过对之后很有用。</p>
 <p>参考一下inc/elf.h文件,以及main.c中的注释，就可以整体上知道这段代码是在干什么了：将ELF格式的kernel image从硬盘读到内存中，并将控制权交给kernel image.</p>
 <pre><code>#ifndef JOS_INC_ELF_H
 #define JOS_INC_ELF_H
@@ -1237,7 +1218,7 @@ The target architecture is assumed to be i386
 </blockquote>
 <p>boot loader先读一小部分kernel，具体来说是8个sector，也就是1 page,对应的代码为 readseg((uint32_t) ELFHDR, SECTSIZE*8, 0); 然后读进来的这部分里面包含了整个kernel有多大的信息，这些信息存储在inc/elf.h文件中。</p>
 <h3 id="loading-the-kernel">Loading the Kernel</h3>
-<p>练习4提到了要熟悉c语言的指针..去看了下推荐的&rdquo;<em>The C Programming Language</em> &ldquo;..发现真是一本非常棒的入门书&hellip;之前还以为是像《算法导论》一样只可远观的大部头&hellip;可惜已经不适初学者了&hellip; 练习4中给出了一段使用c语言指针的代码，第5个输出要注意一下大小端&hellip;</p>
+<p>练习4提到了要熟悉c语言的指针..去看了下推荐的&quot;<em>The C Programming Language</em> &ldquo;..发现真是一本非常棒的入门书&hellip;之前还以为是像《算法导论》一样只可远观的大部头&hellip;可惜已经不适初学者了&hellip; 练习4中给出了一段使用c语言指针的代码，第5个输出要注意一下大小端&hellip;</p>
 <pre><code>#include &lt;stdio.h&gt;
 #include &lt;stdlib.h&gt;
 
@@ -1701,7 +1682,7 @@ printf(&quot;%x %x %x %x\n&quot;,c[0],c[1],c[2],c[3]);
 //小端输出:78 56 34 12
 //大端输出:12 34 56 78
 </code></pre>
-<p>由于x86体系架构字节序为little-endian,因此实际输出为&rsquo;r&rsquo;,&lsquo;l&rsquo;,&lsquo;d&rsquo;.</p>
+<p>由于x86体系架构字节序为little-endian,因此实际输出为&rsquo;r',&lsquo;l&rsquo;,&rsquo;d'.</p>
 <p>如果x86体系架构为large-endian,那么i的值应该改为0x00726c64，以实现相同的输出结果。</p>
 <p>57616不需要做修改，因为整数类型staic_cast不存在字节序问题。</p>
 <blockquote>5.In the following code, what is going to be printed after `'y='`? (note: the answer is not a specific value.) Why does this happen?
@@ -1809,7 +1790,7 @@ f010009c:       c3                      ret
 <p>分别是参数x,ebp和ebx. 参数x和ebp的压栈是常规操作，就不解释了。ebx的压栈可能有些疑问，可以参考<a href="https://stackoverflow.com/questions/9797335/why-are-these-registers-pushed-to-stack">Why are these registers pushed to stack?</a></p>
 <p>下一个练习:</p>
 <blockquote>Exercise 11. Implement the backtrace function as specified above. Use the same format as in the example, since otherwise the grading script will be confused. When you think you have it working right, run make grade to see if its output conforms to what our grading script expects, and fix it if it doesn't. _After_ you have handed in your Lab 1 code, you are welcome to change the output format of the backtrace function any way you like.
-<p>If you use <code>read_ebp()</code>, note that GCC may generate &ldquo;optimized&rdquo; code that calls <code>read_ebp()</code> _before_<code>mon_backtrace()</code>'s function prologue, which results in an incomplete stack trace (the stack frame of the most recent function call is missing). While we have tried to disable optimizations that cause this reordering, you may want to examine the assembly of <code>mon_backtrace()</code> and make sure the call to<code>read_ebp()</code> is happening after the function prologue.</blockquote></p>
+<p>If you use <code>read_ebp()</code>, note that GCC may generate &ldquo;optimized&rdquo; code that calls <code>read_ebp()</code> <em>before</em><code>mon_backtrace()</code>&rsquo;s function prologue, which results in an incomplete stack trace (the stack frame of the most recent function call is missing). While we have tried to disable optimizations that cause this reordering, you may want to examine the assembly of <code>mon_backtrace()</code> and make sure the call to<code>read_ebp()</code> is happening after the function prologue.</blockquote></p>
 <p>这个练习主要参考<a href="https://111qqz.com/2019/01/x86-calling-conventions/">x86-calling-conventions</a>, 主要是需要知道ebp的内容是上一个stack frame中的ebp,以及ebp+4是返回地址,ebp+8是第一个参数，还有ebp的初始值是0.</p>
 <p>最后的实现为:</p>
 <pre><code>int
@@ -2241,6 +2222,10 @@ Welcome to the JOS kernel monitor!
                         
                         
                         
+                        <a href="/tags/caffe" title="caffe">
+                            caffe
+                        </a>
+                        
                         
                         
                         
@@ -2385,6 +2370,10 @@ Welcome to the JOS kernel monitor!
                         
                         
                         
+                        
+                        
+                        
+                        
                         <a href="/tags/km" title="km">
                             km
                         </a>
@@ -2484,6 +2473,8 @@ Welcome to the JOS kernel monitor!
                         <a href="/tags/number-theory" title="number-theory">
                             number-theory
                         </a>
+                        
+                        
                         
                         
                         
@@ -2933,6 +2924,8 @@ Welcome to the JOS kernel monitor!
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E6%A8%A1%E6%8B%9F" title="模拟">
                             模拟
                         </a>
@@ -3145,7 +3138,7 @@ Welcome to the JOS kernel monitor!
 		    
                     
                     <li>
-                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                        <a target="_blank" href="/img/wechat.jpg">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
@@ -3164,19 +3157,10 @@ Welcome to the JOS kernel monitor!
                     </li>
 		    
                     
-                    <li>
-                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
-                            <span class="fa-stack fa-lg">
-                                <i class="fa fa-circle fa-stack-2x"></i>
-                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
-                            </span>
-                        </a>
-                    </li>
-		    
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy; 111qqz的小窝 2020
+                    Copyright &copy; 111qqz的小窝 2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

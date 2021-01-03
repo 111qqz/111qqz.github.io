@@ -15,9 +15,9 @@
     
 
     
-    <meta name="title" content="【施工中】CSAPP archlab" />
-    <meta property="og:title" content="【施工中】CSAPP archlab" />
-    <meta property="twitter:title" content="【施工中】CSAPP archlab" />
+    <meta name="title" content="【施工完成】CSAPP archlab" />
+    <meta property="og:title" content="【施工完成】CSAPP archlab" />
+    <meta property="twitter:title" content="【施工完成】CSAPP archlab" />
     
 
     
@@ -34,7 +34,7 @@
     <meta name="keyword"  content="ACM,111qqz,商汤科技,hust,华中科技大学">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>【施工中】CSAPP archlab-111qqz的小窝</title>
+    <title>【施工完成】CSAPP archlab-111qqz的小窝</title>
 
     <link rel="canonical" href="/2020/02/csapp-archlab/">
 
@@ -97,36 +97,17 @@
                         <a href="/">Home</a>
                     </li>
                     
-                    <li>
-                        <a href="/categories/acm">acm</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/c&#43;&#43;">c&#43;&#43;</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/deep-learning">deep-learning</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E4%BC%98%E5%8C%96">优化</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E5%85%B6%E4%BB%96">其他</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E9%9A%8F%E7%AC%94%E6%9D%82%E8%B0%88">随笔杂谈</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E9%9D%A2%E8%AF%95">面试</a>
-                    </li>
                     
                     
 		    
+                        <li><a href="/categories/acm/">ACM-ICPC</a></li>
+                    
+                        <li><a href="/categories/deep-learning/">深度学习</a></li>
+                    
+                        <li><a href="/categories/mooc/">公开课</a></li>
+                    
+                        <li><a href="/categories/%e5%85%b6%e4%bb%96/">其他</a></li>
+                    
                         <li><a href="/top/about/">ABOUT</a></li>
                     
 
@@ -191,7 +172,7 @@
                         </a>
                         
                     </div>
-                    <h1>【施工中】CSAPP archlab</h1>
+                    <h1>【施工完成】CSAPP archlab</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
 			Posted by 
@@ -230,7 +211,7 @@
     <li><a href="#背景">背景</a></li>
     <li><a href="#准备工作">准备工作</a>
       <ol>
-        <li><a href="#use-tk8586-or-above-will-not-compile">use tk<=8.5,8.6 or above will not compile</a></li>
+        <li><a href="#use-tk8586-or-above-will-not-compile">use tk&lt;=8.5,8.6 or above will not compile</a></li>
         <li><a href="#modify-the-corresponding-header-file-in-seqssimc-and-pipepsimc-assmue-tk85-header-file-is-located-in-usrlocaltk85">Modify the corresponding header file in seq/ssim.c and pipe/psim.c (assmue tk8.5 header file is located in /usr/local/tk8.5)</a></li>
         <li><a href="#modify-makefile-in-sim">modify Makefile in sim</a></li>
         <li><a href="#comment-matherr-in-seqssimc-and-pipepsimc">comment matherr in seq/ssim.c and pipe/psim.c</a></li>
@@ -774,7 +755,7 @@ Simulating with ../seq/ssim
 
 
 </code></pre>
-<p>全部都是&rdquo; ISA Checks Succeed&rdquo;，说明结果应该OK</p>
+<p>全部都是&quot; ISA Checks Succeed&quot;，说明结果应该OK</p>
 <h2 id="part-c">PART C</h2>
 <p>这个lab的前两部分给人一种很简单的错觉。。。。让人觉得，不过如此嘛</p>
 <p>然后就死了。。。也可能是我的思路不对。。。</p>
@@ -782,6 +763,178 @@ Simulating with ../seq/ssim
 <p>又去做了pipe-nobypass,改成没有forwarding机制。。 发现要考虑的case多到爆炸。。调到怀疑人生，怀疑我是不是不适合CS.</p>
 <p>大概卡了一周。。不得已去搜答案。。发现做课后几个pipeline相关题目的人并不多。。而且似乎比lab本身要难很多。。。</p>
 <p>然后循环展开的优化打算读完第五章再说。。</p>
+<p>20200425更新:</p>
+<p>转眼都快五月了,终于把这个坑填了.</p>
+<p>说一下我优化的思路吧.
+根据提示,循环展开肯定是一个非常重要的优化. 于是先尝试实现一个2x1的循环展开看下效果.</p>
+<p>先把对应的c的代码写了出来:</p>
+<pre><code class="language-c">
+typedef int word_t;
+word_t ncopy2(word_t *src, word_t *dst, word_t len)
+{
+    word_t count = 0;
+    word_t val;
+    word_t val2;
+
+    while (len &gt; 1) {
+        val = *src++;
+        val2 = *src++;
+        *dst++ = val;
+        *dst++ = val2;
+        if (val &gt; 0)
+            count++;
+        if (val2 &gt; 0)
+            count++;
+        len-=2;
+    }
+    while (len&gt;0){
+        val = *src;
+        *dst = val;
+        if (val&gt;0)
+        count++;
+        len--;
+    }
+    return count;
+}
+
+</code></pre>
+<p>遇到的第一个问题是如何判断len&gt;1..
+如果是x86汇编可以使用cmp指令,但是Y86并没有这个指令.</p>
+<p>考虑到cmp是不影响寄存器值的sub,参考<a href="https://stackoverflow.com/questions/15098073/how-to-convert-ia32-cmp-instruction-to-y86">How to convert IA32 &lsquo;cmp&rsquo; instruction to Y86?</a></p>
+<p>我们可以用栈来保护被sub影响的值</p>
+<pre><code class="language-GAS">
+pushl %ecx
+subl  %ebx, %ecx
+popl  %ecx
+
+</code></pre>
+<p>于是得到2x1循环展开的初始版本,CPE是11.6,分数是0</p>
+<pre><code class="language-GAS">
+# You can modify this portion
+	# Loop header
+	xorq %rax,%rax		# count = 0;
+	irmovq $1, %r10
+	pushq %rdx
+	subq  %r10, %rdx
+	popq  %rdx		# len &lt;= 1?
+	jle Single		# if so, goto Done:
+
+Loop:	
+	mrmovq (%rdi), %r10	# read val from src...
+	mrmovq 8(%rdi), %r11 # read val2 from src++
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	rmmovq %r11, 8(%rsi) # .. store val2 to dst++
+	andq %r10, %r10		# val &lt;= 0?
+	jle Npos		# if so, goto Npos:
+	iaddq $1, %rax
+	# irmovq $1, %r10
+	# addq %r10, %rax		# count++
+
+Npos:
+	andq %r11, %r11
+	jle	Npos2
+	# irmovq $1, %r10
+	# addq %r10, %rax
+	iaddq $1, %rax
+
+Npos2:	
+    irmovq $2, %r10
+	subq %r10, %rdx		# len-=2
+	irmovq $16, %r10
+	addq %r10, %rdi		# src++
+	addq %r10, %rsi		# dst++
+	irmovq $1, %r10
+	pushq %rdx
+	subq  %r10, %rdx
+	popq  %rdx		# len &gt; 1?
+
+	jg Loop			# if so, goto Loop:
+
+Single:
+	andq %rdx, %rdx
+	jle Done
+	mrmovq (%rdi),%r10
+	rmmovq %r10, (%rsi)
+	andq %r10, %r10
+	jle Done 
+	# irmovq $1, %r10
+	# addq %r10, %rax		# count++
+	iaddq $1, %rax
+##################################################################
+# Do not modify the following section of code
+# Function epilogue.
+Done:
+	ret
+
+</code></pre>
+<p>接下来,我们发现由于一些指令无法使用立即数作为参数,%r10这个寄存器在频繁地作为临时变量存储一些常数. 我们考虑使用更多的寄存器,来存储这几个常数. CPE可以从11.6提高到10.6.  这个时候,仍然是0分.</p>
+<p>想起我们之前实现了的iaddq指令. 不妨把所有的加法和减法运算都用iaddq来替代..CPE课可以从10.6到10.41. 终于有分了.</p>
+<p>然后观察代码..发现瓶颈可能在push和pop&hellip; 因为压栈和出栈都要访问内存.仔细思考一下,其实不是一定要和x86的cmp指令等价. 因此其实是没必要来保护对应寄存器的值的.</p>
+<p>于是得到如下CPE可以到9.48的版本:</p>
+<pre><code class="language-GAS">
+# You can modify this portion
+	# Loop header
+	xorq %rax,%rax		# count = 0;
+	irmovq $1, %r10
+	pushq %rdx
+	subq  %r10, %rdx
+	popq  %rdx		# len &lt;= 1?
+	jle Single		# if so, goto Done:
+
+Loop:	
+	mrmovq (%rdi), %r10	# read val from src...
+	mrmovq 8(%rdi), %r11 # read val2 from src++
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	rmmovq %r11, 8(%rsi) # .. store val2 to dst++
+	andq %r10, %r10		# val &lt;= 0?
+	jle Npos		# if so, goto Npos:
+	iaddq $1, %rax
+	# irmovq $1, %r10
+	# addq %r10, %rax		# count++
+
+Npos:
+	andq %r11, %r11
+	jle	Npos2
+	# irmovq $1, %r10
+	# addq %r10, %rax
+	iaddq $1, %rax
+
+Npos2:	
+    irmovq $2, %r10
+	subq %r10, %rdx		# len-=2
+	irmovq $16, %r10
+	addq %r10, %rdi		# src++
+	addq %r10, %rsi		# dst++
+	irmovq $1, %r10
+	pushq %rdx
+	subq  %r10, %rdx
+	popq  %rdx		# len &gt; 1?
+
+	jg Loop			# if so, goto Loop:
+
+Single:
+	andq %rdx, %rdx
+	jle Done
+	mrmovq (%rdi),%r10
+	rmmovq %r10, (%rsi)
+	andq %r10, %r10
+	jle Done 
+	# irmovq $1, %r10
+	# addq %r10, %rax		# count++
+	iaddq $1, %rax
+##################################################################
+# Do not modify the following section of code
+# Function epilogue.
+Done:
+	ret
+
+</code></pre>
+<p>至此,我们已经确认循环展开是有效的. 因此不妨使用4x1的循环展开. 同时我们删除了一些冗余的代码,最终达到了8.68的CPE.</p>
+<p>分数为36.4/60.. 及格了&hellip;orz</p>
+<p>完整代码可以参考<a href="https://github.com/111qqz/csapp-lab/blob/master/archlab/sim/pipe/ncopy.ys">ncopy.ys</a></p>
+<p>然后接下来的优化方向.. 毕竟容易想到的是条件mov的指令..
+但是条件mov指令应该主要控制分支跳转的代价比较大时,才会比较有用.而我们的程序应该不存在比较大的开销.</p>
+<p>然后其他的就是.. pipe-full.hcl文件我们除了增加iaddq指令外还没修改过&hellip; 可能会有进一步的优化空间</p>
 
 
                 
@@ -941,6 +1094,10 @@ Simulating with ../seq/ssim
                         
                         
                         
+                        <a href="/tags/caffe" title="caffe">
+                            caffe
+                        </a>
+                        
                         
                         
                         
@@ -1085,6 +1242,10 @@ Simulating with ../seq/ssim
                         
                         
                         
+                        
+                        
+                        
+                        
                         <a href="/tags/km" title="km">
                             km
                         </a>
@@ -1184,6 +1345,8 @@ Simulating with ../seq/ssim
                         <a href="/tags/number-theory" title="number-theory">
                             number-theory
                         </a>
+                        
+                        
                         
                         
                         
@@ -1633,6 +1796,8 @@ Simulating with ../seq/ssim
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E6%A8%A1%E6%8B%9F" title="模拟">
                             模拟
                         </a>
@@ -1845,7 +2010,7 @@ Simulating with ../seq/ssim
 		    
                     
                     <li>
-                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                        <a target="_blank" href="/img/wechat.jpg">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
@@ -1864,19 +2029,10 @@ Simulating with ../seq/ssim
                     </li>
 		    
                     
-                    <li>
-                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
-                            <span class="fa-stack fa-lg">
-                                <i class="fa fa-circle fa-stack-2x"></i>
-                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
-                            </span>
-                        </a>
-                    </li>
-		    
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy; 111qqz的小窝 2020
+                    Copyright &copy; 111qqz的小窝 2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

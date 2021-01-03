@@ -97,36 +97,17 @@
                         <a href="/">Home</a>
                     </li>
                     
-                    <li>
-                        <a href="/categories/acm">acm</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/c&#43;&#43;">c&#43;&#43;</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/deep-learning">deep-learning</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E4%BC%98%E5%8C%96">优化</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E5%85%B6%E4%BB%96">其他</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E9%9A%8F%E7%AC%94%E6%9D%82%E8%B0%88">随笔杂谈</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/categories/%E9%9D%A2%E8%AF%95">面试</a>
-                    </li>
                     
                     
 		    
+                        <li><a href="/categories/acm/">ACM-ICPC</a></li>
+                    
+                        <li><a href="/categories/deep-learning/">深度学习</a></li>
+                    
+                        <li><a href="/categories/mooc/">公开课</a></li>
+                    
+                        <li><a href="/categories/%e5%85%b6%e4%bb%96/">其他</a></li>
+                    
                         <li><a href="/top/about/">ABOUT</a></li>
                     
 
@@ -279,70 +260,79 @@ Input is terminated by a value of zero (0) for n.</p>
 <p>正解应该是先排序再做一个最长下降子序列</p>
 <p>注意每个石块有6种不同的方法（有人说三种&hellip;不明白）在读入的时候处理一下即可。</p>
 <p>看到有人按面积排序也可以AC，感觉不对，每个边的限制，按面积排序显然是放宽条件了。。。难道是因为数据水？</p>
-<pre><code>#include &lt;iostream&gt;
-#include &lt;algorithm&gt;
-#include &lt;cstring&gt;
-#include &lt;cstdio&gt;
-#include &lt;cmath&gt;
+<pre><code class="language-c++">
 
-using namespace std;
-    int n,k,a,b,c,tmp;
-    const int N=1E4+5;
-    int dp[N];
-    long long ans;
-struct Q
-{
-    int x,y,z;
 
-}q[N];
 
-bool cmp(Q a,Q b)
-{
-    if (a.x&gt;b.x) return true;
-    if (a.x==b.x&amp;&amp;a.y&gt;b.y) return true;
-    return false;
-}
 
-int main()
-{
-    int cas=0;
-    while (scanf(&quot;%d&quot;,&amp;n)!=EOF&amp;&amp;n)
+    
+    #include &lt;iostream&gt;
+    #include &lt;algorithm&gt;
+    #include &lt;cstring&gt;
+    #include &lt;cstdio&gt;
+    #include &lt;cmath&gt;
+    
+    using namespace std;
+        int n,k,a,b,c,tmp;
+        const int N=1E4+5;
+        int dp[N];
+        long long ans;
+    struct Q
     {
-        cas++;
-        memset(dp,0,sizeof(dp));
-        k = 1;
-        ans = -1;
-        for ( int i = 1 ; i &lt;= n ; i++ )
-        {
-            scanf(&quot;%d%d%d&quot;,&amp;a,&amp;b,&amp;c);
-            q[k].x = a;q[k].y = b;q[k].z=c;k++;
-            q[k].x = a;q[k].y = c;q[k].z=b;k++;
-            q[k].x = b;q[k].y = a;q[k].z=c;k++;
-            q[k].x = b;q[k].y = c;q[k].z=a;k++;
-            q[k].x = c;q[k].y = a;q[k].z=b;k++;
-            q[k].x = c;q[k].y = b;q[k].z=a;k++;
-        }
-        k--;
-        sort(q+1,q+k+1,cmp);
-        dp[1]=q[1].z;
-
-        for ( int i = 2 ; i &lt;= k ; i++ )
-        {
-            tmp = 0;
-            for ( int j = 1 ; j &lt;= i-1 ; j++ )
-                if (q[j].x&gt;q[i].x&amp;&amp;q[j].y&gt;q[i].y&amp;&amp;dp[j]&gt;tmp)
-                {
-                    tmp=dp[j];
-                }
-            dp[i]=tmp+q[i].z;
-        }
-        for ( int i = 1 ; i &lt;= k ; i++)
-            if ( dp[i]&gt;ans )
-                ans = dp[i];
-        printf(&quot;Case %d: maximum height = %I64d\n&quot;,cas,ans);
+        int x,y,z;
+    
+    }q[N];
+    
+    bool cmp(Q a,Q b)
+    {
+        if (a.x&gt;b.x) return true;
+        if (a.x==b.x&amp;&amp;a.y&gt;b.y) return true;
+        return false;
     }
-    return 0;
-}
+    
+    int main()
+    {
+        int cas=0;
+        while (scanf(&quot;%d&quot;,&amp;n)!=EOF&amp;&amp;n)
+        {
+            cas++;
+            memset(dp,0,sizeof(dp));
+            k = 1;
+            ans = -1;
+            for ( int i = 1 ; i &lt;= n ; i++ )
+            {
+                scanf(&quot;%d%d%d&quot;,&amp;a,&amp;b,&amp;c);
+                q[k].x = a;q[k].y = b;q[k].z=c;k++;
+                q[k].x = a;q[k].y = c;q[k].z=b;k++;
+                q[k].x = b;q[k].y = a;q[k].z=c;k++;
+                q[k].x = b;q[k].y = c;q[k].z=a;k++;
+                q[k].x = c;q[k].y = a;q[k].z=b;k++;
+                q[k].x = c;q[k].y = b;q[k].z=a;k++;
+            }
+            k--;
+            sort(q+1,q+k+1,cmp);
+            dp[1]=q[1].z;
+    
+            for ( int i = 2 ; i &lt;= k ; i++ )
+            {
+                tmp = 0;
+                for ( int j = 1 ; j &lt;= i-1 ; j++ )
+                    if (q[j].x&gt;q[i].x&amp;&amp;q[j].y&gt;q[i].y&amp;&amp;dp[j]&gt;tmp)
+                    {
+                        tmp=dp[j];
+                    }
+                dp[i]=tmp+q[i].z;
+            }
+            for ( int i = 1 ; i &lt;= k ; i++)
+                if ( dp[i]&gt;ans )
+                    ans = dp[i];
+            printf(&quot;Case %d: maximum height = %I64d\n&quot;,cas,ans);
+        }
+        return 0;
+    }
+
+
+
 </code></pre>
 
 
@@ -503,6 +493,10 @@ int main()
                         
                         
                         
+                        <a href="/tags/caffe" title="caffe">
+                            caffe
+                        </a>
+                        
                         
                         
                         
@@ -647,6 +641,10 @@ int main()
                         
                         
                         
+                        
+                        
+                        
+                        
                         <a href="/tags/km" title="km">
                             km
                         </a>
@@ -746,6 +744,8 @@ int main()
                         <a href="/tags/number-theory" title="number-theory">
                             number-theory
                         </a>
+                        
+                        
                         
                         
                         
@@ -1195,6 +1195,8 @@ int main()
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E6%A8%A1%E6%8B%9F" title="模拟">
                             模拟
                         </a>
@@ -1407,7 +1409,7 @@ int main()
 		    
                     
                     <li>
-                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                        <a target="_blank" href="/img/wechat.jpg">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
@@ -1426,19 +1428,10 @@ int main()
                     </li>
 		    
                     
-                    <li>
-                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
-                            <span class="fa-stack fa-lg">
-                                <i class="fa fa-circle fa-stack-2x"></i>
-                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
-                            </span>
-                        </a>
-                    </li>
-		    
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy; 111qqz的小窝 2020
+                    Copyright &copy; 111qqz的小窝 2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe
