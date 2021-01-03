@@ -15,9 +15,9 @@
     
 
     
-    <meta name="title" content="高级搜索专题" />
-    <meta property="og:title" content="高级搜索专题" />
-    <meta property="twitter:title" content="高级搜索专题" />
+    <meta name="title" content="筛法求素数（转载）" />
+    <meta property="og:title" content="筛法求素数（转载）" />
+    <meta property="twitter:title" content="筛法求素数（转载）" />
     
 
     
@@ -34,7 +34,7 @@
     <meta name="keyword"  content="ACM,111qqz,商汤科技,hust,华中科技大学">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>高级搜索专题-111qqz的小窝</title>
+    <title>筛法求素数（转载）-111qqz的小窝</title>
 
     <link rel="canonical" href="/2015/08/">
 
@@ -168,7 +168,7 @@
                     <div class="tags">
                         
                     </div>
-                    <h1>高级搜索专题</h1>
+                    <h1>筛法求素数（转载）</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
 			Posted by 
@@ -176,7 +176,7 @@
 			    111qqz
 			 
 			on 
-			Sunday, August 16, 2015
+			Thursday, August 20, 2015
                         
                     </span>
                 </div>
@@ -202,73 +202,120 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                <nav id="TableOfContents"></nav>
+                <nav id="TableOfContents">
+  <ol>
+    <li><a href="#一般的线性筛法">一般的线性筛法</a></li>
+    <li><a href="#heading"></a></li>
+    <li><a href="#快速线性筛法">快速线性筛法</a>
+      <ol>
+        <li><a href="#需要证明的东西">需要证明的东西：</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
                 
-                <p><strong>基础的搜索BFS和DFS,自己找题切吧&hellip;</strong></p>
-<p><strong>高级搜索的题集就在下面,自己看着办吧&hellip;</strong></p>
-<p>**努力爆搜,努力剪枝吧~~~**</p>
-<hr />
-<p><strong>【Level 1】</strong></p>
-<p><em>HDOJ-1429 胜利大逃亡(续)　<br />
-HDOJ-1885 Key Task<br />
-HDOJ-1226 超级密码<br />
-HDOJ-1664 Different Digits<br />
-HDOJ-2821 Pusher<br />
-HDOJ-2128 Tempter of the Bone II<br />
-HDOJ-3533 Escape<br />
-HDOJ-4101 Ali and Baba<br />
-HDOJ-3839 Ancient Messages<br />
-HDOJ-1685 Booksort<br />
-HDOJ-2614 Beat<br />
-HDOJ-3309 Roll The Cube<br />
-HDOJ-1067 Gap<br />
-HDOJ-2181 哈密顿绕行世界问题<br />
-HDOJ-2437 Jerboas<br />
-HDOJ-2102 A计划<br />
-HDOJ-1195 Open the Lock<br />
-HDOJ-3295 An interesting mobile game<br />
-HDOJ-2259 Continuous Same Game(2)<br />
-HDOJ-3681 Prison Break<br />
-HDOJ-3085 Nightmare Ⅱ</em></p>
-<p><strong>【Level 2】</strong><br />
-POJ-1475  Pushing Boxes<br />
-POJ-3635 Full Tank?<br />
-POJ-2044 Weather Forecast<br />
-POJ-2449 Remmarguts' Date<br />
-POJ-1324 Holedox Moving<br />
-POJ-3322 Bloxorz I<br />
-POJ-2308 Dearboy&rsquo;s Puzzle<br />
-POJ-2688 Cleaning Robot<br />
-POJ-1376 Robot<br />
-POJ-1190 生日蛋糕<br />
-POJ-1184 聪明的打字员<br />
-HDOJ-4012 Paint on a Wall<br />
-HDOJ-3766 Knight&rsquo;s Trip<br />
-HDOJ-2605 Snake<br />
-HDOJ-3121 FreeOpen<br />
-HDOJ-3900 Unblock Me<br />
-HDOJ-1732 Push Box<br />
-HDOJ-2913 Traveling Cube<br />
-HDOJ-3001 Travelling<br />
-HDOJ-4090  GemAnd Prince</p>
-<p><strong>【Level 3】</strong><br />
-HDOJ-1401  Solitaire<br />
-HDOJ-4127 Flood-it!<br />
-HDOJ-1560 DNA sequence<br />
-HDOJ-2808 Islands<br />
-HDOJ-1430 魔板<br />
-HDOJ-1043 Eight<br />
-HDOJ-3567 Eight II<br />
-HDOJ-1667 The Rotation Game<br />
-HDOJ-2234 无题I<br />
-HDOJ-1813 Escape from Tetris<br />
-HDOJ-2918 Tobo or not Tobo<br />
-HDOJ-3459 Rubik 2×2×2<br />
-HDOJ-2953 Rubiks Cube<br />
-ZOJ-2477 Magic Cube<br />
-HDOJ-2691 2-Dimensional Rubik&rsquo;s Cube<br />
-HDOJ-2467 Deja vu<br />
-HDOJ-2485 Destroying the bus stations</p>
+                <p>TAG 素数 数论</p>
+<p>素数总是一个比较常涉及到的内容，掌握求素数的方法是一项基本功。</p>
+<p>基本原则就是题目如果只需要判断少量数字是否为素数，直接枚举因子2 。。N^(0.5) ，看看能否整除N。</p>
+<p>如果需要判断的次数较多，则先用下面介绍的办法预处理。</p>
+<h2 id="一般的线性筛法">一般的线性筛法</h2>
+<p>首先先介绍一般的线性筛法求素数</p>
+<p><strong>[cpp]</strong> <a href="http://blog.csdn.net/dinosoft/article/details/5829550">view plain</a><a href="http://blog.csdn.net/dinosoft/article/details/5829550">copy</a></p>
+<ol>
+<li>void make_prime() {</li>
+<li>memset(prime, 1, sizeof(prime));</li>
+<li>prime[0]=false;</li>
+<li>prime[1]=false;</li>
+<li>int N=31700;</li>
+<li>for (int i=2; i</li>
+<li>if (prime[i]) {</li>
+<li>primes[++cnt ]=i;</li>
+<li>for (int k=i*i; k</li>
+<li>prime[k]=false;</li>
+<li>}</li>
+<li>return;</li>
+<li>}</li>
+</ol>
+<p>这种方法比较好理解，初始时，假设全部都是素数，当找到一个素数时，显然这个素数乘上另外一个数之后都是合数(注意上面的 i<em>i , 比 i</em>2 要快点 )，把这些合数都筛掉，即算法名字的由来。</p>
+<p>但仔细分析能发现，这种方法会造成重复筛除合数，影响效率。比如10，在i=2的时候，k=2<em>15筛了一次；在i=5，k=5</em>6 的时候又筛了一次。所以，也就有了快速线性筛法。</p>
+<h2 id="heading"></h2>
+<h2 id="快速线性筛法">快速线性筛法</h2>
+<p>快速线性筛法没有冗余，不会重复筛除一个数，所以&quot;几乎&quot;是线性的，虽然从代码上分析，时间复杂度并不是O(n)。先上代码</p>
+<p><strong>[cpp]</strong> <a href="http://blog.csdn.net/dinosoft/article/details/5829550">view plain</a><a href="http://blog.csdn.net/dinosoft/article/details/5829550">copy</a></p>
+<ol>
+<li>#include</li>
+<li>using namespace std;</li>
+<li>const long N = 200000;</li>
+<li>long prime[N] = {0},num_prime = 0;</li>
+<li>int isNotPrime[N] = {1, 1};</li>
+<li>int main()</li>
+<li>{</li>
+<li>for(long i = 2 ; i &lt; N ; i ++)</li>
+<li>{</li>
+<li>if(! isNotPrime[i])</li>
+<li>prime[num_prime ++]=i;</li>
+<li>//关键处1</li>
+<li>for(long j = 0 ; j &lt; num_prime &amp;&amp; i * prime[j] &lt; N ; j ++)</li>
+<li>{</li>
+<li>isNotPrime[i * prime[j]] = 1;</li>
+<li>if( !(i % prime[j] ) ) //关键处2</li>
+<li>break;</li>
+<li>}</li>
+<li>}</li>
+<li>return 0;</li>
+<li>}</li>
+</ol>
+<p>首先，先明确一个条件，任何合数都能表示成一系列素数的积。</p>
+<p>不管 i 是否是素数，都会执行到&quot;关键处1&quot;，</p>
+<p>①如果 i 都是是素数的话，那简单，一个大的素数 i 乘以不大于 i 的素数，这样筛除的数跟之前的是不会重复的。筛出的数都是 N=p1*p2的形式, p1，p2之间不相等</p>
+<p>②如果 i 是合数，此时 i 可以表示成递增素数相乘 i=p1<em>p2</em>&hellip;*pn, pi都是素数（2&lt;=i&lt;=n）， pi&lt;=pj ( i&lt;=j )</p>
+<p>p1是最小的系数。</p>
+<p>根据&quot;关键处2&quot;的定义，当p1==prime[j] 的时候，筛除就终止了，也就是说，只能筛出不大于p1的质数*i。</p>
+<p>我们可以直观地举个例子。i=2<em>3</em>5</p>
+<p>此时能筛除 2<em>i ,不能筛除 3</em>i</p>
+<p>如果能筛除3<em>i 的话，当 i' 等于 i'=3</em>3<em>5 时，筛除2</em>i' 就和前面重复了。</p>
+<h3 id="需要证明的东西">需要证明的东西：</h3>
+<ol>
+<li>一个数会不会被重复筛除。</li>
+<li>合数肯定会被干掉。</li>
+</ol>
+<p>根据上面红字的条件，现在分析一个数会不会被重复筛除。</p>
+<p>设这个数为 x=p1<em>p2</em>&hellip;*pn, pi都是素数（1&lt;=i&lt;=n) , pi&lt;=pj ( i&lt;=j )</p>
+<p>当 i = 2 时，就是上面①的情况，</p>
+<p>当 i &gt;2 时， 就是上面②的情况， 对于 i ，第一个能满足筛除 x 的数 y 必然为 y=p2*p3&hellip;*pn（p2可以与p1相等或不等），而且满足条件的 y 有且只有一个。所以不会重复删除。</p>
+<p>证明合数肯定会被干掉？ 用归纳法吧。</p>
+<p>类比一个模型，比如说我们要找出 n 中2个不同的数的所有组合 { i , j } ，1&lt;=i&lt;=n, 1&lt;=j&lt;=n,</p>
+<p>我们会这么写</p>
+<p>for (i=1; i</p>
+<p>for (j=i+1; j&lt;=n; ++j)</p>
+<p>{</p>
+<p>/////</p>
+<p>}</p>
+<p>我们取 j=i+1 便能保证组合不会重复。快速筛法大概也是这个道理，不过这里比较难理解，没那么直观。</p>
+<p>1楼提供的方法，我整理下</p>
+<p>//偶数显然不行，所以先去掉偶数。可以看作上面第一种的优化吧。</p>
+<p>//不过这种方法不太直观，不太好理解。</p>
+<p><strong>[cpp]</strong> <a href="http://blog.csdn.net/dinosoft/article/details/5829550">view plain</a><a href="http://blog.csdn.net/dinosoft/article/details/5829550">copy</a></p>
+<pre><code>1. 我推荐这个算法！ 易于理解。 只算奇数部分，时空效率都还不错！ 
+2. half=SIZE/2; 
+3. int sn = (int) sqrt(SIZE); 
+4. for (i = 0; i &lt; half; i++) 
+5. p[i] = true;// 初始化全部奇数为素数。p[0]对应3，即p[i]对应2*i+3 
+6. for (i = 0; i &lt; sn; i++) { 
+7. if(p[i])//如果 i+i+3 是素数 
+8. { 
+9. for(k=i+i+3, j=k*i+k+i; j &lt; half; j+=k) 
+10. // 筛法起点是 p[i]所对应素数的平方 k^2 
+11. // k^2在 p 中的位置是 k*i+k+i 
+12. // 下标 i k*i+k+i 
+13. //对应数值 k=i+i+3 k^2 
+14. p[j]=false; 
+15. } 
+16. } 
+17. //素数都存放在 p 数组中，p[i]=true代表 i+i+2 是素数。 
+18. //举例，3是素数，按3*3,3*5,3*7...的次序筛选，因为只保存奇数，所以不用删3*4，3*6.... 
+19. 
+</code></pre>
 
 
                 
@@ -317,13 +364,13 @@ HDOJ-2485 Destroying the bus stations</p>
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2015/08/poj2688/" data-toggle="tooltip" data-placement="top" title="poj 2688 Cleaning Robot (tsp问题)">&larr;
+                        <a href="/2015/08//" data-toggle="tooltip" data-placement="top" title=".虚">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/2015/08/codeforces567f/" data-toggle="tooltip" data-placement="top" title="codeforces 567 F. Mausoleum (dp)">Next
+                        <a href="/2015/08/poj3842/" data-toggle="tooltip" data-placement="top" title="HUST team contest #2 A An Industrial Spy ||poj 3842 (筛)">Next
                             Post &rarr;</a>
                     </li>
                     
