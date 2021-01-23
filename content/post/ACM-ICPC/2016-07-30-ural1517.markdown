@@ -1,0 +1,144 @@
+---
+author: 111qqz
+date: 2016-07-30 17:18:19+00:00
+draft: false
+title: ural 1517. Freedom of Choice (后缀数组，最长公共子串)
+type: post
+url: /2016/07/ural1517/
+categories:
+- ACM
+tags:
+- 后缀数组
+- 最长公共字串
+---
+
+[ural1517](http://acm.timus.ru/problem.aspx?space=1&num=1517)
+题意：给出两个字符串，求最长的公共字串（要求出具体的字符串是什么）
+
+思路：依然是后缀数组，在更新长度 的时候记录起始位置即可，1A。以及，发现多开了一个完全没有必要的数组w[],这次已删。
+
+
+
+20160730update:模板已更正，lrj的模板的rk[i]为0 的时候会出现re的问题...已特判。
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年07月31日 星期日 00时36分19秒
+    File Name :code/ural/1517.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=2E5+7;
+    char s[N];
+    int n,sa[N],rk[N],t[N],t2[N],cnt[N];
+    int height[N];
+    int cmp(int *r,int a,int b,int l)  {return r[a]==r[b]&&r[a+l]==r[b+l];}
+    void getSa(int n,int m)
+    {
+        int *x = t,*y= t2;
+        ms(cnt,0);
+        for ( int i = 0 ; i < n ; i++) cnt[x[i]=s[i]]++;
+        for ( int i = 1 ; i < m ; i++) cnt[i]+=cnt[i-1];
+        for ( int i = n-1 ; i >= 0 ; i--) sa[--cnt[x[i]]] =  i;
+        for ( int k = 1 ; k <= n ;  k<<=1)
+        {
+    	int p = 0 ;
+    	for ( int i = n - k ; i < n ; i++) y[p++] = i;
+    	for ( int i =  0 ; i < n ; i++) if (sa[i]>=k) y[p++] = sa[i]-k;
+    	ms(cnt,0);
+    	for ( int i = 0 ; i < n;  i++) cnt[x[y[i]]]++;
+    	for ( int i = 0 ; i < m ; i++) cnt[i]+=cnt[i-1];
+    	for ( int i = n-1 ; i >= 0 ; i--) sa[--cnt[x[y[i]]]] = y[i];
+    	swap(x,y);
+    	p = 1;
+    	x[sa[0]] = 0;
+    	for ( int i = 1 ; i < n ; i++)
+    	    x[sa[i]] = cmp(y,sa[i-1],sa[i],k)?p-1:p++;
+    	if (p>=n) break;
+    	m = p;
+        }
+    }
+    void getHeight( int n)
+    {
+        int k = 0 ;
+        for ( int i = 0 ; i < n ; i++) rk[sa[i]] = i ;
+        height[0] = 0 ;
+        for ( int i = 0 ; i < n ; i++)
+        {
+    	if (rk[i]==0) continue;
+    	if (k) k--;
+    	int j = sa[rk[i]-1];
+    	while (s[i+k]==s[j+k]) k++;
+    	height[rk[i]] = k ;
+        }
+    }
+    int getSuffix(char s[])
+    {
+        int len = strlen(s);
+        int up = 0 ;
+        for ( int i = 0 ; i < len ; i++)
+        {
+    	int val = s[i];
+    	up = max(up,val);
+        }
+        getSa(len,up+1);
+        getHeight(len);
+        return len;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	string st1,st2,st;
+    	int len1,len;
+    	cin>>len1>>st1>>st2;
+    	st = st1+"$"+st2;
+    	strcpy(s,st.c_str());
+    	len = getSuffix(s);
+    	int ans = 0 ,beg=0;
+    	for ( int i = 2 ; i < len ; i++)
+    	    if (height[i]>ans)
+    	    {
+    		if (0<=sa[i-1]&&sa[i-1]<len1&&len1<sa[i])
+    		{
+    		    beg = sa[i-1];
+    		    ans = height[i];
+    		}
+    		if (0<=sa[i]&&sa[i]<len1&&len1<sa[i-1])
+    		{
+    		    beg = sa[i];
+    		    ans = height[i];
+    		}
+    	    }
+    	cout<<st1.substr(beg,ans)<<endl<<endl;
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    

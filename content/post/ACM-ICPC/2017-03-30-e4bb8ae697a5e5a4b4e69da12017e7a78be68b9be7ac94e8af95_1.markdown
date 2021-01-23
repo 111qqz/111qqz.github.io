@@ -1,0 +1,223 @@
+---
+author: 111qqz
+date: 2017-03-30 05:53:33+00:00
+draft: false
+title: 今日头条2017秋招笔试_1
+type: post
+url: /2017/03/2017_1/
+categories:
+- 面试
+tags:
+- greedy
+---
+
+
+
+头条校招（今日头条2017秋招真题）
+
+    
+    
+    									题目描述
+
+
+头条的2017校招开始了！为了这次校招，我们组织了一个规模宏大的出题团队。每个出题人都出了一些有趣的题目，而我们现在想把这些题目组合成若干场考试出来。在选题之前，我们对题目进行了盲审，并定出了每道题的难度系数。一场考试包含3道开放性题目，假设他们的难度从小到大分别为a, b, c，我们希望这3道题能满足下列条件：
+
+a＜= b＜= c
+b - a＜= 10
+c - b＜= 10
+
+所有出题人一共出了n道开放性题目。现在我们想把这n道题分布到若干场考试中（1场或多场，每道题都必须使用且只能用一次），然而由于上述条件的限制，可能有一些考试没法凑够3道题，因此出题人就需要多出一些适当难度的题目来让每场考试都达到要求。然而我们出题已经出得很累了，你能计算出我们最少还需要再出几道题吗？
+
+
+
+
+
+
+
+
+
+
+<table cellspacing="1" >
+<tbody >
+<tr >
+
+<td >
+
+
+输入输入的第一行包含一个整数n，表示目前已经出好的题目数量。
+
+第二行给出每道题目的难度系数 d1, d2, …, dn。
+
+
+
+</td>
+
+<td >
+
+
+样例输入4
+
+20 35 23 40
+
+
+
+</td>
+</tr>
+<tr >
+
+<td >
+
+
+输出输出只包括一行，即所求的答案。
+
+
+
+</td>
+
+<td >
+
+
+样例输出2
+
+
+
+</td>
+</tr>
+<tr class="time_rom" >
+
+<td >
+
+
+时间限制C/C++语言：1000MS其它语言：3000MS
+
+</td>
+
+<td >
+
+
+内存限制C/C++语言：65536KB其它语言：589824K
+
+</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+div2 A的难度...直接贪就好,不给数据范围的都是耍流氓...
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2017年03月30日 星期四 12时55分21秒
+    File Name :code/toutiao/1.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    int n;
+    vector<int>vec;
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+            #endif
+    	int ans = 0 ;
+    	cin>>n;
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    int x;
+    	    scanf("%d",&x);
+    	    vec.push_back(x);
+    	}
+    	sort(vec.begin(),vec.end());
+    	int cur = 0 ;
+    	for ( int i = 0 ;i < n ; i++)
+    	{
+    	    if (cur==0)
+    	    {
+    		cur++;
+    		continue;
+    	    }
+    	    if (cur==1)
+    	    {
+    		if (vec[i]-vec[i-1]<=10)
+    		{
+    		    cur++;
+    		    continue;
+    		}
+    		if (vec[i]-vec[i-1]>20)
+    		{
+    		    cur+=2;
+    		    ans+=2;
+    		    cur%=3;
+    		    i--;
+    		    continue;
+    		}
+    		if (vec[i]-vec[i-1]>10)
+    		{
+    		    cur+=2;
+    		    cur%=3;
+    		    ans++;
+    		}
+    		continue;
+    	    }
+    	    if (cur==2)
+    	    {
+    		if (vec[i]-vec[i-1]<=10)
+    		{
+    		    cur++;
+    		    cur%=3;
+    		    continue;
+    		}
+    		else
+    		{
+    		    cur++;
+    		    ans++;
+    		    i--;
+    		    cur%=3;
+    		    continue;
+    		}
+    	    }
+    	}
+    	    if (cur!=0)
+    	    ans = ans + 3-cur;
+    	    cout<<ans<<endl;
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+

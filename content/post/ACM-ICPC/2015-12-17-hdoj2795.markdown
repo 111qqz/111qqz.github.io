@@ -1,0 +1,137 @@
+---
+author: 111qqz
+date: 2015-12-17 09:03:02+00:00
+draft: false
+title: hdoj 2795 Billboard
+type: post
+url: /2015/12/hdoj2795/
+categories:
+- ACM
+tags:
+- 线段树
+---
+
+http://acm.hdu.edu.cn/showproblem.php?pid=2795
+题意：一个尺寸为w*h的方格。要按顺序放放n个尺寸为1*wi的纸条。问每一个纸条回被放在哪里。如果有多个，放在最上面（编号小）
+思路：把没横行能放的最大长度看做一个序列建树。由于h比n大很多。。多出来的没用。。直接取较小值就行。
+
+
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2015年12月17日 星期四 15时04分52秒
+    File Name :code/hdu/2785.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=2E5+7;
+    int h,w,n;
+    
+    struct SegTree   //将每个横格能放置的最大长度看做一个序列，建树。
+    {
+        int mx; 
+    }tree[4*N];
+    
+    void build ( int l,int r,int rt)
+    {
+      //  cout<<"l:"<<l<<" r:"<<r<<" rt:"<<rt<<endl;
+        tree[rt].mx = w;
+        if (l==r)
+        {
+    	return ;
+        }
+        int m = (l+r)>>1;
+        build (lson);
+        build (rson);
+    
+    }
+    
+    int query( int x,int l,int r,int rt)
+    {
+        if (l==r)
+        {
+    	tree[rt].mx-=x;  //将长度为x的改点放在第l个横格里。
+    	return l;
+        }
+        int m = (l+r)>>1;
+        int res;
+        if (tree[rt<<1].mx>=x)  //先搜左子树，可以保证topmost.
+        {
+    	res=query(x,lson);
+        }
+        else
+        {
+    	res=query(x,rson);
+        }
+    
+        tree[rt].mx = max(tree[rt<<1].mx,tree[rt<<1|1].mx);
+        return res;
+    }
+    
+    
+    
+    
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	while (~scanf("%d %d %d",&h,&w,&n))
+    	{
+    	    if (h>n) h = n ;  //不用离散化，这样就可以。
+    	    build(1,h,1);
+    	    while (n--)
+    	    {
+    		int x;
+    		scanf("%d",&x);
+    		if (x>tree[1].mx)
+    		{
+    		    puts("-1");
+    		}
+    		else
+    		{
+    		    printf("%d\n",query(x,1,h,1));
+    		}
+    	    }
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

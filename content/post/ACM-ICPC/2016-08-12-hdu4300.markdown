@@ -1,0 +1,129 @@
+---
+author: 111qqz
+date: 2016-08-12 07:34:47+00:00
+draft: false
+title: hdu 4300 Clairewd’s message (kmp)
+type: post
+url: /2016/08/hdu4300/
+categories:
+- ACM
+tags:
+- kmp
+---
+
+[hdu 4300题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=4300)
+
+**吐槽**：题意难懂的一逼，关键的地方根本没有说清好么。。。竟然还是多校题。。。。出题人英语是体育老师教的吧。。？本来挺傻逼一道题。。被这完全没有说清楚的题意搞得很不爽。。。
+
+题意：给一个26个字母一一对应的密码表。
+
+然后给出一个字符串，先是密文再是明文，明文可能不全。问最小的可能的密文+明文串是什么。。
+
+思路：
+
+把字符串按照密码表转化得到一个新的字符串，然后跑kmp得到原字符串a的后缀等于转化后的字符串b的前缀的最长长度的字符串。（**需要注意的是,kmp匹配的时候，由于密文长度一定是大于等于明文的，并且如果字符串a和字符串b相等，匹配全部是没有意义的，所以我们从中间位置开始匹配，更具体的说，是从第一个后面的字符串的长度大于等于前面的字符串的长度的位置开始匹配**）
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年08月12日 星期五 13时55分42秒
+    File Name :code/hdu/4300.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <stack>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <deque>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    char a[N],b[N];
+    map<char,char>mp;
+    char table[30];
+    int nxt[N];
+    void getnxt( char *s)
+    {
+        int n = strlen(s);
+        int i = 0 ;
+        int j = -1;
+        nxt[0] = -1;
+        while (i<n)
+    	if (j==-1||s[i]==s[j]) nxt[++i] = ++ j;
+    	else j = nxt[j];
+    }
+    int kmp(char *a,char *b)
+    {
+        int n = strlen(a);
+        getnxt(b);
+        int i = 0;
+        int j = 0;
+        if (n%2==0) i = n/2;  //明文可能残缺，因此密文长度大于等于明文，i要从一半往后开始，不然的话会匹配到自身
+        else i = n/2+1;
+        while (i<n)
+        {
+    	if (j==-1||a[i]==b[j]) i++,j++;
+    	else j = nxt[j];
+        }
+        if (i==n) return j;
+        return 0;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	int T;
+    	cin>>T;
+    
+    	while (T--)
+    	{
+    	    mp.clear();
+    	    scanf("%s",table);
+    	    for ( int i = 0 ; i < 26 ; i++)  mp[table[i]]=char(i+97);
+    	    scanf("%s",a);
+    	    int len = strlen(a);
+    	    for ( int i = 0 ; i < len ; i++)
+    		b[i] = mp[a[i]];
+    	    int k = kmp(a,b);
+    	 //  cout<<"k:"<<k<<endl; 
+    	    for ( int i = 0 ; i < len ; i++)
+    		printf("%c",a[i]);
+    	    for ( int i = k ; i < len-k ; i++)
+    		printf("%c",mp[a[i]]);
+    	    printf("\n");
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

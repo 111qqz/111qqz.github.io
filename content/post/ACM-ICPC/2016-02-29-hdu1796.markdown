@@ -1,0 +1,273 @@
+---
+author: 111qqz
+date: 2016-02-29 12:00:53+00:00
+draft: false
+title: hdu 1796  How many integers can you find (容斥原理)
+type: post
+url: /2016/02/hdu1796/
+categories:
+- ACM
+tags:
+- math
+- 容斥原理
+---
+
+[hdu1796](http://acm.hdu.edu.cn/showproblem.php?pid=1796)
+题意：给出n（<=2^31）以及m(<=10)个元素组成的无重复元素集合，集合元素**0<=a[i]<=20**,问有多少个小于n的数能至少被集合中的一个元素整除。
+
+思路：容斥，找到能被一个元素的，被两个元素的...加加减减。
+一个元素的最小公倍数定义成自己，然后多个元素的就两个两个算...
+
+**一个坑点是，a[i]有0，而一个数除以0没有意义。。。所以读入的时候处理下。。。把0删掉（个人觉得这个坑点毫无技术含量。。。。0不能作为除数这种事情呵呵呵）  并且如果只有一个数且为0，那么删掉后集合就为空了，特判输出0.**
+
+
+
+**另一个坑点是，别看每个数都很小。。但是求多个数的最小公倍数的时候会爆int...**
+
+**虽然最后结果没有爆，但是中间量会爆掉，要开long long **
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月29日 星期一 19时09分31秒
+    File Name :code/hdu/1796.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    int n,m;
+    int a[15];
+    int b[15];
+    
+    LL gcd ( LL a,LL b)
+    {
+        if (b>a) return gcd(b,a);
+        if (a%b==0) return b;
+        return gcd(b,a%b);
+    }
+    
+    LL lcm( LL a,LL b)
+    {
+        LL res;
+        res = a*b;  //10个数的最小公倍数会爆掉...虽然最终结果不会，但是乘的这一步会，所以要long long 
+        res = res/gcd(a,b);
+        return res;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	while (~scanf("%d %d",&m,&n))  //m,n和题目中的意思相反，实在看着别扭
+    	{
+    	    int cnt = 0 ;
+    	    bool zero = false;
+    	    for ( int i = 0 ; i < n ; i++)
+    	    {
+    		scanf("%d",&b[i]);
+    		if (b[i])
+    		{
+    		    a[cnt++] = b[i];
+    		}
+    		else
+    		{
+    		    zero = true;
+    		}
+    	    }
+    
+    	    if (cnt==0)   //只有一个元素且是0...0不能做除数啊。。。这题好蠢
+    	    {
+    		puts("0");
+    		continue;  
+    	    }
+    
+    
+    	    
+    	    n = cnt;
+    
+    	    LL ans = 0LL ; 
+    	    for ( int msk = 1 ; msk  < (1<<n) ; msk++)
+    	    {
+    		    int bits = 0 ;
+    		    LL LCM;
+    		    for ( int i = 0 ; i < n ; i++)
+    		    {
+    			
+    			if (msk&(1<<i))
+    			{
+    			    bits++;
+    			    if (bits==1)
+    			    {
+    				LCM = a[i];
+    			    }
+    			    else
+    			    {
+    				LCM = lcm(LCM,LL(a[i]));
+    			    }
+    			}
+    		    }
+    
+    		    //cout<<"LCM:"<<LCM<<endl;
+    		    if (bits%2==1)
+    		    {
+    			ans +=LL((m-1)/LCM);
+    		    }
+    		    else
+    		    {
+    			ans -=LL((m-1)/LCM);
+    		    }
+    
+    	    }
+    	    printf("%lld\n",ans);
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+20160305update:也写个递归版本的，好简洁有木有。
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年03月05日 星期六 15时23分46秒
+    File Name :code/hdu/r1796.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    int n;
+    LL m ;
+    int a[15];
+    int b[15];
+    LL LCM;
+    LL ans;
+    
+    LL gcd ( LL a,LL b)
+    {
+        if (b>a) return gcd(b,a);
+        if (a%b==0) return b;
+        return gcd(b,a%b);
+    }
+    
+    LL lcm( LL a,LL b)
+    {
+        LL res;
+        res = a*b;  //10个数的最小公倍数会爆掉...虽然最终结果不会，但是乘的这一步会，所以要long long 
+        res = res/gcd(a,b);
+        return res;
+    }
+    
+    void dfs( int id ,LL x,int flag)
+    {
+        ans +=flag*(m-1)/x;
+        for  ( int i = id+1 ; i < n ; i++)
+    	dfs(i,lcm(x,1LL*a[i]),-1*flag);
+    
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	while (~scanf("%lld %d",&m,&n))  //m,n和题目中的意思相反，实在看着别扭
+    	{
+    	    int cnt = 0 ;
+    	    bool zero = false;
+    	    for ( int i = 0 ; i < n ; i++)
+    	    {
+    		scanf("%d",&b[i]);
+    		if (b[i])
+    		{
+    		    a[cnt++] = b[i];
+    		}
+    		else
+    		{
+    		    zero = true;
+    		}
+    	    }
+    	    if (cnt==0)   //只有一个元素且是0...0不能做除数啊。。。这题好蠢
+    	    {
+    		puts("0");
+    		continue;  
+    	    }
+    
+    	    ans =  0LL;
+    	    n = cnt;
+    	    LCM = 0;
+    	    for ( int i = 0 ; i < n ; i ++)
+    	    {
+    		dfs(i,a[i],1);
+    	    }
+    	    printf("%lld\n",ans);
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

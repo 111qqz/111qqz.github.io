@@ -1,0 +1,101 @@
+---
+author: 111qqz
+date: 2016-05-17 11:39:28+00:00
+draft: false
+title: hdu 3193 find the hotel (思维题)
+type: post
+url: /2016/05/hdu-3193/
+categories:
+- ACM
+tags:
+- 思维题
+---
+
+[hdu3193题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=3193)
+
+题意：给出n个price 和distance,找到一个集合，集合中的每对在全集中找不到比他price和distance都要小的元素。小于是严格的。
+
+思路：一开始以为找到最小值就好。。。结果漏洞百出。。这题还找不到题解。。。大概是太简单了。。？ 看了一份代码大概看明白了。。。
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年05月17日 星期二 19时20分14秒
+    File Name :code/hdu/r3193.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E4+7;
+    bool ok[N];
+    pi a[N];
+    int n;
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	while (~scanf("%d",&n))
+    	{
+    	    for ( int i = 1 ; i <= n  ; i++) scanf("%d %d",&a[i].fst,&a[i].sec);
+    	    
+    	    ms(ok,false);
+    	    sort(a+1,a+n+1);
+    	    int ans = 0 ;
+    	    int tmp = inf;
+    	    int mn = inf;
+    	    for ( int  i = 1 ; i <= n ; i++)
+    	    {
+    		if (i!=1&&a[i].fst!=a[i-1].fst)
+    		{
+    		    mn = min(mn,tmp);
+    		    tmp = inf;
+    		}
+    
+    		tmp = min(tmp,a[i].sec);
+    		if (mn<a[i].sec) ok [i] = false;
+    		else ok[i] = true,ans++;
+    	    }
+    
+    	    printf("%d\n",ans);
+    	    for ( int i = 1 ; i <= n ; i++) if (ok[i]) printf("%d %d\n",a[i].fst,a[i].sec);
+    	}
+        
+     
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+

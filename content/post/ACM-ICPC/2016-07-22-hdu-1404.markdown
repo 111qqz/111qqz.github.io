@@ -1,0 +1,157 @@
+---
+author: 111qqz
+date: 2016-07-22 12:39:22+00:00
+draft: false
+title: hdu 1404 Digital Deletions (博弈论，根据定义)
+type: post
+url: /2016/07/hdu-1404/
+categories:
+- ACM
+tags:
+- 博弈论
+---
+
+[hdu 1404题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=1404)
+
+题意：一个数字串，每次可以选择一位减少任意大小到一个非负数，或者清除一个0以及该位右边的所有数字。问是否有必胜策略。。
+
+思路：定义来搞。。所有能一步走到p点的都是n点，那么如果我们现在知道p点，就可以反过来推n点。。
+
+看到一些人强行把变量名起成sg就说自己用了sg函数也是笑死我了呵呵呵呵
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年07月22日 星期五 19时11分16秒
+    File Name :code/hdu/1404.cpp
+     ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E6+7;
+    int n;
+    int sg[N];
+    bool vis[N];
+    char st[10];
+    
+    
+    void solve( int x)
+    {
+    
+        int dig[10];
+        int cnt = 0;
+        ms(dig,0);
+        int xx = x;
+        while (x)
+        {
+    	dig[++cnt] = x % 10;
+    	x/=10;
+        }
+        x = xx;
+        //    cout<<"cnt:"<<cnt<<endl; 
+        //   for ( int i = 1 ; i <= cnt ; i ++) cout<<"i:"<<i<<" dig[i]:"<<dig[i]<<endl;
+        int base = 1;
+        for ( int i = 1 ; i <= cnt ; i++)
+        {
+    	for ( int j = dig[i] + 1 ; j <= 9 ; j++)
+    	    if (x+(j-dig[i])*base<N)sg[x+(j-dig[i])*base] = 1;
+    	base *=10;
+        }
+    
+        if (cnt<6)
+        {
+    	base = 1;
+    	for ( int i = cnt ; i < 6 ; i++)
+    	{
+    	    x*=10;
+    	    for ( int j = 0  ; j < base ;j++)
+    		sg[x+j] = 1;
+    
+    	    base*=10;
+    	}
+        }   
+    
+    }
+    void sg_init()
+    {
+        ms(sg,0);
+        //    sg[0] = 1;
+    
+        for ( int i = 1 ; i < N ; i++)
+    	if (!sg[i]) solve(i); //由必败点去更新必胜点 所以能一步走到p点的是n点，反过来说，p点往前走一步到达的点都是n点。
+    
+        //  for ( int i = 1 ; i <= 300 ; i++)
+        //	cout<<"i:"<<i<<" sg[i]:"<<sg[i]<<endl;
+    }
+    int main()
+    {
+    #ifndef  ONLINE_JUDGE 
+        freopen("code/in.txt","r",stdin);
+    #endif
+    
+        sg_init();
+    
+        while (~scanf("%s",st))
+        {
+    	if (st[0]=='0')
+    	{
+    	    puts("Yes");
+    	    continue;
+    	}
+    
+    	int x = 0 ;
+    	int len = strlen(st);
+    	for ( int i = 0 ;  i < len ; i++)
+    	{
+    	    int val = st[i]-'0';
+    	    x = x*10 + val;
+    	}
+    	if (sg[x])
+    	{
+    	    puts("Yes");
+    	}
+    	else
+    	{
+    	    puts("No");
+    	}
+        }
+    
+    
+    
+    #ifndef ONLINE_JUDGE  
+        fclose(stdin);
+    #endif
+        return 0;
+    }
+    
+
+
+

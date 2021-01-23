@@ -1,0 +1,189 @@
+---
+author: 111qqz
+date: 2016-08-17 13:17:02+00:00
+draft: false
+title: hdu 2896 病毒侵袭 (ac自动机)
+type: post
+url: /2016/08/hdu-2896/
+categories:
+- ACM
+tags:
+- ac自动机
+---
+
+[hdu 2896 题目链接](http://acm.split.hdu.edu.cn/showproblem.php?pid=2896)
+
+
+
+题意：给出n个病毒，然后给出m个网站，然后问每个网站中有哪些病毒，以及有病毒的网站的个数。
+
+需要注意病毒和网站都需要按从小到达排列输出。
+
+思路：ac自动机，需要记录病毒id...然后。。因为病毒的id忘记排序wa了好多发。。智力减2.
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年08月16日 星期二 19时53分24秒
+    File Name :code/hdu/2896.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <stack>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <deque>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    vector <int>ans;
+    struct Trie
+    {
+        struct Node
+        {
+    	Node *nxt[128];
+    	Node *fail;
+    	int val;
+    	Node()
+    	{
+    	    for ( int i = 0 ; i < 128 ; i++) nxt[i] = NULL;
+    	    val = 0;
+    	    fail = NULL;
+    	}
+        };
+        Node *root;
+        void init()
+        {
+    	root = new Node();
+        }
+        void Insert(char *s,int num)
+        {
+    	int len = strlen(s);
+    	Node *u = root;
+    	for ( int i = 0 ; i < len ;i++)
+    	{
+    	    int v = s[i]-32;
+    	    if (u->nxt[v]==NULL) u->nxt[v] = new Node();
+    	    u = u->nxt[v];
+    	}
+    	u->val = num;
+        }
+        void getFail()
+        {
+    	root->fail = root;
+    	queue<Node*>Q;
+    	for ( int i = 0 ; i < 128 ; i++)
+    	{
+    	    if (root->nxt[i]==NULL)
+    		root->nxt[i] = root;
+    	    else
+    	    {
+    		root->nxt[i]->fail = root;
+    		Q.push(root->nxt[i]);
+    	    }
+    	}
+    	while (!Q.empty())
+    	{
+    	    Node * cur = Q.front();
+    	    Q.pop();
+    	    for ( int i = 0 ; i < 128 ; i++)
+    		if (cur->nxt[i]==NULL)
+    		    cur->nxt[i] = cur->fail->nxt[i];
+    		else
+    		{
+    		    cur->nxt[i]->fail = cur->fail->nxt[i];
+    		    Q.push(cur->nxt[i]);
+    		}
+    	}
+        }
+        bool Search(char *s)
+        {
+    	int len = strlen(s);
+    	Node *u = root;
+    	ans.clear();
+    	bool ok = false;
+    	for ( int i = 0 ; i < len ; i++)
+    	{
+    	    int v  = s[i]-32;
+    	    u = u->nxt[v];
+    	    Node *tmp = u;
+    	    while (tmp!=root&&tmp->val>0)
+    	    {
+    		ans.push_back(tmp->val);
+    //  		tmp->val = 0;
+    		tmp = tmp->fail;
+    		ok = true;
+    	    }
+    	}
+    	return ok;
+        }
+    }ac;
+    int n,m;
+    char str[10025];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	while (~scanf("%d",&n))
+    	{
+    	    ac.init();
+    	    for ( int i = 1 ; i <= n ; i++)
+    	    {
+    		scanf("%s",str);
+    //		cout<<"str:"<<str<<endl;
+    		ac.Insert(str,i);
+    	    }
+    	    ac.getFail();
+    	    int tot = 0 ;
+    	    scanf("%d",&m);
+    	    for ( int i = 1 ; i <= m ; i++)
+    	    {
+    		scanf("%s",str);
+    //		cout<<"i:"<<i<<" str:"<<str<<endl;
+    		if (ac.Search(str))
+    		{
+    		    tot++;
+    		    printf("web %d:",i);
+    		    sort(ans.begin(),ans.end()); //要求按顺序
+    		    int siz = ans.size();
+    		    for ( int i = 0 ; i < siz; i ++)
+    			printf(" %d",ans[i]);
+    		    printf("\n");
+    		}
+    	    }
+    	    printf("total: %d\n",tot);
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+
+
+

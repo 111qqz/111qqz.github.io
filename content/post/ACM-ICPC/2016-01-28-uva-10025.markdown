@@ -1,0 +1,113 @@
+---
+author: 111qqz
+date: 2016-01-28 13:02:48+00:00
+draft: false
+title: uva 10025 The ? 1 ? 2 ? ... ? n = k problem
+type: post
+url: /2016/01/uva-10025/
+categories:
+- ACM
+
+tags:
+- math
+---
+
+https://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=966
+题意：?1?2?3?4...?n=k,把每个?替换成+或者-，找到最小的n使得式子成立。
+题意：**这道题最关键的一点是。如果s1=1+2+3+.,x+..+n>=k (所有数取正数）,那么一定有s2=1+2+3+..-x+..+n=k**
+
+非严格证明如下：
+
+s1-s2 = 2x,s1-k=2x
+
+**一个数减去偶数，奇偶性不变。x是从1到n中的一个，2*x则包含了s1和s2相差的数所有可能性。**
+
+
+
+具体做法就是找到一个大于等于k的s1,且s1-k是偶数。
+
+
+
+
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年01月28日 星期四 13时58分24秒
+    File Name :code/uva/10025.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    int k;
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	int T;
+    	cin>>T;
+    	while (T--)
+    	{
+    	    scanf("%d",&k);
+    	    if (k<0) k = -k;
+    	
+    
+    	    int sum = 0  ;
+    	    int p = int(sqrt(2*k));
+    
+    //	    cout<<"p:"<<p<<endl;
+    	    for ( int i = p ; ;i++)
+    	    {
+    		sum = (1+i)*i/2;
+    		
+    	    
+    		if (sum>=k&&(sum-k)%2==0&&sum>0)
+    		{
+    		    cout<<i<<endl;
+    		    break;
+    		}
+    	    }
+    	    if (T)
+    	    {
+    		puts("");
+    	    }
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

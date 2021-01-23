@@ -1,0 +1,148 @@
+---
+author: 111qqz
+date: 2016-01-24 12:14:35+00:00
+draft: false
+title: uva 409 - Excuses, Excuses!
+type: post
+url: /2016/01/uva409/
+categories:
+- ACM
+
+tags:
+- 字符串
+---
+
+https://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid;=8&page;=show_problem&problem;=350
+题意：给出k个key word,e个借口...找出包含key word最多的借口，即为最坏的借口。匹配补区分大小写&&同一个key word算多次。
+思路：需要注意的是因为不区分大小写，需要都转化成大写或者小写。。但是输出的时候要输出原始的。。所以要另外存一份。
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年01月22日 星期五 17时58分02秒
+    File Name :code/uva/409.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    string str[50];
+    int k,e;
+    int num[50];
+    set<string>se;
+    
+    struct node
+    {
+        string exc;
+        string ori;
+        int num;
+        bool operator<(node b)const
+        {
+    	return num>b.num;
+        }
+    }ex[50];
+    
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	int cas = 0 ;
+    	while (scanf("%d %d",&k,&e)!=EOF)
+    	{
+    	    se.clear();
+    	    ms(num,0);
+    	    printf("Excuse Set #%d\n",++cas);
+    
+    	    for ( int i = 0 ; i < k ; i++)
+    	    {
+    		cin>>str[i];
+    		int len = str[i].length();
+    		for ( int j = 0 ; j < len ;j++)
+    		{
+    		    str[i][j] = tolower(str[i][j]);
+    		}
+    		se.insert(str[i]);
+    	    }
+    	    getchar();
+    //	    for ( int i = 0 ; i < k ;i++) cout<<"str[i]:"<<str[i]<<endl;
+    	    for ( int i = 0 ; i < e ; i++)
+    	    {
+    		getline(cin,ex[i].exc);
+    		ex[i].ori=ex[i].exc;
+    		int len = ex[i].exc.length();
+    		for ( int j = 0 ; j < len ; j++)
+    		{
+    		    ex[i].exc[j] = tolower(ex[i].exc[j]);
+    		    if (ex[i].exc[j]<'a'||ex[i].exc[j]>'z')
+    			ex[i].exc[j]=' ';  //把非字母部分都转化成空格.
+    		}
+    	    }
+    
+    //	    for ( int i = 0 ; i < e ; i++) cout<<"exc[i]:"<<ex[i].exc<<endl;
+    
+    	    int ans = -1;
+    	
+    	    for ( int i = 0 ; i < e ;i++)
+    	    {
+    		int cnt = 0 ;
+    		string cpy = ex[i].exc;
+    		int pos = 0 ;
+    		while (pos!=-1)
+    		{
+    		    pos = cpy.find(' ');
+    		    string tmp = cpy.substr(0,pos-0);
+    		    if (se.count(tmp)==1) cnt++;
+    		    cpy.erase(0,pos+1);
+    		    //cout<<i<<"cpy:"<<cpy<<cpy.length()<<endl;
+    		}
+    		
+    		ex[i].num=cnt;
+    	    }
+    //	    for ( int i = 0 ; i < e ; i++) cout<<"num[i]:"<<ex[i].num<<endl;
+    	    sort(ex,ex+e);
+    	    for ( int i = 0 ; i < e ; i++)
+    	    {
+    		if (ex[i].num==ex[0].num)
+    		{
+    		    cout<<ex[i].ori<<endl;
+    		}
+    	    }
+    	    cout<<endl;
+    	}
+    
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+

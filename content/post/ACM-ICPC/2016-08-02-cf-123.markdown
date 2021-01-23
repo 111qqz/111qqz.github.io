@@ -1,0 +1,331 @@
+---
+author: 111qqz
+date: 2016-08-02 15:23:55+00:00
+draft: false
+title: codeforces 123 D. String　（后缀数组+两次二分得到区间＋rmq）
+type: post
+url: /2016/08/cf-123/
+categories:
+- ACM
+tags:
+- rmq
+- 二分
+- 后缀数组
+---
+
+[题目链接](http://codeforces.com/problemset/problem/123/D)
+
+题意：定义一个函数F．．
+
+
+<blockquote>For exampe: _F_(_babbabbababbab_, _babb_) = 6. The list of pairs is as follows:
+
+(1, 4), (4, 7), (9, 12)
+
+Its continuous sequences are:</blockquote>
+
+
+
+
+
+	  * 
+
+
+<blockquote>(1, 4)</blockquote>
+
+
+
+	  * 
+
+
+<blockquote>(4, 7)</blockquote>
+
+
+
+	  * 
+
+
+<blockquote>(9, 12)</blockquote>
+
+
+
+	  * 
+
+
+<blockquote>(1, 4), (4, 7)</blockquote>
+
+
+
+	  * 
+
+
+<blockquote>(4, 7), (9, 12)</blockquote>
+
+
+
+	  * 
+
+
+<blockquote>(1, 4), (4, 7), (9, 12)</blockquote>
+
+
+erfen
+
+．
+erfen
+题目描述得很烂．．看例子把．．大概就是：如果字符串y在字符串x中出现n次，那么F(x,y)=n*(n+1)/2
+
+现在给一个字符串，求所有的F(s,x)的和，x为字符串的所有不相同的子串．
+
+
+
+思路：由于刚刚写了一个求一个字符串所有不同子串个数的题目．．．于是就想到了后缀数组．．．
+
+写完之后观察height[i]．如果把height[i]看成底在x轴上的第i个矩形的高的话，n就是一段连续的矩形的长度．
+
+
+
+然后．．．暴力会tle 48
+
+题解说单调栈．．．但是单调栈之后还要线段树or并查集？　（by 羊神）
+
+．．．不会啊orz
+
+最后用了二分+rmp过掉的
+
+大概就是两次二分得到一个矩形的区间，和whust2016 #1的那道题有点像．
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年08月01日 星期一 04时57分01秒
+    File Name :code/cf/problem/123d.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #include <stack>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    int n,sa[N],rk[N],t[N],t2[N],cnt[N];
+    int height[N];
+    char s[N];
+    int cmp( int *r , int a,int b,int l){return r[a]==r[b]&&r[a+l]==r[b+l];}
+    void getSa( int n,int m)
+    {
+        int *x = t;
+        int *y = t2;
+        ms(cnt,0);
+        for ( int i = 0 ; i  < n ; i++) cnt[x[i]=s[i]]++;
+        for ( int i = 1 ; i < m ; i++) cnt[i] +=cnt[i-1];
+        for ( int i = n-1 ; i >= 0 ; i--) sa[--cnt[x[i]]] = i ;
+        for ( int k = 1 ; k <= n ; k <<=1)
+        {
+    	int p = 0 ;
+    	for ( int i = n-k ; i < n;  i++) y[p++] = i;
+    	for  ( int i = 0 ; i < n ; i++) if (sa[i]>=k) y[p++] = sa[i]-k;
+    	ms(cnt,0);
+    	for ( int i = 0 ; i <n ; i++) cnt[x[y[i]]]++;
+    	for ( int i = 0 ; i < m ; i++) cnt[i] +=cnt[i-1];
+    	for ( int i = n-1 ; i >= 0 ; i--) sa[--cnt[x[y[i]]]] = y[i];
+    	swap(x,y);
+    	p = 1;
+    	x[sa[0]] = 0 ;
+    	for ( int i = 1 ;i  <n ; i++)
+    	    x[sa[i]] = cmp(y,sa[i-1],sa[i],k)?p-1:p++;
+    	if (p>=n) break;
+    	m = p;
+        }
+    }
+    void getHeight( int n)
+    {
+        int k = 0 ;
+        for ( int i = 0 ; i < n ; i++) rk[sa[i]] = i ;
+        height[0] =  0 ;
+        for ( int  i = 0 ; i < n ; i++)
+        {
+    	if (rk[i]==0) continue;
+    	if (k) k--;
+    	int j = sa[rk[i]-1];
+    	while (s[i+k]==s[j+k]) k++;
+    	height[rk[i]] = k;
+        }
+    }
+    int getSuffix( char s[])
+    {
+        int len =  strlen(s);
+        int up = 0 ;
+        for ( int i = 0 ; i < len ; i++)
+        {
+    	int  val = s[i];
+    	up = max(up,val);
+        }
+        s[len++]='$';
+        getSa(len,up+1);
+        getHeight(len);
+        return len;
+    }
+    LL cal( LL x)
+    {
+        return x*(x+1)/2LL;
+    }
+    LL solve2(int n)
+    {
+    	 for ( int i = 0 ; i < n ; i++) cout<<i<<" "<<height[i]<<endl;
+        ms(cnt,0);
+        int up = 0 ;
+        for ( int i = 1 ; i < n;  i++) cnt[height[i]]++,up=max(up,height[i]);
+        for ( int i = up-1 ; i >= 0 ; i--) cnt[i] = cnt[i]+cnt[i+1];
+        LL res = 0LL ;
+        for ( int i = 0 ; i <= up ; i++)
+    	res = res + cal(1LL*cnt[i]);
+        return res;
+    }
+    /*
+    stack<int>stk;
+    int l[N],r[N];
+    bool visl[N],visr[N];
+    
+    LL solve ( LL n)  //单调栈
+    {
+        LL res = n*(n-1LL)/2LL;
+        int up = 0 ;abaabaabaaba
+        for ( int i = 1 ; i < n; i++) up = max(height[i],up);
+     //   for ( int i = 1 ; i <= n ; i++) cout<<"i:"<<i<<" height[i]:"<<height[i]<<endl;
+        height[0] = -1;
+        height[n+1] = -1 ; //单调队列的哨兵
+        stk.push(0);
+        int x;
+        for ( int i = 1 ; i <= n; i++)
+        {
+    	for (x=stk.top();height[x]>=height[i];x=stk.top()) stk.pop();
+    	l[i] = x+1;
+    	stk.push(i);
+    //	cout<<"i:"<<i<<endl;
+        }
+        while (!stk.empty()) stk.pop() ; stk.push(n+1);
+        for ( int i  = n ; i >=1 ; i--)
+        {
+    	for (x=stk.top() ; height[x]>=height[i] ; x = stk.top()) stk.pop();
+    	r[i] = x-1;
+    	stk.push(i);
+        }
+      //  for ( int i = 1 ; i <= n ; i++)
+    //	cout<<"i:"<<i<<" l[i]:"<<l[i]<<" r[i]:"<<r[i]<<" height[i]:"<<height[i]<<" "<<(r[i]-l[i]+1)*height[i]<<endl;
+    //    int mxh = 0 ;
+        ms(visl,false);
+        ms(visr,false);
+        int mxh = 0 ;
+        int more =1;
+        for ( int i = 1 ;i  <= n ; i++)
+        {
+    	if (height[i]==0)
+    	{
+    	    mxh = 0 ;
+    	    continue;
+    	}
+    	if (visr[r[i]]&&visl[l[i]])
+    	{
+    	    mxh = 0 ;
+    	    continue;
+    	}
+    	    if (i>1&&height[i-1]<height[i]) more = height[i]-height[i-1];
+    	    if (i<n&&height[i+1]<height[i]) more = min(more,height[i]-height[i+1]);
+    	    res = res + cal((r[i]-l[i]+1))*(more);
+    	    mxh = max(mxh,height[i]);
+    	    visr[r[i]] = true;
+    	    visl[l[i]] = true;
+    //	    cout<<"i:"<<i<<" res:"<<res<<endl;
+    	
+          }
+    	
+        return res;
+    }  */
+    
+    int dp[N][30]; // for rmq;
+    void rmq_init( int n)
+    {
+        for ( int i = 1 ; i <= n ; i++) dp[i][0] = height[i];
+    
+        for ( int j = 1 ; (1<<j) <= n ; j++)
+    	for ( int i = 1 ; i + (1<<j) - 1 <= n ; i++)
+    	    dp[i][j] = min(dp[i][j-1],dp[i+(1<<(j-1))][j-1]);
+    }
+    int rmq( int l,int r)
+    {
+        if (l>r) swap(l,r);
+        int k = 0 ;
+        while (1<<(k+1)<=r-l+1) k++;
+        int res = min(dp[l][k],dp[r-(1<<k)+1][k]);
+        return res;
+    
+    }
+    
+    LL solve( LL len)
+    {
+        rmq_init(len);
+        LL ans = len*(len+1)/2;
+    
+     //   for ( int i = 1 ; i <= len ; i++) cout<<i<<" :"<<height[i]<<endl;
+        for ( int i = 1 ; i <= len ; i++)
+        {
+    	int l = 0 ,r = i ;
+    	while (r>l+1)
+    	{
+    	    int mid = (l+r)/2;
+    	    if (rmq(mid,i-1)>=height[i]) r = mid;
+    	    else l = mid;
+    	}
+    	int L = i,R= len+1;
+    	while (R>L+1)
+    	{
+    	    int mid = (L+R) / 2;
+    	    if (rmq(i+1,mid)>height[i]) L = mid;
+    	    else R = mid;
+    	}
+    //	cout<<"i:"<<height[i]<<"L:"<<L<<" r:"<<r<<" ans:"<<ans<<endl;
+    	ans +=1LL*height[i]*(L-i+1)*(i-r+1);
+        }
+        return ans;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	scanf("%s",s);
+    	int len = getSuffix(s);
+    //	cout<<"len:"<<len-1<<endl;
+    	LL ans = solve(len-1);
+    	printf("%lld\n",ans);
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

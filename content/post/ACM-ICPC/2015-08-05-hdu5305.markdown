@@ -1,0 +1,115 @@
+---
+author: 111qqz
+date: 2015-08-05 15:36:00+00:00
+draft: false
+title: hdu 5305 Friends　（dfs）
+type: post
+url: /2015/08/hdu5305/
+categories:
+- ACM
+tags:
+- dfs
+---
+
+dfs 1A
+ 
+
+    
+    /*************************************************************************
+    	> File Name: code/whust/#9/K.cpp
+    	> Author: 111qqz
+    	> Email: rkz2013@126.com 
+    	> Created Time: 2015年08月05日 星期三 15时02分30秒
+     ************************************************************************/
+    
+    #include<iostream>
+    #include<iomanip>
+    #include<cstdio>
+    #include<algorithm>
+    #include<cmath>
+    #include<cstring>
+    #include<string>
+    #include<map>
+    #include<set>
+    #include<queue>
+    #include<vector>
+    #include<stack>
+    #define y0 abc111qqz
+    #define y1 hust111qqz
+    #define yn hez111qqz
+    #define j1 cute111qqz
+    #define tm crazy111qqz
+    #define lr dying111qqz
+    using namespace std;
+    #define REP(i, n) for (int i=0;i<int(n);++i)  
+    typedef long long LL;
+    typedef unsigned long long ULL;
+    const int inf = 0x7fffffff;
+    int n ,m,ans;
+    int d[50];
+    int on[50],off[50];
+    int u[50],v[50];
+    
+    bool ok(int x,int y)
+    {
+        if ( !d[x] && !d[y] && on[x] == off[x] && on[y] == off[y] )
+            return true;
+        if ( !d[x] && d[y] && on[x] == off[x] )
+            return true;
+        if ( d[x] && !d[y] && on[y] == off[y] )
+            return true;
+        if ( d[x] && d[y] )
+            return true;
+        return false;
+    }
+    
+    void dfs ( int i)
+    {
+        if (i==m)
+        {
+            ans++;
+            return;
+        }
+        int x = u[i];
+        int y = v[i];
+        d[x]--;
+        d[y]--;
+        on[x]++;
+        on[y]++;
+        if (ok(x,y))
+            dfs (i+1);
+        on[x]--;on[y]--;
+        off[y]++;off[x]++;
+        if ( ok( x,y))
+            dfs (i+1);
+        off[y]--;
+        off[x]--;
+        d[x]++;
+        d[y]++;
+    }
+    
+    int main ( )
+    {
+        int T;
+        cin>>T;
+        while ( T-- )
+        {
+            ans = 0;
+            scanf ("%d %d",&n,&m);
+            memset (d,0,sizeof(d));
+            memset (on,0,sizeof(on));
+            memset (off,0,sizeof(off));
+            for ( int i = 0 ; i < m ; i++ )
+            {
+                scanf ("%d%d",&u[i],&v[i]);
+                d[u[i]]++;
+                d[v[i]]++;
+            }
+            dfs (0);
+            printf ( "%d\n" , ans );
+        }
+    }
+    
+
+
+

@@ -1,0 +1,91 @@
+---
+author: 111qqz
+date: 2016-10-04 12:59:16+00:00
+draft: false
+title: codeforces 605 A. Sorting Railway Cars (dp)
+type: post
+url: /2016/10/cf605a/
+categories:
+- ACM
+tags:
+- dp
+---
+
+[题目链接](http://codeforces.com/problemset/problem/605/A)
+
+题意：给出一个n个数的排列，每次可以把一个数放到最前面或者最后面的位置，问至少要进行多少次操作才能使得数列升序。
+
+思路：考虑不被移动的那些数，当把所有一定的数去掉以后，这些剩下的数一定是一段数值连续，位置递增的数。如果想要移动的数最少，俺么这串递增的数就尽可能长。
+
+dp[a[i]] = dp[a[i]-1] + 1
+
+那么ans = n - max{dp[i]}
+
+另外：对于要移动的数，我们可以按照一定顺序（放在前面的数按照递减顺序，放在最长序列后面的数按照递增顺序）移动，**可以保证每个数只需要移动一次。**
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年10月04日 星期二 20时10分00秒
+    File Name :code/cf/problem/605A.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <deque>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <bitset>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    int n;
+    int a[N];
+    int dp[N];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	cin>>n;
+    	for ( int i = 1 ; i <= n ; i++) cin>>a[i];
+    	ms(dp,0);
+    	int mx = 0 ;
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    dp[a[i]] = dp[a[i]-1] + 1;
+    	    mx = max(dp[a[i]],mx);
+    	}
+    	cout<<n-mx<<endl;
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+

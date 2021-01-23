@@ -1,0 +1,161 @@
+---
+author: 111qqz
+date: 2016-07-14 09:05:01+00:00
+draft: false
+title: poj 2031 Building a Space Station (最小生成树)
+type: post
+url: /2016/07/poj-2031/
+categories:
+- ACM
+tags:
+- mst
+---
+
+[poj 2031](http://poj.org/problem?id=2031)
+
+
+
+题意：三维空间中n个球要相连。。。通路的代价是距离。。。如果球相交（切）或者包含那么不用建通路就能联系。。。问联系所有球的最小代价。。。
+
+思路：裸的最小生成树。。。。先预处理球和球表面的距离。。。距离是负数的处理成0.。。然后mst搞之。。。不算CE的话是1A....
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年07月14日 星期四 15时44分53秒
+    File Name :code/poj/2031.cpp
+     ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const  int N =105;
+    int n;
+    int m; 
+    double a[N][N];
+    int f[N];
+    int dblcmp(double d)
+    {
+        return d<-eps?-1:d>eps;
+    }
+    void init()
+    {
+        for ( int i = 1 ; i  <= n ; i++) f[i] = i;
+    }
+    struct circle
+    {
+        double x,y,z,r;
+        double dis(circle b)
+        {
+    	double res = 0 ;
+    	res = (x-b.x)*(x-b.x)+(y-b.y)*(y-b.y)+(z-b.z)*(z-b.z);
+    	res = sqrt(res);
+    	res = res - r - b.r;
+    	if (dblcmp(res)<0) res = 0 ;
+    	return res;
+        }
+        void input()
+        {
+    	scanf("%lf%lf%lf%lf",&x,&y,&z,&r);
+        }
+    }cir[N];
+    struct Edge
+    {
+        int u,v;
+        double w;
+        bool operator < (Edge b)const
+        {
+    	return w<b.w;
+        }
+    }edge[N*N/2];
+    int root ( int x)
+    {
+        if (x!=f[x]) f[x] = root (f[x]);
+        return f[x];
+    }
+    void merge( int x,int y)
+    {
+        int rx = root (x);
+        int ry = root(y);
+        if (rx==ry) return;
+        f[rx] = ry;
+    }
+    int main()
+    {
+    #ifndef  ONLINE_JUDGE 
+        freopen("code/in.txt","r",stdin);
+    #endif
+        while (~scanf("%d",&n))
+        {
+    	if (n==0) break;
+    	init();
+    	for ( int i = 1 ;i  <= n ; i++) cir[i].input();
+    	for ( int i = 1 ; i <= n ; i++)
+    	    for ( int j = 1 ; j <= n ; j++)
+    		a[i][j]=a[j][i]=cir[i].dis(cir[j]);
+    	m = 0 ;
+    	for ( int i = 1 ; i <= n ; i++)
+    	    for ( int j = 1 ; j <= n ; j++)
+    		if (i<j)
+    		{
+    		    m++;
+    		    edge[m].u = i ;
+    		    edge[m].v = j;
+    		    edge[m].w = a[i][j];
+    		}
+    	sort(edge+1,edge+m+1);
+    	double mst = 0 ;
+    	int cnt = 0 ;
+    	for ( int i = 1 ; i <= m ; i++)
+    	{
+    	    int u = edge[i].u;
+    	    int v = edge[i].v;
+    	    double w = edge[i].w;
+    	    if (root(u)==root(v)) continue;
+    	    merge(u,v);
+    	    mst +=w;
+    	    cnt++;
+    	    if (cnt>=n-1) break;
+    	}
+    	if (dblcmp(mst)==0)
+    	{
+    	    puts("0.000");
+    	}else
+    	{
+    	    printf("%.3f\n",mst);
+    	}
+        }
+    #ifndef ONLINE_JUDGE  
+        fclose(stdin);
+    #endif
+        return 0;
+    }
+    
+
+
+

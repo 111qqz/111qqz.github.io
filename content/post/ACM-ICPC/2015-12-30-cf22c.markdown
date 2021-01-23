@@ -1,0 +1,118 @@
+---
+author: 111qqz
+date: 2015-12-30 13:47:31+00:00
+draft: false
+title: codeforces 22  C. System Administrator
+type: post
+url: /2015/12/cf22c/
+categories:
+- ACM
+tags:
+- 图论
+- 构造
+---
+
+http://codeforces.com/contest/22/problem/C
+题意：要求用n个点m条边构造一个不允许有重边的图，满足当去掉点v的时候，剩下的n-1个不联通。如果有答案输出任意，没答案输出-1.
+思路：首先如果n个点要联通。。至少有n-1条边，此时为一棵树。但是是不是边越多越好呢？显然是不可以的。满足去掉一个点使得n-1个点不联通的情况为，存在一个点u只和v相连，不和任意任何其他点相连，那么当去掉v点，u点就变成不可到达了。边数最多的情况就是，除了v点以外的n-1个点，每个点的度都是n-2(去掉自身以及u点还有n-2个点)，，那么除去u点以外的n-1个点的度数就是（n-1）*(n-2)，边数则为(n-1)*(n-2)/2，再加一条连接u的边，**所以图的最大边数为(n-1)*(n-2)/2+1，最小为n-1.**
+
+如果有解，那么接下来的问题是构造。
+
+我是按照如下方式构造的：
+
+先构造一条链，将u点放在第一个，v点放在第二个。不妨当v=1时令u=2,否则u=1;
+
+m-=n-1,如果m还有剩余，那么从第二个点开始，一直到第n-2个点，每个点与至少隔1个点的其他点相连，直到边数没有剩余。
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2015年12月30日 星期三 20时36分06秒
+    File Name :code/cf/problem/22C.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    int n,m,v;
+    int a[N];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	cin>>n>>m>>v;
+    	if (m<n-1||m>((n-1)*(n-2)/2+1))
+    	{
+    	    puts("-1");
+    	    return 0;
+    	}
+    
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    a[i] = i ;
+    	    if (i==2)
+    	    {
+    		a[i]=v;
+    	    }
+    	    if (i==v)
+    	    {
+    		a[i]=2;
+    	    }
+    	}
+    	for ( int i = 1 ; i <= n-1 ; i++)
+    	{
+    	    printf("%d %d\n",a[i],a[i+1]);
+    	}
+    	m-=n-1;
+    
+    	int cnt =  0 ;
+    	for ( int i = 2 ; i <= n-2 ; i ++)
+    	{
+    	    if (cnt>m) break;
+    	    for ( int j = i+2 ; j <= n ; j++)
+    	    {
+    		cnt++;
+    		if (cnt>m) break;
+    		printf("%d %d\n",a[i],a[j]);
+    	    }
+    	}
+    
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

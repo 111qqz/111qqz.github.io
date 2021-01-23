@@ -1,0 +1,161 @@
+---
+author: 111qqz
+date: 2016-05-19 07:39:48+00:00
+draft: false
+title: poj 1330  Nearest Common Ancestors (lca,用dfs+rmq在线求解)
+type: post
+url: /2016/05/poj1330/
+categories:
+- ACM
+
+
+tags:
+- dfs
+- LCA
+- rmq
+---
+
+[poj1330题目链接](http://poj.org/problem?id=1330)
+
+题意：给出一棵树，求两点的lca.
+思路：将lca转化成rmq在线求解。
+
+代码部分参考了：[参考代码](http://www.cppblog.com/abilitytao/archive/2009/09/21/96886.html)
+
+感觉实现得很巧妙。。。
+把树存成了有向图，dfs遇到的时候一定是第一次遇到，此时更新R.
+然后第二次遇到某个点就是在回溯的时候了。
+
+
+
+[算法学习链接](http://dongxicheng.org/structure/lca-rmq/)
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年05月19日 星期四 15时05分31秒
+    File Name :code/poj/1330.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E4+7;
+    vector <int>edge[N];
+    int n;
+    int in[N];
+    int cur;
+    int E[2*N];
+    int R[N];
+    int depth[2*N];
+    int dp[2*N][16];
+    void dfs ( int u,int dep)
+    {
+      //  cout<<"u:"<<u<<" dep:"<<dep<<endl;
+        cur++;
+        E[cur] = u;
+        depth[cur] = dep;
+        R[u] = cur;  //有向图存的话，在这里访问的一定是第一次经过。
+    
+        int siz = edge[u].size();
+        for ( int i = 0 ; i < siz ; i++)
+        {
+    	int v = edge[u][i];
+    	dfs(v,dep+1);
+    	cur++;  //返回时还经过一次。
+    	E[cur] = u ;
+    	depth[cur] = dep;
+        }
+    }
+    
+    int _min(int l,int r)
+    {
+        if (depth[l]<depth[r]) return l;
+        return r;
+    }
+    
+    void rmq_init()
+    {
+        for ( int i =  1 ; i <= 2*n+2 ; i++) dp[i][0] = i;
+    
+        for ( int j = 1 ;  (1<<j) <= 2*n+2 ; j++ )
+    	for ( int i = 1; i + (1<<j)-1 <=2*n+2 ; i++)
+    	    dp[i][j] = _min(dp[i][j-1],dp[i+(1<<(j-1))][j-1]);
+    }
+    
+    int rmq_min( int l,int r)
+    {
+        if (l>r) swap(l,r);
+        int k = 0 ;
+        while (1<<(k+1)<=r-l+1) k++;
+        return _min(dp[l][k],dp[r-(1<<k)+1][k]);
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	int T;
+    	cin>>T;
+    	while (T--)
+    	{
+    	    scanf("%d",&n);
+    	    ms(in,0);
+    	    ms(E,0);
+    	    ms(R,0);
+    	    ms(depth,0);
+    	    for ( int i = 1 ; i <= n ; i++) edge[i].clear();
+    	    for ( int i = 1 ; i <= n-1 ; i++)
+    	    {
+    		int u,v;
+    		scanf("%d %d",&u,&v);
+    		edge[u].push_back(v);
+    		in[v]++;
+    	    }
+    
+    	    int root;
+    	    for ( int i = 1 ; i <= n ; i++) if (in[i]==0) root = i;
+    	    
+    	    cur = 0 ;
+    	    dfs(root,0);
+    	    rmq_init();
+    
+    	    int x,y;
+    	    scanf("%d %d",&x,&y);
+    	    printf("%d\n",E[rmq_min(R[x],R[y])]);
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

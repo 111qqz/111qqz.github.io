@@ -1,0 +1,177 @@
+---
+author: 111qqz
+date: 2016-10-01 16:11:33+00:00
+draft: false
+title: 'bestcoder #88 || hdu 5908 Abelian Period(暴力)'
+type: post
+url: /2016/10/hdu-5908/
+categories:
+- ACM
+tags:
+- brute force
+- number theory
+---
+
+[题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=5908)
+
+题意：一段数字串，如果一个数字k满足，将该串分成若干个长度为K的子串，这些子串两两满足每个字符出现的次数一样多，那么称为k是一个阿贝尔周期。现在问所有合法的阿贝尔周期。
+
+思路：
+
+
+
+	  * 首先我们发现，所有的阿贝尔周期一定是数字串长度（设为n)的因数。
+	  * 然后我们还发现。。。如果某个因子是阿贝尔周期，那么该因子的整数倍中恰好也是n的因子的也一定是阿贝尔周期，类似筛法。
+	  * 然后我们还发现。。。最小的阿贝尔周期一定比数字串中的元素个数大。。。
+
+
+
+[![2016-10-02-00-07-21-](https://111qqz.com/wordpress/wp-content/uploads/2016/10/2016-10-02-00-07-21-的屏幕截图-1-300x7.png)
+](https://111qqz.com/wordpress/wp-content/uploads/2016/10/2016-10-02-00-07-21-的屏幕截图-1.png)
+
+然而其实后面两个不管也可以过吧。。。因为有点忘了n的约数个数的上界了。。。。
+
+还是太保守了。。。
+
+不过hack了四发哈哈哈。。。要是大号的话今天就紫了呜呜呜
+
+[![2016-10-01-21-11-30-](https://111qqz.com/wordpress/wp-content/uploads/2016/10/2016-10-01-21-11-30-的屏幕截图-300x73.png)
+](https://111qqz.com/wordpress/wp-content/uploads/2016/10/2016-10-01-21-11-30-的屏幕截图.png)
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年10月01日 星期六 18时58分00秒
+    File Name :code/bc/#88/1002.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <deque>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <bitset>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    int n;
+    vector <int>factor;
+    int cnt[N];
+    set<int>se;
+    bool vis[N];
+    int a[N];
+    set<int>ans;
+    bool solve(int st,int en)
+    {
+        bool ret = true;
+        for ( int i = st ; i <= en ; i++)
+        {
+    	cnt[a[i]]--;
+    	if (cnt[a[i]]<0) ret = false;
+        }
+        for ( int i = st ; i <= en ; i++) cnt[a[i]]++;
+        return ret;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	int T;
+    	cin>>T;
+    	while (T--)
+    	{
+    	    factor.clear();
+    	    se.clear();
+    	    ans.clear();
+    	    ms(vis,false);
+    	    scanf("%d",&n);
+    	    for ( int i = 1 ; i <= n ; i++)
+    	    {
+    		scanf("%d",a+i);
+    		se.insert(a[i]);
+    	    }
+    	    for ( int i = 1 ; i*i<= n ; i++)
+    	    {
+    		if (n%i==0)
+    		{
+    		    factor.push_back(i);
+    		    if (i!=n/i) factor.push_back(n/i);
+    		}
+    	    }
+    	    int fac_siz = factor.size();
+    	    int fst;
+    	    for ( int i = 0 ; i < fac_siz ; i++)
+    	    {
+    		if (factor[i]>=int(se.size()))
+    		{
+    		    fst = i;
+    		    break;
+    		}
+    	    }
+    	 //   cout<<"fst:"<<fst<<endl;
+    	    for ( int i = fst ; i < fac_siz; i++)
+    	    {
+    		int v = factor[i];
+    		if (vis[v]) continue;
+    		bool ok = true;
+    		ms(cnt,0);
+    		for ( int j = 1 ; j <= v ; j++) cnt[a[j]]++;
+    		for ( int j = v+1 ;  j+v-1 <= n ; j+=v)
+    		{
+    		    if (!solve(j,j+v-1))
+    		    {
+    			ok = false;
+    			break;
+    		    }
+    		}
+    		if (ok)
+    		{
+    		    for ( int j = i ; j < fac_siz ; j++)
+    		    {
+    			int u = factor[j];
+    			if (u%v==0)
+    			{
+    			    ans.insert(u);
+    			    vis[u] = true;
+    			}
+    		    }
+    		}
+    	    }
+    	    vector<int> anss;
+    	    anss.clear();
+    	    for ( auto it = ans.begin() ; it !=ans.end() ; it++) anss.push_back(*it);
+    	    int siz = anss.size();
+    	    for ( int i = 0 ; i < siz-1;  i++) printf("%d ",anss[i]);
+    	    printf("%d\n",anss[siz-1]);
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

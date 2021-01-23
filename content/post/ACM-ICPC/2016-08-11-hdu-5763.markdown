@@ -1,0 +1,144 @@
+---
+author: 111qqz
+date: 2016-08-11 15:41:57+00:00
+draft: false
+title: 'hdu 5763 || 2016 multi #4 1001 Another Meaning (kmp+dp)'
+type: post
+url: /2016/08/hdu-5763/
+categories:
+- ACM
+
+tags:
+- dp
+- kmp
+---
+
+[hdu 5763 题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=5763)
+
+题意：给定两个字符串A和B，每个出现在A中的B(可以overlap)都有两种含义，问A串一共可能有多少种含义。
+
+思路：kmp+dp.
+
+考虑dp[i]为前i个字符（**也就是从开始长度为i，注意不是字符串的下标为i**）的含义数。
+
+我们考虑第i个字符对其他位置字符的贡献。
+
+首先第i位的含义数可以无条件得转移到i+1位。也就是dp[i+1]+=dp[i];
+
+此外，如果第i位是一个B串开始的位置，那么第i位对i+len2位就有贡献。也就是dp[i+len2]+=dp[i];
+
+初始化dp[0]=1，其他为0.
+
+剩下我们要做的就是处理出A串中的哪些位置是B串开始的位置。
+
+kmp处理下就好，用一个布尔数组标记。
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年08月11日 星期四 11时07分24秒
+    File Name :code/hdu/5763.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <stack>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <deque>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int MOD = 1E9+7;
+    const int N=1E5+7;
+    int nxt[N];
+    char a[N],b[N];
+    bool v[N];
+    int dp[N];
+    void getnxt(char *s)
+    {
+        int i = 0;
+        int j = -1;
+        nxt[0] = -1;
+        int n = strlen(s);
+        while (i<n)
+    	if (j==-1||s[i]==s[j]) nxt[++i]=++j;
+    	else j = nxt[j];
+    }
+    void kmp( char *a,char *b)
+    {
+        int n = strlen(a);
+        int m = strlen(b);
+        getnxt(b);
+        int i = 0 ;
+        int j = 0 ;
+        while (i<n)
+        {
+    	if (j==-1||a[i]==b[j]) i++,j++;
+    	else j = nxt[j];
+    	if (j==m)
+    	{
+    	    v[i-m] = true;//长度为i的位置的下标是i-1,开始的位置是（i-1）+m+1,也就是i-m
+    //	    cout<<"i:"<<i<<" i-m:"<<i-m<<endl;
+    	}
+        }
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	int T;
+    	cin>>T;
+    	int cas = 0;
+    	while (T--)
+    	{
+    	    printf("Case #%d: ",++cas);
+    	    scanf("%s",a);
+    	    scanf("%s",b);
+    	    ms(v,false);
+    	    kmp(a,b);
+    	    int len1 = strlen(a);
+    	    int len2 = strlen(b);
+    	    ms(dp,0);
+    //	    for ( int i = 0 ; i < len1 ; i++) cout<<i<<" "<<v[i]<<endl;
+    	    
+    	    dp[0] = 1; //dp[i]表示长度为i为止的方案数(注意是长度为i，不是字符串下标为i!!!)
+    	    for ( int i = 0 ; i < len1;  i++)  //这样考虑比较容易，我们考虑第i位的贡献。
+    	    {					//第i位的贡献无论如何都可以传递到下一位。如果第i位是某个匹配开始的位置，还可以传递到i+len2-1的位置。
+    		dp[i+1] = (dp[i+1] + dp[i])%MOD;
+    		if (v[i]) dp[i+len2] = (dp[i+len2] + dp[i]) % MOD;
+    	    }
+    //	    for ( int i = 0 ; i <= len1 ; i++) cout<<i<<" dp[i]:"<<dp[i]<<endl;
+    	    printf("%d\n",dp[len1]%MOD);
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

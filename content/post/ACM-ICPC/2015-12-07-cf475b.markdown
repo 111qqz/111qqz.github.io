@@ -1,0 +1,144 @@
+---
+author: 111qqz
+date: 2015-12-07 01:38:26+00:00
+draft: false
+title: codeforces 475 B. Strongly Connected City
+type: post
+url: /2015/12/cf475b/
+categories:
+- ACM
+tags:
+- brute force
+- dfs
+---
+
+http://codeforces.com/problemset/status
+题意：n行m列的道路网络。共n*m条道路。每条道路都是单向的.**问从任何一个路口出发**能否到达其他的任何一个路口。
+
+思路：需要注意的是。我从A点能到达B点，**不代表B也能到达A.也就是说，某些点满足可以遍历所有点是不够的，只有当所有点都满足才可以。**
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2015年12月07日 星期一 08时55分48秒
+    File Name :code/cf/problem/475B.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    
+    
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=25;
+    int n,m;
+    bool vis[N][N];
+    char hor[N],ver[N];
+    
+    bool direrror (char ch,int d)
+    {
+        if (ch=='v'&&d==3) return true;
+        if (ch=='^'&&d==0) return true;
+        
+        if (ch=='<'&&d==2) return true;
+        if (ch=='>'&&d==1) return true;
+        
+    	return false;
+    }
+    
+    bool ok ( int x,int y)
+    {
+        if (x>=0&&x<n&&y>=0&&y<m&&!vis[x][y]) return true;
+        return false;
+    }
+    
+    
+    void dfs ( int x,int y)
+    {
+        vis[x][y] = true;
+       // cout<<"x:"<<x<<" y:"<<y<<endl;
+        for ( int i = 0 ; i < 4 ; i++)
+        {
+    	if (direrror(hor[x],i)) continue;
+    	if (direrror(ver[y],i)) continue;
+    
+    	int nx = x + dx4[i];
+    	int ny = y + dy4[i];
+    	if (ok(nx,ny))
+    	{
+    	    dfs(nx,ny);
+    	}
+        }
+    }
+    
+    bool solve ( int x,int y)
+    {
+        ms(vis,false);
+        dfs(x,y);
+        for ( int i = 0 ; i < n ; i++)
+    	for ( int j = 0 ; j < m; j ++)
+    	    if (!vis[i][j]) return false;
+        return true;
+    
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    
+    	cin>>n>>m;                      //注意题目要求是从任意一点都可以到达其他任何点。
+    	for ( int i = 0 ; i < n ; i ++) cin>>hor[i]; 
+    	for ( int i = 0 ; i < m ; i ++) cin>>ver[i];
+    
+    	int cnt = 0 ;
+    	bool ok = true;
+    	for ( int i = 0 ; i< n ; i++)
+    	    for ( int j = 0 ;j < m;  j++)
+    		if (!solve(i,j))
+    		{
+    		    ok = false;
+    		    break;
+    		}
+    //	cout<<"cnt:"<<cnt<<endl;
+    	if (ok)
+    	{
+    	    puts("YES");
+    	}
+    	else
+    	{
+    	    puts("NO");
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

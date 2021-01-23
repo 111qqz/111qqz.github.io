@@ -1,0 +1,185 @@
+---
+author: 111qqz
+date: 2016-07-17 11:33:09+00:00
+draft: false
+title: POJ 1849 Two (树的直径)
+type: post
+url: /2016/07/poj1849/
+categories:
+- ACM
+tags:
+- 树的直径
+---
+
+[题目链接](http://poj.org/problem?id=1849)
+
+题意:一棵树。。然后初始两个推雪机在点s,问如何选择路径使得处理完所有边上的积雪所耗费的汽油最少（走过一条有雪的边和一条没雪的边耗费的汽油一样）
+
+
+
+思路：很容易想到，我们应该尽可能不走已经被清理过雪了的边，因为这样很浪费。。。这样不难想到应该是和树的直径有关。但是初始的位置是给定的。。。怎么办？突然发现由于是给了两个推雪机。。所以其实相当于。。。只有一个推雪机&我们可以从任意位置开始推雪。。。第二个问题是。。。对于不在直径上的边。。我们怎么算cost?解决办法是读边的时候进行记录。。。然后求直径的时候记录路径。。。对于一条边。。。只要有一个点不在直径上。。。那么这条边的代价就是2倍。。。
+
+1A蛤蛤蛤
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年07月17日 星期日 19时04分49秒
+    File Name :code/poj/1849.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    vector < pi > edge[N];
+    int n,s;
+    int lst;
+    int beg;
+    int d[N];
+    bool vis[N];
+    bool onpath[N];
+    int path[N];
+    int ans;
+    
+    struct  Edge
+    {
+        int u,v,w;
+    
+    }e[N];
+    void init( int n)
+    {
+        for ( int i = 1 ; i <= n ; i++) edge[i].clear();
+        ms(path,-1);
+        ms(onpath,false);
+    }
+    
+    void bfs( int s)
+    {
+        ms(d,0);
+        ms(vis,false);
+        queue<int>q;
+        q.push(s);
+        vis[s] = true;
+    
+        while (!q.empty())
+        {
+    	int u = q.front();
+    	q.pop();
+    
+    	int siz = edge[u].size();
+    
+    	for ( int i = 0 ;i  < siz;  i++)
+    	{
+    	    int v = edge[u][i].fst;
+    	    int w = edge[u][i].sec;
+    	    if (vis[v]) continue;
+    	    path[v] =  u;
+    	    vis[v] = true;
+    	    d[v] = d[u] + w;
+    	    q.push(v);
+    	}
+        }
+    
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	
+    	cin>>n>>s;
+    	init(n);
+    	for ( int i = 1  ;i <= n-1 ; i ++)
+    	{
+    	    int u,v,w;
+    	    scanf("%d%d%d",&u,&v,&w);
+    	    e[i].u = u;
+    	    e[i].v = v;
+    	    e[i].w = w;
+    	    edge[u].push_back(make_pair(v,w));
+    	    edge[v].push_back(make_pair(u,w));
+    	}
+    
+    	bfs(1);
+    	int mx = 0 ;
+    	for ( int i = 1 ; i <= n ; i ++)
+    	    if (d[i]>mx)
+    	    {
+    		mx = d[i];
+    		lst = i;
+    	    }
+    
+    	mx = 0 ;
+    	ms(path,-1);
+    	bfs(lst);
+    
+    	for ( int i = 1 ; i <= n ; i++)
+    	    if (d[i]>mx)
+    	    {
+    		mx = d[i];
+    		beg = i ;
+    	    }
+    
+    	ans = mx;
+    	int x = beg;
+    	//cout<<"bfs ok?"<<endl;
+    	while (x!=-1)
+    	{
+    	    //cout<<"x:"<<x<<endl;
+    	    onpath[x] = true;
+    	    x = path[x];
+    	}
+    	
+    //	cout<<"ans:"<<ans<<endl;
+    	for ( int i = 1 ; i <= n-1 ; i++)
+    	{
+    	    int u = e[i].u;
+    	    int v = e[i].v;
+    	    int w = e[i].w;
+    	    if (onpath[u]&&onpath[v]) continue;
+    	    ans +=w*2;
+    	}
+    
+    	printf("%d\n",ans);
+    
+    
+    	
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

@@ -1,0 +1,333 @@
+---
+author: 111qqz
+date: 2015-11-09 03:09:00+00:00
+draft: false
+title: hdu 3532 Max Angle(atan2的使用)
+type: post
+url: /2015/11/hdu3532maxangleatan2/
+categories:
+- ACM
+---
+
+# Max Angle
+
+
+
+
+**Time Limit: 4000/2000 MS (Java/Others) Memory Limit: 32768/32768 K (Java/Others)  
+Total Submission(s): 678 Accepted Submission(s): 238  
+**  
+  
+
+
+
+
+
+Problem Description
+
+
+
+
+Given many points in a plane, two players are playing an interesting game.  
+  
+Player1 selects one point A as the vertex of an angle. Then player2 selects other two points B and C. A, B and C are different with each other. Now they get an angle B-A-C.  
+  
+Player1 wants to make the angle as large as possible, while player2 wants to make the angle as small as possible.  
+  
+Now you are supposed to find the max angle player1 can get, assuming play2 is c lever enough.
+
+
+
+
+
+
+
+
+
+
+Input
+
+
+
+
+There are many test cases. In each test case, the first line is an integer n (3 <= n <= 1001), which is the number of points on the plane. Then there are n lines. Each contains two floating number x, y, witch is the coordinate of one point. n <= 0 denotes the end of input.
+
+
+
+
+
+
+
+
+
+
+Output
+
+
+
+
+For each test case, output just one line, containing the max angle player1 can get in degree format. The result should be accurated up to 4 demicals.
+
+
+
+
+
+
+
+
+
+
+Sample Input
+
+
+
+
+
+
+
+3
+0 0
+2 0
+0 5
+-1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sample Output
+
+
+
+
+
+
+
+90.0000
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Source
+
+
+
+
+[2010 ACM-ICPC Multi-University Training Contest（10）----Host by HEU](http://acm.hdu.edu.cn/search.php?field=problem&key=2010+ACM-ICPC+Multi-University+Training+Contest10Host+by+HEU&source=1&searchmode=source)
+
+
+
+
+
+
+
+
+
+
+题意是说。先选一个点A，然后选两个点B,C。 使得每个A对应的最小角B-A-C最大。
+
+
+
+
+
+
+
+我们可以枚举每个点，然后求得这个点和其他所有点所成的角度，排序后找到一组相邻的差值最小的，记录为mn
+
+
+
+
+然后对于每个点得到的mn,记录最大的一个，就是答案。
+
+
+
+
+
+
+
+角度怎么搞呢...
+
+
+
+
+**atan2(y,x)是个好东西。**
+
+
+
+
+**atan2(y,x)表示点(0,0)到（x,y）的射线与x轴正向所成的角度，取值范围介于 -pi 到 pi 之间（不包括 -pi），**
+
+
+
+
+
+
+
+**我们可以处理下把角度变成0到2*pi之间。**
+
+
+
+
+
+
+
+**  
+**还要注意直线的角度不可能是钝角。所以如果答案为钝角记得取补。
+
+
+
+
+
+
+
+1A，开心。
+
+
+
+
+
+
+
+![](https://111qqz.com/wp-content/uploads/2015/11/ContractedBlock8.gif)
+![](https://111qqz.com/wp-content/uploads/2015/11/ExpandedBlockStart8.gif)
+
+
+
+
+
+    
+    <span style="color: #008080;">  1</span> <span style="color: #008000;">/*</span><span style="color: #008000;">************************************************************************
+    </span><span style="color: #008080;">  2</span> <span style="color: #008000;">    > File Name: code/hdu/3552.cpp
+    </span><span style="color: #008080;">  3</span> <span style="color: #008000;">    > Author: 111qqz
+    </span><span style="color: #008080;">  4</span> <span style="color: #008000;">    > Email: rkz2013@126.com 
+    </span><span style="color: #008080;">  5</span> <span style="color: #008000;">    > Created Time: 2015年11月09日 星期一 10时20分55秒
+    </span><span style="color: #008080;">  6</span> <span style="color: #008000;"> ***********************************************************************</span><span style="color: #008000;">*/</span>
+    <span style="color: #008080;">  7</span> 
+    <span style="color: #008080;">  8</span> #include<iostream>
+    <span style="color: #008080;">  9</span> #include<iomanip>
+    <span style="color: #008080;"> 10</span> #include<cstdio>
+    <span style="color: #008080;"> 11</span> #include<algorithm>
+    <span style="color: #008080;"> 12</span> #include<cmath>
+    <span style="color: #008080;"> 13</span> #include<cstring>
+    <span style="color: #008080;"> 14</span> #include<<span style="color: #0000ff;">string</span>>
+    <span style="color: #008080;"> 15</span> #include<map>
+    <span style="color: #008080;"> 16</span> #include<<span style="color: #0000ff;">set</span>>
+    <span style="color: #008080;"> 17</span> #include<queue>
+    <span style="color: #008080;"> 18</span> #include<vector>
+    <span style="color: #008080;"> 19</span> #include<stack>
+    <span style="color: #008080;"> 20</span> #include<cctype>
+    <span style="color: #008080;"> 21</span> <span style="color: #0000ff;">#define</span> fst first              
+    <span style="color: #008080;"> 22</span> <span style="color: #0000ff;">#define</span> sec second      
+    <span style="color: #008080;"> 23</span> <span style="color: #0000ff;">#define</span> lson l,m,rt<<1
+    <span style="color: #008080;"> 24</span> <span style="color: #0000ff;">#define</span> rson m+1,r,rt<<1|1
+    <span style="color: #008080;"> 25</span> <span style="color: #0000ff;">#define</span> ms(a,x) memset(a,x,sizeof(a))
+    <span style="color: #008080;"> 26</span> <span style="color: #0000ff;">using</span> <span style="color: #0000ff;">namespace</span><span style="color: #000000;"> std;
+    </span><span style="color: #008080;"> 27</span> <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> eps = 1E-<span style="color: #800080;">8</span><span style="color: #000000;">;
+    </span><span style="color: #008080;"> 28</span> <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> dx4[<span style="color: #800080;">4</span>]={<span style="color: #800080;">1</span>,<span style="color: #800080;">0</span>,<span style="color: #800080;">0</span>,-<span style="color: #800080;">1</span><span style="color: #000000;">};
+    </span><span style="color: #008080;"> 29</span> <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> dy4[<span style="color: #800080;">4</span>]={<span style="color: #800080;">0</span>,-<span style="color: #800080;">1</span>,<span style="color: #800080;">1</span>,<span style="color: #800080;">0</span><span style="color: #000000;">};
+    </span><span style="color: #008080;"> 30</span> typedef <span style="color: #0000ff;">long</span> <span style="color: #0000ff;">long</span><span style="color: #000000;"> LL;
+    </span><span style="color: #008080;"> 31</span> <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> inf = <span style="color: #800080;">0x3f3f3f3f</span><span style="color: #000000;">;
+    </span><span style="color: #008080;"> 32</span> <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> pi = acos(-<span style="color: #800080;">1.0</span><span style="color: #000000;">);
+    </span><span style="color: #008080;"> 33</span> <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> N=1E3+<span style="color: #800080;">7</span><span style="color: #000000;">;
+    </span><span style="color: #008080;"> 34</span> <span style="color: #0000ff;">int</span><span style="color: #000000;"> n;
+    </span><span style="color: #008080;"> 35</span> <span style="color: #0000ff;">double</span><span style="color: #000000;"> ang[N];
+    </span><span style="color: #008080;"> 36</span> <span style="color: #0000ff;">int</span> dblcmp( <span style="color: #0000ff;">double</span><span style="color: #000000;"> d)
+    </span><span style="color: #008080;"> 37</span> <span style="color: #000000;">{
+    </span><span style="color: #008080;"> 38</span>     <span style="color: #0000ff;">return</span> d<-eps?-<span style="color: #800080;">1</span>:d><span style="color: #000000;">eps;
+    </span><span style="color: #008080;"> 39</span> <span style="color: #000000;">}
+    </span><span style="color: #008080;"> 40</span> <span style="color: #0000ff;">struct</span><span style="color: #000000;"> point
+    </span><span style="color: #008080;"> 41</span> <span style="color: #000000;">{
+    </span><span style="color: #008080;"> 42</span>     <span style="color: #0000ff;">double</span><span style="color: #000000;"> x,y;
+    </span><span style="color: #008080;"> 43</span> <span style="color: #000000;">    point(){}
+    </span><span style="color: #008080;"> 44</span>     point (<span style="color: #0000ff;">double</span> _x,<span style="color: #0000ff;">double</span><span style="color: #000000;"> _y):
+    </span><span style="color: #008080;"> 45</span> <span style="color: #000000;">    x(_x),y(_y){};
+    </span><span style="color: #008080;"> 46</span> 
+    <span style="color: #008080;"> 47</span>     <span style="color: #0000ff;">void</span><span style="color: #000000;"> input()
+    </span><span style="color: #008080;"> 48</span> <span style="color: #000000;">    {
+    </span><span style="color: #008080;"> 49</span>     scanf(<span style="color: #800000;">"</span><span style="color: #800000;">%lf %lf</span><span style="color: #800000;">"</span>,&x;,&<span style="color: #000000;">y);
+    </span><span style="color: #008080;"> 50</span> <span style="color: #000000;">    }
+    </span><span style="color: #008080;"> 51</span> 
+    <span style="color: #008080;"> 52</span>     <span style="color: #0000ff;">double</span><span style="color: #000000;"> myatan2(point p)
+    </span><span style="color: #008080;"> 53</span> <span style="color: #000000;">    {
+    </span><span style="color: #008080;"> 54</span>     <span style="color: #0000ff;">double</span> res = atan2(p.y-y,p.x-<span style="color: #000000;">x);
+    </span><span style="color: #008080;"> 55</span>     <span style="color: #0000ff;">return</span> res><span style="color: #800080;">0</span>?res:res+<span style="color: #800080;">2</span>*<span style="color: #000000;">pi;
+    </span><span style="color: #008080;"> 56</span> <span style="color: #000000;">    }
+    </span><span style="color: #008080;"> 57</span> <span style="color: #000000;">}p[N];
+    </span><span style="color: #008080;"> 58</span> 
+    <span style="color: #008080;"> 59</span> <span style="color: #0000ff;">int</span><span style="color: #000000;"> main()
+    </span><span style="color: #008080;"> 60</span> <span style="color: #000000;">{
+    </span><span style="color: #008080;"> 61</span> <span style="color: #000000;">  #ifndef  ONLINE_JUDGE 
+    </span><span style="color: #008080;"> 62</span>    freopen(<span style="color: #800000;">"</span><span style="color: #800000;">in.txt</span><span style="color: #800000;">"</span>,<span style="color: #800000;">"</span><span style="color: #800000;">r</span><span style="color: #800000;">"</span><span style="color: #000000;">,stdin);
+    </span><span style="color: #008080;"> 63</span>   <span style="color: #0000ff;">#endif</span>
+    <span style="color: #008080;"> 64</span>    
+    <span style="color: #008080;"> 65</span>     <span style="color: #0000ff;">while</span> (scanf(<span style="color: #800000;">"</span><span style="color: #800000;">%d</span><span style="color: #800000;">"</span>,&n;)!=<span style="color: #000000;">EOF)
+    </span><span style="color: #008080;"> 66</span> <span style="color: #000000;">    {
+    </span><span style="color: #008080;"> 67</span>     <span style="color: #0000ff;">if</span> (n<=<span style="color: #800080;">0</span>) <span style="color: #0000ff;">break</span><span style="color: #000000;">;
+    </span><span style="color: #008080;"> 68</span>     <span style="color: #0000ff;">for</span> ( <span style="color: #0000ff;">int</span> i = <span style="color: #800080;">0</span> ; i < n ; i++<span style="color: #000000;">) p[i].input();
+    </span><span style="color: #008080;"> 69</span>     
+    <span style="color: #008080;"> 70</span>         <span style="color: #0000ff;">double</span> mx = <span style="color: #800080;">0</span><span style="color: #000000;">;
+    </span><span style="color: #008080;"> 71</span>     <span style="color: #0000ff;">for</span> ( <span style="color: #0000ff;">int</span> i = <span style="color: #800080;">0</span> ; i < n ; i++<span style="color: #000000;"> )
+    </span><span style="color: #008080;"> 72</span> <span style="color: #000000;">    {
+    </span><span style="color: #008080;"> 73</span>         <span style="color: #0000ff;">int</span> cnt = <span style="color: #800080;">0</span><span style="color: #000000;"> ;
+    </span><span style="color: #008080;"> 74</span>         <span style="color: #0000ff;">for</span> ( <span style="color: #0000ff;">int</span> j = <span style="color: #800080;">0</span> ; j < n ;j++<span style="color: #000000;">)
+    </span><span style="color: #008080;"> 75</span> <span style="color: #000000;">        {
+    </span><span style="color: #008080;"> 76</span>         <span style="color: #0000ff;">if</span> (i==j) <span style="color: #0000ff;">continue</span><span style="color: #000000;">;
+    </span><span style="color: #008080;"> 77</span>         ang[cnt++] =<span style="color: #000000;"> p[i].myatan2(p[j]);
+    </span><span style="color: #008080;"> 78</span> <span style="color: #000000;">        }
+    </span><span style="color: #008080;"> 79</span>         sort(ang,ang+<span style="color: #000000;">cnt);
+    </span><span style="color: #008080;"> 80</span>         <span style="color: #0000ff;">double</span> mn = <span style="color: #800080;">999999</span><span style="color: #000000;">;
+    </span><span style="color: #008080;"> 81</span>         <span style="color: #0000ff;">for</span> ( <span style="color: #0000ff;">int</span> j = <span style="color: #800080;">0</span> ; j < cnt-<span style="color: #800080;">1</span> ; j++<span style="color: #000000;">)
+    </span><span style="color: #008080;"> 82</span> <span style="color: #000000;">        {
+    </span><span style="color: #008080;"> 83</span>         <span style="color: #0000ff;">double</span> tmp = ang[j+<span style="color: #800080;">1</span>]-<span style="color: #000000;">ang[j];
+    </span><span style="color: #008080;"> 84</span>         <span style="color: #0000ff;">if</span> (dblcmp(tmp-pi)><span style="color: #800080;">0</span>)   <span style="color: #008000;">//</span><span style="color: #008000;">直线的夹角不可能是钝角</span>
+    <span style="color: #008080;"> 85</span> <span style="color: #000000;">        {
+    </span><span style="color: #008080;"> 86</span>             tmp = <span style="color: #800080;">2</span>*pi-<span style="color: #000000;">tmp;
+    </span><span style="color: #008080;"> 87</span> <span style="color: #000000;">        }
+    </span><span style="color: #008080;"> 88</span>         mn =<span style="color: #000000;"> min(tmp,mn);
+    </span><span style="color: #008080;"> 89</span> <span style="color: #000000;">        }
+    </span><span style="color: #008080;"> 90</span>         mx =<span style="color: #000000;"> max(mn,mx);
+    </span><span style="color: #008080;"> 91</span> <span style="color: #000000;">    }
+    </span><span style="color: #008080;"> 92</span>     printf(<span style="color: #800000;">"</span><span style="color: #800000;">%.4fn</span><span style="color: #800000;">"</span>,mx*(<span style="color: #800080;">180.0</span>/<span style="color: #000000;">pi));
+    </span><span style="color: #008080;"> 93</span> 
+    <span style="color: #008080;"> 94</span> <span style="color: #000000;">    }
+    </span><span style="color: #008080;"> 95</span>   
+    <span style="color: #008080;"> 96</span>    
+    <span style="color: #008080;"> 97</span> <span style="color: #000000;"> #ifndef ONLINE_JUDGE  
+    </span><span style="color: #008080;"> 98</span>   <span style="color: #0000ff;">#endif</span>
+    <span style="color: #008080;"> 99</span> <span style="color: #000000;">  fclose(stdin);
+    </span><span style="color: #008080;">100</span>     <span style="color: #0000ff;">return</span> <span style="color: #800080;">0</span><span style="color: #000000;">;
+    </span><span style="color: #008080;">101</span> }
+
+
+
+
+
+View Code
+
+
+
+
+
+
+
+
+

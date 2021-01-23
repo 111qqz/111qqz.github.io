@@ -1,0 +1,129 @@
+---
+author: 111qqz
+date: 2015-02-17 09:04:00+00:00
+draft: false
+title: hdu 5119 - Happy Matt Friends（dp解法）
+type: post
+url: /2015/02/hdu5119/
+categories:
+- ACM
+
+tags:
+- dp
+---
+
+Description
+
+
+
+
+
+
+
+Matt has N friends. They are playing a game together.
+
+Each of Matt’s friends has a magic number. In the game, Matt selects some (could be zero) of his friends. If the xor (exclusive-or) sum of the selected friends’magic numbers is no less than M , Matt wins.
+
+Matt wants to know the number of ways to win.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Input
+
+
+
+
+
+
+
+The first line contains only one integer T , which indicates the number of test cases.
+
+For each test case, the first line contains two integers N, M (1 ≤ N ≤ 40, 0 ≤ M ≤ 10 6).
+
+In the second line, there are N integers ki (0 ≤ k i ≤ 10 6), indicating the i-th friend’s magic number.
+
+
+Output
+
+For each test case, output a single line “Case #x: y”, where x is the case number (starting from 1) and y indicates the number of ways where Matt can win.
+
+
+
+
+正解貌似是高斯消元....不会的说....PYY说不就是解方程么....然后我去看了下.....挺多概念没学线代的话还是挺眼生的...（orzpyy大神）记得高三的时候做过一个用矩阵加速求线性递推式的东西....当时10^18的数据秒过....还是挺让我惊讶了一下...
+扯远了... 这题dp也能做，有点类似01背包（dp真是够渣，寒假看看能不能抽时间弄一下，依然是最大的短板）
+只不过状态转移方程是 dp[i][j]=dp[i-1][j]+dp[i-1][j^a[i]]
+然后正常些貌似会MLE。。。。。用到了滚动数组
+其实滚动数组,完全...没有理解的难度啊
+竟然是我第一次使用，大概是因为基本没怎么做过DP的题吧，而滚动数组这个优化貌似主要在Dp的题里需要...
+然后在搜滚动数组的时候，看到一篇博客里用异或来表示两个状态我觉得这一点也很赞.....
+我自己想的话的大概就要又加，又mod，然后还得再来一个变量了吧.....差评满满
+还有位运算....是挺神的东西....目前还处于一知半解的阶段....ORZ  M67大神
+
+
+
+ 
+```c++
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月19日 星期五 16时30分04秒
+    File Name :code/hdu/5119.cpp
+    ************************************************ */
+    
+    #include<iostream>
+    #include<cmath>
+    #include<cstring>
+    #include<algorithm>
+    const long long C=1<<21;
+    long long dp[2][C];
+    using namespace std;
+    
+    int main()
+    {
+        int t,a[49];
+        cin>>t;
+        int tt;
+        tt=t;
+        while (t--)
+    
+        {
+            int n,m,roll;
+            roll=0;
+             memset(dp,0,sizeof(dp));
+            dp[0][0]=1;
+            cin>>n>>m;
+            for(int i=0;i<n;i++)
+                cin>>a[i];
+    
+            for(int i=0;i<n;i++)
+            {
+                roll=roll^1;
+                for(int j=0;j<=(C/2);j++)
+                    dp[roll][j]=dp[roll^1][j]+dp[roll^1][j^a[i]];
+            }
+            long long ans=0;
+            for(int i=m;i<=(C/2);i++)
+                ans=ans+dp[roll][i];
+                cout<<"Case #"<<tt-t<<": "<<ans<<endl;
+    
+        }
+        return 0;
+    }
+    
+    
+```
+
+
+

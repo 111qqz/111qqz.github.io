@@ -1,0 +1,256 @@
+---
+author: 111qqz
+date: 2016-02-10 08:51:04+00:00
+draft: false
+title: （莫队算法的学习）bzoj 2038  [2009国家集训队]小Z的袜子(hose)
+type: post
+url: /2016/02/bzoj-2038/
+categories:
+- ACM
+
+tags:
+- 分块
+- 莫队算法
+---
+
+2038: [2009国家集训队]小Z的袜子(hose)
+
+Time Limit: 20 Sec Memory Limit: 259 MB
+Submit: 5327 Solved: 2461
+[Submit][Status][Discuss]
+Description
+
+作为一个生活散漫的人，小Z每天早上都要耗费很久从一堆五颜六色的袜子中找出一双来穿。终于有一天，小Z再也无法忍受这恼人的找袜子过程，于是他决定听天由命……
+具体来说，小Z把这N只袜子从1到N编号，然后从编号L到R(L 尽管小Z并不在意两只袜子是不是完整的一双，甚至不在意两只袜子是否一左一右，他却很在意袜子的颜色，毕竟穿两只不同色的袜子会很尴尬。
+你的任务便是告诉小Z，他有多大的概率抽到两只颜色相同的袜子。当然，小Z希望这个概率尽量高，所以他可能会询问多个(L,R)以方便自己选择。
+
+Input
+
+输入文件第一行包含两个正整数N和M。N为袜子的数量，M为小Z所提的询问的数量。接下来一行包含N个正整数Ci，其中Ci表示第i只袜子的颜色，相同的颜色用相同的数字表示。再接下来M行，每行两个正整数L，R表示一个询问。
+
+Output
+
+包含M行，对于每个询问在一行中输出分数A/B表示从该询问的区间[L,R]中随机抽出两只袜子颜色相同的概率。若该概率为0则输出0/1，否则输出的A/B必须为最简分数。（详见样例）
+
+Sample Input
+
+6 4
+
+1 2 3 3 3 2
+
+2 6
+
+1 3
+
+3 5
+
+1 6
+
+Sample Output
+
+2/5
+
+0/1
+
+1/1
+
+4/15
+
+【样例解释】
+
+询问1：共C(5,2)=10种可能，其中抽出两个2有1种可能，抽出两个3有3种可能，概率为(1+3)/10=4/10=2/5。
+
+询问2：共C(3,2)=3种可能，无法抽到颜色相同的袜子，概率为0/3=0/1。
+
+询问3：共C(3,2)=3种可能，均为抽出两个3，概率为3/3=1/1。
+
+注：上述C(a, b)表示组合数，组合数C(a, b)等价于在a个不同的物品中选取b个的选取方案数。
+
+【数据规模和约定】
+
+30%的数据中 N,M ≤ 5000；
+
+60%的数据中 N,M ≤ 25000；
+
+100%的数据中 N,M ≤ 50000，1 ≤ L < R ≤ N，Ci ≤ N。
+
+中文题目，不解释了。
+思路：分块+莫队算法。http://blog.csdn.net/bossup/article/details/39236275
+这篇博客讲得很清楚。看完之后自己写的。。调了大概两个小时。。。？感觉有些理解了。
+**注意的是，如果最后分子为0，那么分母要赋值成1，而且分子为0的时候不要去求gcd...**
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月10日 星期三 15时06分20秒
+    File Name :code/bzoj/2038.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=5E4+7;
+    int n,m;
+    int col[N];
+    int pos[N];  //pos[i]表示第i个袜子在第几块
+    struct node
+    {
+        int l,r,id;
+    
+        bool operator <(node b)const
+        {
+    	if (pos[l]==pos[b.l])
+    	    return r<b.r;
+    	return pos[l]<pos[b.l];
+        }
+    
+    }q[N];
+    
+    
+    struct node2
+    {
+        LL fz,fm;
+    }ans[N];
+    LL num[N];
+    LL sum;
+    
+    
+    void update ( int x,int delta)
+    {
+        
+        sum-=LL(num[col[x]]*num[col[x]]);
+      //  cout<<"sum:::"<<sum<<endl;
+        num[col[x]]+=delta;
+        sum+=LL(num[col[x]]*num[col[x]]);
+    
+       // cout<<x<<" "<<delta<<" "<<"sum::"<<sum<<endl;
+    
+    }
+    
+    LL gcd( LL a,LL b)
+    {
+        if (a<b) return gcd(b,a);
+        if (a%b==0) return b;
+        return gcd(b,a%b);
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	cin>>n>>m;
+    	ms(num,0LL);
+    	int siz = int(sqrt(n));
+    //	cout<<"siz:"<<siz<<endl;
+    	for ( int i =  1 ; i  <= n ; i++)
+    	{
+    	    scanf("%d",&col[i]);
+    	    pos[i] = (i-1)/siz;
+    	}
+    //	cout<<"aaa"<<endl;
+    	for ( int i = 1 ; i <= m ; i++)
+    	{
+    	    scanf("%d %d",&q[i].l,&q[i].r);
+    	    q[i].id = i ;  //离线处理，记得记录id
+    	}
+    	sort(q+1,q+m+1);
+    	//for ( int i = 1 ; i <= m ; i++) cout<<"q[i].l:"<<q[i].l<<" q[i].r:"<<q[i].r<<endl;
+    //	cout<<"bbb"<<endl;
+    
+    	int prel=1,prer=0;
+    	sum=0LL;
+    	for ( int i = 1 ; i <= m ; i++)
+    	{
+    	    int id = q[i].id;
+    	    
+    //	    cout<<"q[i].l:"<<q[i].l<<" q[i].r:"<<q[i].r<<endl;
+    	    if (q[i].l==q[i].r)  //只有一直袜子的话是不可能配成一对的。
+    	    {
+    		ans[id].fz = 0LL;
+    		ans[id].fm = 1LL;
+    		continue;
+    	    }
+    	  //  cout<<"prel:"<<prel<<" prer:"<<prer<<endl;
+    	    if (q[i].r>prer)
+    	    {
+    		for ( int j = prer +1 ; j <=q[i].r ; j++) update(j,1);
+    //		cout<<"sumaa:"<<sum<<endl;
+    	    }
+    	    else
+    	    {
+    		for (int j = prer ; j > q[i].r ; j--) update(j,-1);
+    	    }
+    	    
+    	    prer = q[i].r;
+    
+    	    if (q[i].l<prel)
+    	    {
+    		for ( int j = q[i].l ; j < prel  ;j++) update(j,1);
+    	    }
+    	    else
+    	    {
+    //		cout<<"sum1:"<<sum<<endl;
+    		for ( int j = q[i].l -1 ; j>=prel  ; j--) update(j,-1);
+    //		cout<<"sum2:"<<sum<<endl;
+    	    }
+    	    prel = q[i].l;
+    //	    cout<<q[i].l<<"   "<<q[i].r<<"   "<<sum<<endl;
+    	    LL fz = sum +(-1LL)*(q[i].r-q[i].l+1);
+    	    LL fm = 1LL*(q[i].r-q[i].l)*1LL*(q[i].r-q[i].l+1);
+    //	    cout<<"fz:"<<fz<<" fm:"<<fm<<endl;
+    	    if (fz==0)
+    	    {
+    		fm = 1;
+    	    }
+    	    else
+    	    {
+    		LL GCD = gcd(fz,fm);
+    		fz/=GCD;
+    		fm/=GCD;
+    	    }
+    	    ans[id].fz = fz;
+    	    ans[id].fm = fm;
+    
+    //	    cout<<endl;
+    	}
+    
+    	for ( int i = 1 ; i <= m ; i++)
+    	    printf("%lld/%lld\n",ans[i].fz,ans[i].fm);
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

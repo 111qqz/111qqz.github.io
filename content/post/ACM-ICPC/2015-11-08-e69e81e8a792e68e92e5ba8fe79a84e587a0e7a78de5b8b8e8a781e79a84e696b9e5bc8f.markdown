@@ -1,0 +1,85 @@
+---
+author: 111qqz
+date: 2015-11-08 08:56:00+00:00
+draft: false
+title: 极角排序的几种常见的方式
+type: post
+url: /2015/11//
+categories:
+- ACM
+---
+
+20190211update:工作的时候看同事ocr的代码，发现有一段就是极角排序orz...所以说算法还是有用的...
+
+先介绍几种极角排序：
+
+1.利用叉积的正负来作cmp.(即是按逆时针排序).此题就是用这种方法
+
+    
+     bool cmp(const point &a, const point &b)//逆时针排序 
+     {
+         point origin;
+         origin.x = origin.y = 0;
+         return cross(origin,b,origin,a) < 0;
+     }
+
+
+
+
+2.利用complex的内建函数。
+
+    
+     #include
+     #define x real()
+     #define y imag()
+     #include
+     using namespace std;
+     
+     bool cmp(const Point& p1, const Point& p2)
+     {
+         return arg(p1) < arg(p2);
+     }
+
+
+
+
+
+
+
+
+![复制代码](https://111qqz.com/wp-content/uploads/2015/11/copycode.gif)
+
+
+
+
+
+
+3.利用arctan计算极角大小。（范围『-180，180』）
+
+    
+     bool cmp(const Point& p1, const Point& p2)
+     {
+         return atan2(p1.y, p1.x) < atan2(p2.y, p2.x);
+     }
+
+
+
+
+4.利用象限加上极角，叉积。
+
+    
+     bool cmp(const point &a, const point &b)//先按象限排序，再按极角排序，再按远近排序 
+     {
+         if (a.y == 0 && b.y == 0 && a.x*b.x <= 0)return a.x>b.x;
+         if (a.y == 0 && a.x >= 0 && b.y != 0)return true;
+         if (b.y == 0 && b.x >= 0 && a.y != 0)return false;
+         if (b.y*a.y <= 0)return a.y>b.y;
+         point one;
+         one.y = one.x = 0;
+         return cross(one,a,one,b) > 0 || (cross(one,a,one,b) == 0 && a.x < b.x);    
+    }
+
+
+
+
+

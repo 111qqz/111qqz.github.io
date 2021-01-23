@@ -1,0 +1,130 @@
+---
+author: 111qqz
+date: 2016-07-29 16:19:48+00:00
+draft: false
+title: 'bzoj 1874: [BeiJing2009 WinterCamp]取石子游戏 (sg函数，要求输出第一步具体方案)'
+type: post
+url: /2016/07/bzoj1874/
+categories:
+- ACM
+tags:
+- sg函数
+- 博弈论
+---
+
+
+
+
+## 1874: [BeiJing2009 WinterCamp]取石子游戏
+
+
+Time Limit: 5 Sec  Memory Limit: 162 MB
+Submit: 726  Solved: 296
+[[Submit](http://www.lydsy.com/JudgeOnline/submitpage.php?id=1874)][[Status](http://www.lydsy.com/JudgeOnline/problemstatus.php?id=1874)][[Discuss](http://www.lydsy.com/JudgeOnline/bbs.php?id=1874)]
+
+
+## Description
+
+
+
+
+小H和小Z正在玩一个取石子游戏。 取石子游戏的规则是这样的，每个人每次可以从一堆石子中取出若干个石子，每次取石子的个数有限制，谁不能取石子时就会输掉游戏。 小H先进行操作，他想问你他是否有必胜策略，如果有，第一步如何取石子。
+
+
+
+
+## Input
+
+
+
+
+输入文件的第一行为石子的堆数N 接下来N行，每行一个数Ai，表示每堆石子的个数 接下来一行为每次取石子个数的种类数M 接下来M行，每行一个数Bi，表示每次可以取的石子个数，输入保证这M个数按照递增顺序排列。
+
+
+
+
+## Output
+
+
+
+
+输出文件第一行为“YES”或者“NO”，表示小H是否有必胜策略。 若结果为“YES”,则第二行包含两个数，第一个数表示从哪堆石子取，第二个数表示取多少个石子，若有多种答案，取第一个数最小的答案，若仍有多种答案，取第二个数最小的答案。
+
+
+
+
+## Sample Input
+
+
+
+
+4
+7
+6
+9
+3
+2
+1
+2 
+
+
+
+
+
+
+## Sample Output
+
+
+
+
+YES
+1 1Hint
+样例中共有四堆石子，石子个数分别为7、6、9、3，每人每次可以从任何一堆石子中取出1个或者2个石子，小H有必胜策略，事实上只要从第一堆石子中取一个石子即可。
+
+数据规模和约定
+数据编号 N范围 Ai范围 数据编号 N范围 Ai范围
+1 N=2 Ai≤10 6 N≤10 Ai≤10
+2 N=2 Ai≤1000 7 N≤10 Ai≤100
+3 N=3 Ai≤100 8 N≤10 Ai≤1000
+4 N≤10 Ai≤4 9 N≤10 Ai≤1000
+5 N≤10 Ai≤7 10 N≤10 Ai≤1000
+对于全部数据，M≤10，Bi≤10
+
+
+
+
+
+
+## HINT
+
+
+
+
+
+
+
+## Source
+
+
+
+
+
+
+[Day2](http://www.lydsy.com/JudgeOnline/problemset.php?search=Day2)
+
+
+
+
+
+
+思路：有没有解直接sg函数搞。关键在于输出具体方案。
+
+如果存在某个i，在第i堆取走了ok[j]个石头后，恰好使得sum的值变成0（也就是使得从N态到P态的值）
+
+取这样的i和ok[j]中最小的（i是第一关键字，ok[j]是第二关键字）
+
+需要注意的是，在第i堆取走ok[j]之后的sg值 应该为 **sum^sg[a[i]]^sg[a[i]-ok[j]],而不是直接sum^sg[a[i]-ok[j]]**
+
+可以理解成先**撤销了之前计算的a[i]的操作，换成qu**
+
+

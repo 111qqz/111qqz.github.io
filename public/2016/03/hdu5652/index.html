@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="111qqz的小窝">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="https://111qqz.github.io/img/2.png">
+    <meta property="twitter:image" content="https://111qqz.github.io/img/2.png" />
+    
+
+    
+    <meta name="title" content="bc #77 ||hdu 5652 India and China Origins (图的动态连通性问题，并查集or 二分&#43;bfs验证连通性)" />
+    <meta property="og:title" content="bc #77 ||hdu 5652 India and China Origins (图的动态连通性问题，并查集or 二分&#43;bfs验证连通性)" />
+    <meta property="twitter:title" content="bc #77 ||hdu 5652 India and China Origins (图的动态连通性问题，并查集or 二分&#43;bfs验证连通性)" />
+    
+
+    
+    <meta name="description" content="">
+    <meta property="og:description" content="" />
+    <meta property="twitter:description" content="" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="ACM,111qqz,商汤科技,hust,华中科技大学">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>bc #77 ||hdu 5652 India and China Origins (图的动态连通性问题，并查集or 二分&#43;bfs验证连通性)-111qqz的小窝</title>
+
+    <link rel="canonical" href="/2016/03/hdu5652/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+    <link rel="stylesheet" href="/css/hux-blog.min-custom.css">
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">111qqz的小窝</a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    
+                    
+		    
+                        <li><a href="/categories/acm/">ACM-ICPC</a></li>
+                    
+                        <li><a href="/categories/deep-learning/">深度学习</a></li>
+                    
+                        <li><a href="/categories/mooc/">公开课</a></li>
+                    
+                        <li><a href="/categories/%e5%85%b6%e4%bb%96/">其他</a></li>
+                    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('/img/2.png')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/bfs" title="bfs">
+                            bfs
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E4%BA%8C%E5%88%86" title="二分">
+                            二分
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%8A%A8%E6%80%81%E8%BF%9E%E9%80%9A%E6%80%A7" title="动态连通性">
+                            动态连通性
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%9B%BE%E8%AE%BA" title="图论">
+                            图论
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%B9%B6%E6%9F%A5%E9%9B%86" title="并查集">
+                            并查集
+                        </a>
+                        
+                    </div>
+                    <h1>bc #77 ||hdu 5652 India and China Origins (图的动态连通性问题，并查集or 二分&#43;bfs验证连通性)</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    111qqz
+			 
+			on 
+			Monday, March 28, 2016
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                
+                
+                <p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=5652">题目链接</a>
+题意：没图不好描述，有中文题面<a href="http://bestcoder.hdu.edu.cn/contests/contest_chineseproblem.php?cid=682&amp;pid=1003">中文题面</a>，直接看吧。
+思路：据说这道题有三种做法。 当时比赛一种都不会。</p>
+
+<p>先说一种：做法是把格子看成点，可以到达的相邻格子之间看成有边相连，然后倒过来用并查集判断无向图的连通性。具体做法是：先统计初始所有空的位置，然后把所有要增加的山都加上（<strong>先统计空的位置是因为山之后要去掉，而去掉以后要得到该点的标号）</strong>，然后将把所有空的点以及china(<strong>设标号为n*m+1</strong>)点,和india(<strong>设标号为n*m+2) </strong>点通过并查集来合并..可以从上往下从左往右，每次只需要判断上面的点和左边的点是否有空，如果有就用并查集合并。 china点和india点特殊搞就好。</p>
+
+<p>然后判断india和china是否联通，如果是则输出-1.否则从最后添加的山开始移除，每次移除一座山，添加四个方向能添加的边（<strong>注意这里不要忘记如果改点在第0行或者第n-1行还要添加和china或者india的边）</strong></p>
+
+<p>然后移除后询问india和china是否联通 （root(china)==root(india)?）</p>
+
+<p>如果时间i联通了，而i+1没有联通，说明时间i是两国最早的失去联系的时间。</p>
+
+<p>第一次做这种题目，这种题目的一般做法都是倒过来做。貌似还有一个二分删除的山+bfs判断连通性的。。。？ 窝再搞搞看。
+update :二分+bfs判断连通性。其实这个思路更常规。。做法就是字面意思。注意无解的判断即可。</p>
+
+<p>并查集解法：</p>
+
+<pre><code>/* ***********************************************
+Author :111qqz
+Created Time :2016年03月27日 星期日 20时11分02秒
+File Name :code/bc/#77/1003.cpp
+************************************************ */
+
+#include &lt;cstdio&gt;
+#include &lt;cstring&gt;
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;vector&gt;
+#include &lt;queue&gt;
+#include &lt;set&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+#include &lt;cmath&gt;
+#include &lt;cstdlib&gt;
+#include &lt;ctime&gt;
+#define fst first
+#define sec second
+#define lson l,m,rt&lt;&lt;1
+#define rson m+1,r,rt&lt;&lt;1|1
+#define ms(a,x) memset(a,x,sizeof(a))
+typedef long long LL;
+#define pi pair &lt; int ,int &gt;
+#define MP make_pair
+
+using namespace std;
+const double eps = 1E-8;
+const int dx4[4]={1,0,0,-1};
+const int dy4[4]={0,-1,1,0};
+const int inf = 0x3f3f3f3f;
+const int N=505;
+char maze[N][N];
+int f[N*N];
+int n,m;
+int q;
+int p[N][N];
+int china;
+int india;
+struct node
+{
+    int x,y;
+    int id;
+
+}shan[N*N],kong[N*N];
+
+int root ( int x)
+{
+    if (x!=f[x]) f[x] = root (f[x]);
+    return f[x];
+}
+
+void merge( int x,int y)
+{
+    int rx = root (x);
+    int ry = root (y);
+//    cout&lt;&lt;&quot;rx::&quot;&lt;&lt;rx&lt;&lt;&quot;   ry::&quot;&lt;&lt;ry&lt;&lt;endl;
+    if (rx!=ry)
+    {
+    f[rx] = ry ;
+//  f[ry] = rx;
+    }
+}
+
+void addegg( int x,int y)
+{
+    if (x-1&gt;=0&amp;&amp;maze[x-1][y]=='0') merge(p[x][y],p[x-1][y]);
+    if (x+1&lt;n&amp;&amp;maze[x+1][y]=='0') merge(p[x][y],p[x+1][y]);
+    if (y-1&gt;=0&amp;&amp;maze[x][y-1]=='0') merge(p[x][y],p[x][y-1]);
+    if (y+1&lt;m&amp;&amp;maze[x][y+1]=='0') merge(p[x][y],p[x][y+1]);
+
+    if (x==0) merge(p[x][y],china);  //一开始忘记更新边缘的山被移除后，点和china以及india的边了。
+    if (x==n-1) merge(p[x][y],india);
+}
+int main()
+{
+    #ifndef  ONLINE_JUDGE 
+    freopen(&quot;code/in.txt&quot;,&quot;r&quot;,stdin);
+  #endif
+
+    int T;
+    cin&gt;&gt;T;
+    while (T--)
+    {
+        scanf(&quot;%d %d&quot;,&amp;n,&amp;m);
+        for ( int i = 0 ; i &lt; n ; i++) scanf(&quot;%s&quot;,maze[i]);
+
+        scanf(&quot;%d&quot;,&amp;q);
+        for ( int i = 1 ; i &lt;= q ; i++)
+        {
+        int x,y;
+        scanf(&quot;%d %d&quot;,&amp;x,&amp;y);
+        shan[i].x = x;
+        shan[i].y = y;
+        shan[i].id = i;
+//      maze[x][y] = '1';  //先统计空位。
+        }
+
+        int cnt = 0 ;
+        ms(p,-1);
+        for ( int i = 0 ; i  &lt; n ; i++)
+        {
+        for ( int j = 0 ; j &lt; m;  j++)
+        {
+            if (maze[i][j]=='0')
+            {
+            cnt++;
+            kong[cnt].x = i ;
+            kong[cnt].y = j;
+            kong[cnt].id = i;
+            p[i][j] = cnt;
+            }
+        }
+        }
+
+        for ( int i  = 1 ; i &lt;= q ; i ++)
+        {
+        int x = shan[i].x;
+        int y = shan[i].y;
+        maze[x][y]='1';
+        }
+        //check kong...ok!
+        //for ( int i = 1 ; i  &lt;= cnt ; i++) cout&lt;&lt;&quot;kong:&quot;&lt;&lt;kong[i].x&lt;&lt;&quot; &quot;&lt;&lt;kong[i].y&lt;&lt;endl;
+
+            china = n*m+1;
+            india = n*m+2;
+        for ( int i = 0 ; i &lt;= n*m+2 ; i++) f[i] =  i;
+    //    f[china] = china;
+      //  f[india] = india;
+     //   cout&lt;&lt;&quot;china:&quot;&lt;&lt;china&lt;&lt;endl;
+       // cout&lt;&lt;&quot;india:&quot;&lt;&lt;india&lt;&lt;endl;
+        for ( int j = 0 ; j  &lt; m ; j++)
+        {
+        if (maze[0][j]=='0')
+        {   
+            merge(china,p[0][j]);
+        }
+        if (maze[n-1][j]=='0')
+        {
+            merge(india,p[n-1][j]);
+        }
+        }
+
+        for ( int i = 0 ;i &lt; n ; i++)
+        {
+        for ( int j = 0 ; j &lt; m ; j ++)
+        {
+            if (maze[i][j]=='1') continue;
+            if (maze[i-1][j]=='0') merge(p[i-1][j],p[i][j]);
+            if (maze[i][j-1]=='0') merge(p[i][j-1],p[i][j]);
+        }
+        }
+
+        if (root(china)==root(india))
+        {
+        puts(&quot;-1&quot;);
+        continue;
+        }
+
+        for ( int i = q ; i &gt;= 1 ; i--)
+        {
+        int x = shan[i].x;
+        int y = shan[i].y;
+
+        maze[x][y] = '0';
+        addegg(x,y);
+        if (root(china)==root(india))
+        {
+            printf(&quot;%d\n&quot;,i);
+            break;
+        }
+        } 
+    }
+
+  #ifndef ONLINE_JUDGE  
+  fclose(stdin);
+  #endif
+    return 0;
+}
+</code></pre>
+
+<p>二分+bfs判断连通性。</p>
+
+<pre><code>/* ***********************************************
+Author :111qqz
+Created Time :2016年03月28日 星期一 21时12分05秒
+File Name :code/hdu/5652.cpp
+************************************************ */
+
+#include &lt;cstdio&gt;
+#include &lt;cstring&gt;
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;vector&gt;
+#include &lt;queue&gt;
+#include &lt;set&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+#include &lt;cmath&gt;
+#include &lt;cstdlib&gt;
+#include &lt;ctime&gt;
+#define fst first
+#define sec second
+#define lson l,m,rt&lt;&lt;1
+#define rson m+1,r,rt&lt;&lt;1|1
+#define ms(a,x) memset(a,x,sizeof(a))
+typedef long long LL;
+#define pi pair &lt; int ,int &gt;
+#define MP make_pair
+
+using namespace std;
+const double eps = 1E-8;
+const int dx4[4]={1,0,0,-1};
+const int dy4[4]={0,-1,1,0};
+const int inf = 0x3f3f3f3f;
+const int N=501;
+char maze[N][N];
+int n,m;
+int q;
+bool vis[N][N];
+
+struct node
+{
+    int x,y;
+
+    bool ok ()
+    {
+    if (x&gt;=0&amp;&amp;x&lt;n&amp;&amp;y&gt;=0&amp;&amp;y&lt;m&amp;&amp;!vis[x][y]) return true;
+    return false;
+    }
+}shan[250005];
+
+
+int check( int id)
+{
+
+    for ( int i = 0 ; i &lt; n ; i++)
+    {
+    for ( int j = 0 ; j &lt; m ; j ++)
+    {
+        if (maze[i][j]=='1') vis[i][j] = true;
+        else vis[i][j] = false;
+    }
+    }
+
+    for ( int i = 1 ; i &lt;= id ; i++)
+    {
+    int x = shan[i].x;
+    int y = shan[i].y;
+    vis[x][y] = true;
+    }
+
+    queue&lt;node&gt;q;
+    for ( int j = 0 ; j  &lt; m ; j++)
+    {
+
+    if (!vis[0][j])
+    {
+        node tmp;
+        tmp.x = 0;
+        tmp.y = j;
+        q.push(tmp);
+    }
+    }
+
+    while (!q.empty())
+    {
+    node pre = q.front();q.pop();
+    if (pre.x==n-1) return 1;
+    for ( int i = 0 ; i &lt; 4 ; i++)
+    {
+        node nxt;
+        nxt.x = pre.x + dx4[i];
+        nxt.y = pre.y + dy4[i];
+        if (nxt.ok())
+        {
+        vis[nxt.x][nxt.y] = true;
+        q.push(nxt);
+
+        }
+    }
+    }
+    return 0;
+}
+
+int bin()
+{
+    int l = 1 ;
+    int r = q ;
+    int mid;
+    while (l&lt;=r)
+    {
+    mid = (l+r)/2;
+    if (check(mid))
+        l = mid + 1;
+    else r = mid -1;
+    }
+    if (l&gt;q) return -1;
+    return l;
+}
+int main()
+{
+    #ifndef  ONLINE_JUDGE 
+    freopen(&quot;code/in.txt&quot;,&quot;r&quot;,stdin);
+  #endif
+
+    int T;
+    cin&gt;&gt;T;
+    while (T--)
+    {
+        scanf(&quot;%d%d&quot;,&amp;n,&amp;m);
+        for ( int i = 0 ; i  &lt; n;  i++) scanf(&quot;%s&quot;,maze[i]);
+        scanf(&quot;%d&quot;,&amp;q);
+        for ( int i = 1 ; i &lt;= q ; i ++) scanf(&quot;%d %d&quot;,&amp;shan[i].x,&amp;shan[i].y);
+        int ans = bin();
+        printf(&quot;%d\n&quot;,ans);
+    }
+
+  #ifndef ONLINE_JUDGE  
+  fclose(stdin);
+  #endif
+    return 0;
+}
+</code></pre>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="https://111qqz.github.io"><img src="/img/favicon.png" />111qqz的小窝</a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2016/03/hdu5650/" data-toggle="tooltip" data-placement="top" title="bc #77 div 2 1001 ||hdu 5650 so easy (傻逼题)">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2016/03/cf617e-2/" data-toggle="tooltip" data-placement="top" title="codeforces 617  C. Tourist&#39;s Notes (二分)">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+
+
+
+<div id="git-comments"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://ihtcboy.com/script/gitment.browser.js"></script>
+<script>
+  var gitment = new Gitment({
+    id: decodeURI(window.location.pathname),  
+    owner: '111qqz',
+    repo: '111qqz.github.io',
+    oauth: {
+      client_id: '8839ce5e58d5197e2490',
+      client_secret: '2d475a8a7e27a8b509847a6c60f692b8cbaa274e',
+    }
+  })
+  gitment.render('git-comments')
+</script>
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/km" title="KM">
+                            KM
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/bfs" title="bfs">
+                            bfs
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/binary-search" title="binary search">
+                            binary search
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/brute-force" title="brute force">
+                            brute force
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/c&#43;&#43;" title="c&#43;&#43;">
+                            c&#43;&#43;
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/caffe" title="caffe">
+                            caffe
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dfs" title="dfs">
+                            dfs
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dp" title="dp">
+                            dp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/greedy" title="greedy">
+                            greedy
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/hash" title="hash">
+                            hash
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/kmp" title="kmp">
+                            kmp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/leetcode" title="leetcode">
+                            leetcode
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/math" title="math">
+                            math
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/number-theory" title="number theory">
+                            number theory
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/rmq" title="rmq">
+                            rmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/sg%E5%87%BD%E6%95%B0" title="sg函数">
+                            sg函数
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/stl" title="stl">
+                            stl
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/tensorflow" title="tensorflow">
+                            tensorflow
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%BA%8C%E5%88%86%E5%9B%BE%E6%9C%80%E4%BD%B3%E5%8C%B9%E9%85%8D" title="二分图最佳匹配">
+                            二分图最佳匹配
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%9D%97" title="分块">
+                            分块
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%89%8D%E7%BC%80%E5%92%8C" title="前缀和">
+                            前缀和
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8C%88%E7%89%99%E5%88%A9%E7%AE%97%E6%B3%95" title="匈牙利算法">
+                            匈牙利算法
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E5%8C%BA%E9%97%B4dp" title="区间dp">
+                            区间dp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8D%9A%E5%BC%88%E8%AE%BA" title="博弈论">
+                            博弈论
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%90%8E%E7%BC%80%E8%87%AA%E5%8A%A8%E6%9C%BA" title="后缀自动机">
+                            后缀自动机
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%9B%BE%E8%AE%BA" title="图论">
+                            图论
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2" title="字符串">
+                            字符串
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BF%AB%E9%80%9F%E5%B9%82" title="快速幂">
+                            快速幂
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E4%BD%8Ddp" title="数位dp">
+                            数位dp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9E%84%E9%80%A0" title="构造">
+                            构造
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84" title="树状数组">
+                            树状数组
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%A6%82%E7%8E%87" title="概率">
+                            概率
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%A8%A1%E6%8B%9F" title="模拟">
+                            模拟
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%AF%8D%E5%87%BD%E6%95%B0" title="母函数">
+                            母函数
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%9F%A9%E9%98%B5" title="矩阵">
+                            矩阵
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%A6%BB%E6%95%A3%E5%8C%96" title="离散化">
+                            离散化
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%BA%BF%E6%AE%B5%E6%A0%91" title="线段树">
+                            线段树
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95" title="计算几何">
+                            计算几何
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://111qqz.com">111qqz的wordpress博客</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="111qqz的小窝" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:hust.111qqz@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/img/wechat.jpg">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/111qqz/">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy; 111qqz的小窝 2021
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>

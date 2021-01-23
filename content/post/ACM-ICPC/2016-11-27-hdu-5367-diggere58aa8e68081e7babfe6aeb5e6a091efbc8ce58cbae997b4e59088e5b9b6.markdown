@@ -1,0 +1,246 @@
+---
+author: 111qqz
+date: 2016-11-27 08:59:09+00:00
+draft: false
+title: hdu 5367 digger(动态线段树，区间合并)
+type: post
+url: /2016/11/hdu-5367-digger/
+categories:
+- ACM
+tags:
+- 动态线段树
+- 线段树
+---
+
+[题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=5367)
+
+题意：
+
+    
+    地主小花有n座山，这些山在地主家门前排成一条直线。这些山一开始均有相同的高度。  每一天，小花都会要求ZJiaQ开挖机把几座山挖掉一定高度，或者给一些山堆上一些高度。并且要求报告ZJiaQ报告现在有多少座山属于“高山脉”
+    当一排山的高度相等，并且比这排山左边和右边的山要高时，这排山被称为高山脉。
+    当然，最左边和最右边的山不可能是“高山脉”的一部分
+    
+
+
+思路：线段树，要维护的域蛮多的。
+
+下面高山脉简称"HM"
+
+sum:区间中HM的总长度。
+
+lsum,rsum,区间中包含左端点，右端点的高度相同的山的长度。
+
+lh,rh：区间中包含左端点，包含右端点的的高度相同的山的高度。
+
+llh,rrh:从左端点向右，从有段点向左的，第一个高度不相同的山的高度。
+
+由于这道题n有1E9，没办法像以前的办法build 线段树，因此我们采用动态线段树的技巧。
+
+官方题解：
+
+
+<blockquote>对于求“高山脉”长度，可以利用线段树。树节点中保存左高度连续长度，左高度连续区间的高度，左高度连续区间的状态（即是否高于第一个高度不同的山），右高度连续长度，右高度连续区间的高度，右高度连续区间的状态，每段区间内的“高山脉”数量。每次更新时更新高度即可，在pushup过程中去计算新产生的“高山脉”。写起来难度不是很大，然后对于n很大且必须在线做这个条件只需对于**线段树动态建立节点**去维护即可</blockquote>
+
+
+
+
+**关于动态线段树：**
+
+
+<blockquote>
+
+> 
+> 平时我们做的线段树，假设区间为[1,n]，那我们通常都是直接以 1 号点表示区间【1，n】，以 i*2 号点表示 i 节点代表区间的左半区间，以 i*2+1 号点表示 i 节点多代表区间的右半区间，一半空间长度都定义为4*n。
+> 
+> 
+
+> 
+>         在本题中，n比较大，直接将所有线段树中的所有节点定义出来不现实，那我们注意到，这道题实际上是对区间进行的一系列操作，那么就可能存在一个区间【l，r】，在所有处理过程中，该区间都可以被当做一个整体来看待。   如果是这样的话，我们定义出与该区间的子区间相对应的节点就没有意义了。
+> 
+> 
+
+> 
+>         动态生成线段树就是：假设对某一节点 p (代表区间【l，r】)进行处理时，并不是对整个区间[l，r]进行处理，而是对其某个子区间进行处理，那这个时候，该区间就不能一直被当做一个整体来看待，所以生成两个初始子节点lp、rp（节点之均为初始值），表示该区间的左半部分与右半部分，然后父节点 p 在对两个新生成的子节点进行更新。
+> 
+> </blockquote>
+
+
+
+
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年11月27日 星期日 14时45分27秒
+    File Name :code/hdu/5367.cpp
+     ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int INF = 0x3f3f3f3f;
+    const int N=5E4+7;
+    int cur,root;
+    int n,q,nnn;
+    struct Tree
+    {
+        int sum;//高山脉的长度和
+        int child[2];//左右孩子的编号
+        int rsum,lsum;//从左端点，右端点其高度相同的连续的山有多少个。
+        int lh,rh;//左边连续，右边连续的山的高度。
+        int llh,rrh;//从左边往右第一个不连续，从右边往左第一个不连续的山的高度。
+        int lazy;
+        void init(int l,int r)
+        {
+    	sum = child[0] = child[1] = lh = rh = llh = rrh = lazy = 0;
+    	lsum = rsum = r-l+1; //初始所有高度相同，所以高度相同的连续的山的个数等于区间长度。
+        }
+    };
+    struct SegmentTree{
+        Tree tree[N*60];
+        void check(int &rt,int l,int r)
+        {
+    	//cout<<"rt:"<<rt<<" l:"<<l<<" r:"<<r<<endl;
+    	if (rt) return;
+    	rt=++cur;
+    	tree[rt].init(l,r);
+    	if (l==1) tree[rt].llh = INF;
+    	if (r==n) tree[rt].rrh = INF;//最左边和最右边的山一定不是“high mountain line"的一部分/
+        }
+        void add( int rt,int val)
+        {
+    	tree[rt].lazy +=val;
+    	tree[rt].rrh +=val;
+    	tree[rt].llh +=val;
+    	tree[rt].lh +=val;
+    	tree[rt].rh +=val;
+        }
+        void PushDown( int rt,int l,int r)
+        {
+    	if (tree[rt].lazy)
+    	{
+    	    int m = (l+r)>>1;
+    	    check(tree[rt].child[0],l,m);
+    	    check(tree[rt].child[1],m+1,r);
+    	    add(tree[rt].child[0],tree[rt].lazy);
+    	    add(tree[rt].child[1],tree[rt].lazy);
+    	    tree[rt].lazy = 0;
+    	}
+        }
+        void PushUp( int rt,int l,int r)
+        {
+    	int m = (l+r)>>1;
+    	check(tree[rt].child[0],l,m);
+    	check(tree[rt].child[1],m+1,r);
+    	int lson = tree[rt].child[0];
+    	int rson = tree[rt].child[1];
+    	tree[rt].sum = tree[lson].sum + tree[rson].sum;
+    	tree[rt].lsum = tree[lson].lsum;
+    	tree[rt].rsum = tree[rson].rsum;
+    	tree[rt].lh = tree[lson].lh;
+    	tree[rt].rh = tree[rson].rh;
+    	tree[rt].llh = tree[lson].llh;
+    	tree[rt].rrh = tree[rson].rrh;
+    	//先继承先前小区间的，肯定不会比该答案小
+    	if (tree[lson].rh==tree[rson].lh)
+    	{
+    	    if (tree[lson].rh>tree[lson].rrh&&tree[rson].lh>tree[rson].llh)
+    		tree[rt].sum += tree[lson].rsum + tree[rson].lsum;
+    	    if (tree[lson].rsum==m-l+1) //整段区间都是high mountain line,可能延续到其他区间。
+    	    {
+    		tree[rt].lsum += tree[rson].lsum;
+    		tree[rt].llh = tree[rson].llh;
+    	    }
+    	    if (tree[rson].lsum == r-m) //同上
+    	    {
+    		tree[rt].rsum += tree[lson].rsum;
+    		tree[rt].rrh = tree[lson].rrh;
+    	    }
+    	}else
+    	{
+    	    if (tree[lson].lsum == m-l+1) tree[rt].llh = tree[rson].lh;//如果整个区间山高度相同（但是和右边区间高度不同没办法合并）从左往右第一个不相同的山的高度就是右区间包含左端点的连续的山的高度。
+    	    if (tree[lson].rh>tree[rson].lh&&tree[lson].rh>tree[lson].rrh)
+    		tree[rt].sum +=tree[lson].rsum;//如果左区间包含右端点的一段的高度大于右区间包含左端点的山的高度并且大于左区间从右端点往左第一个高度不相同的山的高度，那么这段是一段high M line.累加到答案。
+    	    if (tree[rson].rsum== r-m) tree[rt].rrh = tree[lson].rh;//同上
+    	    if (tree[rson].lh>tree[lson].rh&&tree[rson].lh>tree[rson].llh) //同上。
+    		tree[rt].sum += tree[rson].lsum;
+    	}
+        }
+        void update(int &rt,int l,int r,int L,int R,int x)
+        {
+    	//	printf("rt %d l %d r %d\n",rt,l,r);
+    	check(rt,l,r);
+    	if (L<=l&&r<=R)
+    	{
+    	    add(rt,x);
+    	    return;
+    	}
+    	PushDown(rt,l,r);
+    	int m = (l+r)>>1;
+    	if (L<=m) update(tree[rt].child[0],l,m,L,R,x);
+    	if (R>=m+1) update(tree[rt].child[1],m+1,r,L,R,x);
+    	PushUp(rt,l,r);
+        }
+    }SegTree;
+    int main()
+    {
+    #ifndef  ONLINE_JUDGE 
+        freopen("code/in.txt","r",stdin);
+    #endif
+        while (~scanf("%d%d%*d",&n,&q))
+        {
+    	cur = root = 0 ;
+    	int ans = 0 ;
+    	int l,r,val;
+    	for ( int i = 1; i  <= q ; i++)
+    	{
+    	    scanf("%d%d%d",&l,&r,&val);
+    	    l ^= ans;
+    	    r ^= ans;
+    	    val ^= ans;
+    	    if (l>r) swap(l,r);
+    	    SegTree.update(root,1,n,l,r,val);
+    	    ans = SegTree.tree[1].sum;
+    	    printf("%d\n",ans);
+    	}
+        }
+    #ifndef ONLINE_JUDGE  
+        fclose(stdin);
+    #endif
+        return 0;
+    }
+    
+
+
+
+
+
+
+
+
+
+
+

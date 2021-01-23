@@ -1,0 +1,157 @@
+---
+author: 111qqz
+date: 2017-10-18 04:52:00+00:00
+draft: false
+title: 2016 CCPC 长春 I 题 | hdu 5919 Sequence II （可持久化线段树求区间第k大+可持久化线段树求区间不同数个数）
+type: post
+url: /2017/10/hdu-5919/
+categories:
+- ACM
+tags:
+- 主席树
+- 区间第k大
+- 可持久化数据结构
+---
+
+[题目链接](http://acm.split.hdu.edu.cn/showproblem.php?pid=5919)
+
+
+
+# 题意：
+
+
+
+给定一个序列 n，有 m次查询，每次查询一个区间[l,r]，求区间中每一种数在区间中第一次出现的位置的中位数，强制在线。
+
+
+
+# 思路：
+
+
+
+先分解一下问题，我们要求一段区间位置的中位数，其实可以分解成，求区间中不同数的个数+求区间中第k大的下标。
+
+对于求区间中不同数的个数，离线可以随便线段树，树状数组，或者莫队也行（观察到数据范围<=2E5)
+
+在线的话，就只能可持久化线段树了。
+
+看到一些题解中说要倒序处理...但是之前写求区间不同数的个数，我都是倒序处理的啊？ （回想一下，当时似乎正序处理也行...
+
+倒序处理是为了，处理到第i个的时候，第i个一定是当前后缀区间中，第一个出现的...
+
+然后第二个问题，求区间中第k大的下标，离线做法不少，在线的话，也可以用可持久化线段树求。
+
+所以感觉就是板子题，可持久化线段树的2个应用放在了一起orz
+
+
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <algorithm>
+    #include <queue>
+    #include <iostream>
+    #include <string>
+    #include <cmath>
+    #include <vector>
+    #include <set>
+    #include <map>
+    #include <bitset>
+    #include <stack>
+    using namespace std;
+    
+    #define MP make_pair
+    #define PB push_back
+    #define SZ(x) (int((x).size()))
+    #define ALL(x) (x).begin(), (x).end()
+    #define X first
+    #define Y second
+    
+    typedef long long LL;
+    typedef long double LD;
+    const int INF = 0x3f3f3f3f;
+    
+    typedef pair<LL, LL> pii;
+    
+    const int N = 2e5 + 10;
+    const int M = 30 * 2 * N;
+    
+    int ls[M], rs[M], root[N], tot, data[M];
+    inline int new_node(int lst = 0) {
+        ls[++ tot] = ls[lst];
+        rs[tot] = rs[lst];
+        data[tot] = data[lst];
+        return tot;
+    }
+    void build(int l, int r, int &rt) {
+        rt = new_node();
+        if(l == r) return ;
+        int m = (l + r) >> 1;
+        build(l, m, ls[rt]);
+        build(m + 1, r, rs[rt]);
+    }
+    void update(int pos, int val, int lst, int l, int r, int &rt) {
+        rt = new_node(lst);
+        data[rt] += val;
+        if(l == r) return ;
+        int m = (l + r) >> 1;
+        if(pos <= m) update(pos, val, ls[lst], l, m, ls[rt]);
+        else update(pos, val, rs[lst], m + 1, r, rs[rt]);
+    }
+    int query(int L, int R, int l, int r, int rt) {
+        if(L <= l && r <= R) return data[rt];
+        int m = (l + r) >> 1, ret = 0;
+        if(L <= m) ret += query(L, R, l, m, ls[rt]);
+        if(R > m) ret += query(L, R, m + 1, r, rs[rt]);
+        return ret;
+    }
+    int ask_kth(int k, int l, int r, int rt) {
+        if(l == r) return l;
+        int m = (l + r) >> 1;
+        return data[ls[rt]] >= k ? ask_kth(k, l, m, ls[rt]) : ask_kth(k - data[ls[rt]], m + 1, r, rs[rt]);
+    }
+    
+    
+    int a[N], pre[N];
+    int main() {
+        int T;
+        int cas = 0;
+        cin >> T;
+        while (T--){
+            int n, m;
+            scanf("%d %d", &n, &m);
+            memset(pre,-1,sizeof(pre));
+            //memset(pre, -1, sizeof(pre[0]) * (n + 5));
+            for(int i = 1; i <= n; i ++) scanf("%d", &a[i]);
+            tot = 0;
+            build(1, n, root[n + 1]);
+            for(int i = n; i >= 1; i --) {
+                if(~ pre[a[i]]) update(pre[a[i]], -1, root[i + 1], 1, n, root[i]);
+                update(i, 1, root[~pre[a[i]] ? i : i + 1], 1, n, root[i]);
+                pre[a[i]] = i;
+            }
+            printf("Case #%d:", ++cas);
+            int ans = 0;
+            while(m --) {
+                int l, r;
+                scanf("%d %d", &l, &r);
+                l = (l + ans) % n + 1;
+                r = (r + ans) % n + 1;
+                if(l > r) swap(l, r);
+                int cnt = query(l, r, 1, n, root[l]);
+                ans = ask_kth((cnt + 1) >> 1, 1, n, root[l]);
+                printf(" %d", ans);
+            }
+            puts("");
+        }
+        
+    }
+    
+    
+
+
+
+
+
+
+
+

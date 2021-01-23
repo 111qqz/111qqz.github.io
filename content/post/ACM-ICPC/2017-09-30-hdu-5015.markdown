@@ -1,0 +1,265 @@
+---
+author: 111qqz
+date: 2017-09-30 10:54:07+00:00
+draft: false
+title: hdu 5015 233 Matrix (构造矩阵，快速幂)
+type: post
+url: /2017/09/hdu-5015/
+categories:
+- ACM
+tags:
+- 矩阵快速幂
+---
+
+[hdu5015题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=5015)
+
+
+
+# 题意：
+
+
+
+给出矩阵的构造规则： a[0][j] (j>=1) 分别为233,2333,23333....给出a[i][0] (i>=1)，对于其余的i,j,a[i][j]=a[i-1][j] + a[i][j-1]
+
+现在问a[n][m] 在% 1E7+7 下的值是多少  （n<=10,m<=1E9）
+
+
+
+# 思路：
+
+
+
+显然矩阵快速幂，但是不会构造矩阵，放弃。
+
+看了很多题解...发现都是“显然”构造出矩阵。。。似乎是直接凑出来的。。。
+
+可能需要积累一点经验。
+
+对于这道题，我们观察到n很小
+
+所以一个直觉就是从n-1列推到第n列，推到n+1列这样地推。
+
+初始第一列的信息是（假设n为3）
+
+[a1]
+
+[a2]
+
+[a3]
+
+然后我们想要得到
+
+[a1+233]
+
+[a1+a2+233]
+
+[a1+a2+a3+233]
+
+我们发现我们需要233这个常数项体现在矩阵中
+
+而且之后还需要233,2333,23333体现在矩阵中。
+
+**那么，我们可以在初始添加23和3两项，这样23...3就都可以构造出来了（我觉得关键点就在这一步，应该是凭借经验吧，虽然刚开始有点难想到orz)**
+
+因此现在初始列变成了(其实放置顺序无所谓，不过这样放可以让ai和行数对应，比较友好。
+
+[23]
+
+[a1]
+
+[a2]
+
+[a3]
+
+[3]
+
+设该矩阵为A
+
+现在我们想得到下一列
+
+[233]
+
+[a1+233]
+
+[a1+a2+233]
+
+[a1+a2+a3+233]
+
+[3]
+
+设该矩阵为B
+
+那么现在的问题就是构造一个矩阵5*5的矩阵X,使得X×A=B
+
+**凭借直觉（经验？**
+
+我们得到这样的矩阵X为
+
+[10,0,0,0,1]
+
+[10,1,0,0,1]
+
+[10,1,1,0,1]
+
+[10,1,1,1,1]
+
+[0,  0,0,0,1]
+
+
+
+接下来就是矩阵快速幂了，答案是 (X^m)×A.mat[n][0]
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2017年09月30日 星期六 17时47分20秒
+    File Name :5015.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define PB push_back
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    int n,m;
+    int a[15];
+    const LL MOD=10000007;
+    struct Mat
+    {
+        LL mat[15][15];
+        void clear()
+        {
+        ms(mat,0);
+        }
+        void print()
+        {
+        for ( int i = 0 ; i <= n+1 ; i++)
+        {
+            for ( int j = 0 ; j <= n+1 ; j++)
+            {
+            printf("%lld ",mat[i][j]);
+            }
+            printf("\n");
+        }
+        }
+    }M,M1;
+    
+    Mat operator * (Mat a,Mat b)
+    {
+        Mat c;
+        c.clear();
+        for ( int i = 0 ; i <= n+1 ; i++)
+        for ( int j = 0 ; j <= n+1 ; j++)
+            for ( int k = 0 ; k <= n+1 ; k++)
+            c.mat[i][j] = (c.mat[i][j] + a.mat[i][k] * b.mat[k][j] )%MOD;
+        return c;
+    }
+    Mat operator ^ (Mat a,LL b)
+    {
+        Mat ret;
+        ret.clear();
+        for ( int i = 0 ; i <= n+1 ; i++) ret.mat[i][i]=1;
+        while (b>0)
+        {
+        if (b&1) ret = ret * a;
+        b = b >> 1LL;
+        a = a * a;
+        }
+        return ret;
+    }
+    LL solve()
+    {
+        M1.clear();
+        M.clear();
+        M1.mat[0][0]=23;
+        M1.mat[n+1][0]=3;
+        for ( int i = 1 ; i <= n ; i++)
+        {
+        M1.mat[i][0] = a[i];
+        }
+        for ( int i = 0 ; i <= n+1 ; i++)
+        {
+        for ( int j = 0 ; j <= n+1; j++)
+        {
+            if (j==0)
+            {
+            if (i!=n+1)
+                M.mat[i][j]=10;
+            }else if (j==n+1)
+            {
+            M.mat[i][j]=1;
+            }else if (i<=n && j>=1&&j<=i)
+            {
+            M.mat[i][j]=1;
+            }
+        }
+        }
+      //  M1.print();
+       // M.print();
+        Mat ans;
+        ans.clear();
+        ans = (M^(m))*M1;
+        //ans.print();
+        return ans.mat[n][0];
+    }
+    
+            
+    int main()
+    {
+        #ifndef  ONLINE_JUDGE 
+        freopen("./in.txt","r",stdin);
+      #endif
+        while (~scanf("%d %d",&n,&m))
+        {
+            for ( int i = 1 ; i <= n ; i++) scanf("%d",&a[i]);
+            LL ret = solve()%MOD;
+            printf("%lld\n",ret);
+        }
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,144 @@
+---
+author: 111qqz
+date: 2015-12-05 06:34:40+00:00
+draft: false
+title: codeforces 377 A maze
+type: post
+url: /2015/12/cf377a/
+categories:
+- ACM
+tags:
+- dfs
+- 构造
+---
+
+http://codeforces.com/contest/377/problem/A
+题意：给定一个n*m的maze. ‘.’代表空，‘#’代表墙。要求构造一种方案，使得将k个空格填成墙壁后不影响当前的连通性（即没有被填充的空格之间可以相互到达）
+思路：一开始想从上往下从左往右构造。错误的认为四个角一定是可以变成墙的。
+
+但其实只要是可能在某条路径上的点，就都不一定可以变成墙。。而四个角显然可以被某条路径经过。
+
+正确的解法很巧妙。以任意一个空格开始跑一遍dfs，设空格一共有sum个，那么就dfs到(sum-k)个。可以做好标记。通过dfs得到的这（sum-k）之间一定是联通的。那么只要填充剩下的就可以了。
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2015年12月05日 星期六 14时06分54秒
+    File Name :code/cf/problem/377A.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    
+    
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=5E2+7;
+    char maze[N][N];
+    bool vis[N][N];
+    int n,m,k;
+    int sx,sy;
+    int sum;
+    int num;
+    bool flag = false;
+    bool ok ( int x,int y)
+    {
+        if (x>=0&&y>=0&&x<=n-1&&y<=m-1&&maze[x][y]=='.'&&!vis[x][y]) return true;
+        return false;
+    }
+    
+    void dfs( int x,int y)
+    {
+        vis[x][y] = true;
+        maze[x][y]='R';
+      //  cout<<"x:"<<x<<" y:"<<y<<" num:"<<num<<" sum:"<<sum<<endl;
+        if (num>=sum-k)
+        {
+    	return;
+        }
+        for ( int i = 0 ; i < 4 ; i++)
+        {
+    	int nx = x + dx4[i];
+    	int ny = y + dy4[i];
+    	if (num>=sum-k) break;
+    	if (ok(nx,ny))
+    	{
+    	    num++;
+    	    dfs(nx,ny);
+    	}
+        }
+    }
+    
+    void print()
+    {
+        for ( int i = 0 ; i < n;  i++) printf("%s\n",maze[i]);
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	
+    	ms(vis,false);
+    	scanf("%d%d%d",&n,&m,&k);
+    	sum = 0 ;
+    	for ( int i = 0 ; i < n ; i++)
+    	{
+    	    scanf("%s",maze[i]);
+    	    for ( int j = 0 ; j < m; j++)
+    	    {
+    		if (maze[i][j]=='.')
+    		{
+    		    sum++;
+    		    sx = i;
+    		    sy = j;
+    		}
+    	    }
+    	}
+    //	cout<<"sum"<<sum<<endl;
+    	num = 1;
+    	dfs(sx,sy);
+    	for ( int i = 0 ; i < n ; i++)
+    	{
+    	    for ( int j = 0 ; j < m;  j++)
+    	    {
+    		if (maze[i][j]=='.')
+    		{
+    		    maze[i][j]='X';
+    		}
+    		if (maze[i][j]=='R')
+    		{
+    		    maze[i][j]='.';
+    		}
+    	    }
+    	}
+    	print();
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    

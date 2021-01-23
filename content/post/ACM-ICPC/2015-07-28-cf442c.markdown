@@ -1,0 +1,324 @@
+---
+author: 111qqz
+date: 2015-07-28 20:45:00+00:00
+draft: false
+title: codeforces 442C. Artem and Array
+type: post
+url: /2015/07/cf442c/
+categories:
+- ACM
+tags:
+- 单调栈
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+C. Artem and Array
+
+
+
+
+
+
+
+time limit per test
+
+
+2 seconds
+
+
+
+
+
+
+
+memory limit per test
+
+
+256 megabytes
+
+
+
+
+
+
+
+input
+
+
+standard input
+
+
+
+
+
+
+
+output
+
+
+standard output
+
+
+
+
+
+
+
+
+
+
+Artem has an array of _n_ positive integers. Artem decided to play with it. The game consists of _n_ moves. Each move goes like this. Artem chooses some element of the array and removes it. For that, he gets _min_(_a_, _b_) points, where _a_ and _b_ are numbers that were adjacent with the removed number. If the number doesn't have an adjacent number to the left or right, Artem doesn't get any points.
+
+
+
+
+After the element is removed, the two parts of the array glue together resulting in the new array that Artem continues playing with. Borya wondered what maximum total number of points Artem can get as he plays this game.
+
+
+
+
+
+
+
+
+
+
+Input
+
+
+
+
+The first line contains a single integer _n_ (1 ≤ _n_ ≤ 5*105) -- the number of elements in the array. The next line contains _n_ integers _a__i_(1 ≤ _a__i_ ≤ 106) -- the values of the array elements.
+
+
+
+
+
+
+
+
+
+
+Output
+
+
+
+
+In a single line print a single integer -- the maximum number of points Artem can get.
+
+
+
+
+
+
+
+
+
+
+Sample test(s)
+
+
+
+
+
+
+
+
+
+
+input
+
+
+
+    
+    5<br></br>3 1 5 2 6
+
+
+
+
+
+
+
+
+
+
+output
+
+
+
+    
+    11
+
+
+
+
+
+
+
+
+
+
+input
+
+
+
+    
+    5<br></br>1 2 3 4 5
+
+
+
+
+
+
+
+
+
+
+output
+
+
+
+    
+    6
+
+
+
+
+
+
+
+
+
+
+input
+
+
+
+    
+    5<br></br>1 100 101 100 1
+
+
+
+
+
+
+
+
+
+
+output
+
+
+
+    
+    102
+
+
+
+
+
+
+
+
+
+
+并不会做.
+
+
+
+
+接触了一个交单调栈的东西...
+
+
+
+
+又是单调栈又是单调队列
+
+
+
+
+是时候仔细了解下了.
+
+
+```c++
+
+    
+    /*************************************************************************
+    	> File Name: code/2015summer/#3/D.cpp
+    	> Author: 111qqz
+    	> Email: rkz2013@126.com 
+    	> Created Time: 2015年07月28日 星期二 13时47分48秒
+     ************************************************************************/
+    
+    #include<iostream>
+    #include<iomanip>
+    #include<cstdio>
+    #include<algorithm>
+    #include<cmath>
+    #include<cstring>
+    #include<string>
+    #include<map>
+    #include<set>
+    #include<queue>
+    #include<vector>
+    #include<stack>
+    #define y0 abc111qqz
+    #define y1 hust111qqz
+    #define yn hez111qqz
+    #define j1 cute111qqz
+    #define tm crazy111qqz
+    #define lr dying111qqz
+    using namespace std;
+    #define REP(i, n) for (int i=0;i<int(n);++i)  
+    typedef long long LL;
+    typedef unsigned long long ULL;
+    const int N=5E5+7;
+    int a[N],b[N];
+    int n;
+    int main()
+    {
+        cin>>n;
+        int x;
+        int top = -1;
+        LL ans = 0;
+        for ( int i = 1 ; i <= n ; i++ )
+        {
+    	  scanf("%d",&x);
+    	  while (top>=1&&a[top-1]>=a[top]&&a[top]<=x)
+    	  {
+    	      ans = ans + min(x,a[top-1]);
+    	      top--;
+    	  }
+    	  top++;
+    	  a[top]=x;
+        }                                                        
+    
+    
+        sort(a,a+top+1);
+        for ( int i = 0 ; i <top-1 ; i++)
+        {
+    	ans = ans + a[i];
+        }
+        cout<<ans<<endl;
+        
+      
+    	return 0;
+    }
+    
+
+```
+

@@ -1,0 +1,100 @@
+---
+author: 111qqz
+date: 2016-08-11 16:53:06+00:00
+draft: false
+title: hdu 3746 Cyclic Nacklace (最小覆盖子串，kmp)
+type: post
+url: /2016/08/hdu-3746/
+categories:
+- ACM
+tags:
+- kmp
+- 最小覆盖子串
+---
+
+[hdu 3746题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=3746)
+题意：给定一个字符串，是一个环（首尾相连），问至少再添加多少个珠子才能使得整个串是循环的。。。
+
+思路：一下子想到了最小覆盖子串的模型。。。我求出最小覆盖子串的长度（n-nxt[n]）。然后特判下最小覆盖子串的长度等于字符串长度的情况。。。试着叫了一发。。。竟然就A了2333.。。大概是所谓的题感吧（逃
+
+
+
+
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年08月12日 星期五 00时41分19秒
+    File Name :code/hdu/3746.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <stack>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <deque>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    char a[N];
+    int n;
+    int nxt[N];
+    void getnxt( char *s)
+    {
+        int n = strlen(s);
+        int i = 0;
+        int j = -1;
+        nxt[0] = -1;
+        while (i<n)
+    	if (j==-1||s[i]==s[j]) nxt[++i]=++j;
+    	else j = nxt[j];
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	int T;
+    	cin>>T;
+    	while (T--)
+    	{
+    	    scanf("%s",a);
+    	    getnxt(a);
+    	    int n =strlen(a);
+    	    int k = n - nxt[n];
+    	    if (k==n) printf("%d\n",n);
+    	    else if (n%k==0) printf("0\n");
+    		 else printf("%d\n",k-n%k);
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

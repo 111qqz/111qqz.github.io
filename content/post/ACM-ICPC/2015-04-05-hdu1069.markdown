@@ -1,0 +1,344 @@
+---
+author: 111qqz
+date: 2015-04-05 05:04:00+00:00
+draft: false
+title: hdu1069 Monkey and Banana (最长下降子序列)
+type: post
+url: /2015/04/hdu1069/
+categories:
+- ACM
+tags:
+- dp
+- 最长下降子序列
+---
+
+
+
+
+C - Monkey and Banana
+
+
+**Time Limit:**1000MS     **Memory Limit:**32768KB     **64bit IO Format:**%I64d & %I64u
+
+
+Submit [Status](http://acm.hust.edu.cn/vjudge/contest/view.action?cid=73774#status//C/0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+Description
+
+
+
+
+
+
+
+
+
+
+A group of researchers are designing an experiment to test the IQ of a monkey. They will hang a banana at the roof of a building, and at the mean time, provide the monkey with some blocks. If the monkey is clever enough, it shall be able to reach the banana by placing one block on the top another to build a tower and climb up to get its favorite food.
+
+The researchers have n types of blocks, and an unlimited supply of blocks of each type. Each type-i block was a rectangular solid with linear dimensions (xi, yi, zi). A block could be reoriented so that any two of its three dimensions determined the dimensions of the base and the other dimension was the height.
+
+They want to make sure that the tallest tower possible by stacking blocks can reach the roof. The problem is that, in building a tower, one block could only be placed on top of another block as long as the two base dimensions of the upper block were both strictly smaller than the corresponding base dimensions of the lower block because there has to be some space for the monkey to step on. This meant, for example, that blocks oriented to have equal-sized bases couldn't be stacked.
+
+Your job is to write a program that determines the height of the tallest tower the monkey can build with a given set of blocks.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Input
+
+
+
+
+
+
+
+
+The input file will contain one or more test cases. The first line of each test case contains an integer n,
+representing the number of different blocks in the following data set. The maximum value for n is 30.
+Each of the next n lines contains three integers representing the values xi, yi and zi.
+Input is terminated by a value of zero (0) for n.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Output
+
+
+
+
+
+
+
+
+For each test case, print one line containing the case number (they are numbered sequentially starting from 1) and the height of the tallest possible tower in the format "Case case: maximum height = height".
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sample Input
+
+
+
+
+
+
+
+
+
+
+
+1
+10 20 30
+2
+6 8 10
+5 5 5
+7
+1 1 1
+2 2 2
+3 3 3
+4 4 4
+5 5 5
+6 6 6
+7 7 7
+5
+31 41 59
+26 53 58
+97 93 23
+84 62 64
+33 83 27
+0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sample Output
+
+
+
+
+
+
+
+
+
+
+
+Case 1: maximum height = 40
+
+
+
+
+Case 2: maximum height = 21
+
+
+
+
+Case 3: maximum height = 28
+
+
+
+
+Case 4: maximum height = 342
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 师傅给我准备的dp第二道。
+
+
+
+
+dp比较渣，一开始看完题，看到有N种物品，每种无限个，加了些限制条件，感觉有点像完全背包。
+
+
+
+
+不过那样想就完全歪掉了。
+
+
+
+
+虽然说每种石块有无限个，但是由于条件限制...每种石块不可能取一个以上....
+
+
+
+
+
+
+
+正解应该是先排序再做一个最长下降子序列
+
+
+
+
+注意每个石块有6种不同的方法（有人说三种...不明白）在读入的时候处理一下即可。
+
+
+
+
+看到有人按面积排序也可以AC，感觉不对，每个边的限制，按面积排序显然是放宽条件了。。。难道是因为数据水？
+
+
+
+
+
+
+
+
+
+
+
+
+```c++
+
+
+
+
+
+    
+    #include <iostream>
+    #include <algorithm>
+    #include <cstring>
+    #include <cstdio>
+    #include <cmath>
+    
+    using namespace std;
+        int n,k,a,b,c,tmp;
+        const int N=1E4+5;
+        int dp[N];
+        long long ans;
+    struct Q
+    {
+        int x,y,z;
+    
+    }q[N];
+    
+    bool cmp(Q a,Q b)
+    {
+        if (a.x>b.x) return true;
+        if (a.x==b.x&&a.y>b.y) return true;
+        return false;
+    }
+    
+    int main()
+    {
+        int cas=0;
+        while (scanf("%d",&n)!=EOF&&n)
+        {
+            cas++;
+            memset(dp,0,sizeof(dp));
+            k = 1;
+            ans = -1;
+            for ( int i = 1 ; i <= n ; i++ )
+            {
+                scanf("%d%d%d",&a,&b,&c);
+                q[k].x = a;q[k].y = b;q[k].z=c;k++;
+                q[k].x = a;q[k].y = c;q[k].z=b;k++;
+                q[k].x = b;q[k].y = a;q[k].z=c;k++;
+                q[k].x = b;q[k].y = c;q[k].z=a;k++;
+                q[k].x = c;q[k].y = a;q[k].z=b;k++;
+                q[k].x = c;q[k].y = b;q[k].z=a;k++;
+            }
+            k--;
+            sort(q+1,q+k+1,cmp);
+            dp[1]=q[1].z;
+    
+            for ( int i = 2 ; i <= k ; i++ )
+            {
+                tmp = 0;
+                for ( int j = 1 ; j <= i-1 ; j++ )
+                    if (q[j].x>q[i].x&&q[j].y>q[i].y&&dp[j]>tmp)
+                    {
+                        tmp=dp[j];
+                    }
+                dp[i]=tmp+q[i].z;
+            }
+            for ( int i = 1 ; i <= k ; i++)
+                if ( dp[i]>ans )
+                    ans = dp[i];
+            printf("Case %d: maximum height = %I64d\n",cas,ans);
+        }
+        return 0;
+    }
+
+
+
+```

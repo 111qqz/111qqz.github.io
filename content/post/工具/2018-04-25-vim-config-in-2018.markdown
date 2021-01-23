@@ -1,0 +1,197 @@
+---
+author: 111qqz
+date: 2018-04-25 16:46:51+00:00
+draft: false
+title: 8102年了，来更新一波vim配置
+type: post
+url: /2018/04/vim-config-in-2018/
+categories:
+- 其他
+tags:
+- vim
+---
+
+现在用的vim配置还是2015年7月的时候写的。
+
+三年过去了，vim到了8.0,很多功能也有了更多选择。因此打算来更新一波vim配置。目前还在更新过程中。。。等差不多折腾完再来记录一些信息。
+
+    
+    """"""""""" for vim """"""""""""""
+    set ru
+    set nu
+    set clipboard+=unnamed 
+    " 映射全选+复制 ctrl+a
+    map <C-A> ggvG"+Y
+    "去空行  
+    nnoremap <F2> :g/^\s*$/d<CR> 
+    " 自动缩进
+    set autoindent  
+    set tabstop=4
+    set softtabstop=4
+    set shiftwidth=4
+    filetype on
+    " 载入文件类型插件
+    filetype plugin on
+    " 为特定文件类型载入相关缩进文件
+    filetype indent on
+    " 高亮显示匹配的括号
+    set showmatch
+    " 高亮当前行
+    set cursorline
+    hi CursorLine  cterm=bold   ctermbg=blue ctermfg=yellow
+    
+    "C，C++ 按F5编译运行
+    map <F5> :call CompileRunGcc()<CR>
+    func! CompileRunGcc()
+        exec "w"
+        if &filetype == 'c'
+            exec "!g++ % -o %<"
+            exec "! ./%<"
+        elseif &filetype == 'cpp'
+            exec "!g++ % -std=gnu++11  -Wall   -o %<"
+            exec "! ./%<"
+        elseif &filetype == 'java'
+            exec "!javac %"
+            exec "!java %<"
+        elseif &filetype == 'sh'
+            :!./%
+        elseif &filetype == 'python'
+        "   exec "!python %"
+        "   exec "!python %<"
+            exec "!python2.7 %"
+        endif
+    endfunc
+    
+    
+    autocmd BufNewFile *.cpp,*.[ch],*.sh,*.java exec ":call SetTitle()" 
+    ""定义函数SetTitle，自动插入文件头
+    "map <F4> :call SetTitle()<CR>
+    func SetTitle() 
+        "如果文件类型为.sh文件 
+        if &filetype == 'sh' 
+            call setline(1,"\#########################################################################") 
+            call append(line("."), "\# File Name: ".expand("%")) 
+            call append(line(".")+1, "\# Author: 111qqz") 
+            call append(line(".")+2, "\# mail: renkuanze@sensetime.com") 
+            call append(line(".")+3, "\# Created Time: ".strftime("%c")) 
+            call append(line(".")+4, "\#########################################################################") 
+            call append(line(".")+5, "\#!/bin/bash") 
+            call append(line(".")+6, "") 
+        else 
+            let l = 0
+            let l = l + 1 | call setline(l,'/* ***********************************************')
+            let l = l + 1 | call setline(l,'Author :111qqz')
+    	let l = l + 1 | call setline(l,'mail: renkuanze@sensetime.com')
+            let l = l + 1 | call setline(l,'Created Time :'.strftime('%c'))
+            let l = l + 1 | call setline(l,'File Name :'.expand('%'))
+            let l = l + 1 | call setline(l,'************************************************ */')
+            let l = l + 1 | call setline(l,'')
+        endif
+        "新建文件后，自动定位到文件末尾
+        autocmd BufNewFile * normal G23
+    endfunc 
+    
+    
+    
+    
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""
+    call plug#begin('~/.vim/plugged')
+    Plug 'octol/vim-cpp-enhanced-highlight'
+    Plug 'w0rp/ale'
+    Plug 'vim-airline/vim-airline'
+    Plug 'vim-airline/vim-airline-themes'
+    Plug 'Valloric/YouCompleteMe'
+    " Initialize plugin system
+    call plug#end() 
+    """""""""""""""""for vim-cpp-enhanced-highlight'''''''''''''''''''''''''''
+    let g:cpp_class_scope_highlight = 1
+    let g:cpp_member_variable_highlight = 1
+    let g:cpp_class_decl_highlight = 1
+    let g:cpp_experimental_simple_template_highlight = 1
+    let g:cpp_concepts_highlight = 1
+    """""""""""""""""""""""""for vim-airline""""""""""""""""""""""""""""
+    let g:airline_powerline_fonts = 1
+    let g:airline#extensions#tabline#enabled = 1
+     let g:airline#extensions#tabline#buffer_nr_show = 1
+    let g:airline#extensions#tabline#left_sep = ' '
+    let g:airline#extensions#tabline#left_alt_sep = '|'
+     if !exists('g:airline_symbols')
+        let g:airline_symbols = {}
+        endif
+     let g:airline_left_sep = '⮀'
+      let g:airline_left_alt_sep = '⮁'
+      let g:airline_right_sep = '⮂'
+      let g:airline_right_alt_sep = '⮃'
+      let g:airline_symbols.branch = '⭠'
+      let g:airline_symbols.readonly = '⭤'
+    """""""""""""""""" for ale """""""""""""""""""""""""""""""""""""""""""""""""""
+    function! LinterStatus() abort
+        let l:counts = ale#statusline#Count(bufnr(''))
+        let l:all_errors = l:counts.error + l:counts.style_error
+        let l:all_non_errors = l:counts.total - l:all_errors
+        return l:counts.total == 0 ? 'OK' : printf(
+        \   '%dW ',
+        \   all_non_errors,
+        \   all_errors
+        \)
+    endfunction
+    let g:ale_linters_explicit = 1
+    "let g:ale_completion_delay = 500
+    "let g:ale_echo_delay = 20
+    "let g:ale_lint_delay = 500
+    let g:ale_echo_msg_format = '[%linter%] %code: %%s'
+    "let g:ale_lint_on_insert_leave = 1
+    let g:airline#extensions#ale#enabled = 1
+    let g:ale_sign_column_always = 1
+    let g:ale_sign_error = '>>'
+    let g:ale_sign_warning = '--'
+    let g:ale_sign_column_always = 1
+    let g:ale_statusline_format = ['⨉ %d', '⚠ %d', '⬥ ok']
+    let g:ale_echo_msg_error_str = 'E'
+    let g:ale_echo_msg_warning_str = 'W'
+    let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+    let g:ale_linters = {'cpp': ['clangcheck']}
+    let g:ale_c_gcc_options = '-Wall -O2 -std=c99'
+    let g:ale_cpp_gcc_options = '-Wall -O2 -std=c++14'
+    hi! clear SpellBad
+    hi! clear SpellCap
+    hi! clear SpellRare
+    hi! SpellBad gui=undercurl guisp=red
+    hi! SpellCap gui=undercurl guisp=blue
+    hi! SpellRare gui=undercurl guisp=magenta
+    set statusline=%{LinterStatus()}
+    """""""""""""""""youcompleteme设置 by wyz"""""""""""""""""
+    let g:cpp_class_scope_highlight=1
+    let g:cpp_experimental_template_highlight=1
+    let g:ycm_show_diagnostics_ui=0
+    let g:ycm_enable_diagnostic_signs=0
+    let g:ycm_enable_diagnostic_highlighting = 0
+    let g:ycm_echo_current_diagnostic = 0
+    let g:ycm_collect_identifiers_from_tags_files = 1
+    let g:ycm_key_invoke_completion = '<C-Q>'
+    let g:ycm_seed_identifiers_with_syntax = 1
+    let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
+    let g:ycm_collect_identifiers_from_tags_files = 1
+    let g:ycm_confirm_extra_conf = 0
+    let g:ycm_autoclose_preview_window_after_completion = 1
+    let g:ycm_autoclose_preview_window_after_insertion = 1
+    let g:ycm_add_preview_to_completeopt = 0
+    let g:ycm_server_log_level = 'info'
+    let g:ycm_min_num_identifier_candidate_chars = 2
+    let g:ycm_collect_identifiers_from_comments_and_strings = 1
+    let g:ycm_complete_in_strings=1
+    let g:ycm_key_invoke_completion = '<c-z>'
+    set completeopt=menu,menuone
+    noremap <c-z> <NOP>
+    let g:ycm_semantic_triggers =  {
+               \ 'c,cpp,python,java,go,erlang,perl': ['re!\w{2}'],
+               \ 'cs,lua,javascript': ['re!\w{2}'],
+               \ }
+    highlight PMenu ctermfg=0 ctermbg=242 guifg=black guibg=darkgrey
+    highlight PMenuSel ctermfg=242 ctermbg=8 guifg=darkgrey guibg=black
+    
+
+
+
+
+

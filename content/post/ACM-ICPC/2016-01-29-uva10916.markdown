@@ -1,0 +1,98 @@
+---
+author: 111qqz
+date: 2016-01-29 12:53:01+00:00
+draft: false
+title: uva 10916  Factstone Benchmark
+type: post
+url: /2016/01/uva10916/
+categories:
+- ACM
+tags:
+- log
+- math
+---
+
+https://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid;=8&page;=show_problem&problem;=1857
+题意：计算最大的n,满足n!/* ***********************************************
+Author :111qqz
+Created Time :2016年01月29日 星期五 19时49分25秒
+File Name :code/uva/10916.cpp
+************************************************ */
+
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <queue>
+#include <set>
+#include <map>
+#include <string>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+#define fst first
+#define sec second
+#define lson l,m,rt<<1
+#define rson m+1,r,rt<<1|1
+#define ms(a,x) memset(a,x,sizeof(a))
+typedef long long LL;
+#define pi pair < int ,int >
+#define MP make_pair
+
+using namespace std;
+const double eps = 1E-8;
+const int dx4[4]={1,0,0,-1};
+const int dy4[4]={0,-1,1,0};
+const int inf = 0x3f3f3f3f;
+const int N=150;
+int n;
+int f[N];
+void pre()
+{
+    f[0] = 3;
+    int per = 2;
+    for ( int i = 1 ; i <=25 ; i++)
+    {
+	f[i]=f[i-1]+per;
+	per++;
+    }
+}
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+  #endif
+	
+
+	while (scanf("%d",&n)!=EOF)  // (1*2*3*...*n)>2^k,巧妙利用对数求解。两边取对数即可。
+	{
+	    if (n==0) break;
+	    int k = (n-1960)/10;
+	    int p = 1<<(k+2);
+	   // cout<<"k:"<<k<<endl;
+	   // cout<<"p:"<<p<<endl;
+	    double dp = p*1.0*log(2); //因为不等式左边每一个都有一个log(2)(计算对数的时候用换底公式产生的)，可以乘到不等号右边。
+	    double sum = 0 ;
+	    
+	    for ( int i = 1; ; i++)
+	    {
+		sum +=log(i);
+		//cout<<"i:"<<i<<" sum:"<<sum<<endl;
+		if (sum>dp)
+		{
+		    printf("%d\n",i-1);
+		    break;
+		}
+	    }
+
+	}
+  #ifndef ONLINE_JUDGE  
+  fclose(stdin);
+  #endif
+    return 0;
+}
+
+
+
+

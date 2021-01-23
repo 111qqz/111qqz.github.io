@@ -1,0 +1,102 @@
+---
+author: 111qqz
+date: 2015-12-15 12:23:32+00:00
+draft: false
+title: codeforces 279 B books
+type: post
+url: /2015/12/cf279b/
+categories:
+- ACM
+tags:
+- 尺取法
+---
+
+http://codeforces.com/problemset/problem/279/B
+题意：给定一个序列，问一段连续的序列的和小于等于t的最长的序列的长度。
+思路：尺取法。三个月前学习的了。
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2015年12月15日 星期二 20时08分16秒
+    File Name :code/cf/problem/279B.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    int n;
+    int t;
+    int a[N];
+    
+    void solve()
+    {
+        int head = 1;
+        int tail = 1;
+        int sum = 0 ;
+        int ans = 0 ;
+        while (tail<=n)
+        {
+    //	cout<<"aaaaa?"<<endl;
+    	sum = sum + a[tail];
+    //	cout<<"head:"<<head<<" tail:"<<tail<<" sum:"<<sum<<endl;
+    	if (sum>t)
+    	{
+    	    while (sum>t)
+    	    {
+    		sum = sum - a[head];
+    //		cout<<"sum:"<<sum<<endl;
+    		head++;
+    	    }
+    	}
+    	if (sum<=t)
+    	    ans = max(ans,tail-head+1);
+    	tail++;
+    
+        }
+        printf("%d\n",ans);
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	scanf("%d%d",&n,&t);
+    	for ( int i =1 ; i  <= n ; i++) scanf("%d",&a[i]);
+    	solve();
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

@@ -1,0 +1,268 @@
+---
+author: 111qqz
+date: 2017-10-13 12:23:49+00:00
+draft: false
+title: hdu 4794 Arnold (二次剩余，斐波那契循环节)
+type: post
+url: /2017/10/hdu-4794/
+categories:
+- ACM
+tags:
+- 二次剩余
+- 斐波那契
+---
+
+# 题意：
+
+
+
+给定一个 N∗N(N≤4e9) 的矩阵，现在经过这样一个变换：将 (x,y) 变为 ((x+y)%N,(x+2×y)%N)(0≤x<N,0≤y<N) 现在求经过多少次这样的变换之后在回到 N∗N 的原始矩阵。
+
+
+
+# 思路：
+
+
+
+在模n的剩余系下可以写成(fib(n)x+fib(n+1)y,fib(n+1)x+fib(n+2)y)的形式fib(n)表示Fibonacci数列的第n项
+
+所以就成了斐波那契数列循环节。。经典题。注意会爆long long,要用ULL
+
+又写了遍板子，去年的东西都忘得差不多了orz
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    File Name :code/hdu/4794.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef unsigned long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    struct Mat
+    {
+        LL mat[2][2];
+        void clear()
+        {
+        ms(mat,0);
+        }
+        void pr()
+        {
+        for ( int i = 0 ; i < 2 ; i++)
+            for ( int j = 0 ; j < 2 ; j++)
+            printf("%lld%c",mat[i][j],j==1?'\n':' ');
+        }
+    }M,M1;
+    const Mat P = {1,1,1,0};
+    Mat mul (Mat a,Mat b,LL mod)
+    {
+        Mat c;
+        c.clear();
+        for ( int i = 0 ; i < 2 ; i++)
+        for ( int j = 0 ; j < 2 ; j++)
+            for ( int k  = 0 ; k < 2 ; k++)
+            c.mat[i][j] = (c.mat[i][j] + a.mat[i][k] * b.mat[k][j]%mod)%mod;
+        return c;
+    }
+    Mat mat_ksm(Mat a,LL b,LL mod)
+    {
+        Mat res;
+        res.clear();
+        for ( int i = 0 ; i < 2 ; i++) res.mat[i][i] = 1;
+        while (b>0)
+        {
+        if (b&1) res = mul(res,a,mod);
+        b = b >> 1LL;
+        a = mul(a,a,mod);
+        }
+        return res;
+    }
+    LL gcd(LL a,LL b)
+    {
+        return b?gcd(b,a%b):a;
+    }
+    const int N = 5E6+7;
+    bool prime[N];
+    int p[N];
+    int pri_tot;
+    void Lineisprime() //换成线性晒了。
+    {
+       // int cnt = 0 ;
+        ms(prime,true);
+        for ( int i = 2 ; i < N ; i++)
+        {
+        if (prime[i]) p[pri_tot++] = i ;
+        for ( int j =  1 ;  j < pri_tot && i*p[j] < N ; j++)
+        {
+            prime[i*p[j]] = false;
+            if (i%p[j]==0) break;
+        }
+        }
+    }
+    
+    LL ksm( LL a,LL b,LL mod)
+    {
+       LL res = 1;
+       while (b>0)
+       {
+           if (b&1) res = (res * a) % mod;
+           b = b >> 1LL;
+           a = a * a % mod;
+       }
+       return res;
+    }
+    LL legendre(LL a,LL p) //勒让德符号,判断二次剩余
+    {
+        if (ksm(a,(p-1)>>1,p)==1) return 1;
+        return -1;
+    }
+    
+    LL pri[N],num[N];//分解质因数的底数和指数。
+    int cnt; //质因子的个数
+    void solve(LL n,LL *pri,LL *num)
+    {
+        cnt = 0 ;
+        for ( int  i = 0 ; 1LL*p[i] * p[i] <= n  && i < pri_tot ; i++)
+        {
+        if (n%p[i]==0)
+        {
+            int Num = 0 ;
+            pri[cnt] = p[i];
+            while (n%p[i]==0)
+            {
+            Num++;
+            n/=p[i];
+            }
+            num[cnt] = Num;
+            cnt++;
+        }
+        }
+        if (n>1)
+        {
+        pri[cnt] = n;
+        num[cnt] = 1;
+        cnt++;
+        }
+    }
+    LL fac[N];
+    int cnt2; //n的因子的个数
+    void get_fac(LL n)//得到n的所有因子
+    {
+        cnt2 = 0 ;
+        for (int i =  1 ; i*i <= n ; i++)
+        {
+        if (n%i==0)
+        {
+            if (i*i!=n)
+            {
+            fac[cnt2++] = i ;
+            fac[cnt2++] = n/i;
+            }
+            else fac[cnt2++] = i;
+        }
+        }
+    }
+    LL delta;
+    const LL LOOP[10]={3,8,20};
+    LL ask_loop(int id) //我好傻啊。。并不一定所有因子都有啊。。。
+    {
+        return LOOP[id];
+    }
+    LL find_loop(LL n)
+    {
+        //cout<<"n:"<<n<<endl;
+        solve(n,pri,num);
+        //puts("pri:");
+       // for ( int i = 0 ; i < cnt ; i++)  printf("i:%d %lld\n",i,pri[i]);
+        LL ans = 1;
+        //cout<<"CNT:"<<cnt<<endl;
+        for ( int i = 0 ; i < cnt ; i++)
+        {
+        LL rec = 1;
+        if (pri[i]==2) rec =  3;
+        else if (pri[i]==3) rec = 8;
+        else if (pri[i]==5) rec = 20;
+        else
+        {
+            if (legendre(5,pri[i])==1)
+            get_fac(pri[i]-1);
+            else get_fac((pri[i]+1LL)*(3-1)); //为什么可以假设循环节不大于2*(p+1)???
+            sort(fac,fac+cnt2);
+           // for  ( int qqq = 0; qqq < cnt2 ; qqq++) printf("fac: %lld  ",fac[qqq]);
+            for ( int j = 0 ; j < cnt2 ; j++) //挨个验证因子
+            {
+            Mat tmp = mat_ksm(M,fac[j],pri[i]); //下标从0开始，验证fac[j]为循环节，应该看fib[0]==fib[fac[j]]和fib[1]==fib[fac[j]+1]是否成立
+            tmp = mul(tmp,M1,pri[i]);
+            if (tmp.mat[0][0]==1&&tmp.mat[1][0]==0)
+            {
+                rec = fac[j];
+                break;
+            }
+            }
+    
+        }
+        for ( LL j = 1 ; j < num[i] ; j++)
+            rec *=pri[i];
+        ans = ans / gcd(ans,rec) * rec;
+        }
+        return ans;
+    }
+    void init()
+    {
+        M.clear();
+        M.mat[0][0] = M.mat[0][1] = M.mat[1][0] = 1;
+        M1.clear();
+        M1.mat[0][0] = 1;
+    }
+    LL n;
+    int main()
+    {
+        
+        
+        init();
+        Lineisprime();
+        while (~scanf("%llu",&n))
+        {
+          //  cout<<"n:"<<n<<endl
+            if (n==2) puts("3");
+            else 
+            printf("%llu\n",find_loop(n)/2);
+    
+        }
+    
+    #ifndef ONLINE_JUDGE  
+        fclose(stdin);
+    #endif
+        return 0;
+    }
+    
+
+
+
+

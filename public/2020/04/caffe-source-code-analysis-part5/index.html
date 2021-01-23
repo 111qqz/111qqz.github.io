@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="111qqz的小窝">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="https://111qqz.github.io/img/2.png">
+    <meta property="twitter:image" content="https://111qqz.github.io/img/2.png" />
+    
+
+    
+    <meta name="title" content="caffe 源码学习笔记(5) 卷积" />
+    <meta property="og:title" content="caffe 源码学习笔记(5) 卷积" />
+    <meta property="twitter:title" content="caffe 源码学习笔记(5) 卷积" />
+    
+
+    
+    <meta name="description" content="">
+    <meta property="og:description" content="" />
+    <meta property="twitter:description" content="" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="ACM,111qqz,商汤科技,hust,华中科技大学">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>caffe 源码学习笔记(5) 卷积-111qqz的小窝</title>
+
+    <link rel="canonical" href="/2020/04/caffe-source-code-analysis-part5">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+    <link rel="stylesheet" href="/css/hux-blog.min-custom.css">
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">111qqz的小窝</a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    
+                    
+		    
+                        <li><a href="/categories/acm/">ACM-ICPC</a></li>
+                    
+                        <li><a href="/categories/deep-learning/">深度学习</a></li>
+                    
+                        <li><a href="/categories/mooc/">公开课</a></li>
+                    
+                        <li><a href="/categories/%e5%85%b6%e4%bb%96/">其他</a></li>
+                    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('/img/2.png')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/caffe" title="caffe">
+                            caffe
+                        </a>
+                        
+                    </div>
+                    <h1>caffe 源码学习笔记(5) 卷积</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    111qqz
+			 
+			on 
+			Wednesday, April 8, 2020
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#caffe中卷积运算的实现">caffe中卷积运算的实现</a></li>
+<li><a href="#各种卷积">各种卷积</a>
+<ul>
+<li><a href="#2d卷积">2d卷积</a></li>
+<li><a href="#3d卷积">3d卷积</a></li>
+<li><a href="#1-x-1-卷积">1 x 1 卷积</a></li>
+<li><a href="#transposed-convolution-deconvolution">Transposed Convolution (Deconvolution)</a></li>
+<li><a href="#dilated-convolution-空洞卷积">Dilated Convolution  (空洞卷积)</a></li>
+<li><a href="#spatially-separable-convolutions">Spatially Separable Convolutions</a></li>
+<li><a href="#grouped-convolution">Grouped Convolution</a></li>
+</ul></li>
+<li><a href="#参考链接">参考链接</a></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<h2 id="caffe中卷积运算的实现">caffe中卷积运算的实现</h2>
+
+<p>暴力实现的卷积大概是这样子的</p>
+
+<pre><code class="language-python">
+for w in 1..W
+  for h in 1..H
+    for x in 1..K
+      for y in 1..K
+        for m in 1..M
+          for d in 1..D
+            output(w, h, m) += input(w+x, h+y, d) * filter(m, x, y, d)
+          end
+        end
+      end
+    end
+  end
+end
+
+</code></pre>
+
+<p>这种方式的效率显然很低，不意外地,caffe中并不是这样实现的．</p>
+
+<p>注释里面说:
+&gt; Caffe convolves by reduction to matrix multiplication. This achieves high-throughput and generality of input and filter dimensions but comes at the cost of memory for matrices. This makes use of efficiency in BLAS.</p>
+
+<blockquote>
+<p>The input is &ldquo;im2col&rdquo; transformed to a channel K&rsquo; x H x W data matrix for multiplication with the N x K&rsquo; x H x W filter matrix to yield a N&rsquo; x H x W output matrix that is then &ldquo;col2im&rdquo; restored. K&rsquo; is the input channel * kernel height * kernel width dimension of the unrolled inputs so that the im2col matrix has a column for each input region to be filtered. col2im restores the output spatial structure by rolling up the output channel N&rsquo; columns of the output matrix.</p>
+</blockquote>
+
+<p>大概意思是说把卷积运算转换成矩阵乘法，然后利用现有的矩阵乘法库来运算．</p>
+
+<p><img src="https://pic2.zhimg.com/80/a54fea5b7e70bd25d3096126a6713d19_720w.jpg" alt="conv1" />
+<img src="https://pic2.zhimg.com/80/314fb9af7d379ba2ea1f67ea982a60b2_720w.jpg" alt="conv2" />
+<img src="https://pic3.zhimg.com/80/69e44f61e8ede5ba84534ca3b764d302_720w.jpg" alt="conv3" />
+<img src="https://pic3.zhimg.com/80/6b1dde11bf30688b4f526ea77d54a196_720w.jpg" alt="conv4" /></p>
+
+<p>最后就是Filter Matrix乘以Feature Matrix的转置，得到输出矩阵Cout x (H x W)</p>
+
+<p>所以我觉得注释里的filter matrix的尺寸说成是&rdquo;N*K&rsquo;&ldquo;而不是＂N x K&rsquo; x H x W＂　更容易让人理解一些？</p>
+
+<p><strong>需要注意的是,这里为了方便讨论,采用了让输入和输出的feature map的尺寸一致的设置.</strong></p>
+
+<p>caffe代码中src/utill/im2col.cpp 中的 im2col和col2im,都是为了这个优化(指把卷积运算转换成矩阵乘法)
+这部分感觉过于detail了,不打算展开.</p>
+
+<p>这里还有caffe作者对这个优化的思考 <a href="https://github.com/Yangqing/caffe/wiki/Convolution-in-Caffe:-a-memo">Convolution in Caffe: a memo</a></p>
+
+<p>我觉得最值得我们学习的是,不要重复造轮子,先看要解决的问题有没有现成的实现,如果没有,那么能不能把我们要解决的问题转换成有现成实现的问题.</p>
+
+<p>分析完这个运算感觉已经说完了. 我们看一下caffe proto</p>
+
+<pre><code class="language-protobuf">
+message ConvolutionParameter {
+  optional uint32 num_output = 1; // The number of outputs for the layer
+  optional bool bias_term = 2 [default = true]; // whether to have bias terms
+
+  // Pad, kernel size, and stride are all given as a single value for equal
+  // dimensions in all spatial dimensions, or once per spatial dimension.
+  repeated uint32 pad = 3; // The padding size; defaults to 0
+  repeated uint32 kernel_size = 4; // The kernel size
+  repeated uint32 stride = 6; // The stride; defaults to 1
+  // Factor used to dilate the kernel, (implicitly) zero-filling the resulting
+  // holes. (Kernel dilation is sometimes referred to by its use in the
+  // algorithme à trous from Holschneider et al. 1987.)
+  repeated uint32 dilation = 18; // The dilation; defaults to 1
+
+  // For 2D convolution only, the *_h and *_w versions may also be used to
+  // specify both spatial dimensions.
+  optional uint32 pad_h = 9 [default = 0]; // The padding height (2D only)
+  optional uint32 pad_w = 10 [default = 0]; // The padding width (2D only)
+  optional uint32 kernel_h = 11; // The kernel height (2D only)
+  optional uint32 kernel_w = 12; // The kernel width (2D only)
+  optional uint32 stride_h = 13; // The stride height (2D only)
+  optional uint32 stride_w = 14; // The stride width (2D only)
+
+  optional uint32 group = 5 [default = 1]; // The group size for group conv
+
+  optional FillerParameter weight_filler = 7; // The filler for the weight
+  optional FillerParameter bias_filler = 8; // The filler for the bias
+  enum Engine {
+    DEFAULT = 0;
+    CAFFE = 1;
+    CUDNN = 2;
+  }
+  optional Engine engine = 15 [default = DEFAULT];
+
+  // The axis to interpret as &quot;channels&quot; when performing convolution.
+  // Preceding dimensions are treated as independent inputs;
+  // succeeding dimensions are treated as &quot;spatial&quot;.
+  // With (N, C, H, W) inputs, and axis == 1 (the default), we perform
+  // N independent 2D convolutions, sliding C-channel (or (C/g)-channels, for
+  // groups g&gt;1) filters across the spatial axes (H, W) of the input.
+  // With (N, C, D, H, W) inputs, and axis == 1, we perform
+  // N independent 3D convolutions, sliding (C/g)-channels
+  // filters across the spatial axes (D, H, W) of the input.
+  optional int32 axis = 16 [default = 1];
+
+  // Whether to force use of the general ND convolution, even if a specific
+  // implementation for blobs of the appropriate number of spatial dimensions
+  // is available. (Currently, there is only a 2D-specific convolution
+  // implementation; for input blobs with num_axes != 2, this option is
+  // ignored and the ND implementation will be used.)
+  optional bool force_nd_im2col = 17 [default = false];
+}
+
+</code></pre>
+
+<p>可以看到,里面有很多参数. 说明caffe是把很多种卷积放在一起实现的. 之后我们逐个分析一下.</p>
+
+<h2 id="各种卷积">各种卷积</h2>
+
+<h3 id="2d卷积">2d卷积</h3>
+
+<p>最最普通的一种</p>
+
+<p>下面的图是一个filter的运算情况.
+<img src="https://miro.medium.com/max/1280/1*K_OsaLGJ7I8cGlPvvWYJdg.png" alt="卷积" /></p>
+
+<p>2d可以理解成filter只在height和width两个方向移动</p>
+
+<p>值得一提的是卷积的尺寸计算:</p>
+
+<p><img src="https://www.zhihu.com/equation?tex=+%5Cbegin%7Bcases%7D+height_%7Bout%7D+%26%3D+%28height_%7Bin%7D+-+height_%7Bkernel%7D+%2B+2+%2A+padding%29+~+%2F+~+stride+%2B+1%5C%5C%5B2ex%5D+width_%7Bout%7D+%26%3D+%28width_%7Bin%7D+-+width_%7Bkernel%7D+%2B+2+%2A+padding%29+~+%2F+~+stride+%2B+1+%5Cend%7Bcases%7D" alt="卷积尺寸计算" /></p>
+
+<p>这里关于padding的尺寸还有两个特别有迷惑色彩的词,&ldquo;valid padding&rdquo;和&rdquo;same padding&rdquo;&rsquo;
+可以参考 <a href="https://stackoverflow.com/questions/37674306/what-is-the-difference-between-same-and-valid-padding-in-tf-nn-max-pool-of-t">What is the difference between &lsquo;SAME&rsquo; and &lsquo;VALID&rsquo; padding in tf.nn.max_pool of tensorflow?</a></p>
+
+<ul>
+<li>valid: 不做任何padding,只在&rdquo;valid&rdquo;的区域做卷积.如果filter的一部分超过了feature map的边界,那么就不做卷积.</li>
+<li>same: <strong>并不表示input和output的size相同</strong>(只在stride 为1时成立)  而是说如果filter超出了feature map的边界,自动做padding.</li>
+</ul>
+
+<h3 id="3d卷积">3d卷积</h3>
+
+<p>区别主要是 filter 的depth小于 input的depth. 因此在depth方向也可以移动.</p>
+
+<p><img src="https://miro.medium.com/max/1280/1*wUVVgZnzBwYKgQyTBK_5sg.png" alt="3d卷积" /></p>
+
+<h3 id="1-x-1-卷积">1 x 1 卷积</h3>
+
+<p><del>印象中应该是 <a href="https://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/43022.pdf">Going Deeper with Convolutions</a>中的inception module最先引入了1*1的卷积.</del></p>
+
+<p>印象错误.. 不过至少算是让这种结构广为人知?</p>
+
+<p>原因是inception module中计算量太大了,因此用1*1的卷积降低维度.</p>
+
+<p><img src="https://miro.medium.com/max/1280/1*deVKbCzJs_7eL6p2ltkY0g.png" alt="1*1卷积" /></p>
+
+<p><strong>其实1*1的卷积本质上就是对不同channel的feature进行线性组合,只不过这种操作恰好可以通过一种1*1的卷积结构实现.</strong></p>
+
+<h3 id="transposed-convolution-deconvolution">Transposed Convolution (Deconvolution)</h3>
+
+<p>Transposed Convolution 其实是比较合适的叫法,但是人们也经常用&rdquo;Deconvolution&rdquo;来表示.</p>
+
+<p>我们考虑一个 Semantic Segmentation 问题,需要做像素级别的分类.</p>
+
+<p><img src="https://i.loli.net/2020/04/11/QlPR693KNAEGJWx.png" alt="semantic seg.png" /></p>
+
+<p>这样的问题在于计算代价比较大,一般的做法是在encoder阶段抽特征,downsample到一个合适的尺寸,然后在decoder阶段upsample到原图的尺寸.</p>
+
+<p><img src="https://i.loli.net/2020/04/11/t635KerJmXUNOoC.png" alt="semantic sef 2.png" /></p>
+
+<p>Transposed Convolution 就是一种做upsample的方式.</p>
+
+<p>正常的卷积是feature map的每个结果是filter和input做点积得到的.
+Transposed Convolution 是 input表示了filter在feature map上对应位置的权重.</p>
+
+<p>大概长这样:</p>
+
+<p><img src="https://i.loli.net/2020/04/11/itVqNXehEJPS72v.png" alt="deconv1.png" /></p>
+
+<p>和这样:</p>
+
+<p><img src="https://i.loli.net/2020/04/11/GrSjDyYHfxaW3w2.png" alt="deconv2.png" /></p>
+
+<p>那么这个操作为啥叫&rdquo;Transposed Convolution&rdquo;呢 因为这个操作其实是把input feature map的矩阵做了转置,再做正常的卷积.</p>
+
+<p><img src="https://i.loli.net/2020/04/11/MzsuvS3fJndipq5.png" alt="deconv3.png" /></p>
+
+<h3 id="dilated-convolution-空洞卷积">Dilated Convolution  (空洞卷积)</h3>
+
+<p><img src="https://github.com/vdumoulin/conv_arithmetic/blob/master/gif/dilation.gif?raw=true" alt="Dilated Convolution" /></p>
+
+<p>其中蓝色为输入的feature map,绿色会输出的feature map.</p>
+
+<p>caffe的conv layer是直接支持这种结构的. 似乎是在 Semantic Segmentation  领域比较常见,在工作中没太接触过这种结构.</p>
+
+<h3 id="spatially-separable-convolutions">Spatially Separable Convolutions</h3>
+
+<p>之前完全没有接触过的一种卷积.似乎主要用在移动端设备上使用的网络结构上.主要作用是为了减少卷积的参数量.</p>
+
+<p><img src="https://miro.medium.com/max/1280/1*o3mKhG3nHS-1dWa_plCeFw.png" alt="Spatial Separable Convolutions" /></p>
+
+<h3 id="grouped-convolution">Grouped Convolution</h3>
+
+<p>做鉴黄的同事提了新的需求，于是来看一下这种卷积．</p>
+
+<p>主要作用是通过group conv替代一般的conv,来降低参数量．具体来说，参数为变成原来的1/G. 推倒过程见下图:</p>
+
+<p><img src="https://i.loli.net/2020/05/08/ilt6ek5RYV9zrUm.png" alt="2020-05-08 15_36_29屏幕截图.png" /></p>
+
+<p>截取自　<a href="https://www.cnblogs.com/shine-lee/p/10243114.html">Group Convolution分组卷积，以及Depthwise Convolution和Global Depthwise Convolution</a>  (虽然感觉＂feature map的数量＂叫法怪怪的..感觉一般是把整个depth看做一个feature map？　不过不影响)</p>
+
+<p>主要思想是做卷积时候把N个Filters分成G组，同时把输入的feature map也按照depth分成G组，每组Filters只和对应的feature map做卷积．</p>
+
+<p>先看G=2的情况直观感受一下</p>
+
+<p><img src="https://miro.medium.com/max/1400/1*oFVlkvZp848nh-QoD3pREw.png" alt="Standard 2D convolution." />
+<img src="https://miro.medium.com/max/1104/1*dBrsVP0nt_PrBlICSBTttg.png" alt="Grouped convolution with 2 filter groups." /></p>
+
+<p><strong>注意图上其实是单个filter的情况，filter的channel变成了一半，只和输入feature map的前一半或者后一半做卷积，然后只会得到一个二维的Wout*Hout的输出feature map. 然后每组的filter的数量也变成了分组前的一半，也就是N/2,加起来还是N.</strong></p>
+
+<p>再来看一个描述全部filter的图，这里G=3
+<img src="https://i.loli.net/2020/05/09/zrTvKNSO1QJqs2i.png" alt="FLPc1x.png" /></p>
+
+<p>然后简单看一下caffe的实现,主要是看base_conv_layer，是conv_layer的基类. 只挑和group有关的部分．</p>
+
+<pre><code class="language-c++">
+  group_ = this-&gt;layer_param_.convolution_param().group();
+  CHECK_EQ(channels_ % group_, 0);
+  CHECK_EQ(num_output_ % group_, 0)
+      &lt;&lt; &quot;Number of output should be multiples of group.&quot;;
+
+</code></pre>
+
+<p>可以看出group数目必须能被filter　num和 input feature channels数整除．</p>
+
+<pre><code class="language-c++">
+
+template &lt;typename Dtype&gt;
+void BaseConvolutionLayer&lt;Dtype&gt;::forward_cpu_gemm(const Dtype* input,
+    const Dtype* weights, Dtype* output, bool skip_im2col) {
+  const Dtype* col_buff = input;
+  if (!is_1x1_) {
+    if (!skip_im2col) {
+      conv_im2col_cpu(input, col_buffer_.mutable_cpu_data());
+    }
+    col_buff = col_buffer_.cpu_data();
+  }
+  for (int g = 0; g &lt; group_; ++g) {
+    caffe_cpu_gemm&lt;Dtype&gt;(CblasNoTrans, CblasNoTrans, conv_out_channels_ /
+        group_, conv_out_spatial_dim_, kernel_dim_,
+        (Dtype)1., weights + weight_offset_ * g, col_buff + col_offset_ * g,
+        (Dtype)0., output + output_offset_ * g);
+  }
+}
+
+</code></pre>
+
+<p>实现的也很朴素..就是for循环．．．group_参数默认为1,为1就是普通的卷积</p>
+
+<h2 id="参考链接">参考链接</h2>
+
+<ul>
+<li><p><a href="https://towardsdatascience.com/a-comprehensive-introduction-to-different-types-of-convolutions-in-deep-learning-669281e58215">A Comprehensive Introduction to Different Types of Convolutions in Deep Learning</a></p></li>
+
+<li><p><a href="https://www.cnblogs.com/shine-lee/p/10775831.html">im2col：将卷积运算转为矩阵相乘</a></p></li>
+
+<li><p><a href="https://github.com/vdumoulin/conv_arithmetic/blob/master/README.md">Convolution arithmetic</a></p></li>
+
+<li><p><a href="https://towardsdatascience.com/a-basic-introduction-to-separable-convolutions-b99ec3102728">A Basic Introduction to Separable Convolutions</a></p></li>
+</ul>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="https://111qqz.github.io"><img src="/img/favicon.png" />111qqz的小窝</a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2020/04/cuda-error-700-when-using-tensorrt-calibration" data-toggle="tooltip" data-placement="top" title="tensorrt INT8 量化debug记录（cuda error 700）">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2020/04/caffe-source-code-analysis-part6" data-toggle="tooltip" data-placement="top" title="caffe 源码学习笔记(6) reshape layer">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+
+
+
+<div id="git-comments"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://ihtcboy.com/script/gitment.browser.js"></script>
+<script>
+  var gitment = new Gitment({
+    id: decodeURI(window.location.pathname),  
+    owner: '111qqz',
+    repo: '111qqz.github.io',
+    oauth: {
+      client_id: '8839ce5e58d5197e2490',
+      client_secret: '2d475a8a7e27a8b509847a6c60f692b8cbaa274e',
+    }
+  })
+  gitment.render('git-comments')
+</script>
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/km" title="KM">
+                            KM
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/bfs" title="bfs">
+                            bfs
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/binary-search" title="binary search">
+                            binary search
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/brute-force" title="brute force">
+                            brute force
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/c&#43;&#43;" title="c&#43;&#43;">
+                            c&#43;&#43;
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/caffe" title="caffe">
+                            caffe
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dfs" title="dfs">
+                            dfs
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dp" title="dp">
+                            dp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/greedy" title="greedy">
+                            greedy
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/hash" title="hash">
+                            hash
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/kmp" title="kmp">
+                            kmp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/leetcode" title="leetcode">
+                            leetcode
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/math" title="math">
+                            math
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/number-theory" title="number theory">
+                            number theory
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/rmq" title="rmq">
+                            rmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/sg%E5%87%BD%E6%95%B0" title="sg函数">
+                            sg函数
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/stl" title="stl">
+                            stl
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/tensorflow" title="tensorflow">
+                            tensorflow
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%BA%8C%E5%88%86%E5%9B%BE%E6%9C%80%E4%BD%B3%E5%8C%B9%E9%85%8D" title="二分图最佳匹配">
+                            二分图最佳匹配
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%9D%97" title="分块">
+                            分块
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%89%8D%E7%BC%80%E5%92%8C" title="前缀和">
+                            前缀和
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8C%88%E7%89%99%E5%88%A9%E7%AE%97%E6%B3%95" title="匈牙利算法">
+                            匈牙利算法
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E5%8C%BA%E9%97%B4dp" title="区间dp">
+                            区间dp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8D%9A%E5%BC%88%E8%AE%BA" title="博弈论">
+                            博弈论
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%90%8E%E7%BC%80%E8%87%AA%E5%8A%A8%E6%9C%BA" title="后缀自动机">
+                            后缀自动机
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%9B%BE%E8%AE%BA" title="图论">
+                            图论
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2" title="字符串">
+                            字符串
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BF%AB%E9%80%9F%E5%B9%82" title="快速幂">
+                            快速幂
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E4%BD%8Ddp" title="数位dp">
+                            数位dp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9E%84%E9%80%A0" title="构造">
+                            构造
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84" title="树状数组">
+                            树状数组
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%A6%82%E7%8E%87" title="概率">
+                            概率
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%A8%A1%E6%8B%9F" title="模拟">
+                            模拟
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%AF%8D%E5%87%BD%E6%95%B0" title="母函数">
+                            母函数
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%9F%A9%E9%98%B5" title="矩阵">
+                            矩阵
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%A6%BB%E6%95%A3%E5%8C%96" title="离散化">
+                            离散化
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%BA%BF%E6%AE%B5%E6%A0%91" title="线段树">
+                            线段树
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95" title="计算几何">
+                            计算几何
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://111qqz.com">111qqz的wordpress博客</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="111qqz的小窝" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:hust.111qqz@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/img/wechat.jpg">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/111qqz/">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy; 111qqz的小窝 2021
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>

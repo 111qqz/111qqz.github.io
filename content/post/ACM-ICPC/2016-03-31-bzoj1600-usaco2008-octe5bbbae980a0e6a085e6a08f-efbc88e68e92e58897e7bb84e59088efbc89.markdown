@@ -1,0 +1,99 @@
+---
+author: 111qqz
+date: 2016-03-31 11:12:49+00:00
+draft: false
+title: bzoj1600  [Usaco2008 Oct]建造栅栏 （排列组合）
+type: post
+url: /2016/03/bzoj1600-usaco2008-oct-/
+categories:
+- ACM
+tags:
+- 排列组合
+---
+
+勤奋的Farmer John想要建造一个四面的栅栏来关住牛们。他有一块长为n（4<=n<=2500）的木板，他想把这块本板切成4块。这四块小木板可以是任何一个长度只要Farmer John能够把它们围成一个合理的四边形。他能够切出多少种不同的合理方案。注意： *只要大木板的切割点不同就当成是不同的方案（像全排列那样），不要担心另外的特殊情况，go ahead。 *栅栏的面积要大于0. *输出保证答案在longint范围内。 *整块木板都要用完。
+
+思路：排列组合。。减法原则。长度为n的木板，有n-1个切点，那么n-1个切点切三刀的方案数就是C(n-1,3) ，但是这里面有不能构成四边形的。
+
+构成四边形的条件是：任意三边之和大于第四边。也就是任意a+b+c>d，可以得到d<n/2
+
+为方便描述，我们不妨认为从左往右切，先且最左边，再切最右边。
+
+并且先讨论最右边的木板是长度最长的。
+
+所以我们最后一刀一定切在n/2之后的地方。
+
+此时无论之前的两刀是怎么切的，由于切完出现的三块的长度和是一定的，所有都一定能构成四边形。
+
+多算的部分就是从n/2点，最左边可以切到3点的方案数。
+
+如果最后一刀切在点i,那么左边还剩下i-1个点，选两个点切，方案数为C(i-1,2)
+
+将多切的方案数sad按照最后一刀的切点累加。
+
+**需要注意的是，我们之前为了方便讨论，设最后一个木板是最长的，然而实际上四块木板都有可能是最长的。 所以多切的方案数sad=sad*4**
+
+
+
+哦，听说这题dp也能过。。。。？反正我是想不到。
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年03月31日 星期四 18时23分16秒
+    File Name :code/bzoj/1600.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N = 2600;
+    LL n;
+    
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	cin>>n;
+    	LL ans = (n-1)*(n-2)*(n-3)/6;
+    	LL sad = 0LL;
+    	for ( LL i =n/2  ; i >= 3 ; i--)
+    	{
+    	    sad = sad + ((i-1)*(i-2)/2)*4;  //C(i-1,2) ，*4是因为每个点都有可能作为最大点。
+    	}
+    //	cout<<"ans:"<<ans<<endl;
+    //	cout<<"sad:"<<sad<<endl;
+    	ans -=sad;
+    	cout<<ans<<endl;
+    	
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    

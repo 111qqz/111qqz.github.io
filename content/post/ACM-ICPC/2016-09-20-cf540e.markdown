@@ -1,0 +1,197 @@
+---
+author: 111qqz
+date: 2016-09-20 12:07:02+00:00
+draft: false
+title: codeforces 540 E. Infinite Inversions (分类思想+线段树求逆序对)
+type: post
+url: /2016/09/cf540e/
+categories:
+- ACM
+tags:
+- 线段树
+- 逆序对
+---
+
+[题目链接](http://codeforces.com/problemset/problem/540/E)
+
+题意：一个无穷数列，从1开始，初始第i个位置上为i，给出n个swap，每次交换两个位置的数。问交换n次以后得到的数列中，逆序对的数。
+
+思路：
+
+官方题解：
+
+
+<blockquote>At first find the position of each element which is used in swap (using map). Now let's find the answer. It consists of the two parts. First part is the number of inversions formed by only whose elements which took part in the swaps. They can be counted by one of the standard ways: mergesort or Fenwick tree. The second part is the number of inversions formed by pairs of elements where one element has been swapped even once, and the other element stayed at his position. Let's consider the following test:
+
+2
+
+2 6
+
+4 8
+
+The global sequence will look as follows: [1 6 3 8 5 2 7 4 9 ...], and here is the array of swapped elements: [6 8 2 4].
+
+Let's understand with which numbers the number 8 forms the inversions. The only elements that could do that are the elements between the initial position of the number 8 (where the number 4 is now) and its current position: [5 2 7]. There are two numbers on this segment which didn't take part in swaps: 5 and 7. The number 2 should not be counted as it took part in the swaps and we have already counted it in the first part of the solution.
+
+So we should take the count of numbers between 8's indices in the global sequence (8 - 4 - 1 = 3) and subtract the count of numbers between its indices in the swaps array **(4 - 2 - 1 = 1)(在交换序列中【6,8,2,4】4的位置在4,8的位置在2).** We'll get the number of inversions formed by the element 8 and the elements which haven't moved at all, it's 2. Counting this value for all elements which have been swapped at least once, we get the second part of the answer. All operations in the second part of the solution can be performed using sorts and binary searches.</blockquote>
+
+
+
+
+讲真。。。题解写的真是不友好。。。。很多概念从天而降。。。公式中magic number不加说明。。。。差评。
+
+我来说一下这道题的做法：
+
+首先，由于交换的位置最大1E9，但是最多1E5个交换。。所以自然而然想到离散化。
+
+**需要注意的是，离散化后最多有2E5个，而不是1E5 （<del>因此re #7</del>）**
+
+对于统计最后的逆序对数，我们分为两部分。
+
+首先我们知道，对于两个没有被交换过的数，肯定不是一对逆序对。
+
+因此答案分为，**两个数都是被交换过的数产生的逆序对数 和 交换过的数和没被交换过的数之间产生的逆序对数。**
+
+
+<blockquote>First part is the number of inversions formed by only whose elements which took part in the swaps. They can be counted by one of the standard ways: mergesort or Fenwick tree. The second part is the number of inversions formed by pairs of elements where one element has been swapped even once, and the other element stayed at his position. Let's consider the following test:</blockquote>
+
+
+对于前者。。。。
+
+就是普通的逆序对。。。直接BIT处理（<del>故意写成线段树真是不美丽）</del>
+
+对于后者。。。我们的做法是。。。
+
+处理两个数组。。。f[i]和p[i]
+
+**f[i]表示交换序列中，离散化后，处于第i个位置上面的值（也是离散化之前的位置）**
+
+**p[i]表示现在在i位置上的数初始是在p[i]位置(位置是离散化后的从小到大的顺序，因此是对于交换序列的（因为只有交换序列才离散化了））**
+
+对于处于交换序列中的某个数，其初始位置和最终位置之间有多少个数，答案为：**abs(f[p[i]]-f[i])-1**
+
+但是这两个位置之间，处于交换序列中的数在之前的第一部分已经算过了（也就是两个数都是被交换过的数）
+
+所以我们需要减去 两个位置之间，已经处于交换序列的个数（不包含两个位置）
+
+结果为**abs(i-p[i])-1** (交换序列中 i和p[i]位置之间，有**abs(i-p[i])-1**个数)
+
+两部分相间，答案为res = abs(f[p[i]-f[i]]-1 - (ans(i-p[i])-1) = abs(f[p[i]]-f[i]) - abs(i-p[i])
+
+把每个处于交换序列中的数的res累加，就是最后的结果。
+
+注意要开LL.
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :Tue 20 Sep 2016 02:14:23 PM CST
+    File Name :code/cf/problem/540E.cpp
+     ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=2E5+7;
+    int n;
+    struct node
+    {
+        int l,r;
+    }q[N];
+    int f[N],p[N];
+    map<int,int>mp;
+    LL tree[N<<2];
+    void PushUp( int rt)
+    {
+        tree[rt] = tree[rt<<1] + tree[rt<<1|1];
+    }
+    void update( int p,LL sc,int l,int r,int rt)
+    {
+        if (l==r)
+        {
+    	tree[rt] += sc;
+    	return ;
+        }
+        int m = (l+r)>>1;
+        if (p<=m) update(p,sc,lson);
+        else update(p,sc,rson);
+        PushUp(rt);
+    }
+    LL query(int L,int R,int l,int r,int rt)
+    {
+        if (L<=l&&r<=R) return tree[rt];
+        int m = (l+r)>>1;
+        LL ret = 0LL;
+        if (L<=m) ret+=query(L,R,lson);
+        if (R>=m+1) ret+=query(L,R,rson);
+        return ret;
+    }
+    int main()
+    {
+    #ifndef  ONLINE_JUDGE 
+        //freopen("code/in.txt","r",stdin);
+    #endif
+        scanf("%d",&n);
+        mp.clear();
+        ms(p,0);
+        for ( int i = 1 ;i <= n ; i++)
+        {
+    	scanf("%d%d",&q[i].l,&q[i].r);
+    	mp[q[i].l] = 0 ;
+    	mp[q[i].r] = 0;
+        }
+        int cnt = 0 ;
+        for ( auto it = mp.begin() ; it!=mp.end() ; it++)
+        {
+    	it->sec = ++cnt;
+    	f[cnt] = it->fst;
+    	p[cnt] = cnt;
+        }
+        for ( int i = 1 ; i <= n ; i++) q[i].l = mp[q[i].l],q[i].r = mp[q[i].r];
+        for ( int i = 1 ; i <= n ; i++) swap(p[q[i].l],p[q[i].r]);
+        LL ans = 0LL;
+        for ( LL i = 1; i <= cnt ; i++)
+        {
+    	update(p[i],1,1,cnt,1);
+    	ans += i-query(1,p[i],1,cnt,1);
+    	ans += abs(f[i]-f[p[i]])-abs(i-p[i]);
+        }
+        printf("%lld\n",ans);
+    #ifndef ONLINE_JUDGE  
+        fclose(stdin);
+    #endif
+        return 0;
+    }
+    
+
+
+
+
+
+
+
+
+
+
+

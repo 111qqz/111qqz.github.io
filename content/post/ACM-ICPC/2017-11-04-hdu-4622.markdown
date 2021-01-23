@@ -1,0 +1,185 @@
+---
+author: 111qqz
+date: 2017-11-04 04:31:38+00:00
+draft: false
+title: hdu 4622 | 2013 Multi-University Training Contest 3 Reincarnation (后缀自动机)
+type: post
+url: /2017/11/hdu-4622/
+categories:
+- ACM
+tags:
+- 后缀自动机
+---
+
+http://acm.hdu.edu.cn/showproblem.php?pid=4622
+
+
+
+# 题意：
+
+
+
+给一个字符串，给出若干询问，每组询问给一个区间[l,r]，问区间中本质不同的字符串的个数。
+
+
+
+# 思路：
+
+
+
+观察发现，有10000组查询，字符串的长度最多才2000，所以可以预处理一波。
+
+我们先考虑如何处理整个区间中，本质不同的子串数量。
+
+考虑SAM，由于后缀自动机中每一条从初始状态出发的路径都对应的一个子串，同时后缀自动机是最简的，所以问题也就变成了从初始状态开始不同**路径的数量**。
+
+每个节点 u 表示的子串长度在 [min[u],max[u]]范围内.
+
+又由于max(u.fail) = min(u)-1
+
+因此u表示的子串的长度就是变成了**(max[u.fail],max[u] ]  (注意区间，是左闭右开)**
+
+**由于每个长度的串都出现了一次**，因此这个状态子串的个数就是max[u] - max[u.fail]
+
+如果是统计整个串的本质不同的串的个数，那么buildSAM之后统计一下就行了。
+
+现在是询问区间。
+
+问题变成了，从[l,r]到[l,r+1]，答案的改变是什么。
+
+**在SAM上添加一个字符之后，SAM当前的状态变成了cur,那么实际上，对答案的贡献，就是初始状态到新的状态cur的不同路径数目。**
+
+也就是**max[cur]-max[cur.fail]**
+
+
+    
+    #include <bits/stdc++.h>
+    #define PB push_back
+    #define fst first
+    #define sec second
+    #define lnxt l,m,rt<<1
+    #define rnxt m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=2017;
+    const int maxn = 4017;
+    LL ret;
+    struct node{
+        node*nxt[26],*fail;
+        LL len,cnt;
+        void init()
+        {
+        for ( int i = 0 ; i < 26 ; i++) nxt[i]=NULL;
+        fail=NULL;
+        len=cnt=0;
+        }
+    };
+    struct SAM{
+        node no[maxn];
+        node*root;
+        int cnt;
+         node*  newnode(){
+        ms(no[cnt].nxt,0);
+        no[cnt].fail=NULL;
+        no[cnt].len=no[cnt].cnt=0;
+        return &no[cnt++];
+        }
+        SAM(){
+        cnt = 0;
+        root = newnode();
+        }
+        void init()
+        {
+        cnt = 0;
+        root =newnode();
+        no[0].init();
+        }
+        node*add(int c,node*p){
+            node*cur = newnode();
+            cur->len = p->len+1;
+        node *lst = cur;
+            while(p&&!p->nxt[c]){
+                p->nxt[c] = cur;
+                p = p->fail;
+            }
+            if(!p){
+                cur->fail = root;
+                return cur;
+            }
+            node *q = p->nxt[c];
+            if(p->len+1==q->len){
+                cur->fail = q;
+            }else{
+                node*nq = newnode();
+                *nq = *q;
+                q->fail = cur->fail = nq;
+                nq->len = p->len+1;
+                while(p&&p->nxt[c]==q){
+                    p->nxt[c] = nq;
+                    p = p->fail;
+                }
+            }
+            return cur;
+        }
+        LL calc(node *cur)
+        {
+        return cur->len - cur->fail->len;
+        }
+    };
+    SAM sam;
+    string A;
+    LL ans[N][N];
+    int main()
+    {
+        #ifndef  ONLINE_JUDGE 
+        freopen("./in.txt","r",stdin);
+      #endif
+        int T;
+        cin>>T;
+        while (T--)
+        {
+            cin>>A;
+            int q;
+            ms(ans,0);
+            int len = A.length();
+            //预处理一下，就只需要2000个SAM了
+            for ( int i = 0 ; i < len ; i++)
+            {
+            sam.init();
+            node *cur = sam.root;
+            for ( int j = i ; j < len ; j++)
+            {
+                cur = sam.add(A[j]-'a',cur);
+                ans[i+1][j+1] = ans[i+1][j] + sam.calc(cur);
+    
+            }
+            }
+            scanf("%d",&q);
+            while (q--)
+            {
+            int l,r;
+            scanf("%d %d",&l,&r);
+            printf("%lld\n",ans[l][r]);
+            }
+        }
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+
+

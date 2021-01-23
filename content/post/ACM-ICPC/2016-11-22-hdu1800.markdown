@@ -1,0 +1,102 @@
+---
+author: 111qqz
+date: 2016-11-22 11:41:34+00:00
+draft: false
+title: hdu 1800 Flying to the Mars (字符串hash)
+type: post
+url: /2016/11/hdu1800/
+categories:
+- ACM
+tags:
+- hash
+---
+
+[题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=1800)
+
+题意：n个人，每个人有一个level值，用一个最长30位的，可能带前缀0的数字串表示，如果i的level大于j的level，那么i可以教j飞行，每个人只能有一个老师，每个人也只能收一个徒弟。师生可以共用一把扫帚飞行。现在问最少需要多少扫帚。
+
+思路：分析发现，影响扫帚多少的是相等的数有多少，因为只要不相等，就肯定可以构成师生关系....
+
+更确切得说，是所有数出现次数的最大值。
+
+有一个trick点，就是带前缀0和不带前缀0的两个level被认为是相等的，hash的时候要处理前缀0.
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年11月22日 星期二 19时18分30秒
+    File Name :code/hdu/1800.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    unsigned int BKDHash(char *str)
+    {
+        unsigned int seed = 251;
+        unsigned int hash = 0 ;
+        while (*str=='0') str++; //带前缀0的和不带前缀0的认为是同一个数，因此要处理前缀0.
+        while (*str) hash = hash*seed+(*str++);
+        return (hash&0x7fffffff);
+    }
+    int n;
+    map<int,int>mp;
+    char st[305];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    //	freopen("code/in.txt","r",stdin);
+      #endif
+    	while (~scanf("%d",&n))
+    	{
+    	    mp.clear();
+    	    for ( int i = 1; i <= n ; i++)
+    	    {
+    		scanf("%s",st);
+    		int id = BKDHash(st);
+    		if (!mp[id]) mp[id] = 1;
+    		else mp[id]++;
+    	    }
+    	    int ans = 0;
+    	    for ( auto it = mp.begin(); it !=mp.end();  it++)
+    	    {
+    		ans = max(ans,it->sec);
+    	    }
+    	    printf("%d\n",ans);
+    	}
+    	
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+

@@ -1,0 +1,162 @@
+---
+author: 111qqz
+date: 2016-07-12 09:53:17+00:00
+draft: false
+title: poj 1679 The Unique MST (判断mst的唯一性，次小生成树)
+type: post
+url: /2016/07/poj1679/
+categories:
+- ACM
+tags:
+- mst
+- 次小生成树
+---
+
+[poj1679](http://poj.org/problem?id=1679)
+
+题意：问最小生成树是否唯一。。
+
+思路：求一下次小生成树。。。如果无解，或者次小生成树的权值之和和最小生成树的权值之和不同，那么唯一，否则不唯一。1A
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年07月12日 星期二 16时16分52秒
+    File Name :code/poj/1679.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=105;
+    int n,m;
+    int ans;
+    int f[N];
+    struct Edge
+    {
+        int u,v,w;
+        int in;
+        void input()
+        {
+    	scanf("%d%d%d",&u,&v,&w);
+        }
+        bool operator < (Edge b)const
+        {
+    	return w<b.w;
+        }
+    }edge[N*N];
+    void init()
+    {
+        for ( int i = 1 ; i <= n ; i++) f[i] = i;
+    }
+    int root ( int x)
+    {
+        if (x!=f[x]) f[x] = root(f[x]);
+        return f[x];
+    }
+    void merge( int x,int y)
+    {
+        int rx = root(x);
+        int ry = root(y);
+        if (rx==ry) return ;
+        f[rx] = ry;
+    }
+    void kruskal( int k)
+    {
+        for ( int i = 1 ; i <= n; i++) f[i] = i;
+        int cnt = 0 ;
+        int cur = 0 ;
+        for ( int i = 1; i <= m ; i++)
+        {
+    	int u = edge[i].u;
+    	int v = edge[i].v;
+    	int w = edge[i].w;
+    	if (i==k) continue;
+    	if (root(u)==root(v)) continue;
+    	merge(u,v);
+    	cnt++;
+    	cur+=w;
+    	if (cnt>=n-1) break;
+        }
+     //   cout<<"cnt:"<<cnt<<endl;
+        if (cnt<n-1) return ;
+        ans = min(ans,cur);
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	int T;
+    	scanf("%d",&T);
+    	while (T--)
+    	{
+    	    scanf("%d%d",&n,&m);
+    	    init();
+    	    for ( int i = 1; i <= m ; i++) edge[i].input();
+    	    sort(edge+1,edge+m+1);
+    	    int cnt = 0 ;
+    	    int mst = 0 ;
+    	    for ( int i = 1 ; i <= m ; i++)
+    	    {
+    		int u = edge[i].u;
+    		int v = edge[i].v;
+    		int w = edge[i].w;
+    		if (root(u)==root(v)) continue;
+    		edge[i].in = 1;
+    		merge(u,v);
+    		cnt++;
+    		mst+=w; 
+    	    }
+    	    ans = inf;
+    	    for ( int i = 1 ; i <= m ; i++)
+    	    {
+    		if (edge[i].in==0) continue;
+    	//cout<<"i:"<<i<<endl;
+    		kruskal(i);
+    	    }
+    	//    cout<<"mst:"<<mst<<endl;
+    	 //   cout<<"ans:"<<ans<<endl;
+    	    if (ans==inf)
+    	    {
+    		printf("%d\n",mst);
+    	    }else
+    	    {
+    		if (ans==mst) puts("Not Unique!");
+    		else printf("%d\n",mst);
+    	    }
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+

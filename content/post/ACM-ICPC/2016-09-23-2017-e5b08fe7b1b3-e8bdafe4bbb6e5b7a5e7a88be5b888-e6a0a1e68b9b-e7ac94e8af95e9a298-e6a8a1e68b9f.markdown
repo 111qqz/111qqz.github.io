@@ -1,0 +1,98 @@
+---
+author: 111qqz
+date: 2016-09-23 15:51:41+00:00
+draft: false
+title: 2017 小米 软件工程师 校招 笔试题 (模拟)
+type: post
+url: /2016/09/2017-----/
+categories:
+- ACM
+tags:
+- 模拟
+---
+
+题意：一串电话号码，每个数字+8取各位后，把每个数字写成对应的大写英文，从"ZERO"和“NINE”，然后打乱字母的顺序。现在给出打乱的字母顺序，问可能的字典序最小的电话号码是是多少（可能有前导0）
+
+思路：分析0..9 每个数字的英文组成。。。然后大概类似解方程。。可以根据字母的个数确定每个数字的个数。。。
+
+然后-8。。。存一下排个序就好了。。。1A
+
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E4+7;
+    char st[N];
+    int len;
+    int a[30];
+    int cnt[15]; //0..9数字的个数.
+    int main()
+    {
+    	int T;
+    	cin>>T;
+    	while (T--)
+    	{
+    	    scanf("%s",st);
+    	    len = strlen(st);
+    	    ms(a,0);
+    	    ms(cnt,0);
+    	    for ( int i = 0 ; i < len ; i++)
+    	    {
+    		int val = st[i]-'A'+1;
+    		a[val]++;
+    	    }
+    	    cnt[0] = a['Z'-'A'+1];
+    	    cnt[6] = a['X'-'A'+1];
+    	    cnt[2] = a['W'-'A'+1]; 
+    	    cnt[8] = a['G'-'A'+1];
+    	    cnt[4] = a['U'-'A'+1];
+    	    cnt[7] = a['S'-'A'+1]-cnt[6];
+    	    cnt[5] = a['V'-'A'+1]-cnt[7];
+    	    cnt[1] = a['O'-'A'+1]-cnt[0]-cnt[2]-cnt[4];
+    	    cnt[3] = a['H'-'A'+1]-cnt[8];
+    	    cnt[9] = (a['N'-'A'+1]-cnt[1]-cnt[7])/2;
+    	    vector <int>ans;
+    	    for ( int i = 0 ; i <= 9 ; i++)
+    	    {
+    		for ( int j = 1 ; j <= cnt[i] ; j++)
+    		{
+    		    int val = i-8;
+    		    if (val<0) val+=10;
+    		    ans.push_back(val);
+    		}
+    	    }
+    	    sort(ans.begin(),ans.end());
+    	    int siz = ans.size();
+    	    for ( int i  = 0 ; i < siz; i ++) printf("%d",ans[i]);
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

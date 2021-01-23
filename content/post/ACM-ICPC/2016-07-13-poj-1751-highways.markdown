@@ -1,0 +1,178 @@
+---
+author: 111qqz
+date: 2016-07-13 13:28:29+00:00
+draft: false
+title: poj 1751 Highways (最小生成树，空间卡常数有毒啊)
+type: post
+url: /2016/07/poj-1751-highways/
+categories:
+- ACM
+tags:
+- mst
+---
+
+[poj1751题目链接](http://poj.org/problem?id=1751)
+
+题意：一开始有一些边，然后添加一些边，使得代价之和最小。
+
+思路：先把给定的边merge掉。。然后计算其余可以添加的边。。。接下来就是最小生成树。。。
+
+然而因为多开了一个750*750的数组空间被卡了常。。。毫无人性。。。。
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年07月13日 星期三 19时53分29秒
+    File Name :code/poj/1751.cpp
+     ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=755;
+    int n;
+    int m;
+    int om;
+    pi ans[N*N];
+    bool conc[N*N];
+    int f[N];
+    struct Edge
+    {
+        int u,v;
+        double w;
+    
+        bool operator < (Edge b)const
+        {
+    	return w<b.w;
+        }
+    }edge[N*N];
+    
+    
+    
+    struct point
+    {
+        double  x,y;
+    
+        void input()
+        {
+    	scanf("%lf%lf",&x,&y);
+        }
+    
+        double dis( point b)
+        {
+    	double res ;
+    	res = (x-b.x)*(x-b.x)+(y-b.y)*(y-b.y);
+    	return sqrt(res);
+        }
+    }p[N];
+    
+    void init()
+    {
+        for ( int i = 1 ; i <= n ; i++) f[i] = i;
+    }
+    
+    int root ( int x)
+    {
+        if (x!=f[x] ) f[x] = root (f[x]);
+        return f[x];
+    }
+    
+    void merge( int x,int y)
+    {
+        int rx = root (x);
+        int ry = root (y);
+        if (rx==ry) return ;
+        f[rx] = ry;
+    }
+    int main()
+    {
+    #ifndef  ONLINE_JUDGE 
+        freopen("code/in.txt","r",stdin);
+    #endif
+    
+        cin>>n;
+        init();
+        for ( int i = 1 ; i <= n ; i++) p[i].input();
+        cin>>m;
+        om = m;
+        int cnt = 0 ;
+        for ( int i = 1 ; i <= m ; i++)
+        {
+    	int u,v;
+    	scanf("%d%d",&u,&v);
+    	if (root(u)==root(v)) continue;
+    	merge(u,v);
+    	cnt++;
+        }
+    
+        m = 0 ;
+        for ( int i = 1 ; i <= n ; i++)
+    	for ( int j = 1 ; j <= n ; j++)
+    	    if (i<j)
+    	    {
+    		m++;
+    		edge[m].u =i;
+    		edge[m].v = j ;
+    		edge[m].w = p[i].dis(p[j]);
+    	    }
+    
+        sort(edge+1,edge+m+1);
+        double mst = 0 ;
+        int num = 0 ;
+        for ( int i = 1; i <= m ; i++)
+        {
+    	int u = edge[i].u;
+    	int v = edge[i].v;
+    	double w = edge[i].w;
+    	if (cnt>=n-1) break;
+    	if (root(u)==root(v)) continue;
+    	//	    cout<<"u:"<<u<<" v:"<<v<<" w:"<<w<<endl;
+    	merge(u,v);
+    	cnt++;
+    	num++;
+    	mst+=w;
+    	ans[num]=make_pair(u,v);
+        }
+        //	cout<<"cnt:"<<cnt<<endl;
+        sort(ans+1,ans+num+1);
+    
+        for ( int i = 1 ;i <= num ; i++)
+    	cout<<ans[i].fst<<" "<<ans[i].sec<<endl;
+    
+    
+    
+    #ifndef ONLINE_JUDGE  
+        fclose(stdin);
+    #endif
+        return 0;
+    }
+    
+
+
+

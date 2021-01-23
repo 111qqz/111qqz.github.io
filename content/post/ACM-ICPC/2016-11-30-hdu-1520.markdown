@@ -1,0 +1,135 @@
+---
+author: 111qqz
+date: 2016-11-30 12:55:30+00:00
+draft: false
+title: hdu 1520 Anniversary party (树形dp模板题)
+type: post
+url: /2016/11/hdu-1520/
+categories:
+- ACM
+
+
+tags:
+- 树形dp
+---
+
+[题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=1520)
+题意：一个舞会，每个人有一个val，给出n个人之间的领导和被领导关系，一个人不愿意与他的领导同时参加，问一种安排方案，使得参加的人的val和最大，问这个最大的和是多少。
+
+思路：树形dp模板题。
+
+dp1[v]表示包含v节点的子树的最大值。
+
+dp2[v]表示，不包含v节点的子树的最大值。
+
+下面讲得很清楚。。
+
+
+<blockquote>Now, similar to array problem, we have to make a decision about including node _V_ in our subset or not. If we include node _V_, we can't include any of its children(say _v_1, _v_2, ..., _v__n_), but we can include any grand child of _V_. If we don't include _V_, we can include any child of _V_.
+
+So, we can write a recursion by defining maximum of two cases.
+![](http://codeforces.com/predownloaded/03/2c/032c971c364ebef5587d19cb5a55aa4fd6f0f1a0.png)
+.
+
+As we see in most DP problems, multiple formulations can give us optimal answer. Here, from an implementation point of view, we can define an easier solution using DP. We define two DPs, ![](http://codeforces.com/predownloaded/e3/23/e323caad7b270198f9896c24655a685cecc925f3.png)
+and ![](http://codeforces.com/predownloaded/22/d1/22d1da887c305bf05f0772561d89eea38726f39f.png)
+, denoting maximum coins possible by choosing nodes from subtree of node _V_ and if we include node _V_ in our answer or not, respectively. Our final answer is maximum of two case i.e. ![](http://codeforces.com/predownloaded/f3/95/f3955309b2daf932b86bc9fa8ff75765d1a7c4d5.png)
+.
+
+And defining recursion is even easier in this case. ![](http://codeforces.com/predownloaded/02/19/02192e1e0ce160a12d5d4ea0f0c35e78e606e495.png)
+(since we cannot include any of the children) and ![](http://codeforces.com/predownloaded/2e/7f/2e7f9a55f015b53bb5993b43b855578b06b81ad8.png)
+(since we can include children now, but we can also choose not include them in subset, hence max of both cases).</blockquote>
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年11月30日 星期三 20时37分22秒
+    File Name :code/hdu/1520.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=6E3+7;
+    int a[N];
+    int n;
+    int dp1[N],dp2[N];
+    vector <int>edge[N];
+    int in[N];
+    int root;
+    void dfs(int u,int pre)
+    {
+        int sum1=0,sum2=0;
+        for ( auto v: edge[u])
+        {
+    	if (v==pre) continue;
+    	dfs(v,u);
+    	sum1+=dp2[v];
+    	sum2+=max(dp1[v],dp2[v]);
+        }
+        dp1[u] = a[u] + sum1;
+        dp2[u] = sum2;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	while (~scanf("%d",&n))
+    	{
+    	    ms(in,0);
+    	    ms(dp1,0);
+    	    ms(dp2,0);
+    	    for ( int i = 1 ;i <= n ; i++) edge[i].clear();
+    	    for ( int i = 1; i <= n ; i++) scanf("%d",&a[i]);
+    	    int u,v;
+    	    while (~scanf("%d%d",&u,&v))
+    	    {
+    		if (u==0&&v==0) break;
+    		edge[u].push_back(v);
+    		edge[v].push_back(u);
+    		in[u]++;
+    	    }
+    	    for ( int i = 1 ; i <= n ; i++)
+    		if (in[i]==0)
+    		{
+    		    root = i;
+    		    break;
+    		}
+    	    dfs(root,-1);
+    	    int ans = max(dp1[root],dp2[root]);
+    	    printf("%d\n",ans);
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

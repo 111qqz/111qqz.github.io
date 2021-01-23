@@ -1,0 +1,163 @@
+---
+author: 111qqz
+date: 2015-07-21 05:02:00+00:00
+draft: false
+title: poj 2251 Dungeon Master (三维bfs)
+type: post
+url: /2015/07/poj2251/
+categories:
+- ACM
+tags:
+- bfs
+---
+
+http://poj.org/problem?id=2251
+
+简单bfs，只不过是三维的。。。
+
+唯一的坑点在输出上...
+
+    
+    Escaped in %d minute(s)
+
+
+这意思是答案为1输出minute,不为1输出minutes还是说是不是1都输出minute(s)?
+试了下，答案是后者。
+
+
+
+另：终于找到了好的读地图的方法。。。而不用担心回车符。
+
+就是先读成字符串。
+
+具体见代码
+
+ 
+ ```c++
+
+    
+    /*************************************************************************
+    	> File Name: code/2015summer/searching/B.cpp
+    	> Author: 111qqz
+    	> Email: rkz2013@126.com 
+    	> Created Time: 2015年07月17日 星期五 16时47分46秒
+     ************************************************************************/
+    
+    #include<iostream>
+    #include<iomanip>
+    #include<cstdio>
+    #include<algorithm>
+    #include<cmath>
+    #include<cstring>
+    #include<string>
+    #include<map>
+    #include<set>
+    #include<queue>
+    #include<vector>
+    #include<stack>
+    using namespace std;
+    #define REP(i, n) for (int i=0;i<int(n);++i)  
+    typedef long long LL;
+    typedef unsigned long long ULL;
+    const int N=40;
+    char st[N][N][N];
+    int d[N][N][N];
+    int l,r,c;
+    int sx,sy,sz,tx,ty,tz;
+    int dirx[6]={1,-1,0,0,0,0};
+    int diry[6]={0,0,-1,1,0,0};
+    int dirz[6]={0,0,0,0,1,-1};
+    
+    bool ok(int x,int y,int z)
+    {
+        if (z>=0&&z<l&&x>=0&&x<r&&y>=0&&y<c&&d[z][x][y]==-1&&st[z][x][y]!='#')
+    	  return true;
+        return false;
+    }
+    
+    void bfs()
+    {
+        memset(d,-1,sizeof(d));
+        queue<int>x;
+        queue<int>y;
+        queue<int>z;
+        x.push(sx);
+        y.push(sy);
+        z.push(sz);
+        d[sz][sx][sy]=0;
+        while (!x.empty()&&!y.empty()&&!z.empty())
+        {
+    	  int prex = x.front();x.pop();
+    	  int prey = y.front();y.pop();
+    	  int prez = z.front();z.pop();
+    	  for ( int  i = 0 ; i < 6 ; i++ )
+    	  {
+    		int newx = prex+dirx[i];
+    		int newy = prey+diry[i];
+    		int newz = prez+dirz[i];
+    		bool flag = ok(newx,newy,newz);
+    		if (flag)
+    		{
+    		    d[newz][newx][newy]=d[prez][prex][prey]+1;
+    		    x.push(newx);
+    		    y.push(newy);
+    		    z.push(newz);
+    		}
+    	  }
+    
+        }
+    }
+    
+    int main()
+    {
+        while (scanf("%d %d %d",&l,&r,&c))
+        {
+    	  if (l==0&&r==0&&c==0)
+    		break;
+    	  for ( int i = 0 ; i < l ; i++)
+    	  {
+    		for ( int j = 0 ; j < r; j++)
+    		    scanf("%s",st[i][j]);
+    	  }
+    	  for ( int i = 0 ; i < l ; i++ )
+    	  {
+    		for ( int j = 0 ; j < r ; j ++)
+    		{
+    		    for ( int k =  0 ;  k < c ; k++ )
+    		    {
+    			  if (st[i][j][k]=='S')
+    			  {
+    				sx = j;
+    				sy = k;
+    				sz = i;
+    			  }
+    			  if (st[i][j][k]=='E')
+    			  {
+    				tx = j;
+    				ty = k;
+    				tz = i;
+    			  }
+    				    
+    		    }
+    		}
+    	  }
+    	  bfs();
+    	  int ans = d[tz][tx][ty];
+    	  if (ans==-1)
+    	  {
+    		printf("Trapped!\n");
+    	  }
+    	  else
+    	  {
+    	//	if (ans==1)
+    	//	printf("Escaped in 1 minute.\n");
+    	//	else printf("Escaped in %d minutes.\n",ans);
+    		printf("Escaped in %d minute(s).\n",ans);
+    	  }
+    
+        }
+    }
+    
+```
+
+

@@ -1,0 +1,94 @@
+---
+author: 111qqz
+date: 2015-12-09 10:38:35+00:00
+draft: false
+title: hdu 2094 产生冠军
+type: post
+url: /2015/12/hdu2094/
+categories:
+- ACM
+tags:
+- 图论
+- 拓扑排序
+---
+
+题意：给定n组u关系。每组表示a战胜b。。问根据这些关系能否确定冠军。
+思路：如果a战胜b就从a连一条指向b的边。那么能确定冠军的条件就变成了，有且只有一个入度为0的点。翻译过来就是，有一个人没有被任何人战胜过。且，这样的人只有一个。一开始想用map来搞。。但是比较麻烦。。其实用set比较好。。开两个set,一个存所有的人，一个存输过的人。出度为0的点只有一个等价为，有且只有一个人没有输过。也就是两个set的元素差个数为1.
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2015年12月08日 星期二 21时11分20秒
+    File Name :code/hdu/2094.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int  N= 1E3+7;
+    int n;
+    set<string>all;
+    set<string>loser;
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	
+    	    while (scanf("%d",&n)!=EOF)
+    	    {
+    		all.clear();
+    		loser.clear();
+    		if (n==0) break;
+    		for ( int i = 0 ; i < n ;i++)
+    		{
+    		    string win,lose;
+    		    cin>>win>>lose;
+    		    all.insert(win);
+    		    all.insert(lose);
+    		    loser.insert(lose);
+    		}
+    		if (all.size()-loser.size()==1)
+    		{
+    		    puts("Yes");
+    		}
+    		else
+    		{
+    		    puts("No");
+    		}
+    	    }
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

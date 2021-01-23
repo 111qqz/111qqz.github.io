@@ -1,0 +1,123 @@
+---
+author: 111qqz
+date: 2015-12-05 12:34:50+00:00
+draft: false
+title: codeforces 217A ice skating
+type: post
+url: /2015/12/cf217a/
+categories:
+- ACM
+tags:
+- dfs
+- tree
+---
+
+http://codeforces.com/problemset/problem/217/A
+题意：有n个雪漂（那是啥？，从某个雪漂出发走直线，只有到达另一个雪飘才能停下来。问最少需要添加多少个雪漂，才能使得可以到达任何一个雪漂。
+思路：横坐标相同或者纵坐标相同的两个点之间是可以到达的。先O(N2)扫一遍建图。记录这个森林中数的个数为cnt,cnt-1即为答案。因为对于任意两个不能相互到达的点。我们只需要再来一个雪漂就可以使得这两个点相互到达。
+
+一遍AC，有点爽。
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2015年12月05日 星期六 20时18分23秒
+    File Name :code/problem/217A.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    
+    
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=105;
+    int n;
+    bool vis[N];
+    int x[N],y[N];
+    
+    vector<int>edge[N];
+    
+    void dfs( int x)
+    {
+        vis[x] = true;
+        for ( int i = 0 ; i < edge[x].size() ; i++)
+        {
+    	int v = edge[x][i];
+    	if  (!vis[v])
+    	{
+    	    dfs(v);
+    	}
+        }
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	scanf("%d",&n);
+    	for ( int i = 0 ; i < n ; i++) scanf("%d %d",&x[i],&y[i]);
+    
+    	for ( int i = 0 ; i  < n-1 ; i++)
+    	{
+    	    for ( int j = i+1 ; j < n ; j++)
+    	    {
+    		if (x[i]==x[j])
+    		{
+    		    edge[i].push_back(j);
+    		    edge[j].push_back(i);
+    		}
+    		if (y[i]==y[j])
+    		{
+    		    edge[i].push_back(j);
+    		    edge[j].push_back(i);
+    		}
+    
+    	    }
+    	}
+    	ms(vis,false);
+    	int cnt = 0 ;
+    	for ( int i = 0 ; i < n ; i++)
+    	{
+    	    if (!vis[i])
+    	    {
+    		dfs(i);
+    		cnt++;
+    	    }
+    	}
+    	cout<<cnt-1<<endl;
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+

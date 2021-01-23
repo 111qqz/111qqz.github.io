@@ -1,0 +1,329 @@
+---
+author: 111qqz
+date: 2015-08-07 18:42:00+00:00
+draft: false
+title: hdu 3333 Turing Tree (求区间中不相同数的和，离线+线段树/树状数组)
+type: post
+url: /2015/08/hdu3333/
+categories:
+- ACM
+tags:
+- 树状数组
+- 线段树
+---
+
+# 
+
+
+[题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=3333)
+
+
+
+喵呜，离散树状数组。
+
+这道题由于相同的值加和的时候只算一次，所以比较伤脑筋==
+
+怎么办呢？
+
+我们发现对于一个值，由于相同的只算一次，所以在任意时间内，这个值只需要出现一次。
+
+**如果我们从作往右将原数组更新到树状数组，如果某个值之前出现过，那么我在更新当前的时候，还需要删掉之前那个。**
+
+这样就可以保证当前的序列中一个值只出现了一次，而且位置更新成最后出现的位置。
+
+如果只出现一次的话那就又是我们喜闻乐见的那个熟悉的树状数组了呢 喵呜！
+
+**但是这样删掉前面出现的元素真心大丈夫？ 万一之后又查询了之前你删掉的点岂不是整个人都萌萌哒了？**
+
+
+
+所以我们可以按照查询区间的又断点排序，保证前面删掉的点以后不会再被查询。
+
+**也就是按照顺序，从左往右，边查询，边更新原数组到树状数组。**
+
+**由于查询区间是无序的，按照右端点排序之后打乱了原来的查询顺序，所以要离线操作。**
+
+****由于查询区间是无序的，按照右端点排序之后打乱了原来的查询顺序，所以要离线操作。****
+
+**由于查询区间是无序的，按照右端点排序之后打乱了原来的查询顺序，所以要离线操作。**
+
+**
+**重要的事情说三遍。
+
+所谓离线操作，就是查询的时候不直接输出答案，而是将答案存起来，然后最后一起输出。
+
+ 
+
+我们需要开一个数组pre [x] 记录x这个数的上一个位置，初始为-1
+
+由 x的范围太大，数组存不下，所以要离散化。
+
+离散化是为了记录一个数上次出现的位置！
+
+注意要开LL 。
+
+    
+    /*************************************************************************
+    	> File Name: code/hdu/3333.cpp
+    	> Author: 111qqz
+    	> Email: rkz2013@126.com 
+    	> Created Time: 2015年08月07日 星期五 17时04分07秒
+     ************************************************************************/
+    
+    #include<iostream>
+    #include<iomanip>
+    #include<cstdio>
+    #include<algorithm>
+    #include<cmath>
+    #include<cstring>
+    #include<string>
+    #include<map>
+    #include<set>
+    #include<queue>
+    #include<vector>
+    #include<stack>
+    #define y0 abc111qqz
+    #define y1 hust111qqz
+    #define yn hez111qqz
+    #define j1 cute111qqz
+    #define tm crazy111qqz
+    #define lr dying111qqz
+    using namespace std;
+    #define REP(i, n) for (int i=0;i<int(n);++i)  
+    typedef long long LL;
+    typedef unsigned long long ULL;
+    const int inf = 0x7fffffff;
+    const int N=3E4+3;
+    LL c[N];
+    LL n,m,qur;
+    LL ref[N];
+    LL pre[N];
+    LL ori[N];
+    struct Q
+    {
+        LL val,id;
+    }q[N];
+    
+    struct S
+    {
+         LL x,y;
+         LL id,ans;
+    }s[100005];
+    
+    bool cmp( Q a,Q b)
+    {
+        if (a.val<b.val) return true;
+        return false;
+    }
+    bool cmp2(S a,S b)
+    {
+        if (a.y<b.y) return true;
+        return false;
+    }
+    
+    LL lowbit ( int x)
+    {
+        return x&(-x);
+    }
+    
+    void update ( LL x,LL delta)
+    {
+        for ( LL i = x ; i <= n ; i = i + lowbit(i))
+        {
+    	c[i] = c[i] + delta;
+        }
+    }
+    LL sum( LL x)
+    {
+        LL res = 0 ;
+        for ( LL i = x; i >= 1 ; i = i - lowbit(i))
+        {
+    	res = res + c[i];
+        }
+        return res;
+    }
+    int main()
+    {
+        int T;
+        cin>>T;
+        while (T--)
+        {
+    	memset(ref,0,sizeof(ref));
+    	memset(c,0,sizeof(c));
+    	memset(pre,-1,sizeof(pre)); //标记上次出现位置的数组
+    	scanf("%lld",&n);
+    	for ( LL i = 1 ; i <= n ; i++)
+    	{
+    	    scanf("%lld",&q[i].val);
+    	    q[i].id  = i;
+    	}
+    	sort(q+1,q+n+1,cmp);
+    	LL cnt  = 0;
+    	for ( LL i = 1 ; i <= n ; i++ )
+    	{
+    	    if (q[i].val!=q[i-1].val)
+    	    {
+    		cnt++;
+    	    }
+    	    ref[q[i].id] = cnt;
+    	    ori[q[i].id] = q[i].val;
+    	}
+    
+    	scanf("%lld",&qur);
+    	for ( LL i = 1 ;i  <= qur; i++ )
+    	{
+    	    scanf("%lld %lld",&s[i].x,&s[i].y);
+    	    s[i].id = i;
+    	}
+    	sort(s+1,s+1+qur,cmp2);
+    	s[0].y = 0;
+    	for ( LL i = 1 ; i <= qur  ; i++)
+    	{
+    	    for ( LL j = s[i-1].y+1 ; j <= s[i].y ; j++)
+    	    {
+    		int tmp = ref[j];
+    		if (pre[tmp]==-1)
+    		{
+    		    update(j,ori[j]);
+    		}
+    		else
+    		{
+    		    update (j,ori[j]);
+    		    update (pre[tmp],-ori[j]);
+    		}
+    		pre[tmp] =  j;
+    	    }
+    	    s[s[i].id].ans = sum(s[i].y)-sum(s[i].x-1);
+    	}
+    	for ( int i = 1 ; i <= qur ; i++ )
+    	{
+    	    cout<<s[i].ans<<endl;
+    	}
+    	
+        }
+      
+    	return 0;
+    }
+    
+
+
+
+
+update:20160916,写了个线段树的版本。
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :Fri 16 Sep 2016 08:26:34 PM CST
+    File Name :code/hdu/r3333.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=3E4+7;
+    const int M=1E5+7;
+    LL tree[N<<2];
+    LL a[N];
+    int n,m;
+    struct node
+    {
+        int l,r;
+        int id;
+        bool operator < (node b)
+        {
+    	if (r==b.r) return l<b.l;
+    	return r<b.r;
+        }
+    }q[M];//把M写成N
+    void PushUp( int rt)
+    {
+        tree[rt] = tree[rt<<1] + tree[rt<<1|1];
+    }
+    void update( int p,LL sc,int l,int r,int rt)
+    {
+        if (l==r)
+        {
+    	tree[rt]+=sc;
+    	return;
+        }
+        int m = (l+r)>>1;
+        if (p<=m)update(p,sc,lson);
+        else update(p,sc,rson);
+        PushUp(rt);
+    }
+    LL query(int L,int R,int l,int r,int rt)
+    {
+        if (L<=l&&r<=R) return tree[rt];
+        int m = (l+r)>>1;
+        LL ret = 0 ;
+        if (L<=m)  ret+= query(L,R,lson);
+        if (R>=m+1) ret+=query(L,R,rson);
+        return ret;
+    }
+    map<LL,int>mp;
+    LL ans[M]; //把M写成N
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	int T;
+    	scanf("%d",&T);
+    	while (T--)
+    	{
+    	    ms(tree,0);
+    	    ms(ans,0);
+    	    mp.clear();
+    	    scanf("%d",&n);
+    	    for ( int i = 1; i  <= n ;  i++) scanf("%lld",a+i);
+    	    scanf("%d",&m);
+    	    for ( int i = 1 ; i <= m ; i++)
+    	    {
+    		int a,b;
+    		scanf("%d%d",&a,&b);
+    		q[i].l = a;
+    		q[i].r = b;
+    		q[i].id = i ;
+    	    }
+    	    sort(q+1,q+m+1);
+    	    int l = 1;
+    	    for ( int i = 1 ; i <= m ; i++)
+    	    {
+    		for ( ; l <= q[i].r ; l++)
+    		{
+    		    if (mp[a[l]]) update(mp[a[l]],-a[l],1,n,1);
+    		    mp[a[l]] = l ;
+    		    update(mp[a[l]],a[l],1,n,1);
+    		}
+    		ans[q[i].id] = query(q[i].l,q[i].r,1,n,1);
+    	    }
+    	    for ( int i = 1 ; i <= m ; i++) printf("%lld\n",ans[i]);
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    

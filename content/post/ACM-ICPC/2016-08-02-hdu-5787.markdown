@@ -1,0 +1,125 @@
+---
+author: 111qqz
+date: 2016-08-02 09:39:08+00:00
+draft: false
+title: hdu 5787 K-wolf Number 2016 Multi-University Training Contest 5 1007  (不允许前导0的数位dp)
+type: post
+url: /2016/08/hdu-5787/
+categories:
+- ACM
+tags:
+- 数位dp
+---
+
+[hdu5787](http://acm.hdu.edu.cn/showproblem.php?pid=5787)
+
+题意:给出l,r,k求区间[l,r]中满足任意相邻k个数字都不相同的数的个数.
+
+思路:数位dp,dp[i][k1][k2][k3][k4]表示长度为i,前1位是k1,前2位是k2,前3位是k3,前4位是k4的方案数. 注意不允许前导0.2A
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年08月02日 星期二 16时28分29秒
+    File Name :code/multi2016/#5/1007.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    LL l,r;
+    int k;
+    LL digit[25];
+    LL dp[22][11][11][11][11];
+    int LEN;
+    LL dfs(int pos,int k1,int k2,int k3,int k4,bool limit,bool prehasnonzero)
+    {
+        if (pos==0) return 1;
+        if (prehasnonzero&&!limit&&dp[pos][k1][k2][k3][k4]!=-1LL) return dp[pos][k1][k2][k3][k4];
+    
+        int mx = limit?digit[pos]:9;
+        LL res = 0LL;
+        if (!prehasnonzero)
+        {
+    	for  (int i = 0 ; i <= mx ;i++)
+    	{
+    	    res +=dfs(pos-1,i,10,10,10,limit&&i==mx,i==0?false:true);
+    	}
+        }
+        else
+        {
+    	for ( int i = 0 ; i <= mx ; i++)
+    	{
+    	   // if (i==k1||i==k2||i==k3||i==k4) continue;
+    	    if (k>=2&&i==k1) continue;
+    	    if (k>=3&&i==k2) continue;
+    	    if (k>=4&&i==k3) continue;
+    	    if (k>=5&&i==k4) continue;
+    
+    	    res +=dfs(pos-1,i,k1,k2,k3,limit&&i==mx,true);
+    	}
+        }
+    
+        if (prehasnonzero&&!limit) dp[pos][k1][k2][k3][k4] = res;
+        return res;
+    }
+    LL solve ( LL n)
+    {
+        ms(digit,0);
+        int len = 0 ;
+        while (n)
+        {
+    	digit[++len] = n;
+    	n/=10;
+        }
+        LEN = len;
+        return dfs(len,10,10,10,10,true,false);
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	while (~scanf("%lld%lld%d",&l,&r,&k))
+    	{
+    	    ms(dp,-1);
+    //	    cout<<"solve(100):"<<solve(100)<<endl;
+    //	    cout<<"solve(r):"<<solve(r)<<" solve(l-1):"<<solve(l-1)<<endl;
+    	    LL ans = solve(r)-solve(l-1);
+    	    printf("%lld\n",ans);
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

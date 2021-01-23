@@ -1,0 +1,136 @@
+---
+author: 111qqz
+date: 2016-08-14 11:24:01+00:00
+draft: false
+title: hdu 5835 || ccpc 2016 网络赛 1004 Danganronpa (模拟)
+type: post
+url: /2016/08/hdu-5835/
+categories:
+- ACM
+tags:
+- 模拟
+---
+
+[hdu 5835 题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=5835)
+题意：n种礼物，每种a[i]个。现在有无穷个小朋友排成一排，分给每个人一个“普通”的礼物，一个“昂贵”的礼物（哪个普通哪个昂贵是自己定的，或者说，任意的） 要求是相邻的小朋友的普通的礼物不能是同一种。现在问最多能给多少小朋友分礼物。。。
+
+思路：容易知道，因为昂贵的礼物是没有限制的。。所以没什么用。。考虑礼物总数sum..那么最多只可能分给sum/2个小朋友。。。然后再两个指针模拟一下。。记得特判n=1的情况。1A
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年08月14日 星期日 12时46分56秒
+    File Name :code/ccpc2016/1004.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <stack>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <deque>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=11;
+    int n;
+    int a[N];
+    int total;
+    bool bian[N];
+    bool cmp(int a,int b)
+    {
+        return a>b;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	int T;
+    	cin>>T;
+    	int cas = 0 ;
+    	while (T--)
+    	{
+    	    printf("Case #%d: ",++cas);
+    	    scanf("%d",&n);
+    	    ms(bian,false);
+    	    total = 0 ;
+    	    for ( int i = 1 ; i <= n ; i++)
+    	    {
+    		scanf("%d",&a[i]);
+    		total +=a[i];
+    	    }
+    	    if (n==1)
+    	    {
+    		if (a[1]>1)
+    		puts("1");
+    		else puts("0");
+    		continue;
+    	    }
+    	    sort(a+1,a+n+1,cmp);
+    	    int R = total/2;
+    	    int cur = 0 ;
+    	    int i = 1;
+    	    int j = 2;
+    	    while (cur<R&&i<=n&&j<=n)
+    	    {
+    //		int x = a[i];
+    //		int y = a[j];
+    		if (a[i]==a[j])
+    		{
+    		    cur +=a[i]+a[j];
+    		    a[i] = 0;
+    		    a[j] = 0;
+    		    i = j+1;
+    		    j = i+1;
+    		}
+    		else  if (!bian[i])
+    		{
+    		    cur +=a[j]+a[j]+1;
+    		    a[i]-=(a[j]+1);
+    		    a[j] = 0;
+    		    j++;
+    		    if (a[i]<a[j]) swap(a[i],a[j]);
+    		    else bian[i] = true;
+    		}
+    		else
+    		{
+    		    cur +=a[j]+a[j];
+    		    a[i]-=a[j];
+    		    a[j] = 0;
+    		    j++;
+    		    if (a[i]<a[j]) swap(a[i],a[j]);
+    		}
+    //		cout<<"cur:"<<cur<<endl;
+    	    }
+    	    cur = min(cur,R);
+    	    printf("%d\n",cur);
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+

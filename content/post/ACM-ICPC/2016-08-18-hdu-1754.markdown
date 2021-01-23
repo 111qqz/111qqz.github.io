@@ -1,0 +1,249 @@
+---
+author: 111qqz
+date: 2016-08-18 11:47:41+00:00
+draft: false
+title: hdu 1754 I Hate It (线段树模板题，炒鸡详细注释版)
+type: post
+url: /2016/08/hdu-1754/
+categories:
+- ACM
+
+
+tags:
+- 线段树
+---
+
+[hdu 1754 题目链接](http://acm.split.hdu.edu.cn/showproblem.php?pid=1754)
+题意：单点更新，区间查询最大值。
+思路：线段树。
+一开始借鉴了clj的pointer写法。。[wjmzbmr's code](http://codeforces.com/contest/438/submission/6770765) 直接MLE。。。看来也许只能在cf上用。。。
+下面是MLE的代码：
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年08月18日 星期四 18时40分24秒
+    File Name :code/hdu/1754.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <stack>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <deque>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=2E5+7;
+    int a[N],n,m;
+    int _max( int x,int y)
+    {
+        if (x==-1||y==-1)
+    	return x==-1?y:x;
+        return a[x]>a[y]?x:y;
+    }
+    struct Tree
+    {
+        Tree *pl,*pr;
+        int l,r,mx;
+         void update()
+        {
+    	mx = _max(pl->mx,pr->mx);
+        }
+        Tree(int l,int r) :
+    	    l(l),r(r)
+    	    {
+    		if ( l + 1 == r)
+    		{
+    		    mx = l ;
+    		    return ;
+    		}
+    		pl = new Tree(l,(l+r)>>1);
+    		pr = new Tree((l+r)>>1,r);
+    		update();
+    	    }
+        void change(int p,int x)
+        {
+    	if (p < l|| p>=r) return;
+    	if (l+1==r)
+    	{
+    	    a[l] = x;
+    	    return ;
+    	}
+    	pl->change(p,x);
+    	pr->change(p,x);
+    	update();
+        }
+        int queryMax(int L,int R)
+        {
+    	if (L <= l && r <= R) return mx;
+    	if (L>=r || l >=R)
+    	    return -1;
+    	return _max(pl->queryMax(L,R),pr->queryMax(L,R));
+        }
+    }*rt;
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+        while (~scanf("%d%d",&n,&m))
+        {
+    	ms(a,0);
+    	for ( int i = 0 ; i < n ; i++) scanf("%d",a+i);
+    	rt = new Tree(0,n);
+    	while (m--)
+    	{
+    	    char opt[3];
+    	    int x,y;
+    	    scanf("%s %d %d",opt,&x,&y);
+    	    x--;
+    	    if (opt[0]=='Q')
+    		printf("%d\n",a[rt->queryMax(x,y)]);
+    	    else rt->change(x,y);
+    	}
+        }
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+关于线段树的理解，见代码注释：
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年09月03日 星期六 16时50分33秒
+    File Name :code/hdu/r1754.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=2E5+7;
+    int n,m;
+    int a[N];
+    int MAX[N<<2];//MAX[i]表示的是第i个节点所存储的信息，根据题目会有所变化，这道题存储的是以i节点为根节点的子树的最大值（也就是i节点所表示的区间的最大值）
+    void PushUp(int rt)
+    {
+        MAX[rt] = max(MAX[rt<<1],MAX[rt<<1|1]);  //线段树上每一个节点代表一段区间，该区间的最大值是把区间分成两部分，每一部分的最大值的最大值，也就是该节点（rt)的两个子节点取最大值。
+    }                                           //编号为i节点的两个子节点的编号为i*2和 i*2+1,写成位运算也就是 rt<<1和rt<<1|1（因为左移动一位以后末尾肯定为0，“或”1就相当于+1
+    					    //写成位运算是因为不用考虑优先级的问题。。因为加法的优先级比位移高，而或运算的优先级比位移低。
+    void update(int p,int sc,int l,int r,int rt) //p表示要更新的的节点的位置，sc表示要更新成什么，l,r,rt三个参数表示当前的树，初始就是整个线段树。
+    {
+       // printf("p:%d sc:%d l:%d r:%d rt:%d\n",p,sc,l,r,rt);
+        if (l==r) //此时该区间只有一个数，说明已经到了线段树的底部（叶子节点），一个数的最大值就是本身。直接更新
+        {
+    	MAX[rt]= sc;
+    	return ;
+        }
+        int m = (l+r)>>1; //单点更新的时候，要更新所有包含该单点的子区间（子树）
+        if (p<=m) update(p,sc,lson);
+        else update(p,sc,rson);
+    
+        PushUp(rt);//当前区间的子区间更新完成后，可能对当前区间的答案有影响，记得更新（从下往上)
+    }
+    void build(int l,int r,int rt)
+    {
+     //   printf("l:%d r:%d rt:%d\n",l,r,rt);
+        if (l==r)
+        {
+    	scanf("%d",&MAX[rt]);
+    	return;
+        }
+        int m = (l+r)>>1;//当前树的两个子树对应到区间的角度，就是把当前区间分成尽可能相同长度的两部分，m为分界点，前一半区间为[l,m]后一半为[m+1,r].
+        build(lson);
+        build(rson);  //递归建树，建一棵树只需要先建该树的两棵子树，递归的终点是(l==r)，此时到达线段树的叶子节点，对应区间中只有一个数。
+        PushUp(rt);  //当当前树的左右子树都建好，就可以向上更新了。
+    }
+    int query(int L,int R,int l,int r,int rt) //L,R为当前询问的区间，l,r,rt表示当前的子树,初始是在整棵线段树中查询。
+    {
+        if ( L<=l&&r<=R ) //如果当前询问的区间可以完整覆盖当前树的区间，那么这棵子树所代表的区间的最大值就有可能成为当前查询区间的答案，因此直接返回。
+        {
+    	return MAX[rt];
+        }
+        int m = (l+r)>>1;  //如果当前询问的区间不能完整覆盖当前树的区间，那么就继续查询当前树的区间的子区间（子树），因为子树表示的区间越来越小，总会完全覆盖。
+        int ret = 0 ;
+        if (L<=m){// 只有当前询问区间和左子树的区间由交点时，左子树对应的区间的答案才会对当前询问的区间有意义。
+    	int res = query(L,R,lson);
+    	ret = max(ret,res); //答案是所有当前询问区间所能覆盖到的树上的子区间所代表的最大值中的最大值。
+        }
+        if (R>m){//其实是R>=m+1，同理。
+    	int res = query(L,R,rson);
+    	ret = max(res,ret);
+        }
+        return ret;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	while (~scanf("%d%d",&n,&m))
+    	{
+    	    build(1,n,1);//直接建树的时候读入，根节点为1.
+    	    while(m--)
+    	    {
+    		char opt[10];
+    		int a,b;
+    		scanf("%s%d%d",opt,&a,&b);
+    		if (opt[0]=='Q') printf("%d\n",query(a,b,1,n,1));
+    		else update(a,b,1,n,1);
+    	    }
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

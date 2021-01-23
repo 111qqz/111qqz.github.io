@@ -1,0 +1,161 @@
+---
+author: 111qqz
+date: 2016-07-31 18:18:04+00:00
+draft: false
+title: poj 3261 Milk Patterns (最长公共子串，后缀数组)
+type: post
+url: /2016/08/poj-3261/
+categories:
+- ACM
+tags:
+- 后缀数组
+- 最长公共字串
+---
+
+[poj3261](http://poj.org/problem?id=3261)
+
+题意：给一个字符串，要求找出至少出现k次的最长重复子串...
+
+思路：后缀数组，然后再次用到了根据height数组对后缀进行分组的套路...二分判定合法性，对于当前的最长长度x,分组使得每组中的height[i]都大于等于x,所不同的是，判定变成了存在一个组，后缀的个数至少为k个（**因为这样，就可以对于大于等于k个的后缀，同时取前x长度，得到的就是出现了至少k次且长度为x的前缀**）1A,蛤蛤蛤
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年08月01日 星期一 01时30分34秒
+    File Name :code/poj/3261.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=2E4+7;
+    const  int M=2E6+11;
+    const int C = 5;
+    int n,sa[N],rk[N],t[N],t2[N],cnt[M];
+    int height[N];
+    int s[N];
+    int k;
+    int cmp(int *r,int a,int b,int l){ return r[a]==r[b]&&r[a+l]==r[b+l];}
+    void getSa( int n,int m)
+    {
+        int *x = t;
+        int *y = t2;
+        ms(cnt,0);
+        for ( int i = 0 ; i < n;  i++) cnt[x[i]=s[i]]++;
+        for ( int i = 1 ; i < m ; i++) cnt[i]+=cnt[i-1];
+        for ( int i = n-1 ; i >= 0 ; i--) sa[--cnt[x[i]]] =  i;
+        for ( int k = 1 ; k <= n ; k<<=1)
+        {
+    	int p = 0;
+    	for ( int i = n-k ; i < n;  i++) y[p++] = i ;
+    	for ( int i = 0 ; i < n;  i++) if (sa[i]>=k) y[p++] = sa[i]-k;
+    	ms(cnt,0);
+    	for ( int i = 0 ; i <n ; i++) cnt[x[y[i]]]++;
+    	for ( int i = 0 ; i <m ; i++) cnt[i]+=cnt[i-1];
+    	for ( int i = n-1 ; i >= 0 ; i--) sa[--cnt[x[y[i]]]] = y[i];
+    	swap(x,y);
+    	p = 1;
+    	x[sa[0]] = 0 ;
+    	for ( int i = 1 ; i < n; i++)
+    	    x[sa[i]] = cmp(y,sa[i-1],sa[i],k)?p-1:p++;
+    	if (p>=n) break;
+    	m = p;
+        }
+    }
+    void getHeight( int n)
+    {
+        int k = 0 ;
+        for ( int i = 0 ; i < n; i++) rk[sa[i]] = i ;
+        height[0] =  0;
+        for ( int i = 0 ; i < n; i ++)
+        {
+    	if (rk[i]==0) continue;
+    	if (k) k--;
+    	int j = sa[rk[i]-1];
+    	while (s[i+k]==s[j+k]) k++;
+    	height[rk[i]] = k ;
+        }
+    }
+    int getSuffix( int s[],int len)
+    {
+        int up = 0 ;
+        for ( int i = 0 ; i < len ; i++)
+        {
+    	up = max(up,s[i]);
+        }
+        s[len++] = 0 ;
+        getSa(len,up+1);
+        getHeight(len);
+        return len;
+    }
+    bool check( int x,int k,int n)
+    {
+        int cnt = 1 ;
+        for ( int i = 2; i  <= n ; i++)
+        {
+    	if (height[i]>=x&&i<n)
+    	{
+    	    cnt++;
+    	    continue;
+    	}
+    	if (cnt>=k) return true;
+    	cnt = 1;
+        }
+        return false;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	scanf("%d %d",&n,&k);
+    	for ( int i = 0 ; i < n ; i++) scanf("%d",&s[i]),s[i]+=C;
+    	n = getSuffix(s,n);
+    //	for ( int i = 0 ; i < n; i++) cout<<"s[i]:"<<s[i]<<endl;
+    	int l = 1,r = n;
+    	int ans = 0 ;
+    	while (l<=r)
+    	{
+    	    int mid = (l+r)/2;
+    	    if (check(mid,k,n))
+    	    {
+    		ans = mid;
+    		l = mid + 1;
+    	    }
+    	    else r = mid-1;
+    	}
+    	printf("%d\n",ans);
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

@@ -1,0 +1,278 @@
+---
+author: 111qqz
+date: 2015-07-31 09:10:00+00:00
+draft: false
+title: 'bc #43(hdu 5265) pog loves szh II  （单调性优化）'
+type: post
+url: /2015/07/hdu5265/
+categories:
+- ACM
+tags:
+- 单调性优化
+---
+
+# pog loves szh II
+
+
+
+
+**Time Limit: 4000/2000 MS (Java/Others) Memory Limit: 65536/65536 K (Java/Others)  
+Total Submission(s): 2115 Accepted Submission(s): 609  
+**  
+  
+
+
+
+
+
+Problem Description
+
+
+
+
+Pog and Szh are playing games.There is a sequence with n numbers, Pog will choose a number A from the sequence. Szh will choose an another number named B from the rest in the sequence. Then the score will be (A+B) mod p.They hope to get the largest score.And what is the largest score?
+
+
+
+
+
+
+
+
+
+
+Input
+
+
+
+
+Several groups of data (no more than 5 groups,n≥1000).  
+  
+For each case:   
+  
+The following line contains two integers,n(2≤n≤100000)，p(1≤p≤231−1)。  
+  
+The following line contains n integers ai(0≤ai≤231−1)。
+
+
+
+
+
+
+
+
+
+
+Output
+
+
+
+
+For each case,output an integer means the largest score.
+
+
+
+
+
+
+
+
+
+
+Sample Input
+
+
+
+
+
+
+
+4 4
+1 2 3 0
+4 4
+0 0 2 2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sample Output
+
+
+
+
+
+
+
+3
+2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Source
+
+
+
+
+[BestCoder Round #43](http://acm.hdu.edu.cn/search.php?field=problem&key=BestCoder+Round+43&source=1&searchmode=source)
+
+
+
+
+
+
+
+
+
+
+Recommend
+
+
+
+
+hujie | We have carefully selected several similar problems for you: [5338](http://acm.hdu.edu.cn/showproblem.php?pid=5338) [5337](http://acm.hdu.edu.cn/showproblem.php?pid=5337) [5336](http://acm.hdu.edu.cn/showproblem.php?pid=5336) [5335](http://acm.hdu.edu.cn/showproblem.php?pid=5335) [5334](http://acm.hdu.edu.cn/showproblem.php?pid=5334)
+
+
+
+
+对于读入的a[i] mod p后
+
+
+
+
+对于任意 0=
+
+
+所以a[i]+a[j]的结果只有两种情况，一种是 =p  <=2p-2  a[i]+a[j]-p 是答案
+
+
+
+
+把a[i]升序排列，如果存在a[i]+a[j]>=p ,那么最大的一定是a[n-1]+a[n-2]
+
+
+
+
+对于a[i]+a[j]小于p的，我们枚举i，找到最大的j，使得a[i]+a[j]
+
+
+如果直接枚举O(N2)会超时
+
+
+
+
+由于a[i]数组已经是有序的了
+
+
+
+
+我们可以利用a[i]的单调性，从两边往中间找。
+
+
+
+
+这样复杂度就是O(N)了
+
+
+
+
+这个优化前几天刚遇到过。。。。
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+    
+    /*************************************************************************
+    	> File Name: code/bc/#43/B.cpp
+    	> Author: 111qqz
+    	> Email: rkz2013@126.com 
+    	> Created Time: 2015年07月31日 星期五 16时38分13秒
+     ************************************************************************/
+    
+    #include<iostream>
+    #include<iomanip>
+    #include<cstdio>
+    #include<algorithm>
+    #include<cmath>
+    #include<cstring>
+    #include<string>
+    #include<map>
+    #include<set>
+    #include<queue>
+    #include<vector>
+    #include<stack>
+    #define y0 abc111qqz
+    #define y1 hust111qqz
+    #define yn hez111qqz
+    #define j1 cute111qqz
+    #define tm crazy111qqz
+    #define lr dying111qqz
+    using namespace std;
+    #define REP(i, n) for (int i=0;i<int(n);++i)  
+    typedef long long LL;
+    typedef unsigned long long ULL;
+    const int inf = 0x7fffffff;
+    const int N=1E5+7;
+    LL a[N];
+    int n,p;
+    
+    int main()
+    {
+        while (scanf("%d %d",&n,&p)!=EOF)
+        {
+    	LL ans = -1;
+    	for ( int i = 0 ; i < n;  i++ )
+    	{
+    	    scanf("%lld",&a[i]);
+    	    a[i]=a[i]%p;
+    	}
+    	sort(a,a+n);
+    	ans = (a[n-1]+a[n-2])%p;
+    	int j = n-1;
+    	for ( int i = 0 ; i  < n-2 ; i++ )
+    	{
+    	    while (i<j&&a[i]+a[j]>=p) j--;
+    	    ans = max(ans,(a[i]+a[j])%p);
+    	}
+    	cout<<ans<<endl;
+    
+        }
+      
+    	return 0;
+    }
+    
+
+
+

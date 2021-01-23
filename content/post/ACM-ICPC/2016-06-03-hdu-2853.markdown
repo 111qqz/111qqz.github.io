@@ -1,0 +1,366 @@
+---
+author: 111qqz
+date: 2016-06-03 07:36:50+00:00
+draft: false
+title: hdu 2853 Assignment (二分图最佳匹配，KM算法+数论，做法太神)
+type: post
+url: /2016/06/hdu-2853/
+categories:
+- ACM
+tags:
+- KM
+- number theory
+- 二分图最佳匹配
+---
+
+[hdu 2853题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=2853)
+
+题意：n个公司，m个任务（m>=n),一个公司只能对应一个任务，一个任务也只能对应一个公司。给出一个n*m的mat,表示每个公司对应每个任务产生的val。  然后给出n个数，表示初始钦定（雾）这n个公司分别做哪些任务。 但是可能初始的安排得到的val表示最大的。我们现在想得到最大的val,并且保证改变的安排数最少。求安排后得到的 val比初始安排大多少，以及需要改变的安排数量。
+
+思路：最大val很好求，KM就好。。。但**是，怎么才能保证改变的安排数最少呢？ 尤其是当两个安排val一样的时候，如何才能保证优先选已经安排好的，而不取选另一个呢？**
+
+并没有想出来，看了题解T T
+
+太神辣。
+
+由于KM算法会根据权值来选取，权值大的会优先。
+
+**如果我们把每个权值*k(k>n)，然后对于已经钦定的安排，每个权值再+1.**
+
+**这样，钦定的安排就会有更高的优先级，最后统计的时候除以k,那么权值答案不会有影响（利用到了初等数论的整除知识。。。？）**
+
+然后这样做该有一个好处。
+
+**不除以k的权值和再模k,就是没有改变的安排数。**
+
+**原因是由于没有钦定的安排的权值每个都乘了k,最后%k都为0，只有那些钦定的安排每个会贡献1.**
+
+**又由于k>n,这样就保证了正确性。**
+
+
+
+这做法太神了。。。。。吓傻了。。。。
+
+我试着推广一下。。。？
+
+对于根据权值来决定优先顺序，但是权值相同的时候还是需要对一些赋有更高的优先权的模型。。。？
+
+除了再增加一维的大家都能想到的做法。。。这样的做法是不是有通用性呢。。。？
+
+做法太神，我得慢慢体会。。
+
+
+
+
+
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年06月03日 星期五 14时35分46秒
+    File Name :code/hdu/2853.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N = 55;
+    int n,m;
+    int w[N][N];
+    int id[N];
+    int lx[N],ly[N];
+    int link[N];
+    bool visx[N],visy[N];
+    int slk[N];
+    int num;
+    
+    bool find( int u)
+    {
+        visx[u] = true;
+    
+        for ( int v = 1 ; v <= m ;v++)
+        {
+    	if(visy[v]) continue;
+    	int tmp = lx[u] + ly[v] - w[u][v];
+    
+    	if (tmp==0)
+    	{
+    	    visy[v] = true;
+    
+    	    if (link[v]==-1||find(link[v]))
+    	    {
+    		link[v] = u;
+    		return true;
+    	    }
+    	}else if (tmp<slk[v]) slk[v] = tmp;
+    
+        }
+        return false;
+    }
+    
+    int KM()
+    {
+        ms(link,-1);
+        ms(lx,0);
+        ms(ly,0);
+    
+        for ( int i = 1 ; i <= n ; i++)
+    	for ( int j = 1 ; j <= m ; j++)
+    	    lx[i] = max(lx[i],w[i][j]);
+    
+        for ( int i = 1 ; i <= n ; i++)
+        {
+    	ms(slk,0x3f);
+    
+    	while (1)
+    	{
+    	    ms(visx,false);
+    	    ms(visy,false);
+    
+    	    if (find(i)) break;
+    
+    	    int d = inf;
+    
+    	    for ( int j = 1 ; j <= m ; j++)
+    		if (!visy[j]&&slk[j]<d) d = slk[j];
+    
+    	    for ( int j = 1 ; j <= n ; j++)
+    		if (visx[j])  lx[j]-=d;
+    
+    	    for ( int j = 1 ; j <= m ; j++)
+    		if (visy[j]) ly[j]+=d; else slk[j]-=d;
+    	}
+        }
+    
+        int res = 0 ;
+        for ( int i = 1 ; i <= m ; i++)
+    	if (link[i]>-1)
+    	{
+    	    res = res + w[link[i]][i]/N;
+    	    num = num + w[link[i]][i];
+    	}
+    
+    //    cout<<"num:"<<num<<endl;
+        num%=N;
+    
+        return res;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	while (scanf("%d%d",&n,&m)!=EOF)
+    	{
+    
+    	    ms(w,0);
+    	    num = 0 ;
+    	    for ( int i = 1 ; i <= n ; i++)
+    		for ( int j = 1 ; j <= m ; j++)
+    		    scanf("%d",&w[i][j]),w[i][j]*=N;
+    	    
+    	    int sum = 0;
+    	    for ( int i  = 1 ; i <= n ; i++)
+    	    {
+    		scanf("%d ",&id[i]);
+    		sum = sum + w[i][id[i]]/N;
+    		w[i][id[i]]++; //太神了。
+    	    }
+    	    
+    	    int ans = KM();
+    
+    	    printf("%d %d\n",n-num,ans-sum);
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年06月03日 星期五 14时35分46秒
+    File Name :code/hdu/2853.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N = 55;
+    int n,m;
+    int w[N][N];
+    int id[N];
+    int lx[N],ly[N];
+    int link[N];
+    bool visx[N],visy[N];
+    int slk[N];
+    int num;
+    
+    bool find( int u)
+    {
+        visx[u] = true;
+    
+        for ( int v = 1 ; v <= m ;v++)
+        {
+    	if(visy[v]) continue;
+    	int tmp = lx[u] + ly[v] - w[u][v];
+    
+    	if (tmp==0)
+    	{
+    	    visy[v] = true;
+    
+    	    if (link[v]==-1||find(link[v]))
+    	    {
+    		link[v] = u;
+    		return true;
+    	    }
+    	}else if (tmp<slk[v]) slk[v] = tmp;
+    
+        }
+        return false;
+    }
+    
+    int KM()
+    {
+        ms(link,-1);
+        ms(lx,0);
+        ms(ly,0);
+    
+        for ( int i = 1 ; i <= n ; i++)
+    	for ( int j = 1 ; j <= m ; j++)
+    	    lx[i] = max(lx[i],w[i][j]);
+    
+        for ( int i = 1 ; i <= n ; i++)
+        {
+    	ms(slk,0x3f);
+    
+    	while (1)
+    	{
+    	    ms(visx,false);
+    	    ms(visy,false);
+    
+    	    if (find(i)) break;
+    
+    	    int d = inf;
+    
+    	    for ( int j = 1 ; j <= m ; j++)
+    		if (!visy[j]&&slk[j]<d) d = slk[j];
+    
+    	    for ( int j = 1 ; j <= n ; j++)
+    		if (visx[j])  lx[j]-=d;
+    
+    	    for ( int j = 1 ; j <= m ; j++)
+    		if (visy[j]) ly[j]+=d; else slk[j]-=d;
+    	}
+        }
+    
+        int res = 0 ;
+        for ( int i = 1 ; i <= m ; i++)
+    	if (link[i]>-1)
+    	{
+    	    res = res + w[link[i]][i]/N;
+    	    num = num + w[link[i]][i];
+    	}
+    
+    //    cout<<"num:"<<num<<endl;
+        num%=N;
+    
+        return res;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	while (scanf("%d%d",&n,&m)!=EOF)
+    	{
+    
+    	    ms(w,0);
+    	    num = 0 ;
+    	    for ( int i = 1 ; i <= n ; i++)
+    		for ( int j = 1 ; j <= m ; j++)
+    		    scanf("%d",&w[i][j]),w[i][j]*=N;
+    	    
+    	    int sum = 0;
+    	    for ( int i  = 1 ; i <= n ; i++)
+    	    {
+    		scanf("%d ",&id[i]);
+    		sum = sum + w[i][id[i]]/N;
+    		w[i][id[i]]++; //太神了。
+    	    }
+    	    
+    	    int ans = KM();
+    
+    	    printf("%d %d\n",n-num,ans-sum);
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+

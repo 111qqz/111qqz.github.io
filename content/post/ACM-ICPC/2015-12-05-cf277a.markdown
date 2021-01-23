@@ -1,0 +1,119 @@
+---
+author: 111qqz
+date: 2015-12-05 13:28:36+00:00
+draft: false
+title: codeforces 277 A. Learning Languages
+type: post
+url: /2015/12/cf277a/
+categories:
+- ACM
+tags:
+- dfs
+- tree
+---
+
+http://codeforces.com/contest/277/problem/A
+
+题意：有n个人，每个人会一定数目的语言（可能为0），一个人学一门语言的代价为1，人和人之间沟通可以通过任意个中间人翻译。问最少的代价使得这n个人可以相互沟通。
+
+思路：建图方式如下：第i个人会语言j，那么连上i和j+n。然后跑一遍dfs,使得1..n这n个点都被访问过。
+
+
+结果wa4...觉得算法没问题。。看了官方题解。。发现果然有情况没有考虑到。如果所有的人都什么语言都不会的话，那么答案是不能-1的。。因为。。语言和语言之间不能连边。。改了之后A了。。有点开心。。
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2015年12月05日 星期六 20时55分14秒
+    File Name :code/cf/problem/277A.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    
+    
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=2E2+5;
+    int n,m;
+    vector<int>edge[N];
+    bool vis[N];
+    
+    void dfs( int x)
+    {
+      //  cout<<"x:"<<x<<endl;
+        vis[x] = true;
+        for ( int i = 0 ; i < edge[x].size(); i ++)
+        {
+    	int v = edge[x][i];
+    //	cout<<"v:"<<v<<endl;
+    	if (!vis[v])
+    	{
+    	    dfs(v);
+    	}
+        }
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	
+    	scanf("%d %d",&n,&m);
+    	int p =  0;
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    int k ;
+    	    scanf("%d",&k);
+    	    if (k!=0) p = -1;
+    	    for ( int j =  0 ; j < k ; j++)
+    	    {
+    		int x;
+    		scanf("%d",&x);
+    		edge[i].push_back(x+n);
+    		edge[x+n].push_back(i);
+    	    }
+    	}
+    	int cnt = 0 ;
+    	ms(vis,false);
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    if (!vis[i])
+    	    {
+    		dfs(i);
+    		cnt++;
+    	    }
+    	}
+    	cout<<cnt+p<<endl;
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

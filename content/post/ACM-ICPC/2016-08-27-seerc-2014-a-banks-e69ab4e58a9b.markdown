@@ -1,0 +1,92 @@
+---
+author: 111qqz
+date: 2016-08-27 06:42:17+00:00
+draft: false
+title: seerc 2014 A Banks (暴力)
+type: post
+url: /2016/08/seerc-2014-a-banks-/
+categories:
+tags:
+- brute force
+---
+
+[题目链接](http://acm.hust.edu.cn/vjudge/contest/130303#problem/A)
+
+题意：n个数围成一圈，对于负数可以进行magic操作，也就是取反，但是会影响到左右相邻的，加上这个负数。问最少进行多少次magic操作，使得所有数都是非负。
+
+思路：我们知道，如果一个负数想变成整数的话，只能通过magic 操作。唯一可能影响次数的就是顺序。
+
+不过手动写了几个发现顺序好像无关紧要？
+
+于是大胆猜测，写了发暴力2333。
+
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int maxn = 1e4+10;
+    int n,a[maxn];
+    void work(){
+        queue<int> Q;
+        int cnt = 0;
+        while(!Q.empty())Q.pop();
+        for(int i = 0; i < n; i++){
+            if(a[i] < 0){
+                Q.push(i);
+            }
+        }
+        while(!Q.empty()){
+            int fr = Q.front();
+            Q.pop();
+            if(a[fr]>=0)continue;
+            int delta = -a[fr];
+            if(a[(fr+n-1)%n] - delta < 0){
+                Q.push((fr+n-1)%n);
+            }
+            if(a[(fr+1)%n] - delta < 0){
+                Q.push((fr+1)%n);
+            }
+            a[(fr+n-1)%n]-=delta;
+            a[(fr+1)%n]-=delta;
+            a[fr] = -a[fr];
+            cnt++;
+        }
+        printf("%d\n",cnt);
+    }
+    int main()
+    {
+      //freopen("in.txt","r",stdin);
+      while(scanf("%d",&n)==1){
+         for(int i = 0; i < n; i++)scanf("%d",&a[i]);
+         work();
+      }
+    
+    return 0;
+    }
+    
+
+
+

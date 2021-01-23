@@ -1,0 +1,115 @@
+---
+author: 111qqz
+date: 2016-03-31 07:20:25+00:00
+draft: false
+title: codeforces 484 B Maximum Value (暴力乱搞)
+type: post
+url: /2016/03/484b/
+categories:
+- ACM
+tags:
+- 乱搞
+---
+
+[题目链接](http://codeforces.com/problemset/problem/484/B)
+题意：给出n个元素的序列，求出最大的a[i]%a[j] (i>=j)
+思路：没思路。。。。
+
+
+<blockquote>Let us iterate over all different _a__j_. Since we need to maximize ![](http://codeforces.com/predownloaded/78/b3/78b367327f7d7a7eba50f5e1ebfaf0cb199e1837.png)
+, then iterate all integer _x_ (such_x_ divisible by _a__j_) in range from 2_a__j_ to _M_, where _M_ — doubled maximum value of the sequence. For each such _x_ we need to find maximum _a__i_, such _a__i_ < _x_. Limits for numbers allow to do this in time _O_(1) with an array. After that, update answer by value ![](http://codeforces.com/predownloaded/78/b3/78b367327f7d7a7eba50f5e1ebfaf0cb199e1837.png)
+. Total time complexity is _O_(_nlogn_ + _MlogM_)</blockquote>
+
+
+题解也没有特别懂。。。感觉和筛法有点类似。
+
+不过学到了一个o(1)时间得到小于x的最大数是多少的做法。
+
+
+<blockquote>Sort the array and just maintain another array `A` of `10^6` elements where`index i stores element just smaller than i`
+
+For example consider sorted array `[2,4,7,11]`, then
+
+`A`(0 indexed) will be `[-1,-1,-1,2,2,4,4,4,7,7,7,7,11...]`
+
+`-1 means no element is smaller than i.`</blockquote>
+
+
+见代码中的b数组。
+
+
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年03月31日 星期四 14时23分39秒
+    File Name :code/cf/problem/484B.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E6+7;
+    int b[2*N];
+    int n ;
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	cin>>n;
+    	ms(b,-1);//b[i]表示比小于等于a[i]的元素里最大的。
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    int x;
+    	    cin>>x;
+    	    b[x] = x;
+    	}
+    	for ( int i = 1 ; i <2*N ; i++) if (b[i]==-1) b[i] = b[i-1];
+    //	for ( int i = 1 ; i <= 20 ;  i++) cout<<b[i]<<" ";
+    	int ans = 0 ;
+    	for ( int j = 1 ; j < N ; j++)
+    	    if (b[j]==j)
+    		for ( int i = j-1 ; i < 2*N ; i+=j)
+    		    if (j<=b[i]&&ans<b[i]%j) ans = b[i] % j ;
+    
+    	cout<<ans<<endl;
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+

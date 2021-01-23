@@ -1,0 +1,177 @@
+---
+author: 111qqz
+date: 2016-07-11 19:50:37+00:00
+draft: false
+title: ural 1416. Confidential (次小生成树模板题)
+type: post
+url: /2016/07/ural1416/
+categories:
+- ACM
+
+tags:
+- mst
+- 次小生成树
+---
+
+[URAL1416](http://acm.timus.ru/problem.aspx?space=1&num=1416)
+题意：次小生成树模板题
+
+思路：用Kruskal求最小生成树，标记用过的边。求次小生成树时，依次枚举用过的边，将其去除后再求最小生成树，得出所有情况下的最小的生成树就是次小的生成树。复杂度o(m2)。。。貌似有其他优化。。。
+
+
+
+写的时候。。因为点数是500。。我把边集的数组大小开成了500.。。交了10遍越界才意识到问题在哪里。。。真的是智商掉线啊orz...
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年07月11日 星期一 20时44分28秒
+    File Name :code/ural/1416.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=505;
+    int n,m;
+    int f[N];
+    int mst;
+    int ans;
+    int cnt = 0 ;
+    vector < pi > e[N*N];
+    bool flag;
+    struct Edge
+    {
+        int u,v;
+        int w;
+        int in;//标记边是否在生成树中。
+        bool operator < (Edge b)const
+        {
+    	return w<b.w;
+        }
+        void input()
+        {
+    	scanf("%d%d%d",&u,&v,&w);
+        }
+    }E[N*N];
+    void init()
+    {
+        for ( int i = 1 ; i <= n ; i++) f[i] = i;
+        for ( int i = 1 ; i <= n ; i++) e[i].clear();
+    }
+    int root ( int x)
+    {
+      //  cout<<"x:"<<x<<" f[x]:"<<f[x]<<endl;
+        if (x!=f[x]) f[x] = root (f[x]);
+        return f[x];
+    }
+    void merge( int x,int y)
+    {
+        int rx = root (x);
+        int ry = root (y);
+        if (rx==ry) return ;
+        f[rx] = ry; 
+      //  if (rx<ry) f[ry] = rx;
+      //  else f[rx]=ry;
+    }
+    void kruskal(int k)
+    {
+        for ( int i = 1 ; i <= n ; i++) f[i] = i ;
+        mst = 0 ;
+        cnt =  0;
+        for ( int i = 1; i <= m ; i++)
+        {
+    	int u = E[i].u;
+    	int v = E[i].v;
+    	int w = E[i].w;
+    	if (i==k) continue;
+    	if (root(u)==root(v)) continue;
+    	merge(u,v);
+    	cnt++;
+    	mst+=w;
+    	if (cnt>=n-1) break;
+        }
+        if (cnt<n-1) return ;
+        ans = min(ans,mst);
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	cin>>n>>m;
+    	init();
+    	for ( int i = 1 ; i <= m ; i++)
+    	{
+    	    E[i].input();
+    	    int u = E[i].u;
+    	    int v = E[i].v;
+    	    int w = E[i].w;
+    
+    	    e[u].push_back(make_pair(v,w));
+    	    e[v].push_back(make_pair(u,w));
+    	}
+    	sort(E+1,E+m+1);
+    	mst = 0 ;
+    	cnt = 0 ;
+    	for ( int i = 1 ; i <= m ; i++)
+    	{
+    	    int u = E[i].u;
+    	    int v = E[i].v;
+    	    int w = E[i].w;
+    	    if (root(u)==root(v)) continue;
+    	    E[i].in = 1;
+    	    merge(u,v);
+    	    cnt++;
+    	    mst+=w;
+    	}
+    	if (cnt<n-1)
+    	{
+    	    puts("Cost: -1");
+    	    puts("Cost: -1");
+    	    return 0;
+    	}
+    	printf("Cost: %d\n",mst);
+    	ans = inf;
+    	for ( int i = 1 ; i <= m ; i++)
+    	{
+    	    if (E[i].in==0) continue;
+    	   // cout<<"hhh?"<<endl; 
+    	    kruskal(i);
+    	}
+    	if (ans==inf) ans = -1;
+    	printf("Cost: %d\n",ans);
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+

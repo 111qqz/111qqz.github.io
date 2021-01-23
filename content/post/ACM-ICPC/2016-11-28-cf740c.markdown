@@ -1,0 +1,110 @@
+---
+author: 111qqz
+date: 2016-11-28 07:03:51+00:00
+draft: false
+title: 'codeforces #381 div 2 C. Alyona and mex (构造)'
+type: post
+url: /2016/11/cf740c/
+categories:
+- ACM
+tags:
+- 构造
+---
+
+[题目链接](http://codeforces.com/contest/740/problem/C)
+
+题意：
+
+m个区间，要求构造一个长度为n的数组，满足m个区间中，每个区间的mex值中的最小值最大。
+
+s思路：很容易想到的是...这个最大的mex 不可能超过每一组区间长度，假设最小的区间长度为mn
+
+那么是否一定可以构造出mex为mn的数组呢？
+
+是的。
+
+只需要按照
+
+0,1,2...mn-1,0,1....的方式构造即可。
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年11月24日 星期四 09时00分04秒
+    File Name :code/cf/#381/C.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    int n,m;
+    struct node
+    {
+        int l,r;
+        int len;
+        bool operator < ( node b)const
+        {
+    	if (r==b.r) return l<b.l;
+    	return r<b.r;
+        }
+    }a[N];
+    int ans[N];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	scanf("%d%d",&n,&m);
+    	int mx = inf ;
+    	for ( int i = 1; i <= m ; i++)
+    	{
+    	    scanf("%d%d",&a[i].l,&a[i].r);
+    	    a[i].len = a[i].r-a[i].l+1;
+    	    mx = min(mx,a[i].len);
+    	}
+    	printf("%d\n",mx);
+    	int cur = 0 ;
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    //	    cout<<"miao"<<endl;
+    	    ans[i] = cur;
+    	    cur++;
+    	    cur = cur % mx;
+    	}
+    	for ( int i = 1;  i <= n ; i++) printf("%d ",ans[i]);
+    	printf("\n");
+    
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

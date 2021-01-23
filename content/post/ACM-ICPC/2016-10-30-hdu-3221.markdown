@@ -1,0 +1,192 @@
+---
+author: 111qqz
+date: 2016-10-30 16:45:32+00:00
+draft: false
+title: hdu 3221 Brute-force Algorithm (矩阵快速幂+指数循环节)
+type: post
+url: /2016/10/hdu-3221/
+categories:
+- ACM
+tags:
+- 快速幂
+- 指数循环节
+- 矩阵
+---
+
+[题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=3221)
+
+
+
+题意：给出了一段伪代码。分析得知其实就是f[1]= a,f[2] = b,f[n]=f[n-1] * f[n-2]
+
+思路：一眼题，和hdu4549很类似[hdu4549解题报告](https://111qqz.com/wordpress/2016/10/hdu4549/)
+
+不同的是这道题中p不一定是质数（其实不是也无所谓啊...hdu4549只不过是因为1E9+7是指数，又用费马小定理化简了一下,这道理%phi(p)即可）
+
+还有这道题让我知道了
+
+
+<blockquote>首先我们知道指数循环节公式，也就是所谓的降幂公式为：**a^x = a^(x mod phi(c)+phi(c)) (mod c) x>=phi(c)，（<del>ps:后面的限制条件，在x<phi(c)的时候，该式子依然正确，只不过增加了运算复杂度。。。？ 存疑）</del>**</blockquote>
+
+
+括号里的话是错误的。只有当x<phi(c)的时候，这个公式才成立。
+
+这道题就是反例，不加判断会wa。
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :Sun 30 Oct 2016 11:46:33 PM CST
+    File Name :code/hdu/3221.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    LL a,b,p,n;
+    LL mod;
+    LL euler( LL x)
+    {
+        LL ret = 1;
+        for ( LL i = 2 ; i*i <= x;  i++)
+        {
+    	if (x%i==0)
+    	{
+    	    x/=i;
+    	    ret*=(i-1);
+    	    while (x%i==0)
+    	    {
+    		x/=i;
+    		ret*=i;
+    	    }
+    	}
+        }
+        if (x>1) ret*=(x-1);
+        return ret;
+    }
+    
+    struct Mat
+    {
+        LL mat[2][2];
+        void clear()
+        {
+    	ms(mat,0);
+        }
+    }M,M1;
+    
+    Mat operator * (Mat a,Mat b)
+    {
+        Mat res;
+        res.clear();
+        for ( int i = 0 ; i < 2 ; i++)
+    	for ( int j = 0 ; j < 2 ; j++)
+    	    for ( int k = 0 ; k < 2 ; k++)
+    	    {
+    		res.mat[i][j] = (res.mat[i][j] + a.mat[i][k]*b.mat[k][j]);
+    		if (res.mat[i][j]>=mod)
+    		    res.mat[i][j] = res.mat[i][j] % mod + mod;
+    	    }
+        return res;
+    }
+    Mat operator ^ (Mat a,LL b)
+    {
+        Mat res;
+        res.clear();
+        for ( int i = 0 ; i < 2 ; i++) res.mat[i][i] = 1;
+        while (b>0)
+        {
+    	if (b&1) res = res * a;
+    	b = b >> 1LL;
+    	a = a * a;
+        }
+        return res;
+    }
+    void init()
+    {
+        M.clear();
+        M.mat[0][1] =  M.mat[1][0] = M.mat[1][1] = 1;
+        M1.clear();
+        M1.mat[0][0] = 0 ;
+        M1.mat[1][0] = 1;
+    }
+    LL ksm( LL a,LL b,LL k)
+    {
+        LL res = 1LL;
+        while (b>0)
+        {
+    	if (b&1) res = (res * a) % k;
+    	b = b >> 1LL;
+    	a = ( a * a ) % k;
+        }
+        return res;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	int T;
+    	int cas = 0 ;
+    	cin>>T;
+    	while (T--)
+    	{
+    	    scanf("%lld%lld%lld%lld",&a,&b,&p,&n);
+    	    printf("Case #%d: ",++cas);
+    	    if (n==1)
+    	    {
+    		printf("%lld\n",a%p);
+    		continue;
+    	    }
+    	    if (n==2)
+    	    {
+    		printf("%lld\n",b%p);
+    		continue;
+    	    }
+    	    init();
+    	    mod = euler(p);
+    	    Mat ans;
+    	    ans.clear();
+    	    ans = (M^(n-2))*M1;
+    	    LL x = ans.mat[0][0];
+    	    LL y = ans.mat[1][0];
+    	    LL ret = ksm(a,x,p)*ksm(b,y,p)%p;
+    	    printf("%lld\n",ret);
+    	   // printf("Case #%d: %lld\n",++cas,ret);
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+
+
+

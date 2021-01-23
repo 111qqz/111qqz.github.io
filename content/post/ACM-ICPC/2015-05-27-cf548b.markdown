@@ -1,0 +1,146 @@
+---
+author: 111qqz
+date: 2015-05-27 14:45:00+00:00
+draft: false
+title: codeforces  548B  Mike and Fun
+type: post
+url: /2015/05/cf548b/
+categories:
+- ACM
+tags:
+- brute force
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+http://codeforces.com/problemset/problem/548/B
+
+
+
+
+比赛的时候不懂为什么就没做出来....
+其实很容易想到一个o(q*(n+m))的做法...
+就是每次更新，要同时更新当前更新行的最大连续和....O（m）可以完成...然后在O（n）扫一遍，找到所有行中的最大值。
+然后需要注意的是，在第一次更改之前就要把每个行的最大值处理出来l..
+然后cf机器真是够快，O(n*m*q)的1.2S过。。。。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```c++
+
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月19日 星期五 17时01分58秒
+    File Name :code/cf/problem/548B.cpp
+    ************************************************ */
+    
+    #include <algorithm>
+    #include <cstdio>
+    #include <iostream>
+    #include <cstring>
+    #include <string>
+    #include <cmath>
+    #include <map>
+    
+    using namespace std;
+    const int N=5E2+5;
+    int a[N][N];
+    int fans;
+    int n,m,q,x,y,cur,ans[N];
+    int main()
+    {
+        cin>>n>>m>>q;
+        for (int i = 1 ; i <= n;i++ )
+        {
+            for (int j = 1; j <= m ; j++ )
+                    scanf("%d",&a[i][j]);
+            cur = 0;
+            for (int j = 1; j <=m ;j++ )
+                if (a[i][j]==1)
+                {
+                    cur++;
+                    ans[i]=max(cur,ans[i]);
+                }
+                else
+                {
+                   cur = 0;
+                }
+        }
+        for ( int i = 1 ; i <= q; i++ )
+        {
+            scanf("%d %d",&x,&y);
+            a[x][y]=a[x][y]^1;
+           // if (i==3) cout<<a[x][y]<<"sadsadasd"<<endl;
+            cur = 0;
+            ans[x]=0;
+            for (int j = 1; j <=m ;j++ )
+                if (a[x][j]==1)
+                {
+                    cur++;
+                    ans[x]=max(cur,ans[x]);
+                }
+                else
+                {
+                   cur = 0;
+                }
+            fans=-1;
+            for (int j = 1;j <= n ; j++ )
+                if (ans[j]>fans)
+                {
+                    fans=ans[j];
+                }
+            cout<<fans<<endl;
+        }
+    
+    
+        return 0;
+    }
+    
+
+
+```

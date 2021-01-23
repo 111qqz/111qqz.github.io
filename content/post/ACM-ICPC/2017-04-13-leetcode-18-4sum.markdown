@@ -1,0 +1,77 @@
+---
+author: 111qqz
+date: 2017-04-13 09:34:15+00:00
+draft: false
+title: leetcode 18. 4Sum (k-sum问题，two pointer)
+type: post
+url: /2017/04/leetcode-18-4sum/
+categories:
+- 面试
+tags:
+- k-sum
+- two pointer
+- leetcode
+---
+
+Given an array _S_ of _n_ integers, are there elements _a_, _b_, _c_, and _d_ in _S_ such that _a_ + _b_ + _c_ + _d_ = target? Find all unique quadruplets in the array which gives the sum of target.
+
+**Note:** The solution set must not contain duplicate quadruplets.
+
+思路： O(n^2)枚举两个元素，变成2-sum问题，总体复杂度O(n^3)
+
+hash的解法以后补
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2017年04月13日 星期四 17时24分54秒
+    File Name :18.cpp
+    ************************************************ */
+    class Solution {
+    
+    public:
+        
+        vector<vector<int> >res;
+        set<vector<int> >se;
+        int n;
+        vector<vector<int>> fourSum(vector<int>& nums, int target) {
+    	n = nums.size();
+    	if (n<4) return res;
+    	sort(nums.begin(),nums.end());
+    	
+    	for ( int i = 0 ; i <= n-4 ; i++ )
+    	{
+    	    for ( int j = i+1 ; j <= n-3 ; j++)
+    	    {
+    		int head = j+1;
+    		int tail = n-1;
+    		int tar = target - nums[i] - nums[j];
+    		while (head<tail)
+    		{
+    		    if (nums[head]+nums[tail]==tar)
+    		    {
+    			vector<int>tmp;
+    			tmp.push_back(nums[i]);
+    			tmp.push_back(nums[j]);
+    			tmp.push_back(nums[head]);
+    			tmp.push_back(nums[tail]);
+    			se.insert(tmp);
+    			head++;
+    			tail--;
+    		    }
+    		    else if (nums[head]+nums[tail]<tar) head++;
+    		    else tail--;
+    		}
+    	    }
+    	}
+    	for ( auto &it :se) res.push_back(it);
+    	return res;
+            
+    
+        }
+    
+    };
+    
+
+
+

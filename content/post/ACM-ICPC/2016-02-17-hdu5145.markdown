@@ -1,0 +1,223 @@
+---
+author: 111qqz
+date: 2016-02-17 07:34:05+00:00
+draft: false
+title: hdu 5145 NPY and girls
+type: post
+url: /2016/02/hdu5145/
+categories:
+- ACM
+tags:
+- 组合数学
+- 莫队算法
+- 计数问题
+- 逆元
+---
+
+http://acm.hdu.edu.cn/showproblem.php?pid=5145
+题意：有n个女孩，编号1..n,第i个女孩在第a[i]个教室,m次访问，每次访问编号[L,R]的女孩，处于同一个教室的女孩一次只能访问一个，问有多少种访问方案。两个不同的方案当且仅当访问的顺序有所不同。
+
+
+## 思路：正好刚刚听完学堂在线上的组合数学的那一节，讲到有重复元素的不重复排列的个数的计算方法：可以先将所有元素看成不重复，再除以每个元素的重复度的阶乘（重复度定义为每个元素个数）。
+
+
+
+
+## 增加一个元素的影响是，乘一个增加的长度，并且除以该元素的重复度（因为每增加一个元素就要除以以此重复度，那么当同一元素c增加到第i次时，除以的就是i的阶乘），减少一个元素的影响正相反。 两种改变都可以O(1)实现，因此可以上莫队。
+
+
+之前要预处理下逆元。
+
+
+
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月17日 星期三 14时20分01秒
+    File Name :code/hdu/5145.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=3E5+7;
+    const int MOD =1E9+7;
+    int n,m;
+    int a[N];
+    int pos[N];
+    LL ny[N]; 
+    LL p;
+    LL num;
+    int ans[N];
+    int cnt[N];
+    
+    struct node
+    {
+        int l,r;
+        int id;
+    
+        bool operator <(node b)const
+        {
+    	if (pos[l]==pos[b.l]) return r<b.r;
+    	return pos[l]<pos[b.l];
+        }
+    }q[N];
+    
+    LL ksm(LL a,LL b)
+    {
+        LL res = 1LL;
+        while (b)
+        {
+    	if (b&1) 
+    	    res =(res*a)%MOD;
+    	b = b>>1;
+    	a = (a*a)%MOD;
+        }
+        return res;
+        
+    }
+    
+    
+    void update(int x,int d)
+    {
+        if (d>0)
+        {
+    	num++;
+    	p = (p*num)%MOD;
+    	cnt[a[x]]++;
+    //	if (cnt[a[x]]>3E4) return;
+    	p = (p*ny[cnt[a[x]]])%MOD;
+        }
+        else
+        {
+    	
+    	p = (p*cnt[a[x]])%MOD;
+    	cnt[a[x]]--;
+    //	if (num>3E4||num<0) return;
+    	p = (p*ny[num])%MOD;
+    	num--;
+        }
+    }
+    
+    
+    
+    void getny()  //预处理逆元
+    {
+        ms(ny,0);
+        for ( int i = 1 ; i <= 30005 ;  i++)
+        {
+    	ny[i]=ksm(LL(i),MOD-2);
+        }
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	getny();
+    	int T;
+    	cin>>T;
+    	while (T--)
+    	{
+    	
+    	    scanf("%d %d",&n,&m);
+    	    ms(cnt,0);
+    	    p = 1LL;
+    	    num = 0LL;
+    	    ms(ans,0);
+    
+    	    int siz  = 173; //sqrt(30000);
+    	    for ( int i = 1 ; i <= n ; i++)
+    	    {
+    		scanf("%d",&a[i]);
+    		pos[i] = (i-1)/siz;
+    	    }
+    	    for ( int i = 1 ; i <= m ; i ++)
+    	    {
+    		scanf("%d %d",&q[i].l,&q[i].r);
+    		q[i].id = i ;
+    	    }
+    
+    	    sort(q+1,q+m+1);
+    //	    cout<<"ok2<"<<endl;
+    	    int pl = 1;
+    	    int pr = 0 ;
+    	    int id,l,r;
+    
+    	    for ( int i = 1 ; i <= m ; i++)
+    	    {
+    		id = q[i].id;
+    		l  = q[i].l;
+    		r  = q[i].r;
+    
+    		if (pr<r)
+    		{
+    		    for ( int j = pr+1 ; j <= r ; j++)
+    			update(j,1);
+    		}
+    		else
+    		{
+    		    for ( int j = r+1 ; j <= pr ; j++)
+    			update(j,-1);
+    		}
+    		pr = r;
+    
+    		if (pl<l)
+    		{
+    		    for ( int j =  pl ; j  <=  l-1 ; j ++) 
+    			update(j,-1);
+    		}
+    		else
+    		{
+    		    for ( int j = l  ; j <= pl-1  ; j++)
+    			update(j,1);
+    		}
+    		pl = l;
+    
+    		ans[id] = p;
+    	    }
+    
+    	    for ( int i = 1 ;i <= m ; i++) printf("%d\n",ans[i]);
+    
+    	}
+    
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

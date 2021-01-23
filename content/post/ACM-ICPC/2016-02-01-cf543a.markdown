@@ -1,0 +1,81 @@
+---
+author: 111qqz
+date: 2016-02-01 21:50:39+00:00
+draft: false
+title: codeforces 453 A. Little Pony and Expected Maximum
+type: post
+url: /2016/02/cf543a/
+categories:
+- ACM
+tags:
+- math
+- 概率
+---
+
+http://codeforces.com/problemset/problem/453/A
+题意：m面筛子，每面点数出现的概率相同，连续投掷n次，问出现的最大值的数学期望。
+思路：手写样例。。。发现答案为![](http://codeforces.com/predownloaded/2a/ed/2aede49a2c6f455a4cb3af6fe16b61f4da56aa87.png)
+ 。。。记得把（1/m）^n放进去。
+
+**观察答案，可以这样理解（我是用样例推出公式后理解。。。数学差的人心好累）：如果i为最大值，那么n次每次必须投掷出1..i的点数，概率为 (i/m)^n,但是要至少有一个投掷成i，也就是要减去所有的数都是1..i-1中的情况（概率 为((i-1)/m)^n），** 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月02日 星期二 05时17分24秒
+    File Name :code/cf/problem/453A.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    double ans;
+    int n ,m;
+    double p1[N],p2[N];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	cin>>m>>n;
+    	ans =  0;
+    	for ( int i = 1 ; i <= m ; i++)
+    	{
+    	    ans +=i*(pow(i*1.0/m,n*1.0)-pow((i-1)*1.0/m,n*1.0));
+    	}
+    	printf("%.10f\n",ans);
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

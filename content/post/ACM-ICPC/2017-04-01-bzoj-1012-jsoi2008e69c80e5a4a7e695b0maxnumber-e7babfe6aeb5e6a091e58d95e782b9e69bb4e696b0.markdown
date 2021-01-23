@@ -1,0 +1,222 @@
+---
+author: 111qqz
+date: 2017-04-01 09:20:48+00:00
+draft: false
+title: 'BZOJ 1012: [JSOI2008]最大数maxnumber (线段树,,单点更新)'
+type: post
+url: /2017/04/bzoj-1012-jsoi2008maxnumber-/
+categories:
+- ACM
+tags:
+- 线段树
+---
+
+
+
+
+## 1012: [JSOI2008]最大数maxnumber
+
+
+Time Limit: 3 Sec  Memory Limit: 162 MB
+Submit: 9717  Solved: 4244
+[[Submit](http://www.lydsy.com/JudgeOnline/submitpage.php?id=1012)][[Status](http://www.lydsy.com/JudgeOnline/problemstatus.php?id=1012)][[Discuss](http://www.lydsy.com/JudgeOnline/bbs.php?id=1012)]
+
+
+## Description
+
+
+
+
+
+
+　　现在请求你维护一个数列，要求提供以下两种操作：1、 查询操作。语法：Q L 功能：查询当前数列中末尾L
+个数中的最大的数，并输出这个数的值。限制：L不超过当前数列的长度。2、 插入操作。语法：A n 功能：将n加
+上t，其中t是最近一次查询操作的答案（如果还未执行过查询操作，则t=0)，并将所得结果对一个固定的常数D取
+模，将所得答案插入到数列的末尾。限制：n是非负整数并且在长整范围内。注意：初始时数列是空的，没有一个
+数。
+
+
+
+
+
+
+## Input
+
+
+
+
+
+
+　　第一行两个整数，M和D，其中M表示操作的个数(M <= 200,000)，D如上文中所述，满足D在longint内。接下来
+M行，查询操作或者插入操作。
+
+
+
+
+
+
+## Output
+
+
+
+
+
+
+　　对于每一个询问操作，输出一行。该行只有一个数，即序列中最后L个数的最大数。
+
+
+
+
+
+
+## Sample Input
+
+
+
+
+5 100
+A 96
+Q 1
+A 97
+Q 1
+Q 2
+
+
+
+
+## Sample Output
+
+
+
+
+96
+93
+96
+
+
+
+
+
+
+
+
+
+
+
+
+
+思路:线段树即可....
+
+
+
+
+只是为了回忆一下..发现线段树还是没有忘记的23333
+
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2017年04月01日 星期六 16时37分55秒
+    File Name :code/bzoj/1012.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define PB push_back
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int N=2E5+7;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    int m,D;
+    int tree[N<<2]; //树最大为M个节点..
+    int lst; //最后一个查询的结果
+    int cur;//当前队列中元素的个数.
+    void PushUp( int rt)
+    {
+        tree[rt] = max( tree[rt<<1] , tree[rt<<1|1]);
+    }
+    void update(int p,int sc, int l,int r,int rt)
+    {
+    //    cout<<"p:"<<p<<" sc:"<<sc<<" l:"<<l<<" r:"<<r<<" rt:"<<rt<<endl;
+        if (l==r)
+        {
+    	tree[rt] = sc;
+    	return;
+        }
+        int m = (l+r)>>1;
+        if (p<=m) update(p,sc,lson);
+        else update(p,sc,rson);
+        PushUp(rt);
+    }
+    int query( int L,int R,int l,int r,int rt)
+    {
+    //    cout<<"L:"<<L<<" R:"<<R<<endl;
+        if (L<=l && r<=R) return tree[rt];
+        int m = (l+r)>>1;
+        int ret = 0 ;
+        if (L<=m) ret = max(ret,query(L,R,lson));
+        if (R>=m+1) ret = max(ret,query(L,R,rson));
+        return ret;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	ms(tree,0);
+    	lst = 0 ;
+    	cur = 0 ;
+    	scanf("%d %d",&m,&D);
+    	for ( int i = 1 ; i <= m ; i++)
+    	{
+    	    char opt[2];
+    	    int x;
+    	    scanf("%s %d",opt,&x);
+    	    if (opt[0]=='A')
+    	    {
+    		update(++cur,(x+lst)%D,1,m,1);
+    	    }
+    	    else
+    	    {
+    		lst = query(cur-x+1,cur,1,m,1);
+    		printf("%d\n",lst);
+    	    }
+    	}
+    //	for ( int i = 1 ; i <= 30 ;  i++) printf("%d ",tree[i]);
+    
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+

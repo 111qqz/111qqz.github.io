@@ -1,0 +1,169 @@
+---
+author: 111qqz
+date: 2016-02-17 15:54:12+00:00
+draft: false
+title: 'codeforces #339 div 2 C. Peter and Snow Blower'
+type: post
+url: /2016/02/cf614c/
+categories:
+- ACM
+tags:
+- 计算几何
+---
+
+### http://codeforces.com/contest/614/problem/C
+题意：给一个多边形和多边形外一定点，多边形绕定点旋转，问多边形扫过的面积。
+思路：简单计算几何，找到多边形距离定点的最大和最小距离R和r,答案就是(R^2-R^2)*PI
+**需要注意的是：最大距离一定是从某点上取得，但是最小距离可能不在顶点上，而在某条边上。**
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月16日 星期二 16时58分59秒
+    File Name :code/cf/problem/614C.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N = 1E5+7;
+    const double PI = acos(-1.0);
+    
+    int dblcmp(double d)
+    {
+        return d<-eps?-1:d>eps;
+    }
+    struct point
+    {
+        double x,y;
+        point (){}
+        point (double _x,double _y):
+    	x(_x),y(_y){};
+        void input()
+        {
+    	cin>>x>>y;
+        }
+        point sub(point p)
+        {
+    	return point (x-p.x,y-p.y);
+        }
+        double dot(point p)
+        {
+    	return x*p.x+y*p.y;
+        }
+        double distance2(point p)
+        {
+    	return (x-p.x)*(x-p.x)+(y-p.y)*(y-p.y);
+        }
+        double distance(point p)
+        {
+    	return hypot(x-p.x,y-p.y);
+        }
+        double det(point p)
+        {
+    	return x*p.y-y*p.x;
+        }
+    }p[N],q;
+    double sqr(double x)
+    {
+        return x*x;
+    }
+    struct line
+    {
+        point a,b;
+        line(){}
+        line (point _a,point _b)
+        {
+    	a = _a;
+    	b = _b;
+        }
+        double length()
+        {
+    	return a.distance(b);
+        }
+    
+        double dispointtoline2(point p)
+        {
+    	double res = sqr(fabs(p.sub(a).det(b.sub(a)))/length());
+    //	cout<<"res:"<<res<<endl;
+    	return res;
+        }
+        double dispointtoseg2(point p)
+        {
+    	if (dblcmp(p.sub(b).dot(a.sub(b)))<0||dblcmp(p.sub(a).dot(b.sub(a)))<0)
+    	    return min(p.distance2(a),p.distance2(b));
+        
+        return dispointtoline2(p);
+        }
+    }li[N];
+    
+    int n;
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	cin>>n;
+    	q.input();
+    	double MIN = 99999999999999999;
+    	double MAX = -1;
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    p[i].input();
+    	    double d= p[i].distance2(q);
+    	    MAX = max(MAX,d);
+    	}
+    
+    	for ( int i = 1 ; i <= n-1 ; i++)
+    	{
+    	    li[i] = line(p[i],p[i+1]);
+    	}
+    	li[n]=line(p[n],p[1]);
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    double d = li[i].dispointtoseg2(q);
+    //	    cout<<li[i].a.x<<" "<<li[i].a.y<<"   "<<li[i].b.x<<" "<<li[i].b.y<<endl; 
+    	//    cout<<"d:"<<d<<endl;
+    	    MIN = min(MIN,d);
+    	}
+    //	cout<<"MAX:"<<MAX<<"  MIN:"<<MIN<<endl;
+    	double ans = (MAX-MIN)*PI;
+    	printf("%.18f\n",ans);
+    
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

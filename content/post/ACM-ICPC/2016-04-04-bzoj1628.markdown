@@ -1,0 +1,227 @@
+---
+author: 111qqz
+date: 2016-04-04 08:47:38+00:00
+draft: false
+title: 'BZOJ 1628: [Usaco2007 Demo]City skyline (单调栈)'
+type: post
+url: /2016/04/bzoj1628/
+categories:
+- ACM
+tags:
+- 单调栈
+---
+
+
+
+
+## 1628: [Usaco2007 Demo]City skyline
+
+
+Time Limit: 5 Sec  Memory Limit: 64 MB
+Submit: 396  Solved: 317
+[[Submit](http://www.lydsy.com/JudgeOnline/submitpage.php?id=1628)][[Status](http://www.lydsy.com/JudgeOnline/problemstatus.php?id=1628)][[Discuss](http://www.lydsy.com/JudgeOnline/bbs.php?id=1628)]
+
+
+## Description
+
+
+
+
+
+
+
+![](http://www.lydsy.com/JudgeOnline/upload/201506/1.PNG)
+
+
+
+
+
+
+
+
+## Input
+
+
+
+
+
+
+
+第一行给出N，W
+
+
+
+
+第二行到第N+1行:每行给出二个整数x,y，输入的x严格递增，并且第一个x总是1
+
+
+
+
+
+
+
+## Output
+
+
+
+
+
+
+输出一个整数，表示城市中最少包含的建筑物数量
+
+
+
+
+
+
+## Sample Input
+
+
+
+
+10 26
+1 1
+2 2
+5 1
+6 3
+8 1
+11 0
+15 2
+17 3
+20 2
+22 1
+
+INPUT DETAILS:
+
+The case mentioned above
+
+
+
+
+
+
+## Sample Output
+
+
+
+
+6
+
+
+
+
+
+
+
+
+思路：我是正着做的，判断条件没有问题，但是细节不好处理，一直WA..大概是有什么地方没想到？ 正解是单调栈。
+
+
+
+
+转载一段题解：
+
+
+
+
+<blockquote>
+
+> 
+> 
+
+答案的上限 肯定是 n， 何时会减一呢？ 当有两座楼高度相等且它们的中间没有比它们低的楼。
+
+所以要维护的是一个单调递增的序列， 每次弹出比它大的直到遇到一个和它相等的， 没有相等的话就把 它加入这个序列中。
+
+实现很简单。
+
+
+> 
+> </blockquote>
+
+
+
+
+
+
+
+<blockquote>
+
+> 
+> </blockquote>
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年04月04日 星期一 15时23分45秒
+    File Name :code/bzoj/1628.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E6+7;
+    int n,w;
+    int x[N],y[N];
+    int st[N];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	ios::sync_with_stdio(false);
+    	cin>>n>>w;
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    cin>>x[i]>>y[i];
+    	}
+    
+    	int top = 0;
+    	int ans = n;
+    	for ( int i = 1 ;i  <= n ; i++)
+    	{
+    	    while (top&&y[i]<st[top]) top--;
+    	    if (st[top]==y[i]) ans--;
+    	    else st[++top] = y[i];
+    	}
+    	cout<<ans<<endl;
+    
+    	
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

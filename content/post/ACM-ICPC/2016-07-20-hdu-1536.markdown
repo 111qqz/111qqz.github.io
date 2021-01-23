@@ -1,0 +1,123 @@
+---
+author: 111qqz
+date: 2016-07-20 15:45:35+00:00
+draft: false
+title: hdu 1536 S-Nim (sg函数)
+type: post
+url: /2016/07/hdu-1536/
+categories:
+- ACM
+tags:
+- sg函数
+- 博弈论
+---
+
+[hdu 1536题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=1536)
+
+题意：还是若干堆石子，但是每次取的个数只能是集合S中有的数。。问是否必赢。。。
+
+思路：sg函数。。。1A
+
+
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年07月20日 星期三 23时32分48秒
+    File Name :code/hdu/1536.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E4+7;
+    int  sg[N];
+    bool vis[N];
+    int ok[N];
+    int k,m;
+    
+    void sg_init()
+    {
+        ms(sg,0);
+    
+        for ( int i = 1; i < N ; i++)
+        {
+    	ms(vis,false);
+    	for ( int j = 1 ; j <= k ; j++)
+    	    if (i-ok[j]>=0) vis[sg[i-ok[j]]] = true;
+    
+    	for ( int j = 0 ;  ; j++)
+    	    if (!vis[j])
+    	    {
+    		sg[i] = j;
+    		break;
+    	    }
+        }
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	while (~scanf("%d",&k))
+    	{
+    	    if (k==0) break;
+    	    ms(ok,0);
+    	    for ( int i = 1 ; i <= k ; i++) scanf("%d",&ok[i]);
+    	    sg_init();
+    	    scanf("%d",&m);
+    //	    cout<<"m:"<<m<<endl;
+    	    while (m--)
+    	    {
+    		int num;
+    		scanf("%d",&num);
+    		int sum = 0 ;
+    		while (num--)
+    		{
+    		    int x;
+    		    scanf("%d",&x);
+    		    sum^=sg[x];
+    		}
+    		if (sum==0) printf("L");
+    		else printf("W");
+    	    }
+    	    printf("\n");
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

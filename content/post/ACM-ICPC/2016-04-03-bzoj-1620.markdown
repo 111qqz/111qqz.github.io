@@ -1,0 +1,197 @@
+---
+author: 111qqz
+date: 2016-04-03 17:44:02+00:00
+draft: false
+title: 'BZOJ 1620: [Usaco2008 Nov]Time Management 时间管理 (贪心)'
+type: post
+url: /2016/04/bzoj-1620/
+categories:
+- ACM
+tags:
+- greedy
+---
+
+
+
+
+## 1620: [Usaco2008 Nov]Time Management 时间管理
+
+
+Time Limit: 5 Sec  Memory Limit: 64 MB
+Submit: 636  Solved: 387
+[[Submit](http://www.lydsy.com/JudgeOnline/submitpage.php?id=1620)][[Status](http://www.lydsy.com/JudgeOnline/problemstatus.php?id=1620)][[Discuss](http://www.lydsy.com/JudgeOnline/bbs.php?id=1620)]
+
+
+## Description
+
+
+
+
+
+
+Ever the maturing businessman, Farmer John realizes that he must manage his time effectively. He has N jobs conveniently numbered 1..N (1 <= N <= 1,000) to accomplish (like milking the cows, cleaning the barn, mending the fences, and so on). To manage his time effectively, he has created a list of the jobs that must be finished. Job i requires a certain amount of time T_i (1 <= T_i <= 1,000) to complete and furthermore must be finished by time S_i (1 <= S_i <= 1,000,000). Farmer John starts his day at time t=0 and can only work on one job at a time until it is finished. Even a maturing businessman likes to sleep late; help Farmer John determine the latest he can start working and still finish all the jobs on time.
+
+N个工作,每个工作其所需时间,及完成的Deadline,问要完成所有工作,最迟要什么时候开始.
+
+
+
+
+
+
+## Input
+
+
+
+
+
+
+* Line 1: A single integer: N
+
+* Lines 2..N+1: Line i+1 contains two space-separated integers: T_i and S_i
+
+
+
+
+
+
+## Output
+
+
+
+
+
+
+* Line 1: The latest time Farmer John can start working or -1 if Farmer John cannot finish all the jobs on time.
+
+
+
+
+
+
+## Sample Input
+
+
+
+
+4
+3 5
+8 14
+5 20
+1 16
+
+INPUT DETAILS:
+
+Farmer John has 4 jobs to do, which take 3, 8, 5, and 1 units of
+time, respectively, and must be completed by time 5, 14, 20, and
+16, respectively.
+
+
+
+
+
+
+## Sample Output
+
+
+
+
+2
+
+OUTPUT DETAILS:
+
+Farmer John must start the first job at time 2. Then he can do
+the second, fourth, and third jobs in that order to finish on time.
+
+
+
+
+
+
+
+
+思路：贪心。一眼题。5分钟A掉，爽。 按照s[i]排序，然后完成前i个任务的最晚开始时间为 s[i]-sum ，sum为t[1]+...+t[i]..
+
+
+
+
+如果ans<0,说明无法完成，赋值为-1.
+
+
+
+
+
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年04月04日 星期一 01时36分31秒
+    File Name :code/bzoj/1620.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E3+7;
+    pi a[N];
+    int n;
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	cin>>n;
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    int x,y;
+    	    cin>>x>>y;
+    	    a[i]=make_pair(y,x);
+    	}
+    
+    	sort(a+1,a+n+1);
+    	int sum = 0 ;
+    	int ans = inf;
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    sum += a[i].sec;
+    	    ans = min(ans,a[i].fst-sum);
+    	}
+    	if (ans<0) ans=-1;
+    	cout<<ans<<endl;
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

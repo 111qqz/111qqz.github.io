@@ -1,0 +1,111 @@
+---
+author: 111qqz
+date: 2016-09-19 16:54:21+00:00
+draft: false
+title: poj 3579 Median (尺取法+二分)
+type: post
+url: /2016/09/poj-3579/
+categories:
+- ACM
+tags:
+- binary search
+---
+
+题意：给出n个数，两两做差的绝对值，共有m=n*(n-1)/2个，问其中的中位数是多少。特别地，当m为偶数的时候，中位数为第m/2个。
+
+思路：二分中位数。
+
+一开始还觉得由于中位数在整数意义上不连续不能二分。。。。
+
+但是最后结果不可能是那样的答案啊。。。
+
+check的条件是，以k为中位数的时候，绝对值小于k的数要小于(m+1)/2个（也就是中位数所在的位置）
+
+check的时候尺取即可。
+
+复杂度 排序O(nlgn) + 二分(lgn)*尺取O(n) ，整体O(nlgn)
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :Tue 20 Sep 2016 12:18:19 AM CST
+    File Name :code/poj/3579.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    LL n,m;
+    int x[N];
+    bool check( int k) 
+    {
+        int cnt = 0 ; //cnt为绝对值小于k的对数,小于中位数的对数应该小于m个。
+        int head = 1;
+        int tail = 1;
+        while (head<=n)
+        {
+    	while (x[tail]-x[head]<k&&tail<=n) tail++;
+    	tail--;
+    	cnt+=(tail-head);
+    	head++;
+        }
+        return cnt>=m;
+    }
+    int bin()
+    {
+        int l = 0 ;
+        int r = x[n] - x[1];
+        while (l<=r)
+        {
+    	int mid = (l+r)>>1;
+    	if (check(mid)) r = mid-1;
+    	else l = mid+1;
+        }
+        return l-1;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	while (scanf("%lld",&n)!=EOF){
+    	    for ( int i = 1 ; i <= n ; i++	) scanf("%d",&x[i]);
+    	    sort(x+1,x+n+1);
+    	    m = n*(n-1)/2;
+    	    m = (m+1)/2;
+    	    int ans = bin();
+    	    printf("%d\n",ans);
+    	}
+    #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+

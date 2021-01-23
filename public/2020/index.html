@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="111qqz的小窝">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="https://111qqz.github.io/img/2.png">
+    <meta property="twitter:image" content="https://111qqz.github.io/img/2.png" />
+    
+
+    
+    <meta name="title" content="[施工完成] CSAPP Cachelab" />
+    <meta property="og:title" content="[施工完成] CSAPP Cachelab" />
+    <meta property="twitter:title" content="[施工完成] CSAPP Cachelab" />
+    
+
+    
+    <meta name="description" content="">
+    <meta property="og:description" content="" />
+    <meta property="twitter:description" content="" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="ACM,111qqz,商汤科技,hust,华中科技大学">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>[施工完成] CSAPP Cachelab-111qqz的小窝</title>
+
+    <link rel="canonical" href="/2020/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+    <link rel="stylesheet" href="/css/hux-blog.min-custom.css">
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">111qqz的小窝</a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    
+                    
+		    
+                        <li><a href="/categories/acm/">ACM-ICPC</a></li>
+                    
+                        <li><a href="/categories/deep-learning/">深度学习</a></li>
+                    
+                        <li><a href="/categories/mooc/">公开课</a></li>
+                    
+                        <li><a href="/categories/%e5%85%b6%e4%bb%96/">其他</a></li>
+                    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('/img/2.png')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/csapp" title="CSAPP">
+                            CSAPP
+                        </a>
+                        
+                    </div>
+                    <h1>[施工完成] CSAPP Cachelab</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    111qqz
+			 
+			on 
+			Saturday, December 26, 2020
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#背景">背景</a></li>
+<li><a href="#part-a">PART A</a></li>
+<li><a href="#part-b">PART B</a>
+<ul>
+<li><a href="#32-32">32*32</a></li>
+<li><a href="#61-67">61*67</a></li>
+<li><a href="#64-64">64*64</a></li>
+</ul></li>
+<li><a href="#最终分数">最终分数</a></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<h2 id="背景">背景</h2>
+
+<p>CSAPP:3e 的配套实验 <a href="http://csapp.cs.cmu.edu/3e/README-cachelab">地址</a>
+分成了两个部分，第一部分是模拟一下cache的miss,hit,evict的规则。第二部分是优化一个矩阵的转置，使得miss尽可能少。</p>
+
+<h2 id="part-a">PART A</h2>
+
+<p>给了一个标程csim-ref,要求实现一个程序，输出与该标程一致。</p>
+
+<p>写的时候太心急了。。导致没看完作业要求就开始写了。。  然后就纠结了好久。。如果要访问的地址超过了一个block line的边界该怎么办。。</p>
+
+<p>然而实际上题目里已经把这种情况排除了。。</p>
+
+<blockquote>
+<p>For this this lab, you should assume that memory accesses are aligned properly, such that a single
+memory access never crosses block boundaries. By making this assumption, you can ignore the
+request sizes in the valgrind traces</p>
+</blockquote>
+
+<p>这样的话。。就没什么难度了。。
+LRU的替换策略用纯c去撸hashmap+list有点烦。。。干脆就写了暴力的实现。。反正是模拟题(x</p>
+
+<pre><code class="language-c++">
+#include &lt;getopt.h&gt;
+#include &lt;stdbool.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+
+#include &quot;cachelab.h&quot;
+
+const unsigned int address_space_size = 64;
+// https://stackoverflow.com/questions/9642732/parsing-command-line-arguments-in-c
+
+typedef struct {
+  bool verbose;
+  int set_index_bits;
+  int lines_per_set;
+  int block_bits;
+  char *tracefile;
+
+} Arg;
+
+void ParseArgs(int argc, char **argv, Arg *arg) {
+  int opt;
+  while ((opt = getopt(argc, argv, &quot;hvs:E:b:t:&quot;)) != -1) {
+    switch (opt) {
+      case 'h':
+        printf(&quot;Usage: ./csim-ref [-hv] -s &lt;s&gt; -E &lt;E&gt; -b &lt;b&gt; -t &lt;tracefile&gt;\n&quot;);
+        break;
+      case 'v':
+        arg-&gt;verbose = true;
+        break;
+      case 's':
+        arg-&gt;set_index_bits = atoi(optarg);
+        break;
+      case 'E':
+        arg-&gt;lines_per_set = atoi(optarg);
+        break;
+      case 'b':
+        arg-&gt;block_bits = atoi(optarg);
+        break;
+      case 't':
+        arg-&gt;tracefile = optarg;
+        break;
+      default:
+        abort();
+    }
+  }
+}
+
+typedef unsigned long long ULL;
+// 注意: 地址是十六进制表示。。。debug 到去世。。
+typedef struct {
+  ULL tag_bits;
+  ULL index_bits;
+  ULL offset_bits;
+  ULL block_number;
+
+} AddressBits;
+// 64 bit address,m=64
+// tag bit t = m-(b+s)
+// parse 64 address bits into tag bits,index bits and offset bits
+void ParseAddress(const Arg *arg, const ULL raw_addr, AddressBits *addr) {
+  const unsigned int index_and_block_bit_length =
+      arg-&gt;block_bits + arg-&gt;set_index_bits;
+  ULL block_bit_mask = (1ULL &lt;&lt; arg-&gt;block_bits) - 1;
+  ULL index_bit_mask = ((1ULL &lt;&lt; arg-&gt;set_index_bits) - 1) &lt;&lt; arg-&gt;block_bits;
+  ULL tag_bit_mask =
+      ((1ULL &lt;&lt; (address_space_size - index_and_block_bit_length)) - 1)
+      &lt;&lt; index_and_block_bit_length;
+  // printf(&quot;index_and_block_bit_length:%d\n&quot;,index_and_block_bit_length);
+  // printf(&quot;mask:%lld %lld %lld\n&quot;, block_bit_mask, index_bit_mask,
+  // tag_bit_mask);
+  addr-&gt;tag_bits = (raw_addr &amp; tag_bit_mask) &gt;&gt; index_and_block_bit_length;
+  addr-&gt;index_bits = (raw_addr &amp; index_bit_mask) &gt;&gt; arg-&gt;block_bits;
+  addr-&gt;offset_bits = raw_addr &amp; block_bit_mask;
+  addr-&gt;block_number = raw_addr / (1ULL &lt;&lt; arg-&gt;block_bits);
+  // printf(&quot;addr:%llx tag:%lld index:%lld osset:%lld block:%lld \n&quot;, raw_addr,
+  //        addr-&gt;tag_bits, addr-&gt;index_bits, addr-&gt;offset_bits,
+  //        addr-&gt;block_number);
+}
+void TestParseAddress(const Arg *arg) {
+  for (int addr = 0; addr &lt; (1ULL &lt;&lt; address_space_size); addr++) {
+    AddressBits tmp_addr;
+    ParseAddress(arg, addr, &amp;tmp_addr);
+  }
+}
+typedef struct {
+  enum operation { instruction_load, data_load, data_store, data_modify } op;
+  ULL address;
+  int size;
+} Trace;
+#define MAX_NUM_OF_TRACE 300000
+Trace trace[MAX_NUM_OF_TRACE];
+int lines_in_trace_file = 0;
+void ParseTraceFile(const char *file) {
+  FILE *fptr = fopen(file, &quot;r&quot;);
+  if (fptr == NULL) {
+    printf(&quot;Error!&quot;);
+    exit(1);
+  }
+
+  char op[5];
+  ULL addr;
+  int cnt = 0, siz;
+  while (fscanf(fptr, &quot;%s %llx,%d&quot;, op, &amp;addr, &amp;siz) != EOF) {
+    // printf(&quot;op:%s addr:%lld size:%d\n&quot;, op, addr, siz);
+    trace[cnt].address = addr;
+    trace[cnt].size = siz;
+    if (op[0] == 'L') {
+      trace[cnt].op = data_load;
+    } else if (op[0] == 'I') {
+      trace[cnt].op = instruction_load;
+    } else if (op[0] == 'S') {
+      trace[cnt].op = data_store;
+    } else if (op[0] == 'M') {
+      trace[cnt].op = data_modify;
+    }
+    cnt++;
+  }
+  lines_in_trace_file = cnt;
+
+  fclose(fptr);
+}
+
+void TestParseTraceFile() {
+  char *file = &quot;direct-mapped-4-bit.trace&quot;;
+  ParseTraceFile(file);
+}
+
+// 不需要真的做cache,只需要模拟hit,miss,evition 的次数即可
+
+typedef struct {
+  unsigned int valid;
+  unsigned int tag;
+  // used for LRU policy
+  // use line number of trace file as age
+  // the smallest age is the least recent used line
+  unsigned int age;
+} Line;
+
+typedef struct {
+  int num_of_lines;
+  Line *lines;
+} Set;
+
+Set *set;
+struct cache_summary_t {
+  int hits;
+  int misses;
+  int evitions;
+} cache_summary;
+char operation_table[5] = {'I', 'L', 'S', 'M'};
+
+bool CheckCacheLineHit(const AddressBits addr, Set *cur_set, const int index) {
+  bool any_of_line_hit = false;
+  for (int j = 0; j &lt; cur_set-&gt;num_of_lines; j++) {
+    Line *cur_line = &amp;cur_set-&gt;lines[j];
+    if (cur_line-&gt;valid == 1 &amp;&amp; cur_line-&gt;tag == addr.tag_bits) {
+      // printf(&quot;addr.tag_bits:%lld\n&quot;, addr.tag_bits);
+      cache_summary.hits++;
+      cur_line-&gt;age = index;
+      any_of_line_hit = true;
+      break;
+    }
+  }
+  return any_of_line_hit;
+}
+
+bool CheckCacheLineEmpty(const AddressBits addr, Set *cur_set,
+                         const int index) {
+  bool any_of_line_empty = false;
+  for (int j = 0; j &lt; cur_set-&gt;num_of_lines; j++) {
+    Line *cur_line = &amp;cur_set-&gt;lines[j];
+    if (cur_line-&gt;valid == 0) {
+      cache_summary.misses++;
+      cur_line-&gt;valid = 1;
+      cur_line-&gt;tag = addr.tag_bits;
+      cur_line-&gt;age = index;
+
+      any_of_line_empty = true;
+      break;
+    }
+  }
+  return any_of_line_empty;
+}
+
+void NaiveLru(const AddressBits addr, Set *cur_set, const int index) {
+  int evict_line;
+  int min_age = lines_in_trace_file;
+  // printf(&quot;set[%lld]-&gt;num_of_lines:%d\n&quot;,addr.index_bits,cur_set-&gt;num_of_lines);
+  for (int j = 0; j &lt; cur_set-&gt;num_of_lines; j++) {
+    Line *cur_line = &amp;cur_set-&gt;lines[j];
+    // printf(&quot;cur_line age:%d\n&quot;,cur_line-&gt;age);
+    if (cur_line-&gt;age &lt; min_age) {
+      min_age = cur_line-&gt;age;
+      evict_line = j;
+    }
+  }
+  // printf(&quot;evict_line:%d min_age:%d\n&quot;,evict_line,min_age);
+  cache_summary.misses++;
+  cache_summary.evitions++;
+  cur_set-&gt;lines[evict_line].tag = addr.tag_bits;
+  cur_set-&gt;lines[evict_line].age = index;
+}
+
+void EvicteCacheLine(const AddressBits addr, Set *cur_set, const int index) {
+  // I'm too lazy to use Doubly linked list and hashmap
+  NaiveLru(addr, cur_set, index);
+}
+
+void SimulateCache(const Arg *arg) {
+  memset(&amp;cache_summary, 0, sizeof(cache_summary));
+  //   instruction_load, data_load, data_store, data_modify
+
+  for (int i = 0; i &lt; lines_in_trace_file; i++) {
+    // ignore instruction load
+    if (trace[i].op == 0) continue;
+    AddressBits addr;
+    ParseAddress(arg, trace[i].address, &amp;addr);
+    Set *cur_set = &amp;set[addr.index_bits];
+    // data load or data store
+    if (trace[i].op &lt;= 2) {
+      bool any_of_line_hit = CheckCacheLineHit(addr, cur_set, i);
+      if (any_of_line_hit) {
+        if (arg-&gt;verbose) {
+          printf(&quot;%c %lld,%d hit\n&quot;, operation_table[trace[i].op],
+                 trace[i].address, trace[i].size);
+        }
+        continue;
+      }
+      bool any_of_line_empty = CheckCacheLineEmpty(addr, cur_set, i);
+      if (any_of_line_empty) {
+        if (arg-&gt;verbose) {
+          printf(&quot;%c %lld,%d miss\n&quot;, operation_table[trace[i].op],
+                 trace[i].address, trace[i].size);
+        }
+        continue;
+      }
+      EvicteCacheLine(addr, cur_set, i);
+      if (arg-&gt;verbose) {
+        printf(&quot;%c %lld,%d miss eviction\n&quot;, operation_table[trace[i].op],
+               trace[i].address, trace[i].size);
+      }
+    } else {
+      // data modify
+      bool any_of_line_hit_in_data_load = CheckCacheLineHit(addr, cur_set, i);
+      if (any_of_line_hit_in_data_load) {
+        // if 'data load' hit cache, then 'data store' must also hit cache
+        cache_summary.hits++;
+        if (arg-&gt;verbose) {
+          printf(&quot;%c %lld,%d hit hit \n&quot;, operation_table[trace[i].op],
+                 trace[i].address, trace[i].size);
+        }
+        continue;
+      }
+      bool any_of_line_empty = CheckCacheLineEmpty(addr, cur_set, i);
+      if (any_of_line_empty) {
+        cache_summary.hits++;
+        if (arg-&gt;verbose) {
+          printf(&quot;%c %lld,%d miss hit\n&quot;, operation_table[trace[i].op],
+                 trace[i].address, trace[i].size);
+        }
+        continue;
+      }
+      EvicteCacheLine(addr, cur_set, i);
+      if (arg-&gt;verbose) {
+        cache_summary.hits++;
+        printf(&quot;%c %lld,%d miss eviction hit\n&quot;, operation_table[trace[i].op],
+               trace[i].address, trace[i].size);
+      }
+    }
+  }
+}
+int main(int argc, char **argv) {
+  Arg arg;
+  ParseArgs(argc, argv, &amp;arg);
+  ParseTraceFile(arg.tracefile);
+  int total_set_num = 1 &lt;&lt; arg.set_index_bits;
+  // printf(&quot;total_set_num:%d\n&quot;,total_set_num);
+  set = (Set *)malloc(total_set_num * sizeof(Set));
+  memset(set, 0, total_set_num * sizeof(Set));
+  for (int i = 0; i &lt; total_set_num; i++) {
+    set[i].lines = (Line *)malloc(arg.lines_per_set * sizeof(Line));
+    memset(set[i].lines, 0, arg.lines_per_set * sizeof(Line));
+    set[i].num_of_lines = arg.lines_per_set;
+  }
+  SimulateCache(&amp;arg);
+  printSummary(cache_summary.hits, cache_summary.misses,
+               cache_summary.evitions);
+
+  for (int i = 0; i &lt; total_set_num; i++) {
+    free(set[i].lines);
+  }
+  free(set);
+
+  return 0;
+}
+
+
+</code></pre>
+
+<h2 id="part-b">PART B</h2>
+
+<p>三个小题。。矩阵的size分别是:
+- 32*32
+- 64*64
+- 61*67</p>
+
+<p>很重要的一点是。。输入就是这三组固定值。。。<strong>题目是允许根据不同的输入。。来用不同的实现应对的。</strong></p>
+
+<h3 id="32-32">32*32</h3>
+
+<pre><code class="language-c++">
+int tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+    for (int i = 0; i &lt; N; i += 8) {
+      for (int j = 0; j &lt; M; j++) {
+        tmp = A[i][j];
+        tmp1 = A[i + 1][j];
+        tmp2 = A[i + 2][j];
+        tmp3 = A[i + 3][j];
+        tmp4 = A[i + 4][j];
+        tmp5 = A[i + 5][j];
+        tmp6 = A[i + 6][j];
+        tmp7 = A[i + 7][j];
+        B[j][i] = tmp;
+        B[j][i + 1] = tmp1;
+        B[j][i + 2] = tmp2;
+        B[j][i + 3] = tmp3;
+        B[j][i + 4] = tmp4;
+        B[j][i + 5] = tmp5;
+        B[j][i + 6] = tmp6;
+        B[j][i + 7] = tmp7;
+      }
+    }
+
+</code></pre>
+
+<h3 id="61-67">61*67</h3>
+
+<pre><code class="language-c++">
+ int tmp[8];
+    for (int block_i_start = 0; block_i_start &lt; N; block_i_start += 8) {
+      for (int block_j_start = 0; block_j_start &lt; M; block_j_start += 8) {
+        for (int i = block_i_start; i &lt; min(block_i_start + 8, N); i++) {
+          for (int j = block_j_start; j &lt; min(M, block_j_start + 8); j++) {
+            tmp[j - block_j_start] = A[i][j];
+          }
+          for (int j = block_j_start; j &lt; min(M, block_j_start + 8); j++) {
+            B[j][i] = tmp[j - block_j_start];
+          }
+         
+        }
+      }
+    }
+</code></pre>
+
+<h3 id="64-64">64*64</h3>
+
+<p>略难。。留个坑。。日后填</p>
+
+<h2 id="最终分数">最终分数</h2>
+
+<p>64*64的没拿到分数。。其他部分是满分</p>
+
+<pre><code class="language-shell">
+Cache Lab summary:
+                        Points   Max pts      Misses
+Csim correctness          27.0        27
+Trans perf 32x32           8.0         8         287
+Trans perf 64x64           0.0         8        4723
+Trans perf 61x67          10.0        10        1997
+          Total points    45.0        53
+
+</code></pre>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="https://111qqz.github.io"><img src="/img/favicon.png" />111qqz的小窝</a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2020/09/torch2trt" data-toggle="tooltip" data-placement="top" title="【施工中】torch2trt　学习笔记">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2020/01/my-2020" data-toggle="tooltip" data-placement="top" title="2020年终总结">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+
+
+
+<div id="git-comments"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://ihtcboy.com/script/gitment.browser.js"></script>
+<script>
+  var gitment = new Gitment({
+    id: decodeURI(window.location.pathname),  
+    owner: '111qqz',
+    repo: '111qqz.github.io',
+    oauth: {
+      client_id: '8839ce5e58d5197e2490',
+      client_secret: '2d475a8a7e27a8b509847a6c60f692b8cbaa274e',
+    }
+  })
+  gitment.render('git-comments')
+</script>
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/km" title="KM">
+                            KM
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/bfs" title="bfs">
+                            bfs
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/binary-search" title="binary search">
+                            binary search
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/brute-force" title="brute force">
+                            brute force
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/c&#43;&#43;" title="c&#43;&#43;">
+                            c&#43;&#43;
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/caffe" title="caffe">
+                            caffe
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dfs" title="dfs">
+                            dfs
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dp" title="dp">
+                            dp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/greedy" title="greedy">
+                            greedy
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/hash" title="hash">
+                            hash
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/kmp" title="kmp">
+                            kmp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/leetcode" title="leetcode">
+                            leetcode
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/math" title="math">
+                            math
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/number-theory" title="number theory">
+                            number theory
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/rmq" title="rmq">
+                            rmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/sg%E5%87%BD%E6%95%B0" title="sg函数">
+                            sg函数
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/stl" title="stl">
+                            stl
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/tensorflow" title="tensorflow">
+                            tensorflow
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%BA%8C%E5%88%86%E5%9B%BE%E6%9C%80%E4%BD%B3%E5%8C%B9%E9%85%8D" title="二分图最佳匹配">
+                            二分图最佳匹配
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%9D%97" title="分块">
+                            分块
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%89%8D%E7%BC%80%E5%92%8C" title="前缀和">
+                            前缀和
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8C%88%E7%89%99%E5%88%A9%E7%AE%97%E6%B3%95" title="匈牙利算法">
+                            匈牙利算法
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E5%8C%BA%E9%97%B4dp" title="区间dp">
+                            区间dp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8D%9A%E5%BC%88%E8%AE%BA" title="博弈论">
+                            博弈论
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%90%8E%E7%BC%80%E8%87%AA%E5%8A%A8%E6%9C%BA" title="后缀自动机">
+                            后缀自动机
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%9B%BE%E8%AE%BA" title="图论">
+                            图论
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2" title="字符串">
+                            字符串
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BF%AB%E9%80%9F%E5%B9%82" title="快速幂">
+                            快速幂
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E4%BD%8Ddp" title="数位dp">
+                            数位dp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9E%84%E9%80%A0" title="构造">
+                            构造
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84" title="树状数组">
+                            树状数组
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%A6%82%E7%8E%87" title="概率">
+                            概率
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%A8%A1%E6%8B%9F" title="模拟">
+                            模拟
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%AF%8D%E5%87%BD%E6%95%B0" title="母函数">
+                            母函数
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%9F%A9%E9%98%B5" title="矩阵">
+                            矩阵
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%A6%BB%E6%95%A3%E5%8C%96" title="离散化">
+                            离散化
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%BA%BF%E6%AE%B5%E6%A0%91" title="线段树">
+                            线段树
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95" title="计算几何">
+                            计算几何
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://111qqz.com">111qqz的wordpress博客</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="111qqz的小窝" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:hust.111qqz@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/img/wechat.jpg">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/111qqz/">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy; 111qqz的小窝 2021
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>

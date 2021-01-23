@@ -1,0 +1,144 @@
+---
+author: 111qqz
+date: 2016-11-17 13:22:47+00:00
+draft: false
+title: 【叉姐的魔法训练第一课_初级魔法练习】poj 3244 Difference between Triplets （数学）
+type: post
+url: /2016/11/poj-3244/
+categories:
+- ACM
+tags:
+- math
+---
+
+[题目链接](http://poj.org/problem?id=3244)
+
+
+### 题意：
+
+
+For every pair of triplets, _Ta _= (_Ia_, _Ja_, _Ka_) and _T__b_ = (_Ib_, _Jb_,_ Kb_), we define the _difference value_ between _Ta_ and_T__b_ as follows:
+
+
+_D_(_Ta_,_ Tb_) = max {_Ia_ − _Ib_, _Ja_ − _Jb_, _Ka_ − _Kb_} − min {_Ia_ − _Ib_, _Ja_ − _Jb_, _Ka_ − _Kb_}
+
+
+Now you are given _N_ triplets, could you write a program to calculate the sum of the difference values between every unordered pair of triplets?
+
+
+### 思路：转化要求的式子，如果把_Ia_ − _Ib_, _Ja_ − _Jb_, _Ka_ − _Kb_ 看成数轴上的点，所求的式子就变成了求三个点构成的线段的距离。
+
+
+
+
+### **设X=_Ia_ − _Ib_,Y=_Ja_ − _Jb_,Z=_Ka_ − _Kb_,那么该距离D = （|X-Y| + |Y-Z| + |Z-X|  ）/2（该式子是此题最关键的一部，可以通过画图直观得到）  **
+
+
+
+
+### **D=|(ia-ja)-(ib-jb)| + |(ja-ka)-(jb-kb)| + | (ka-za)+(kb-zb) |**
+
+
+
+
+### **设a = ia-ja,b =ja-ka,c = ka-ia，然后分别排序类似于[bzoj1604_拆点求曼哈顿距离](https://111qqz.com/wordpress/2016/02/bzoj1604/)**
+
+
+
+
+### 考虑第i个a,对于其他的n-1个a，有i-1个比它小，n-i个比它大，因此对答案的贡献为(i-1)个a[i]和 (n-i)个-a[i]
+
+
+
+
+### b,c同理。
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年11月17日 星期四 20时05分54秒
+    File Name :code/hdu/3244.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=2E5+7;
+    int n;
+    int x,y,z;
+    int a[N],b[N],c[N];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	while (~scanf("%d",&n))
+    	{
+    	    if (n==0) break;
+    	    for ( int i = 1; i  <= n ; i++)
+    	    {
+    		scanf("%d%d%d",&x,&y,&z);
+    		a[i] = x - y;
+    		b[i] = y - z;
+    		c[i] = z - x;
+    	    }
+    	    sort(a+1,a+n+1);
+    	    sort(b+1,b+n+1);
+    	    sort(c+1,c+n+1);
+    	    LL ans = 0 ;
+    	    for (  int i = 1 ; i <= n ; i++)
+    	    {
+    		ans += 1LL*(i-1)*a[i];
+    		ans +=-1LL*(n-i)*a[i];	
+    		ans += 1LL*(i-1)*b[i];
+    		ans +=-1LL*(n-i)*b[i];	
+    		ans += 1LL*(i-1)*c[i];
+    		ans +=-1LL*(n-i)*c[i];
+    	    }
+    	    printf("%lld\n",ans/2);
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+
+
+
+### 
+
+
+
+
+#### 
+
+
+

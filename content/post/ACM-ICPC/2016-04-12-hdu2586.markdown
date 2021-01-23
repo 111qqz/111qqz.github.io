@@ -1,0 +1,198 @@
+---
+author: 111qqz
+date: 2016-04-12 12:28:42+00:00
+draft: false
+title: hdu 2586 How far away ？ (tarjan算法求LCA模板题)
+type: post
+url: /2016/04/hdu2586/
+categories:
+- ACM
+
+tags:
+- LCA
+- Tarjan
+---
+
+[题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=2586)
+题意：一棵树，给出n-1个边权，然后q组查询，每组查询询问两个点之间的距离。
+思路：
+
+dfs跑出根到每个点的距离，设为dis[i]
+那么u,v两点的距离就是ans = dis[u]+dis[v]-2*dis[lca(u,v)];
+
+其中lca(u,v)为u,v的最近公共祖先。 这个式子是利用容斥，其实也很直观。。不理解的话画个图就好。
+
+所以终点就是求两个点的LCA.
+
+据说有好多种做法。今天学习了大概是最简单的一种？
+[学习链接](http://www.cnblogs.com/ylfdrib/archive/2010/11/03/1867901.html)
+
+    
+    //parent为并查集，FIND为并查集的查找操作
+    //QUERY为询问结点对集合
+    //TREE为基图有根树
+     Tarjan(u)
+          visit[u] = true
+          for each (u, v) in TREE    
+              if !visit[v]
+                  Tarjan(v)
+                  parent[v] = u
+          for each (u, v) in QUERY
+              if visit[v]
+                  ans(u, v) = FIND(v)
+    
+    
+
+
+
+
+我的理解：其实本质就是利用并查集。。在访问一个点的子树的时候，这个点其所有子树的祖先。。。由于祖先的节点比较小，所以merge的时候要f[大]=小...
+
+要注意Tarjan 算法是离线算法。
+
+哦对了。。这题要扩展语句才能过，不然会RE...
+
+    
+    <span style="color: blue;">#pragma comment(linker, "/STACK:1024000000,1024000000")  </span>
+
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年04月12日 星期二 19时39分38秒
+    File Name :code/hdu/2586.cpp
+    ************************************************ */
+    #pragma comment(linker, "/STACK:1024000000,1024000000") 
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N = 4E4+7;
+    int n,q;
+    vector < pi > edge[N];
+    vector < pi >query[N];
+    bool vis[N];
+    int f[N];
+    int ans[N];
+    int dis[N];
+    void init()
+    {
+        for ( int i = 1 ; i <= n ; i++) edge[i].clear();
+        for ( int i = 1 ; i <= q ; i++) query[i].clear();
+        ms(vis,false);
+        for ( int i = 1 ; i <= n ; i++) f[i] = i ;
+        ms(ans,0);
+        ms(dis,0);
+    }
+    
+    int root ( int x)
+    {
+        if (x!=f[x]) f[x]=root(f[x]);
+        return f[x];
+    }
+    
+    void merge(int x,int y)
+    {
+        int rx = root (x);
+        int ry = root (y);
+        if (rx!=ry)
+        {
+    	f[ry] = rx;
+        }
+    
+    }
+    
+    
+    void tarjan( int u,int val)
+    {
+        vis[u] = true;
+        dis[u] = val;
+        int siz = edge[u].size();
+        for ( int i = 0 ; i < siz ; i++)
+        {
+    	int v = edge[u][i].fst;
+    	if (vis[v]) continue;
+    	tarjan(v,val+edge[u][i].sec);
+    	merge(u,v);
+        }
+        siz = query[u].size();
+        for ( int i = 0 ; i < siz ; i++)
+        {
+    	int v = query[u][i].fst;
+    	int id = query[u][i].sec;
+    	if (!vis[v]) continue;
+    	ans[id] = dis[u] + dis[v] -2*dis[root(v)];
+        }
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	ios::sync_with_stdio(false);
+    	int T;
+    	cin>>T;
+    	while (T--)
+    	{
+    	    cin>>n>>q;
+    	    init();
+    	    for ( int i = 1 ; i <= n-1 ; i++)
+    	    {
+    		int u,v,w;
+    		cin>>u>>v>>w;
+    		edge[u].push_back(make_pair(v,w));
+    		edge[v].push_back(make_pair(u,w));
+    	    }
+    
+    	    for ( int i = 1 ; i <= q ; i++)
+    	    {
+    		int u,v;
+    		cin>>u>>v;
+    		query[u].push_back(make_pair(v,i));
+    		query[v].push_back(make_pair(u,i));
+    	    }
+    
+    	    tarjan(1,0);
+    
+    	    for ( int i = 1 ;i <= q ; i++) cout<<ans[i]<<endl;
+    
+    
+    
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

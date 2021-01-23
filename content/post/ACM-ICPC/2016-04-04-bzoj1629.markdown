@@ -1,0 +1,196 @@
+---
+author: 111qqz
+date: 2016-04-04 09:27:55+00:00
+draft: false
+title: 'BZOJ 1629: [Usaco2007 Demo]Cow Acrobats (贪心)'
+type: post
+url: /2016/04/bzoj1629/
+categories:
+- ACM
+tags:
+- greedy
+---
+
+
+
+
+## 1629: [Usaco2007 Demo]Cow Acrobats
+
+
+Time Limit: 5 Sec  Memory Limit: 64 MB
+Submit: 771  Solved: 398
+[[Submit](http://www.lydsy.com/JudgeOnline/submitpage.php?id=1629)][[Status](http://www.lydsy.com/JudgeOnline/problemstatus.php?id=1629)][[Discuss](http://www.lydsy.com/JudgeOnline/bbs.php?id=1629)]
+
+
+## Description
+
+
+
+
+Farmer John's N (1 <= N <= 50,000) cows (numbered 1..N) are planning to run away and join the circus. Their hoofed feet prevent them from tightrope walking and swinging from the trapeze (and their last attempt at firing a cow out of a cannon met with a dismal failure). Thus, they have decided to practice performing acrobatic stunts. The cows aren't terribly creative and have only come up with one acrobatic stunt: standing on top of each other to form a vertical stack of some height. The cows are trying to figure out the order in which they should arrange themselves within this stack. Each of the N cows has an associated weight (1 <= W_i <= 10,000) and strength (1 <= S_i <= 1,000,000,000). The risk of a cow collapsing is equal to the combined weight of all cows on top of her (not including her own weight, of course) minus her strength (so that a stronger cow has a lower risk). Your task is to determine an ordering of the cows that minimizes the greatest risk of collapse for any of the cows. //有三个头牛，下面三行二个数分别代表其体重及力量 //它们玩叠罗汉的游戏，每个牛的危险值等于它上面的牛的体重总和减去它的力量值，因为它要扛起上面所有的牛嘛. //求所有方案中危险值最大的最小
+
+
+
+
+## Input
+
+
+
+
+* Line 1: A single line with the integer N. * Lines 2..N+1: Line i+1 describes cow i with two space-separated integers, W_i and S_i.
+
+
+
+
+## Output
+
+
+
+
+* Line 1: A single integer, giving the largest risk of all the cows in any optimal ordering that minimizes the risk.
+
+
+
+
+## Sample Input
+
+
+
+
+3
+10 3
+2 5
+3 3
+
+
+
+
+
+## Sample Output
+
+
+
+
+2
+
+OUTPUT DETAILS:
+
+Put the cow with weight 10 on the bottom. She will carry the other
+two cows, so the risk of her collapsing is 2+3-3=2. The other cows
+have lower risk of collapsing.
+
+
+
+
+
+
+
+
+思路：贪心。 两头奶牛的相对位置，对于其他奶牛是没有影响的。因为这两头奶牛的体重之和一定。
+
+
+
+
+那么对于两头奶牛i,j,谁放在下面呢？
+
+
+
+
+**如果i放在下面  代价为 s[i]-w[j],如果j放在下面 ，代价为s[j]-w[i];**
+
+
+
+
+**当且仅当 s[i]-w[j]<s[j]-w[i]，也就是 s[i]+w[i]<s[j]+w[j]时，i放在下面。**
+
+
+
+
+所以以s[i]+w[i]的和为关键字排序就好。
+
+
+
+
+
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年04月04日 星期一 17时12分44秒
+    File Name :code/bzoj/1629.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=5E4+7;
+    int n;
+    struct node
+    {
+        int s,w;
+    
+        bool operator < (node b)const
+        {
+    	return w+s<b.w+b.s;
+        }
+    }a[N];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	ios::sync_with_stdio(false);
+    	cin>>n;
+    	for ( int i = 1 ; i <= n ; i++) cin>>a[i].w>>a[i].s;
+    
+    	sort(a+1,a+n+1);
+    
+    	int ans = -inf;
+    	int total =  0;
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    ans = max(ans,total-a[i].s);
+    	    total += a[i].w;
+    	}
+    
+    	cout<<ans<<endl;
+    
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

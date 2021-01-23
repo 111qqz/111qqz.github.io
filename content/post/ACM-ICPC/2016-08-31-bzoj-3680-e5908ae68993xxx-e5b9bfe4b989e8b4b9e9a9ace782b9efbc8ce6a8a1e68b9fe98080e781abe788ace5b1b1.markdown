@@ -1,0 +1,281 @@
+---
+author: 111qqz
+date: 2016-08-31 13:32:02+00:00
+draft: false
+title: 'BZOJ 3680: 吊打XXX (广义费马点，模拟退火+爬山)'
+type: post
+url: /2016/08/bzoj-3680-xxx-/
+categories:
+- ACM
+tags:
+- 模拟退火
+- 爬山法
+- 计算几何
+- 费马点
+---
+
+
+
+
+## 3680: 吊打XXX
+
+
+Time Limit: 10 Sec  Memory Limit: 128 MBSec  Special Judge
+Submit: 2043  Solved: 732
+[[Submit](http://www.lydsy.com/JudgeOnline/submitpage.php?id=3680)][[Status](http://www.lydsy.com/JudgeOnline/problemstatus.php?id=3680)][[Discuss](http://www.lydsy.com/JudgeOnline/bbs.php?id=3680)]
+
+
+## Description
+
+
+
+
+
+
+gty又虐了一场比赛，被虐的蒟蒻们决定吊打gty。gty见大势不好机智的分出了n个分身，但还是被人多势众的蒟蒻抓住了。蒟蒻们将
+n个gty吊在n根绳子上，每根绳子穿过天台的一个洞。这n根绳子有一个公共的绳结x。吊好gty后蒟蒻们发现由于每个gty重力不同，绳
+结x在移动。蒟蒻wangxz脑洞大开的决定计算出x最后停留处的坐标，由于他太弱了决定向你求助。
+不计摩擦，不计能量损失，由于gty足够矮所以不会掉到地上。
+
+
+
+
+
+
+## Input
+
+
+
+
+
+
+输入第一行为一个正整数n(1<=n<=10000)，表示gty的数目。
+接下来n行,每行三个整数xi，yi，wi，表示第i个gty的横坐标，纵坐标和重力。
+对于20%的数据，gty排列成一条直线。
+对于50%的数据，1<=n<=1000。
+对于100%的数据，1<=n<=10000,-100000<=xi,yi<=100000
+
+
+
+
+
+
+
+## Output
+
+
+
+
+
+
+输出1行两个浮点数（保留到小数点后3位），表示最终x的横、纵坐标。
+
+
+
+
+
+
+
+## Sample Input
+
+
+
+
+3
+0 0 1
+0 2 1
+1 1 1
+
+
+
+
+
+## Sample Output
+
+
+
+
+0.577 1.000
+
+
+
+
+
+## HINT
+
+
+
+
+
+
+
+## Source
+
+
+
+
+
+
+[
+By wangxz](http://www.lydsy.com/JudgeOnline/problemset.php?search=Bywangxz)
+
+思路：
+
+
+
+
+看起来是物理题。。其实就是求广义非费马点。。
+
+也就是带权费马点。
+
+一般的费马点是说，所有点到这个点的距离之和最小。
+
+带权的费马点就是每个点到这个点的距离*权值，和最小。
+
+**这道题用到的才是真正的模拟退火！**
+
+**模拟退火很重要的一部分就是允许有一定概率向不优的方向走，之前写的所谓的“模拟退火”的题目，全都没有体现这一点。**
+
+所以那些，其实就是一个爬山法吧。。
+
+而且看到主席如是说...
+
+[![webwxgetmsgimg](https://111qqz.com/wordpress/wp-content/uploads/2016/08/webwxgetmsgimg.jpg)
+](https://111qqz.com/wordpress/wp-content/uploads/2016/08/webwxgetmsgimg.jpg)
+
+
+
+
+
+**这道题真的很棒。**
+
+**初始搜索范围很大的时候用模拟退火，快速得到一个大致范围。**
+
+**但是由于精度不能很好的保证，于是在做完模拟退火后在答案附近爬山。**
+
+**完美的分段思想！**
+
+一直调不对样例的原因是。。。
+
+忘记把ans初始化成最大值23333
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年08月31日 星期三 15时47分25秒
+    File Name :code/bzoj/3680.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    #define INF 1E40
+    #define MAX 100000
+    using namespace std;
+    const double eps = 1E-3;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N =1E4+7;
+    int n;
+    double Rand(){ return (rand()000)/10000.0;}
+    struct point 
+    {
+        double x,y,w;
+        void input()
+        {
+    	scanf("%lf%lf%lf",&x,&y,&w);
+        }
+        double dis(point b)
+        {
+    	double res = (x-b.x)*(x-b.x)+(y-b.y)*(y-b.y);
+    	return b.w*sqrt(res);
+        }
+        void look()
+        {
+    	cout<<"x:"<<x<<" y:"<<y<<endl;
+        }
+    }p[N],ret;
+    double ans;
+    double dis(const point &a,const point &b)
+    {
+        return sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y));
+    }
+    double Cal(point x)
+    {
+        double res = 0;
+        for ( int i = 0 ; i < n ; i++) res +=x.dis(p[i]);
+        if (res<ans)
+        {
+    	ret = x;
+    	ans = res;
+        }
+        return res;
+    }
+    double SA(const point *p)
+    {
+        ans = INF;
+        double step;
+        const double delta = 0.98;
+        point nxt;
+        ret.x = 0 ;
+        ret.y = 0 ;
+        for ( int i = 0 ; i < n ; i++) ret.x+=p[i].x,ret.y+=p[i].y;
+        ret.x = ret.x/double(n);
+        ret.y = ret.y/double(n);
+        ret.x = 0 ;
+        ret.y = 0 ;
+        point cur = ret;
+      //  cur.look();
+        for (step = MAX ; step>eps ; step*=delta){
+    		nxt.x = cur.x + (Rand()*2-1.0)*step;
+    		nxt.y = cur.y + (Rand()*2-1.0)*step;
+    	//	nxt.look();
+    	//	ret.look();
+    		double delta = Cal(cur)-Cal(nxt);
+    		if (delta>0||exp(delta/step)>Rand()) cur = nxt;
+    	}
+        for ( int i = 1 ; i <=1000 ; i++)
+        {
+    	point nxt;
+    	nxt.x = ret.x+(Rand()*2-1.0)*step; //在模拟退火得到的答案附近用爬山法微调，增加精确度。
+    	nxt.y = ret.y+(Rand()*2-1.0)*step;
+    	Cal(nxt);
+        }   
+        return ans;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	srand(821452);
+    	scanf("%d",&n);
+    	for ( int i = 0 ; i < n ; i++) p[i].input();
+    	SA(p);
+    	printf("%.3f %.3f\n",ret.x,ret.y);
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

@@ -1,0 +1,334 @@
+---
+author: 111qqz
+date: 2015-07-28 16:07:00+00:00
+draft: false
+title: cf 443B  Kolya and Tandem Repeat
+type: post
+url: /2015/07/cf443b/
+categories:
+- ACM
+tags:
+- brute force
+---
+
+
+
+
+B. Kolya and Tandem Repeat
+
+
+
+
+
+
+
+time limit per test
+
+
+2 seconds
+
+
+
+
+
+
+
+memory limit per test
+
+
+256 megabytes
+
+
+
+
+
+
+
+input
+
+
+standard input
+
+
+
+
+
+
+
+output
+
+
+standard output
+
+
+
+
+
+
+
+
+
+
+Kolya got string _s_ for his birthday, the string consists of small English letters. He immediately added _k_ more characters to the right of the string.
+
+
+
+
+Then Borya came and said that the new string contained a tandem repeat of length _l_ as a substring. How large could _l_ be?
+
+
+
+
+See notes for definition of a tandem repeat.
+
+
+
+
+
+
+
+
+
+
+Input
+
+
+
+
+The first line contains _s_ (1 ≤ |_s_| ≤ 200). This string contains only small English letters. The second line contains number _k_ (1 ≤ _k_ ≤ 200) -- the number of the added characters.
+
+
+
+
+
+
+
+
+
+
+Output
+
+
+
+
+Print a single number -- the maximum length of the tandem repeat that could have occurred in the new string.
+
+
+
+
+
+
+
+
+
+
+Sample test(s)
+
+
+
+
+
+
+
+
+
+
+input
+
+
+
+    
+    aaba<br></br>2
+
+
+
+
+
+
+
+
+
+
+output
+
+
+
+    
+    6
+
+
+
+
+
+
+
+
+
+
+input
+
+
+
+    
+    aaabbbb<br></br>2
+
+
+
+
+
+
+
+
+
+
+output
+
+
+
+    
+    6
+
+
+
+
+
+
+
+
+
+
+input
+
+
+
+    
+    abracadabra<br></br>10
+
+
+
+
+
+
+
+
+
+
+output
+
+
+
+    
+    20
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Note
+
+
+
+
+A tandem repeat of length 2_n_ is string _s_, where for any position _i_ (1 ≤ _i_ ≤ _n_) the following condition fulfills: _s__i_ = _s__i_ + _n_.
+
+
+
+
+In the first sample Kolya could obtain a string aabaab, in the second -- aaabbbbbb, in the third -- abracadabrabracadabra.
+
+
+
+
+
+
+
+大力出奇迹2333
+
+
+
+
+
+ ```c++
+    
+    /*************************************************************************
+    	> File Name: code/2015summer/#3/A.cpp
+    	> Author: 111qqz
+    	> Email: rkz2013@126.com 
+    	> Created Time: 2015年07月28日 星期二 12时27分08秒
+     ************************************************************************/
+    
+    #include<iostream>
+    #include<iomanip>
+    #include<cstdio>
+    #include<algorithm>
+    #include<cmath>
+    #include<cstring>
+    #include<string>
+    #include<map>
+    #include<set>
+    #include<queue>
+    #include<vector>
+    #include<stack>
+    #define y0 abc111qqz
+    #define y1 hust111qqz
+    #define yn hez111qqz
+    #define j1 cute111qqz
+    #define tm crazy111qqz
+    #define lr dying111qqz
+    using namespace std;
+    #define REP(i, n) for (int i=0;i<int(n);++i)  
+    typedef long long LL;
+    typedef unsigned long long ULL;
+    const int N=1E4+5;
+    char a[N];
+    int k;
+    int main()
+    {
+    
+        cin>>a>>k;
+        int l=strlen(a);
+        int m,ans;
+        m=l+k;
+        if (m%2==1) m--;
+        if(k>=l)
+        {
+    	cout<<m<<endl;
+    	return 0;
+        }
+        int max=0;
+        for(int i = 0 ; i < l ; i++)
+        {
+            for(int j = 1 ; j <= l-i;j++)
+            {
+    	    ans = 0;
+                for(int o = i ; o < i+j ; o++)
+                {
+    		
+                    if(o+j>=l&&o+j<l+k)
+                        ans++;
+                    else if(a[o]==a[o+j])
+                         ans++;
+                }
+                if(ans==j&&2*ans>max)
+                  max=2*ans;
+            }
+        }
+        cout<<max<<endl;
+        return 0;
+    }
+    
+
+
+
+```

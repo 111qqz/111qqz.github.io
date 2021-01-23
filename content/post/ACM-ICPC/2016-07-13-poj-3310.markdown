@@ -1,0 +1,253 @@
+---
+author: 111qqz
+date: 2016-07-13 06:21:41+00:00
+draft: false
+title: poj 3310 Caterpillar (树的直径+并查集判环+dfs判断连通性)
+type: post
+url: /2016/07/poj-3310/
+categories:
+- ACM
+tags:
+- dfs
+- 并查集
+- 无向图的环
+- 树的直径
+- 连通性
+---
+
+[poj3310 题目链接](http://poj.org/problem?id=3310)
+
+题意：给出一个无向图。。。问是否满足。。联通，并且无环，并且能找到一条路径，图中所有的顶点要么在这条路径上，要么与这条路径上的顶点相邻。
+
+思路：一个一个来。。。联通的话任意起点开始跑一遍dfs? 开一个bool数组标记走过的点。。最后扫一遍。。看是否有点没走过
+
+环的话并查集就好。。
+
+关键是第三个条件。。。根据题中题中的例子。。感觉如果存在这样的路径。。。那么这样的路径应该尽可能长？
+
+于是想到求直径。。。然后在bfs的时候顺便记录路径。。。这样我就知道直径是哪些点。。。然后对于所有点。。判断是否在这条直径上或者与之相邻就好。。。
+
+具体做法是。。。开了一个bool数组ok标记直径上的点。。。在存边的时候用一个to[]数组表示相连。。。to[u]=v,to[v]=u...
+
+然后只要ok[i]或者ok[to[i]]满足其一就好。。。
+
+又是1A，蛤蛤蛤蛤蛤，我好神啊（误
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年07月12日 星期二 20时27分28秒
+    File Name :code/poj/3310.cpp
+     ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=305;
+    int n,m;
+    vector < int >edge[N];
+    int f[N];
+    bool vis[N];
+    bool die;
+    int d[N];
+    int to[N];
+    int pre[N];//记录最长的路径。。。
+    int lst,beg;
+    bool ok[N];
+    struct Edge
+    {
+        int u,v;
+    }e[N];
+    void init()
+    {
+        ms(to,-1);
+        ms(pre,-1);
+        ms(vis,false); //for dfs
+        ms(ok,false);
+        for ( int i = 1 ; i <= n ; i++) f[i] = i;
+        for ( int i = 1 ; i <= n ; i++) edge[i].clear();
+    }
+    int root ( int x)
+    {
+        if (x!=f[x]) f[x] = root (f[x]);
+        return f[x];
+    }
+    void merge( int x,int y)
+    {
+        int rx = root(x);
+        int ry = root(y);
+        if (rx==ry) return ;
+        f[rx] = ry;
+    }
+    void dfs( int u)
+    {
+        vis[u] = true;
+        int siz = edge[u].size();
+        for ( int i = 0 ; i < siz ; i++)
+        {
+    	int v = edge[u][i];
+    	if (vis[v]) continue;
+    	dfs(v);
+        }
+    }
+    void bfs( int s)
+    {
+        ms(d,0);
+        ms(vis,false);
+        ms(pre,-1);
+        queue<int>q;
+        q.push(s);
+        vis[s] = true;
+        while (!q.empty())
+        {
+    	int u = q.front();q.pop();
+    	int siz = edge[u].size();
+    	for ( int i = 0 ; i < siz ; i++)
+    	{
+    	    int v = edge[u][i];
+    	    if (vis[v]) continue;
+    	  //  cout<<" u:"<<u<<" v:"<<v<<endl;
+    	    d[v] = d[u] + 1;
+    	    pre[v] = u;
+    	    vis[v] = true;
+    	    q.push(v);
+    	}
+        }
+    }
+    int main()
+    {
+    #ifndef  ONLINE_JUDGE 
+        freopen("code/in.txt","r",stdin);
+    #endif
+        int cas = 0 ;
+        while (scanf("%d",&n)!=EOF)
+        {
+    	if (n==0) break;
+    	scanf("%d",&m);
+    	init();
+    	die = false;
+    	for ( int i =1 ; i <= m ; i++)
+    	{
+    	    int u,v;
+    	    scanf("%d%d",&u,&v);
+    //	    cout<<"u:"<<u<<" v:"<<v<<endl;
+    	    e[i].u =u;
+    	    e[i].v= v;
+    	    to[u] = v;
+    	    to[v] = u;
+    	    edge[u].push_back(v);
+    	    edge[v].push_back(u);
+    	}
+    	dfs(1); //判断连通性
+    //	cout<<"dfs die?"<<endl;
+    	for ( int i = 1 ; i <= n ; i++) 
+    	{
+    	    if (!vis[i])
+    	    {
+    		die = true;
+    		break;
+    	    }
+    	}
+    	if (die)
+    	{
+    	    printf("Graph %d is not a caterpillar.\n",++cas);
+    	    continue;
+    	}
+    	for ( int i = 1 ; i <= m ; i++)
+    	{
+    	    int u = e[i].u;
+    	    int v = e[i].v;
+    	    if (root(u)==root(v))   //判环
+    	    {
+    		die = true;
+    		continue;
+    	    }
+    	    merge(u,v);
+    	}
+    //	cout<<"union set die?"<<endl;
+    	if (die)
+    	{
+    	    printf("Graph %d is not a caterpillar.\n",++cas);
+    	    continue;
+    	}
+    	bfs(1);
+    //	for ( int i = 1 ;i  <= n ; i++) cout<<" pre[i]:"<<pre[i]<<endl;
+    	int mx = 0 ;
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    if (d[i]>mx)
+    	    {
+    		mx = d[i];
+    		lst = i;
+    	    }
+    	}
+    	bfs(lst);
+    //	cout<<"bfs die?"<<endl;
+    	mx = 0 ;
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    if (d[i]>mx)
+    	    {
+    		mx = d[i];
+    		beg = i ;
+    	    }
+    	}
+    	int x = beg;
+    //	for ( int i = 1 ;i  <= n ; i++) cout<<" pre[i]:"<<pre[i]<<endl;
+    	while(x!=-1)
+    	{
+    	//   cout<<"x:"<<x<<endl;
+    	    ok[x] = true;
+    	    x = pre[x];
+    	}
+    //	cout<<"get pre die?"<<endl;
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    if (ok[i]||ok[to[i]]) continue;
+    //	    cout<<"i:"<<i<<endl;
+    	    die = true;
+    	    break;
+    	}
+    	if (die)
+    	{
+    	    printf("Graph %d is not a caterpillar.\n",++cas);
+    	    continue;
+    	}
+    	printf("Graph %d is a caterpillar.\n",++cas);
+        }
+    #ifndef ONLINE_JUDGE  
+        fclose(stdin);
+    #endif
+        return 0;
+    }
+    
+
+
+
+
+

@@ -1,0 +1,93 @@
+---
+author: 111qqz
+date: 2015-04-14 20:32:00+00:00
+draft: false
+title: cf 534B. Covered Path
+type: post
+url: /2015/04/cf534b/
+categories:
+- ACM
+tags:
+- math
+---
+
+http://codeforces.com/problemset/problem/534/B
+
+题意是说一辆车，每秒内的速度恒定...第I秒到第I+1秒的速度变化不超过D。初始速度为V1，末速度为V2，经过时间t，问最远能走多远。
+
+
+
+
+策略就是尽可能加速...加到某个时间，如果在这个时间不开始减速就回不到V2了。
+
+
+
+
+从后往前预处理下每秒钟能达到的最大速度（如果超过这个速度，将不能减回到V2）
+
+
+ 
+```c++
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月22日 星期一 23时49分32秒
+    File Name :code/cf/problem/534B.cpp
+    ************************************************ */
+    
+    #include <iostream>
+    #include <cmath>
+    #include <cstring>
+    #include <algorithm>
+    
+    using namespace std;
+    const int N=1E2+5;
+    const int inf=8E9;
+    int a[N],m[N];
+    int v1,v2,t,d,tmp,p,ans,n;
+    
+    
+    int main()
+    {
+        cin>>v1>>v2>>t>>d;
+        p = inf;
+        memset(a,0,sizeof(a));
+        a[1]= v1;
+        tmp = v2;
+        m[t]= v2;
+        for ( int i = t-1 ; i >= 1; i--)
+        {
+            tmp = tmp+d;
+            m[i] = tmp;
+        }
+        for ( int i =2 ;i <= t; i++ )
+        {
+            if (a[i-1]+d<=m[i])
+            {
+                a[i] = a[i-1] + d;
+            }
+            else
+            {
+                a[i] = m[i];
+                p = i;
+                break;
+            }
+        }
+        ans = 0;
+        for ( int i = p ; i <= t; i++ )
+            a[i] = m[i];
+        for ( int i = 1; i <= t ; i++ )
+        {
+            if (i<p)
+                ans = ans + a[i];
+            else ans = ans + m[i];
+        }
+       // for ( int i = 1; i <= t ; i++)
+       //     cout<<"a[i]:"<<a[i]<<endl;
+        cout<<ans<<endl;
+    
+        return 0;
+    }
+
+```
+

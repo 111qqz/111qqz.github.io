@@ -1,0 +1,222 @@
+---
+author: 111qqz
+date: 2017-11-11 07:11:25+00:00
+draft: false
+title: SPOJ  LCS2 Longest Common Substring 2[后缀自动机+dp]
+type: post
+url: /2017/11/spoj-lcs2/
+categories:
+- ACM
+tags:
+- dp
+- 后缀自动机
+---
+
+# 题意：
+
+
+
+求n个串的最长公共子串，n<=10
+
+
+
+# 思路：
+
+
+
+不会啊orz
+
+先放一波参考资料&题解好了。
+
+[codeforces_Understanding Suffix Automaton in depth](http://codeforces.com/blog/entry/20764)
+
+[code风景区_spoj_lcs2](https://codingsimplifylife.blogspot.co.id/2016/02/spoj-lcs2lcs2-longest-common-substring.html)
+
+[code风景区_sam教学](https://codingsimplifylife.blogspot.co.id/2016/02/sam.html)
+
+[candy SPOJ 1812 LCS2 [后缀自动机 DP]](http://www.cnblogs.com/candy99/p/6376055.html)
+
+
+
+首先参考下2个串的LCS的做法[spoj-lcs](https://111qqz.com/wordpress/2017/11/spoj-lcs/)
+
+
+
+卧槽终于懂了...
+
+
+
+<blockquote>一个串在上面走的时候记录与每个状态公共子串的最大值，注意**出现次数向父亲传递**，一个状态能到达说明了Suffix Link指向的状态可以取到最大子串，这一步对val后基数排序然后倒着更新就行了</blockquote>
+
+
+
+
+
+<del>...代码之后补</del>
+
+关键是理解这句话：**_一个状态能到达说明了Suffix Link指向的状态可以取到最大子串_**
+
+**比如如果状态S（从初始状态到S状态所表示的子串是abcbc） 能够最长向前匹配的长度是x,那么状态s的par的状态Q(从初始状态到Q状态所表示的子串是bc）也至少为x.**
+
+**所以dp[link[v]] = Max{dp[link[v]],dp[v]}**
+
+
+
+妈个鸡。。。
+
+[![](https://111qqz.com/wordpress/wp-content/uploads/2017/11/深度截图_选择区域_20171111202708.png)
+](https://111qqz.com/wordpress/wp-content/uploads/2017/11/深度截图_选择区域_20171111202708.png)
+
+没事改什么字符集大小啊。。。
+
+上道题做的是数字。。就手贱把字符集的大小改成了12.。。忘了改回来。。WA到死。。。
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2017年11月08日 星期三 18时50分18秒
+    File Name :4436.cpp
+    ************************************************ */
+    
+    #include <bits/stdc++.h>
+    #define PB push_back
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    #define MAXALP 30
+    const int mod = 2012;
+    struct state
+    {
+        int len, link, nxt[MAXALP];
+    };
+    const int N =1E5+7;
+    state st[N*2];
+    int sz, last,rt;
+    char s[N];
+    int cnt[2*N],rk[2*N];//for radix sort
+    int dp[2*N],maxlen[2*N];
+    void sa_init()
+    {
+        sz = 0;
+        last = rt = ++sz;
+        st[1].len = 0;
+        st[1].link=-1;
+        ms(st[1].nxt,-1);
+    }
+    void sa_extend(int c)
+    {
+        int cur = ++sz;
+        st[cur].len = st[last].len + 1;
+        memset(st[cur].nxt, -1, sizeof(st[cur].nxt));
+        int p;
+        for (p = last; p != -1 && st[p].nxt[c] == -1; p = st[p].link)
+            st[p].nxt[c] = cur;
+        if (p == -1) {
+            st[cur].link = rt;
+        } else {
+            int q = st[p].nxt[c];
+            if (st[p].len + 1 == st[q].len) {
+                st[cur].link = q;
+            } else {
+                int clone = ++sz ;
+                st[clone].len = st[p].len + 1;
+                st[clone].link = st[q].link;
+                memcpy(st[clone].nxt, st[q].nxt, sizeof(st[q].nxt));
+                for (; p != -1 && st[p].nxt[c] == q; p = st[p].link)
+                    st[p].nxt[c] = clone;
+                st[q].link = st[cur].link = clone;
+            }
+        }
+        last = cur;
+    }
+    void topo()
+    {
+        ms(cnt,0); 
+        for (int i = 1 ; i <= sz ; i++) cnt[st[i].len]++;
+        for ( int i = 1 ; i <= sz ; i++) cnt[i]+=cnt[i-1];
+        for (int i = 1 ; i <= sz  ;i++) rk[cnt[st[i].len]--] = i;
+    }
+    char ST[N];
+    int main()
+    {
+    #ifndef  ONLINE_JUDGE 
+            freopen("./in.txt","r",stdin);
+    #endif
+    
+        int flag = 1;
+        ms(maxlen,0x3f);
+        while (scanf("%s",ST)!=EOF)
+        {
+    //  cout<<"ST:"<<ST<<endl;
+        if (flag)
+        {
+            sa_init();
+            for (int i = 0,len = strlen(ST);  i < len ; i++)
+            {
+            sa_extend(ST[i]-'a');
+            }
+            topo();
+            flag = 0 ;
+        }
+        else
+        {
+            ms(dp,0);
+            int now = rt,len = 0;
+            for ( int i = 0,_len = strlen(ST) ; i < _len ; i++)
+            {
+            if (st[now].nxt[ST[i]-'a']!=-1)
+            {
+                now = st[now].nxt[ST[i]-'a'];
+                len++;
+                dp[now] = max(dp[now],len);
+              //  printf("now:%d dp[now]:%d len: %d\n",now,dp[now],len);
+            }
+            else 
+            {
+                while (now!=-1&&st[now].nxt[ST[i]-'a']==-1) now = st[now].link;
+                if (now==-1) now=rt,len=0;else len = st[now].len + 1,now=st[now].nxt[ST[i]-'a'],dp[now] = max(dp[now],len);
+            }
+            }
+            for ( int i = sz ; i >= 1 ; i-- )
+            {
+            int v = rk[i];
+            st[v].len = min(st[v].len,dp[v]);
+            dp[st[v].link] = max(dp[st[v].link],dp[v]);
+    //      dp[v] = 0 ;  //其实只是为了清空，多次ms太慢了...
+            }
+        }
+    
+        }
+    
+        int ans = 0 ;
+        for ( int i = 1 ; i <= sz ; i++) ans = max(ans,st[i].len);
+        printf("%d\n",ans);
+    //  cout<<ans<<endl;
+        
+    
+    
+    #ifndef ONLINE_JUDGE  
+        fclose(stdin);
+    #endif
+        return 0;
+    }
+    
+    
+
+
+
+

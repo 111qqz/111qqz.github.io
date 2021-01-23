@@ -1,0 +1,160 @@
+---
+author: 111qqz
+date: 2017-11-01 06:47:11+00:00
+draft: false
+title: hdu 6038 | 2017 Multi-University Training Contest - Team 1 E Function  (置换群找循环节)
+type: post
+url: /2017/11/hdu-6038/
+categories:
+- ACM
+tags:
+- 循环节
+- 置换群
+---
+
+http://acm.hdu.edu.cn/showproblem.php?pid=6038
+
+
+
+# 题意：
+
+
+
+给出两个序列 a 和 b ，求满足  f[i]= b_{f[a[i]]} 的函数个数。
+
+
+
+# 思路：
+
+
+
+分别找两个序列的循环节，这一点是比较容易想到的。
+
+由于点都在0..n-1 或者0..m-1，因此没必要建图跑dfs找循环节，直接while就可以了。
+
+然后发现一个循环节如果符合条件，那么对答案的贡献是循环节长度。
+
+但是没有想清楚，什么才是符合条件的循环节。
+
+**结论是，b的循环节长度当且近当是A的循环节的长度的因子时，b的这个循环节会对答案贡献其长度的大小。**
+
+对于A的每个循环节，都是互不影响的。
+
+而且我们只关心循环节的长度。
+
+因此O（n）和O(m)的时间，处理出所有循环节的长度。
+
+然后分别枚举累计答案即可。
+
+但是我怎么感觉。。。这复杂度不太对啊。。。。
+
+对于O(1E5)的序列。。我好像可以构造出1E5个长度为1的循环节？
+
+那么1E5 * 1E5,1E10的复杂度了。。。
+
+然而看了下官方题解。。。发现给出的复杂度分析是O(n+m)
+
+？？？？？？？？？？？？？？？？？？？？？
+
+所以这是说。。。数据保证O(n*m) < O (n+m)了么。。。
+
+这是面向数据解题。。还是说我哪里想错了啊。。。orz
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2017年11月01日 星期三 14时17分58秒
+    File Name :6038.cpp
+    ************************************************ */
+    
+    #include <bits/stdc++.h>
+    #define PB push_back
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    const LL mod = 1E9+7;
+    int a[N],b[N];
+    bool vis[N];
+    int n,m;
+    vector <int>loopa,loopb;
+    vector <int> findloop( int *a,int n)
+    {
+        vector<int>res;
+        ms(vis,false);
+        for ( int i = 0 ; i < n ; i++)
+        {
+        int cur = i ;
+        if (vis[cur]) continue;
+        int len = 0;
+        while (!vis[cur])
+        {
+         //   cout<<"cur:"<<cur<<endl;
+            vis[cur] = true;
+            cur = a[cur];
+            len++;
+        }
+        res.PB(len); //只关心循环节的长度
+        }
+        return res; 
+    }
+    int main()
+    {
+        #ifndef  ONLINE_JUDGE 
+        freopen("./in.txt","r",stdin);
+      #endif
+        int cas = 0 ;
+        while (~scanf("%d %d",&n,&m))
+        {
+        for ( int i = 0 ; i < n ; i++) scanf("%d",a+i);
+        for ( int i = 0 ; i < m ; i++) scanf("%d",b+i);
+        loopa.clear();
+        loopb.clear();
+        loopa = findloop(a,n);
+        loopb = findloop(b,m);
+    
+        int lena = loopa.size();
+        int lenb = loopb.size();
+        //cout<<"lena:"<<lena<<" lenb:"<<lenb<<endl;
+        LL ans = 1;
+        for ( int i = 0 ; i < lena ; i++)
+        {
+            LL tmp = 0 ;
+            for ( int j = 0 ; j < lenb ; j++)
+            {
+        //  cout<<"i:"<<i<<" j:"<<j<<" loopb[j]:"<<loopb[j]<<endl;
+            if (loopa[i]%loopb[j]==0) tmp = (tmp + loopb[j])%mod;
+            }
+            ans = ans * tmp % mod;
+        }
+        printf("Case #%d: %lld\n",++cas,ans);
+        }
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+
+
+
+

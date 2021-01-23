@@ -1,0 +1,209 @@
+---
+author: 111qqz
+date: 2017-04-02 06:26:02+00:00
+draft: false
+title: 'BZOJ 2257: [Jsoi2009]瓶子和燃料 (裴蜀定理)'
+type: post
+url: /2017/04/bzoj-2257-jsoi2009-/
+categories:
+- ACM
+tags:
+- number theory
+- 裴蜀定理
+---
+
+
+
+
+## 2257: [Jsoi2009]瓶子和燃料
+
+
+Time Limit: 10 Sec  Memory Limit: 128 MB
+Submit: 1246  Solved: 756
+[[Submit](http://www.lydsy.com/JudgeOnline/submitpage.php?id=2257)][[Status](http://www.lydsy.com/JudgeOnline/problemstatus.php?id=2257)][[Discuss](http://www.lydsy.com/JudgeOnline/bbs.php?id=2257)]
+
+
+## Description
+
+
+
+
+
+
+jyy就一直想着尽快回地球，可惜他飞船的燃料不够了。
+有一天他又去向火星人要燃料，这次火星人答应了，要jyy用飞船上的瓶子来换。jyy
+的飞船上共有 N个瓶子(1<=N<=1000) ，经过协商，火星人只要其中的K 个 。 jyy
+将 K个瓶子交给火星人之后，火星人用它们装一些燃料给 jyy。所有的瓶子都没有刻度，只
+在瓶口标注了容量，第i个瓶子的容量为Vi（Vi 为整数，并且满足1<=Vi<=1000000000 ） 。
+火星人比较吝啬，他们并不会把所有的瓶子都装满燃料。他们拿到瓶子后，会跑到燃料
+库里鼓捣一通，弄出一小点燃料来交差。jyy当然知道他们会来这一手，于是事先了解了火
+星人鼓捣的具体内容。火星人在燃料库里只会做如下的3种操作：1、将某个瓶子装满燃料；
+2、将某个瓶子中的燃料全部倒回燃料库；3、将燃料从瓶子a倒向瓶子b，直到瓶子b满
+或者瓶子a空。燃料倾倒过程中的损耗可以忽略。火星人拿出的燃料，当然是这些操作能
+得到的最小正体积。
+jyy知道，对于不同的瓶子组合，火星人可能会被迫给出不同体积的燃料。jyy希望找
+到最优的瓶子组合，使得火星人给出尽量多的燃料。
+
+
+
+
+
+
+## Input
+
+
+
+
+
+
+第1行：2个整数N,K，
+第2..N 行：每行1个整数，第i+1 行的整数为Vi
+
+
+
+
+
+
+## Output
+
+
+
+
+
+
+仅1行，一个整数，表示火星人给出燃料的最大值。
+
+
+
+
+
+
+## Sample Input
+
+
+
+
+3 2
+3
+4
+4
+
+
+
+
+## Sample Output
+
+
+
+
+4
+
+
+
+
+
+
+## HINT
+
+
+
+
+
+
+选择第2 个瓶子和第 个瓶子，火星人被迫会给出4 体积的容量。
+
+
+
+
+思路:
+
+思路完全错掉了orz...想去贪心来着....
+
+因为自己脑算的例子错掉了...容量3和容量7的瓶子,能得到的最小是1不是2(**因为忘了可以从瓶子中倒回燃料库的操作)...**
+
+样例一错毁所有orz..
+
+正确的思路是,容量为a,b的两个瓶子能鼓捣出的体积一定是ax+by的形式
+
+**根据[裴蜀定理](https://zh.wikipedia.org/zh-hans/)**,ax+by能得到的最小正数解就是(a,b),也就是gcd(a,b)
+
+由此可以推广到多个瓶子,容量分别为x1,x2,...xn,能得到的最小体积就是gcd(x1,x2..xn)
+
+**(能推广的原因还是多说一句吧,假设现在只有两个瓶子x1,x2,称出了gcd(x1,x2),那么其实和只有一个容量为gcd(x1,x2)的瓶子在效果上是等价的)**
+
+因为剩下我们要做的就是,统计每个容量的因子统计,找到最大的并且出现此处大于等于k次的...
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2017年04月01日 星期六 19时38分24秒
+    File Name :code/bzoj/2257.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define PB push_back
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E3+7;
+    int n,k;
+    int val[N];
+    map<int,int>mp;
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	scanf("%d %d",&n,&k);
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    int x;
+    	    scanf("%d",&x);
+    	    for ( int j = 1 ; j*j <= x ; j++)
+    	    {
+    		if (x%j==0) mp[j]++,mp[x/j]++;
+    		if (j*j==x) mp[j]--;
+    	    }
+    	}
+    	map<int,int>::reverse_iterator it;
+    	for ( it = mp.rbegin(); it!=mp.rend() ;it++)
+    	{
+    	    if (it->sec>=k)
+    	    {
+    		printf("%d\n",it->fst);
+    		break;
+    	    }
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+

@@ -1,0 +1,96 @@
+---
+author: 111qqz
+date: 2016-02-29 13:06:00+00:00
+draft: false
+title: poj 2356 Find a multiple (剩余类，抽屉原理)
+type: post
+url: /2016/02/poj2356/
+categories:
+- ACM
+tags:
+- number theory
+- 剩余系
+- 抽屉原理
+---
+
+
+
+http://poj.org/problem?id=2356
+
+题意：有n个数，从中选取若干个（1..n），和能被n整除。问是否有解，无解输出0，有解的话，**输出个数以及选择的a[i]( 不是i)**
+
+由抽屉原理可知一定有解：
+做一个带模的前缀和 sum[i]=(sum[i-1]+a[i])%n
+n个数，sum[i]最多有n种。
+如果某个sum[i]为0，那么表示从1到i的和能被n整除。
+如果所有的sum[i]不为0，那么一共有n个sum[i]，n-1个值（1..n-1），一定有sum[i]==sum[j](i<=j)
+那么a[i]到a[j]的和一定能被n整除。
+
+    
+    /*************************************************************************
+    	> File Name: code/poj/2356.cpp
+    	> Author: 111qqz
+    	> Email: rkz2013@126.com 
+    	> Created Time: 2015年08月21日 星期五 13时43分41秒
+     ************************************************************************/
+    
+    #include<iostream>
+    #include<iomanip>
+    #include<cstdio>
+    #include<algorithm>
+    #include<cmath>
+    #include<cstring>
+    #include<string>
+    #include<map>
+    #include<set>
+    #include<queue>
+    #include<vector>
+    #include<stack>
+    #define y0 abc111qqz
+    #define y1 hust111qqz
+    #define yn hez111qqz
+    #define j1 cute111qqz
+    #define tm crazy111qqz
+    #define lr dying111qqz
+    using namespace std;
+    #define REP(i, n) for (int i=0;i<int(n);++i)  
+    typedef long long LL;
+    typedef unsigned long long ULL;
+    const int inf = 0x3f3f3f3f;
+    const int N=2E4+7;
+    int a[N];
+    int sum[N];
+    int n;
+    int p[N];
+    int main()
+    {
+        scanf("%d",&n);
+        sum[0]= 0;
+        for ( int i = 1  ; i <= n ; i++){
+    	scanf("%d",&a[i]);
+    	sum[i] = (sum[i-1] + a[i])%n;
+        }
+        memset(p,0,sizeof(p));
+        for ( int i = 1 ; i <= n ; i++){
+    	if (sum[i]==0){
+    	    printf("%d\n",i);
+    	    for ( int j = 1 ; j <= i ; j++){
+    		printf("%d\n",j);
+    	    }
+    	    break;
+    	}
+    	if (p[sum[i]]){
+    	   // cout<<"111qqz"<<endl;
+    	    printf("%d\n",i-p[sum[i]]);
+    	    for ( int j = p[sum[i]]+1 ; j <= i ; j++){
+    		printf("%d\n",j);
+    	    }
+    	    break;
+    	}
+    	    p[sum[i]] =  i;
+    	
+        }
+      
+    	return 0;
+    }
+    

@@ -1,0 +1,97 @@
+---
+author: 111qqz
+date: 2015-12-22 05:09:32+00:00
+draft: false
+title: 'codeforces #334 div 2 D.Moodular Arithmetic'
+type: post
+url: /2015/12/cf604d/
+categories:
+- ACM
+tags:
+- dfs
+- 组合数学
+- 计数问题
+---
+
+http://codeforces.com/contest/604/problem/D
+题意：一个恒等式 f(k*x%p)=k*f(x)%p ,k,p为常数，且满足x对于定义域为0..p-1的p的整数，值域也在0..p-1范围（不一定一一对应）。问满足题意的f有多少个。
+思路： 
+f(0)=0,对于其他的值，当f（x）确定时，f（k*x%p）也随之确定，那么把k*x%p看做新的x,f（k*k*x%p）也随之确定...相当于【1，p-1】被分为r个小环，确定每个环可以任选一个数字，ans=p^r。环的个数可以用dfs跑一遍得到r.
+注意当k=1的时候是特殊情况，f(x)恒等于f(x)那么答案应该有p的p次方种。因为对于p个f(0..p-1)，每一个都可以任意取p种值。
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2015年12月22日 星期二 12时31分09秒
+    File Name :code/cf/#334/D.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int MOD =1E9+7;
+    const int N=1E6+7;
+    LL p,k;
+    LL ans;
+    bool v[N];
+    
+    void dfs( int x)
+    {
+    //    cout<<"x:"<<x<<endl;
+        v[x] = true;
+        int y = (k*x)%p;
+        if (!v[y]) dfs(y);
+    }
+    
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    //	freopen("code/in.txt","r",stdin);
+      #endif    
+    	ms(v,false);
+    	cin>>p>>k;
+    	if (k==1) ans = p;
+    	    else ans = 1;
+    	
+    	for ( int i = 1 ; i <= p-1 ; i++)
+    	{
+    	    if (v[i]) continue;
+    	    ans = (ans *p)%MOD;
+    	    dfs(i);
+    	}
+    	cout<<ans<<endl;
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

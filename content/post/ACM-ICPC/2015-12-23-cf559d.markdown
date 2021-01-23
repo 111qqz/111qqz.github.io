@@ -1,0 +1,134 @@
+---
+author: 111qqz
+date: 2015-12-23 08:57:18+00:00
+draft: false
+title: 'codeforces #332 div 2 D. Spongebob and Squares'
+type: post
+url: /2015/12/cf559d/
+categories:
+- ACM
+tags:
+- math
+- set
+- stl
+---
+
+http://codeforces.com/contest/599/problem/D
+题意：给出总的方格数x，问有多少种不同尺寸的矩形满足题意，输出方案数和长宽（3,5和5,3算两种）
+思路：比赛的时候gg了。。其实稍微在纸上推一下。就会得到对于n,m的矩形，一共会有-n*n*n+3*n*n*m+n+3*n*m的方格。数量级是n3。
+我们可以实际跑一遍。发现对于x1E18的数量级，n不会超过1442550，1E6,可以搞。
+
+需要注意的是，一个是会爆int,所以记得用long long
+
+另一个是如果两个数相等，记得只输入一组，并且方案数-1
+
+我是用set +pair存的答案。。反向遍历set的时候要用reserve_iterator...
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2015年12月23日 星期三 15时54分37秒
+    File Name :code/cf/#332/D.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < LL ,LL >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    LL x;
+    LL cur;
+    const LL MAXN = 1442550;
+    set<pi>se;
+    LL cal( LL n,LL m)
+    {
+        LL res = -n*n*n+3*n*n*m+3*n*m+n;
+        return res;
+    }
+    int square = -1;
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    //	for ( LL i = 1 ; ; i++)
+    //	{
+    //	    cur = cal(i,i);
+    //	  //  cout<<"i:"<<i<<" cur:"<<cur<<endl;
+    //	    if (cur>1E18)
+    //	    {
+    //		cout<<i<<endl;
+    //		break;
+    //	    }
+    //
+    //	}
+    	cin>>x;
+    	x = x*6;
+    	for ( LL i = 1 ; cal(i,i)<=x ; i++)
+    	{
+    	    LL tmp = (x-i+i*i*i)%(3*i*i+3*i);
+    	  //  cout<<"i:"<<i<<" tmp:"<<tmp<<endl;
+    	    if (tmp==0)
+    	    {
+    		se.insert(make_pair(i,(x-i+i*i*i)/(3*i*i+3*i)));
+    		if (i==(x-i+i*i*i)/(3*i*i+3*i)) square = 1;
+    
+    	    }
+    	}
+    	if (square==1)
+    	cout<<se.size()*2-1<<endl;
+    	else cout<<se.size()*2<<endl;
+    	set<pi>::iterator it;
+    	for (it = se.begin(); it!=se.end() ;it++)
+    	{
+    
+    	    cout<<(*it).fst<<" "<<(*it).sec<<endl;
+    	}
+    	set<pi>::reverse_iterator it2;   //反向遍历要用反向迭代器。。。右忘记了。。。。
+    	for ( it2 =se.rbegin() ;it2 !=se.rend() ; it2 ++)
+    	{
+    	    if (square==1)
+    	    {
+    		square = 2;
+    		continue;
+    	    }
+    
+    	    
+    	    cout<<(*it2).sec<<" "<<(*it2).fst<<endl;
+    	}
+    	
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

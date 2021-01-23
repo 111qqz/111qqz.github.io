@@ -1,0 +1,126 @@
+---
+author: 111qqz
+date: 2016-01-21 06:33:22+00:00
+draft: false
+title: uva 152 Tree's a Crowd
+type: post
+url: /2016/01/uva152/
+categories:
+- ACM
+
+tags:
+- 水
+---
+
+题意：题意：给你一组三维空间中的点，每个点到其它点都有个距离，其中有个最小距离，如果这个最小距离小于10，就将对应的距离的点个数加１，最后输出距离为0,1,2...8,9的点的个数。（from 百度）
+老实说，上面这题意也讲的不明不白，其实这题非常水，就是对每个点进行判断，找出和其他点最短的距离，在下标为该距离的数组上+1,最后输出数组下标0-9的数。
+trick：其实最小距离大于9的就不用存放了，只要开个大小10的数组。（不会概括。。。抄的别人的）
+
+好坑啊。。。最后要多一个换行。。不然会WA...题目中又木有说。。。WA到死了好么。。。。
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年01月21日 星期四 00时08分50秒
+    File Name :uva/152.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #include <cassert>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=5E3+11;
+    int n;
+    int cnt;
+    int ans[30];
+    int dblcmp( double d)
+    {
+        return d<-eps?-1:d>eps;
+    }
+    struct point 
+    {
+        int x,y,z;
+    
+        int dis(point q)
+        {
+    	int res = (x-q.x)*(x-q.x)+(y-q.y)*(y-q.y)+(z-q.z)*(z-q.z);
+    	return  (int)sqrt(res);
+        }
+        
+    }p[N];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	ms(ans,0);
+    	cnt =  0;
+    	
+    	while (scanf("%d%d%d",&p[cnt].x,&p[cnt].y,&p[cnt].z)!=EOF)
+    	{
+    	    if (p[cnt].x==0&&p[cnt].y==0&&p[cnt].z==0) break;
+    	    cnt++;
+    	}
+    	
+    	
+    	for ( int i = 0 ; i < cnt ; i++)
+    	{
+    	    int mind = 10000;
+    	    for ( int j = 0 ; j < cnt ; j++)
+    	    {
+    		if (i==j) continue;
+    		int tmp = p[i].dis(p[j]);
+    
+    		if (tmp<mind)
+    		{
+    		    mind = tmp;
+    		}
+    
+    	    }
+    		if (mind<10) 	
+    		ans[mind]++;
+    	    
+    	}	
+    	for ( int i = 0 ; i < 10 ; i++)
+    	printf("",ans[i]);
+    	printf("\n");
+    
+    	
+    	
+    
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

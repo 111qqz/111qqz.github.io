@@ -1,0 +1,170 @@
+---
+author: 111qqz
+date: 2015-04-08 11:52:00+00:00
+draft: false
+title: codeforces 479D. Long Jumps
+type: post
+url: /2015/04/cf479d/
+categories:
+- ACM
+tags:
+- binary search
+- greedy
+---
+
+http://codeforces.com/problemset/problem/479/D
+
+
+题意是说有一把尺子，本身有一些刻度，然后需要测量x和y，问最少需要添加多少个刻度，如果需要，这些刻度分别添加在什么位置。
+
+
+
+
+
+
+
+一开始没有看清题目，以为答案最多为4，但是发现，a[1]=0 a[n]=l这两个是确定的，所以答案最多为2，
+
+
+
+
+而不会出现中间有两个刻度，无论是往前刻还是往后都会越界的情况。
+
+
+
+
+先去看看已知的刻度里有没有直接满足的。
+
+
+
+
+除此之外，如果在已知的刻度下无法测量x也无法测量y，我们还可以找找是否能有公用点使得只刻一个刻度就可以满足题意。公用点分两种情况，一种是在两个刻度之间，另一种是在两个刻度的同侧。
+
+
+
+
+前一种没什么坑，后一种要判断是否越界！！！
+
+
+
+
+如果在已知的刻度下能测量x或者能测量出y但不能同时测量的话，就没有必要找公用点。
+
+
+
+
+
+
+
+还有就是查找的话如果线性找复杂度是O(n2)，会TLE在第27个点。
+
+
+
+
+我们用二分...
+
+
+
+
+话说STL里竟然连二分查找也有。。。。简直orz。。。。真是省时省力。
+
+
+
+
+
+
+
+代码：
+
+
+
+ ```c++
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月22日 星期一 23时42分46秒
+    File Name :code/cf/problem/479D.cpp
+    ************************************************ */
+    
+    #include <iostream>
+    #include <algorithm>
+    #include <cstring>
+    #include <cstdio>
+    #include <cmath>
+    
+    using namespace std;
+    
+    int n,l,x,y;
+    const int N=1E5+7;
+    int a[N];
+    int ans,p,q;
+    bool flag1,flag2,flag3,flag4;
+    
+    int main()
+    {
+        scanf("%d %d %d %d",&n,&l,&x,&y);
+        flag1 = false;
+        flag2 = false;
+        flag3 = false;
+        flag4 = false;
+    
+        for ( int i = 1 ; i <= n ; i++ )
+            scanf("%d",&a[i]);
+            ans = 2;
+            p = -1;
+            q = 0;
+        for ( int i = 1 ; i <= n ; i++ )
+        {
+            if(binary_search(a,a+n+1,a[i]+x))
+            {
+                flag1 = true;
+    
+            }
+            if (binary_search(a,a+n+1,a[i]+y))
+            {
+                flag2 = true;
+            }
+            if (binary_search(a,a+n+1,a[i]+x+y))
+            {
+                flag3 = true;
+                p = a[i];
+            }
+            if (binary_search(a,a+n+1,a[i]+y-x)&&((a[i]+y<=l)||(a[i]-x>=0)))
+            {
+                flag4 = true;
+                p = a[i];
+            }
+        }
+    
+            if ( flag1) {ans--;q = 1 ;}
+            if ( flag2 ){ ans--;q = 2 ;}
+            if ( ans==2&&(flag3||flag4))
+            {
+                ans--;
+            }
+            cout<<ans<<endl;
+        if ( ans==2 )
+        {
+            cout<<a[1]+x<<" "<<a[1]+y<<endl;
+        }
+        if ( ans==1 )
+        {
+            if ( p==-1 )
+            {
+                if ( q==1 )
+                    cout<<a[1]+y<<endl;
+                else cout<<a[1]+x<<endl;
+            }
+            else
+            {
+                if ( p+y<=l )
+                cout<<p+y<<endl;
+                else cout<<p-x<<endl;
+            }
+        }
+        return 0;
+    }
+
+
+```

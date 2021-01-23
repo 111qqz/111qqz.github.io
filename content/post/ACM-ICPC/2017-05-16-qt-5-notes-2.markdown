@@ -1,0 +1,733 @@
+---
+author: 111qqz
+date: 2017-05-16 03:14:19+00:00
+draft: false
+title: qt 5.x 学习笔记　(2)
+type: post
+url: /2017/05/qt-5-notes-2/
+categories:
+- 其他
+tags:
+- qt
+- c++
+---
+
+先来放一波过程中用到的资料和官方文档好了。
+
+[basic layout_qt5.8](http://doc.qt.io/qt-5/qtwidgets-layouts-basiclayouts-example.html)
+
+[QBoxLayout Class_qt5.8](http://doc.qt.io/qt-5/qboxlayout.html)
+
+[QString Class 5.8](http://doc.qt.io/qt-5/qstring.html)
+
+[QChar Class qt 5.8](http://doc.qt.io/qt-5/qchar.html)
+
+[Standard Dialogs Example qt 5.8](http://doc.qt.io/qt-5/qtwidgets-dialogs-standarddialogs-example.html)
+
+更新的部分还是放在最前面好了。。。
+
+convert from QString to char *的时候有个坑。。。
+
+
+<blockquote>In order to convert a QString to a char*, then you first need to get a latin1 representation of the string by calling toLatin1() on it which will return a QByteArray. Then call data() on the QByteArray to get a pointer to the data stored in the byte array. See the documentation:
+See the following example for a demonstration:</blockquote>
+
+
+举个栗子。。。。
+
+    
+    int main(int argc, char **argv)
+    {
+     QApplication app(argc, argv);
+     QString str1 = "Test";
+     QByteArray ba = str1.toLatin1();
+     const char *c_str2 = ba.data(); 
+     printf("str2: %s", c_str2);
+     return app.exec();   
+    }
+
+
+
+
+<blockquote>**Note that it is necessary to store the bytearray before you call data() on it, a call like the following
+const char *c_str2 = str2.toLatin1().data();
+will make the application crash as the QByteArray has not been stored and hence no longer exists.**</blockquote>
+
+
+
+
+
+
+
+
+
+
+<!-- more -->
+
+目前基本框架出来了。。。
+
+可以打开一个文件。。加密。。保存。。。
+
+加密算法部分暂时用倒序输出代替。。。
+
+界面布局还没搞。。。一些提示之类的还没搞。。。。。。。。
+
+接下来要做的。。。大概就是把des写进去了。。。
+
+放一波代码好了。。。
+
+    
+    /****************************************************************************
+    **
+    ** Copyright (C) 2016 The Qt Company Ltd.
+    ** Contact: https://www.qt.io/licensing/
+    **
+    ** This file is part of the examples of the Qt Toolkit.
+    **
+    ** $QT_BEGIN_LICENSE:BSD$
+    ** Commercial License Usage
+    ** Licensees holding valid commercial Qt licenses may use this file in
+    ** accordance with the commercial license agreement provided with the
+    ** Software or, alternatively, in accordance with the terms contained in
+    ** a written agreement between you and The Qt Company. For licensing terms
+    ** and conditions see https://www.qt.io/terms-conditions. For further
+    ** information use the contact form at https://www.qt.io/contact-us.
+    **
+    ** BSD License Usage
+    ** Alternatively, you may use this file under the terms of the BSD license
+    ** as follows:
+    **
+    ** "Redistribution and use in source and binary forms, with or without
+    ** modification, are permitted provided that the following conditions are
+    ** met:
+    **   * Redistributions of source code must retain the above copyright
+    **     notice, this list of conditions and the following disclaimer.
+    **   * Redistributions in binary form must reproduce the above copyright
+    **     notice, this list of conditions and the following disclaimer in
+    **     the documentation and/or other materials provided with the
+    **     distribution.
+    **   * Neither the name of The Qt Company Ltd nor the names of its
+    **     contributors may be used to endorse or promote products derived
+    **     from this software without specific prior written permission.
+    **
+    **
+    ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    ** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+    ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+    ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+    ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+    ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+    ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+    ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+    ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+    **
+    ** $QT_END_LICENSE$
+    **
+    ****************************************************************************/
+    
+    #ifndef DIALOG_H
+    #define DIALOG_H
+    
+    #include <QWidget>
+    #include <QTextEdit>
+    
+    class QCheckBox;
+    class QLabel;
+    class QErrorMessage;
+    
+    class DialogOptionsWidget;
+    
+    class Dialog : public QWidget
+    {
+        Q_OBJECT
+    
+    public:
+        Dialog(QWidget *parent = 0);
+    
+    private slots:
+    
+        void setText();
+    
+    
+        void setOpenFileName();
+        void beginToCal();
+        void setSaveFileName();
+        void criticalMessage();
+        void informationMessage();
+        void questionMessage();
+        void warningMessage();
+        void errorMessage();
+    
+    private:
+    
+        QLabel *textLabel;
+    
+    
+        QLabel *openFileNameLabel;
+    
+        QLabel *saveFileNameLabel;
+        QLabel *criticalLabel;
+        QLabel *informationLabel;
+        QLabel *questionLabel;
+        QLabel *warningLabel;
+        QLabel *errorLabel;
+        QErrorMessage *errorMessageDialog;
+        DialogOptionsWidget *fileDialogOptionsWidget;
+        DialogOptionsWidget *colorDialogOptionsWidget;
+        DialogOptionsWidget *fontDialogOptionsWidget;
+        QString openFilesPath;
+        QTextEdit *textEdit;
+        QString QTextSt;
+    };
+    
+    #endif
+    
+
+
+
+
+    
+    /****************************************************************************
+    **
+    ** Copyright (C) 2016 The Qt Company Ltd.
+    ** Contact: https://www.qt.io/licensing/
+    **
+    ** This file is part of the examples of the Qt Toolkit.
+    **
+    ** $QT_BEGIN_LICENSE:BSD$
+    ** Commercial License Usage
+    ** Licensees holding valid commercial Qt licenses may use this file in
+    ** accordance with the commercial license agreement provided with the
+    ** Software or, alternatively, in accordance with the terms contained in
+    ** a written agreement between you and The Qt Company. For licensing terms
+    ** and conditions see https://www.qt.io/terms-conditions. For further
+    ** information use the contact form at https://www.qt.io/contact-us.
+    **
+    ** BSD License Usage
+    ** Alternatively, you may use this file under the terms of the BSD license
+    ** as follows:
+    **
+    ** "Redistribution and use in source and binary forms, with or without
+    ** modification, are permitted provided that the following conditions are
+    ** met:
+    **   * Redistributions of source code must retain the above copyright
+    **     notice, this list of conditions and the following disclaimer.
+    **   * Redistributions in binary form must reproduce the above copyright
+    **     notice, this list of conditions and the following disclaimer in
+    **     the documentation and/or other materials provided with the
+    **     distribution.
+    **   * Neither the name of The Qt Company Ltd nor the names of its
+    **     contributors may be used to endorse or promote products derived
+    **     from this software without specific prior written permission.
+    **
+    **
+    ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    ** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+    ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+    ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+    ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+    ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+    ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+    ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+    ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+    **
+    ** $QT_END_LICENSE$
+    **
+    ****************************************************************************/
+    
+    #include <QtWidgets>
+    #include <QTextEdit>
+    
+    #include "dialog.h"
+    
+    #define MESSAGE \
+        Dialog::tr("<p>Message boxes have a caption, a text, " \
+                   "and any number of buttons, each with standard or custom texts." \
+                   "<p>Click a button to close the message box. Pressing the Esc button " \
+                   "will activate the detected escape button (if any).")
+    #define MESSAGE_DETAILS \
+        Dialog::tr("If a message box has detailed text, the user can reveal it " \
+                   "by pressing the Show Details... button.")
+    
+    class DialogOptionsWidget : public QGroupBox
+    {
+    public:
+        explicit DialogOptionsWidget(QWidget *parent = 0);
+    
+        void addCheckBox(const QString &text, int value);
+        void addSpacer();
+        int value() const;
+    
+    private:
+        typedef QPair<QCheckBox *, int> CheckBoxEntry;
+        QVBoxLayout *layout;
+        QList<CheckBoxEntry> checkBoxEntries;
+    };
+    
+    DialogOptionsWidget::DialogOptionsWidget(QWidget *parent) :
+        QGroupBox(parent) , layout(new QVBoxLayout)
+    {
+        //setTitle(Dialog::tr("Optionsssss"));
+       // textEdit = new QTextEdit(this);
+        //setCentralWidget(textEdit);
+        //textEdit = new QTextEdit(this);
+        //setCentralWidget(textEdit);
+    
+      //  setLayout(layout);
+    }
+    
+    void DialogOptionsWidget::addCheckBox(const QString &text, int value)
+    {
+        QCheckBox *checkBox = new QCheckBox(text);
+        layout->addWidget(checkBox);
+        checkBoxEntries.append(CheckBoxEntry(checkBox, value));
+    }
+    
+    void DialogOptionsWidget::addSpacer()
+    {
+        layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::MinimumExpanding));
+    }
+    
+    int DialogOptionsWidget::value() const
+    {
+        int result = 0;
+        foreach (const CheckBoxEntry &checkboxEntry, checkBoxEntries)
+            if (checkboxEntry.first->isChecked())
+                result |= checkboxEntry.second;
+        return result;
+    }
+    
+    Dialog::Dialog(QWidget *parent)
+        : QWidget(parent)
+    {
+        QVBoxLayout *verticalLayout;
+        if (QGuiApplication::styleHints()->showIsFullScreen() || QGuiApplication::styleHints()->showIsMaximized()) {
+            QHBoxLayout *horizontalLayout = new QHBoxLayout(this);
+            QGroupBox *groupBox = new QGroupBox(QGuiApplication::applicationDisplayName(), this);
+            horizontalLayout->addWidget(groupBox);
+            verticalLayout = new QVBoxLayout(groupBox);
+        } else {
+            verticalLayout = new QVBoxLayout(this);
+        }
+    
+        QToolBox *toolbox = new QToolBox;
+        verticalLayout->addWidget(toolbox);
+    
+        errorMessageDialog = new QErrorMessage(this);
+    
+        int frameStyle = QFrame::Sunken | QFrame::Panel;
+    
+        textLabel = new QLabel;
+        textLabel->setFrameStyle(frameStyle);
+        QPushButton *textButton = new QPushButton(tr("加密文件"));
+    
+        openFileNameLabel = new QLabel;
+        openFileNameLabel->setFrameStyle(frameStyle);
+        QPushButton *openFileNameButton =
+                new QPushButton(tr("打开文件"));
+    
+        QPushButton *calButton =
+                new QPushButton(tr("加密"));
+    
+    
+    
+        saveFileNameLabel = new QLabel;
+        saveFileNameLabel->setFrameStyle(frameStyle);
+        QPushButton *saveFileNameButton =
+                new QPushButton(tr("QFileDialog::get&SaveFileName()"));
+    
+        criticalLabel = new QLabel;
+        criticalLabel->setFrameStyle(frameStyle);
+        QPushButton *criticalButton =
+                new QPushButton(tr("QMessageBox::critica&l()"));
+    
+        informationLabel = new QLabel;
+        informationLabel->setFrameStyle(frameStyle);
+        QPushButton *informationButton =
+                new QPushButton(tr("QMessageBox::i&nformation()"));
+    
+        questionLabel = new QLabel;
+        questionLabel->setFrameStyle(frameStyle);
+        QPushButton *questionButton =
+                new QPushButton(tr("QMessageBox::&question()"));
+    
+        warningLabel = new QLabel;
+        warningLabel->setFrameStyle(frameStyle);
+        QPushButton *warningButton = new QPushButton(tr("QMessageBox::&warning()"));
+    
+        errorLabel = new QLabel;
+        errorLabel->setFrameStyle(frameStyle);
+        QPushButton *errorButton =
+                new QPushButton(tr("QErrorMessage::showM&essage()"));
+    
+    
+        connect(textButton, &QAbstractButton::clicked, this, &Dialog::setText);
+    
+        connect(openFileNameButton, &QAbstractButton::clicked,
+                this, &Dialog::setOpenFileName);
+    
+        connect(calButton,&QAbstractButton::clicked,
+                this,&Dialog::beginToCal);
+    
+        connect(saveFileNameButton, &QAbstractButton::clicked,
+                this, &Dialog::setSaveFileName);
+        connect(criticalButton, &QAbstractButton::clicked, this, &Dialog::criticalMessage);
+        connect(informationButton, &QAbstractButton::clicked,
+                this, &Dialog::informationMessage);
+        connect(questionButton, &QAbstractButton::clicked, this, &Dialog::questionMessage);
+        connect(warningButton, &QAbstractButton::clicked, this, &Dialog::warningMessage);
+        connect(errorButton, &QAbstractButton::clicked, this, &Dialog::errorMessage);
+    
+        QWidget *page = new QWidget;
+        QGridLayout *layout = new QGridLayout(page);
+        layout->setColumnStretch(1, 1);
+        layout->setColumnMinimumWidth(1, 250);
+    
+        layout->addWidget(textButton, 3, 0);
+        layout->addWidget(textLabel, 3, 1);
+    
+        layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::MinimumExpanding), 5, 0);
+        toolbox->addItem(page, tr("Input Dialogs"));
+    
+        const QString doNotUseNativeDialog = tr("Do not use native dialog");
+    
+        page = new QWidget;
+        layout = new QGridLayout(page);
+        layout->setColumnStretch(1, 1);
+    
+       /* colorDialogOptionsWidget = new DialogOptionsWidget;
+        colorDialogOptionsWidget->addCheckBox(doNotUseNativeDialog, QColorDialog::DontUseNativeDialog);
+        colorDialogOptionsWidget->addCheckBox(tr("Show alpha channel") , QColorDialog::ShowAlphaChannel);
+        colorDialogOptionsWidget->addCheckBox(tr("No buttons") , QColorDialog::NoButtons);
+        layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::MinimumExpanding), 1, 0);
+        layout->addWidget(colorDialogOptionsWidget, 2, 0, 1 ,2);
+    
+        toolbox->addItem(page, tr("Color Dialog"));
+        */
+    
+       // page = new QWidget;
+       // layout = new QGridLayout(page);
+       // layout->setColumnStretch(1, 1);
+       // layout->addWidget(fontButton, 0, 0);
+        //layout->addWidget(fontLabel, 0, 1);
+    
+    
+        page = new QWidget;
+        layout = new QGridLayout(page);
+        layout->setColumnStretch(3,1);
+    
+        layout->addWidget(openFileNameButton, 1, 0);
+        layout->addWidget(openFileNameLabel, 1,1);
+        layout->addWidget(calButton,1,2);
+    
+        layout->addWidget(saveFileNameButton, 3, 0);
+        layout->addWidget(saveFileNameLabel, 3, 1);
+        fileDialogOptionsWidget = new DialogOptionsWidget;
+    
+    
+        layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::MinimumExpanding), 4, 0);
+        toolbox->addItem(page, tr("File Dialogs"));
+    
+    
+        page = new QWidget;
+        layout = new QGridLayout(page);
+        layout->setColumnStretch(1, 1);
+        layout->addWidget(criticalButton, 0, 0);
+        layout->addWidget(criticalLabel, 0, 1);
+        layout->addWidget(informationButton, 1, 0);
+        layout->addWidget(informationLabel, 1, 1);
+        layout->addWidget(questionButton, 2, 0);
+        layout->addWidget(questionLabel, 2, 1);
+        layout->addWidget(warningButton, 3, 0);
+        layout->addWidget(warningLabel, 3, 1);
+        layout->addWidget(errorButton, 4, 0);
+        layout->addWidget(errorLabel, 4, 1);
+        layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::MinimumExpanding), 5, 0);
+    
+        toolbox->addItem(page, tr("Message Boxes"));
+    
+        setWindowTitle(QGuiApplication::applicationDisplayName());
+    }
+    
+    
+    
+    
+    
+    void Dialog::setText()
+    {
+        bool ok;
+        QString text = QInputDialog::getText(this, tr("QInputDialog::getText()"),
+                                             tr("User name:"), QLineEdit::Normal,
+                                             QDir::home().dirName(), &ok);
+        if (ok && !text.isEmpty())
+            textLabel->setText(text);
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    void Dialog::setOpenFileName()
+    {
+        const QFileDialog::Options options = QFlag(fileDialogOptionsWidget->value());
+        QString selectedFilter;
+        QString fileName = QFileDialog::getOpenFileName(this,
+                                    tr("QFileDialog::getOpenFileName()"),
+                                    openFileNameLabel->text(),
+                                    tr("All Files (*);;Text Files (*.txt)"),
+                                    &selectedFilter,
+                                    options);
+        if (!fileName.isEmpty())
+        {
+    
+            openFileNameLabel->setText(fileName);
+            qDebug()<<"filename:"<<fileName;
+            QFile file(fileName);
+    
+            //不仅仅是if判断。。重点是执行了open操作。。。顺便返回值罢了。。kk最菜.jpg
+    
+            if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                QMessageBox::warning(this, tr("Read File"),
+                                     tr("Cannot open file:\n%1").arg(fileName));
+                return;
+            }
+    
+            QTextStream in(&file);
+            QTextSt = in.readAll();
+            qDebug()<<"fileText:"<<QTextSt<<endl;
+            qDebug()<<"TextLen:"<<QTextSt.length();
+              file.close();
+         }
+    }
+    
+    
+    
+    void Dialog::beginToCal()
+    {
+        int len = QTextSt.length();
+        QString ret = "";
+        for ( int i = len-1 ; i >=0 ; i--)
+        {
+               QChar tmp = QTextSt[i];
+               ret+=tmp;
+    
+        }
+        QTextSt = ret;
+    }
+    
+    void Dialog::setSaveFileName()
+    {
+        const QFileDialog::Options options = QFlag(fileDialogOptionsWidget->value());
+        QString selectedFilter;
+        QString fileName = QFileDialog::getSaveFileName(this,
+                                    tr("QFileDialog::getSaveFileName()"),
+                                    saveFileNameLabel->text(),
+                                    tr("All Files (*);;Text Files (*.txt)"),
+                                    &selectedFilter,
+                                    options);
+    
+        if (!fileName.isEmpty())
+        {
+            saveFileNameLabel->setText(fileName);
+            QFile file(fileName);
+            if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                QMessageBox::warning(this, tr("Write File"),
+                                           tr("Cannot open file:\n%1").arg(fileName));
+                return;
+            }
+            QTextStream out(&file);
+            qDebug()<<"save file text:"<<QTextSt<<endl;
+            //out << textEdit->toPlainText();
+            out<<QTextSt<<endl;
+            file.close();
+         }
+    
+    
+    }
+    
+    void Dialog::criticalMessage()
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::critical(this, tr("QMessageBox::critical()"),
+                                        MESSAGE,
+                                        QMessageBox::Abort | QMessageBox::Retry | QMessageBox::Ignore);
+        if (reply == QMessageBox::Abort)
+            criticalLabel->setText(tr("Abort"));
+        else if (reply == QMessageBox::Retry)
+            criticalLabel->setText(tr("Retry"));
+        else
+            criticalLabel->setText(tr("Ignore"));
+    }
+    
+    void Dialog::informationMessage()
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::information(this, tr("QMessageBox::information()"), MESSAGE);
+        if (reply == QMessageBox::Ok)
+            informationLabel->setText(tr("OK"));
+        else
+            informationLabel->setText(tr("Escape"));
+    }
+    
+    void Dialog::questionMessage()
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, tr("QMessageBox::question()"),
+                                        MESSAGE,
+                                        QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+        if (reply == QMessageBox::Yes)
+            questionLabel->setText(tr("Yes"));
+        else if (reply == QMessageBox::No)
+            questionLabel->setText(tr("No"));
+        else
+            questionLabel->setText(tr("Cancel"));
+    }
+    
+    void Dialog::warningMessage()
+    {
+        QMessageBox msgBox(QMessageBox::Warning, tr("QMessageBox::warning()"),
+                           MESSAGE, 0, this);
+        msgBox.setDetailedText(MESSAGE_DETAILS);
+        msgBox.addButton(tr("Save &Again"), QMessageBox::AcceptRole);
+        msgBox.addButton(tr("&Continue"), QMessageBox::RejectRole);
+        if (msgBox.exec() == QMessageBox::AcceptRole)
+            warningLabel->setText(tr("Save Again"));
+        else
+            warningLabel->setText(tr("Continue"));
+    
+    }
+    
+    void Dialog::errorMessage()
+    {
+        errorMessageDialog->showMessage(
+                tr("This dialog shows and remembers error messages. "
+                   "If the checkbox is checked (as it is by default), "
+                   "the shown message will be shown again, "
+                   "but if the user unchecks the box the message "
+                   "will not appear again if QErrorMessage::showMessage() "
+                   "is called with the same message."));
+        errorLabel->setText(tr("If the box is unchecked, the message "
+                               "won't appear again."));
+    }
+    
+
+
+
+
+    
+    /****************************************************************************
+    **
+    ** Copyright (C) 2016 The Qt Company Ltd.
+    ** Contact: https://www.qt.io/licensing/
+    **
+    ** This file is part of the examples of the Qt Toolkit.
+    **
+    ** $QT_BEGIN_LICENSE:BSD$
+    ** Commercial License Usage
+    ** Licensees holding valid commercial Qt licenses may use this file in
+    ** accordance with the commercial license agreement provided with the
+    ** Software or, alternatively, in accordance with the terms contained in
+    ** a written agreement between you and The Qt Company. For licensing terms
+    ** and conditions see https://www.qt.io/terms-conditions. For further
+    ** information use the contact form at https://www.qt.io/contact-us.
+    **
+    ** BSD License Usage
+    ** Alternatively, you may use this file under the terms of the BSD license
+    ** as follows:
+    **
+    ** "Redistribution and use in source and binary forms, with or without
+    ** modification, are permitted provided that the following conditions are
+    ** met:
+    **   * Redistributions of source code must retain the above copyright
+    **     notice, this list of conditions and the following disclaimer.
+    **   * Redistributions in binary form must reproduce the above copyright
+    **     notice, this list of conditions and the following disclaimer in
+    **     the documentation and/or other materials provided with the
+    **     distribution.
+    **   * Neither the name of The Qt Company Ltd nor the names of its
+    **     contributors may be used to endorse or promote products derived
+    **     from this software without specific prior written permission.
+    **
+    **
+    ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    ** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+    ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+    ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+    ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+    ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+    ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+    ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+    ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+    **
+    ** $QT_END_LICENSE$
+    **
+    ****************************************************************************/
+    
+    #include <QApplication>
+    #include <QStyleHints>
+    #include <QDesktopWidget>
+    #include <QTranslator>
+    #include <QLocale>
+    #include <QLibraryInfo>
+    
+    #include "dialog.h"
+    
+    int main(int argc, char *argv[])
+    {
+        QApplication app(argc, argv);
+        QGuiApplication::setApplicationDisplayName(Dialog::tr("Standard Dialogs"));
+    
+    #ifndef QT_NO_TRANSLATION
+        QString translatorFileName = QLatin1String("qt_");
+        translatorFileName += QLocale::system().name();
+        QTranslator *translator = new QTranslator(&app);
+        if (translator->load(translatorFileName, QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
+            app.installTranslator(translator);
+    #endif
+    
+        Dialog dialog;
+        if (!QGuiApplication::styleHints()->showIsFullScreen() && !QGuiApplication::styleHints()->showIsMaximized()) {
+            const QRect availableGeometry = QApplication::desktop()->availableGeometry(&dialog);
+            dialog.resize(availableGeometry.width() * 4 / 5, availableGeometry.height() * 2 / 3);
+            dialog.move((availableGeometry.width() - dialog.width()) / 2,
+                        (availableGeometry.height() - dialog.height()) / 2);
+        }
+        dialog.show();
+    
+        return app.exec();
+    }
+    
+
+
+
+
+记录一些坑？（其实也不算坑。。。
+
+
+
+目前我的做法是有一个全局的QString。。。
+
+我是打算直接拆分包装这个QString。。。每8位。。。
+
+然后QString的[] operator得到的是QCharRef类型。。。。
+
+QString之前有的toAscii()被移除了。。。。
+
+qt 5.2以后的方法叫:toLatin1()
+
+[qt5.8_doc_toLatin1()](http://doc.qt.io/qt-5/qchar.html#toLatin1)
+
+
+
+
+
+

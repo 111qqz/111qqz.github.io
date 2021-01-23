@@ -1,0 +1,151 @@
+---
+author: 111qqz
+date: 2016-07-25 08:29:03+00:00
+draft: false
+title: poj 1141 Brackets Sequence (区间dp,括号匹配，记录路径)
+type: post
+url: /2016/07/poj-1141/
+categories:
+- ACM
+tags:
+- 区间dp
+- 括号匹配
+---
+
+[poj 1141题目链接](http://poj.org/problem?id=1141)
+
+
+
+题意：给出一个括号序列，要求添加最少的括号，使得这个序列变成合法的括号匹配，输出最后的序列。
+
+思路：区间dp。。。有了那么一点思路。。。我们可以用dp[i][j]表示区间[i,j]的序列最少需要添加几个符号使得匹配。。转移的话。。。和之前差不多。。dp[i][j] = dp[i+1][j-1] (s[i]与s[j])匹配。。。不匹配的话也是找中间某个点。。。初始化的话。。要变成最大值。。。比较没思路的是输出括号序列这部分。。。
+
+参考了这篇题解：[参考题解](http://www.cnblogs.com/neulike/archive/2011/02/12/1952600.html)
+
+记录路径的思路是。。。记录转移的点。。。
+
+cut[i][j]表示的是区间[i,j]的最优值是由点cut[i][j]这里划分得到的。。。
+
+cut[i][j]为-1表示区间[i,j]的最优值不是从中间分成两部分得到。。。
+
+打印路径的时候。。。如果[i,j]的长度小于等于0.。直接return.
+
+如果长度为1.。。直接输出。。。
+
+如果长度大于1.。。。要分这段区间是否中间有划分两种情况。。具体见代码。。。
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年07月25日 星期一 15时55分47秒
+    File Name :code/poj/1141.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    char s[105];
+    int dp[105][105]; //dp[i][j]表示区间[i,j]最少需要添加多少字符达到匹配。
+    int cut[105][105] ; //记录一段区间是在哪里断开最优，是为了记录路径，打印括号
+    bool check(char a,char b)
+    {
+        if (a=='['&&b==']') return true;
+        if (a=='('&&b==')') return true;
+        return false;
+    }
+    
+    void print(int i ,int j)
+    {
+        if (i>j) return ;
+        if (i==j)
+        {
+    	if (s[i]=='('||s[i]==')') printf("()");
+    	if (s[i]=='['||s[i]==']') printf("[]");
+    	return ;
+        }
+        if (cut[i][j]==-1)
+        {
+    	printf("%c",s[i]);
+    	print(i+1,j-1);
+    	printf("%c",s[j]);
+        }
+        else
+        {
+    	print(i,cut[i][j]);
+    	print(cut[i][j]+1,j);
+        }
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	scanf("%s",s);
+    	
+    	    int len = strlen(s);
+    	    ms(dp,0x3f);
+    	    ms(cut,-1);
+    	    for ( int i = 0 ; i <=len ; i++) dp[i][i] = 1;
+    
+    	    for ( int l = 1 ; l  < len ; l++)
+    	    {
+    		for ( int i = 0 , j = l ; j < len ; i++,j++)
+    		{
+    		    dp[i][j] = inf;
+    		    if (check(s[i],s[j]))
+    		    {
+    			dp[i][j] = dp[i+1][j-1]; //当前匹配的话，就不需要增加字符
+    			cut[i][j] = -1; 
+    		    }
+    
+    		    for ( int k = i ; k < j ; k++)
+    			if (dp[i][j]>dp[i][k]+dp[k+1][j])
+    			{
+    			    dp[i][j] = dp[i][k] + dp[k+1][j];
+    			    cut[i][j] = k;
+    			}
+    		}
+    	    }
+    
+    	    print(0,len-1);
+    	    printf("\n");
+    	
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+

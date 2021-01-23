@@ -1,0 +1,98 @@
+---
+author: 111qqz
+date: 2016-10-02 12:58:24+00:00
+draft: false
+title: codeforces 679A A. Bear and Prime 100 (交互题，构造)
+type: post
+url: /2016/10/cf679a/
+categories:
+- ACM
+tags:
+- 交互题
+- 构造
+---
+
+[题目链接](http://codeforces.com/problemset/problem/679/A)
+
+题意：存在一个[2..100]之间的数，每次可以询问一个数是否是该数的因子，返回yes或者no,最多询问20次。每次要输出询问的数，以及最后要输出这个数是否是质数。
+
+思路：第一次做交互题。。。发现完全不能按照以前的思路。。。
+
+更像是相反的。。。把output看做某种输入。。。input里是某种结果。。。我要根据input里的东西来确定一些东西。
+
+就是先有output，再有input。。。output是选手的输入（最后一个除外），input是返回结果(不是你写的代码的返回结果）
+
+
+
+对于这道题。。我们要尽可能少得猜一个数的因子，以确定该数是否为质数。
+
+一个数不是质数的话，就有至少两个大于1的因子。。。
+
+很容易想到。。。判素因子。。。
+
+由于至少有2个非1的因子才不是素数。。。最小为2，因此另一个因子不会大于50.。。
+
+此外。。。有可能有两个相同质因数组成的因子。。。。
+
+因此还要判一下2*2,3*5,5*5,7*7
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :Sun 02 Oct 2016 08:22:44 PM CST
+    File Name :code/cf/problem/679A.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    int prime[19]={2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,4,9,25,49};
+    string st;
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	int cnt = 0 ;
+    	for ( int i = 0 ; i < 19 ; i++)
+    	{
+    	    cout<<prime[i]<<endl;
+    	    fflush(stdout);
+    	    cin>>st;
+    	    if (st=="yes") cnt++;
+    	}
+    	if (cnt>=2) puts("composite");
+    	else puts("prime");
+    	fflush(stdout);
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+

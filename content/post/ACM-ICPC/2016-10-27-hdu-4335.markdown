@@ -1,0 +1,165 @@
+---
+author: 111qqz
+date: 2016-10-27 12:18:20+00:00
+draft: false
+title: hdu 4335 What is N? （指数循环节+欧拉函数)
+type: post
+url: /2016/10/hdu-4335/
+categories:
+- ACM
+tags:
+- 指数循环节
+- 欧拉函数
+---
+
+[题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=4335)
+
+题意：给出b,p,m（( 0<=b<P, 1<=P<=10^5, 1 <= M <=2^64 – 1 )）,问满足图中条件的n有多少个。
+
+![](http://acm.hdu.edu.cn/data/images/C401-1005-1.jpg)
+
+
+思路：这题由于对p没有限制，所以细节多一些，需要讨论。
+
+首先我们知道指数循环节公式，也就是所谓的降幂公式为：**a^x = a^(x mod phi(c)+phi(c)) (mod c) x>=phi(c)，（ps:后面的限制条件，在x<phi(c)的时候，该式子依然正确，只不过增加了运算复杂度。。。？ 存疑）**
+
+然后我们只需要对n分两种情况讨论。
+
+第一种是n<t ,第二种是n>=t  (t = min{x| x! % phi(P)==0})
+
+由于t不会很大。。前一种直接暴力。。。
+
+后一种用降幂公式搞之。。。
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :Thu 27 Oct 2016 03:43:05 AM CST
+    File Name :code/hdu/4335.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    typedef unsigned long long ULL;
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N =2E5+7;
+    LL b,p;
+    LL a[N];
+    unsigned long long M;
+    LL euler( LL x)
+    {
+        LL ret = 1;
+        for ( LL i = 2 ; i * i <= x ; i++)
+        {
+    	if (x%i==0)
+    	{
+    	    x/=i;
+    	    ret*=(i-1);
+    	    while (x%i==0)
+    	    {
+    		x/=i;
+    		ret*=i;
+    	    }
+    	}
+        }
+        if (x>1) ret*=(x-1);
+        return ret;
+    }
+    LL ksm( LL a,LL b,LL k)
+    {
+        LL res = 1;
+        while (b>0)
+        {
+    	if (b&1) res = (res * a) % k;
+    	b = b >> 1LL;
+    	a = (a*a) % k;
+        }
+        return res;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	int T;
+    	cin>>T;
+    	int cas = 0;
+    	while (T--)
+    	{
+    	    scanf("%lld%lld%llu",&b,&p,&M);
+    	    printf("Case #%d: ",++cas);
+    	    LL mod = euler(p);
+    	    if (p==1)
+    	    {
+    		if (b==0)
+    		{
+    		    if (M==18446744073709551615ULL)
+    			puts("18446744073709551616");
+    		    else printf("%llu\n",M+1); //把%llu 写成了%lld...wa了半天。。。。。<sad
+    		}else printf("0\n");
+    		continue;
+    	    }
+    	    LL cnt = 0 ;
+    	    LL fac = 1;
+    	    LL i = 0 ;
+    	    /*
+    	    for ( i = 0 ; ULL(i)<=M&&fac < mod ; i++)
+    	    {
+    		if (ksm(i,fac,p)==b) cnt++;
+    		fac *= (i+1);
+    	    }
+    	    */
+    	    fac%=mod;
+    	    for ( ; ULL(i)<=M && fac ; i++)
+    	    {
+    		if (ksm(i,fac+mod,p)==b) cnt++;
+    		fac = fac*(i+1)%mod;
+    	    }
+    	    if (ULL(i)<=M)
+    	    {
+    		LL num = 0 ;
+    		for ( int j = 0 ; j < p ; j++)
+    		{
+    		    a[j] = ksm(i+j,mod,p);
+    		    if (a[j]==b) ++num;
+    		}
+    		LL bk_num = (M-i+1)/p;
+    		cnt +=bk_num*num;
+    		LL Rem = (M-i+1)-bk_num*p;
+    		for ( int j = 0 ; j < Rem ; j++)
+    		    cnt += (a[j]==b);
+    	    }
+    	    printf("%lld\n",cnt);
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

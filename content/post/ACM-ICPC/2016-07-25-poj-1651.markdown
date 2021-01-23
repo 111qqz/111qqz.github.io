@@ -1,0 +1,115 @@
+---
+author: 111qqz
+date: 2016-07-25 15:09:40+00:00
+draft: false
+title: poj 1651 Multiplication Puzzle (区间dp)
+type: post
+url: /2016/07/poj-1651/
+categories:
+- ACM
+tags:
+- dp
+- 区间dp
+---
+
+[poj 1651题目链接](http://poj.org/problem?id=1651)
+
+题意：n个数，删掉a[i]的得分是a[i]*a[i-1]*a[i+1]，两个端点的不允许删。问删完n-2个数得到的最小分数是多少。
+
+思路：能想到设计状态dp[i][j]表示区间[i,j]的最小分数。然后就没思路了。 T T
+
+参考了几篇题解，思路大概是，枚举最后剩下的那个数。
+
+
+<blockquote>**对于一个区间(l, r),如果最后删除的是k位置的数的话，将得到a[l]*a[k]*a[r]分，而要得到这个情况的前提是吧区间(l, k) 和(k, r)的中间数字删掉所以的转移方程是**
+
+**DP(l, r) = DP(l, k) + DP(k, r) + a[l]*a[k]*a[r];**</blockquote>
+
+
+以及。。。初始化又想错了。。。
+
+要注意。。初始化可能没办法一次完成。。。这**道题的初始化就是分情况的。。。**
+
+对于区间长度不够的。。初始化为0.。
+
+区间长度为3的。。初始化为a[i]*a[i+1]*a[i+2]。。
+
+其他的初始化为正无穷。。
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年07月25日 星期一 22时44分55秒
+    File Name :code/poj/1651.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=105;
+    int n;
+    int a[N];
+    int dp[N][N];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	ios::sync_with_stdio(false);
+    	cin>>n;
+    	for ( int i = 1 ; i <= n ; i++) cin>>a[i];
+    	
+    	ms(dp,0x3f);
+    
+    	for ( int l = 1 ; l <= n ; l++)
+    	    for ( int i = 1; i <= n-l ; i++)
+    	    {
+    		int j = i + l;
+    		if (l==1) dp[i][j]=0;  //分类初始化。。。
+    		else 
+    		if (l==2)
+    		    dp[i][j] = a[i]*a[i+1]*a[i+2];
+    		else
+    		for ( int k = i+1 ; k < j ; k++)
+    		    dp[i][j] = min(dp[i][j],dp[i][k]+dp[k][j]+a[i]*a[j]*a[k]); //枚举最后剩下的数。
+    	    }
+    
+    	cout<<dp[1][n]<<endl;
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+
+

@@ -1,0 +1,199 @@
+---
+author: 111qqz
+date: 2016-03-02 11:53:41+00:00
+draft: false
+title: poj 1322 chocolate (指数型母函数 )
+type: post
+url: /2016/03/poj1322chocolate/
+categories:
+- ACM
+tags:
+- 母函数
+- 组合数学
+---
+
+http://poj.org/problem?id=1322
+题意：
+
+
+
+![](http://images.cnitblog.com/blog/361759/201312/03210928-5c2c6f7484cc418e85b498c4d70d860b.jpg)
+
+
+
+
+思路：别看n,m很大。。。但是想一下。。m显然不可能大于c(如果大于c，那么根据抽屉原理，至少存在一种巧克力大于一个，然而大于一个就会被取走...矛盾)   这样概率为0.m也不可能大于n，因为最好的情况就是取出的巧克力都放在了桌子上，如果总共取的还不到n个，又怎么可能剩下m（m>n）个呢。此外，还需要n,m奇偶性相同，否则设n-m=2K+1 ,说明如果要剩余m个，那么就要减少2k+1个，但是巧克力是两个两个减少的，减少的个数一定是偶数，因此矛盾。所以n,m奇偶性相同。
+
+
+
+接下来可以用概率dp做，由于n比较大，滚动一下应该可以... 然后看到别人的题解里写到当n>1000的时候已经趋向平衡（达到了要求的精度）... 这道题dp写起来的确容易，也不是很难想。
+
+不过作为dp废宁愿选择数学方法，指数型母函数。
+
+
+
+**分析可知，取过偶数次的巧克力消失，只有取过奇数次的巧克力会留在桌子上。**
+
+**那么要剩余m个巧克力，也就是有m种巧克力取了奇数次，剩下的c-m种巧克力取了偶数次。**
+
+**对应的的生成函数（母函数）分别是(e^x-e(-x))/2和（e^x+e(-x)）/2  （推倒类似）**[hdu2065红色病毒解题报告](https://111qqz.com/wordpress/2016/02/hdu2065/)
+
+总事件个数为c^n
+
+根据古典概型，所求概率为 (Gn*n!*C[c][m])/(c^n)  其中Gn*n!为生成函数，C[c][m]是因为不确定c种巧克力中的哪m种取了奇数个。
+
+现在的问题就成了求Gn中x^n的系数。。我就是因为这个卡了两天这道题。。。
+
+
+
+其实模拟就好，复杂度O(c^2)而已。。主要是好久没写二项式定理。。。有点忘了（手动智力-2）
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年03月02日 星期三 18时57分58秒
+    File Name :code/poj/1322.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=105;
+    double c[N][N];
+    int C,n,m;
+    
+    
+    
+    void pre()
+    {
+        c[0][0] = 1;
+        for ( int i = 1 ; i <  N ; i++)
+        {
+    	c[i][0]=c[i][i] = 1;
+    	for ( int j = 1 ; j < i ; j++) c[i][j]=c[i-1][j-1]+c[i-1][j];
+        }
+    }
+    double ksm( double a,int b)
+    {
+        double res = 1.0;
+        while (b)
+        {
+    	if (b&1) res = (res*a);
+    	b = b>>1;
+    	a = a*a;
+        }
+        return res;
+    }
+    void solve()
+    {
+        double posi[N],nega[N],a[N],b[N];
+        
+        ms(posi,0);
+        ms(nega,0);
+        ms(a,0);
+        ms(b,0);
+    
+        double tmp1=ksm(0.5,m);
+        double tmp2;
+        for ( int i = 0 ; i <= m ; i++)
+        {
+    	int j = i-(m-i);
+    	if ((m-i)&1) tmp2 = -tmp1;
+    	    else tmp2 = tmp1 ;   //正负项
+    	if (j>=0) a[j]+=tmp2*c[m][i];
+    	    else b[-j] +=tmp2*c[m][i];
+        }
+    
+        tmp1 = ksm(0.5,C-m);
+        for ( int i = 0 ; i <= C-m ; i++)
+        {
+    	tmp2 = tmp1 *c[C-m][i];
+    	for (int j = 0 ; j <= m ; j++)
+    	{
+    	    int k = j+i-(C-m-i);
+    	    if (k>=0) posi[k]+=tmp2*a[j];
+    	    else nega[-k]+=tmp2*a[j];
+    
+    	}
+    
+    	for ( int j = 0 ; j <= m ; j ++)
+    	{
+    	    int k = -j+i-(C-m-i);
+    	    if (k>=0) posi[k]+=tmp2*b[j];
+    	    else nega[-k]+=tmp2*b[j];
+    
+    	}
+        }
+    
+        double ans =  0.0;
+        for ( int i = 1 ; i <= C ; i++)
+        {
+    	if (n&1) nega[i]=-nega[i];
+    	ans +=c[C][m]*ksm(1.0*i/(1.0*C),n)*(posi[i]+nega[i]);
+    //	cout<<c[C][m]<<" "<<ksm(1.0*i/C,n)<<" "<<posi[i]+nega[i]<<endl;
+        }
+    
+        printf("%.3f\n",ans);
+    
+    
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	
+    	pre();
+    	while (~scanf("%d",&C))
+    	{
+    	    if (C==0) break;
+    	    scanf("%d %d",&n,&m);
+    	    if ((n-m)%2||m>C||m>n)
+    	    {
+    		puts("0.000");
+    		continue;
+    	    }
+    	    if (n==0&&m==0)
+    	    {
+    		puts("1.000");
+    		continue;
+    	    }
+    	    solve();
+    
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

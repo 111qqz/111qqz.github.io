@@ -1,0 +1,183 @@
+---
+author: 111qqz
+date: 2016-05-26 15:40:56+00:00
+draft: false
+title: poj 1325 Machine Schedule(二分图的最小顶点覆盖，匈牙利算法)
+type: post
+url: /2016/05/poj-1325-machine-schedule/
+categories:
+- ACM
+tags:
+- 二分图匹配
+- 匈牙利算法
+- 最小顶点覆盖
+---
+
+[poj 1325 题目链接](http://poj.org/problem?id=1325)
+题意：有两台机器A和B,分别有n和m种工作模式。 现在有k个job,三元组（i,x,y),job i可以用A机器的x模式完成或者用B机器的y模式完成。初始两个机器都在模式0.机器更换模式的时候需要重启，问最少的重启次数。
+
+
+
+思路：这道题的难点在于建图。。。每个job恰好对应了两种模式。。那么如果把模式看成点。。边就对应了这个job。。这样就是一个二分图。。。至于方向。。。怎么指都可以。。。统一就行。。
+
+完全没有图的影子的题依然可以用图论解决。。。而且算是加深了对图这种模型的理解把。
+
+
+
+然后这道题就变成了二分图的最小顶点覆盖。
+
+
+<blockquote>**二分图中，选取最少的点数，使这些点和所有的边都有关联（把所有的边的覆盖），叫做最小点覆盖。**</blockquote>
+
+
+根据**Knoig定理：二分图的最小顶点覆盖数等于二分图的最大匹配数。**
+
+一个证明：[二分图最小顶点覆盖的证明](http://www.cnblogs.com/g0feng/archive/2012/11/05/2755713.html)
+
+
+
+剩下的就是裸的hungary..
+
+然而WA了好几次。。。
+
+一个小细节没处理好。。。
+
+由于初始是模式0.。。
+
+所以模式0肯定要特殊考虑。。。因为初始状态是没有重启的。。。
+
+但是我错误得以为只有当存在（i,0,0）这样的边时才忽略不算。。。
+
+但是其实只要有一个端点是0就好了啊。。。不管哪端是0，我就用这个0来完成工作。。。依然不增加重启次数。。。
+
+这不是什么坑点。。。脑袋秀逗了。。。
+
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年05月26日 星期四 21时41分11秒
+    File Name :code/poj/1325.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E3+7;
+    int n,m,k;
+    int cnt;
+    struct Edge
+    {
+        int v;
+        int nxt;
+    }edge[N];
+    
+    
+    int head[N];
+    int link[N];
+    bool vis[N];
+    
+    void addedge( int u,int v)
+    {
+        edge[cnt] .v = v;
+        edge[cnt].nxt = head[u];
+        head[u] = cnt;
+        cnt++;
+    }
+    
+    
+    bool dfs( int u)
+    {
+        for ( int i = head[u] ; i!=-1 ; i = edge[i].nxt)
+        {
+    	int v = edge[i].v;
+    	if (vis[v]) continue;
+    	vis[v] = true;
+    
+    	if (link[v]==-1||dfs(link[v]))
+    	{
+    	    link[v] = u;
+    	    return true;
+    	}
+        }
+    
+        return false;
+    }
+    int hungary()
+    {
+        int res = 0 ;
+        ms(link,-1);
+    
+        for ( int i = 1 ; i <= n;  i++)
+        {
+    	ms(vis,false);
+    	if (dfs(i)) res++;
+        }
+        return res;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	while (scanf("%d",&n)!=EOF)
+    	{
+    	    if (n==0) break;
+    	    scanf("%d %d",&m,&k);
+    	    ms(edge,0);
+    	    cnt = 0 ;
+    	    ms(head,-1);
+    	    int ans = 0 ;
+    	    for ( int i = 1 ; i <= k ; i++)
+    	    {
+    		int id,u,v;
+    		scanf("%d%d%d",&id,&u,&v);
+    		if (u==0||v==0) continue ;//初始在0，那么只要边的一个端点是0，我们就可以选择在0完成，而不去重启。
+    		u++;
+    		v++;
+    
+    		v = v + n;
+    		addedge(u,v);
+    	    }
+    
+    	    ans = ans+hungary();
+    	    printf("%d\n",ans);
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

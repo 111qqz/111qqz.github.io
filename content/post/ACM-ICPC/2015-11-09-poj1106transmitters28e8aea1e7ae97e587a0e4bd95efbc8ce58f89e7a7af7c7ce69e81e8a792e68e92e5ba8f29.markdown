@@ -1,0 +1,319 @@
+---
+author: 111qqz
+date: 2015-11-09 01:59:00+00:00
+draft: false
+title: poj 1106 Transmitters (计算几何，叉积||极角排序)
+type: post
+url: /2015/11/poj1106transmitters/
+categories:
+- ACM
+---
+
+Transmitters
+
+
+
+
+
+<table align="center" >
+<tbody >
+<tr >
+
+<td >**Time Limit:** 1000MS
+</td>
+
+<td width="10px" >
+</td>
+
+<td >**Memory Limit:** 10000K
+</td>
+</tr>
+<tr >
+
+<td >**Total Submissions:** 4817
+</td>
+
+<td width="10px" >
+</td>
+
+<td >**Accepted:** 2576
+</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+Description
+
+
+
+
+In a wireless network with multiple transmitters sending on the same frequencies, it is often a requirement that signals don't overlap, or at least that they don't conflict. One way of accomplishing this is to restrict a transmitter's coverage area. This problem uses a shielded transmitter that only broadcasts in a semicircle.   
+  
+A transmitter T is located somewhere on a 1,000 square meter grid. It broadcasts in a semicircular area of radius r. The transmitter may be rotated any amount, but not moved. Given N points anywhere on the grid, compute the maximum number of points that can be simultaneously reached by the transmitter's signal. Figure 1 shows the same data points with two different transmitter rotations.   
+![](https://111qqz.com/wp-content/uploads/2015/11/1106_1.gif)
+  
+All input coordinates are integers (0-1000). The radius is a positive real number greater than 0. Points on the boundary of a semicircle are considered within that semicircle. There are 1-150 unique points to examine per transmitter. No points are at the same location as the transmitter.
+
+
+
+
+Input
+
+
+
+
+Input consists of information for one or more independent transmitter problems. Each problem begins with one line containing the (x,y) coordinates of the transmitter followed by the broadcast radius, r. The next line contains the number of points N on the grid, followed by N sets of (x,y) coordinates, one set per line. The end of the input is signalled by a line with a negative radius; the (x,y) values will be present but indeterminate. Figures 1 and 2 represent the data in the first two example data sets below, though they are on different scales. Figures 1a and 2 show transmitter rotations that result in maximal coverage.
+
+
+
+
+Output
+
+
+
+
+For each transmitter, the output contains a single line with the maximum number of points that can be contained in some semicircle.
+
+
+
+
+Sample Input
+
+
+
+    
+    25 25 3.5
+    7
+    25 28
+    23 27
+    27 27
+    24 23
+    26 23
+    24 29
+    26 29
+    350 200 2.0
+    5
+    350 202
+    350 199
+    350 198
+    348 200
+    352 200
+    995 995 10.0
+    4
+    1000 1000
+    999 998
+    990 992
+    1000 999
+    100 100 -2.5
+
+
+
+
+Sample Output
+
+
+
+    
+    3
+    4
+    4
+
+
+
+
+Source
+
+
+
+
+[Mid-Central USA 2001](http://poj.org/searchproblem?field=source&key=Mid-Central+USA+2001)
+
+
+
+
+
+
+
+题意是说，给定一个固定圆心和半径的半圆，问半圆旋转到哪个角度覆盖的点最多。
+
+
+
+
+当点在边界上认为也是在半圆里面。
+
+
+
+
+分析可知，当半圆恰好旋转道某角度使得点在边界上的时候一定不会比对应的最优的情况更坏。
+
+
+
+
+所以我们可以首先剔除掉那些距离圆心距离大于r的点。
+
+
+
+
+然后枚举剩下的每个点，以当前点连接圆心，作为当前圆的半径（这样得到的是两个圆，左边一个右边一个，但我们只考虑一个就好）
+
+
+
+
+看有多少点在当前半圆的同一侧，记录为sum
+
+
+
+
+然后更新所有点得到的sum的最大值即可。
+
+
+
+
+
+
+
+不需要极角排序。。。直接枚举就行。。
+
+
+
+
+判断在一侧的方法是，用叉积。 小于0逆时针大于0顺时针。。。嗯。都可以。。。
+
+
+
+
+
+
+
+![](https://111qqz.com/wp-content/uploads/2015/11/ContractedBlock9.gif)
+![](https://111qqz.com/wp-content/uploads/2015/11/ExpandedBlockStart9.gif)
+
+
+
+
+
+    
+    <span style="color: #008080;">  1</span> <span style="color: #008000;">/*</span><span style="color: #008000;">************************************************************************
+    </span><span style="color: #008080;">  2</span> <span style="color: #008000;">    > File Name: code/poj/1106.cpp
+    </span><span style="color: #008080;">  3</span> <span style="color: #008000;">    > Author: 111qqz
+    </span><span style="color: #008080;">  4</span> <span style="color: #008000;">    > Email: rkz2013@126.com 
+    </span><span style="color: #008080;">  5</span> <span style="color: #008000;">    > Created Time: 2015年11月09日 星期一 09时28分51秒
+    </span><span style="color: #008080;">  6</span> <span style="color: #008000;"> ***********************************************************************</span><span style="color: #008000;">*/</span>
+    <span style="color: #008080;">  7</span> 
+    <span style="color: #008080;">  8</span> #include<iostream>
+    <span style="color: #008080;">  9</span> #include<iomanip>
+    <span style="color: #008080;"> 10</span> #include<cstdio>
+    <span style="color: #008080;"> 11</span> #include<algorithm>
+    <span style="color: #008080;"> 12</span> #include<cmath>
+    <span style="color: #008080;"> 13</span> #include<cstring>
+    <span style="color: #008080;"> 14</span> #include<<span style="color: #0000ff;">string</span>>
+    <span style="color: #008080;"> 15</span> #include<map>
+    <span style="color: #008080;"> 16</span> #include<<span style="color: #0000ff;">set</span>>
+    <span style="color: #008080;"> 17</span> #include<queue>
+    <span style="color: #008080;"> 18</span> #include<vector>
+    <span style="color: #008080;"> 19</span> #include<stack>
+    <span style="color: #008080;"> 20</span> #include<cctype>
+    <span style="color: #008080;"> 21</span> <span style="color: #0000ff;">#define</span> fst first              
+    <span style="color: #008080;"> 22</span> <span style="color: #0000ff;">#define</span> sec second      
+    <span style="color: #008080;"> 23</span> <span style="color: #0000ff;">#define</span> lson l,m,rt<<1
+    <span style="color: #008080;"> 24</span> <span style="color: #0000ff;">#define</span> rson m+1,r,rt<<1|1
+    <span style="color: #008080;"> 25</span> <span style="color: #0000ff;">#define</span> ms(a,x) memset(a,x,sizeof(a))
+    <span style="color: #008080;"> 26</span> <span style="color: #0000ff;">using</span> <span style="color: #0000ff;">namespace</span><span style="color: #000000;"> std;
+    </span><span style="color: #008080;"> 27</span> <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> eps = 1E-<span style="color: #800080;">8</span><span style="color: #000000;">;
+    </span><span style="color: #008080;"> 28</span> <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> dx4[<span style="color: #800080;">4</span>]={<span style="color: #800080;">1</span>,<span style="color: #800080;">0</span>,<span style="color: #800080;">0</span>,-<span style="color: #800080;">1</span><span style="color: #000000;">};
+    </span><span style="color: #008080;"> 29</span> <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> dy4[<span style="color: #800080;">4</span>]={<span style="color: #800080;">0</span>,-<span style="color: #800080;">1</span>,<span style="color: #800080;">1</span>,<span style="color: #800080;">0</span><span style="color: #000000;">};
+    </span><span style="color: #008080;"> 30</span> typedef <span style="color: #0000ff;">long</span> <span style="color: #0000ff;">long</span><span style="color: #000000;"> LL;
+    </span><span style="color: #008080;"> 31</span> <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> inf = <span style="color: #800080;">0x3f3f3f3f</span><span style="color: #000000;">;
+    </span><span style="color: #008080;"> 32</span> <span style="color: #0000ff;">const</span>  <span style="color: #0000ff;">int</span> N=2E4+<span style="color: #800080;">7</span><span style="color: #000000;">;
+    </span><span style="color: #008080;"> 33</span> 
+    <span style="color: #008080;"> 34</span> <span style="color: #0000ff;">int</span><span style="color: #000000;"> n;
+    </span><span style="color: #008080;"> 35</span> <span style="color: #0000ff;">double</span><span style="color: #000000;"> r;
+    </span><span style="color: #008080;"> 36</span> <span style="color: #0000ff;">int</span> dblcmp( <span style="color: #0000ff;">double</span><span style="color: #000000;"> d)
+    </span><span style="color: #008080;"> 37</span> <span style="color: #000000;">{
+    </span><span style="color: #008080;"> 38</span>     <span style="color: #0000ff;">return</span> d<-eps?-<span style="color: #800080;">1</span>:d><span style="color: #000000;">eps;
+    </span><span style="color: #008080;"> 39</span> <span style="color: #000000;">}
+    </span><span style="color: #008080;"> 40</span> <span style="color: #0000ff;">struct</span><span style="color: #000000;"> point
+    </span><span style="color: #008080;"> 41</span> <span style="color: #000000;">{
+    </span><span style="color: #008080;"> 42</span>     <span style="color: #0000ff;">double</span><span style="color: #000000;"> x,y;
+    </span><span style="color: #008080;"> 43</span> <span style="color: #000000;">    point(){}
+    </span><span style="color: #008080;"> 44</span>     point(<span style="color: #0000ff;">double</span> _x,<span style="color: #0000ff;">double</span><span style="color: #000000;"> _y):
+    </span><span style="color: #008080;"> 45</span> <span style="color: #000000;">    x(_x),y(_y){};
+    </span><span style="color: #008080;"> 46</span> 
+    <span style="color: #008080;"> 47</span>     <span style="color: #0000ff;">void</span><span style="color: #000000;"> input()
+    </span><span style="color: #008080;"> 48</span> <span style="color: #000000;">    {
+    </span><span style="color: #008080;"> 49</span>     scanf(<span style="color: #800000;">"</span><span style="color: #800000;">%lf %lf</span><span style="color: #800000;">"</span>,&x;,&<span style="color: #000000;">y);
+    </span><span style="color: #008080;"> 50</span> <span style="color: #000000;">    }
+    </span><span style="color: #008080;"> 51</span>     
+    <span style="color: #008080;"> 52</span> 
+    <span style="color: #008080;"> 53</span>     point <span style="color: #0000ff;">operator</span> - (<span style="color: #0000ff;">const</span> point &p;)<span style="color: #0000ff;">const</span><span style="color: #000000;">{
+    </span><span style="color: #008080;"> 54</span>     <span style="color: #0000ff;">return</span> point(x-p.x,y-<span style="color: #000000;">p.y);
+    </span><span style="color: #008080;"> 55</span> <span style="color: #000000;">    }
+    </span><span style="color: #008080;"> 56</span>     <span style="color: #0000ff;">double</span> <span style="color: #0000ff;">operator</span> ^(<span style="color: #0000ff;">const</span> point &p;)<span style="color: #0000ff;">const</span><span style="color: #000000;">{
+    </span><span style="color: #008080;"> 57</span>     <span style="color: #0000ff;">return</span> x*p.y-y*<span style="color: #000000;">p.x;
+    </span><span style="color: #008080;"> 58</span> <span style="color: #000000;">    }
+    </span><span style="color: #008080;"> 59</span>     <span style="color: #0000ff;">double</span><span style="color: #000000;"> dis(point p)
+    </span><span style="color: #008080;"> 60</span> <span style="color: #000000;">    {
+    </span><span style="color: #008080;"> 61</span>     <span style="color: #0000ff;">return</span> sqrt((x-p.x)*(x-p.x)+(y-p.y)*(y-<span style="color: #000000;">p.y));
+    </span><span style="color: #008080;"> 62</span> <span style="color: #000000;">    }
+    </span><span style="color: #008080;"> 63</span> <span style="color: #000000;">}tmp[N],c,p[N];
+    </span><span style="color: #008080;"> 64</span> <span style="color: #0000ff;">int</span><span style="color: #000000;"> main()
+    </span><span style="color: #008080;"> 65</span> <span style="color: #000000;">{
+    </span><span style="color: #008080;"> 66</span> <span style="color: #000000;">  #ifndef  ONLINE_JUDGE 
+    </span><span style="color: #008080;"> 67</span>    freopen(<span style="color: #800000;">"</span><span style="color: #800000;">in.txt</span><span style="color: #800000;">"</span>,<span style="color: #800000;">"</span><span style="color: #800000;">r</span><span style="color: #800000;">"</span><span style="color: #000000;">,stdin);
+    </span><span style="color: #008080;"> 68</span>   <span style="color: #0000ff;">#endif</span>
+    <span style="color: #008080;"> 69</span>     <span style="color: #0000ff;">while</span> (~scanf(<span style="color: #800000;">"</span><span style="color: #800000;">%lf %lf %lf</span><span style="color: #800000;">"</span>,&c.x;,&c.y;,&<span style="color: #000000;">r))
+    </span><span style="color: #008080;"> 70</span> <span style="color: #000000;">    {
+    </span><span style="color: #008080;"> 71</span>     <span style="color: #0000ff;">int</span> cnt = <span style="color: #800080;">0</span><span style="color: #000000;"> ;
+    </span><span style="color: #008080;"> 72</span>     <span style="color: #0000ff;">if</span> (dblcmp(r)<=<span style="color: #800080;">0</span>) <span style="color: #0000ff;">break</span><span style="color: #000000;">;
+    </span><span style="color: #008080;"> 73</span>     scanf(<span style="color: #800000;">"</span><span style="color: #800000;">%d</span><span style="color: #800000;">"</span>,&<span style="color: #000000;">n);
+    </span><span style="color: #008080;"> 74</span>     <span style="color: #0000ff;">for</span> ( <span style="color: #0000ff;">int</span> i = <span style="color: #800080;">0</span> ;i  < n ; i ++<span style="color: #000000;">)
+    </span><span style="color: #008080;"> 75</span> <span style="color: #000000;">    {
+    </span><span style="color: #008080;"> 76</span> <span style="color: #000000;">        tmp[i].input();
+    </span><span style="color: #008080;"> 77</span>         <span style="color: #0000ff;">double</span> d =<span style="color: #000000;">c.dis(tmp[i]);
+    </span><span style="color: #008080;"> 78</span>         <span style="color: #0000ff;">if</span> (dblcmp(d-r)<=<span style="color: #800080;">0</span><span style="color: #000000;">)
+    </span><span style="color: #008080;"> 79</span> <span style="color: #000000;">        {
+    </span><span style="color: #008080;"> 80</span>         <span style="color: #008000;">//</span><span style="color: #008000;">p[cnt]=tmp[i];</span>
+    <span style="color: #008080;"> 81</span>         p[cnt].x=<span style="color: #000000;">tmp[i].x;
+    </span><span style="color: #008080;"> 82</span>         p[cnt].y=<span style="color: #000000;">tmp[i].y;
+    </span><span style="color: #008080;"> 83</span>         cnt++<span style="color: #000000;">;
+    </span><span style="color: #008080;"> 84</span> <span style="color: #000000;">        }
+    </span><span style="color: #008080;"> 85</span> <span style="color: #000000;">    }
+    </span><span style="color: #008080;"> 86</span>     <span style="color: #0000ff;">int</span> ans = <span style="color: #800080;">0</span><span style="color: #000000;">;
+    </span><span style="color: #008080;"> 87</span>     <span style="color: #0000ff;">for</span> ( <span style="color: #0000ff;">int</span> i = <span style="color: #800080;">0</span> ; i < cnt ; i++<span style="color: #000000;">)
+    </span><span style="color: #008080;"> 88</span> <span style="color: #000000;">    {
+    </span><span style="color: #008080;"> 89</span>         <span style="color: #0000ff;">int</span> sum = <span style="color: #800080;">1</span><span style="color: #000000;"> ;
+    </span><span style="color: #008080;"> 90</span>         <span style="color: #0000ff;">for</span> ( <span style="color: #0000ff;">int</span> j = <span style="color: #800080;">0</span> ; j < cnt ; j++<span style="color: #000000;">)
+    </span><span style="color: #008080;"> 91</span> <span style="color: #000000;">        {
+    </span><span style="color: #008080;"> 92</span>         <span style="color: #0000ff;">double</span> cross = (c-p[i])^(c-<span style="color: #000000;">p[j]);
+    </span><span style="color: #008080;"> 93</span>         <span style="color: #0000ff;">if</span> (cross>=<span style="color: #800080;">0</span>&&i;!=<span style="color: #000000;">j)
+    </span><span style="color: #008080;"> 94</span> <span style="color: #000000;">        {
+    </span><span style="color: #008080;"> 95</span>             sum++<span style="color: #000000;">;
+    </span><span style="color: #008080;"> 96</span> <span style="color: #000000;">        }
+    </span><span style="color: #008080;"> 97</span> <span style="color: #000000;">        }
+    </span><span style="color: #008080;"> 98</span>         ans =<span style="color: #000000;"> max(sum,ans);
+    </span><span style="color: #008080;"> 99</span> <span style="color: #000000;">    }
+    </span><span style="color: #008080;">100</span>     printf(<span style="color: #800000;">"</span><span style="color: #800000;">%dn</span><span style="color: #800000;">"</span><span style="color: #000000;">,ans);
+    </span><span style="color: #008080;">101</span> <span style="color: #000000;">    }
+    </span><span style="color: #008080;">102</span>   
+    <span style="color: #008080;">103</span>    
+    <span style="color: #008080;">104</span> <span style="color: #000000;"> #ifndef ONLINE_JUDGE  
+    </span><span style="color: #008080;">105</span>   <span style="color: #0000ff;">#endif</span>
+    <span style="color: #008080;">106</span> <span style="color: #000000;">  fclose(stdin);
+    </span><span style="color: #008080;">107</span>     <span style="color: #0000ff;">return</span> <span style="color: #800080;">0</span><span style="color: #000000;">;
+    </span><span style="color: #008080;">108</span> }
+
+
+
+
+
+View Code
+
+
+
+
+
+

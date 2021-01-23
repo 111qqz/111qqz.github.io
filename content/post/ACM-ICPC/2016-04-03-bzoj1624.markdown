@@ -1,0 +1,232 @@
+---
+author: 111qqz
+date: 2016-04-03 19:07:17+00:00
+draft: false
+title: 'BZOJ 1624: [Usaco2008 Open] Clear And Present Danger 寻宝之路 (Floyd)'
+type: post
+url: /2016/04/bzoj1624/
+categories:
+- ACM
+tags:
+- floyd
+---
+
+
+
+
+## 1624: [Usaco2008 Open] Clear And Present Danger 寻宝之路
+
+
+Time Limit: 5 Sec  Memory Limit: 64 MB
+Submit: 507  Solved: 345
+[[Submit](http://www.lydsy.com/JudgeOnline/submitpage.php?id=1624)][[Status](http://www.lydsy.com/JudgeOnline/problemstatus.php?id=1624)][[Discuss](http://www.lydsy.com/JudgeOnline/bbs.php?id=1624)]
+
+
+## Description
+
+
+
+
+
+
+
+    农夫约翰正驾驶一条小艇在牛勒比海上航行．
+
+
+
+
+    海上有N(1≤N≤100)个岛屿，用1到N编号．约翰从1号小岛出发，最后到达N号小岛．一
+
+
+
+
+张藏宝图上说，如果他的路程上经过的小岛依次出现了Ai，A2，…，AM(2≤M≤10000)这样的序列（不一定相邻），那他最终就能找到古老的宝藏．  但是，由于牛勒比海有海盗出没．约翰知道任意两个岛屿之间的航线上海盗出没的概率，他用一个危险指数Dij(0≤Dij≤100000)来描述．他希望他的寻宝活动经过的航线危险指数之和最小．那么，在找到宝藏的前提下，这个最小的危险指数是多少呢？
+
+
+
+
+
+
+
+## Input
+
+
+
+
+
+
+
+    第1行输入N和M，之后M行一行一个整数表示A序列，之后输入一个NxN的方阵，表示两两岛屿之间航线的危险指数．数据保证Dij=Dji，Dii=0．
+
+
+
+
+
+
+
+## Output
+
+
+
+
+
+
+
+
+
+
+    最小的危险指数和．
+
+
+
+
+
+
+
+## Sample Input
+
+
+
+
+3 4
+1
+2
+1
+3
+0 5 1
+5 0 2
+1 2 0
+
+INPUT DETAILS:
+
+There are 3 islands and the treasure map requires Farmer John to
+visit a sequence of 4 islands in order: island 1, island 2, island
+1 again, and finally island 3. The danger ratings of the paths are
+given: the paths (1, 2); (2, 3); (3, 1) and the reverse paths have
+danger ratings of 5, 2, and 1, respectively.
+
+
+
+
+
+
+
+## Sample Output
+
+
+
+
+7
+
+OUTPUT DETAILS:
+
+He can get the treasure with a total danger of 7 by traveling in
+the sequence of islands 1, 3, 2, 3, 1, and 3. The cow map's requirement
+(1, 2, 1, and 3) is satisfied by this route. We avoid the path
+between islands 1 and 2 because it has a large danger rating.
+
+
+
+
+
+## HINT
+
+
+
+
+
+
+
+## Source
+
+
+
+
+
+
+[Silver](http://www.lydsy.com/JudgeOnline/problemset.php?search=Silver)
+
+
+
+
+
+
+思路：可以把危险指数看成距离，于是floyd一下就好咯
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年04月04日 星期一 02时54分18秒
+    File Name :code/bzoj/1624.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=105;
+    int d[N][N];
+    int n,m;
+    int a[10005];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	ios::sync_with_stdio(false);
+    	cin>>n>>m;
+    	a[0]=1;
+    	a[m+1]=n;
+    	for ( int i = 1 ; i <= m ; i++) cin>>a[i];
+        
+    	for ( int i = 1 ; i <= n ; i++) 
+    	    for ( int j = 1 ; j <= n ; j++) cin>>d[i][j];
+    	
+    	for ( int k = 1 ; k <= n ; k++)
+    	    for ( int i = 1 ; i <= n ; i++)
+    		for ( int j = 1 ; j <= n ; j++)
+    		    d[i][j] = min(d[i][j],d[i][k]+d[k][j]);
+    
+    	int ans = 0 ;
+    	for ( int i = 1 ; i <= m+1 ; i++)
+    	    ans +=d[a[i-1]][a[i]];
+    
+    	cout<<ans<<endl;
+        
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

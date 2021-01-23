@@ -1,0 +1,276 @@
+    ---
+author: 111qqz
+date: 2017-10-12 08:26:53+00:00
+draft: false
+title: uvalive 7675 | 2016 北京 regional onsite H - A New Ground Heating Device （二分+多个圆面积并）
+type: post
+url: /2017/10/uvalive-7675/
+categories:
+- ACM
+tags:
+- binary search
+- 计算几何
+---
+
+[题目链接](https://icpcarchive.ecs.baylor.edu/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=5697)
+
+
+
+# 题意：
+
+
+
+在一个二维平面上，有n个加热设备，每个加热设备加热一个圆形，加热设备需要信号源才可以工作，信号源在原点上，但是高度不确定。假设设备的加热半径是一个与{信号源与设备的距离}有关的表达式。现在想要满足，至少有k个加热设备加热的面积大于s，问信号源的最高高度是多少。
+
+
+
+# 思路：
+
+
+
+训练的时候一眼二分，但是求圆并的时候gg了。。毫无思路。
+
+搞定了多个圆面积并。。这题就很easy了。。
+
+需要注意，每次二分的时候，记得初始化圆的d...
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    File Name :H.cpp
+    ************************************************ */
+     
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define PB push_back
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    typedef long long LL;  
+    typedef unsigned long long ULL;  
+    typedef vector <int> VI;  
+    const int INF = 0x3f3f3f3f;  
+    const double eps = 1e-6;  
+    const int MAXN = 1E3+7;  
+    const double PI = acos(-1.0);  
+    #define sqr(x) ((x)*(x))  
+    const int N = 1010;  
+    double area[N];  
+    int n,k;
+    double Z[N];
+    double W,S;
+    
+      
+    int dblcmp(double d){ return d<-eps?-1:d>eps;}  
+    struct point
+    {
+        double x,y;
+        double ang;
+        int d;
+        point(){}
+        point(double x,double y):x(x),y(y){}
+        point(double _x,double _y,double _ang,int _d)
+        {
+        x = _x;
+        y = _y;
+        ang = _ang;
+        d = _d;
+        }
+        void input(){scanf("%lf%lf",&x,&y);}
+        double angle(){ return atan2(y,x);}
+        point operator + (const point &rhs)const{ return point(x+rhs.x,y+rhs.y);}
+        point operator - (const point &rhs)const{ return point(x-rhs.x,y-rhs.y);}
+        point operator * (double t)const{ return point(t*x,t*y);}
+        point operator / (double t)const{ return point(x/t,y/t);}
+        double length() const { return sqrt(x*x+y*y);};
+        double length2() const { return x*x + y*y;}
+        point unit()const { double l = length();return point(x/l,y/l); }
+    }tp[N*2];
+    double cross (const point a,point b){ return a.x*b.y-a.y*b.x ;}
+    double dist(const point p1,point p2) { return (p1-p2).length();}
+    struct circle  
+    { 
+        point c;
+        double r;
+        double Z;
+        int d; 
+        void pr()
+        {
+        printf(" (%.3f,%.3f) r=%.3f\n",c.x,c.y,r);
+        }
+        void input()  
+        {  
+        c.input();
+        scanf("%lf",&r);
+            d = 1;  
+        }
+        bool contain (const circle & cir)const{ return dblcmp(dist(cir.c,c)+cir.r-r)<=0;}
+        bool interect (const circle & cir)const{ return dblcmp(dist(cir.c,c)-cir.r-r)<0;}
+    } cir[N];// tp[N * 2];  
+      
+    double dis(point a, point b)  {return sqrt(sqr(a.x - b.x) + sqr(a.y - b.y));} 
+    int CirCrossCir(circle cir1,circle cir2, point &p1, point &p2)  
+    {  
+        point m = cir2.c-cir1.c;
+        point s = cir2.c+cir1.c;
+        point m2 = point(sqr(m.x),sqr(m.y));
+        double dis2 = m2.x + m2.y, d = -(dis2 - sqr(cir1.r - cir2.r)) * (dis2 - sqr(cir1.r + cir2.r));  
+        if (d + eps < 0) return 0;  
+        if (d < eps) d = 0;  
+        else d = sqrt(d);
+        double x = m.x * ((cir1.r + cir2.r) * (cir1.r - cir2.r) + m.x * s.x) + s.x * m2.y;  
+        double y = m.y * ((cir1.r+ cir2.r) * (cir1.r - cir2.r) + m.y * s.y) + s.y * m2.x;  
+        point dp = m*d;
+        dis2 *= 2;
+        p1 = point (x-dp.y,y+dp.x)/dis2;
+        p2 = point (x+dp.y,y-dp.x)/dis2;
+        if (d > eps) return 2;  
+        else return 1;  
+    }  
+    bool circmp(const circle& u, const circle& v)  
+    {  
+        return dblcmp(u.r - v.r) < 0;  
+    }  
+    bool cmp(const point& u, const point& v)  
+    {  
+        if (dblcmp(u.ang - v.ang)) return u.ang < v.ang;  
+        return u.d > v.d;  
+    }  
+      
+    double calc(circle cir, point p1, point p2)  
+    {  
+        double ans = (p2.ang - p1.ang) * sqr(cir.r)
+             - cross ( (p1-cir.c),(p2-cir.c)) + cross( p1,p2);
+        return ans *0.5; 
+    }  
+    void CirUnion(circle cir[], int n)  
+    {  
+        circle cir1, cir2;  
+        point p1,p2;
+        sort(cir, cir + n, circmp);  
+        for (int i = 0; i < n; ++i)  
+            for (int j = i + 1; j < n; ++j)  
+            if (cir[j].contain(cir[i]))
+                    cir[i].d++;  
+        for (int i = 0; i < n; ++i)  
+        {  
+            int tn = 0, cnt = 0;  
+            for (int j = 0; j < n; ++j)  
+            {  
+                if (i == j) continue;  
+                if (CirCrossCir(cir[i],cir[j],p2, p1) < 2) continue;  
+            p1.ang = (p1-cir[i].c).angle();
+            p2.ang = (p2-cir[i].c).angle();
+                p1.d = 1;  
+                tp[tn++] = p1;  
+                p2.d = -1;  
+                tp[tn++] = p2;  
+                if (dblcmp(p1.ang - p2.ang) > 0) cnt++;  
+            }  
+            tp[tn++] = point(cir[i].c.x - cir[i].r, cir[i].c.y, PI, -cnt);  
+            tp[tn++] = point(cir[i].c.x - cir[i].r, cir[i].c.y, -PI, cnt);  
+            sort(tp, tp + tn, cmp);  
+            int p, s = cir[i].d + tp[0].d;  
+            for (int j = 1; j < tn; ++j)  
+            {  
+                p = s;  
+                s += tp[j].d;  
+                area[p] += calc(cir[i], tp[j - 1], tp[j]);  
+            }  
+        }  
+    }  
+    bool check( double h)  
+    { 
+       // cout<<"h:"<<h<<"  ";
+        
+        for ( int i = 0 ; i < n ; i++)
+        {
+        double l = sqrt(cir[i].c.length2() + h*h);
+        double r = W/(l*cir[i].Z);
+        cir[i].r = r;
+        cir[i].d = 1; //多次，是累加值，记得每次二分都要初始化。
+        //cir[i].pr();
+        }
+    
+        memset(area, 0, sizeof(area));
+        ms(tp,0);
+        CirUnion(cir, n);  
+        //去掉重复计算的  
+        for (int i = 1; i <= n; ++i)  
+        {  
+            area[i] -= area[i + 1];  
+        }  
+        //area[i]为重叠了i次的面积 
+        double sum=0;
+        for ( int i = k ; i <= n ; i++) sum = sum + area[i];
+        //sum = fabs(sum);
+        return dblcmp(sum-S)>0;
+        //tot 为总面积  
+        //double tot = 0;  
+        //for(int i=1; i<=n; i++) tot += area[i];  
+        //printf("%f\n", tot);  
+    }  
+    
+    bool ok;
+    double bin()
+    {
+        double l = 0;
+        double r = 10000;
+        while (dblcmp(l-r)<0)
+        {
+        double mid = (l+r)*0.5;
+        //printf("l: %.4f r:%.4f mid:%.4f \n",l,r,mid); 
+        if (check(mid)) l = mid,ok = true;
+        else r = mid;
+        }
+        return l;
+    }
+    int main()  
+    {  
+       // freopen("./in.txt", "r", stdin);
+        int T;
+        cin>>T;
+        while (T--)
+        {
+        ok = false;
+        cin>>n>>W>>k>>S;
+        for ( int i = 0 ; i < n ; i++) 
+        {
+            cir[i].c.input();
+            scanf("%lf",&cir[i].Z);
+        }
+        double ans =bin();
+        if (!ok) puts("No solution!");
+        else
+        {
+            if (dblcmp(ans-500)>0) puts("Oops!");
+            else printf("%.4f\n",ans);
+        }
+        }
+            
+    
+    
+    
+        return 0;  
+    }
+    
+
+
+
+

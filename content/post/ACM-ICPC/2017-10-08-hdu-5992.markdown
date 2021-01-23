@@ -1,0 +1,164 @@
+---
+author: 111qqz
+date: 2017-10-08 12:55:55+00:00
+draft: false
+title: hdu 5992 Finding Hotels (kd-tree 裸题,查询)
+type: post
+url: /2017/10/hdu-5992/
+categories:
+- ACM
+tags:
+- kd-tree
+---
+
+[题目链接](http://acm.split.hdu.edu.cn/showproblem.php?pid=5992)
+
+
+
+# 题意：
+
+
+
+有若干个(2E5)旅馆，分别给出旅馆的坐标和价格。有m个查询，每个查询给出一个人的位置(x0,y0),以及其能接受的最高价格。问在该人能接受的价格内，距离其最近的旅馆的坐标和价格是多少。
+
+
+
+# 思路：
+
+
+
+[kd-tree学习笔记](https://111qqz.com/wordpress/2017/10/kd-tree-/)
+
+加了价格的限制其实无所谓，只要在更新的时候，先判一下价格就行了。
+
+训练的时候不会kd-tree。。感觉有点可惜了。不然就6题了orz
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2017年10月08日 星期日 18时43分38秒
+    File Name :5992.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define PB push_back
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=2E5+7;
+    int n,m;
+    struct Point
+    {
+        LL x,y;
+        int c;
+        int id;
+    }p[N]; 
+    bool dv[N]; //划分方式
+    bool cmpx( const Point & p1, const Point &p2)
+    {
+        return p1.x<p2.x;
+    }
+    bool cmpy(const Point &p1 ,const Point &p2)
+    {
+        return p1.y<p2.y;
+    }
+    LL getDis( Point a, Point b)
+    {
+        return (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y);
+    }
+    void build ( int l,int r)
+    {
+        if (l>r) return;
+        int mid = (l+r) >> 1;
+        int minx = min_element(p+l,p+r,cmpx)->x;
+        int miny = min_element(p+l,p+r,cmpy)->y;
+        int maxx = max_element(p+l,p+r,cmpx)->x;
+        int maxy = max_element(p+l,p+r,cmpy)->y;
+        dv[mid] = maxx-minx >= maxy-miny;
+        nth_element(p+l,p+mid,p+r+1,dv[mid]?cmpx:cmpy);
+        build(l,mid-1);
+        build(mid+1,r);
+        
+    }
+    LL res,ansid;
+    void query( int l,int r,Point a)
+    {
+        if (l>r) return;
+        int mid = (l+r)>>1;
+        LL dis = getDis(a,p[mid]);
+        //printf("%lld %lld  %lld %lld    %lld\n",a.x,a.y,p[mid].x,p[mid].y,dis);
+        if (a.c>=p[mid].c)
+        {
+        if (dis<res) res = dis,ansid = mid;
+        else if (dis==res&&p[mid].id<p[ansid].id) ansid = mid;
+        }
+        LL d = dv[mid]?(a.x-p[mid].x):(a.y-p[mid].y);
+        int l1=l,r1=mid-1,l2=mid+1,r2=r;
+        if (d>0) swap(l1,l2),swap(r1,r2);
+        query(l1,r1,a); //左儿子
+        if (d*d<res) query(l2,r2,a);//如果与分界线相交，则也要查询右儿子。
+    }
+    
+    int main()
+    {
+        #ifndef  ONLINE_JUDGE 
+        freopen("./in.txt","r",stdin);
+      #endif
+        int T;
+        cin>>T;
+        while (T--)
+        {
+            scanf("%d%d",&n,&m);
+            for ( int i = 1 ; i <= n ; i++) {
+            scanf("%lld %lld %d",&p[i].x,&p[i].y,&p[i].c);
+            p[i].id = i;
+            }
+            build (1,n);
+            while (m--)
+            {
+            
+            res = 1LL<<60;
+            Point p2;
+            scanf("%lld%lld%d",&p2.x,&p2.y,&p2.c);
+            query(1,n,p2);
+            printf("%lld %lld %d\n",p[ansid].x,p[ansid].y,p[ansid].c);
+            }
+    
+        }
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+
+
+
+

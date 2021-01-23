@@ -1,0 +1,278 @@
+---
+author: 111qqz
+date: 2016-02-01 12:56:14+00:00
+draft: false
+title: 'codeforces #341 div2 A. Die Roll'
+type: post
+url: /2016/02/cf621a/
+categories:
+- ACM
+tags:
+- brute force
+---
+
+http://codeforces.com/contest/621/problem/A
+
+
+
+
+
+A. Wet Shark and Odd and Even
+
+
+
+
+
+
+
+time limit per test
+
+
+2 seconds
+
+
+
+
+
+
+
+memory limit per test
+
+
+256 megabytes
+
+
+
+
+
+
+
+input
+
+
+standard input
+
+
+
+
+
+
+
+output
+
+
+standard output
+
+
+
+
+
+
+
+
+
+Today, Wet Shark is given _n_ integers. Using any of these integers no more than once, Wet Shark wants to get maximum possible even (divisible by 2) sum. Please, calculate this value for Wet Shark.
+
+Note, that if Wet Shark uses no integers from the _n_ integers, the sum is an even integer 0.
+
+
+
+
+
+
+
+
+
+Input
+
+
+The first line of the input contains one integer, _n_ (1 ≤ _n_ ≤ 100 000). The next line contains _n_ space separated integers given to Wet Shark. Each of these integers is in range from 1 to 109, inclusive.
+
+
+
+
+
+
+
+
+
+Output
+
+
+Print the maximum possible even sum that can be obtained if we use some of the given integers.
+
+
+
+
+
+
+
+
+
+Sample test(s)
+
+
+
+
+
+
+
+
+
+
+input
+
+
+
+    
+    3
+    1 2 3
+
+
+
+
+
+
+
+
+
+
+output
+
+
+
+    
+    6
+
+
+
+
+
+
+
+
+
+
+input
+
+
+
+    
+    5
+    999999999 999999999 999999999 999999999 999999999
+
+
+
+
+
+
+
+
+
+
+output
+
+
+
+    
+    3999999996
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Note
+
+
+In the first sample, we can simply take all three integers for a total sum of 6.
+
+In the second sample Wet Shark should take any four out of five integers 999 999 999.
+
+
+
+
+
+题意,n个数，每个数最多使用一次，问能得到的最大的偶数和是多少。
+思路：偶数不影响。偶数个奇数和还是偶数，不影响。奇数个奇数的时候把最小的奇数拿出来。
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年01月31日 星期日 22时02分34秒
+    File Name :code/cf/#341/A.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    
+    LL n;
+    LL a[N];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	cin>>n;
+    	int cnt = 0 ;
+    	LL minodd = inf;
+    	LL ans = 0 ;
+    	for ( int i = 0 ; i < n ; i++)
+    	{
+    	    scanf("%lld",&a[i]);
+    	    if (a[i]%2==1)
+    	    {
+    		cnt++;
+    		minodd = min(minodd,a[i]);
+    	    }
+    	    ans +=a[i];
+    	}
+    	if (cnt%2==1) ans-=minodd;
+    	cout<<ans<<endl;
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

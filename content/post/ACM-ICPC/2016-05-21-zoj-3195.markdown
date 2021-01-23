@@ -1,0 +1,163 @@
+---
+author: 111qqz
+date: 2016-05-21 08:31:20+00:00
+draft: false
+title: zoj 3195 Design the city （lca,dfs+rmq）
+type: post
+url: /2016/05/zoj-3195/
+categories:
+- ACM
+tags:
+- LCA
+- rmq
+---
+
+[zoj 3195题目链接](http://www.icpc.moe/onlinejudge/showProblem.do?problemId=3320)
+题意：求树上三点的最短距离。。。
+思路：两两求，和除以2.
+因为忘记初始化p=0..WA了将近两个小时。。。？
+妈的智障。
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年05月21日 星期六 14时44分39秒
+    File Name :code/zoj/3195.cpp
+    ************************************************ */
+    
+    
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=5E4+7;
+    int n,m;
+    vector < pi > edge[N];
+    int q;
+    int in[N];
+    int E[2*N],R[2*N],dis[N],depth[2*N];
+    int p;
+    int dp[2*N][20];
+    void dfs( int u,int dep,int d,int pre)
+    {
+    
+      //  cout<<"u:"<<u<<" dep:"<<dep<<" d:"<<d<<endl;
+        p++;
+        E[p] = u;
+        depth[p] = dep;
+        R[u] = p ;
+        dis[u] = d;
+    
+    
+        int siz = edge[u].size();
+        for ( int i = 0 ; i < siz ; i++)
+        {
+    	int v = edge[u][i].fst;
+    	if (v==pre) continue;
+    	dfs(v,dep+1,d+edge[u][i].sec,u);
+    
+    	p++;
+    	E[p] = u;
+    	depth[p] = dep;
+        }
+    }
+    
+    
+    
+    int _min( int l,int r)
+    {
+        if (depth[l]<depth[r]) return l;
+        return r;
+    }
+    void rmq_init()
+    {
+        for ( int i = 1 ; i <= 2*n+2 ; i++) dp[i][0] = i;
+    
+        for ( int j = 1 ; (1<<j) <= 2*n+2 ; j++)
+    	for ( int i = 1 ; i + (1<<j)-1 <= 2*n+2 ; i++)
+    	dp[i][j] = _min(dp[i][j-1],dp[i+(1<<(j-1))][j-1]);
+    }
+    
+    int rmq_min( int l,int r)
+    {
+        if (l>r) swap(l,r);
+        int k = 0 ;
+        while (1<<(k+1)<=r-l+1) k++;
+        return _min(dp[l][k],dp[r-(1<<k)+1][k]);
+    }
+    int solve (int x,int y)
+    {
+        int LCA = E[rmq_min(R[x],R[y])];
+        int res = dis[x] + dis[y] - 2 * dis[LCA];
+        return res;
+    }
+    int main()
+    {
+        #ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	
+    	ms(in,0);
+    	bool ok = false;
+    	while (~scanf("%d",&n)){
+    	    if (ok) puts("");
+    	    ok = true;
+    	    for ( int i = 0 ; i <= n ; i++) edge[i].clear();
+    	    for ( int i = 1 ; i <= n-1 ; i++)
+    	    {
+    		int u,v,w;
+    		scanf("%d%d%d",&u,&v,&w);
+    		edge[u].push_back(make_pair(v,w));
+    		edge[v].push_back(make_pair(u,w));
+    	    }
+    
+    
+    	    p = 0 ;
+    	    dfs(0,0,0,-1);
+    	    rmq_init();
+    
+    	    scanf("%d",&q);
+    	    while (q--)
+    	    {
+    		int x,y,z;
+    		scanf("%d%d%d",&x,&y,&z);
+    		int ans = solve(x,y)+solve(x,z)+solve(y,z);
+    		printf("%d\n",ans/2);
+    	    }
+    	}
+    
+    #ifndef ONLINE_JUDGE  
+    	fclose(stdin);
+    #endif
+        return 0;
+    }
+    
+
+
+
+

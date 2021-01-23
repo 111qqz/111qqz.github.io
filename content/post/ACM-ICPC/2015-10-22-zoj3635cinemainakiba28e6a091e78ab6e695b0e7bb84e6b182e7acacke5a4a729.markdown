@@ -1,0 +1,277 @@
+---
+author: 111qqz
+date: 2015-10-22 02:54:00+00:00
+draft: false
+title: zoj 3635  Cinema in Akiba (树状数组求第K大)
+type: post
+url: /2015/10/zoj3635cinemainakibak/
+categories:
+- ACM
+---
+
+
+
+
+
+
+
+_Cinema in Akiba_
+
+
+
+
+_Cinema in Akiba (CIA)_ is a small but very popular cinema in _Akihabara_. Every night the cinema is full of people. The layout of _CIA_ is very interesting, as there is only one row so that every audience can enjoy the wonderful movies without any annoyance by other audiences sitting in front of him/her.
+
+
+
+
+The ticket for _CIA_ is strange, too. There are n seats in _CIA_ and they are numbered from 1 to n in order. Apparently, n tickets will be sold everyday. When buying a ticket, if there are k tickets left, your ticket number will be an integer i (1 ≤ i ≤ k), and you should choose theith empty seat (not occupied by others) and sit down for the film.
+
+
+
+
+On November, 11th, n geeks go to _CIA_ to celebrate their anual festival. The ticket number of the ith geek is ai. Can you help them find out their seat numbers?
+
+
+
+
+
+
+
+
+
+
+
+
+
+Input
+
+
+
+
+
+
+
+The input contains multiple test cases. Process to end of file.  
+The first line of each case is an integer n (1 ≤ n ≤ 50000), the number of geeks as well as the number of seats in _CIA_. Then follows a line containing n integers a1, a2, ..., an (1 ≤ ai ≤ n - i + 1), as described above. The third line is an integer m (1 ≤ m ≤ 3000), the number of queries, and the next line is m integers, q1, q2, ..., qm (1 ≤ qi ≤ n), each represents the geek's number and you should help him find his seat.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Output
+
+
+
+
+
+
+
+For each test case, print m integers in a line, seperated by one space. The ith integer is the seat number of the qith geek.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sample Input
+
+
+
+
+
+
+    
+    3
+    1 1 1
+    3
+    1 2 3
+    5
+    2 3 3 2 1
+    5
+    2 3 4 5 1
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sample Output
+
+
+
+
+
+
+    
+    1 2 3
+    4 5 3 1 2<br></br><br></br>思路比较清晰。<br></br>树状数组+二分<br></br>具体见注释
+
+
+
+
+![](https://111qqz.com/wp-content/uploads/2015/11/ContractedBlock33.gif)
+![](https://111qqz.com/wp-content/uploads/2015/11/ExpandedBlockStart33.gif)
+
+
+
+
+
+    
+    <span style="color: #008080;">  1</span> <span style="color: #008000;">/*</span><span style="color: #008000;">************************************************************************
+    </span><span style="color: #008080;">  2</span> <span style="color: #008000;">    > File Name: code/zoj/3635.cpp
+    </span><span style="color: #008080;">  3</span> <span style="color: #008000;">    > Author: 111qqz
+    </span><span style="color: #008080;">  4</span> <span style="color: #008000;">    > Email: rkz2013@126.com 
+    </span><span style="color: #008080;">  5</span> <span style="color: #008000;">    > Created Time: 2015年10月22日 星期四 10时03分36秒
+    </span><span style="color: #008080;">  6</span> <span style="color: #008000;"> ***********************************************************************</span><span style="color: #008000;">*/</span>
+    <span style="color: #008080;">  7</span> 
+    <span style="color: #008080;">  8</span> #include<iostream>
+    <span style="color: #008080;">  9</span> #include<iomanip>
+    <span style="color: #008080;"> 10</span> #include<cstdio>
+    <span style="color: #008080;"> 11</span> #include<algorithm>
+    <span style="color: #008080;"> 12</span> #include<cmath>
+    <span style="color: #008080;"> 13</span> #include<cstring>
+    <span style="color: #008080;"> 14</span> #include<<span style="color: #0000ff;">string</span>>
+    <span style="color: #008080;"> 15</span> #include<map>
+    <span style="color: #008080;"> 16</span> #include<<span style="color: #0000ff;">set</span>>
+    <span style="color: #008080;"> 17</span> #include<queue>
+    <span style="color: #008080;"> 18</span> #include<vector>
+    <span style="color: #008080;"> 19</span> #include<stack>
+    <span style="color: #008080;"> 20</span> #include<cctype>
+    <span style="color: #008080;"> 21</span>                  
+    <span style="color: #008080;"> 22</span> <span style="color: #0000ff;">#define</span> yn hez111qqz
+    <span style="color: #008080;"> 23</span> <span style="color: #0000ff;">#define</span> j1 cute111qqz
+    <span style="color: #008080;"> 24</span> <span style="color: #0000ff;">#define</span> ms(a,x) memset(a,x,sizeof(a))
+    <span style="color: #008080;"> 25</span> <span style="color: #0000ff;">using</span> <span style="color: #0000ff;">namespace</span><span style="color: #000000;"> std;
+    </span><span style="color: #008080;"> 26</span> <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> dx4[<span style="color: #800080;">4</span>]={<span style="color: #800080;">1</span>,<span style="color: #800080;">0</span>,<span style="color: #800080;">0</span>,-<span style="color: #800080;">1</span><span style="color: #000000;">};
+    </span><span style="color: #008080;"> 27</span> <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> dy4[<span style="color: #800080;">4</span>]={<span style="color: #800080;">0</span>,-<span style="color: #800080;">1</span>,<span style="color: #800080;">1</span>,<span style="color: #800080;">0</span><span style="color: #000000;">};
+    </span><span style="color: #008080;"> 28</span> typedef <span style="color: #0000ff;">long</span> <span style="color: #0000ff;">long</span><span style="color: #000000;"> LL;
+    </span><span style="color: #008080;"> 29</span> typedef <span style="color: #0000ff;">double</span><span style="color: #000000;"> DB;
+    </span><span style="color: #008080;"> 30</span> <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> inf = <span style="color: #800080;">0x3f3f3f3f</span><span style="color: #000000;">;
+    </span><span style="color: #008080;"> 31</span> <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> N=5E5+<span style="color: #800080;">7</span><span style="color: #000000;">;
+    </span><span style="color: #008080;"> 32</span> <span style="color: #0000ff;">int</span><span style="color: #000000;"> t[N],a[N];
+    </span><span style="color: #008080;"> 33</span> <span style="color: #0000ff;">int</span><span style="color: #000000;"> ans[N],k;
+    </span><span style="color: #008080;"> 34</span> <span style="color: #0000ff;">int</span><span style="color: #000000;"> n,m;
+    </span><span style="color: #008080;"> 35</span> 
+    <span style="color: #008080;"> 36</span> 
+    <span style="color: #008080;"> 37</span> <span style="color: #0000ff;">int</span> lowbit( <span style="color: #0000ff;">int</span><span style="color: #000000;"> x)
+    </span><span style="color: #008080;"> 38</span> <span style="color: #000000;">{
+    </span><span style="color: #008080;"> 39</span>     <span style="color: #0000ff;">return</span> x&(-<span style="color: #000000;">x);
+    </span><span style="color: #008080;"> 40</span> <span style="color: #000000;">}
+    </span><span style="color: #008080;"> 41</span> <span style="color: #0000ff;">void</span> update ( <span style="color: #0000ff;">int</span> x,<span style="color: #0000ff;">int</span><span style="color: #000000;"> delta)
+    </span><span style="color: #008080;"> 42</span> <span style="color: #000000;">{
+    </span><span style="color: #008080;"> 43</span>     <span style="color: #0000ff;">for</span> ( <span style="color: #0000ff;">int</span> i = x ; i <= n ; i = i +<span style="color: #000000;"> lowbit(i))
+    </span><span style="color: #008080;"> 44</span> <span style="color: #000000;">    {
+    </span><span style="color: #008080;"> 45</span>     t[i] = t[i] +<span style="color: #000000;"> delta;
+    </span><span style="color: #008080;"> 46</span> <span style="color: #000000;">    }
+    </span><span style="color: #008080;"> 47</span> <span style="color: #000000;">}
+    </span><span style="color: #008080;"> 48</span> 
+    <span style="color: #008080;"> 49</span> <span style="color: #0000ff;">int</span> sum( <span style="color: #0000ff;">int</span><span style="color: #000000;"> x)
+    </span><span style="color: #008080;"> 50</span> <span style="color: #000000;">{
+    </span><span style="color: #008080;"> 51</span>     <span style="color: #0000ff;">int</span> res = <span style="color: #800080;">0</span><span style="color: #000000;"> ; 
+    </span><span style="color: #008080;"> 52</span>     <span style="color: #0000ff;">for</span> ( <span style="color: #0000ff;">int</span> i = x; i >= <span style="color: #800080;">1</span> ; i = i -<span style="color: #000000;"> lowbit(i))
+    </span><span style="color: #008080;"> 53</span> <span style="color: #000000;">    {
+    </span><span style="color: #008080;"> 54</span>     res = res +<span style="color: #000000;"> t[i];
+    </span><span style="color: #008080;"> 55</span> <span style="color: #000000;">    }
+    </span><span style="color: #008080;"> 56</span>     <span style="color: #0000ff;">return</span><span style="color: #000000;"> res;
+    </span><span style="color: #008080;"> 57</span> <span style="color: #000000;">}
+    </span><span style="color: #008080;"> 58</span> 
+    <span style="color: #008080;"> 59</span> <span style="color: #0000ff;">int</span> bin_search(<span style="color: #0000ff;">int</span> l,<span style="color: #0000ff;">int</span><span style="color: #000000;"> r)
+    </span><span style="color: #008080;"> 60</span> <span style="color: #000000;">{
+    </span><span style="color: #008080;"> 61</span>     <span style="color: #0000ff;">while</span> (l<<span style="color: #000000;">r)
+    </span><span style="color: #008080;"> 62</span> <span style="color: #000000;">    {
+    </span><span style="color: #008080;"> 63</span>     <span style="color: #0000ff;">int</span> mid = (l+r)>><span style="color: #800080;">1</span><span style="color: #000000;">;
+    </span><span style="color: #008080;"> 64</span>     <span style="color: #0000ff;">if</span> (sum(mid)<<span style="color: #000000;">k)
+    </span><span style="color: #008080;"> 65</span>         l = mid + <span style="color: #800080;">1</span><span style="color: #000000;">;
+    </span><span style="color: #008080;"> 66</span>     <span style="color: #0000ff;">else</span> r =<span style="color: #000000;"> mid ;
+    </span><span style="color: #008080;"> 67</span> <span style="color: #000000;">    }
+    </span><span style="color: #008080;"> 68</span>     <span style="color: #0000ff;">return</span><span style="color: #000000;"> r;
+    </span><span style="color: #008080;"> 69</span> <span style="color: #000000;">}
+    </span><span style="color: #008080;"> 70</span> <span style="color: #0000ff;">int</span><span style="color: #000000;"> main()
+    </span><span style="color: #008080;"> 71</span> <span style="color: #000000;">{
+    </span><span style="color: #008080;"> 72</span> <span style="color: #000000;">  #ifndef  ONLINE_JUDGE 
+    </span><span style="color: #008080;"> 73</span>    freopen(<span style="color: #800000;">"</span><span style="color: #800000;">in.txt</span><span style="color: #800000;">"</span>,<span style="color: #800000;">"</span><span style="color: #800000;">r</span><span style="color: #800000;">"</span><span style="color: #000000;">,stdin);
+    </span><span style="color: #008080;"> 74</span>   <span style="color: #0000ff;">#endif</span>
+    <span style="color: #008080;"> 75</span> 
+    <span style="color: #008080;"> 76</span>    <span style="color: #0000ff;">while</span> (scanf(<span style="color: #800000;">"</span><span style="color: #800000;">%d</span><span style="color: #800000;">"</span>,&n;)!=<span style="color: #000000;">EOF)
+    </span><span style="color: #008080;"> 77</span> <span style="color: #000000;">    {
+    </span><span style="color: #008080;"> 78</span>     
+    <span style="color: #008080;"> 79</span>     ms(t,<span style="color: #800080;">0</span><span style="color: #000000;">);
+    </span><span style="color: #008080;"> 80</span>     ms(ans,<span style="color: #800080;">0</span><span style="color: #000000;">);
+    </span><span style="color: #008080;"> 81</span>     ms(a,<span style="color: #800080;">0</span><span style="color: #000000;">);
+    </span><span style="color: #008080;"> 82</span>     <span style="color: #0000ff;">for</span> ( <span style="color: #0000ff;">int</span> i = <span style="color: #800080;">1</span> ; i <= n ; i++) update(i,<span style="color: #800080;">1</span>);  <span style="color: #008000;">//</span><span style="color: #008000;">1表示没有被占，初始所有位置都没有被占。</span>
+    <span style="color: #008080;"> 83</span> 
+    <span style="color: #008080;"> 84</span>     <span style="color: #0000ff;">for</span> ( <span style="color: #0000ff;">int</span> i =  <span style="color: #800080;">1</span> ; i <= n ; i++<span style="color: #000000;">)
+    </span><span style="color: #008080;"> 85</span> <span style="color: #000000;">    {
+    </span><span style="color: #008080;"> 86</span>     
+    <span style="color: #008080;"> 87</span>         scanf(<span style="color: #800000;">"</span><span style="color: #800000;">%d</span><span style="color: #800000;">"</span>,&k;);            <span style="color: #008000;">//</span><span style="color: #008000;">每次要占第k个没有被占的位置，由于被占的位置被设置成0,所以就是找第k大的。</span>
+    <span style="color: #008080;"> 88</span>         
+    <span style="color: #008080;"> 89</span>         <span style="color: #0000ff;">int</span> posi = bin_search(<span style="color: #800080;">1</span><span style="color: #000000;">,n);
+    </span><span style="color: #008080;"> 90</span>         ans[i] =<span style="color: #000000;">posi;
+    </span><span style="color: #008080;"> 91</span>         update(posi,-<span style="color: #800080;">1</span>);    <span style="color: #008000;">//</span><span style="color: #008000;">将被占的位置设置成0</span>
+    <span style="color: #008080;"> 92</span> 
+    <span style="color: #008080;"> 93</span> <span style="color: #000000;">    }
+    </span><span style="color: #008080;"> 94</span> 
+    <span style="color: #008080;"> 95</span> 
+    <span style="color: #008080;"> 96</span> 
+    <span style="color: #008080;"> 97</span> 
+    <span style="color: #008080;"> 98</span>     scanf(<span style="color: #800000;">"</span><span style="color: #800000;">%d</span><span style="color: #800000;">"</span>,&<span style="color: #000000;">m);
+    </span><span style="color: #008080;"> 99</span>     <span style="color: #0000ff;">int</span><span style="color: #000000;"> x;
+    </span><span style="color: #008080;">100</span>     <span style="color: #0000ff;">for</span> ( <span style="color: #0000ff;">int</span> i = <span style="color: #800080;">1</span> ; i < m ; i++<span style="color: #000000;">)
+    </span><span style="color: #008080;">101</span> <span style="color: #000000;">    {
+    </span><span style="color: #008080;">102</span>         scanf(<span style="color: #800000;">"</span><span style="color: #800000;">%d</span><span style="color: #800000;">"</span>,&<span style="color: #000000;">x);
+    </span><span style="color: #008080;">103</span>         printf(<span style="color: #800000;">"</span><span style="color: #800000;">%d </span><span style="color: #800000;">"</span><span style="color: #000000;">,ans[x]);
+    </span><span style="color: #008080;">104</span> <span style="color: #000000;">    }
+    </span><span style="color: #008080;">105</span>     scanf(<span style="color: #800000;">"</span><span style="color: #800000;">%d</span><span style="color: #800000;">"</span>,&<span style="color: #000000;">x);
+    </span><span style="color: #008080;">106</span>     printf(<span style="color: #800000;">"</span><span style="color: #800000;">%dn</span><span style="color: #800000;">"</span><span style="color: #000000;">,ans[x]);
+    </span><span style="color: #008080;">107</span>     
+    <span style="color: #008080;">108</span> <span style="color: #000000;">    }
+    </span><span style="color: #008080;">109</span>   
+    <span style="color: #008080;">110</span>    
+    <span style="color: #008080;">111</span> <span style="color: #000000;"> #ifndef ONLINE_JUDGE  
+    </span><span style="color: #008080;">112</span> <span style="color: #000000;">  fclose(stdin);
+    </span><span style="color: #008080;">113</span>   <span style="color: #0000ff;">#endif</span>
+    <span style="color: #008080;">114</span>     <span style="color: #0000ff;">return</span> <span style="color: #800080;">0</span><span style="color: #000000;">;
+    </span><span style="color: #008080;">115</span> }
+
+
+
+
+
+View Code
+
+
+
+
+
+
+
+
+

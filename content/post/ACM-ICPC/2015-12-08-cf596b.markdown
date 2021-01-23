@@ -1,0 +1,96 @@
+---
+author: 111qqz
+date: 2015-12-08 10:06:44+00:00
+draft: false
+title: cf 596 B. Wilbur and Array
+type: post
+url: /2015/12/cf596b/
+categories:
+- ACM
+tags:
+- greedy
+---
+
+http://codeforces.com/problemset/problem/596/B
+题意：初始序列全为0，问经过多少次变换，能变成序列b。一次变换是指，选定一个i，从i一直到最后每个元素都增加1，或者每个元素都减少1.
+思路：很容易发现。后面的变换补影响前面的变换。每一个数字可以唯一由之前的增加和减少次数决定。所以我们用两个变量，记录之前做的增加和减少变换的次数。然后扫一遍即可。
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2015年12月08日 星期二 17时53分58秒
+    File Name :code/cf/problem/596B.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=2E5+7;
+    int n;
+    LL a[N],b[N];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	ms(a,0);
+    	cin>>n;
+    	for ( int i = 0 ; i < n ;i++) cin>>b[i];
+    
+    	LL add = 0,minus = 0;
+    	LL cnt = 0 ;
+    	for ( int i = 0 ; i < n ;i++)
+    	{
+    	    a[i] = add-minus;
+    	    if (a[i]==b[i]) continue;
+    	    if (a[i]>b[i])
+    	    {
+    		minus += a[i]-b[i];
+    		cnt += a[i]-b[i];
+    	//	a[i] = b[i];
+    	    }
+    	    else
+    	    {
+    		add +=b[i]-a[i];
+    		//a[i] = b[i];
+    		cnt += b[i]-a[i];
+    	    }
+    	}
+    	cout<<cnt<<endl;
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+

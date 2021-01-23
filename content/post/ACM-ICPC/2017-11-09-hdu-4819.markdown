@@ -1,0 +1,374 @@
+---
+author: 111qqz
+date: 2017-11-09 12:59:36+00:00
+draft: false
+title: hdu 4819  2013 Asia Regional Changchun  G  (四叉树|| 二维线段树单点更新 模板题)
+type: post
+url: /2017/11/hdu-4819/
+categories:
+- ACM
+tags:
+- 二维线段树
+- 四叉树
+---
+
+http://acm.hdu.edu.cn/showproblem.php?pid=4819
+
+
+
+# 题意：
+
+
+
+给你一个n*n的矩阵， 每个点是一个数字， Q个操作，每次选择一个子矩阵， 把中心元素替换成子矩阵中最大值和最小值之和的二分之一。
+
+
+
+
+
+# 思路:
+
+
+
+显然是一个二维线段树.....
+
+然而菜鸡如我，并没有写过二维线段树啊？
+
+那怎么办呢
+
+<del>一首《凉凉》送给自己</del>
+
+
+
+
+
+然而我们还有四叉树2333
+
+2A，写错一个地方。第一次写四叉树，orz
+
+
+
+
+    
+    #include <bits/stdc++.h>
+    #define ms(a,x) memset(a,x,sizeof(a))
+    #define lowbit(x) (x&(-x))
+    using namespace std;
+    typedef long long LL;
+    const double eps = 1e-8;
+    const double PI = acos(-1.0);
+    const int N=805;
+    int n;
+    int a[N][N];
+    struct Tree
+    {
+        int mn,mx;
+        Tree()
+        {
+            mn = 1E9;
+            mx = 0;
+        }
+        void init()
+        {
+            mn = 1E9;
+            mx = 0;
+        }
+    }tree[N*10000];
+    int _max( int a,int b,int c,int d)
+    {
+        int ret = max(a,b);
+        ret = max(ret,c);
+        ret = max(ret,d);
+        return ret;
+    }
+    int _min( int a,int b,int c,int d)
+    {
+        int ret = min(a,b);
+        ret = min(ret,c);
+        ret = min(ret,d);
+        return ret;
+    }
+    void PushUp( int rt)
+    {
+    //  cout<<"rt:"<<rt<<endl;
+        tree[rt].mn = _min(tree[rt*4+1].mn,tree[rt*4+2].mn,tree[rt*4+3].mn,tree[rt*4+4].mn);
+        tree[rt].mx = _max(tree[rt*4+1].mx,tree[rt*4+2].mx,tree[rt*4+3].mx,tree[rt*4+4].mx);
+    }
+    
+    
+    void insert( int idx,int lx,int rx,int ly,int ry,int X,int Y,int val)
+    {
+    //  cout<<"val:"<<val<<endl;
+        if (lx==rx&&ly==ry)
+        {
+            tree[idx].mn = tree[idx].mx = val;
+    //      cout<<"fuck"<<" val:"<<val<<" mn:"<<tree[idx].mn <<" mx:"<<tree[idx];
+            return;
+        }
+        int mx = (lx+rx) >> 1;
+        int my = (ly+ry) >> 1;
+        if (X<=mx&&Y<=my) insert(idx*4+1,lx,mx,ly,my,X,Y,val);
+        if (X<=mx&&Y>=my+1) insert(idx*4+2,lx,mx,my+1,ry,X,Y,val);
+        if (X>=mx+1&&Y<=my) insert(idx*4+3,mx+1,rx,ly,my,X,Y,val);
+        if (X>=mx+1&&Y>=my+1) insert(idx*4+4,mx+1,rx,my+1,ry,X,Y,val);
+    //  puts("miao");
+        PushUp(idx);
+    }
+    int queryMN( int idx,int lx,int rx,int ly,int ry,int Lx,int Rx,int Ly,int Ry)
+    {
+        if (Lx<=lx && Rx>=rx && Ly<=ly && Ry>=ry) return tree[idx].mn;
+        int mx = (lx+rx)>>1,my = (ly+ry)>>1,t=1E9;
+        if (Lx<=mx && Ly<=my)  t = min(t,queryMN(idx*4+1,lx,mx,ly,my,Lx,Rx,Ly,Ry));
+        if (Lx<=mx && Ry>my) t = min(t,queryMN(idx*4+2,lx,mx,my+1,ry,Lx,Rx,Ly,Ry));
+        if (Rx>mx  && Ly<=my) t = min (t,queryMN(idx*4+3,mx+1,rx,ly,my,Lx,Rx,Ly,Ry)); 
+        if (Rx>mx&&Ry>my) t = min (t,queryMN(idx*4+4,mx+1,rx,my+1,ry,Lx,Rx,Ly,Ry));
+        return t;
+    }
+    int queryMX( int idx,int lx,int rx,int ly,int ry,int Lx,int Rx,int Ly,int Ry)
+    {
+        if (Lx<=lx && Rx>=rx && Ly<=ly && Ry>=ry) return tree[idx].mx;
+        int mx = (lx+rx)>>1,my = (ly+ry)>>1,t=0;
+        if (Lx<=mx && Ly<=my)  t = max(t,queryMX(idx*4+1,lx,mx,ly,my,Lx,Rx,Ly,Ry));
+        if (Lx<=mx && Ry>my) t = max(t,queryMX(idx*4+2,lx,mx,my+1,ry,Lx,Rx,Ly,Ry));
+        if (Rx>mx  && Ly<=my) t = max (t,queryMX(idx*4+3,mx+1,rx,ly,my,Lx,Rx,Ly,Ry)); 
+        if (Rx>mx&&Ry>my) t = max(t,queryMX(idx*4+4,mx+1,rx,my+1,ry,Lx,Rx,Ly,Ry));
+        return t;
+    }
+    void init()
+    {
+        for ( int i = 0 ; i < 8E6 ; i++) tree[i].init();
+    }
+    int main(){
+    #ifdef YourCodeHasBug
+    //  freopen("in2","r",stdin);
+    #endif
+        int T;
+        cin>>T;
+        int cas = 0 ;
+        while (T--)
+        {
+            init();
+            scanf("%d",&n);
+            for ( int i = 1 ; i <= n ; i++)
+                for ( int j = 1 ; j <= n ; j++)
+                {
+                    scanf("%d",&a[i][j]);
+    //              cout<<"a[i][j]:"<<a[i][j]<<endl;
+                    insert(0,1,n,1,n,i,j,a[i][j]);
+                }
+    //      for ( int i = 0 ; i <= 20 ; i++) printf("tree_mn:%d mx:%d\n",tree[i].mn,tree[i].mx);
+            int m;
+            scanf("%d",&m);
+                printf("Case #%d:\n",++cas);
+            while (m--)
+            {
+                int x,y,L;
+                scanf("%d %d %d",&x,&y,&L);
+                int Lx = max(x-L/2,1);
+                int Rx = min(n,x+L/2);
+                int Ly = max(y-L/2,1);
+                int Ry = min(n,y+L/2);
+    //          printf("x:[%d,%d] y:[%d,%d]\n",Lx,Rx,Ly,Ry);
+                int mn = queryMN(0,1,n,1,n,Lx,Rx,Ly,Ry);
+                int mx = queryMX(0,1,n,1,n,Lx,Rx,Ly,Ry);
+                int newval = floor((mn+mx)/2);
+                //printf("mn:%d mx:%d %d\n",mn,mx,newval);
+                printf("%d\n",newval);
+                insert(0,1,n,1,n,x,y,newval);
+            }
+        }
+    #ifdef YourCodeHasBug
+        fclose(stdin);
+    #endif
+        return 0;
+    }
+    
+
+
+
+然后又写了一个二维线段树的版本，借鉴了kuangbin的写法，改成了自己习惯的代码风格。
+
+果然常数差好多。。。(据说是因为四叉树退化得厉害QAQ
+
+[![](https://111qqz.com/wordpress/wp-content/uploads/2017/11/深度截图_选择区域_20171110183111.png)
+](https://111qqz.com/wordpress/wp-content/uploads/2017/11/深度截图_选择区域_20171110183111.png)
+
+第三个是四叉树的做法，第二个是kuangbin 的 树套树版本的二维线段树
+
+第一个是我改写kuangbin代码之后的代码。
+
+可以看出，四叉树虽然好写好理解一点，但是时间上不太优秀啊....
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2017年11月10日 星期五 17时18分40秒
+    File Name :4819_2D.cpp
+     ************************************************ */
+    
+    #include <bits/stdc++.h>
+    #define PB push_back
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=803;
+    struct Treey
+    {
+        int l,r;
+        int Max,Min;
+    };
+    int n;
+    int rtx[N],rty[N] ; //rtx[i]表示横坐标为i的点属于哪棵线段树
+    struct  Treex
+    {
+        int l,r;
+        Treey treey[N<<2];
+        void build ( int _l,int _r,int rt)
+        {
+        treey[rt].l = _l;
+        treey[rt].r = _r;
+        treey[rt].Max = -inf;
+        treey[rt].Min = inf;
+        if (_l==_r)
+        {
+            rty[_l] = rt;
+            return;
+        }
+        int m = (_l + _r) / 2;
+        build (_l,m,rt<<1);
+        build(m+1,_r,rt<<1|1);
+        }
+        int QMin( int L,int R,int rt)
+        {
+        if (treey[rt].l >= L && treey[rt].r <= R) return treey[rt].Min;
+        int m = (treey[rt].l + treey[rt].r) / 2;
+        int ret = 1E9;
+        if (L<=m) ret = QMin(L,R,rt<<1);
+        if (R>=m+1) ret = min(ret,QMin(L,R,rt<<1|1));
+        return ret;
+        }
+        int QMax( int L,int R,int rt)
+        {
+        if (treey[rt].l >= L && treey[rt].r <= R) return treey[rt].Max;
+        int m = (treey[rt].l + treey[rt].r) / 2;
+        int ret = 0 ;
+        if (L<=m) ret = QMax (L,R,rt<<1);
+        if (R>=m+1) ret = max(ret,QMax(L,R,rt<<1|1));
+        return ret;
+        }
+    }treex[N<<2];
+    
+    void build (int l,int r,int rt)
+    {
+        treex[rt].l = l;
+        treex[rt].r = r;
+        treex[rt].build(1,n,1);
+        if (l==r)
+        {
+        rtx[l] = rt;
+        return;
+        }
+        int m = (l+r)>>1;
+        build (lson);
+        build (rson);
+    }
+    void update ( int x,int y,int val) //单点更新，更新a[x,y]到val
+    {
+        int rx = rtx[x];
+        int ry = rty[y];
+        treex[rx].treey[ry].Min = treex[rx].treey[ry].Max = val;
+        for ( int i = rx ; i ; i >>=1)
+        for ( int j = ry ; j ; j >>=1)
+        {
+            if (i==rx && j==ry) continue; //上面更新过了
+            if (j==ry)
+            {
+            treex[i].treey[j].Min = min(treex[i<<1].treey[j].Min,treex[i<<1|1].treey[j].Min);
+            treex[i].treey[j].Max = max(treex[i<<1].treey[j].Max,treex[i<<1|1].treey[j].Max);
+            }
+            else
+            {
+                treex[i].treey[j].Min = min(treex[i].treey[j<<1].Min,treex[i].treey[j<<1|1].Min);
+            treex[i].treey[j].Max = max(treex[i].treey[j<<1].Max,treex[i].treey[j<<1|1].Max);
+            }
+        }
+    }
+    int QMin( int L1,int R1,int L2,int R2,int rt)
+    {
+        if (treex[rt].l >= L1 && treex[rt].r <= R1) return treex[rt].QMin(L2,R2,1);
+        int m = (treex[rt].l + treex[rt].r)/2;
+        int ret = 1E9;
+        if (L1<=m) ret = QMin(L1,R1,L2,R2,rt<<1);
+        if (R1>=m+1) ret = min(ret,QMin(L1,R1,L2,R2,rt<<1|1));
+        return ret;
+    }
+    int QMax ( int L1,int R1,int L2,int R2,int rt)
+    {
+     //   printf("rt:%d l:%d r:%d  L1:%d R1:%d \n",rt,treex[rt].l,treex[rt].r,L1,R1);
+        if (treex[rt].l >= L1 && treex[rt].r <=R1) return treex[rt].QMax(L2,R2,1);
+        int m = (treex[rt].l + treex[rt].r) / 2;
+        int ret = 0 ;
+        if (L1<=m) ret = QMax(L1,R1,L2,R2,rt<<1);
+        if (R1>=m+1) ret = max(ret, QMax(L1,R1,L2,R2,rt<<1|1));
+        return ret;
+    }
+    
+    int main() 
+    {
+    #ifndef  ONLINE_JUDGE 
+        freopen("./in.txt","r",stdin);
+    #endif
+        int T,cas=0;
+        cin>>T;
+        while (T--)
+        {
+        printf("Case #%d:\n",++cas);
+        scanf("%d",&n);
+        build (1,n,1);
+        for ( int i = 1 ; i  <= n ; i++)
+            for ( int j = 1; j <= n ; j++)
+            {
+            int x;
+            scanf("%d",&x);
+            update(i,j,x);
+            }
+        int q;
+        scanf("%d",&q);
+        while (q--)
+        {
+            int x,y,L;
+            scanf("%d %d %d",&x,&y,&L);
+            int L1 = max(x-L/2,1);
+            int R1 = min(x+L/2,n);
+            int L2 = max(y-L/2,1);
+            int R2 = min(y+L/2,n);
+    //      printf("[%d,%d] [%d,%d]\n",L1,R1,L2,R2);
+            int Mx = QMax(L1,R1,L2,R2,1);
+            int Mn = QMin(L1,R1,L2,R2,1);
+            int val = floor((Mx+Mn)/2);
+            printf("%d\n",val);
+            update(x,y,val);
+        }
+        }   
+    #ifndef ONLINE_JUDGE  
+        fclose(stdin);
+    #endif
+        return 0;
+    }
+    
+
+
+
+

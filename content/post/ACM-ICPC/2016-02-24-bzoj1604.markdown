@@ -1,0 +1,269 @@
+---
+author: 111qqz
+date: 2016-02-24 13:07:01+00:00
+draft: false
+title: 'bzoj 1604: [Usaco2008 Open]Cow Neighborhoods 奶牛的邻居 (曼哈顿距离的转化【拆点】+set+并查集)'
+type: post
+url: /2016/02/bzoj1604/
+categories:
+- ACM
+tags:
+- map
+- set
+- 并查集
+- 拆点
+- 曼哈顿距离
+---
+
+http://www.lydsy.com/JudgeOnline/problem.php?id=1604
+题意：了解奶牛们的人都知道，奶牛喜欢成群结队．观察约翰的N(1≤N≤100000)只奶牛，你会发现她们已经结成了几个“群”．每只奶牛在吃草的时候有一个独一无二的位置坐标Xi，Yi(l≤Xi，Yi≤[1．.10^9]；Xi，Yi∈整数．当满足下列两个条件之一，两只奶牛i和j是属于同一个群的：
+1．两只奶牛的曼哈顿距离不超过C(1≤C≤10^9)，即lXi - xil+IYi - Yil≤C.
+2．两只奶牛有共同的邻居．即，存在一只奶牛k，使i与k，j与k均同属一个群．
+给出奶牛们的位置，请计算草原上有多少个牛群，以及最大的牛群里有多少奶牛
+
+
+### 思路：一开始并没有什么思路...**入手点是关于曼哈顿距离的转化。**
+
+
+
+
+<blockquote>
+
+> 
+> <blockquote>
+
+>> 
+>> 先看曼哈顿距离的定义
+>> 
+>> 
+
+>> 
+>> |x1−x2|+|y1−y2|
+>> 
+>> 
+
+>> 
+>> 拆绝对值
+>> 
+>> 
+
+>> 
+>> x1−x2+y1−y2或x1−x2+y2−y1
+>> 
+>> 
+
+>> 
+>> x2−x1+y1−y2或x2−x1+y2−y1
+>> 
+>> 
+
+>> 
+>> 即|x1+y1−(x2+y2)|或|x1−y1−(x2−y2)|
+>> 
+>> 
+
+>> 
+>> 设x1+y1为x′，x1−y1为y′
+>> 
+>> 
+
+>> 
+>> 则|x1′−x2′|或|y1′−y2′|
+>> 
+>> 
+
+>> 
+>> 所以原要求1转化为
+>> 
+>> 
+
+>> 
+>> max(|x1′−x2′|,|y1′−y2′|)<=c
+>> 
+>> 
+</blockquote>
+> 
+> 
+</blockquote>
+
+
+引用自：http://blog.csdn.net/wzq_QwQ/article/details/47746091
+
+
+
+这样就有思路了。如果两个点属于同一个群，那么必须这两个点的x的差在c范围内，并且两个点的y的差也在范围内。 我们可以先按照一个 坐标排序，不妨以x为关键字排序，然后维护一段点的序列，使得这段序列中的所有的点的横坐标（其实就是最大减去最小）的差都在c范围内。然后对于序列中的所有点，我们想要知道有没有群“接纳”最新加入的点，二分找到比当前新加入点的纵坐标大的最小值和比当前新加入点的纵坐标小的最大值（set的lower_bound 第一次用），判断是否满足纵坐标的差在c的范围内。如果是，则用并差集合合并一下。
+
+用multiset的原因是经过变换后点的坐标可能重复，以及multiset删除元素的时候不能直接删，因为会把所有相同的值删掉。
+
+
+
+重要的话再说一遍：这道题最关键也是最大的收货就是，关于曼哈顿距离的变换。
+
+
+
+
+## 
+
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月24日 星期三 13时36分09秒
+    File Name :code/bzoj/1604.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const LL linf =1E17;
+    const int N=1E5+7;
+    int n;
+    int father[N];
+    struct point
+    {
+        LL x,y;
+        int id; //合并的时候需要用到原来的序号
+        point (){}
+        point (LL _x,LL _y,int _id):x(_x),y(_y),id(_id){};
+    
+        bool operator<(point b)const
+        {
+    	return y<b.y;
+        }
+    }p[N];
+    LL c;
+    
+    multiset<point>se;  //因为变换坐标后可能有相同的蒂娜所以要用multiset...?
+    multiset<point>::iterator it,it2;
+    
+    queue<point>q;
+    
+    
+    int cnt[N];
+    int total;
+    bool cmp(point a,point b)
+    {
+        return a.x<b.x;
+    }
+    void init()
+    {
+        ms(cnt,0);
+        ms(father,0);
+        for ( int i = 1 ; i <N ; i++) father[i] =  i;
+    
+        total = n ;
+    }
+    
+    int root( int x)
+    {
+        if (x==father[x]) return x;
+        else return father[x]=root(father[x]);
+    }
+    
+    void merge(int x,int y)
+    {
+        int rx=root(x);
+        int ry=root(y);
+        if (rx!=ry) father[rx]=ry,total--;
+    }
+    
+    LL labs(LL x)
+    {
+        if (x>0) return x;
+        else return -x;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	ios::sync_with_stdio(false);
+    
+    	cin>>n>>c;
+    	init();
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    LL x,y;
+    	    cin>>x>>y;
+    	    p[i]=point(x+y,x-y,i);
+    	}
+    
+    	sort(p+1,p+n+1,cmp);
+         
+    	se.insert((point){0,linf,0});
+    	se.insert((point){0,-linf,0});
+    	se.insert(p[1]);
+    	int head = 1;
+    
+    	for ( int i = 2 ; i <= n ; i++)
+    	{
+    	    while (p[i].x-p[head].x>c)
+    	    {
+    		se.erase(se.find(p[head]));  //注意multiset删除元素的时候的写法...写erase(p[head])的话会把所有相同的都删了
+    		head++;
+    //		cout<<"head:"<<head<<endl;
+    	    }
+    //	    cout<<"sad"<<endl;
+    	    
+    
+    	    it = se.lower_bound(p[i]);
+    	    it2 = it;
+    	    it2--;
+    	    if (labs(it->y-p[i].y)<=c) merge(it->id,p[i].id);
+    	    if (labs(it2->y-p[i].y)<=c) merge(it2->id,p[i].id);
+    
+    	    se.insert(p[i]);
+    	}
+    
+    
+    	for ( int i = 1 ;i <= n ; i++) 
+    	    cnt[root(i)]++;
+    
+    	int mx = -1;
+    	for ( int i = 1 ; i <= n ; i++)
+    	    mx = max(mx,cnt[i]);
+    
+    	cout<<total<<" "<<mx<<endl;
+    
+    
+    
+    
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

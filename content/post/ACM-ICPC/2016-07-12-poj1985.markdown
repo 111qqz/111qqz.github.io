@@ -1,0 +1,149 @@
+---
+author: 111qqz
+date: 2016-07-12 04:07:00+00:00
+draft: false
+title: poj 1985 Cow Marathon (树的直径模板题)
+type: post
+url: /2016/07/poj1985/
+categories:
+- ACM
+tags:
+- 树的直径
+---
+
+[poj1985](http://poj.org/problem?id=1985)
+题意：求树上两点的最长距离。。。也就是传说中的树的直径。。。
+
+
+<blockquote>思路： **两遍BFS :先任选一个起点BFS找到最长路的终点，再从终点进行BFS，则第二次BFS找到的最长路即为树的直径；**
+原理: 设起点为u,第一次BFS找到的终点v一定是树的直径的一个端点
+证明: 1) 如果u 是直径上的点，则v显然是直径的终点(因为如果v不是的话，则必定存在另一个点w使得u到w的距离更长，则于BFS找到了v矛盾)
+2) 如果u不是直径上的点，则u到v必然于树的直径相交(反证),那么交点到v 必然就是直径的后半段了
+所以v一定是直径的一个端点，所以从v进行BFS得到的一定是直径长度</blockquote>
+
+
+
+
+[参考博客](http://www.cnblogs.com/hanyulcf/archive/2010/10/23/tree_radius.html)
+
+
+
+<del>实际写的时候，第一次bfs最后一个出队的点就是直径的一个端点。。。
+</del>
+好像错了。。。还是稳妥一点。。。最后扫一遍。。距离最远的一定是端点。。。
+然后因为题目没有数据范围。。。？re多次orz。。。
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年07月12日 星期二 11时26分41秒
+    File Name :code/poj/1985.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=4E4+5;
+    int n,m;
+    vector < pi >edge[N];
+    int d[N];
+    int lst;
+    int ans;
+    bool vis[N];
+    
+    void bfs( int s)
+    {
+        ms(vis,false);
+        ms(d,0x3f);
+        
+        queue<int>q;
+        q.push(s);
+        d[s] = 0 ;
+        vis[s] = true;
+    
+        while (!q.empty())
+        {
+    	int u = q.front(); q.pop();
+    	int siz = edge[u].size();
+    	lst = u ;
+    
+    	for ( int i = 0 ; i < siz;  i++)
+    	{
+    	    int v = edge[u][i].fst;
+    	    if (vis[v]) continue;
+    	    vis[v] = true;
+    	    d[v] = d[u] + edge[u][i].sec;
+    	    ans = max(ans,d[v]);
+    	    q.push(v);
+    	}
+        }
+        int mx = 0;
+     /*   for ( int i = 1 ; i <= n ; i++)
+        {
+    	if (d[i]>mx)
+    	{
+    	    mx = d[i];
+    	    lst = i ;
+    	}
+        }  */
+    
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	cin>>n>>m;
+    	for ( int i = 1 ; i <= n ; i++) edge[i].clear();
+    	for ( int i = 1 ; i <= m ; i++)
+    	{
+    	    int u,v,w;
+    	    char dir;
+    	    scanf("%d %d %d %c",&u,&v,&w,&dir); //dir这东西有用？
+    	    edge[u].push_back(make_pair(v,w));
+    	    edge[v].push_back(make_pair(u,w));
+    	}
+    
+    	ans = inf;
+    	bfs(1);
+    	ans = 0;
+    //	cout<<"lst:"<<lst<<endl;
+    	bfs(lst);
+    	cout<<ans<<endl;
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

@@ -1,0 +1,102 @@
+---
+author: 111qqz
+date: 2016-02-27 17:30:18+00:00
+draft: false
+title: bzoj 1607 [Usaco2008 Dec]Patting Heads 轻拍牛头 （筛法）
+type: post
+url: /2016/02/bzoj1607/
+categories:
+- ACM
+tags:
+- math
+- 筛法
+---
+
+http://www.lydsy.com/JudgeOnline/problem.php?id=1607
+
+题意：n个数，求对于每个数来说，其他n-1个数中是它约数的数的个数。
+
+思路：类似筛法，从小到大处理，数i对其所有倍数的数的答案有cnt[i]的贡献 。最后记得把自己是自己的约数的情况减掉。
+
+
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月28日 星期日 01时06分35秒
+    File Name :code/bzoj/1607.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    int n;
+    int a[N];
+    int cnt[N*10];
+    int ans[N*10];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    //	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	ms(cnt,0);
+    
+    	cin>>n;
+    	int mx = -1;
+    	for ( int i = 0 ; i < n ; i++)
+    	{
+    	    scanf("%d",&a[i]);
+    	    cnt[a[i]]++;
+    	    mx = max(mx,a[i]);
+    	}
+    
+    	for ( int i = 1 ; i <= mx; i++)
+    	    if (cnt[i])                       //类似筛法，对所有倍数都有贡献
+    		for ( int j = 1 ; j*i <= mx ; j++)
+    		    ans[j*i]+=cnt[i];
+    
+    	for ( int i = 0  ;i < n ; i++)
+    	    printf("%d\n",ans[a[i]]-1);//减去自己是自己约数的情况
+    
+    	
+    
+    
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

@@ -1,0 +1,230 @@
+---
+author: 111qqz
+date: 2017-11-13 18:02:49+00:00
+draft: false
+title: 'BZOJ 2565: 最长双回文串 (回文自动机)'
+type: post
+url: /2017/11/bzoj-2565/
+categories:
+- ACM
+tags:
+- 回文自动机
+---
+
+## Description
+
+
+
+
+
+
+
+
+顺序和逆序读起来完全一样的串叫做回文串。比如acbca是回文串，而abc不是（abc的顺序为“abc”，逆序为“cba”，不相同）。
+输入长度为n的串S，求S的最长双回文子串T,即可将T分为两部分X，Y，（|X|,|Y|≥1）且X和Y都是回文串。
+
+
+
+
+
+
+
+
+## Input
+
+
+
+
+
+
+
+一行由小写英文字母组成的字符串S。
+
+
+
+
+
+
+
+## Output
+
+
+
+
+
+
+
+
+一行一个整数，表示最长双回文子串的长度。
+
+
+
+
+
+
+
+
+## Sample Input
+
+
+
+
+
+baacaabbacabb
+
+
+
+
+
+
+## Sample Output
+
+
+
+
+
+12
+
+
+
+
+
+
+## HINT
+
+
+
+
+
+
+
+样例说明
+
+从第二个字符开始的字符串aacaabbacabb可分为aacaa与bbacabb两部分，且两者都是回文串。
+
+对于100%的数据，2≤|S|≤10^5
+
+2015.4.25新加数据一组
+
+
+
+
+
+
+
+## Source
+
+
+
+
+
+
+
+[2012国家集训队Round 1 day2](http://www.lydsy.com/JudgeOnline/problemset.php?search=2012Round1day2)
+
+
+
+
+
+
+
+
+
+
+
+# 思路：
+
+
+
+我们考虑增量构建PAM的时候
+
+构建到pos,当前的状态的len其实就是到以pos位置结尾的最长回文串的长度。
+
+那么我们只需要正着做一遍，再倒着做一遍，然后枚举断点就行了。
+
+时间复杂度O(n)
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2017年11月14日 星期二 01时01分03秒
+    File Name :2565.cpp
+    ************************************************ */
+    
+    #include <bits/stdc++.h>
+    #define PB push_back
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    struct PAM
+    {
+        int fail,cnt,len;
+        int nxt[26];
+    }st[N];
+    char S[N],RS[N];
+    int n,now,sz;
+    int Right[N],Left[N]; 
+    //right[i]表示以i结尾的最长回文串的长度
+    //left[i]表示以i开头的最长回文串的长度,需要反转母串构建PAM求得
+    void pam_init()
+    {
+        ms(st,0);
+        st[0].fail = st[1].fail = 1;
+        st[1].len = -1;
+        sz = 1;
+    }
+    void extend(char *S,int c,int pos,bool flag)  //忘记加*S这个参数了。。。以至于没有真正反着做orz
+    {
+        int p = now;
+        while (S[pos-st[p].len-1]!=S[pos]) p = st[p].fail;
+        if (!st[p].nxt[c]){
+        int np=++sz,q=st[p].fail;
+        st[np].len=st[p].len+2;
+        while (S[pos-st[q].len-1]!=S[pos]) q=st[q].fail;
+        st[np].fail=st[q].nxt[c];
+        st[p].nxt[c] = np;
+        }
+        now=st[p].nxt[c];
+        if (flag)
+        Right[pos]=st[now].len;
+        else Left[n-pos-1]=st[now].len;
+        st[now].cnt++;
+    }
+    int main()
+    {
+        #ifndef  ONLINE_JUDGE 
+    //  freopen("./in.txt","r",stdin);
+      #endif 
+        scanf("%s",S);
+        pam_init();
+        n = strlen(S);
+        for ( int i = 0 ; i < n; i++) extend(S,S[i]-'a',i,true),RS[n-i-1]=S[i];
+        pam_init();
+        for ( int i = 0 ; i < n; i++) extend(RS,RS[i]-'a',i,false);
+        int ans = 0 ;
+    //  for ( int i = 0 ; i < n ; i++) printf("Right:%d Left:%d\n",Right[i],Left[i]);
+        for ( int i = 0 ; i < n-1 ; i++) ans = max(ans,Right[i]+Left[i+1]); //枚举断点
+        printf("%d\n",ans);
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+

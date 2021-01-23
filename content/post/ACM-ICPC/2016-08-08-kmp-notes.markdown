@@ -1,0 +1,193 @@
+---
+author: 111qqz
+date: 2016-08-08 11:26:45+00:00
+draft: false
+title: KMP算法学习
+type: post
+url: /2016/08/kmp-notes/
+categories:
+- ACM
+tags:
+- kmp
+---
+
+**20170801update:当时竟然没有强调next函数的含义？**
+
+next[i]的含义是,i之前的整个前缀中，最长的该前缀的前缀和后缀相同的长度。
+
+看图：
+
+![](http://img.blog.csdn.net/20140725231726921)
+
+
+
+
+KMP感觉是我学到现在最难懂的一个算法了QAQ
+为什么你们都那么强啊，看几个小时就看懂了...
+
+
+
+先放一波我觉得值得看的资料：
+[kmp算法讲解](http://www.mathcs.emory.edu/~cheung/Courses/323/Syllabus/Text/Matching-KMP1.html)（配图比较全....）
+[kmp学习资料2](http://jakeboxer.com/blog/2009/12/13/the-knuth-morris-pratt-algorithm-in-my-own-words/)
+
+
+
+说下我对kmp算法的理解：
+
+理解kmp算法大概分成两个部分。
+
+**一部分是理解一个naive的kmp算法，可以叫"fast slide" algorithm**
+
+思想大概就是，当mismatch发生时，我们并不是一无所有，而是知道在mismatch发生前所匹配的字符的信息的。
+
+![](http://www.mathcs.emory.edu/~cheung/Courses/323/Syllabus/Text/FIGS/KMP/KMP03a.gif)
+
+
+然后知道这些信息我们可以做什么呢？
+
+先观察一下最最暴力的求解字符串匹配的算法：
+
+    
+    //***********************************************************
+    //brute force 
+     n = T.length();
+          m = P.length();
+    
+          i0 = 0;              // Line P up with the first character of T       
+          i = 0;               // Start matching with first char in T
+          j = 0;               // Start matching with first char in P
+    
+          while ( i < n )     // Not all characters used
+          {
+             if ( T[i] == P[j] )
+             {
+                /* ===============================================
+    	       T[i] and P[j] match ==> try next pair
+    	       =============================================== */
+                i++;           // Match next pair
+                j++;
+    
+                if ( j == m )
+                   return ( i0 );    // Match found at position i0 !!!
+             }
+             else
+             {  /* ===========================================
+                   T[i] ≠ P[j]:
+                      1. Slide P up 1 position
+    		  2. restart from beginning of string
+                   =========================================== */
+                i0 = i0 + 1;   // Slide pattern P one character further
+    
+                i  = i0;       // Restart matching at position i0 in T
+                j  = 0;        // Restart matching at position 0 in P
+             }
+          }
+    
+          return -1;           // Return not found
+       }
+
+
+这个算法低效在，当mismatch发生时，我只是往前移动了一个字符。
+
+[![Screenshot from 2016-08-08 21-03-22](https://111qqz.com/wordpress/wp-content/uploads/2016/08/Screenshot-from-2016-08-08-21-03-22.png)
+](https://111qqz.com/wordpress/wp-content/uploads/2016/08/Screenshot-from-2016-08-08-21-03-22.png)
+
+因此我们定义了 maxoverlap函数。。
+
+[![Screenshot from 2016-08-08 21-05-51](https://111qqz.com/wordpress/wp-content/uploads/2016/08/Screenshot-from-2016-08-08-21-05-51.png)
+](https://111qqz.com/wordpress/wp-content/uploads/2016/08/Screenshot-from-2016-08-08-21-05-51.png)
+
+**需要特别强调的是：**
+
+[![Screenshot from 2016-08-08 21-08-22](https://111qqz.com/wordpress/wp-content/uploads/2016/08/Screenshot-from-2016-08-08-21-08-22.png)
+](https://111qqz.com/wordpress/wp-content/uploads/2016/08/Screenshot-from-2016-08-08-21-08-22.png)
+
+
+
+
+
+这样我们就可以利用maxoverlap函数来优化当mismatch发生的时候，移动的过程。
+
+    
+      KMP( T,  P )
+       {
+          int i0, i, j, m, n;
+    
+          n = T.length();
+          m = P.length();
+    
+          i0 = 0;              // Line P up with the first character of T
+          i = 0;               // Start matching with first char in T
+          j = 0;               // Start matching with first char in P
+    
+          while ( i < n )     // Not all characters used
+          {
+             if ( T[i] == P[j] )
+             {
+                i++;           // Match next pair
+                j++;
+    
+                if ( j == m )
+                   return ( i0 );    // Match found atposition i0 !!!
+             }
+             else
+             {  /* ===========================================
+    	       T[i] ≠ P[j]
+                   =========================================== */
+    
+                 if ( j == 0 )
+    	     {  /* ==============================================
+    	           First character already mismatched
+    		   We have NO prefix info. to work with...
+    		   =============================================== */
+    	        i0++;        // Just slide P 1 character over
+    		i = i0;      //
+    		j = 0;
+                 }
+    	     else
+                 {
+    	        prefix = P[ 0..(j-1) ];  // Prefix of pattern at the mismatch    
+    
+    	        k = MaxOverlap( prefix );
+    
+    	        j = k;
+    	        i0 = (i - j);
+    		// i is unchanged !
+                 }
+             }
+          }
+    
+          return -1;           // No match found
+       }
+
+
+这样我们就得到了**"fast slide" algorithm算法**
+
+
+
+但是。。。能不能再给力一点呢
+
+[![再给力一点](https://111qqz.com/wordpress/wp-content/uploads/2016/08/再给力一点.png)
+](https://111qqz.com/wordpress/wp-content/uploads/2016/08/再给力一点.png)
+
+我们发现，上述代码中，我们每次都要计算一次maxoverlap函数...
+
+但是。 。一个字符串。。。它的子串个数是有限的。。。
+
+我们能不能加速这个过程呢。。。
+
+很容易想到预处理一波。。。
+
+也就是求所谓的failure function ,中文应该叫失配函数...
+
+
+
+[![Screenshot from 2016-08-08 21-19-04](https://111qqz.com/wordpress/wp-content/uploads/2016/08/Screenshot-from-2016-08-08-21-19-04.png)
+](https://111qqz.com/wordpress/wp-content/uploads/2016/08/Screenshot-from-2016-08-08-21-19-04.png)
+
+
+
+**所以第二部分就是如何快速求出失配函数**
+
+**这也是我认为的kmp算法最精(nan)髓(dong)的地方。**

@@ -1,0 +1,305 @@
+---
+author: 111qqz
+date: 2016-10-30 21:01:37+00:00
+draft: false
+title: hdu 3977 Evil teacher (斐波那契数列循环节)
+type: post
+url: /2016/10/hdu-3977/
+categories:
+- ACM
+tags:
+- 二次剩余
+- 循环节
+- 斐波那契
+---
+
+[题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=3977)
+
+题意：f[0] = 1,f[1] = 1,f[i] = f[i-1] + f[i-2] (i>=2)，问最小的m满足f[n]%p==f[n+m]%p
+
+思路：求斐波那契数列循环节。
+
+参考了Acdreamer的博客_Fib数模n的循环节
+
+
+<blockquote>对于一个正整数n，我们求Fib数模n的循环节的长度的方法如下：
+
+（1）把n素因子分解，即![](http://img.blog.csdn.net/20140209101151109)
+
+
+（2）分别计算Fib数模每个![](http://img.blog.csdn.net/20140209101307140)
+的循环节长度，假设长度分别是![](http://img.blog.csdn.net/20140209101422531)
+
+
+（3）那么Fib模n的循环节长度![](http://img.blog.csdn.net/20140209101851656)
+
+
+> 
+> 从上面三个步骤看来，貌似最困难的是第二步，那么我们如何求Fib模![](http://img.blog.csdn.net/20140209101307140)
+的循环节长度呢？
+> 
+> 
+
+> 
+>      这里有一个优美的定理：Fib数模![](http://img.blog.csdn.net/20140209101307140)
+的最小循环节长度等于![](http://img.blog.csdn.net/20140209102448546)
+，其中![](http://img.blog.csdn.net/20140209102607812)
+表示Fib数模素数![](http://img.blog.csdn.net/20140209102622156)
+的最小循环节长度。可以看出我们现在最重要的就是求![](http://img.blog.csdn.net/20140209102607812)
+
+> 
+> 
+
+> 
+> 对于求![](http://img.blog.csdn.net/20140209102607812)
+我们利用如下定理：
+> 
+> 
+
+> 
+>    如果5是模![](http://img.blog.csdn.net/20140209102622156)
+的二次剩余，那么循环节的的长度是![](http://img.blog.csdn.net/20140209102849421)
+的因子，否则，循环节的长度是![](http://img.blog.csdn.net/20140209102856546)
+的因子。
+> 
+> 
+
+> 
+> 顺便说一句，对于小于等于5的素数，我们直接特殊判断，loop(2)=3,loop(3)=8,loop(5)=20。
+> 
+> 
+
+> 
+> 那么我们可以先求出所有的因子，然后用矩阵快速幂来一个一个判断，这样时间复杂度不会很大。
+> 
+> 
+</blockquote>
+
+
+
+
+
+这道题是模板题。博客中的模板代码很好理解...
+
+换成了自己比较熟悉的矩阵构造方式，以及代码风格。
+
+需要注意的是下标是从0开始的，当验证k是否为循环节的时候，应该验证f[k]和f[k+1]
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :Mon 31 Oct 2016 03:54:15 AM CST
+    File Name :code/hdu/3977.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    LL P;
+    struct Mat
+    {
+        LL mat[2][2];
+        void clear()
+        {
+    	ms(mat,0);
+        }
+    }M,M1;
+    Mat mul (Mat a,Mat b,LL mod)
+    {
+        Mat c;
+        c.clear();
+        for ( int i = 0 ; i < 2 ; i++)
+    	for ( int j = 0 ; j < 2 ; j++)
+    	    for ( int k  = 0 ; k < 2 ; k++)
+    		c.mat[i][j] = (c.mat[i][j] + a.mat[i][k] * b.mat[k][j]%mod)%mod;
+        return c;
+    }
+    Mat mat_ksm(Mat a,LL b,LL mod)
+    {
+        Mat res;
+        res.clear();
+        for ( int i = 0 ; i < 2 ; i++) res.mat[i][i] = 1;
+        while (b>0)
+        {
+    	if (b&1) res = mul(res,a,mod);
+    	b = b >> 1LL;
+    	a = mul(a,a,mod);
+        }
+        return res;
+    }
+    LL gcd(LL a,LL b)
+    {
+        return b?gcd(b,a%b):a;
+    }
+    const int N = 1E6+7;
+    bool prime[N];
+    int p[N];
+    void isprime() //一个普通的筛
+    {
+        int cnt = 0 ;
+        ms(prime,true);
+        for ( int i = 2 ; i < N ; i++)
+        {
+    	if (prime[i])
+    	{
+    	    p[cnt++] = i ;
+    	    for ( int j = i+i ; j < N ; j+=i) prime[j] = false;
+    	}
+        }
+    }
+    LL ksm( LL a,LL b,LL mod)
+    {
+       LL res = 1;
+       while (b>0)
+       {
+           if (b&1) res = (res * a) % mod;
+           b = b >> 1LL;
+           a = a * a % mod;
+       }
+       return res;
+    }
+    LL legendre(LL a,LL p) //勒让德符号,判断二次剩余
+    {
+        if (ksm(a,(p-1)>>1,p)==1) return 1;
+        return -1;
+    }
+    LL pri[N],num[N];//分解质因数的底数和指数。
+    int cnt; //质因子的个数
+    void solve(LL n,LL pri[],LL num[])
+    {
+        cnt = 0 ;
+        for ( int  i = 0 ; p[i] * p[i] <= n ; i++)
+        {
+    	if (n%p[i]==0)
+    	{
+    	    int Num = 0 ;
+    	    pri[cnt] = p[i];
+    	    while (n%p[i]==0)
+    	    {
+    		Num++;
+    		n/=p[i];
+    	    }
+    	    num[cnt] = Num;
+    	    cnt++;
+    	}
+        }
+        if (n>1)
+        {
+    	pri[cnt] = n;
+    	num[cnt] = 1;
+    	cnt++;
+        }
+    }
+    LL fac[N];
+    int cnt2; //n的因子的个数
+    void get_fac(LL n)//得到n的所有因子
+    {
+        cnt2 = 0 ;
+        for (int i =  1 ; i*i <= n ; i++)
+        {
+    	if (n%i==0)
+    	{
+    	    if (i*i!=n)
+    	    {
+    		fac[cnt2++] = i ;
+    		fac[cnt2++] = n/i;
+    	    }
+    	    else fac[cnt2++] = i;
+    	}
+        }
+    }
+    LL find_loop(LL n)
+    {
+        solve(n,pri,num);
+        LL ans = 1;
+        for ( int i = 0 ; i < cnt ; i++)
+        {
+    	LL rec = 1;
+    	if (pri[i]==2) rec = 3;
+    	else if (pri[i]==3) rec = 8;
+    	else if (pri[i]==5) rec = 20;
+    	else
+    	{
+    	    if (legendre(5,pri[i])==1)
+    		get_fac(pri[i]-1);
+    	    else get_fac(2*pri[i]+2);
+    	    sort(fac,fac+cnt2);
+    	    for ( int j = 0 ; j < cnt2 ; j++) //挨个验证因子
+    	    {
+    		Mat tmp = mat_ksm(M,fac[j],pri[i]); //下标从0开始，验证fac[j]为循环节，应该看fib[0]==fib[fac[j]]和fib[1]==fib[fac[j]+1]是否成立
+    		tmp = mul(tmp,M1,pri[i]);
+    		if (tmp.mat[0][0]==1&&tmp.mat[1][0]==1)
+    		{
+    		    rec = fac[j];
+    		    break;
+    		}
+    	    }
+    
+    	}
+    	for ( int j = 1 ; j < num[i] ; j++)
+    	    rec *=pri[i];
+    	ans = ans / gcd(ans,rec) * rec;
+        }
+        return ans;
+    }
+    void init()
+    {
+        M.clear();
+        M.mat[0][1] = M.mat[1][0] = M.mat[1][1] = 1;
+        M1.clear();
+        M1.mat[0][0] = M1.mat[1][0] = 1;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	int T;
+    	int cas = 0 ;
+    	isprime();
+    	scanf("%d",&T);
+    	while (T--)
+    	{
+    	    init();
+    	    scanf("%lld",&P);
+    	    printf("Case #%d: ",++cas);
+    	    LL ret = find_loop(P);
+    	    printf("%lld\n",ret);
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+
+
+

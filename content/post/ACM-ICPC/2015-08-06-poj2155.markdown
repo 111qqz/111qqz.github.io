@@ -1,0 +1,141 @@
+---
+author: 111qqz
+date: 2015-08-06 18:41:00+00:00
+draft: false
+title: poj 2155- Matrix (树状数组，二维，更新区间，查询单点)
+type: post
+url: /2015/08/poj2155/
+categories:
+- ACM
+tags:
+- 树状数组
+---
+
+
+1  
+  
+和上一道类似，也是更新区间，查询单点。  
+用到了容斥原理。
+
+
+ 
+
+    
+    /*************************************************************************
+    	> File Name: code/poj/2155.cpp
+    	> Author: 111qqz
+    	> Email: rkz2013@126.com 
+    	> Created Time: 2015年08月07日 星期五 00时42分38秒
+     ************************************************************************/
+    
+    #include<iostream>
+    #include<iomanip>
+    #include<cstdio>
+    #include<algorithm>
+    #include<cmath>
+    #include<cstring>
+    #include<string>
+    #include<map>
+    #include<set>
+    #include<queue>
+    #include<vector>
+    #include<stack>
+    #define y0 abc111qqz
+    #define y1 hust111qqz
+    #define yn hez111qqz
+    #define j1 cute111qqz
+    #define tm crazy111qqz
+    #define lr dying111qqz
+    using namespace std;
+    #define REP(i, n) for (int i=0;i<int(n);++i)  
+    typedef long long LL;
+    typedef unsigned long long ULL;
+    const int inf = 0x7fffffff;
+    const int N=1E3+7;
+    int c[N][N];
+    int n,m,x1,x2,y1,y2,x,y,t;
+    
+    int lowbit ( int x)
+    {
+        return x&(-x);
+    }
+    void update ( int x,int y ,int delta)
+    {
+        for ( int i = x ; i  <= n ; i = i + lowbit(i))
+        {
+    	for ( int j = y; j <= n ; j = j + lowbit(j))
+    	{
+    	    c[i][j] = c[i][j] + delta;
+    	}
+        }
+    }
+    int sum ( int x,int y)
+    {
+        int res  = 0;
+        for ( int i = x; i >= 1 ; i = i - lowbit (i))
+        {
+    	for ( int j = y ; j >= 1 ; j = j - lowbit (j))
+    	{
+    
+    	    res  = res + c[i][j];
+    	}
+        }
+        return res;
+    }
+    int main()
+    {
+        int T;
+        cin>>T;
+        while (T--)
+        {
+    	memset(c,0,sizeof(c));
+    	scanf("%d %d",&n,&t);
+    	for ( int i = 1; i <=  t;  i ++ )
+    	{
+    	    char cmd;
+    	    cin>>cmd;
+    	    if (cmd=='C')
+    	    {
+    		scanf("%d %d %d %d",&x1,&y1,&x2,&y2);
+    //		cout<<"*******"<<c[2][1]<<" "<<c[2][2]<<endl;
+    		update (x1,y1,1);
+    		update (x2+1,y1,1);
+    		update (x1,y2+1,1);
+    		update (x2+1,y2+1,1);
+    //		cout<<"*******"<<c[2][1]<<" "<<c[2][2]<<endl;
+    	    }
+    	    else
+    	    {
+    		scanf("%d %d",&x,&y);
+    		int tmp;
+    //		cout<<"sum(x)(y):"<<sum(x,y)<<endl;
+    //	    	cout<<"sum(x-1,y-1):"<<sum(x-1,y-1)<<endl;
+    //		cout<<"sum(x-1,y):"<<sum(x-1,y)<<endl;
+    //		cout<<"sum(x,y-1):"<<sum(x,y-1)<<endl;
+    		tmp =sum(x,y)+sum(x-1,y-1)-sum(x-1,y)-sum(x,y-1);
+    //		cout<<"tmp:"<<tmp<<endl;
+    		if (sum(x,y)%2==0)
+    		    cout<<0<<endl;
+    		else cout<<1<<endl;
+    	    }
+    //	    cout<<"*****************"<<endl;
+    //	    for ( int ii = 1 ; ii <= n ; ii++)
+    //	    {
+    //		for ( int jj = 1 ; jj <= n ; jj++ )
+    //		{
+    //		    cout<<c[ii][jj]<<" ";
+    //		}
+    //		cout<<endl;
+    //	    }
+    //	    cout<<"*************************"<<endl;
+    //
+    	}
+    	cout<<endl;
+        }
+      
+    	return 0;
+    }
+    
+
+
+

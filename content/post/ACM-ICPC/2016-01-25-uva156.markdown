@@ -1,0 +1,170 @@
+---
+author: 111qqz
+date: 2016-01-25 09:19:56+00:00
+draft: false
+title: uva 156 - Ananagrams
+type: post
+url: /2016/01/uva156/
+categories:
+- ACM
+
+tags:
+- hash
+- stl
+- 字符串
+---
+
+https://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=92
+题意：给出一段文字，包含若干个单词，以'#'结束。按照字典序输出所有的ananagrams。所谓ananagram，是指经过任意的重排后，不能得到这段文字中的另一个单词（不区分大小写）
+思路：首先是字符串的读入...可以整行读入然后用空格分隔单词。由于补区分大小写，所以要都转化成小写...但是输出的时候要输出原始，所以还记得保留一份。而且要能够通过新的找到原始的（我用了一个toori的map<string,string>来实现）
+**然后最关键的部分是如何判断两个单词经过重排是否能一样...**
+
+**我的做法是构造一个hash函数...一个单词的hash值等于对应字母的顺序的平方和...效果还不错？**
+
+单词和hash值一一对应...最大也就9E5,可以存的下。然后统计每个hash值出现的次数。对于那些只出现一次的，就是我们要的答案。
+
+还要注意的是输出要按照原始单词的字典序，而不是都变成小写以后的字典序。
+
+所以找到之后可以先找到对应的原始单词存到set里，最后再输出。
+
+
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年01月25日 星期一 14时26分38秒
+    File Name :code/uva/156.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=9E5+7;
+    string str;
+    int a[N];
+    map<string,int>mp;
+    map<string,int>::iterator it;
+    map<string,string>toori;
+    struct node
+    {
+        string ori;
+        string nw;
+    }st[1005];
+    
+    set<string>ans;
+    set<string>::iterator it2;
+    
+    int main()
+    {
+    	mp.clear();
+    	ans.clear();
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	ms(a,0);
+    	int cnt = 0 ;
+    	while (getline(cin,str))
+    	{
+    	    if (str=="#") break;
+    	    int p = str.find(' ');
+    	    string tmp;
+    	    int len;
+    	    int num;
+    	    while (p!=-1)
+    	    {
+    	        tmp = str.substr(0,p);
+    	//	cout<<"tmp:"<<tmp<<endl;
+    	//	if (tmp=="") continue;
+    		cnt++;
+    		st[cnt].ori = tmp;
+    
+    	        len = tmp.length();
+    	        num = 0;
+    		
+    		for ( int i = 0 ; i < len ; i ++)
+    		{
+    		    tmp[i]=tolower(tmp[i]);
+    		    int val = tmp[i]-'a'+1;  //a..z对应1..26
+    		    num +=val*val;
+    		}
+    	//	cout<<"tmp:"<<tmp<<endl;
+    		st[cnt].nw = tmp;
+    		toori[st[cnt].nw]=st[cnt].ori;
+    		mp[tmp] = num;
+    		a[num]++;
+    		str.erase(0,p+1);
+    		p = str.find(' ');
+    	    }
+    	    //cout<<"rstr:"<<str<<endl;
+    	    tmp=str.substr(0);
+    	    cnt++;
+    	    st[cnt].ori=tmp;
+    	     len = tmp.length();
+    	     num = 0 ;
+    	    for ( int i = 0  ; i < len ; i++)
+    	    {
+    		tmp[i]=tolower(tmp[i]);
+    		int val = tmp[i]-'a'+1;
+    		num +=val *val;
+    	    }
+    	  //  cout<<"tmp:"<<tmp<<endl;
+    	    st[cnt].nw = tmp;
+    	    toori[st[cnt].nw]=st[cnt].ori;
+    	    mp[tmp]=num;
+    	    a[num]++;
+    	}
+    //	cout<<"a[drIed]:"<<a[mp["dried"]]<<endl;	
+    	for ( it=mp.begin() ;it!=mp.end(); it ++)
+    	{
+    	    int tmp = it->sec;
+    	  //  cout<<"a[tmp]:"<<a[tmp]<<endl;
+    	    if (a[tmp]==1)
+    	    {
+    		//	cout<<toori[it->fst]<<endl;
+    //		cout<<it->fst<<" "<<it->sec<<" "<<toori[it->fst]<<endl;
+    		ans.insert(toori[it->fst]);
+    	    }
+    	}
+    	for ( it2=ans.begin() ; it2!=ans.end();it2++)
+    	{
+    	    cout<<*it2<<endl;
+    	}
+    	
+        
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

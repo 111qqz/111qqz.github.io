@@ -1,0 +1,132 @@
+---
+author: 111qqz
+date: 2016-09-02 08:48:37+00:00
+draft: false
+title: codeforces  623 A. Graph and String (构造)
+type: post
+url: /2016/09/cf623a/
+categories:
+- ACM
+tags:
+- 构造
+---
+
+题目链接：[题目链接](http://codeforces.com/problemset/problem/623/A)
+
+题意：给出一个无向图，该图是通过仅包含‘a’ 'b' 'c'三个字母，以规则“i,j之间有边，当且仅当s[i]和s[j]相同，或者s[i]和s[j]在字母表中相邻”（也就是只有'a'和'c'是没有边相连的）得到的，现在问能否还原这个字符串，如果能，输出任意一个解。
+
+思路：其实就是简单构造。。。
+
+构造的一个技巧是。。把能确定的地方先确定了。。。。
+
+我们发现'b'比较特殊。。因为b和任意点都相连。。。
+
+于是可以统计一下度。。。然后确定字符串中的b
+
+然后对于某个没有确定的位置，我放置一个a,并且把所有和这个位置相连的都放成a
+
+字符串中剩下的没有确定的位置就一定是c了。
+
+这个时候我再判断是否满足题中图的条件。
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年09月02日 星期五 15时56分14秒
+    File Name :code/cf/problem/623A.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=505;
+    int n,m;
+    bool conc[N][N];
+    int degree[N];
+    char ans[N];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	ms(degree,0);
+    	ms(conc,false);
+    	ms(ans,0);
+    	cin>>n>>m;
+    	for ( int i = 1 ; i <= m ; i++)
+    	{
+    	    int u,v;
+    	    cin>>u>>v;
+    	    u--;
+    	    v--;
+    	    conc[u][v] = conc[v][u] = true;
+    	    degree[u]++;
+    	    degree[v]++;
+    	}
+    	
+    	for ( int i = 0 ; i < n ; i++) if (degree[i]==n-1) ans[i]='b'; // 字符串第一位为空的话。。。会输出空串。。。
+    	for ( int i = 0 ; i < n ; i++)
+    	{
+    	    if (!ans[i])
+    	    {
+    		ans[i] = 'a';
+    		for ( int j = 0 ; j < n ;j++)
+    		    if (conc[i][j]&&!ans[j]) ans[j]='a';
+    		break;
+    	    }
+    
+    	}
+    	for ( int i = 0 ; i < n ; i++) if (!ans[i]) ans[i]='c';
+    	for ( int i = 0 ; i < n ; i++)
+    	    for ( int j = 0 ; j < n ; j++)
+    	    {
+    		if (i==j) continue;
+    		if (ans[i]=='b'||ans[j]=='b') continue;
+    		if (conc[i][j]&&(ans[i]!=ans[j]))
+    		{
+    		    puts("No");
+    		    return 0;
+    		}
+    		if (!conc[i][j]&&(ans[i]==ans[j]))
+    		{
+    		    puts("No");
+    		    return 0;
+    		}
+    	    }
+    	cout<<"Yes"<<endl;
+    	cout<<ans<<endl;
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+

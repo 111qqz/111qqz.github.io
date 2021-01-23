@@ -1,0 +1,150 @@
+---
+author: 111qqz
+date: 2016-11-26 11:21:26+00:00
+draft: false
+title: hdu 3308 LCIS (线段树单点更新，区间合并)
+type: post
+url: /2016/11/hdu-3308/
+categories:
+- ACM
+tags:
+- 线段树
+---
+
+[题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=3308)
+
+题意：长度为n的序列，单点更新，或者询问某一个区间中最长连续严格递增序列的长度是多少。（此处的连续为位置连续，并非数值连续，也就是3,5,7,9，这样的就是满足题意的长度为4的序列）
+
+思路：线段树区间合并。维护三个域。
+
+mx:区间中最长连续严格递增序列的长度
+
+lm:包含区间左端点的最长连续严格递增序列的长度。
+
+rm:包含区间右端点的最长连续严格递增序列的长度。
+
+PushUp的时候，一个区间的答案显然可以从左右两个子区间的最大值得到。
+
+还有一种可能是左右区间各取一部分，此时必须满足左区间的右端点值严格小于右区间的左端点值。
+
+**需要注意的是，如果某区间的最长连续严格递增子序列的长度等于区间长度，那么该区间可以向相应方向延伸。**
+
+查询的时候也是如此，要记得查询的时候，某一段区间对答案贡献不会超过区间长度。。
+
+hdu有点坑。。。函数名不能命名为update...update2也不行2333
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年11月26日 星期六 18时12分49秒
+    File Name :code/hdu/3308.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    int n,m;
+    int a[N];
+    struct Tree
+    {
+        int mx,lm,rm;
+    }tree[N<<2];
+    void PushUp(int rt,int l,int r)
+    {
+        tree[rt].lm = tree[rt<<1].lm;
+        tree[rt].rm = tree[rt<<1|1].rm;
+        tree[rt].mx = max(tree[rt<<1].mx,tree[rt<<1|1].mx);
+        int m = (l+r)>>1;
+        if (a[m]<a[m+1])
+        {
+    	if (tree[rt<<1].lm==m-l+1) tree[rt].lm+=tree[rt<<1|1].lm;
+    	if (tree[rt<<1|1].rm == r-m) tree[rt].rm += tree[rt<<1].rm;
+    	tree[rt].mx = max(tree[rt].mx,tree[rt<<1].rm + tree[rt<<1|1].lm);
+        }
+    }
+    void build( int l,int r,int rt)
+    {
+        if (l==r)
+        {
+    	tree[rt].mx = tree[rt].lm = tree[rt].rm = 1;
+    	return;
+        }
+        int m = (l+r)>>1;
+        build(lson);
+        build(rson);
+        PushUp(rt,l,r);
+    }
+    void upd( int p,int sc,int l,int r,int rt)
+    {
+        if (l==r)
+        {
+    	a[p] = sc;
+    	return ;
+        }
+        int m = (l+r)>>1;
+        if (p<=m) upd(p,sc,lson);
+        else upd(p,sc,rson);
+        PushUp(rt,l,r);
+    }
+    int query(int L,int R,int l,int r,int rt)
+    {
+        if (L<=l&&r<=R) return tree[rt].mx;
+        int m = (l+r)>>1;
+        int ret = 0 ;
+        if (L<=m) ret = max(ret,query(L,R,lson)); 
+        if (R>=m+1) ret = max(ret,query(L,R,rson));
+        if (a[m]<a[m+1])
+        {
+    	ret = max(ret,min(tree[rt<<1|1].lm,R-m)+min(tree[rt<<1].rm,m-L+1)); 
+        }
+        return ret;
+    }
+    int main()
+    {
+    	int T;
+    	cin>>T;
+    	while (T--)
+    	{
+    	    scanf("%d %d",&n,&m);
+    	    for ( int i = 1; i <= n ; i++) scanf("%d",&a[i]);
+    	    ms(tree,0);
+    	    build(1,n,1);
+    	    while (m--)
+    	    {
+    		char opt[3];
+    		int x,y;
+    		scanf("%s %d %d",opt,&x,&y);
+    		if (opt[0]=='Q') printf("%d\n",query(x+1,y+1,1,n,1));
+    		else upd(x+1,y,1,n,1);
+    	    }
+    	}
+        return 0;
+    }
+    
+
+
+
+
+

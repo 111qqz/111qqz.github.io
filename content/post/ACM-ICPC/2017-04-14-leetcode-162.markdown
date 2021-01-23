@@ -1,0 +1,91 @@
+---
+author: 111qqz
+date: 2017-04-14 12:25:16+00:00
+draft: false
+title: leetcode162. Find Peak Element (O(lgn)复杂度寻找峰值)
+type: post
+url: /2017/04/leetcode-162/
+categories:
+- 面试
+tags:
+- binary search
+- leetcode
+---
+
+A peak element is an element that is greater than its neighbors.
+
+Given an input array where `num[i] ≠ num[i+1]`, find a peak element and return its index.
+
+The array may contain multiple peaks, in that case return the index to any one of the peaks is fine.
+
+You may imagine that `num[-1] = num[n] = -∞`.
+
+For example, in array `[1, 2, 3, 1]`, 3 is a peak element and your function should return the index number 2.
+
+
+[click to show spoilers.](https://leetcode.com/problems/find-peak-element/#)
+
+
+
+
+
+
+
+**Note:**Your solution should be in logarithmic complexity.
+
+
+
+
+思路：
+
+为什么能lgn。。。
+
+首先要想明白，这样的峰值是一定存在的（因为最左最右已经负无穷了。
+
+如果中间元素的值，比它右边相邻元素的小，说明什么呢？
+
+说明右边区间一定存在峰值。
+
+为什么？
+
+现在a[mid]<a[mid+1]
+
+如果a[mid+1]>a[mid+2],那么 a[mid+1]就是峰值
+
+如果a[mid+1]<=a[mid+2]，那么可以继续缩小区间，到[mid+2,n-1]
+
+由于a[n]为负无穷，因此至少会出现一个 a[x]>a[x+1]的情况，此时a[x]就是峰值。
+
+想清楚了这点就好办了。二分就好。
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2017年04月14日 星期五 20时15分01秒
+    File Name :162.cpp
+    ************************************************ */
+    class Solution {
+    
+    public:
+    
+        int findPeakElement(vector<int>& nums) {
+            int n = nums.size();
+    	int l = 0 ;
+    	int r = n-1;
+    	while (l<=r)
+    	{
+    	    if (l==r) return l;
+    	    int mid = (l+r)>>1;
+    	    if (nums[mid]<nums[mid+1])
+    		l = mid + 1;
+    	    else r = mid;
+    	}
+    
+    
+        }
+    
+    };
+    
+
+
+

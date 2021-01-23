@@ -1,0 +1,734 @@
+---
+author: 111qqz
+date: 2016-04-09 12:29:38+00:00
+draft: false
+title: 'BZOJ 1640/1692 : [Usaco2007 Nov]Best Cow Line 队列变换 (贪心)'
+type: post
+url: /2016/04/bzoj-1640/
+categories:
+- ACM
+tags:
+- greedy
+---
+
+
+
+
+## 1640: [Usaco2007 Nov]Best Cow Line 队列变换
+
+
+Time Limit: 5 Sec  Memory Limit: 64 MB
+Submit: 710  Solved: 373
+[[Submit](http://www.lydsy.com/JudgeOnline/submitpage.php?id=1640)][[Status](http://www.lydsy.com/JudgeOnline/problemstatus.php?id=1640)][[Discuss](http://www.lydsy.com/JudgeOnline/bbs.php?id=1640)]
+
+
+## Description
+
+
+
+
+
+
+FJ打算带着他可爱的N (1 ≤ N ≤ 2,000)头奶牛去参加”年度最佳老农”的比赛.在比赛中,每个农夫把他的奶牛排成一列,然后准备经过评委检验. 比赛中简单地将奶牛的名字缩写为其头字母(the initial letter of every cow),举个例子,FJ带了Bessie, Sylvia,和Dora,那么就可以缩写为BSD. FJ只需将奶牛的一个序列重新排列,然后参加比赛.他可以让序列中的第一头奶牛,或者最后一头走出来,站到新队列的队尾. 利欲熏心的FJ为了取得冠军,他就必须使新队列的字典序尽量小. 给你初始奶牛序列(用头字母)表示,然后按照上述的规则组成新序列,并使新序列的字典序尽量小.
+
+
+
+
+
+
+## Input
+
+
+
+
+
+
+第1行:一个整数N.
+
+第2行至第N+1行:每行一个大写字母,表示初始序列中该奶牛的头字母.
+
+
+
+
+
+
+## Output
+
+
+
+
+
+
+得到的最小字典序的序列.每输出80个字母需要一个换行!
+
+
+
+
+
+
+## Sample Input
+
+
+
+
+6
+A
+C
+D
+B
+C
+B
+
+
+
+
+
+## Sample Output
+
+
+
+
+ABCBCD
+
+
+
+
+
+## HINT
+
+
+
+
+
+
+![](http://www.lydsy.com/JudgeOnline/upload/201401/22(9).jpg)
+
+
+
+
+
+
+
+## Source
+
+
+
+
+
+
+[Silver](http://www.lydsy.com/JudgeOnline/problemset.php?search=Silver)
+
+
+
+
+
+
+思路：比较麻烦的一个贪心。。对拍才找出了一个错误。。。
+
+写丑了QAQ
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年04月08日 星期五 16时16分34秒
+    File Name :code/bzoj/1640.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=2E3+7;
+    int n;
+    int a[N];
+    string ans;
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	ios::sync_with_stdio(false);
+    	cin>>n;
+    	ans ="";
+    	for ( int i = 1 ;i <= n ; i++)
+    	{
+    	    char ch;
+    	    cin>>ch;
+    	    a[i] = ch-'A'+1;
+    	}
+    
+    	int l = 1;
+    	int r = n ;
+    
+    	while (l<=r)
+    	{
+    	    if (l==r)
+    	    {
+    	//	cout<<"aans:"<<ans<<endl;
+    		ans += char(a[l]+64);
+    	//	cout<<"aaans:"<<ans<<endl;
+    		
+    		break;
+    	    }
+    	    if (a[l]!=a[r])
+    	    {
+    		if (a[l]<a[r])
+    		{
+    		    ans += char(a[l]+64);
+    		    l++;
+    		}
+    		else
+    		{
+    		    ans += char(a[r]+64);
+    		    r--;
+    		}
+    	    }
+    	    else
+    	    {
+    		if (l==r) continue;
+    		int tmpl = l;
+    		int tmpr = r;
+    		while (a[tmpl]==a[tmpr]&&tmpl<tmpr)
+    		{
+    		    tmpl++;
+    		    tmpr--;
+    		}
+    //		cout<<"tmpl:"<<tmpl<<" tmpr:"<<tmpr<<" ans:"<<ans<<endl;	
+    		if (tmpl>=tmpr)
+    		{
+    		    while (l<=r)
+    		    {
+    	//		cout<<"l:"<<l<<" r:"<<r<<" ans:"<<ans<<endl;
+    			
+    			
+    			if (a[l]<=a[r])
+    			{
+    			    ans += char(a[l]+64);
+    			    l++;
+    			    break;
+    			}
+    			else
+    			{
+    			    ans += char(a[r]+64);
+    			    r--;
+    			    break;
+    			}
+    			//cout<<" ans:"<<ans<<endl;
+    		    }
+    		 /*   for ( int i = l ;  i <= r ; i++)
+    		    {
+    			if (tmpl==tmpr&&a[tmpl]>a[l]&&i==tmpl) continue;
+    			ans +=char(a[i]+64);
+    		    }
+    		    if (tmpl==tmpr&&a[tmpl]>a[l]) ans += char(a[tmpl]+64); */
+    		    //break;
+    		}
+    		else
+    		{
+    		    while (l<tmpl&&r>tmpr)
+    		    {
+    	//		cout<<"l:"<<l<<" r:"<<r<<" anssss:"<<ans<<endl;
+        
+    			if (a[l]==a[r])
+    			{
+    			    if (a[tmpl]<=a[tmpr])
+    			    {
+    				ans += char(a[l]+64);
+    				l++;
+    				break;
+    			    }else
+    			    {
+    				ans += char(a[r]+64);
+    				r--;
+    				break;
+    			    }
+    
+    			}
+    			else
+    			{
+    
+    			    if (a[l]<a[r])
+    			    {
+    				ans+=char(a[l]+64);
+    				l++;
+    				break;
+    			    }
+    			    else 
+    			    {
+    				ans+=char(a[r]+64);
+    				r--;
+    				break;
+    			    }
+    			 //   cout<<"l:"<<l<<" r:"<<r<<" anssss:"<<ans<<endl;    
+    			}
+    		    }
+    			/*   if (a[tmpl]<a[tmpr])
+    		    {
+    			for ( int i = l ; i <= tmpl ; i++) ans +=char(a[i]+64);
+    			l = tmpl+1;
+    		    }
+    		    else
+    		    {
+    			for ( int i = r ; i >= tmpr ; i--) ans +=char(a[i]+64);
+    			r = tmpr-1;
+    		    }   */
+    		}
+    	    }
+    	   // cout<<"l:"<<l<<" r:"<<r<<" ans:"<<ans<<endl;
+    	    
+    	}
+    	int len = ans.length();
+    	for ( int i = 0 ; i < len ; i++)
+    	{
+    	    cout<<ans[i];
+    	    if ((i+1)==0) cout<<endl;
+    	}
+    //	cout<<ans<<endl;
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+ 
+
+    
+    出错数据：
+    input:
+    393
+    A
+    C
+    A
+    A
+    B
+    C
+    C
+    C
+    C
+    B
+    B
+    C
+    A
+    C
+    C
+    C
+    B
+    B
+    A
+    C
+    C
+    B
+    C
+    C
+    C
+    C
+    A
+    A
+    A
+    A
+    C
+    A
+    A
+    A
+    B
+    C
+    C
+    C
+    B
+    A
+    A
+    B
+    A
+    A
+    B
+    C
+    C
+    C
+    A
+    A
+    C
+    A
+    C
+    A
+    C
+    B
+    C
+    C
+    B
+    A
+    A
+    B
+    C
+    B
+    B
+    A
+    B
+    B
+    C
+    A
+    B
+    A
+    B
+    B
+    B
+    B
+    B
+    B
+    A
+    B
+    A
+    B
+    A
+    C
+    B
+    A
+    B
+    B
+    B
+    A
+    B
+    C
+    C
+    A
+    B
+    B
+    C
+    C
+    A
+    B
+    C
+    C
+    A
+    C
+    C
+    B
+    A
+    A
+    A
+    A
+    A
+    A
+    B
+    A
+    A
+    A
+    B
+    C
+    B
+    C
+    A
+    A
+    C
+    A
+    B
+    A
+    B
+    A
+    C
+    C
+    A
+    C
+    C
+    A
+    B
+    C
+    C
+    B
+    C
+    C
+    A
+    A
+    B
+    C
+    B
+    B
+    A
+    A
+    B
+    B
+    A
+    B
+    C
+    C
+    C
+    C
+    A
+    C
+    A
+    A
+    B
+    A
+    A
+    B
+    B
+    B
+    A
+    A
+    A
+    B
+    B
+    B
+    B
+    C
+    A
+    A
+    B
+    B
+    B
+    A
+    A
+    B
+    B
+    A
+    C
+    C
+    C
+    C
+    B
+    A
+    A
+    A
+    B
+    A
+    C
+    B
+    B
+    A
+    C
+    C
+    B
+    A
+    A
+    B
+    A
+    C
+    C
+    C
+    A
+    A
+    C
+    B
+    C
+    C
+    C
+    B
+    B
+    C
+    B
+    C
+    A
+    B
+    C
+    A
+    C
+    C
+    B
+    A
+    A
+    A
+    B
+    C
+    C
+    C
+    B
+    C
+    B
+    A
+    A
+    C
+    B
+    C
+    A
+    C
+    B
+    A
+    A
+    C
+    B
+    B
+    C
+    B
+    A
+    A
+    C
+    C
+    C
+    A
+    B
+    A
+    C
+    A
+    B
+    B
+    C
+    C
+    B
+    C
+    B
+    B
+    B
+    A
+    C
+    C
+    C
+    A
+    B
+    A
+    B
+    C
+    C
+    B
+    B
+    A
+    B
+    B
+    A
+    C
+    C
+    C
+    C
+    B
+    C
+    A
+    A
+    A
+    A
+    A
+    C
+    C
+    C
+    B
+    C
+    B
+    A
+    C
+    A
+    B
+    A
+    C
+    B
+    C
+    A
+    A
+    A
+    A
+    C
+    C
+    C
+    B
+    B
+    B
+    B
+    C
+    C
+    B
+    A
+    A
+    C
+    C
+    C
+    A
+    A
+    C
+    B
+    B
+    B
+    C
+    B
+    C
+    B
+    C
+    C
+    A
+    A
+    C
+    A
+    C
+    C
+    C
+    C
+    B
+    A
+    A
+    B
+    A
+    C
+    B
+    B
+    C
+    B
+    B
+    C
+    B
+    B
+    B
+    C
+    A
+    C
+    B
+    A
+    B
+    B
+    C
+    C
+    B
+    C
+    C
+    C
+    A
+    C
+    B
+    C
+    B
+    B
+    A
+    B
+    B
+    C
+    B
+    A
+    A
+    C
+    
+    我的输出：ACAABCBBABBCAABCBCACCCBCCBBABCACBBBCBBCBBCABAABCCCCACAACCBCBCBBBCAACCCAABCCBBBBC
+    CCAAAACBCABACABCBCCCAAAAACBCCCCABBABBCCBABACCCABBBCBCCBBACABACCCAABCBBCAABCACBCA
+    ABCBCCCBAAABCCACBACBCBBCCCBCAACCCABAABCCABBCABAAABCCCCABBAABBBAACBBBBAAABBBAABAA
+    CACCCCBABBAABBCBAACCBCCBACCACCABABACAACBCBAAABAAAAAABCCACCBACCBBACCBABBBABCABABA
+    BBBBBBABACBBABBCBAABCCBCACACAACCCBAABAABCCCBAAACAAAACCCCBBCACCCBBACCBCCCC
+    
+    正确输出：ACAABCAABCBBABBCBCACCCBCCBBABCACBBBCBBCBBCABAABCCCCACAACCBCBCBBBCAACCCAABCCBBBBC
+    CCAAAACBCABACABCBCCCAAAAACBCCCCABBABBCCBABACCCABBBCBCCBBACABACCCAABCBBCAABCACBCA
+    ABCBCCCBAAABCCACBACBCBBCCCBCAACCCABAABCCABBCABAAABCCCCABBAABBBAACBBBBAAABBBAABAA
+    CACCCCBABBAABBCBAACCBCCBACCACCABABACAACBCBAAABAAAAAABCCACCBACCBBACCBABBBABCABABA
+    BBBBBBABACBBABBCBAABCCBCACACAACCCBAABAABCCCBAAACAAAACCCCBBCACCCBBACCBCCCC
+
+
+

@@ -1,0 +1,377 @@
+---
+author: 111qqz
+date: 2016-03-28 12:37:40+00:00
+draft: false
+title: 'bc #77 ||hdu 5652 India and China Origins (图的动态连通性问题，并查集or 二分+bfs验证连通性)'
+type: post
+url: /2016/03/hdu5652/
+categories:
+- ACM
+tags:
+- bfs
+- 二分
+- 动态连通性
+- 图论
+- 并查集
+---
+
+[题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=5652)
+题意：没图不好描述，有中文题面[中文题面](http://bestcoder.hdu.edu.cn/contests/contest_chineseproblem.php?cid=682&pid=1003)，直接看吧。
+思路：据说这道题有三种做法。 当时比赛一种都不会。
+
+先说一种：做法是把格子看成点，可以到达的相邻格子之间看成有边相连，然后倒过来用并查集判断无向图的连通性。具体做法是：先统计初始所有空的位置，然后把所有要增加的山都加上（**先统计空的位置是因为山之后要去掉，而去掉以后要得到该点的标号）**，然后将把所有空的点以及china(**设标号为n*m+1**)点,和india(**设标号为n*m+2) **点通过并查集来合并..可以从上往下从左往右，每次只需要判断上面的点和左边的点是否有空，如果有就用并查集合并。 china点和india点特殊搞就好。
+
+然后判断india和china是否联通，如果是则输出-1.否则从最后添加的山开始移除，每次移除一座山，添加四个方向能添加的边（**注意这里不要忘记如果改点在第0行或者第n-1行还要添加和china或者india的边）**
+
+然后移除后询问india和china是否联通 （root(china)==root(india)?）
+
+如果时间i联通了，而i+1没有联通，说明时间i是两国最早的失去联系的时间。
+
+
+
+第一次做这种题目，这种题目的一般做法都是倒过来做。貌似还有一个二分删除的山+bfs判断连通性的。。。？ 窝再搞搞看。
+update :二分+bfs判断连通性。其实这个思路更常规。。做法就是字面意思。注意无解的判断即可。
+
+
+
+
+并查集解法：
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年03月27日 星期日 20时11分02秒
+    File Name :code/bc/#77/1003.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=505;
+    char maze[N][N];
+    int f[N*N];
+    int n,m;
+    int q;
+    int p[N][N];
+    int china;
+    int india;
+    struct node
+    {
+        int x,y;
+        int id;
+    
+    }shan[N*N],kong[N*N];
+    
+    int root ( int x)
+    {
+        if (x!=f[x]) f[x] = root (f[x]);
+        return f[x];
+    }
+    
+    void merge( int x,int y)
+    {
+        int rx = root (x);
+        int ry = root (y);
+    //    cout<<"rx::"<<rx<<"   ry::"<<ry<<endl;
+        if (rx!=ry)
+        {
+    	f[rx] = ry ;
+    //	f[ry] = rx;
+        }
+    }
+    
+    void addegg( int x,int y)
+    {
+        if (x-1>=0&&maze[x-1][y]=='0') merge(p[x][y],p[x-1][y]);
+        if (x+1<n&&maze[x+1][y]=='0') merge(p[x][y],p[x+1][y]);
+        if (y-1>=0&&maze[x][y-1]=='0') merge(p[x][y],p[x][y-1]);
+        if (y+1<m&&maze[x][y+1]=='0') merge(p[x][y],p[x][y+1]);
+    
+        if (x==0) merge(p[x][y],china);  //一开始忘记更新边缘的山被移除后，点和china以及india的边了。
+        if (x==n-1) merge(p[x][y],india);
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	int T;
+    	cin>>T;
+    	while (T--)
+    	{
+    	    scanf("%d %d",&n,&m);
+    	    for ( int i = 0 ; i < n ; i++) scanf("%s",maze[i]);
+    
+    	    scanf("%d",&q);
+    	    for ( int i = 1 ; i <= q ; i++)
+    	    {
+    		int x,y;
+    		scanf("%d %d",&x,&y);
+    		shan[i].x = x;
+    		shan[i].y = y;
+    		shan[i].id = i;
+    //		maze[x][y] = '1';  //先统计空位。
+    	    }
+    
+    	    int cnt = 0 ;
+    	    ms(p,-1);
+    	    for ( int i = 0 ; i  < n ; i++)
+    	    {
+    		for ( int j = 0 ; j < m;  j++)
+    		{
+    		    if (maze[i][j]=='0')
+    		    {
+    			cnt++;
+    			kong[cnt].x = i ;
+    			kong[cnt].y = j;
+    			kong[cnt].id = i;
+    			p[i][j] = cnt;
+    		    }
+    		}
+    	    }
+    
+    	    for ( int i  = 1 ; i <= q ; i ++)
+    	    {
+    		int x = shan[i].x;
+    		int y = shan[i].y;
+    		maze[x][y]='1';
+    	    }
+    	    //check kong...ok!
+    	    //for ( int i = 1 ; i  <= cnt ; i++) cout<<"kong:"<<kong[i].x<<" "<<kong[i].y<<endl;
+    
+    	        china = n*m+1;
+    	        india = n*m+2;
+    	    for ( int i = 0 ; i <= n*m+2 ; i++) f[i] =  i;
+    	//    f[china] = china;
+    	  //  f[india] = india;
+    	 //   cout<<"china:"<<china<<endl;
+    	   // cout<<"india:"<<india<<endl;
+    	    for ( int j = 0 ; j  < m ; j++)
+    	    {
+    		if (maze[0][j]=='0')
+    		{   
+    		    merge(china,p[0][j]);
+    		}
+    		if (maze[n-1][j]=='0')
+    		{
+    		    merge(india,p[n-1][j]);
+    		}
+    	    }
+    
+    	    for ( int i = 0 ;i < n ; i++)
+    	    {
+    		for ( int j = 0 ; j < m ; j ++)
+    		{
+    		    if (maze[i][j]=='1') continue;
+    		    if (maze[i-1][j]=='0') merge(p[i-1][j],p[i][j]);
+    		    if (maze[i][j-1]=='0') merge(p[i][j-1],p[i][j]);
+    		}
+    	    }
+    
+    	    if (root(china)==root(india))
+    	    {
+    		puts("-1");
+    		continue;
+    	    }
+    
+    	    for ( int i = q ; i >= 1 ; i--)
+    	    {
+    		int x = shan[i].x;
+    		int y = shan[i].y;
+    
+    		maze[x][y] = '0';
+    		addegg(x,y);
+    		if (root(china)==root(india))
+    		{
+    		    printf("%d\n",i);
+    		    break;
+    		}
+    	    } 
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+二分+bfs判断连通性。
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年03月28日 星期一 21时12分05秒
+    File Name :code/hdu/5652.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=501;
+    char maze[N][N];
+    int n,m;
+    int q;
+    bool vis[N][N];
+    
+    struct node
+    {
+        int x,y;
+    
+        bool ok ()
+        {
+    	if (x>=0&&x<n&&y>=0&&y<m&&!vis[x][y]) return true;
+    	return false;
+        }
+    }shan[250005];
+    
+    
+    int check( int id)
+    {
+        
+        for ( int i = 0 ; i < n ; i++)
+        {
+    	for ( int j = 0 ; j < m ; j ++)
+    	{
+    	    if (maze[i][j]=='1') vis[i][j] = true;
+    		else vis[i][j] = false;
+    	}
+        }
+    
+        for ( int i = 1 ; i <= id ; i++)
+        {
+    	int x = shan[i].x;
+    	int y = shan[i].y;
+    	vis[x][y] = true;
+        }
+    
+        queue<node>q;
+        for ( int j = 0 ; j  < m ; j++)
+        {
+    	
+    	if (!vis[0][j])
+    	{
+    	    node tmp;
+    	    tmp.x = 0;
+    	    tmp.y = j;
+    	    q.push(tmp);
+    	}
+        }
+    
+        while (!q.empty())
+        {
+    	node pre = q.front();q.pop();
+    	if (pre.x==n-1) return 1;
+    	for ( int i = 0 ; i < 4 ; i++)
+    	{
+    	    node nxt;
+    	    nxt.x = pre.x + dx4[i];
+    	    nxt.y = pre.y + dy4[i];
+    	    if (nxt.ok())
+    	    {
+    		vis[nxt.x][nxt.y] = true;
+    		q.push(nxt);
+    		
+    	    }
+    	}
+        }
+        return 0;
+    }
+    
+    int bin()
+    {
+        int l = 1 ;
+        int r = q ;
+        int mid;
+        while (l<=r)
+        {
+    	mid = (l+r)/2;
+    	if (check(mid))
+    	    l = mid + 1;
+    	else r = mid -1;
+        }
+        if (l>q) return -1;
+        return l;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	int T;
+    	cin>>T;
+    	while (T--)
+    	{
+    	    scanf("%d%d",&n,&m);
+    	    for ( int i = 0 ; i  < n;  i++) scanf("%s",maze[i]);
+    	    scanf("%d",&q);
+    	    for ( int i = 1 ; i <= q ; i ++) scanf("%d %d",&shan[i].x,&shan[i].y);
+    	    int ans = bin();
+    	    printf("%d\n",ans);
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

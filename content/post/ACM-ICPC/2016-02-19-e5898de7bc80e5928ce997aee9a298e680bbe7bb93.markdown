@@ -1,0 +1,66 @@
+---
+author: 111qqz
+date: 2016-02-19 07:31:21+00:00
+draft: false
+title: 前缀和问题总结
+type: post
+url: /2016/02//
+categories:
+- ACM
+tags:
+- 前缀和
+---
+
+<blockquote>There are two types of problems solvable by partial sum.
+
+1.Problems which you are asked to answer some queries about the sum of a part of elements (without modify queries).
+
+Solution of all of this problems are the same. You just need to know how to solve one of them.
+
+Example : You are asked some queries on an array _a_1, _a_2, ..._a_, _n_. Each query give you numbers _l_ and _r_ and you should print _a__l_ + _a__l_ + 1 + ... + _a__r_ .
+
+Solution : You need to build another array _s_1, _s_2, ..., _s__n_ which _s__i_ = _a_1 + _a_2 + ... + _a__i_ and answer is _s__r_ - _s__l_ - 1 .
+
+2.Problems which you are asked to perform some queries asking you to modify a part of elements (without printing queries.)
+
+Solution of all of this problems are the same. You just need to know how to solve one of them.
+
+Example : You need to perform some queries on an array _a_1, _a_2, ..._a_, _n_. Each query give you numbers _l_, _r_ and _v_ and for each _i_ such that _l_ ≤ _i_ ≤ _r_ you should increase _a__i_ by _v_, and then after performing all queries, you should print the whole array.
+
+Solution : You should have another array _p_1, _p_2, ..., _p__n_ which, all of its members are initially 0, for each query, you should increase _p__l_ by _v_ and decrease _p__r_ + 1 by _v_ .
+
+An then, for each _i_, starting from 1 you should increase _p__i_ by _p__i_ - 1. So, final array would be _a_1 + _p_1, _a_2 + _p_2, ..., _a__n_ + _p__n_ .</blockquote>
+
+
+
+
+
+### 先说最简单也是最常见的一种。
+sum[i]=sum[i-1]+a[i] （初始sum[0]=0,所以a[i]的下标最好从1开始）
+询问得到[l,r]的和，答案为sum[r]-sum[l-1];
+
+
+
+
+### 还有一种遇到相对较少的用法。 每次对数组a的某区间[l,r]内的每个数增加x。最后要求输出经过所有变换后的数组a。做法是：声明另一个数组p，当对区间[l,r]增加x时， p[l]+=x,p[r-1]-=x; 所有的变换完成后，另p[i]+=p[i-1] ，那么最后的答案就是p[i]+a[i]（i:1..n） （可以这样理解：p[l]+=x,表示从x开始被增加x这个变换影响，一直影响到r,也就是从r+1取消这种变换的效果，所以p[r+1]-=x,然后处理前缀和，把标记在开头的变幻累计到每个元素）
+
+
+
+
+### 
+
+
+
+
+### 此外：前缀和不一定是“和”，加法可以推广到任何有“前缀和性质”的运算，比如乘积，异或（虽然那样就应该不叫前缀“和”了2333）
+
+
+ [cf617E异或前缀和](https://111qqz.com/wordpress/2016/02/cf617e/)
+
+
+### 这些都是区间上的前缀和，我们可以进一步推广到树上。区间的前缀和是从第一个节点开始累加，树上则是从根节点开始做dfs然后累加。
+
+
+[树上前缀和hdu5416](https://111qqz.com/wordpress/2016/02/hdu5416/)
+
+

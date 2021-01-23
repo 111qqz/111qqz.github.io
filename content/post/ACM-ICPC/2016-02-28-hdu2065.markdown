@@ -1,0 +1,132 @@
+---
+author: 111qqz
+date: 2016-02-28 06:26:51+00:00
+draft: false
+title: hdu 2065 "红色病毒"问题 (指数型母函数，泰勒级数展开)
+type: post
+url: /2016/02/hdu2065/
+categories:
+- ACM
+tags:
+- math
+- 母函数
+- 泰勒展开
+---
+
+http://acm.hdu.edu.cn/showproblem.php?pid=2065
+题意：a,b,c,d四种元素，a,c只能出现偶数次（包括0次），b,d没有限制，问n个（2^64）个元素有多少种不同的组合。
+思路：指数型母函数。。。n大的没办法用之前的办法做。
+
+先来看下我们要求的式子：A=(1+x/1!+x^2/2!+x^3/3!……)^2*(1+x^2/2!+x^4/4!+x^6/6!……)^2.
+
+其实一共四个式子相乘，但是a和c的情况相同，b和d的式子相同。
+
+我们要求的是x^n的系数。。。n太大了。。直接搞肯定不行。
+
+想到微积分学的泰勒展开。
+
+e^x=1+x/1!+x^2/2!+x^3/3!+... (|x|<oo)
+
+其实这里x的范围没有意义，因为母函数关注的是系数，不会代入x的值，所以可以不用考虑收敛性。
+
+那么第一项(1+x/1!+x^2/2!+x^3/3!……)^2就可以换成(e^x)^2
+
+第二项没有奇数项，很容易想到可以写成(（e^x+e^(-x)）/2)^2
+
+继续化简：4*A=(e^x)^2*((e^x+e^(-x))/2)^2
+
+4*A = (e^(4x)+2*e^(2x)+1)
+
+我们要的是x^n的系数，再正向泰勒展开，得到x^n的系数应该是 (4^n+2*2^n)/4,也就是4^(n-1)+2^(n-1)
+
+因为只要后两位的结果，其实就是结果0.快速幂搞之。
+
+以及，2^64 long long 存不下，应该用unsigned long long ，类型说明符是 %llu
+
+
+
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月28日 星期日 14时01分58秒
+    File Name :code/hdu/2065.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef unsigned long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const LL MOD = 100;
+    LL n;
+    LL ksm(LL a,LL b)
+    {
+        LL res = 1LL;
+        while (b)
+        {
+    	if (b&1) res = (res*a)%MOD;
+    	b = b>>1;
+    	a =(a*a)%MOD;
+        }
+        return res;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	int T;
+    
+    	while (~scanf("%d",&T))
+    	{
+    	    if (T==0) break;
+    	    int cas = 0 ;
+    	    while (T--)
+    	    {
+    		printf("Case %d: ",++cas);
+    		scanf("%llu",&n);
+    		LL ans = ksm(4,n-1)+ksm(2,n-1);
+    		ans %=MOD;
+    		printf("%llu\n",ans);
+    	    }
+    	    printf("\n");
+    	}
+    	
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+

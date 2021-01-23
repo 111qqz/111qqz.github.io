@@ -1,0 +1,110 @@
+---
+author: 111qqz
+date: 2015-12-05 10:26:11+00:00
+draft: false
+title: codeforces 445 B. DZY Loves Chemistry
+type: post
+url: /2015/12/cf445b/
+categories:
+- ACM
+tags:
+- dfs
+- tree
+---
+
+http://codeforces.com/contest/445/problem/B
+
+题意：一共有n种化学药品。m对关系，每对关系表示为x,y表示x和y相互反应。初始容器的danger值为1，当向容器中加入一个化学药品A,如果容器中存在化学药品和A反应，那么容器的danger值翻倍。否则不变。问一个最优的放置药品的顺序。
+
+思路：容易发现。如果两个药品相互反应就连一条边。实际上这些药品构成了一个森林。而一个节点只要不是树的根节点，那么它在任何位置，对答案的贡献度都是*2.反过来说。所有的节点，只有根节点是对答案没有贡献的。那实际上，我们只需要dfs一遍，得到树的数目，用n减去树的数目，就是对答案有贡献的点的数目。
+
+要注意开long long 。。。
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2015年12月05日 星期六 17时13分51秒
+    File Name :code/cf/problem/445/B.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=55;
+    bool vis[N];
+    int n,m;
+    vector<int>edge[N];
+    LL ans;
+    LL tree_num;
+    void dfs( int cur)
+    {
+    
+        vis[cur] = true;
+        for ( int i = 0 ; i < edge[cur].size();  i++)
+        {
+    	int v = edge[cur][i];
+    	if (!vis[v])
+    	{
+    	    dfs(v);
+    	}
+        }
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	scanf("%d %d",&n,&m);
+    	ms(vis,false);
+    	for ( int i = 0 ; i < m ; i++)
+    	{
+    	    int u,v;
+    	    scanf("%d %d",&u,&v);
+    	    edge[u].push_back(v);
+    	    edge[v].push_back(u);
+    	}
+    	tree_num = 0 ;
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    if (!vis[i])
+    	    {
+    		dfs(i);
+    		tree_num++;
+    	    }
+    	}
+    	ans = 1;
+    	ans = (LL)(1)<<(LL(n-tree_num));
+    	cout<<ans<<endl;
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

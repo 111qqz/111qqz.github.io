@@ -1,0 +1,213 @@
+---
+author: 111qqz
+date: 2016-07-12 07:59:55+00:00
+draft: false
+title: hdu 4514 湫湫系列故事——设计风景线 (无向图并查集判环+非联通图的最长路径)
+type: post
+url: /2016/07/hdu4514/
+categories:
+- ACM
+tags:
+- 并查集
+- 无向图的环
+- 树的直径
+---
+
+[hdu4514](http://acm.hdu.edu.cn/showproblem.php?pid=4514)
+
+题意：给出一个无向图。。问是否有环。。。有的话输出YES。。如果没有环的话。。输出最长路径。。
+
+思路：无向图判环并查集就好。。。关于最长路径这里。。一开始以为就是树的直径。。。
+
+但是需要注意的是。。。**题目并没有保证图一定是联通的**。。。所以gg了。。
+
+也就是要在一个不联通的图中求最长路径。。。
+
+没想出来。。搜了一下。。有树形dp的做法。。。有并查集的时候带权的做法。。。
+
+不过感觉最容易想到的还是求多次直径的做法。。。
+
+也就是。。每一个联通块求一次直径。。。取最大。。。
+
+具体做的时候。。。加一个bool数组在bfs标记一下就好。。。
+
+以及bfs的时候。。。由于我之后是要得到最大值。。。而图本身可能是不联通的。。所以要注意d数组初始化的问题。。。不能初始化成0x3f...（这么说来即使联通也没必要初始化成0x3f。。。。)
+
+还有一点，这道题数据量比较大。。。用vector存图会MLE ...
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年07月12日 星期二 14时31分09秒
+    File Name :code/hdu/4514.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    const int M=1E6+7;
+    int n,m;
+    int f[N];
+    int lst;
+    int far;
+    int cnt;
+    bool cyc;
+    struct Edge
+    {
+        int v,w;
+        int nxt;
+    }edge[M];
+    int d[N];
+    bool vis[N];
+    bool used[N];
+    int head[N];
+    int root ( int x)
+    {
+        if (x!=f[x]) f[x] = root (f[x]);
+        return f[x];
+    }
+    void merge( int x,int y)
+    {
+        int rx = root(x);
+        int ry = root(y);
+        if (rx==ry) return ;
+        f[rx] = ry;
+    }
+    void init()
+    {
+        for ( int i = 1 ; i <= n ; i++) f[i] = i;
+        ms(used,false);
+        ms(head,-1);
+    }
+    void bfs( int s)
+    {
+        ms(d,0); //初始化不能为正无穷。。。。因为本身就可能不联通。。取最大一定会得到正无穷。。。gg
+        ms(vis,false);
+        queue<int>q;
+        q.push(s);
+        vis[s] = true;
+        while (!q.empty())
+        {
+    	int u = q.front();q.pop();
+    	used[u] = true;
+    	for ( int i = head[u] ; i != -1;  i=edge[i].nxt)
+    	{
+    	    int v = edge[i].v;
+    	    int w = edge[i].w;
+    	    if (vis[v]) continue;
+    	    vis[v] = true;
+    	    d[v] = d[u] + w;
+    	    q.push(v);
+    	}
+        }
+    }
+    void addedge(int u,int v,int w)
+    {
+        edge[cnt].v = v;
+        edge[cnt].w = w;
+        edge[cnt].nxt = head[u];
+        head[u] = cnt;
+        cnt++;
+    }
+    int treeDiameter( int s)
+    {
+        bfs(s);
+        int mx = 0 ;
+        lst = s;
+        for ( int i = 1 ; i <= n ; i++)
+        {
+    	if (d[i]>mx)
+    	{
+    	    mx = d[i];
+    	    lst = i;
+    	}
+        }
+        far = 0 ;
+        bfs(lst);
+        for ( int i = 1 ; i <= n ; i++)
+        {
+    	if (d[i]>far)
+    	{
+    	    far = d[i];
+    	}
+        }
+        return far;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	while (~scanf("%d%d",&n,&m))
+    	{
+    	    init();
+    	    cnt = 0 ;
+    	    cyc = false;
+    	    for ( int i = 1; i <= m ; i++)
+    	    {
+    		int u,v,w;
+    		scanf("%d%d%d",&u,&v,&w);
+    		addedge(u,v,w);
+    		addedge(v,u,w);
+    		if (root(u)==root(v))
+    		{
+    		    cyc = true;
+    		    continue;
+    		}
+    		merge(u,v);
+    	    }
+    	    if (cyc)
+    	    {
+    		puts("YES");
+    		continue;
+    	    }
+    	    int ans = 0 ;
+    	    for ( int i = 1 ; i <= n ; i++)
+    	    {
+    		if (!used[i])  ans = max(ans,treeDiameter(i));
+    	    }
+    	    cout<<ans<<endl;
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

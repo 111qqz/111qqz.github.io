@@ -1,0 +1,150 @@
+---
+author: 111qqz
+date: 2015-12-15 05:55:54+00:00
+draft: false
+title: hdoj 1754 I hate it
+type: post
+url: /2015/12/hdoj1754/
+categories:
+- ACM
+tags:
+- 分块
+- 数据结构
+---
+
+http://acm.hdu.edu.cn/showproblem.php?pid=1754
+题意：给定一个区间，有m组操作，操作可以是改变单点，或者查询区间最大值。对于每组查询，输出。
+思路：分块。这篇博客说得很不错。http://www.cnblogs.com/sweetsc/archive/2012/08/15/2639395.html
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2015年12月15日 星期二 11时25分17秒
+    File Name :code/hdu/1754.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=2E5+7;
+    int a[N];
+    int mx[N];
+    int n ,m;
+    int magic;
+    
+    void pre()
+    {
+        magic = int(sqrt(n));
+        ms(mx,-1); //把i%magic去掉试试。
+        for ( int i = 0 ; i <n ; i++ )  //从0开始比较方便。
+        {
+    //	if (a[i]>mx[i/magic])
+    //	    mx[i/magic] = a[i];
+    	mx[i/magic] = max(mx[i/magic],a[i]);
+        }
+    
+    }
+    
+    int query( int l,int r)
+    {
+        int ret = a[l];
+        for ( int j = l ; j <= r;)
+        {
+    	if (j%magic==0&&j+magic-1<=r)
+    	{
+    	    ret = max(ret,mx[j/magic]);
+    	 //   if (mx[j/magic]>ret) ret= mx[j/magic];
+    	    j+= magic;
+    	}
+    	else  //首尾两段不够magic的部分直接暴力
+    	{
+    	    ret = max(a[j],ret);
+    	    //if (a[j]>ret) ret = a[j];
+    	    j++;
+    	}
+        }
+        return ret;
+    }
+    
+    void update( int x,int delta)
+    {
+        a[x] = delta;
+        int l = x/magic*magic;
+        int r = l+magic;  //找到x对应的哪个块。
+        for ( int i = l ; i < r ; i++)
+        {
+    	//	if (i%magic==0||a[i]>mx[i/magic]) mx[i/magic] = a[i];
+    	    mx[i/magic] = max(mx[i/magic],a[i]);
+        }
+    }
+    
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	
+    	while (scanf("%d%d",&n,&m)!=EOF)
+    	{
+    //	    ms(a,0);
+    //	    ms(mx,0);
+    	    for ( int i = 0 ; i < n ; i++) scanf("%d",&a[i]);
+    	    getchar();
+    	    pre();
+    	    while (m--)
+    	    {
+    		char opt;
+    		scanf("%c ",&opt);
+    		if (opt=='Q')
+    		{
+    		    int l,r;
+    		    scanf("%d%d",&l,&r);
+    		    getchar();
+    		    printf("%d\n",query(l-1,r-1));
+    		}
+    		else
+    		{
+    		    int x,delta;
+    		    scanf("%d%d",&x,&delta);
+    		    getchar(); //又忘记读掉回车符了.....
+    		    update(x-1,delta);
+    		}
+    	    }
+    
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+

@@ -1,0 +1,350 @@
+---
+author: 111qqz
+date: 2017-10-16 18:38:53+00:00
+draft: false
+title: 'bzoj 1901: Zju2112 Dynamic Rankings (可持久化线段树，区间动态第k大)'
+type: post
+url: /2017/10/bzoj-1901/
+categories:
+- ACM
+tags:
+- 主席树
+- 区间第k大
+- 可持久化数据结构
+---
+
+## Description
+
+
+
+
+
+
+
+
+给定一个含有n个数的序列a[1],a[2],a[3]……a[n]，程序必须回答这样的询问：对于给定的i,j,k，在a[i],a[i+1
+
+
+
+
+],a[i+2]……a[j]中第k小的数是多少(1≤k≤j-i+1)，并且，你可以改变一些a[i]的值，改变后，程序还能针对改
+
+
+
+
+变后的a继续回答上面的问题。
+
+
+
+
+
+
+
+
+## Input
+
+
+
+
+
+
+
+
+
+
+
+第一行有两个正整数n(1≤n≤10000)，m(1≤m≤10000)。
+
+
+
+
+分别表示序列的长度和指令的个数。
+
+
+
+
+第二行有n个数，表示a[1],a[2]……a[n]，这些数都小于10^9。
+
+
+
+
+接下来的m行描述每条指令
+
+
+
+
+每行的格式是下面两种格式中的一种。
+
+
+
+
+Q i j k 或者 C i t
+
+
+
+
+Q i j k （i,j,k是数字，1≤i≤j≤n, 1≤k≤j-i+1）
+
+
+
+
+表示询问指令，询问a[i]，a[i+1]……a[j]中第k小的数。
+
+
+
+
+C i t (1≤i≤n，0≤t≤10^9)表示把a[i]改变成为t
+
+
+
+
+m,n≤10000
+
+
+
+
+
+
+
+
+
+
+
+## Output
+
+
+
+
+
+
+
+ 对于每一次询问，你都需要输出他的答案，每一个输出占单独的一行。
+
+
+
+
+
+
+
+## Sample Input
+
+
+
+
+
+5 3
+3 2 1 4 7
+Q 1 4 3
+C 2 6
+Q 2 5 3
+
+
+
+
+
+
+## Sample Output
+
+
+
+
+
+3
+6
+
+
+
+
+
+# 思路：
+
+
+
+现在我们已经会了用可持久化线段树，去做静态区间第k大的问题。
+
+考虑一次修改，修改的元素会影响后面所有建好的线段树，时间代价是无法承受的。
+
+我们考虑root[i]表示的这颗线段树，它保存的是从第一个元素开始插入到第i个元素后的数字区间。也就是说每次我们进行线段树区间相减时，我们是对两个前缀和[1, l - 1]和[1, r]进行了相减。
+
+所以我们需要的是，以一个可以接受的时间代价，维护一个前缀和。
+
+显然是用BIT来维护。
+
+所以带修改的可持久化线段树，本质上应该是BIT套可持久化线段树。
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2017年10月16日 星期一 23时50分14秒
+    File Name :1901.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define PB push_back
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N = 2E5+7;
+    int n,m;
+    int a[N],H[N];
+    int root[N];
+    int cnt,p[2];
+    int num;
+    int prefix_l[100],prefix_r[100];
+    
+    struct node
+    {
+        int a,b,c;
+        char opt[3];
+    }querys[N];
+    struct PTree
+    {
+        int sum;
+        int left,right;
+    }tree[N*30];
+    int Hash( int x){ return lower_bound(H+1,H+num+1,x)-H;}
+    inline int lowbit( int x) { return x&(-x);}
+    inline int add_node( int _sum,int _left,int _right)
+    {
+        int idx = ++cnt;
+        tree[idx].sum = _sum;
+        tree[idx].left = _left;
+        tree[idx].right = _right;
+        return idx;
+    }
+    void build( int &root,int pre_rt,int pos,int l,int r)
+    {
+        root = add_node(tree[pre_rt].sum+1,tree[pre_rt].left,tree[pre_rt].right);
+        if (l==r) return;
+        int mid = (l+r)>>1;
+        if (pos<=mid)
+        build(tree[root].left,tree[root].left,pos,l,mid);
+        else
+        build(tree[root].right,tree[root].right,pos,mid+1,r);
+    }
+    void Insert( int &root,int pos,int l,int r,int val)
+    {
+        if (!root) root = add_node(0,0,0);
+        tree[root].sum += val;
+        if (l==r) return;
+        int mid = (l+r)>>1;
+        if (pos<=mid)
+        Insert(tree[root].left,pos,l,mid,val);
+        else
+        Insert(tree[root].right,pos,mid+1,r,val);
+    }
+    int query(int l,int r,int k)
+    {
+        if (l==r) return l;
+        int mid = (l+r)>>1,sum=0;
+        for ( int i = 0 ; i < p[0] ; i++)
+        sum += tree[tree[prefix_r[i]].left].sum;
+        for ( int i = 0 ; i < p[1] ; i++)
+        sum -= tree[tree[prefix_l[i]].left].sum;
+        if (k<=sum)
+        {
+        for (int i = 0 ; i < p[0] ; i++)
+            prefix_r[i] = tree[prefix_r[i]].left;
+        for ( int i = 0 ; i < p[1] ; i++)
+            prefix_l[i] = tree[prefix_l[i]].left;
+        return query(l,mid,k);
+        }
+        else
+        {
+        for ( int i = 0 ; i < p[0] ; i++)
+            prefix_r[i] = tree[prefix_r[i]].right;
+        for ( int i = 0 ; i < p[1] ; i++)
+            prefix_l[i] = tree[prefix_l[i]].right;
+        return query(mid+1,r,k-sum);
+        }
+    }
+    
+    int main()
+    {
+        #ifndef  ONLINE_JUDGE 
+        freopen("./in.txt","r",stdin);
+      #endif 
+        scanf("%d %d",&n,&m);
+        int p_val = n;
+        ms(root,0);
+        for ( int i = 1 ; i <= n ; i++) scanf("%d",a+i),H[i] = a[i];
+        cnt = 0;
+        for ( int i = 0 ; i < m; i++) //读入所有操作是为了离散化
+        {
+            scanf("%s %d %d",querys[i].opt,&querys[i].a,&querys[i].b);
+            if (querys[i].opt[0]=='Q') scanf("%d",&querys[i].c);
+            else H[++p_val] = querys[i].b;
+        }
+        sort(H+1,H+p_val+1);
+        num = unique(H+1,H+p_val+1)-(H+1);
+        for ( int i = 1 ; i <= n ; i++)
+        {
+            a[i] = Hash(a[i]);
+        }
+    //  for ( int i = 1 ; i <= n ; i++) printf("a[%d]=%d\n",i,a[i]);
+        for ( int i = 1 ; i <= n ; i++)
+        {
+            build(root[i+n],root[(i-1)+n],a[i],1,num);
+        }
+        for ( int i = 0 ; i < m ; i++)
+        {
+            if (querys[i].opt[0]=='Q')
+            {
+            p[0] = p[1] = 1;
+            prefix_r[0] = root[querys[i].b + n];
+            prefix_l[0] = root[querys[i].a-1==0?0:querys[i].a-1+n];
+            for ( int arr = querys[i].b; arr ; arr-=lowbit(arr))
+                prefix_r[p[0]++] = root[arr];
+            for ( int arr = querys[i].a-1 ; arr ; arr-=lowbit(arr))
+                prefix_l[p[1]++] = root[arr];
+            int id = query(1,num,querys[i].c);
+            printf("%d\n",H[id]);
+            }
+            else
+            {
+            for ( int j = querys[i].a ; j <= n ; j+=lowbit(j))
+                Insert(root[j],a[querys[i].a],1,num,-1);
+            a[querys[i].a] = Hash(querys[i].b);
+            for ( int j = querys[i].a ; j <= n ; j+=lowbit(j))
+                Insert(root[j],a[querys[i].a],1,num,1);
+            }
+        }
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,119 @@
+---
+author: 111qqz
+date: 2016-07-25 07:46:23+00:00
+draft: false
+title: poj 2955 Brackets（区间dp....括号匹配。。。人生第一道区间dp）
+type: post
+url: /2016/07/poj2955/
+categories:
+- ACM
+tags:
+- dp
+- 区间dp
+---
+
+[poj2955题目链接](http://poj.org/problem?id=2955)
+
+
+
+题意：给出若干括号，问最大匹配数是多少。
+
+思路：没有思路。我知道这是dp。。。然后其他就什么都不知道了。。。转移方程？ 完全没思路。。知道了转移方程。。。。嗯，还是不会。。。边界怎么写？状态怎么推？循环顺序? 循环次序？我一点思路都没有。。。。。
+
+人生中第一道区间dp(这话我都说了不知道多少次了。。。每次都学不会。。。。sad)
+
+我的dp水平和其他部分的水平还真是不匹配。。。
+
+看了题解。。。自己写（抄）了一遍。。还是觉得好玄学。。。
+
+细节见代码。
+
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年07月25日 星期一 15时12分28秒
+    File Name :code/poj/2955.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=105;
+    char st[N];
+    int dp[N][N];
+    
+    bool check(char a,char b)
+    {
+        //cout<<"a:"<<a<<" b:"<<b<<endl;
+        if((a=='['&&b==']')||(a=='('&&b==')')) return true;
+        return false;
+        
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	while (~scanf("%s",st))
+    	{
+    	    if (st[0]=='e') break;
+    	    ms(dp,0);
+    	    int len = strlen(st);
+    
+    	    for (  int l =  1 ; l < len ; l++)  //枚举区间长度,区间dp好像经常要这样？
+    						//区间长度要从小到大枚举，原因是计算较长区间的答案的时候，需要用到较短区间的值。
+    						//所以要先算所有区间为1的，再算所有区间为2的...
+    		for ( int i = 0 ,j = l  ; j < len ; i++,j++) 
+    		{
+    			if(check(st[i],st[j]))
+    			    dp[i][j] = dp[i+1][j-1]+2;  //如果当前匹配，那么匹配数在原有的基础（区间i+1到j-1）上+2
+    
+    			for ( int k = i ;  k < j ; k++)  //由于区间具有累加性，意思是区间[i,j]的匹配数等于区间[i,k]和区间[k+1,j]的匹配数的和。
+    			    dp[i][j] = max(dp[i][j],dp[i][k]+dp[k+1][j]); //但是我们不知道在哪里划分区间最大，所以枚举划分的点，取最大。
+    		//    cout<<"dp[i][j]:"<<dp[i][j]<<endl;
+    		}
+    
+    	    printf("%d\n",dp[0][len-1]);
+    		
+    	    
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

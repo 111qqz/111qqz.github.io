@@ -1,0 +1,113 @@
+---
+author: 111qqz
+date: 2015-07-17 07:17:00+00:00
+draft: false
+title: POJ 1564 Sum It Up (DFS+剪枝）
+type: post
+url: /2015/07/poj1564/
+categories:
+- ACM
+tags:
+- dfs
+---
+
+http://poj.org/problem?id=1564
+
+dfs
+
+三个参数 x,sum,k,   x表示开始的坐标,sum表示当前的和,k表示这是一组答案中的第几个数,是用来记录路径的...
+
+调了好久没写出来...我写完之后答案会有重复.一开始想开一个boolean数组记录,这样第一组样例的3+1就只会输出一遍,但是这样,2+2就不会被记录到答案中了.
+
+然后看了下别人的代码...
+
+卧槽,只是加了个判断...当前的数和上一个如果不同,就继续dfs....
+
+我为何就没想到...这特么是判断重复的直译啊....
+
+ 
+```c++
+    
+    /*************************************************************************
+    	> File Name: code/2015summer/0714/K.cpp
+    	> Author: 111qqz
+    	> Email: rkz2013@126.com 
+    	> Created Time: 2015年07月16日 星期四 01时03分01秒
+     ************************************************************************/
+    
+    #include<iostream>
+    #include<iomanip>
+    #include<cstdio>
+    #include<algorithm>
+    #include<cmath>
+    #include<cstring>
+    #include<string>
+    #include<map>
+    #include<set>
+    #include<queue>
+    #include<vector>
+    #include<stack>
+    using namespace std;
+    #define REP(i, n) for (int i=0;i<int(n);++i)  
+    typedef long long LL;
+    typedef unsigned long long ULL;
+    const int N=20;
+    int n,t;
+    int a[N];
+    int ans;
+    int k;
+    int rec[N];
+    bool vis[105];
+    bool ok;
+    void dfs(int x,int sum,int k)
+    {
+        if (sum==t)
+        {
+    	  ok=true;
+    	  for ( int i = 0 ; i < k ; i++)
+    	  {
+    		if (i)
+    		{
+    		    printf("+%d",rec[i]);
+    		}
+    		else
+    		{
+    		    printf("%d",rec[i]);
+    		}
+    	  }
+    	  printf("\n");
+    	  return;
+        }
+        int pre = -1;
+        for ( int i = x ; i < n ; i++)
+        {
+    	  if (sum+a[i]<=t&&a[i]!=pre)
+    	  {
+    		pre = a[i];
+    		rec[k] = a[i];
+    		dfs(i+1,sum+a[i],k+1);
+    	  }
+        }
+    }
+    int main()
+    {
+        while (scanf("%d %d",&t,&n)!=EOF&&n)
+        {
+    	   ok = false;
+    	  memset(vis,false,sizeof(vis));
+    	  ans  = 0 ;
+    	  k = 0;
+    	  for ( int i = 0 ; i < n ; i++)
+    		scanf("%d",&a[i]);
+    	  printf("Sums of %d:\n",t);
+    	  dfs(0,0,0);
+    	  if (!ok) printf("NONE\n");
+        }
+      
+    	return 0;
+    }
+    
+
+
+
+```

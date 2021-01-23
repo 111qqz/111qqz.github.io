@@ -1,0 +1,163 @@
+---
+author: 111qqz
+date: 2017-11-06 09:42:38+00:00
+draft: false
+title: hdu 4782 | 2013 Asia Chengdu Regional Contest  B (模拟)
+type: post
+url: /2017/11/hdu-4782/
+categories:
+- ACM
+tags:
+- 模拟
+---
+
+http://acm.hdu.edu.cn/showproblem.php?pid=4782
+
+
+
+# 题意：
+
+
+
+将格式混乱的html代码输出成标准格式。
+
+
+
+# 思路：
+
+
+
+模拟。
+
+说下细节：
+
+
+
+
+      * 遇到open tag,先打印，后dep++
+      * 遇到close tag,先dep--,再打印
+      * 遇到空标签，直接在当前深度打印
+      * 遇到空白字符时，只有当前面出现了text以及后面也出现了text的时候才打印。**也就是说第一个string和最后一个string都是紧邻标签的。**
+
+
+**最坑的一点是...虽然题目给了数据组数，但是在</html>所在行的同一行，可能出现下一组的开始<html>**
+
+**最坑的一点是...虽然题目给了数据组数，但是在</html>所在行的同一行，可能出现下一组的开始<html>**
+
+**最坑的一点是...虽然题目给了数据组数，但是在</html>所在行的同一行，可能出现下一组的开始<html>**
+
+说好的多组数据呢...
+
+
+    
+    #include <bits/stdc++.h>
+    using namespace std;
+    typedef long long LL;
+    const int N = 1E5+10;
+    const double eps = 1e-8;
+    #define ms(a,x) memset(a,x,sizeof(a))
+    #define lowbit(x) (x&(-x))
+    char buff[N];
+    int len = 0;
+    char ch;
+    void skip()
+    {
+        while (ch=='\n'||ch==' '||ch=='\t') ch =getchar();
+    }
+    void TAG()
+    {
+        len = 0;
+        ch =getchar();
+        while (ch!='>')
+        {
+        buff[len++] = ch;
+        ch = getchar();
+        }
+        buff[len] = 0;
+    }
+    void STR()
+    {
+        len = 0 ;
+        while (ch!=' '&&ch!='\t'&&ch!='\n'&&ch!='<')
+        {
+        buff[len++] = ch;
+        ch = getchar();
+        }
+        buff[len] = 0;
+    }
+    
+    void pr( int len)
+    {
+        for ( int i = 0 ; i < len ; i++) putchar(' ');
+    }
+    void solve()
+    {
+        ch = ' ';
+        int dep = 0;
+        for ( ; ;)
+        {
+        skip();
+        if (ch=='<')
+        {
+            TAG();
+            if (buff[0]=='/')
+            {
+            dep--;
+            pr(dep);
+            }
+            else if (buff[len-1]=='/')
+            {
+            pr(dep);
+            }
+            else 
+            {
+            pr(dep);
+            dep++;
+            }
+            printf("<%s>\n",buff);
+            if (strcmp(buff,"/html")==0) break;
+            ch = getchar();
+        }
+        else
+        {
+            STR();
+            pr(dep);
+            printf("%s",buff);
+            //可能有多个字符串
+            skip();
+        //    cout<<"buff:"<<buff<<endl;
+            while (ch!='<')
+            {
+        //  cout<<"ch:"<<ch<<endl;
+            STR();
+            printf(" %s",buff);
+            skip();
+            }
+            puts("");
+            //printf("\n");
+        }
+    
+        }
+    }
+    int main(){
+            freopen("./in.txt","r",stdin);
+    //      freopen("output","w",stdout);
+        int cas = 0 ;
+        int T;
+        cin>>T;
+    
+       // cout<<"T:"<<T<<endl;
+        while (T--)
+        {
+        printf("Case #%d:\n",++cas);
+        solve();
+        }
+        return 0;
+    }
+    
+
+
+
+
+
+

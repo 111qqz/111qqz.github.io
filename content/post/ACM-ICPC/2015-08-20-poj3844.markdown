@@ -1,0 +1,137 @@
+---
+author: 111qqz
+date: 2015-08-20 17:11:00+00:00
+draft: false
+title: 'HUST team contest #2 C Divisible Subsequences ||poj 3844 (剩余类)'
+type: post
+url: /2015/08/poj3844/
+categories:
+- ACM
+tags:
+- 抽屉原理
+- 组合数学
+---
+
+
+算是签到帖，竟然卡住了。
+
+我数学还是太差了。。
+
+然后去找题解。。竟然看不懂！
+
+我数学真的有这么差嘛。。。
+
+然后多亏了队友 @zcy 妹子的讲解。。
+
+其实很好理解啊。。。
+
+不过数到底还是数学太差了==
+
+今天七夕，废话有点多==
+
+
+
+这道题的题意是，找序列中连续的一段，使得和 可以整除d
+
+我们观察到数列中的数的范围是1..1 000 000 000 的
+
+而d只有1 000 000
+
+我们考虑余数相同，读入的时候就可以直接先 % 掉 d
+
+因为只会和余数有关。
+
+我们可以先处理出来一个前缀和数组sum[i]，表示前i个元素的和。
+
+如果有一段序列从a[i] 到 a[j] 满足题意
+
+根据题意那么这段序列的和一定%d=0
+
+a[i] 到 a[j]的和为 sum[j]-sum[i-1]
+
+也就是(sum[j]-sum[i-1] )%d==0
+
+也就是sum[j] 和 sum[i-1] 关于 d 同余
+
+如果我们在处理得到前缀和的时候就%dshuxue
+
+那么就是sum[j]==sum[i-1]
+
+所以我只要对于d的每一个剩余类有多少个统计出来。
+
+然后对于每个剩余类，只需要任意取出两个，就是一种答案。
+
+需要注意的是如果只有一个0，也是一种答案。
+
+我们可以定义sum[i] = 0
+
+还有一个需要注意的是要开long long
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月29日 星期一 21时20分01秒
+    File Name :code/poj/3844.cpp
+    ************************************************ */
+    
+    #include<iostream>
+    #include<iomanip>
+    #include<cstdio>
+    #include<algorithm>
+    #include<cmath>
+    #include<cstring>
+    #include<string>
+    #include<map>
+    #include<set>
+    #include<queue>
+    #include<vector>
+    #include<stack>
+    #define y0 abc111qqz
+    #define y1 hust111qqz
+    #define yn hez111qqz
+    #define j1 cute111qqz
+    #define tm crazy111qqz
+    #define lr dying111qqz
+    using namespace std;
+    #define REP(i, n) for (int i=0;i<int(n);++i)  
+    typedef long long LL;
+    typedef unsigned long long ULL;
+    const int inf = 0x7fffffff;
+    const int N=1E6+7;
+    int sum[50005];
+    LL p[N];
+    
+    void solve ()
+    {
+        int d,n;
+        int x;
+        memset(p,0,sizeof(p));
+        sum[0] =  0;
+        p [0] = 1;
+        for ( int i = 1 ; i <= n ; i++){
+    	scanf("%d",&x);
+    	sum[i] = (sum[i-1] + x) % d;
+    	p[sum[i]]++;
+        }
+        LL ans = 0 ;
+        for ( int i = 0 ; i < d ; i++){
+    	if (p[i]>0){
+    	    ans = ans + p[i]*(p[i]-1)/2;
+    	}
+        }
+        cout<<ans<<endl;
+    }
+    int main()
+    {
+        int T;
+        cin>>T;
+        while (T--){
+    	solve();
+        }
+    	return 0;
+    }
+    
+
+
+

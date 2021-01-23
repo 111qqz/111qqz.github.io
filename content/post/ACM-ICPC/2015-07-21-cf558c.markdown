@@ -1,0 +1,127 @@
+---
+author: 111qqz
+date: 2015-07-21 03:00:00+00:00
+draft: false
+title: codeforces 558c Amr and Chemistry (贪心)
+type: post
+url: /2015/07/cf558c/
+categories:
+- ACM
+tags:
+- brute force
+- greedy
+---
+
+http://codeforces.com/contest/558/problem/C
+
+题目大意是说，给定N个数，可以对任意数进行任意次两种操作，×2，和/2（整除）
+
+问最少操作多少次，可以让所有数相等。
+
+嘛，前半个小时A掉了前两个提，d E貌似都是线段树。。并不会。。。就一直搞C。。。。
+
+然而并没有做出来。位运算是什么神奇的黑魔法。
+
+转载一份题解：http://blog.csdn.net/qq_24451605/article/details/46906813
+
+思路是声明两个数组，一个数组表示到达i的步数，另一个数组表示n个数中能够达到i的数的个数（包括本身）
+
+```c++
+    
+    /*************************************************************************
+      > File Name: code/#312C.cpp
+      > Author: 111qqz
+      > Email: rkz2013@126.com
+      > Created Time: Mon 20 Jul 2015 11:36:50 PM CST
+     ************************************************************************/
+    
+    #include<iostream>
+    #include<iomanip>
+    #include<cstdio>
+    #include<algorithm>
+    #include<cmath>
+    #include<cstring>
+    #include<string>
+    #include<map>
+    #include<set>
+    #include<queue>
+    #include<vector>
+    #include<stack>
+    using namespace std;
+    #define REP(i, n) for (int i=0;i<int(n);++i)
+    typedef long long LL;
+    typedef unsigned long long ULL;
+    const int N= 1E5+7;
+    const int inf = 0x7fffffff;
+    int a[N];
+    int  vis[N],step[N];
+    bool cmp (int a,int b)
+    {
+        if (a>b) return true;
+        return false;
+    }
+    int main()
+    {
+        int n;
+        cin>>n;
+        int mx = -1;
+        memset(vis,0,sizeof(vis));
+        memset(step,0,sizeof(step));
+    
+        for ( int i = 1 ;  i <= n ; i++ )
+        {
+    	cin>>a[i];
+    	if (a[i]>mx)
+    	    mx = a[i];
+        }
+        for ( int i = 1 ; i <= n ; i++ )f
+        {
+    	int tmp = a[i];
+    	int num = 0;
+    	while (tmp<=mx)
+    	{
+    	    step[tmp]+=num;   //到达tmp需要的操作数是之前的数到达tmo的操作数加上当前
+    	    vis[tmp]++;     //能够到达i的数的个数存在vis数组
+    	    num++;
+    	    tmp = tmp << 1;
+    	}
+    	num = 0;
+    	int tmpa = a[i];
+    	while (tmpa)
+    	{
+    	    if (tmpa&1&&tmpa!=1)    //a[i]&1为真当且仅当a[i]的二进制表示的最后一位是1，即a[i]为奇数
+    	    {               //但是如果a[i]为1，/2为0，就无法变大了。
+    		int tmp = (tmpa>>1)<<1;
+    		int sum = num + 2;  //奇数a[i]变为偶数a[i]-1的需要两步。
+    		while (tmp<=mx) //再从a[i]-1扩展下去，看能达到哪些数。
+    		{
+    		    step[tmp]=step[tmp]+sum;
+    		    vis[tmp]++;
+    		    sum++;
+    		    tmp = tmp << 1;
+    		}
+    	    }
+    	    num++;          //往反方向扩展，看能达到哪些数。
+    	    tmpa = tmpa>>1;     //注意a[i]在之前已经达到过了。
+    	    step[tmpa]+=num;
+    	    vis[tmpa]++;
+    	}
+    
+        }
+        int ans = inf;
+        for ( int i = 1 ; i <= mx ; i++ )
+        {
+    	//     cout<<"i:"<<i<<" vis[i]:"<<vis[i]<<"  step[i]:"<<step[i]<<endl;
+    	if (vis[i]==n)
+    	{
+    	    ans = min(ans,step[i]);
+    	}
+        }
+        cout<<ans<<endl;
+    
+    
+    
+        return 0;
+    }
+    
+```

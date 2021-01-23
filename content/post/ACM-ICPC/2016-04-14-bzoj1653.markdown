@@ -1,0 +1,174 @@
+---
+author: 111qqz
+date: 2016-04-14 07:12:27+00:00
+draft: false
+title: 'BZOJ 1653: [Usaco2006 Feb]Backward Digit Sums(暴力)'
+type: post
+url: /2016/04/bzoj1653/
+categories:
+- ACM
+tags:
+- brute force
+- stl
+---
+
+
+
+
+## 1653: [Usaco2006 Feb]Backward Digit Sums
+
+
+Time Limit: 5 Sec  Memory Limit: 64 MB
+Submit: 349  Solved: 258
+[[Submit](http://www.lydsy.com/JudgeOnline/submitpage.php?id=1653)][[Status](http://www.lydsy.com/JudgeOnline/problemstatus.php?id=1653)][[Discuss](http://www.lydsy.com/JudgeOnline/bbs.php?id=1653)]
+
+
+## Description
+
+
+
+
+FJ and his cows enjoy playing a mental game. They write down the numbers from 1 to N (1 <= N <= 10) in a certain order and then sum adjacent numbers to produce a new list with one fewer number. They repeat this until only a single number is left. For example, one instance of the game (when N=4) might go like this: 3 1 2 4 4 3 6 7 9 16 Behind FJ's back, the cows have started playing a more difficult game, in which they try to determine the starting sequence from only the final total and the number N. Unfortunately, the game is a bit above FJ's mental arithmetic capabilities. Write a program to help FJ play the game and keep up with the cows.
+
+
+
+
+## Input
+
+
+
+
+* Line 1: Two space-separated integers: N and the final sum.
+
+
+
+
+## Output
+
+
+
+
+* Line 1: An ordering of the integers 1..N that leads to the given sum. If there are multiple solutions, choose the one that is lexicographically least, i.e., that puts smaller numbers first.
+
+
+
+
+## Sample Input
+
+
+
+
+
+4 16
+
+
+
+
+
+## Sample Output
+
+
+
+
+
+3 1 2 4OUTPUT DETAILS:
+
+There are other possible sequences, such as 3 2 1 4, but 3 1 2 4
+is the lexicographically smallest.
+
+
+
+
+
+
+
+
+
+
+
+
+思路：n很小。。一开始做得时候把公式推错了。。3+3算成了4.我的内心是崩溃的。。
+
+
+
+
+其实直接暴力就好。可以用next_permutation来生成全排列，然后判断是否合法。
+
+
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年04月12日 星期二 10时54分23秒
+    File Name :code/bzoj/1653.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    int n;
+    int sum;
+    int a[15];
+    int tmp[15];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	scanf("%d %d",&n,&sum);
+    	for ( int i = 1 ; i <= n ; i++) a[i] = i;
+    	
+    	do
+    	{
+    	    for ( int i = 1 ; i <= n ; i++) tmp[i] = a[i];
+    	    for ( int i = 1 ; i < n ; i++)
+    		for ( int j = 1 ; j <= n - i ; j ++)
+    		    tmp[j]+=tmp[j+1];
+    	    if (tmp[1]==sum)
+    	    {
+    		for ( int i = 1 ; i< n ; i++)
+    		    printf("%d ",a[i]);
+    		printf("%d\n",a[n]);
+    		break;
+    	    }
+    	}while (next_permutation(a+1,a+n+1));
+    
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

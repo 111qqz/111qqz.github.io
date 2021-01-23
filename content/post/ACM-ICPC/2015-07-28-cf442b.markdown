@@ -1,0 +1,314 @@
+---
+author: 111qqz
+date: 2015-07-28 18:18:00+00:00
+draft: false
+title: cf 442B Andrey and Problem
+type: post
+url: /2015/07/cf442b/
+categories:
+- ACM
+tags:
+- 概率
+---
+
+
+
+
+B. Andrey and Problem
+
+
+
+
+
+
+
+time limit per test
+
+
+2 seconds
+
+
+
+
+
+
+
+memory limit per test
+
+
+256 megabytes
+
+
+
+
+
+
+
+input
+
+
+standard input
+
+
+
+
+
+
+
+output
+
+
+standard output
+
+
+
+
+
+
+
+
+
+
+Andrey needs one more problem to conduct a programming contest. He has _n_ friends who are always willing to help. He can ask some of them to come up with a contest problem. Andrey knows one value for each of his fiends -- the probability that this friend will come up with a problem if Andrey asks him.
+
+
+
+
+Help Andrey choose people to ask. As he needs only one problem, Andrey is going to be really upset if no one comes up with a problem or if he gets more than one problem from his friends. You need to choose such a set of people that maximizes the chances of Andrey not getting upset.
+
+
+
+
+
+
+
+
+
+
+Input
+
+
+
+
+The first line contains a single integer _n_ (1 ≤ _n_ ≤ 100) -- the number of Andrey's friends. The second line contains _n_ real numbers _p__i_(0.0 ≤ _p__i_ ≤ 1.0) -- the probability that the _i_-th friend can come up with a problem. The probabilities are given with at most 6 digits after decimal point.
+
+
+
+
+
+
+
+
+
+
+Output
+
+
+
+
+Print a single real number -- the probability that Andrey won't get upset at the optimal choice of friends. The answer will be considered valid if it differs from the correct one by at most 10 - 9.
+
+
+
+
+
+
+
+
+
+
+Sample test(s)
+
+
+
+
+
+
+
+
+
+
+input
+
+
+
+    
+    4<br></br>0.1 0.2 0.3 0.8
+
+
+
+
+
+
+
+
+
+
+output
+
+
+
+    
+    0.800000000000
+
+
+
+
+
+
+
+
+
+
+input
+
+
+
+    
+    2<br></br>0.1 0.2
+
+
+
+
+
+
+
+
+
+
+output
+
+
+
+    
+    0.260000000000
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Note
+
+
+
+
+In the first sample the best strategy for Andrey is to ask only one of his friends, the most reliable one.
+
+
+
+
+In the second sample the best strategy for Andrey is to ask all of his friends to come up with a problem. Then the probability that he will get exactly one problem is 0.1*0.8 + 0.9*0.2 = 0.26.
+
+
+
+
+
+
+
+可以选1个,可以选2个,选i个....
+
+
+
+
+但是选哪i个,似乎还要枚举...这样计算起来很麻烦
+
+
+
+
+但是再一看,很容易发现,选i个概率最大的情况一定是选本身概率最大的i个的情况
+
+
+
+
+那么我们只需要枚举选的个数,取每种情况的最大值就好了.
+
+
+ ```c++
+
+    
+    /*************************************************************************
+    	> File Name: code/2015summer/#3/C.cpp
+    	> Author: 111qqz
+    	> Email: rkz2013@126.com 
+    	> Created Time: 2015年07月28日 星期二 12时27分50秒
+     ************************************************************************/
+    
+    #include<iostream>
+    #include<iomanip>
+    #include<cstdio>
+    #include<algorithm>
+    #include<cmath>
+    #include<cstring>
+    #include<string>
+    #include<map>
+    #include<set>
+    #include<queue>
+    #include<vector>
+    #include<stack>
+    #define y0 abc111qqz
+    #define y1 hust111qqz
+    #define yn hez111qqz
+    #define j1 cute111qqz
+    #define tm crazy111qqz
+    #define lr dying111qqz
+    using namespace std;
+    #define REP(i, n) for (int i=0;i<int(n);++i)  
+    typedef long long LL;
+    typedef unsigned long long ULL;
+    const int N=1E2+7;
+    double p[N];
+    int n;
+    
+    bool cmp(double a,double b)
+    {
+        if (a>b) return true;
+        return false;
+    }
+    double solve (int x)
+    {
+        double res=0;
+        double poss;
+        for  ( int i = 1 ; i <= x; i++)
+        {
+    	poss = 1.0;
+    	for ( int j = 1 ; j <= x;  j++ )
+    	{
+    	    if (j==i) poss=poss*p[j-1];
+    	    else poss = poss * (1-p[j-1]);
+    	}
+    	res = res + poss;
+        }
+        return res;
+    }
+    int main()
+    {
+        cin>>n;
+        for ( int i = 0 ; i < n ; i++ )
+        {
+    	cin>>p[i];
+        }
+        sort(p,p+n,cmp);
+        double ans = 0;
+        for ( int i = 0 ; i < n ; i++ )
+        {
+    	ans = max(ans,solve(i+1));
+        }
+        cout<<fixed<<setprecision(12)<<ans<<endl;
+      
+    	return 0;
+    }
+    
+
+```
+

@@ -1,0 +1,866 @@
+---
+author: 111qqz
+date: 2016-12-12 09:02:12+00:00
+draft: false
+title: 编译原理实验：词法分析器
+type: post
+url: /2016/12//
+categories:
+- 其他
+tags:
+- 编译器
+---
+
+# ****实验一　设计实现简单语言的词法分析器****
+
+
+****1、实验目的****
+
+通过该实验,熟练应用编译原理关于词法分析的基本理论和方法；学会用C/C++高级程序设计语言设计一个词法分析器；加深对编译原理理论的分析理解，提高实际操作和解决具体问题的能力。
+
+****2、实验条件****
+
+计算机上安装C/C++编译处理软件。
+
+****3、实验内容及要求****
+
+对下述单词表定义的语言设计编制一个词法分析器。单词符号及种别表和词法分析器功能及基本要求如下：
+
+（1）单词符号及种别表
+<table >
+<tbody >
+<tr >
+
+<td width="240" >单词符号
+</td>
+
+<td width="96" >种别编码
+</td>
+
+<td width="132" >单词值
+</td>
+</tr>
+<tr >
+
+<td width="240" >main
+</td>
+
+<td width="96" >1
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >int
+</td>
+
+<td width="96" >2
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >float
+</td>
+
+<td width="96" >3
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >double
+</td>
+
+<td width="96" >4
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >char
+</td>
+
+<td width="96" >5
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >if
+</td>
+
+<td width="96" >6
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >else
+</td>
+
+<td width="96" >7
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >do
+</td>
+
+<td width="96" >8
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >while
+</td>
+
+<td width="96" >9
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >l(l|d)*
+</td>
+
+<td width="96" >10
+</td>
+
+<td width="132" >内部字符串
+</td>
+</tr>
+<tr >
+
+<td width="240" > ( +|-|ε ) dd*(.dd* | ε)( e ( +|-|ε ) dd*|ε)
+</td>
+
+<td width="96" >20
+</td>
+
+<td width="132" >二进制数值表示
+</td>
+</tr>
+<tr >
+
+<td width="240" >=
+</td>
+
+<td width="96" >21
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >+
+</td>
+
+<td width="96" >22
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >-
+</td>
+
+<td width="96" >23
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >*
+</td>
+
+<td width="96" >24
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >/
+</td>
+
+<td width="96" >25
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >(
+</td>
+
+<td width="96" >26
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >)
+</td>
+
+<td width="96" >27
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >{
+</td>
+
+<td width="96" >28
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >}
+</td>
+
+<td width="96" >29
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >,
+</td>
+
+<td width="96" >30
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >;
+</td>
+
+<td width="96" >31
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >>
+</td>
+
+<td width="96" >32
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >>=
+</td>
+
+<td width="96" >33
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" ><
+</td>
+
+<td width="96" >34
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" ><=
+</td>
+
+<td width="96" >35
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >==
+</td>
+
+<td width="96" >36
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >!=
+</td>
+
+<td width="96" >37
+</td>
+
+<td width="132" >
+</td>
+</tr>
+<tr >
+
+<td width="240" >#
+</td>
+
+<td width="96" >0
+</td>
+
+<td width="132" >
+</td>
+</tr>
+</tbody>
+</table>
+（2）词法分析器功能及基本要求
+
+处理用户提交的符合上述词法的源代码序列，进行词法分析，并输出单词二元组。
+
+****4、主要参考步骤****
+
+(1)画出识别上述语言单词的状态转换图
+
+(2)用C/C++语言编写词法分析程序（应考虑能被语法分析程序调用）
+
+(3)预处理，去除注释、多余空格、Tab字符、回车换行符等
+
+(4)设计若干用例，上机测试并通过所设计实现的词法分析器
+
+
+
+ 	  1. +++-123.456e-127*+45.99e+200++abc+-cnt++49
+ 	  2. (+123.456+-456.789e-120)*m2+(a++456)*-c123
+ 	  3. ++4+1.4
+ 	  4. a+-149+49.7e+127+m123
+ 	  5. x=a++1.27e+18
+ 	  6. --20+-124.987e+127+-xyz
+
+begin  if(x>=-1.27e-18) xyz=(x1+y1)* -124.987e+127
+
+ 	  7. --20+-124. e+111-137++569.246e+(123+ivar);
+
+x=1;if(x>1) y=1234; x=(123+abc); (本例应有出错信息)
+
+****5、思考****
+
+数字的正负号与运算符加减如何处理，识别数字的DFA怎样和运算符加减等融合在一起，进而指导词法分析器的程序编写。
+
+****6、实验报告提交格式****
+
+(1) 总体设计思想
+
+(2) 详细算法设计
+
+(3) 流程框图
+
+(4) 函数相关说明
+
+(5) 输入与输出（包括出错处理）
+
+(6) 程序运行结果（屏幕截图）
+
+(7) 词法分析器使用说明
+
+(8) 心得与体会
+
+(9) 源程序清单
+
+
+
+
+
+——————————————————————————————————————————————————————————————————————————————
+
+主要时间卡在了double转二进制上...
+
+有的人说需要转，有的人说不需要orz
+
+我能想到的办法。。大概就是要高精度＋手动实现itof?
+
+一点也不美啊。。。求好看的方法orz
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年12月09日 星期五 10时39分52秒
+    
+     ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-200;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int MAX = 2E4+5;
+    map<string,int>mp;
+    char code[MAX];
+    /*
+     * ascii code:
+     * sapce ->32
+     *  n ->10
+     *  tab->9
+     */
+    char token[100];
+    int Reallen = 0 ;
+    int codelen = 0;
+    //table size:26
+    char table[][10]={"main","int","float","double","char","if","else","do","while"};
+    bool comment = false;
+    int row;
+    void killchar(char *code)
+    {
+        int len = strlen(code);
+        //cout<<"len:"<<len<<endl;
+        for ( int i = 0 ;i < len ; i++)
+        {
+    	//	if (code[i]==32||code[i]==10||code[i]==9) continue;
+    	if (i<len-1)
+    	{
+    	    if (code[i]=='/'&&code[i+1]=='*')
+    	    {
+    		//	cout<<"xgxgxg"<<endl;
+    		comment = true;
+    		i+=2;
+    		continue;
+    	    }
+    	    if (code[i]=='*'&&code[i+1]=='/')
+    	    {
+    		comment = false;
+    		i+=2;
+    		continue;
+    	    }
+    	}
+    	if (comment) continue;
+    	code[Reallen++] = code[i];	
+        }
+    }
+    bool letter(char ch)
+    {
+        if (ch>='A'&&ch<='Z') return true;
+        if (ch>='a'&&ch<='z') return true;
+        return false;
+    }
+    bool digit(char ch)
+    {
+        if (ch>='0'&&ch<='9') return true;
+        return false;
+    }
+    int state;
+    int sum = 0 ; //记录数值
+    int sign; //0,1,-1,分别表示没有符号，正号，符号。
+    int pos = 0 ;
+    int dblcmp(double d)
+    {
+        return d<-eps?-1:d>eps;
+    }
+    bool Real;
+    int Rlen; //digit的实数部分长度
+    double Rsum;
+    int esum; //e后面的数
+    int Esum;//用科学计数法表示的最后的答案
+    bool sci;
+    int sci_sign; //科学计数法部分的符号
+    bool Signed ;//符号是否出现过.
+    bool lstdig = false; //判断上一位是否为数字
+    bool okDigit()
+    {
+        if (digit(code[pos])) return true;
+        if (code[pos]=='e'||code[pos]=='E')
+        {
+    	sci_sign = 0 ;
+    	return true;
+        }
+        if (sci&&(code[pos]=='+'||code[pos]=='-'))
+        {
+    	if (Signed) return false;
+    	if (code[pos]=='+') sci_sign = 1;
+    	else sci_sign = -1;
+    	pos++;
+    	Signed = true;
+    	return true;
+        }
+        return false;
+    }
+    void solveInt()
+    {
+        while (okDigit())
+        {
+    	if (code[pos]=='e'||code[pos]=='E')
+    	{
+    	    if (sci) //出现一个以上的e报error
+    	    {
+    		state = -1;
+    		return ;
+    	    }
+    	    sci = true;
+    	    pos++;
+    	    continue;
+    	}
+    	if (sci)
+    	{
+    	    if (code[pos]>='0'&&code[pos]<='9')
+    		esum = esum * 10 + code[pos]-'0';
+    	    else 
+    	    {
+    		state = -1;
+    		return;
+    	    }
+    	}
+    	else
+    	{
+    	    Rsum = Rsum * 10 + code[pos]-'0';
+    	}
+    	pos++;
+        }
+        if (sci&&esum==0) //出现了e,e后面却为空
+        {
+    	state = -1;
+    	return; 
+        }
+        if (sci)
+        {
+    	if (sci_sign==0||sci_sign==1)
+    	{
+    	    for ( int i = 1 ;i  <= esum ; i++) Rsum *= 10;
+    	}
+    	else
+    	{
+    	    for ( int i = 1 ; i<= esum ; i++) Rsum = Rsum * 0.1;
+    	}
+        }
+    }
+    void solveReal()
+    {
+        if (code[pos]=='.') Real = true,pos++;
+        if (!Real)
+        {
+    	pos--;
+    	return;
+        }
+        if (code[pos]=='e')
+        {
+    	state = -1;
+    	pos-
+    	return;
+        }
+        Rlen = 0 ;
+        while (okDigit())
+        {
+    	if (code[pos]=='e'||code[pos]=='E')
+    	{
+    	    if (sci)
+    	    {
+    		state = -1;
+    		return;
+    	    }
+    	    sci = true;
+    	    pos++;
+    	    continue;
+    	}
+    	if (sci)
+    	{
+    	    if (code[pos]<'0'||code[pos]>'9')
+    	    {
+    		state = -1;
+    		return;
+    	    }
+    	    int val = code[pos]-'0';
+    	    esum = esum * 10 + val;
+    	}
+    	else
+    	{
+    	    Rsum = Rsum * 10 + code[pos]-'0';
+    	    Rlen++;
+    	}
+    	pos++;
+        }
+        pos--;
+        Rsum = Rsum *pow(10.0,-Rlen*1.0);
+        if (sci&&esum==0)
+        {
+    	state = -1;
+    	return;
+        }
+        if (sci)
+        {
+    	if (sci_sign==0||sci_sign==1)
+    	{
+    	    for ( int i = 1 ; i <= esum ; i++) Rsum = Rsum * 10;
+    	}else
+    	{
+    	    for ( int i = 1 ; i <= esum ; i++) Rsum = Rsum * 0.1;
+    	}
+        }
+    }
+    void SolveDigit()
+    {
+        lstdig  = true;
+        Signed = false;
+        sum = 0 ;
+        state = 20;
+        Real = false;
+        Rsum = 0;
+        sci = false;
+        Esum = 0 ;
+        Rlen = 0;
+        esum = 0;
+        solveInt();
+        solveReal();
+    }
+    void Err()
+    {
+        printf("Err! in row %d\n",row);
+    }
+    void scaner()
+    {
+        int cur = 0;
+       // while (isspace(code[pos])) pos++;
+       while (code[pos]==' '||code[pos]=='\t') pos++; //空格
+        ms(token,0);
+        if (letter(code[pos]))
+        {
+    	lstdig = false;
+    	state = 10;
+    	cur = 0 ;
+    	while (letter(code[pos])||digit(code[pos]))
+    	{
+    	    token[cur++] =  code[pos];
+    	    pos++;
+    	}
+    	//	token[cur]='\n';//　!!!
+    	//	cout<<"cur:"<<cur<<endl;
+    	//	for ( int i = 0 ; i < cur ; i++) printf("%c",token[i]);
+    	//	cout<<"token:"<<token<<endl;
+    	pos--;
+    	cur--;
+    	for ( int i = 0 ; i < 9 ; i++)
+    	{
+    	    if (strcmp(token,table[i])==0)
+    	    {
+    		state = i + 1;
+    		break;
+    	    }
+    	}
+        }
+        else if (digit(code[pos]))
+        {
+    	sign = 0 ;
+    	lstdig = true;
+    	SolveDigit();
+    
+    	++pos;
+    	return ; //for lstdig
+        }else if (code[pos]=='\n') state = -2;
+        else if (code[pos]=='#') state = 0;
+        else  switch (code[pos])
+        {
+    	case '=': state = 21;pos++;
+    		  if (code[pos]=='=')
+    		  {
+    		      state = 36;
+    		  }else pos--;
+    		  break;
+    	case '>':state  = 32; pos++;
+    		 if (code[pos]=='=')
+    		 {
+    		     state = 33;
+    		 }else pos--;
+    		 break;
+    	case '<':state = 34; pos++;
+    		 if (code[pos]=='=')
+    		 {
+    		     state = 35;
+    		 }else pos--;
+    		 break;
+    	case '!': pos++;
+    		  if (code[pos]=='=')
+    		  {
+    		      state =37;
+    		  }else pos--;
+    		  break;
+    	case '+':state = 22;pos++;
+    		// cout<<"pos:"<<pos<<"code[pos]:"<<code[pos]<<"lstdig:"<<lstdig<<endl;
+    		 if(!lstdig&&digit(code[pos])) 
+    		{   
+    		   // cout<<"lstdig:"<<lstdig<<"pos:"<<pos<<endl;
+    		    SolveDigit();
+    		    sign = 1; 
+    		}
+    		else lstdig = false,pos--;
+    		 pos++;
+    		 return;
+    	case '-':state = 23;pos++;
+    		 if(!lstdig&&digit(code[pos]))
+    		 {
+    		     SolveDigit();sign = -1; 
+    		}
+    		 else lstdig = false, pos--; 
+    		 pos++;
+    		 return;
+    	case '*':state = 24; break;
+    	case '/':state = 25; break;
+    	case '(':state = 26; break;
+    	case ')':state = 27; break;
+    	case '{':state = 28; break;
+    	case '}':state = 29; break;
+    	case ',':state = 30; break;
+    	case ';':state = 31; break;
+        }
+        ++pos;
+        lstdig = false;
+        //   cout<<"posss:"<<pos<<" "<<code[pos]<<endl;
+    }
+    void init()
+    {
+        mp["main"] = 1;
+        mp["int"]  = 2;
+        mp["float"] = 3;
+        mp["double"] = 4;
+        mp["char"] = 5;
+        mp["if"] = 6;
+        mp["else"] =  7;
+        mp["do"] = 8 ;
+        mp["while"] = 9;
+    }
+    void pr()
+    {
+        int len = strlen(code);
+        for ( int i = 0 ; i  < len ; i++)
+        {
+    	cout<<code[i];
+        }
+    }
+    char *Table[20]={"=","+","-","*","/","(",")","{","}",",",";",">",">=","<","<=","==","!="};
+    int main()
+    {
+    #ifndef  ONLINE_JUDGE 
+        freopen("s2.txt","r",stdin);
+    #endif
+        init();
+        row = 1;
+        while (1)
+        {
+    	char ch;
+    	cin.get(ch);
+    	code[codelen++] = ch;
+    	if (ch=='#') break;
+        }
+        //	pr(code);
+        code[codelen]='\n';
+        killchar(code);
+        // cout<<code<<endl;
+        codelen = Reallen;
+        //  cout<<"codelen:"<<codelen<<endl;
+        //   	pr();
+        pos = 0;
+        while (1) 
+        {
+    	scaner();
+    //	cout<<"lstdig:"<<lstdig<<endl;
+    	if (state==0) break;
+    	if (state==-2)
+    	{
+    	    row++;
+    	    cout<<endl;
+    	}else if (state>=1&&state<=9)
+    	{
+    	    char *tmp = table[state-1];
+    	    int id = mp[string(tmp)];
+    	    cout<<"("<<id<<", )"<<endl;
+    	}else if (state>=21&&state<=37)
+    	{
+    	    cout<<"("<<state<<",'"<<Table[state-21]<<"')"<<endl;
+    	}else if (state==10)
+    	{
+    	    cout<<"(10,"<<token<<")"<<endl;
+    	}else if (state==20)
+    	{
+    	    cout<<"(20,";
+    	    if (sign==1) putchar('+');
+    	    else if (sign==-1) putchar('-');
+    	    cout<<Rsum;
+    	    cout<<")"<<endl;
+    	}else 
+    	{
+    	    Err();
+    	    pos++;
+    	}
+        }
+    #ifndef ONLINE_JUDGE  
+    #endif
+        return 0;
+    }
+    
+
+
+

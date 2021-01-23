@@ -1,0 +1,209 @@
+---
+author: 111qqz
+date: 2016-04-11 12:07:02+00:00
+draft: false
+title: 'BZOJ 1650: [Usaco2006 Dec]River Hopscotch 跳石子 (二分)'
+type: post
+url: /2016/04/bzoj-1650/
+categories:
+- ACM
+tags:
+- binary search
+---
+
+
+
+
+## 1650: [Usaco2006 Dec]River Hopscotch 跳石子
+
+
+Time Limit: 5 Sec  Memory Limit: 64 MB
+Submit: 440  Solved: 290
+[[Submit](http://www.lydsy.com/JudgeOnline/submitpage.php?id=1650)][[Status](http://www.lydsy.com/JudgeOnline/problemstatus.php?id=1650)][[Discuss](http://www.lydsy.com/JudgeOnline/bbs.php?id=1650)]
+
+
+## Description
+
+
+
+
+
+
+Every year the cows hold an event featuring a peculiar version of hopscotch that involves carefully jumping from rock to rock in a river. The excitement takes place on a long, straight river with a rock at the start and another rock at the end, L units away from the start (1 <= L <= 1,000,000,000). Along the river between the starting and ending rocks, N (0 <= N <= 50,000) more rocks appear, each at an integral distance Di from the start (0 < Di < L). To play the game, each cow in turn starts at the starting rock and tries to reach the finish at the ending rock, jumping only from rock to rock. Of course, less agile cows never make it to the final rock, ending up instead in the river. Farmer John is proud of his cows and watches this event each year. But as time goes by, he tires of watching the timid cows of the other farmers limp across the short distances between rocks placed too closely together. He plans to remove several rocks in order to increase the shortest distance a cow will have to jump to reach the end. He knows he cannot remove the starting and ending rocks, but he calculates that he has enough resources to remove up to M rocks (0 <= M <= N). FJ wants to know exactly how much he can increase the shortest distance *before* he starts removing the rocks. Help Farmer John determine the greatest possible shortest distance a cow has to jump after removing the optimal set of M rocks.
+
+数轴上有n个石子，第i个石头的坐标为Di，现在要从0跳到L，每次条都从一个石子跳到相邻的下一个石子。现在FJ允许你移走M个石子，问移走这M个石子后，相邻两个石子距离的最小值的最大值是多少。
+
+
+
+
+
+
+## Input
+
+
+
+
+
+
+* Line 1: Three space-separated integers: L, N, and M * Lines 2..N+1: Each line contains a single integer indicating how far some rock is away from the starting rock. No two rocks share the same position.
+
+
+
+
+
+
+## Output
+
+
+
+
+
+
+* Line 1: A single integer that is the maximum of the shortest distance a cow has to jump after removing M rocks
+
+
+
+
+
+
+## Sample Input
+
+
+
+
+25 5 2
+2
+14
+11
+21
+175 rocks at distances 2, 11, 14, 17, and 21. Starting rock at position
+0, finishing rock at position 25.
+
+
+
+
+
+
+## Sample Output
+
+
+
+
+4
+
+
+
+
+
+## HINT
+
+
+
+
+
+
+   移除之前，最短距离在位置2的石头和起点之间；移除位置2和位置14两个石头后，最短距离变成17和21或21和25之间的4．
+
+
+
+
+
+
+
+
+题意：n个石头在数轴上，坐落在(0,L)上,初次之外0和L还有两个石头。从0跳到L,每次只能跳相邻的石头，现在要移除m个石头，设dm=min(d[i+1]-d[i]),现在要最优得选择去掉的m个石头，使得这个最小值dm最大。
+
+思路：这题特么坑读题啊。。翻译什么鬼。。
+
+做法是二分判断合法性。
+
+**需要注意的是，check某个值是否合法的时候，这个值是作为距离的最小值，也就是不允许有两个石头之间的距离小于这个值，**如果有，那么则要移除石头，使得这个距离大于该值。
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年04月11日 星期一 19时04分50秒
+    File Name :code/bzoj/1650.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=5E4+7;
+    int L,n,m;
+    int d[N];
+    
+    bool check( int k)
+    {
+        int lst = 0 ;
+        int cnt = 0 ;
+        for ( int i = 1 ; i <= n+1 ; i++)
+        {
+    	if (d[i]-d[lst]<k) cnt++;
+    	else lst = i;
+    	if (cnt>m) return false;
+    
+        }
+        return true;
+    }
+    int bin()
+    {
+        int l = 0 ;
+        int r = L ;
+        int mid;
+        while (l<=r)
+        {
+    	mid = (l+r)/2;
+    	if (check(mid)) l = mid + 1;
+    	else r = mid-1;
+        }
+        return r;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	scanf("%d %d %d",&L,&n,&m);
+    	for ( int i = 1 ; i <= n ; i++) scanf("%d",&d[i]);
+    	
+    	sort(d+1,d+n+1);
+    	d[0] = 0;
+    	d[n+1] = L;
+    
+    	printf("%d\n",bin());
+    	
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    

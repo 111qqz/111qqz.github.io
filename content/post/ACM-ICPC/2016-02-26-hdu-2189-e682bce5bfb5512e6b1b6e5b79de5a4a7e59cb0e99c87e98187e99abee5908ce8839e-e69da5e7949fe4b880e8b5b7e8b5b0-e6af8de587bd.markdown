@@ -1,0 +1,126 @@
+---
+author: 111qqz
+date: 2016-02-26 08:39:56+00:00
+draft: false
+title: hdu 2189  悼念512汶川大地震遇难同胞——来生一起走 (母函数)
+type: post
+url: /2016/02/hdu-2189-512--/
+categories:
+- ACM
+tags:
+- 母函数
+---
+
+http://acm.hdu.edu.cn/showproblem.php?pid=2189
+题意：n个人可以分成若干组，每组人数都为素数，问有多少种分法。
+思路：母函数。先预处理素数，记得多处理一点...
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月26日 星期五 16时24分17秒
+    File Name :code/hdu/2189.cpp
+    ************************************************ */
+    
+    #include <cstdio>muhanshu
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=155;
+    int pri[N];
+    int a[N],tmp[N];
+    int cnt;
+    int n;
+    
+    bool judge ( int n)
+    {
+        if (n<=3) return true;
+        for ( int i = 2 ; i*i <= n ; i++)
+        {
+    	if (n%i==0) return false;
+        }
+    
+        return true;
+    } 
+    
+    
+    void pre()
+    {
+        cnt  = 0;
+        for ( int i = 2 ; i <= 200 ;  i++)
+        {
+    	if (judge(i))
+    	    pri[++cnt] = i;
+        }
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	
+    	int T;
+    	pre();
+    	scanf("%d",&T);
+    	while (T--)
+    	{
+    	    scanf("%d",&n);
+    
+    	    ms(a,0);
+    	    for ( int i = 0 ; i <= n ; i+=2 )
+    	    {
+    		a[i] = 1;
+    		tmp[i] =  0;
+    	    }
+    
+    	    
+    	    for ( int i = 2 ; pri[i] <= n ; i++)
+    	    {
+    		for ( int j = 0 ; j <= n ; j++)
+    		{
+    		    for ( int k = 0 ; k + j <= n ; k +=pri[i])
+    		    {
+    			tmp[j+k] +=a[j];
+    		    }
+    		}
+    		for ( int j = 0 ; j <= n ; j ++)
+    		{
+    		    a[j] = tmp[j];
+    		    tmp[j] =  0;
+    		}
+    	    }
+    
+    	    printf("%d\n",a[n]);
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    

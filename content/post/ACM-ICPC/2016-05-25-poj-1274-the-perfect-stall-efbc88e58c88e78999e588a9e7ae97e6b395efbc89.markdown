@@ -1,0 +1,138 @@
+---
+author: 111qqz
+date: 2016-05-25 09:59:54+00:00
+draft: false
+title: poj 1274 The Perfect Stall （匈牙利算法）
+type: post
+url: /2016/05/poj-1274-the-perfect-stall-/
+categories:
+- ACM
+tags:
+- 二分图匹配
+- 匈牙利算法
+---
+
+[poj 1274题目链接](http://poj.org/problem?id=1274)
+
+裸的匈牙利。
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年05月25日 星期三 17时49分22秒
+    File Name :code/poj/1274.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=405;
+    int n,m;
+    int head[N];
+    int cnt;
+    int link[N];
+    bool vis[N];
+    struct Edge
+    {
+        int v;
+        int nxt;
+    }edge[N*N];
+    void addedge(int u,int v)
+    {
+        edge[cnt].v = v;
+        edge[cnt].nxt = head[u];
+        head[u] = cnt;
+        cnt++;
+    }
+    
+    bool dfs( int u)
+    {
+      //  cout<<"u:"<<u<<endl;
+        for ( int i = head[u] ; i!=-1 ; i = edge[i].nxt)
+        {
+    	int v = edge[i].v;
+    //	cout<<"v:"<<v<<endl;
+    	if (vis[v]) continue;
+    	vis[v] = true;
+    
+    	if (link[v]==-1||dfs(link[v]))
+    	{
+    	    link[v] = u;
+    	    return true;
+    	}
+        }
+        return false;
+    }
+    int hung()
+    {
+        int res = 0 ;
+        ms(link,-1);
+        for ( int i = 1 ; i <= n ; i++)
+        {
+    	ms(vis,false);
+    	if (dfs(i)) res++;
+        }
+    
+        return res;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	while (scanf("%d%d",&n,&m)!=EOF)
+    	{
+    	    ms(head,-1);
+    	    cnt = 0 ;
+    
+    	    for ( int i = 1 ; i <= n ; i++)
+    	    {
+    		int num;
+    		scanf("%d",&num);
+    		while (num--)
+    		{
+    		    int x;
+    		    scanf("%d",&x);
+    		    x = x + n;
+    		    addedge(i,x);
+    		}
+    	    }
+    	    int ans = hung();
+    	    printf("%d\n",ans);
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

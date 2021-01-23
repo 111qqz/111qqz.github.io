@@ -1,0 +1,129 @@
+---
+author: 111qqz
+date: 2016-07-23 06:57:10+00:00
+draft: false
+title: hdu 2873 Bomb Game（Sg函数）
+type: post
+url: /2016/07/hdu-2873/
+categories:
+- ACM
+tags:
+- sg函数
+- 博弈论
+---
+
+[hdu 2873题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=2873)
+
+题意：n*m个格子，有若干炸弹。对于在第一行或者第一列的炸弹，爆炸后会到那一行或者那一列的更前面（总的来说就是更靠近左上角）的位置。对于其他位置的炸弹，爆炸后会生成两个炸弹，分别到那一行的更前面或者那 一列的更前面。问先手是否有必赢策略。
+
+
+
+思路： 不会做2333
+参考了 [参考博客1](http://www.cnblogs.com/staginner/archive/2012/08/31/2666118.html)
+[参考博客2](http://www.it610.com/article/1655660.htm)
+
+大概明白了一点。整个游戏可以分为若干个炸弹的游戏的和，**而实际上一个不在边界行或者列的炸弹，依然可以继续分，分成两个炸弹的和**。而位于(i.j)的炸弹，分成两个炸弹的和，有(i-1)*(j-1)种方案（这个不重要2333）
+
+处于边界行或者列的点的sg值我们是可以知道的。。因为规则单一。。和移动等价。。
+
+然后根据边界来进一步处理一般的情况。。
+
+有点类似dp的思想。。。？
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年07月23日 星期六 04时52分16秒
+    File Name :code/hdu/2873.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=55;
+    int n,m;
+    int sg[N][N];
+    bool vis[N*N];
+    char maze[N][N];
+    int px[N],py[N];
+    void sg_init()
+    {
+        ms(sg,0);
+        for ( int i = 0 ; i < N ; i++) //在边界的只能往一个方向生成炸弹，和移动了炸弹等价。
+    	sg[i][0]=sg[0][i]=i;                       //还是0based好一点。。。这样（1,1）点的sg值自然就是0了。。。
+        for ( int i1 = 1 ; i1 < N ; i1++)
+    	for ( int i2 = 1 ; i2 < N ; i2++)
+    	{
+    	    ms(vis,false);
+    	    for ( int j1 =  0 ;  j1 < i1 ; j1++)
+    		for ( int j2 = 0 ; j2 < i2 ; j2++)
+    		    vis[sg[i1][j2]^sg[j1][i2]] = true;   //注意sg函数的变化规则。。其实是把一次爆炸考虑成两个爆炸的叠加，所以异或了。
+    	    for ( int k = 0 ; ; k++)
+    		if (!vis[k])
+    		{   
+    		    sg[i1][i2] = k;
+    		    break;
+    		}   
+    	}
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	sg_init();
+    //or ( int i = 0 ; i <= 10 ; i++)
+    //   for ( int j = 0 ; j <= 10 ; j++)
+    //cout<<"i:"<<i<<" j:"<<j<<" sgg[i][j]:"<<sg[i][j]<<endl;
+    	while (~scanf("%d%d",&n,&m))
+    	{
+    	    if (n==0&&m==0) break;
+    	    for ( int i = 0 ; i < n ; i++) scanf("%s",maze[i]);
+    	    int sum  =  0 ;
+    	    for ( int i = 0 ; i  < n ; i++)
+    		for ( int j = 0 ; j < m ; j++)
+    		    if (maze[i][j]=='#')
+    		    {
+    			    int tmp = sg[i][j];
+    			    sum ^= tmp;
+    		    }
+    	    if  (sum)
+    	    {
+    		puts("John");
+    	    }
+    	    else
+    	    {
+    		puts("Jack");
+    	    }
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    

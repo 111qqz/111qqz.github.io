@@ -1,0 +1,128 @@
+---
+author: 111qqz
+date: 2016-08-04 16:04:14+00:00
+draft: false
+title: ural 1126. Magnetic Storms (单调队列模板题)
+type: post
+url: /2016/08/ural1126/
+categories:
+- ACM
+
+
+tags:
+- 单调队列
+---
+
+[ural 1126](http://acm.timus.ru/problem.aspx?space=1&num=1126)
+题意：n个数，求从第k个元素开始，求每k个元素的最大值（一共求n-k+1次）
+思路：单调队列。
+[单调队列学习链接](http://blog.csdn.net/dgq8211/article/details/7430726)
+其实单调队列挺容易的理解的。。。当时觉得写不明白大概是因为看到的代码写得太丑了2333
+
+说下我的理解：
+
+单调队列的尾端（就是后进入元素的那一端）其实和单调栈类似。
+
+首端加了个元素期限的概念，不断删除“过期”的元素。
+
+所谓过期的元素，对于这道题来说，当我往前移动到第k+1个元素的时候，第1个元素就是过期了的元素，堆答案不会再有贡献。
+
+理论上单调队列中的元素是<元素的期限，元素>的二元组。
+
+而一般元素的"期限"是由下标的位置决定的，而得到下标就可以知道元素。
+
+所以我们实际操作的时候只需要将下标存入单调队列中就行了。
+
+那么查询最大值呢？ 队首元素就是最大值。
+
+**以及，用到了stl的双端队列deque(double end queue)，头文件是#include <deque>**
+
+由于每次的答案是队首元素，**因此设置哨兵而使得队列不为空就使得问题变得繁琐。**
+
+**所以这里不同于单调栈的写法，我们不设置哨兵，而是.empty()判断双端队列是否为空。**
+
+也正是因为这个原因，没有办法像单调栈一样写成for的样子（因为没有哨兵，初始x=dq.front()的时候可能dp中还没有元素，导致RE），而是写成while的样子。。具体见代码。
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年08月04日 星期四 23时08分34秒
+    File Name :code/ural/1126.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #include <deque>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=3E4+7;
+    int a[N];
+    int f[N];
+    int n,k;
+    deque<int>dq;
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	scanf("%d",&k);
+    	n = 0 ;
+    	while (scanf("%d",&a[++n])!=EOF)
+    	{
+    	    if (a[n]==-1) 
+    	    {
+    		n--;
+    		break;
+    	    }
+    	}
+    	//for ( int i = 1 ; i <= n ; i++) cout<<"a[i]:"<<a[i]<<endl;
+    	dq.clear();
+    	for (  int i = 1 ; i <= n ; i++)
+    	{
+    	    while (!dq.empty()&&dq.front()<i-k+1) dq.pop_front(); //不断删除队首过期元素。以第i个元素结尾的连续K个元素的开头位置是i-k+1,在这之前的已经“失效”，因此出队.
+    	    while (!dq.empty()&&a[dq.back()]<=a[i]) dq.pop_back();//不断删除队尾破坏单调性的元素。能删除的原因是比i早出现并且不比i大的元素一定不会成为答案。
+    	    dq.push_back(i);
+    	   // cout<<"dq.size():"<<dq.size()<<endl;
+    	    //cout<<"i:"<<i<<" "<<dq.front()<<endl;
+    	    if (i>=k)
+    		printf("%d\n",a[dq.front()]);
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+
+

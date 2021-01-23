@@ -1,0 +1,250 @@
+---
+author: 111qqz
+date: 2016-07-17 16:21:03+00:00
+draft: false
+title: hdu 4123 Bob’s Race (树的直径+尺取+rmq)(珍爱生命，远离log)
+type: post
+url: /2016/07/hdu-4123/
+categories:
+- ACM
+tags:
+- rmq
+- 尺取法
+- 树的直径
+---
+
+[hdu 4123 题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=4123)
+
+
+
+题意：一棵树，定义d[i]为点i到树上某点的最大距离。。。给出若干查询，每个查询一个x,问最多能有多少点满足这些点中，最大的d与最小的d的差小于等于x.要求这些点的编号必须是连续的。
+
+思路：可以三遍bfs处理出所有点的d...
+
+由于不能排序。。。所以就是尺取+rmq....
+
+然而神Tm TLE.....
+
+这复杂度还TLe...
+
+结果最后发现是。。。log运算的常数太大被卡。。。
+
+[![2016-07-17 23-19-46 的屏幕截图](https://111qqz.com/wordpress/wp-content/uploads/2016/07/2016-07-17-23-19-46-的屏幕截图.png)
+](https://111qqz.com/wordpress/wp-content/uploads/2016/07/2016-07-17-23-19-46-的屏幕截图.png) [![2016-07-17 23-26-58 的屏幕截图](https://111qqz.com/wordpress/wp-content/uploads/2016/07/2016-07-17-23-26-58-的屏幕截图.png)
+](https://111qqz.com/wordpress/wp-content/uploads/2016/07/2016-07-17-23-26-58-的屏幕截图.png)
+
+
+
+所以做法是先预处理一下。。。嗯。。。。
+
+
+
+
+## **珍爱生命，远离log!**
+
+
+
+
+## **珍爱生命，远离log!**
+
+
+
+
+## **珍爱生命，远离log!**
+
+
+
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年07月17日 星期日 19时37分55秒
+    File Name :code/hdu/4123.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <cmath>
+    #include <string>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    #define log2 0.693147
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7; //双向边。。。
+    int n,Q;
+    int head[N];
+    int d[5][N];
+    bool vis[N];
+    int ans;
+    int cnt;
+    int dp[N][30],dp2[N][30];
+    int beg,lst;
+    int LOG[N+10];
+    struct Edge
+    {
+        int v;
+        int w;
+        int nxt;
+    }edge[N];
+    void addedge( int u,int v,int w)
+    {
+        edge[cnt].v = v;
+        edge[cnt].w = w;
+        edge[cnt].nxt = head[u];
+        head[u] = cnt;
+        cnt++;
+    }
+    void rmq_init()
+    {
+        for ( int i = 1 ; i <= n ; i++)
+    	dp[i][0] = dp2[i][0] = d[0][i];
+        for ( int j = 1 ;  (1<<j)<=n; j++)
+    	for ( int i = 1 ; i + (1<<j) -1 <= n ; i++)
+    	{
+    	    dp[i][j] = max(dp[i][j-1],dp[i+(1<<(j-1))][j-1]);
+    	    dp2[i][j] = min(dp2[i][j-1],dp2[i+(1<<(j-1))][j-1]);
+    	}
+    }
+    int rmq( int l,int r)
+    {
+        if (l>r) return 0;
+    int k = log(double (r-l+1)/log2);
+    //int k = LOG[r-l+1];
+    //int k = 0;
+    //while (1<<(k+1)<=r-l+1) k++;
+        int mx = max(dp[l][k],dp[r-(1<<k)+1][k]);
+        int mn = min(dp2[l][k],dp2[r-(1<<k)+1][k]);
+        return mx - mn;
+    }
+    void init()
+    {
+        ms(head,-1);
+        cnt = 0; 
+    }
+    void bfs( int s,int k)
+    {
+        ms(d[k],0x3f);
+        ms(vis,false);
+        queue<int>q;
+        q.push(s);
+        vis[s] = true;
+        d[0][s]  = 0;
+        while (!q.empty())
+        {
+    	int u = q.front();
+    	q.pop();
+    	for ( int i = head[u] ; i !=-1 ; i = edge[i].nxt)
+    	{
+    	    int v = edge[i].v;
+    	    int w = edge[i].w;
+    	    if (vis[v]) continue;
+    	    vis[v] = true;
+    	    d[k][v] = d[k][u] + w;
+    	    q.push(v);
+    	}
+        }
+    }
+    void ruler(int k)
+    {
+        int head = 1;
+        int tail = 1;
+        ans = 0 ;
+    //    for ( int i = 1 ; i <= n ; i++) cout<<"d[0][i]:"<<d[0][i]<<endl;
+    //   cout<<"k:"<<k<<endl;
+        while (tail<=n)
+        {
+    	int cur = rmq(head,tail);
+    //	cout<<"head:"<<head<<" tail:"<<tail<<" cur:"<<cur<<endl;
+    	while (head<tail&&rmq(head,tail)>k) head++;
+    	cur = rmq(head,tail);
+    	if (cur<=k) ans = max(ans,tail-head);
+    	tail++;
+        }
+        ans++;
+    }
+    void ruler2 ( int k)
+    {
+        ans = 0 ;
+        int id = 1;
+        for ( int i = 1 ;i <= n ; i++)
+        {
+    	while (id<=i&&rmq(id,i)>k) id++;
+    	ans =max(ans,i-id+1);
+        }
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	LOG[0] = -1;
+    	for ( int i = 1 ; i < 2* N ; i++) LOG[i] =LOG[i>>1]+1;
+    	while (scanf("%d%d",&n,&Q),n||Q)
+    	{
+    	  //  cout<<log(2.0)<<endl;
+    	    init();
+    	    for ( int i = 1 ; i <= n-1 ; i++)
+    	    {
+    		int u,v,w;
+    		scanf("%d%d%d",&u,&v,&w);
+    		addedge(u,v,w);
+    		addedge(v,u,w);
+    	    }
+    	    bfs(1,0);
+    	    int far = 0 ;
+    	    for ( int i = 1 ; i <= n ; i++)
+    		if (d[0][i]>far)
+    		{
+    		    far = d[0][i];
+    		    lst  = i ;
+    		}
+    	    far = 0 ;
+    	    bfs(lst,1);
+    	    for ( int i = 1 ;i  <= n ; i++)
+    		if (d[1][i]>far)
+    		{
+    		    far = d[1][i];
+    		    beg = i ;
+    		}
+    	    bfs(beg,2);
+    	    for ( int i = 1 ; i <= n ; i++)
+    		d[0][i] = max(d[1][i],d[2][i]);
+    	     rmq_init();
+    	    while (Q--)
+    	    {
+    		int x;
+    		scanf("%d",&x);
+    		ruler(x);
+    		printf("%d\n",ans);
+    	    }
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    v
+
+
+

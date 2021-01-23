@@ -1,0 +1,118 @@
+---
+author: 111qqz
+date: 2016-11-28 07:07:00+00:00
+draft: false
+title: codeforces 381 div 2 D. Alyona and a tree(二分+前缀和)
+type: post
+url: /2016/11/cf740d/
+categories:
+- ACM
+tags:
+- binary search
+- 前缀和
+---
+
+[题目链接](http://codeforces.com/contest/740/problem/D)
+
+d:题意：一棵树，给出边权和点权，定义点v控制点u，当且仅当u是v的子树中的点，并且dis(u,v)<=a[u]，其中dis(u,v)为点u到点v路径上的边权和，a[u]为点u的点权，现在问对于每个节点v，其能控制的点有多少个。
+
+思路：<del>先写了个rmq+dfs的lca。。。那么任意两个点的距离都可以O(1)得到了。然后不会了233333.</del>
+
+**upd**:和lca没有什么关系，因为一个点能控制另一个点这两个点一定在一条通向根的链上，因此距离直接减一下就好了。
+
+**机智的做法**：dfs的时候维护一个栈，对于栈中序列，后面一半是对当前点有贡献的。问题时求对于每个v统计其能控制多少个u，现在我们固定u，考虑能控制他的v。这些v在树上的形态时一条链 ，借助第二类前缀和的思想，对于u标记+1，对于u往上的离根最近的且能统治u的v上面的一个标记-1，然后dfs后序遍历（也就是链的起点时距离根远的那一边），距离处理的时候，只需要在递归之后更新ans就好了。
+
+栈里面维护，到哪个节点，从根下来，边权和最大，找边权和>=当前边权和-a[u]的地方。
+
+**启示：由于两个存在统治关系的点在一条链上，边权都为正，边权和具有单调性，单调的东西，容易想到二分处理。**
+
+
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年11月24日 星期四 09时17分48秒
+    File Name :code/cf/#381/D.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=2E5+7;
+    int n;
+    int a[N];
+    LL dis[N];
+    vector< pair<int,LL> >edge[N];
+    vector< pair<LL,int> >path;
+    int ans[N];
+    void dfs( int u,int pre)
+    {
+        ans[u]++;
+        int idx = lower_bound(path.begin(),path.end(),make_pair(dis[u]-a[u],-1))-path.begin()-1;
+        if (idx>=0) ans[path[idx].sec]--;
+        path.push_back(make_pair(dis[u],u));
+        for ( auto x : edge[u])
+        {
+    	int v  = x.first;
+    	if (v==pre) continue;
+    	dis[v] = dis[u] + x.sec;
+    	dfs(v,u);
+    	ans[u]+=ans[v];//后序遍历...链的起点原理根，终点靠近根
+        }
+        path.pop_back();
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	cin>>n;
+    	ms(dis,0);
+    	for ( int i = 1 ; i <= n ; i++) scanf("%d",&a[i]);
+    	for ( int i =2 ; i <= n ; i++)
+    	{
+    	    int u,v;
+    	    LL w;
+    	    u = i ;
+    	    scanf("%d%lld",&v,&w);
+    	    edge[u].push_back(make_pair(v,w));
+    	    edge[v].push_back(make_pair(u,w));
+    	}
+    	dfs(1,0);
+    	for ( int i = 1 ; i <= n ; i++) printf("%d ",ans[i]-1);
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+

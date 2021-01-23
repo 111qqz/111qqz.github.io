@@ -1,0 +1,102 @@
+---
+author: 111qqz
+date: 2016-11-12 12:39:25+00:00
+draft: false
+title: '[dp专题000]uva 10328  Coin Toss (java 大数+dp)（Unsolved）'
+type: post
+url: /2016/11/uva10328/
+categories:
+- ACM
+tags:
+- dp
+- java
+- 区间dp
+- 高精度
+---
+
+题目链接
+
+题意：问长度为n，每个位置由且仅有‘H’和'T'组成的序列中，至少有连续k个‘H’出现的方案数。
+
+思路：不会做，参考了题解 不过没有完全搞懂。
+
+根据题解，正面考虑比较麻烦，所以反面考虑。[j]
+
+dp[i][j]表示长度为i，前面最后连续的‘H’的个数不超过j个的方案数。
+
+考虑转移方程为：
+
+总的情况为：dp[i][j] = dp[i-1][j] * 2;
+
+但是其中有多考虑的情况，就是第i位是'H'，且i位之前的最后j个位置都是'H'（即从i-j位到第i-1位都是‘H’，此时第i-j-1位必然是'T'）
+
+
+<blockquote>有i个硬币时，如果i < j+1，那么它对于i-1的情况来说，最后一个硬币的位置就可以随便放了。
+
+如果i > j + 1，dp[ i ] [ j ]  = dp [ i - 1 ] [ j ] * 2 - x（不满足条件的部分）
+
+然后我们来考虑这个x怎么求，既然是不满足条件，那么肯定是第i的位置放了H，前面的都是H，从而这些连续的H大于j。那么就考虑dp[ i - 1 - j - 1 ]（中间这 j - 1 个（**kk:疑似作者笔误。应该位j个**）全为H，加上第i个H，就不满足条件了），所以：
+
+dp [ i ] [ j ] = dp [ i - 1 ] [ j ] * 2 - dp [ i - j - 2 ] [ j ]（kk:仍然不是很懂这个式子...）
+
+那么我们就差最后一个了：i == j + 1的情况了。（因为 i - j - 2 就等于 -1 了，用递推公式会RE的）
+
+这种情况只有一种，即是全是H。
+
+那么它就为：dp [ i ] [ j ] = dp [ i - 1 ] [ j ] * 2 - 1
+
+</blockquote>
+
+
+
+
+
+
+最后，要用到高精度，干脆写了java
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年11月11日 星期五 12时31分47秒
+    File Name :code/uva/10328.java
+     ************************************************ */
+    import java.math.BigInteger;
+    import java.util.Scanner;
+    
+    public class Main{
+    	public static void main(String [] args){
+    		Scanner cin = new Scanner(System.in);
+    		BigInteger[][] f = new BigInteger [110][110];
+    		for ( int i = 0 ; i <= 100 ; i++) f[0][i] = new BigInteger("1");
+    		f[1][0] = new BigInteger("1");
+    		for ( int i = 1 ; i <= 100 ; i++) f[1][i] = new BigInteger("2");
+    		for ( int i = 2 ; i <= 100 ; i++){
+    			for ( int j = 0 ; j <= 100;  j++){
+    				f[i][j] = f[i-1][j].multiply(BigInteger.valueOf(2));
+    				if (i==j+1)
+    					f[i][j] = f[i][j].add(BigInteger.valueOf(-1));
+    				else if (i>=j+1)
+    					f[i][j] = f[i][j].add(f[i-j-2][j].negate());
+    			}
+    		}
+    		while (cin.hasNext()){
+    			int n = cin.nextInt();
+    			int k = cin.nextInt();
+    			System.out.println(f[n][n].add(f[n][k-1].negate()));
+    		}
+    	}
+    }
+    
+
+
+
+
+
+
+
+
+
+
+
+
+

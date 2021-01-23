@@ -1,0 +1,195 @@
+---
+author: 111qqz
+date: 2016-07-13 17:40:56+00:00
+draft: false
+title: poj 1789 Truck History (mst,prim)
+type: post
+url: /2016/07/poj-1789/
+categories:
+- ACM
+tags:
+- mst
+- prim
+---
+
+[poj1789题目链接](http://poj.org/problem?id=1789)
+
+
+
+题意：其实题目不难理解。。。直接按照定义去搞就行了。。。
+
+思路：由于距离在分母上。。所以要quality最大。。。就是要分母最小。。。
+
+然后由于题目中说每一种类型的type只能由其他一种派生出来。。。我们可以把这个派生关系看做一条边。。。把每种类型看成点。。
+
+这样就构成了一棵树。。。先o(n*n*7)预处理出权值。。。然后最小生成树即可。。。
+
+这种给了坐标距离作为权值的图一定是稠密图。。。图小用kruskal糊弄一下就过去了。。。图大的话还是乖乖的用prim吧。。。
+
+然而仍然 TLE???wtf??
+
+
+
+最后发现。。因为我习惯用string...但是又怕卡cin...所以做法是scanf读入字符数组然后再赋值给string..
+
+[![2016-07-14 00-56-11 的屏幕截图](https://111qqz.com/wordpress/wp-content/uploads/2016/07/2016-07-14-00-56-11-的屏幕截图.png)
+](https://111qqz.com/wordpress/wp-content/uploads/2016/07/2016-07-14-00-56-11-的屏幕截图.png)
+
+
+
+然而这种操作不知为何神tm慢。。。。。（求指教）
+
+
+
+以至于：[![2016-07-14 01-06-47 的屏幕截图](https://111qqz.com/wordpress/wp-content/uploads/2016/07/2016-07-14-01-06-47-的屏幕截图.png)
+](https://111qqz.com/wordpress/wp-content/uploads/2016/07/2016-07-14-01-06-47-的屏幕截图.png)
+
+要知道。。。这题时限2s啊。。。为毛能差1s多。。。也就是说时间的瓶颈完全是在读入了orz...
+
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年07月14日 星期四 00时13分04秒
+    File Name :code/poj/1789.cpp
+     ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=2E3+7;
+    int n,m;
+    int f[N];
+    int v[N];
+    char st[N][10];
+    //string st[N];
+    int matrix[N][N];
+    
+    void init()
+    {
+        for ( int i = 0 ; i < n; i++)
+    	for ( int j = 0 ; j <n ; j++)
+    	    matrix[i][j] = inf;
+    }
+    int getw(char * a,char * b)
+    {
+        int res = 0 ;
+        for ( int i = 0 ; i < 7 ; i++)
+    	if (a[i]!=b[i]) res++;
+        return res;
+    }
+    void prim()
+    {
+        bool flag[N]; 
+        int nearest[N]; 
+        int adjecent[N];
+        int i,j;
+        int min;
+        int sum=0;
+    
+        for ( int i = 0 ; i < n ; i++) flag[i] = false;
+        flag[0] = true;
+        for(i = 1; i < n; ++i)
+        {
+    	nearest[i] = matrix[0][i];
+    	adjecent[i] = 0;
+        }
+        int count = n;
+        while(--count)
+        {
+    	min = inf;
+    	j = 0;
+    	for(i = 0; i < n; ++i)
+    	{
+    	    if(!flag[i] && nearest[i] < min)
+    	    {
+    		min = nearest[i];
+    		j = i;
+    	    }
+    	}
+    	sum+=matrix[j][adjecent[j]];
+        
+    	flag[j] = true;
+    	for(i = 0; i < n; ++i)
+    	{
+    	    if(!flag[i] && matrix[i][j] < nearest[i])
+    	    {
+    		nearest[i] = matrix[i][j];
+    		adjecent[i] = j;
+    	    }
+    	}
+        }
+        printf("The highest possible quality is 1/%d.\n",sum);
+    }
+    
+    int main()
+    {
+    #ifndef  ONLINE_JUDGE 
+        freopen("code/in.txt","r",stdin);
+    #endif
+    
+        while (~scanf("%d",&n))
+        {
+    	if (n==0) break;
+    	init();
+    
+    	for ( int i = 0 ; i < n ; i++)
+    	{
+    	  //  char tmp[10];
+    	    scanf("%s",st[i]);
+    	//    st[i]=tmp;
+    	}
+    
+    	for ( int i = 0 ; i < n ; i++)
+    	    for ( int j = 0 ; j < n ; j++)
+    		if (i<j)
+    		{
+    		    
+    		    matrix[i][j]=matrix[j][i]=getw(st[i],st[j]);
+    		    
+    		}
+    
+    	prim();
+        }
+    
+    
+    
+    
+    #ifndef ONLINE_JUDGE  
+        fclose(stdin);
+    #endif
+        return 0;
+    }
+    
+
+
+
+

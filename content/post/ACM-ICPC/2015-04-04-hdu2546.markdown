@@ -1,0 +1,252 @@
+---
+author: 111qqz
+date: 2015-04-04 08:53:00+00:00
+draft: false
+title: hdu 2546 饭卡 （01背包）
+type: post
+url: /2015/04/hdu2546/
+categories:
+- ACM
+tags:
+- 01背包
+- dp
+---
+
+# 饭卡
+
+
+
+
+**Time Limit: 5000/1000 MS (Java/Others) Memory Limit: 32768/32768 K (Java/Others)  
+Total Submission(s): 14225 Accepted Submission(s): 4945  
+**  
+  
+
+
+
+
+
+Problem Description
+
+
+
+
+电子科大本部食堂的饭卡有一种很诡异的设计，即在购买之前判断余额。如果购买一个商品之前，卡上的剩余金额大于或等于5元，就一定可以购买成功（即使购买后卡上余额为负），否则无法购买（即使金额足够）。所以大家都希望尽量使卡上的余额最少。  
+某天，食堂中有n种菜出售，每种菜可购买一次。已知每种菜的价格以及卡上的余额，问最少可使卡上的余额为多少。
+
+
+
+
+
+
+
+
+
+
+Input
+
+
+
+
+多组数据。对于每组数据：  
+第一行为正整数n，表示菜的数量。n<=1000。  
+第二行包括n个正整数，表示每种菜的价格。价格不超过50。  
+第三行包括一个正整数m，表示卡上的余额。m<=1000。  
+  
+n=0表示数据结束。
+
+
+
+
+
+
+
+
+
+
+Output
+
+
+
+
+对于每组输入,输出一行,包含一个整数，表示卡上可能的最小余额。
+
+
+
+
+
+
+
+
+
+
+Sample Input
+
+
+
+
+
+
+
+1
+50
+5
+10
+1 2 3 2 1 1 2 3 2 1
+50
+0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sample Output
+
+
+
+
+
+
+
+-45
+32
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Source
+
+
+
+
+[UESTC 6th Programming Contest Online](http://acm.hdu.edu.cn/search.php?field=problem&key=UESTC+6th+Programming+Contest+Online&source=1&searchmode=source)
+
+
+
+
+
+
+
+
+
+
+
+
+
+在入门dp。
+
+
+
+
+显然是01背包。 cost和value都是价钱。
+
+
+
+
+但是有限制条件。
+
+
+
+
+很容易想到，为了使得余额最少，我们要把最贵的留在最后买。
+
+
+
+
+读入的时候把最贵的菜价拿出来
+
+
+
+
+然后剩下的n-1个菜，做一个容量为m-5的01背包。
+
+
+
+
+注意如果m<5,直接输出即可。
+
+
+
+
+
+
+
+
+
+ ```c++
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月22日 星期一 22时44分27秒
+    File Name :code/hdu/2546.cpp
+    ************************************************ */
+    
+    #include <iostream>
+    #include <algorithm>
+    #include <cstring>
+    #include <cstdio>
+    #include <cmath>
+    
+    using namespace std;
+    
+    const int  N=2E3+5;
+    int mmax;
+    int a[N],dp[N],posi;
+    int n,m;
+    
+    void ZeroOnePack(int value ,int cost)
+    {
+         for ( int i = m - 5 ; i >= cost ; i-- )
+            dp[i]=max(dp[i],dp[i-cost]+value);
+    
+    }
+    
+    int main()
+    {
+        while (scanf("%d",&n)!=EOF&&n)
+        {   mmax = -1;
+           memset(dp,0,sizeof(dp));
+           memset(a,0,sizeof(a));
+            for ( int i = 1 ; i <= n ; i++)
+                scanf("%d",&a[i]);
+            for ( int i = 1 ; i <= n ; i++)
+                if ( a[i] > mmax )
+                {
+                    mmax=a[i];
+                    posi=i;
+                }
+            scanf("%d",&m);
+            if ( m< 5) {printf("%d\n",m);continue;}
+    
+    
+            for ( int i = 1 ; i <= n ; i++ )
+                if ( i!=posi )
+                ZeroOnePack(a[i],a[i]);
+                printf("%d\n",m-dp[m-5]-mmax);
+        }
+        return 0;
+    }
+    
+
+
+```

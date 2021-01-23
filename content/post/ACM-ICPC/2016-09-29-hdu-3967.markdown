@@ -1,0 +1,131 @@
+---
+author: 111qqz
+date: 2016-09-29 08:46:11+00:00
+draft: false
+title: hdu 3967 Zero's Number (不允许前导0（新写法）的数位dp)
+type: post
+url: /2016/09/hdu-3967/
+categories:
+- ACM
+tags:
+- 数位dp
+---
+
+[题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=3967)
+
+题意：给出l,r,k，定义f(n,k)为将数n分成左右两个非空的部分，再求和之后能被k整除的方案数。
+
+现在问区间[l,r]中所有f(i,k)的和。
+
+思路：数位dp...
+
+**枚举一下分点即可**。。想到这个这题就A了。。。
+
+然后相当于做分点个数个数位dp...求和即可。
+
+dp[i][j][k][p]表示第i位，前半部分%k的结果，后半部分%k的结果，是否有前导0.
+
+然后关于前导0这个。。。换了一种写法。。。加了一个状态在dp数组里。。。
+
+不然每次都要一个if。。。感觉有点丑。。。。这样写简介了一点。。。
+
+以及。。因为每次k是不同的。。。我dp状态记录的时候又没有记录k...所以记得每次初始化成-1。。。
+
+因为忘记这个结果第二个样例调了好久一直是31。。。。
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :Thu 29 Sep 2016 02:49:50 PM CST
+    File Name :code/hdu/3967.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    int k;
+    LL l,r;
+    int digit[20];
+    LL dp[20][20][20][20][2];
+    LL dfs( int pos,LL sum1,LL sum2,bool limit,int cut,int prehasnonzero)
+    {
+        if (pos==0) return (sum1+sum2)%k==0;
+        if (!limit&&dp[pos][sum1%k][sum2%k][cut][prehasnonzero]!=-1) return dp[pos][sum1%k][sum2%k][cut][prehasnonzero];
+        int mx = limit?digit[pos]:9;
+        LL res = 0 ;
+        for ( int i = 0 ; i <= mx;  i++)
+        {
+    	if (pos<cut) res = res + dfs(pos-1,sum1,sum2*10+i,limit&&i==mx,cut,prehasnonzero||i!=0);
+    	else
+    	{
+    	    if (!prehasnonzero&&pos==cut&&i==0) continue; //前半部分可以有前导0，但是不能全为0.
+    	    res = res + dfs(pos-1,sum1*10+i,sum2,limit&&i==mx,cut,prehasnonzero||i!=0);
+    	}
+        }
+        if (!limit) dp[pos][sum1%k][sum2%k][cut][prehasnonzero] = res;
+        return res;
+    }
+    LL solve( LL n)
+    {
+      //  if (n<10) return 0;
+        ms(digit,0);
+        int len = 0 ;
+        ms(dp,-1);// 每次计算的时候都要初始化dp。。。因为d不一样。。。。。。
+        while (n)
+        {
+    	digit[++len] = n % 10;
+    	n /= 10;
+        }
+        LL res = 0 ;
+        for ( int i = 2 ; i  <= len ; i++)
+    	res = res + dfs(len,0,0,true,i,0);
+        return res;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	while (~scanf("%lld%lld%d",&l,&r,&k))
+    	{
+    	    LL ans = solve(r) - solve(l-1);
+    	    printf("%lld\n",ans);
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+
+
+
+
+
+
+

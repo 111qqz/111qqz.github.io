@@ -1,0 +1,96 @@
+---
+author: 111qqz
+date: 2015-07-08 02:08:00+00:00
+draft: false
+title: POJ 1028 Web Navigation
+type: post
+url: /2015/07/poj1028/
+categories:
+- ACM
+tags:
+- stl
+---
+
+http://poj.org/problem?id=1028
+
+```c++
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月19日 星期五 15时45分01秒
+    File Name :1028.cpp
+    ************************************************ */
+    
+    #include <algorithm>
+    #include <cstdio>
+    #include <iostream>
+    #include <cstring>
+    #include <string>
+    #include <cmath>
+    #include <map>
+    #include <stack>
+    #include <queue>
+    
+    using namespace std;
+    typedef long long LL;
+    const int inf = 8E8;
+    stack<string> backstack;
+    stack<string> forwardstack;
+    string cur;
+    string cmd;
+    int main()
+    {
+        cur ="http://www.acm.org/";
+    
+        while (cin>>cmd)
+        {
+            if (cmd=="QUIT")
+            {
+                break;
+            }
+            if (cmd=="BACK")
+            {
+                if (backstack.empty())
+                {
+                    cout<<"Ignored"<<endl;
+                    continue;
+                }
+                forwardstack.push(cur);
+                cur=backstack.top();
+                backstack.pop();
+                cout<<cur<<endl;
+            }
+            if (cmd=="FORWARD")
+            {
+                if (forwardstack.empty())
+                {
+                    cout<<"Ignored"<<endl;
+                    continue;
+                }
+                backstack.push(cur);
+                cur=forwardstack.top();
+                forwardstack.pop();
+                cout<<cur<<endl;
+            }
+            if (cmd=="VISIT")
+            {
+                backstack.push(cur);
+    
+                cin>>cur;
+                while (!forwardstack.empty())  forwardstack.pop();
+                cout<<cur<<endl;
+    
+            }
+        }
+    
+    
+    	return 0;
+    }
+    
+    
+``` 
+
+
+

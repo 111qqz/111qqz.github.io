@@ -1,0 +1,161 @@
+---
+author: 111qqz
+date: 2016-04-15 08:07:59+00:00
+draft: false
+title: 'BZOJ 1657: [Usaco2006 Mar]Mooo 奶牛的歌声 (单调栈)'
+type: post
+url: /2016/04/bzoj-1657-usaco2006-marmooo--/
+categories:
+- ACM
+tags:
+- 单调栈
+---
+
+## 1657: [Usaco2006 Mar]Mooo 奶牛的歌声
+
+
+Time Limit: 5 Sec  Memory Limit: 64 MB
+Submit: 634  Solved: 447
+[[Submit](http://www.lydsy.com/JudgeOnline/submitpage.php?id=1657)][[Status](http://www.lydsy.com/JudgeOnline/problemstatus.php?id=1657)][[Discuss](http://www.lydsy.com/JudgeOnline/bbs.php?id=1657)]
+
+
+## Description
+
+
+Farmer John's N (1 <= N <= 50,000) cows are standing in a very straight row and mooing. Each cow has a unique height h in the range 1..2,000,000,000 nanometers (FJ really is a stickler for precision). Each cow moos at some volume v in the range 1..10,000. This "moo" travels across the row of cows in both directions (except for the end cows, obviously). Curiously, it is heard only by the closest cow in each direction whose height is strictly larger than that of the mooing cow (so each moo will be heard by 0, 1 or 2 other cows, depending on not whether or taller cows exist to the mooing cow's right or left). The total moo volume heard by given cow is the sum of all the moo volumes v for all cows whose mooing reaches the cow. Since some (presumably taller) cows might be subjected to a very large moo volume, FJ wants to buy earmuffs for the cow whose hearing is most threatened. Please compute the loudest moo volume heard by any cow.
+
+Farmer John的N(1<=N<=50,000)头奶牛整齐地站成一列“嚎叫”。每头奶牛有一个确定的高度h(1<=h<=2000000000)，叫的音量为v (1<=v<=10000)。每头奶牛的叫声向两端传播，但在每个方向都只会被身高严格大于它的最近的一头奶牛听到，所以每个叫声都只会 被0，1，2头奶牛听到（这取决于它的两边有没有比它高的奶牛）。 一头奶牛听到的总音量为它听到的所有音量之和。自从一些奶牛遭受巨大的音量之后，Farmer John打算买一个耳罩给被残害得最厉 害的奶牛，请你帮他计算最大的总音量。
+
+
+## Input
+
+
+* Line 1: A single integer, N.
+
+* Lines 2..N+1: Line i+1 contains two space-separated integers, h and v, for the cow standing at location i.
+
+第1行：一个正整数N.
+
+第2到N+1行：每行包括2个用空格隔开的整数，分别代表站在队伍中第i个位置的奶牛的身高以及她唱歌时的音量．
+
+
+## Output
+
+
+* Line 1: The loudest moo volume heard by any single cow.
+
+队伍中的奶牛所能听到的最高的总音量．
+
+
+## Sample Input
+
+
+3
+4 2
+3 5
+6 10
+
+INPUT DETAILS:
+
+Three cows: the first one has height 4 and moos with volume 2, etc.
+
+
+## Sample Output
+
+
+7
+
+
+## HINT
+
+
+队伍中的第3头奶牛可以听到第1头和第2头奶牛的歌声，于是她能听到的总音量为2+5=7．虽然她唱歌时的音量为10，但并没有奶牛可以听见她的歌声．
+
+
+## Source
+
+
+[Silver](http://www.lydsy.com/JudgeOnline/problemset.php?search=Silver)
+
+
+
+思路：窝想到了是单调栈。。。但是细节想不清楚。。大抵还是对单调栈不够熟悉吧
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年04月15日 星期五 15时34分08秒
+    File Name :code/bzoj/1657.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=5E4+7;
+    int left[N],right[N];
+    int n;
+    int h[N],v[N];
+    int st[N];
+    int ans;
+    int val[N];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	scanf("%d",&n);
+    	for ( int i = 1 ; i <= n ; i++) scanf("%d %d",&h[i],&v[i]);
+    
+    	int top = 0;
+    	ans = 0 ;
+    	for (int i = 1 ; i <= n ; i++) //枚举i，将i作为作为右边能听到歌的奶牛，看左边有多少个奶牛的歌声能被听到。
+    	{
+    	    while (top&&h[i]>h[st[top]])   val[i]+=v[st[top--]];
+    	    st[++top] = i;
+    	}
+    	ms(st,0);
+    	top = 0 ;
+    	for ( int i = n ; i >= 1 ; i--) //枚举i,将i作为左边能听到歌声的奶牛，看右边有多少个奶牛的歌声能被听到。
+    	{
+    	    while (top&&h[i]>h[st[top]])
+    		val[i]+=v[st[top--]];
+    	    st[++top] = i;
+    	}
+    	for ( int i = 1 ; i <= n ; i++) ans = max(ans,val[i]);
+    	cout<<ans<<endl;
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

@@ -1,0 +1,86 @@
+---
+author: 111qqz
+date: 2016-03-31 05:33:39+00:00
+draft: false
+title: codeforces 137 C. History (sorting,贪心)
+type: post
+url: /2016/03/cf137c/
+categories:
+- ACM
+tags:
+- greedy
+- sortings
+---
+
+[题目链接](http://codeforces.com/problemset/problem/137/C)
+题意：给出n个时间的开始和截止时间，保证没有两个时间的开始或者截止时间相同，问有多少个时间被包含在其他事件中。即aj < ai and bi < bj.
+
+思路：没有两个事件的时间相同很关键。
+那么我们可以直接按照开始时间为关键字排序，然后结束时间取之前发生了的（可能还没发生完）时间的结束时间的最大值即可。
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年03月31日 星期四 13时23分21秒
+    File Name :code/cf/problem/137C.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    int n;
+    pi a[N];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	cin>>n;
+    	for ( int i =  1; i <= n ; i++) cin>>a[i].fst>>a[i].sec;
+    
+    	sort(a+1,a+n+1);
+    	
+    	int r = a[1].sec;
+    	int ans = 0 ;
+    	for ( int i = 2 ; i <= n ; i++)
+    	{
+    	    if (a[i].sec<r) ans++;
+    	    r = max(r,a[i].sec);
+    	}
+    
+    	cout<<ans<<endl;
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

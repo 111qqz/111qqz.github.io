@@ -1,0 +1,120 @@
+---
+author: 111qqz
+date: 2016-11-13 11:33:20+00:00
+draft: false
+title: 【dp专题002】hdu 4489 The King’s Ups and Downs (dp)
+type: post
+url: /2016/11/dp002hdu-4489-the-kings-ups-and-downs-dp/
+categories:
+- ACM
+tags:
+- dp
+---
+
+[题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=4489)
+
+题意：问长度为n的“波浪”型排列（即1..n每个数出现一次）有多少。波浪型的含义是，“高低高”或者“低高低”
+
+思路：我们考虑当前已经知道i-1个数的波浪型的排列的方案数，那么当第i个数到来时，第i个数一定是最大的。
+
+那么将i插入到某个位置，必须满足该位置前面必须以“高低”结尾，该位置后面必须以“低高”结尾才合法。（特别地，允许前面或者后面为空，这点体现在初始化上）
+
+因此我们分别考虑，用dp[i][0]表示有i位且最后结尾为“高低”的方案数，dp[i][1]表示有i位且最后结尾为“低高”的方案数。
+
+此时我们的情况是，已经有i-1个数，我要把第i个数插在某个位置。
+
+这个位置是不确定的，因为我们需要枚举插入的位置（表现为，枚举插入的第i个数前面有j个数，后面剩余i-1-j个数）
+
+那么第i个数前面是选择哪j个数呢？ 组合数为C[i-1][j] (i-1个数选择j个放在前面)
+
+因此长度为i的答案为**sum[i] = sigma{dp[j][0]*dp[i-j-1][1]*C[i-1][j]} (0=<j<i)**
+
+dp[i][0]和dp[i][1]对称，显然相等，都等于sum[i]/2.
+
+我们只需要再预处理一个组合数就好了。
+
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    LL C[30][30];
+    LL dp[30][2];
+    LL sum[25];
+    void cal()
+    {
+        for ( int i = 1 ; i <= 20 ; i++)
+        {
+            C[i][0] = 1;
+            C[i][i] = 1;
+        }
+        for ( int i = 2; i <= 20 ; i++)
+            for ( int j = 1 ; j < i ; j++)
+                C[i][j] = C[i-1][j] + C[i-1][j-1];
+    }
+    int main()
+    {
+        cal();
+     /*   for ( int i = 2 ;i  <= 10 ; i++)
+        {
+            for ( int j = 0 ; j <= i ; j++)
+                printf("%d ",C[i][j]);
+            printf("\n");
+        } */
+        ms(sum,0);
+        sum[1] = 1;
+        dp[0][0]=dp[0][1]=dp[1][0]=dp[1][1] = 1;
+        for ( int i = 2 ; i <= 20 ; i++)
+        {
+            for ( int j = 0 ; j < i ; j++) //枚举第i个位置前有几个。
+            {
+                sum[i] += dp[j][0]*dp[i-1-j][1]*C[i-1][j];
+            }
+            dp[i][0] = dp[i][1] = sum[i]/2;
+        }
+    //    for ( int i = 1; i <= 20 ; i++) printf("%lld\n",sum[i]);
+         int T;
+         cin>>T;
+         while (T--)
+         {
+             int cas,n;
+             scanf("%d%d",&cas,&n);
+             printf("%d %lld\n",cas,sum[n]);
+         }
+    
+    
+    	return 0;
+    }
+    
+
+
+
+
+
+
+
+
+
+
+

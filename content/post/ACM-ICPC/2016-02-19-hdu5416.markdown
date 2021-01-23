@@ -1,0 +1,136 @@
+---
+author: 111qqz
+date: 2016-02-19 07:05:18+00:00
+draft: false
+title: 'hdu 5416 CRB and Tree ( 2015 多校 #10 )'
+type: post
+url: /2016/02/hdu5416/
+categories:
+- ACM
+tags:
+- dfs
+- 前缀和
+---
+
+### http://acm.hdu.edu.cn/showproblem.php?pid=5416
+题意：给出一棵树（n<=1E5），定义二元函数函数f(u,v) (u可以等于v)表示节点u到节点v经过的路径的权值的异或和。给出q组查询（q<=10），每组一个s,问有多少对无序点对（u,v）满足f(u,v)=s.
+思路：类似[codeforces #340 div 2 E XOR and Favorite Number](https://111qqz.com/wordpress/2016/02/cf617e/)
+先dfs,处理出从根节点都任意节点的异或前缀和。然后对于每个询问o(n)扫一遍，统计sum[i]^s出现多少次。 总的时间复杂度为O(T*q*n);
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月19日 星期五 13时52分32秒
+    File Name :code/hdu/5416.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,LL >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    vector<pi>edge[N];
+    int n;
+    LL sum[N];
+    LL  cnt[N*10];
+    int q;
+    void dfs( int x,LL val)
+    {
+        sum[x] = val;
+    
+        for ( int i = 0 ; i< edge[x].size() ; i++)
+        {
+    	pi v = edge[x][i];
+    	if (sum[v.fst]!=-1) continue ; //表示已经访问过了。
+    	dfs(v.fst,val^v.sec);
+        }
+    }
+    
+    LL cal( LL x)
+    {
+        LL res = 0 ;
+        for ( int i = 1 ; i <= n ; i++)
+        {
+    	res +=cnt[sum[i]^x];
+    //	cout<<"i:"<<i<<" res:"<<res<<endl;
+        }
+        if (x==0) res +=n; //f(u,u)
+    
+        res /=2; //因为要求无序。。。 （u,v）和(v,u)算一种。
+        return res;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	int T;
+    	cin>>T;
+    	while (T--)
+    	{
+    	    
+    	    scanf("%d",&n);
+    	    for ( int i = 1 ; i <= n ; i++) edge[i].clear();
+    	    for ( int i = 1 ; i <= n-1 ; i++)
+    	    {
+    		int a,b,c;
+    		scanf("%d %d %d",&a,&b,&c);
+    		edge[a].push_back(make_pair(b,c));
+    		edge[b].push_back(make_pair(a,c));
+    	    }
+    	    ms(sum,-1);
+    	    dfs(1,0);
+    	    ms(cnt,0);
+    //	    for ( int i = 1 ;  i <= n ; i++) cout<<"sum[i]:"<<sum[i]<<endl;
+    	    for ( int i = 1 ; i <= n ; i++)
+    		if (sum[i]>=0)
+    		cnt[sum[i]]++;
+    	    
+    	    
+    	    scanf("%d",&q);
+    	    while (q--)
+    	    {
+    		LL s;
+    		scanf("%lld",&s);
+    		LL ans = cal(s);
+    		printf("%lld\n",ans);
+    	    }
+    	    
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

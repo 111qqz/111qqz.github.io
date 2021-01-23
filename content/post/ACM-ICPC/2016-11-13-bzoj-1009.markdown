@@ -1,0 +1,311 @@
+---
+author: 111qqz
+date: 2016-11-13 07:21:02+00:00
+draft: false
+title: '【dp专题001】bzoj 1009: [HNOI2008]GT考试 (字符串上dp+kmp+矩阵加速线性递推式)'
+type: post
+url: /2016/11/bzoj-1009/
+categories:
+- ACM
+tags:
+- dp
+- kmp
+- 快速幂
+- 矩阵
+---
+
+
+
+
+## 1009: [HNOI2008]GT考试
+
+
+Time Limit: 1 Sec  Memory Limit: 162 MB
+Submit: 3127  Solved: 1926
+[[Submit](http://www.lydsy.com/JudgeOnline/submitpage.php?id=1009)][[Status](http://www.lydsy.com/JudgeOnline/problemstatus.php?id=1009)][[Discuss](http://www.lydsy.com/JudgeOnline/bbs.php?id=1009)]
+
+
+## Description
+
+
+
+
+
+
+　　阿申准备报名参加GT考试，准考证号为N位数X1X2....Xn(0<=Xi<=9),他不希望准考证号上出现不吉利的数字。
+他的不吉利数学A1A2...Am(0<=Ai<=9)有M位，不出现是指X1X2...Xn中没有恰好一段等于A1A2...Am. A1和X1可以为
+0
+
+
+
+
+
+
+## Input
+
+
+
+
+
+
+　　第一行输入N,M,K.接下来一行输入M位的数。 N<=10^9,M<=20,K<=1000
+
+
+
+
+
+
+## Output
+
+
+
+
+
+
+　　阿申想知道不出现不吉利数字的号码有多少种，输出模K取余的结果.
+
+
+
+
+
+
+## Sample Input
+
+
+
+
+4 3 100
+111
+
+
+
+
+## Sample Output
+
+
+
+
+81
+
+
+
+
+### 
+
+
+
+
+### **思路：**
+
+
+
+
+### **<del>这次总算想对了</del>状态表示：dp[i][j] 表示当前处理到第i位，最后j位与不吉利串相同的方案数。**
+
+
+
+
+### **然后此时考虑转移，也就是观察第i+1位。**
+
+
+
+
+### **根据第i+1位字符的不同，转移到的 位置也不相同。**
+
+
+
+
+### **从dp[i][j] 可以转移到dp[i+1][k]，这种转移表现为dp[i+1][k] += dp[i][j] (k取决于第i+1位字符)**
+
+
+
+
+### **我们可以用f[i+1][k]+=f[i][j]*trans[j][k]，trans[j][k]表示串s后j位与不吉利串前j位相同，**
+
+
+
+
+### **添加一个字符后后k位与不吉利串前k位相同的方案数。**
+
+
+
+
+<blockquote>
+
+> 
+> [![_001](https://111qqz.com/wordpress/wp-content/uploads/2016/11/选区_001.png)
+](https://111qqz.com/wordpress/wp-content/uploads/2016/11/选区_001.png)
+> 
+> 
+
+> 
+> ### 就是说中间的那一部式子可以化简成矩阵的形式。。因此整个递推式就成了矩阵乘法的形式。
+> 
+> 
+
+> 
+> ### tran数组可以用kmp预处理出来。
+> 
+> 
+</blockquote>
+
+
+
+
+**重点是注意体会在字符串上dp的思想。**
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年11月13日 星期日 13时54分33秒
+    File Name :code/bzoj/1009.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int M=25;
+    int n;
+    int m;
+    int mod;
+    int nxt[30];
+    char s[M];
+    struct Mat
+    {
+        LL mat[M][M];
+        void clear()
+        {
+    	ms(mat,0);
+        }
+        void init()
+        {
+    	ms(mat,0);
+    	for ( int i = 0 ; i < m ; i++) mat[i][i] =  1;
+        }
+        void pr()
+        {
+    	for ( int i = 0 ; i < m ; i++)
+    	{
+    	    for ( int j = 0 ; j < m ;  j++)
+    	    {
+    		printf("%lld ",mat[i][j]);
+    	    }
+    	    printf("\n");
+    	}
+        }
+    
+    }tran;
+    
+    Mat operator * (Mat a,Mat b)
+    {
+        Mat res;
+        res.clear();
+        for ( int i = 0 ; i < m;  i++)
+    	for ( int j = 0 ; j < m ; j++)
+    	    for ( int k = 0 ; k < m ; k++)
+    	    {
+    		res.mat[i][j] = (res.mat[i][j] + a.mat[i][k] * b.mat[k][j])%mod;
+    	    }
+        return res;
+    }
+    Mat operator ^ ( Mat a,LL b)
+    {
+        Mat res;
+        res.init();
+        while (b>0)
+        {
+    	if (b&1) res = res * a;
+    	b = b >> 1LL;
+    	a = a * a;
+        }
+        return res;
+    }
+    void getnxt() //下标为1的kmp写法
+    {
+        int len = strlen(s+1);
+        nxt[1] =  0;
+        for ( int i = 2 , j = 0 ; i <= len ; i++)
+        {
+    	while (j&&s[j+1]!=s[i]) j = nxt[j];
+    	if (s[j+1]==s[i]) j++;
+    	nxt[i] = j;
+        }
+    }
+    void getTran()
+    {
+        for  (  int i = 0 ; i  < m ; i++)
+    	for ( int j = 0 ; j <= 9 ; j++)
+    	{
+    	    int tmp = i ;
+    	    while (tmp&&(s[tmp+1]-'0')!=j) tmp = nxt[tmp];
+    	    if ((s[tmp+1]-'0')==j) tran.mat[i][tmp+1]++,tran.mat[i][tmp+1]%=mod;
+    	    else tran.mat[i][0]++,tran.mat[i][0]%=mod;
+    
+    	}
+    }
+    
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    //	freopen("code/in.txt","r",stdin);
+      #endif
+    	scanf("%d%d%d",&n,&m,&mod);
+    	scanf("%s",s+1);
+    	getnxt();
+    	getTran();
+    	Mat ans,tmp;
+    	tmp = tran^n;
+    	ans.clear();
+    	ans.mat[0][0] = 1;
+    	ans = ans*tmp;
+    //	tmp.pr();
+    //	ans.pr();
+    	LL ret = 0 ;
+    	for ( int i = 0 ; i < m ; i++) ret = ( ret + ans.mat[0][i])%mod;
+    	printf("%lld\n",ret);
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

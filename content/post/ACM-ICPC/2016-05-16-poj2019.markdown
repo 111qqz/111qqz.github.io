@@ -1,0 +1,145 @@
+---
+author: 111qqz
+date: 2016-05-16 11:01:34+00:00
+draft: false
+title: poj 2019 Cornfields (二维rmq)
+type: post
+url: /2016/05/poj2019/
+categories:
+- ACM
+tags:
+- rmq
+---
+
+[poj2019题目链接](http://poj.org/problem?id=2019)
+
+题意：给一个方阵，k个查询，每个查询求某个方阵的最大值和最小值之差。
+
+思路：二维rmq.同时用到最大值和最小值的话可以把初始化写在一起。
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年05月16日 星期一 18时31分23秒
+    File Name :code/poj/2019.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=251;
+    int a[N][N];
+    int dp[N][N][8][8];
+    int dp2[N][N][8][8];
+    int n,b,q;
+    
+    void init_rmq()
+    {
+        for ( int i = 1 ;i  <= n ; i++)
+    	for ( int j = 1 ; j <= n ; j++)
+    	    dp[i][j][0][0] = dp2[i][j][0][0] = a[i][j];
+    
+        
+        for ( int i = 0 ; (1<<i)<= n ; i++)
+    	for ( int  j = 0 ;  (1<<j) <= n ; j++)
+    	    if (i==0 && j==0) continue;
+    	    else for ( int p = 1 ; p + (1<<i)-1 <= n ; p++)
+    		    for ( int q = 1 ; q + (1<<j)-1 <= n ; q++)
+    			if (i==0)
+    			{
+    			    dp[p][q][i][j] = max(dp[p][q][i][j-1],dp[p][q+(1<<(j-1))][i][j-1]);
+    			    dp2[p][q][i][j] = min(dp2[p][q][i][j-1],dp2[p][q+(1<<(j-1))][i][j-1]);
+    			}
+    			else
+    			{
+    			    dp[p][q][i][j] = max(dp[p][q][i-1][j],dp[p+(1<<(i-1))][q][i-1][j]);
+    			    dp2[p][q][i][j] = min(dp2[p][q][i-1][j],dp2[p+(1<<(i-1))][q][i-1][j]);
+    			}
+    }
+    
+    
+    int _rmq(int x1,int y1,int x2,int y2)
+    {
+        int k1 = 0 ;
+        int k2 = 0 ;
+        while (1<<(k1+1)<=x2-x1+1) k1++;
+        while (1<<(k2+1)<=y2-y1+1) k2++;
+    
+        int tmp1 = dp[x1][y1][k1][k2];
+        int tmp2 = dp[x2-(1<<k1)+1][y1][k1][k2];
+        int tmp3 = dp[x1][y2-(1<<k2)+1][k1][k2];
+        int tmp4 = dp[x2-(1<<k1)+1][y2-(1<<k2)+1][k1][k2];
+        
+        int mx =  max(max(tmp1,tmp2),max(tmp3,tmp4));
+    
+        tmp1 = dp2[x1][y1][k1][k2];
+        tmp2 = dp2[x2-(1<<k1)+1][y1][k1][k2];
+        tmp3 = dp2[x1][y2-(1<<k2)+1][k1][k2];
+        tmp4 = dp2[x2-(1<<k1)+1][y2-(1<<k2)+1][k1][k2];
+    
+        int mn = min(min(tmp1,tmp2),min(tmp3,tmp4));
+    
+       // cout<<"mx:"<<mx<<" mn:"<<mn<<endl;
+    
+        return mx - mn;
+    }
+    
+    
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	scanf("%d %d %d",&n,&b,&q);
+    	for ( int i = 1 ; i <= n ; i++)
+    	    for ( int j = 1 ; j <= n ; j++) scanf("%d",&a[i][j]);
+    	init_rmq();
+    
+    	while (q--)
+    	{
+    	    int x1,y1;
+    	    scanf("%d %d",&x1,&y1);
+    	    printf("%d\n",_rmq(x1,y1,x1+b-1,y1+b-1));
+    	}
+    
+    
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+
+
+
+
+

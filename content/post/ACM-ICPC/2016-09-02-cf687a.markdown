@@ -1,0 +1,134 @@
+---
+author: 111qqz
+date: 2016-09-02 17:57:46+00:00
+draft: false
+title: codeforces 687 A. NP-Hard Problem(交叉染色法)
+type: post
+url: /2016/09/cf687a/
+categories:
+- ACM
+tags:
+- 二分图
+- 交叉染色法
+---
+
+[题目链接](http://codeforces.com/contest/687/problem/A)
+
+题意：找两个不相交点集使得对于每一条边至少有一个顶点在点集中
+
+思路：判断能否构成二分图。染色即可。
+
+需要注意的是。。。答案有特判。。和样例不一样我还以为是自己做错了2333.
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年09月03日 星期六 01时04分40秒
+    File Name :code/hdu/687A.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <deque>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <bitset>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=1E5+7;
+    const int M=2E5+7;
+    int n,m;
+    struct Edge
+    {
+        int v;
+        int nxt;
+    }edge[M];
+    int cnt = 0 ;
+    int head[N];
+    int col[N];
+    void addedge( int u,int v)
+    {
+        edge[cnt].v = v;
+        edge[cnt].nxt = head[u];
+        head[u] = cnt;
+        cnt++;
+    }
+    bool dfs( int u,int x,int fa)
+    {
+        col[u] = x;
+        for ( int i = head[u] ;  i!=-1 ; i = edge[i].nxt)
+        {
+    	int v  = edge[i].v;
+    	if (v==fa) continue;
+    	if (col[v]==1-x) continue;
+    	if (col[v]==x) return false;
+    	if (!dfs(v,1-x,u)) return false;
+        }
+        return true;
+    }
+    bool solve()
+    {
+        for ( int i = 1  ; i <= n ; i++) if (col[i]==-1) if (!dfs(i,0,-1)) return false;
+        return true;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	cin>>n>>m;
+    	ms(col,-1);
+    	ms(head,-1);
+    	for ( int i = 1 ; i <= m ; i++)
+    	{
+    	    int u,v;
+    	    cin>>u>>v;
+    	    addedge(u,v);
+    	    addedge(v,u);
+    	}
+    	if (!solve())
+    	    puts("-1");
+    	else 
+    	{
+    	    vector<int>ans1,ans2;
+    	    for ( int i = 1 ; i <= n ; i++)
+    	    {
+    		if (col[i]==-1) continue;
+    		if ( col[i]==0) ans1.push_back(i);
+    		else ans2.push_back(i);
+    	    }
+    	    int siz1 = ans1.size();
+    	    int siz2 = ans2.size();
+    	    cout<<siz1<<endl;
+    	    for ( int i = 0 ; i < siz1 ; i++) cout<<ans1[i]<<" ";
+    	    cout<<endl;
+    	    cout<<siz2<<endl;
+    	    for  ( int i = 0 ; i < siz2 ; i++) cout<<ans2[i]<<" ";
+    	    cout<<endl;
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

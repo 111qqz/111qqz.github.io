@@ -1,0 +1,167 @@
+---
+author: 111qqz
+date: 2016-07-18 12:20:08+00:00
+draft: false
+title: whust 2016 warm up E ||codeforces 689 B. Mike and Shortcuts (spfa)
+type: post
+url: /2016/07/cf689b/
+categories:
+- ACM
+
+tags:
+- spfa
+- 最短路
+---
+
+[cf689B题目链接](http://codeforces.com/problemset/problem/689/B)
+
+题意：n点。。点i到点j的代价是|i-j|..给出n条近路。。。a[i]表示点i到a[i]的代价为1（注意近路不一定就近）
+
+思路：一开始建边卡了一下。。。实际上只要连相邻的就好了。。。然后边表只开了2*N蠢哭。。。实际上应该3*M...因为连相邻的边是双向的。。。再加上近路的单向。。。然后spfa就好了。。。。
+
+
+
+
+
+
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年07月18日 星期一 13时33分18秒
+    File Name :code/2016whust/F.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=2E5+7;
+    int n;
+    int a[N];
+    bool inq[N];
+    int d[N];
+    int head[N];
+    int cnt;
+    
+    
+    struct Edge
+    {
+        int v;
+        int w;
+        int nxt;
+    }edge[8*N];
+    
+    void addedge( int u,int v,int w)
+    {
+        edge[cnt].v = v;
+        edge[cnt].w = w;
+        edge[cnt].nxt = head[u];
+        head[u] = cnt;
+        cnt++;
+    }
+    void init()
+    {
+        ms(head,-1);
+        cnt = 0 ;
+    }
+    void spfa( int s)
+    {
+        ms(inq,false);
+        ms(d,0x3f);
+        queue<int>q;
+        q.push(s);
+        inq[s] = true;
+        d[s] =  0;
+    
+        while (!q.empty())
+        {
+    	int u = q.front();
+    //<	cout<<"u:"<<u<<endl;
+    	q.pop();
+    	inq[u] = false;
+    	
+    	for ( int i = head[u] ; i!=-1 ; i = edge[i].nxt)
+    	{
+    	    int v = edge[i].v;
+    	    int w = edge[i].w;
+    	    if (d[v]>d[u]+w)
+    	    {
+    		d[v] = d[u] + w;
+    		if (inq[v]) continue;
+    		inq[v] = true;
+    		q.push(v);
+    	    }
+    //	    if (a[u]==v&&d[v]>1)
+    //	    {
+    //		d[v] = 1;
+    //		if (inq[v]) continue;
+    //		inq[v] = true;
+    //		q.push(v);
+    //	    }
+    
+    	}
+        }
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	cin>>n;
+    	init();
+    	for ( int i = 1 ; i <= n ; i++)
+    	{
+    	    scanf("%d",&a[i]);
+    	    if (a[i]!=i)
+    	    addedge(i,a[i],1);
+    //	    addedge(1,i,i-1);
+    //	    addedge(i,1,i-1);
+    //	    else addedge(i,a[i],0);
+    	}
+    	for ( int i = 1;  i <= n-1 ; i++)
+    	{
+    	    addedge(i,i+1,1);
+    	    addedge(i+1,i,1);
+    	}
+    	
+    	spfa(1);
+    
+    	for ( int i = 1 ; i <= n ; i++) printf("%d ",d[i]);
+    
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+

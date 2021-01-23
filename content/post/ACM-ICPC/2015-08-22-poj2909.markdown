@@ -1,0 +1,90 @@
+---
+author: 111qqz
+date: 2015-08-22 06:43:00+00:00
+draft: false
+title: poj 2909 Goldbach's Conjecture （哥德巴赫猜想）
+type: post
+url: /2015/08/poj2909/
+categories:
+- ACM
+tags:
+- number theory
+- 快速筛
+---
+
+
+ 水题
+
+写一遍的目的是。。。复习一下快速筛的写法　喵呜
+ 
+
+    
+    /*************************************************************************
+    	> File Name: code/poj/2909.cpp
+    	> Author: 111qqz
+    	> Email: rkz2013@126.com 
+    	> Created Time: 2015年08月22日 星期六 14时25分34秒
+     ************************************************************************/
+    
+    #include<iostream>
+    #include<iomanip>
+    #include<cstdio>
+    #include<algorithm>
+    #include<cmath>
+    #include<cstring>
+    #include<string>
+    #include<map>
+    #include<set>
+    #include<queue>
+    #include<vector>
+    #include<stack>
+    #define y0 abc111qqz
+    #define y1 hust111qqz
+    #define yn hez111qqz
+    #define j1 cute111qqz
+    #define tm crazy111qqz
+    #define lr dying111qqz
+    using namespace std;
+    #define REP(i, n) for (int i=0;i<int(n);++i)  
+    typedef long long LL;
+    typedef unsigned long long ULL;
+    const int inf = 0x3f3f3f3f;
+    const int N=1<<16;
+    bool not_prime[N];
+    int prime[N];
+    int prime_num;
+    int n;
+    
+    void init(){
+        not_prime[0] = true;
+        not_prime[1] = true;
+        for ( int i  =2 ; i < N ; i++){
+    	if (!not_prime[i]){
+    	    prime[++prime_num] = i;
+    	}
+    	for ( int j = 1  ; j <= prime_num&&i*prime[j]<N ; j++){
+    	    not_prime[i*prime[j]] = true;
+    	    if (i%prime[j]==0) break;
+    	}
+        }
+    }
+    int main()
+    {
+        init();
+        int n ;
+        while (scanf("%d",&n)&&n){
+    	int ans = 0 ;
+    	for ( int i = 2 ; i <= n /2 ; i++){
+    	    if (!not_prime[i]&&!not_prime[n-i]){
+    		ans++;
+    	    }
+    	}
+    	printf("%d\n",ans);
+        }
+         
+    	return 0;
+    }
+    
+
+
+

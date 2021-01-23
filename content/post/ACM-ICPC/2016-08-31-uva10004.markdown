@@ -1,0 +1,122 @@
+---
+author: 111qqz
+date: 2016-08-31 14:03:50+00:00
+draft: false
+title: uva 10004 Bicoloring （交叉染色法判断二分图模板题）
+type: post
+url: /2016/08/uva10004/
+categories:
+- ACM
+tags:
+- 二分图
+- 交叉染色法
+---
+
+[uva10004题目链接](https://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=945)
+
+题意：给出一个无向图，问是否可以组成二分图。
+
+思路：交叉染色法。
+
+
+<blockquote>**首先任意取出一个顶点进行染色,和该节点相邻的点有三种情况:**
+
+**　　　　　　　　　　1.未染色    那么继续染色此节点(染色为另一种颜色)**
+
+**　　　　　　　　　　2.已染色但和当前节点颜色不同      跳过该点**
+
+**　　　　　　　　　　3.已染色并且和当前节点颜色相同       返回失败(该图不是二分图)**</blockquote>
+
+
+
+
+[学习链接](http://www.cnblogs.com/Kurokey/p/5524776.html)
+
+
+
+upd:更正dfs中的一个错误。
+
+**把dfs(v,1-x)改成了 if (!dfs(v,1-x)) return false;**
+
+之前的写法中，当前层之后的层的没有起到任何作用。。。
+
+而实际上应该是后面只要某一层不满足，整体就该为false.
+
+写成这样这题还能过我也是醉了。。。。
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年08月31日 星期三 21时50分16秒
+    File Name :code/uva/10004.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=205;
+    vector <int>edge[N];
+    int n,m;
+    int col[N];
+    bool dfs( int u,int x)
+    {
+        col[u] = x;
+        int siz = edge[u].size();
+        for ( int i = 0 ; i < siz ; i++)
+        {
+    	int v = edge[u][i];
+    	if (col[v]==1-x) continue;
+    	if (col[v]==x) return false;
+    	if (!dfs(v,1-x)) return false;
+        }
+        return true;
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	while (~scanf("%d",&n))
+    	{
+    	    if (n==0) break;
+    	    ms(col,-1);
+    	    for ( int i =  0 ;i <= n ; i++) edge[i].clear();
+    	    scanf("%d",&m);
+    	    for ( int i = 1 ; i <= m ; i++)
+    	    {
+    		int u,v;
+    		scanf("%d%d",&u,&v);
+    		edge[u].push_back(v);
+    		edge[v].push_back(u);
+    	    }
+    	    if (dfs(0,0))
+    		puts("BICOLORABLE.");
+    	    else puts("NOT BICOLORABLE.");
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    

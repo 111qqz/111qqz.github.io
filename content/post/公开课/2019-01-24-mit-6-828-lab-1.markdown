@@ -1,0 +1,2320 @@
+---
+author: 111qqz
+date: 2019-01-24 12:27:58+00:00
+draft: false
+title: '【施工完成】MIT 6.828 lab 1: C, Assembly, Tools and Bootstrapping'
+type: post
+url: /2019/01/mit-6-828-lab-1/
+categories:
+- mooc
+tags:
+- '6.828'
+---
+
+## 花费了30+小时，终于搞定了orz
+
+
+
+
+
+## Part 1: PC Bootstrap
+
+
+
+
+### The PC's Physical Address Space
+
+
+
+
+#### 8086/8088时代
+
+
+
+    
+    +------------------+  <- 0x00100000 (1MB)
+    |     BIOS ROM     |
+    +------------------+  <- 0x000F0000 (960KB)
+    |  16-bit devices, |
+    |  expansion ROMs  |
+    +------------------+  <- 0x000C0000 (768KB)
+    |   VGA Display    |
+    +------------------+  <- 0x000A0000 (640KB)
+    |                  |
+    |    Low Memory    |
+    |                  |
+    +------------------+  <- 0x00000000
+
+
+由于8086/8088只有20跟地址线，因此物理内存空间就是2^20=1MB.地址空间从0x00000到0xFFFFF.其中从0x00000开始的640k空间被称为"low memory"，是PC真正能使用的RAM。从 0xA0000 到 0xFFFFF　的384k的non-volatile memory被硬件保留，用作video display buffers和BIOS等。
+
+<!-- more -->
+
+
+#### 80286/80386时代及以后
+
+
+为了保持向后兼容，因此0-1MB的空间还是和原来保持一致。因此地址空间似乎存在一个“洞”（为什么我觉得其实是两个“洞”。。。不是空着的才叫“洞”吗），PC能使用的RAM被这个“洞”（也就是0xA0000 到 0xFFFFF)分成了0x00000000到0x000BFFFF的640k和 0x00100000到0xFFFFFFFF两部分。
+<table align="center" >
+<tbody >
+<tr >
+
+<td >
+
+    
+    +------------------+  <- 0xFFFFFFFF (4GB)
+    |      32-bit      |
+    |  memory mapped   |
+    |     devices      |
+    |                  |
+    /\/\/\/\/\/\/\/\/\/\
+    
+    /\/\/\/\/\/\/\/\/\/\
+    |                  |
+    |      Unused      |
+    |                  |
+    +------------------+  <- depends on amount of RAM
+    |                  |
+    |                  |
+    | Extended Memory  |
+    |                  |
+    |                  |
+    +------------------+  <- 0x00100000 (1MB)
+    |     BIOS ROM     |
+    +------------------+  <- 0x000F0000 (960KB)
+    |  16-bit devices, |
+    |  expansion ROMs  |
+    +------------------+  <- 0x000C0000 (768KB)
+    |   VGA Display    |
+    +------------------+  <- 0x000A0000 (640KB)
+    |                  |
+    |    Low Memory    |
+    |                  |
+    +------------------+  <- 0x00000000
+
+
+
+</td>
+</tr>
+</tbody>
+</table>
+此外，在地址空间的最上面一部分，通常被BIOS保留用于 32-bit PCI devices的memory mapped. memory mapped是对于memory和I/O设备使用相同的地址空间的一种I/O寻址方式。具体可以参考[Memory-mapped I/O](https://en.wikipedia.org/wiki/Memory-mapped_I/O)。PCI设备具体可以参考[PCI_Express](https://en.wikipedia.org/wiki/PCI_Express)和[深入PCI与PCIe之一：硬件篇](https://zhuanlan.zhihu.com/p/26172972)
+
+目前处理器已经可以支持超过4GB大小的内存空间。因此为了保持后向兼容性，地址空间又会多一个"洞"。
+
+
+### The ROM BIOS
+
+
+用qemu模拟启动，观察到进入BIOS执行的第一条命令为
+
+    
+    [f000:fff0]    0xffff0: ljmp   $0xf000,$0xe05b
+
+
+说明PC执行的第一条指令的物理地址为0xffff0。
+
+然后使用si命令执行单步指令,得到的前面几条执行的指令如下：
+
+    
+    [f000:e05b]    0xfe05b: cmpl   $0x0,%cs:0x6ac8
+    [f000:e062]    0xfe062: jne    0xfd2e1
+    [f000:e066]    0xfe066: xor    %dx,%dx
+    [f000:e068]    0xfe068: mov    %dx,%ss
+    [f000:e06a]    0xfe06a: mov    $0x7000,%esp
+    [f000:e070]    0xfe070: mov    $0xf34c2,x
+    [f000:e076]    0xfe076: jmp    0xfd15c
+    [f000:d15c]    0xfd15c: mov    x,x
+    ...
+    
+    
+
+
+如果看着觉得似懂非懂...不要慌，问题不大，因为这里不需要弄明白BIOS到底在干什么。不过建议先复习一下x86汇编，可以参考[General Registers (AX, BX, CX, and DX)](http://learn-assembly.blogspot.com/2009/04/general-registers-ax-bx-cx-and-dx.html)，[Intel 80386 Reference Programmer's Manual Table of Contents](https://pdos.csail.mit.edu/6.828/2018/readings/i386/toc.htm) 等内容。然后强烈推荐去稍微看一下[gdb_examining data](ftp://ftp.gnu.org/old-gnu/Manuals/gdb/html_chapter/gdb_9.html#SEC56) 部分的教程，尤其是查看memory和register内容的章节，对搞清楚BIOS这里到底在干嘛大有裨益。**(x [memory]来查看某个地址的内容，x/i [memory]将该地址的指令以人类可读的方式写出，p/x $[register] 来查看某个寄存器的值。）**
+
+那么BIOS大概做了什么呢？主要是建立[Interrupt descriptor table](https://en.wikipedia.org/wiki/Interrupt_descriptor_table)（其实就是x86体系架构中断向量表的实现),初始化一些硬件设备，然后寻找一个"bootable"设备。如果找到了这样一个设备，BIOS就将该设备上的boot loader加载到内存，并将控制权交给boot loader.
+
+先明确几个概念。所谓boot loader,就是在加载OS前运行的一段程序。通常在硬盘的第一个sector里，因此这个sector也叫boot sector.至于我们更经常见到的[master boot record(主引导记录)](https://en.wikipedia.org/wiki/Master_boot_record)，其实就是一种对于分区过的媒介的特殊的boot sector.
+
+顺便提一句，确定一个设备是否为"bootable"是通过 0x55和0xAA两个boot signature来决定的。具体来说，如果一个设备中的第0个sector的最后两个byte的值分别为0x55和0xAA,就认为这是一个bootable设备。可以参考[bool sequence](https://wiki.osdev.org/Boot_Sequence)
+
+
+## Part 2: The Boot Loader
+
+
+BIOS在初始化完成后需要将boot loader加载到内存，具体的地址为 0x7c00 到0x7dff。
+
+关于0x7c00这个magic number是怎么来的？　其实不重要，不过感兴趣可以参考[Why BIOS loads MBR into 0x7C00 in x86 ?](https://www.glamenv-septzen.net/en/view/6)　知道这个magic number其实不是x86相关的，而是和IBM的BIOS开发团队有关就可以了。
+
+boot loader包含一个汇编文件boot/boot.S和一个c语言文件boot/main.c
+
+先来看下boot/boot.S文件都在干什么吧
+
+不过在这之前，不妨先复习一下real mode和proteced mode
+
+
+### real mode / protected mode
+
+
+
+
+
+ 	  * [Real_mode](https://en.wikipedia.org/wiki/Real_mode)　地址空间被限制在2^20(因为地址总线为20),没有虚拟内存的概念，内存都是真实的物理内存。在real mode下，segment位于物理内存中的固定位置上。
+ 	  * 16-bit Protected Mode　登场于intel 80286处理器。首次引入了虚拟内存的概念。依赖局部性原理，只将程序运行需要的部分放入内存，暂时用不到的部分则存储在硬盘。segment的位置在其从disk回到memory中，可能和之前的位置不同。由于segment的位置不再固定，引入[Global Descriptor Table，GDT](https://en.wikipedia.org/wiki/Global_Descriptor_Table)来描述segment的信息，诸如是否在内存中，如果在，在内存中的什么位置，以及访问权限。由于寄存器仍然是16bit,所以segment [OSTEP](http://pages.cs.wisc.edu/~remzi/OSTEP/)
+ 	  *  32-bit Protected Mode 　登场于intel 80386处理器。比起80286,使用的寄存器是32-bit的，因此segment size 增大到4GB(2^32). 同时，由于segment size不再像64k那么小，以前的一整个segment要么都在memory中，要么都在disk中的策略就变得不太科学了。因此引入[paging](https://en.wikipedia.org/wiki/Paging) 机制，将segment分成尺寸更小的page。允许segment中的一部分在memory中。关于paging可以参考[OSTEP](http://pages.cs.wisc.edu/~remzi/OSTEP/)的18章。
+
+这里值得一提的是，对于支持protected mode的cpu,启动时为了保持向后兼容，仍然会以real mode启动，之后再切换到protected mode.
+
+
+<blockquote>_When a processor that supports x86 protected mode is powered on, it begins executing instructions in [real mode](https://en.wikipedia.org/wiki/Real_mode), in order to maintain [backward compatibility](https://en.wikipedia.org/wiki/Backward_compatibility) with earlier x86 processors.[[4]](https://en.wikipedia.org/wiki/Protected_mode#cite_note-Real_mode_on_powered_on-4) Protected mode may only be entered after the system software sets up one descriptor table and enables the Protection Enable (PE) [bit](https://en.wikipedia.org/wiki/Bit) in the [control register](https://en.wikipedia.org/wiki/Control_register) 0 (CR0)_</blockquote>
+
+
+
+
+### boot/boot.S文件在干什么
+
+
+
+    
+    #include <inc/mmu.h>
+    
+    # Start the CPU: switch to 32-bit protected mode, jump into C.
+    # The BIOS loads this code from the first sector of the hard disk into
+    # memory at physical address 0x7c00 and starts executing in real mode
+    # with %cs=0 %ip=7c00.
+    
+    .set PROT_MODE_CSEG, 0x8         # kernel code segment selector
+    .set PROT_MODE_DSEG, 0x10        # kernel data segment selector
+    .set CR0_PE_ON,      0x1         # protected mode enable flag
+    
+    .globl start
+    start:
+      .code16                     # Assemble for 16-bit mode
+      cli                         # Disable interrupts
+      cld                         # String operations increment
+    
+      # Set up the important data segment registers (DS, ES, SS).
+      xorw    %ax,%ax             # Segment number zero
+      movw    %ax,%ds             # -> Data Segment
+      movw    %ax,%es             # -> Extra Segment
+      movw    %ax,%ss             # -> Stack Segment
+    
+      # Enable A20:
+      #   For backwards compatibility with the earliest PCs, physical
+      #   address line 20 is tied low, so that addresses higher than
+      #   1MB wrap around to zero by default.  This code undoes this.
+    seta20.1:
+      inb     $0x64,%al               # Wait for not busy
+      testb   $0x2,%al
+      jnz     seta20.1
+    
+      movb    $0xd1,%al               # 0xd1 -> port 0x64
+      outb    %al,$0x64
+    
+    seta20.2:
+      inb     $0x64,%al               # Wait for not busy
+      testb   $0x2,%al
+      jnz     seta20.2
+    
+      movb    $0xdf,%al               # 0xdf -> port 0x60
+      outb    %al,$0x60
+    
+      # Switch from real to protected mode, using a bootstrap GDT
+      # and segment translation that makes virtual addresses 
+      # identical to their physical addresses, so that the 
+      # effective memory map does not change during the switch.
+      lgdt    gdtdesc  # lgdt means load global descriptor table
+      movl    %cr0, x
+      orl     $CR0_PE_ON, x  # cr0 = cr0 | 1
+      movl    x, %cr0
+      
+      # Jump to next instruction, but in 32-bit code segment.
+      # Switches processor into 32-bit mode.
+      ljmp    $PROT_MODE_CSEG, $protcseg
+    
+      .code32                     # Assemble for 32-bit mode
+    protcseg:
+      # Set up the protected-mode data segment registers
+      movw    $PROT_MODE_DSEG, %ax    # Our data segment selector
+      movw    %ax, %ds                # -> DS: Data Segment
+      movw    %ax, %es                # -> ES: Extra Segment
+      movw    %ax, %fs                # -> FS
+      movw    %ax, %gs                # -> GS
+      movw    %ax, %ss                # -> SS: Stack Segment
+      
+      # Set up the stack pointer and call into C.
+      movl    $start, %esp
+      call bootmain
+    
+      # If bootmain returns (it shouldn't), loop.
+    spin:
+      jmp spin
+    
+    # Bootstrap GDT
+    .p2align 2                                # force 4 byte alignment
+    gdt:
+      SEG_NULL                              # null seg
+      SEG(STA_X|STA_R, 0x0, 0xffffffff)     # code seg
+      SEG(STA_W, 0x0, 0xffffffff)           # data seg
+    
+    gdtdesc:
+      .word   0x17                            # sizeof(gdt) - 1
+      .long   gdt                             # address gdt
+
+
+
+
+第一次看到这段代码的时候感觉Enable A20这一部分比较喵(ling)喵(ren)喵(fei)喵(jie)
+
+可以参考[A20 - a pain from the past](https://www.win.tue.nl/~aeb/linux/kbd/A20.html)。重点是
+
+
+<blockquote>One sets the output port of the keyboard controller by first writing 0xd1 to port 0x64, and the the desired value of the output port to port 0x60. One usually sees the values 0xdd and 0xdf used to disable/enable A20.</blockquote>
+
+
+然后比较让人疑惑的可能是"bootstrap GDT”这部分。参考[cs421 x86 Assembly Guide](http://flint.cs.yale.edu/cs421/papers/x86-asm/asm.html)尤其是:
+
+    
+    .data		
+    var:		
+    .byte 64	/* Declare a byte, referred to as location var, containing the value 64. */
+    .byte 10	/* Declare a byte with no label, containing the value 10. Its location is var + 1. */
+    x:		
+    .short 42	/* Declare a 2-byte value initialized to 42, referred to as location x. */
+    y:		
+    .long 30000    	/* Declare a 4-byte value, referred to as location y, initialized to 30000. */
+    
+    
+    s:		
+    .long 1, 2, 3	/* Declare three 4-byte values, initialized to 1, 2, and 3. 
+    The value at location s + 8 will be 3. */
+    barr:		
+    .zero 10	/* Declare 10 bytes starting at location barr, initialized to 0. */
+    str:		
+    .string "hello"   	/* Declare 6 bytes starting at the address str initialized to 
+    the ASCII character values for hello followed by a nul (0) byte. */
+
+
+知道gdtdesc部分做的事情是，在gdtdesc这个位置定义了一个word类型（２字节）的变量，值为0x17,参考注释也就是gdt定义的那一段的size大小。然后在gdtdsec+2这个位置定义了long类型(4字节)的gdt地址.
+
+这里gdt和gdtdesc都是"label"，label其实就是标记了一个内存地址，方便使用。
+
+具体来说，一个“label”的值，是其之后的第一条instruction的内存地址。
+
+
+<blockquote>We use the notation <label> to refer to labeled locations in the program text. Labels can be inserted anywhere in x86 assembly code text by entering a label name followed by a colon. For example,
+
+> 
+> <blockquote>
+
+>>     
+>>            mov 8(p), %esi
+>>     begin:
+>>            xor x, x
+>>            mov (%esi), x
+>>     
+>> 
+>> 
+</blockquote>
+> 
+> 
+The second instruction in this code fragment is labeled begin. Elsewhere in the code, we can refer to the memory location that this instruction is located at in memory using the more convenient symbolic name begin. This label is just a convenient way of expressing the location instead of its 32-bit value.</blockquote>
+
+
+然后是关于gdt部分，SEG看起来是个宏，我们看到inc/mmu.h这个文件中相关的部分，豁然开朗。
+
+    
+    #ifdef __ASSEMBLER__
+    
+    /*
+     * Macros to build GDT entries in assembly.
+     */
+    #define SEG_NULL                                                \
+            .word 0, 0;                                             \
+            .byte 0, 0, 0, 0
+    #define SEG(type,base,lim)                                      \
+            .word (((lim) >> 12) & 0xffff), ((base) & 0xffff);      \
+            .byte (((base) >> 16) & 0xff), (0x90 | (type)),         \
+                    (0xC0 | (((lim) >> 28) & 0xf)), (((base) >> 24) & 0xff)
+    
+    #else   // not __ASSEMBLER__
+
+
+接下来不太明确的地方可能是cr0部分。
+
+我们看到代码最开始有一个CR0_PE_ON,值为0x1.之后就是在计算cr0 = cr0 | 0x1，按照注释说这样就可以把保护模式打开了。理解到这里其实就ok，不过我还是想多说两句。　Control register是用来控制cpu行为的寄存器。cr0是x86体系架构的[Control register](https://en.wikipedia.org/wiki/Control_register)中的一个。cr0是32bit的寄存器，其中一些bit上有名称以及固定的作用。比如对于位置bit 0,该位置的名称是"Protected Mode Enable"，简称为PE,当该位置值为1,表示保护模式被打开。
+
+最后一个小细节是".globl start"。".globl"是什么含义？为什么要把start这个label定义成global的？可以参考[What is global _start in assembly language?](https://stackoverflow.com/questions/17898989/what-is-global-start-in-assembly-language)　用人话说就是定义成.globl的lable会被导出到生成的.o文件中，不然linker找不到这个符号。由于start是这个boot.S文件的entry point，因此需要linker看到。
+
+最后，从全局来看，boot.S这个文件做了什么呢？　其实上面一个小节中已经提到了。
+
+
+<blockquote>_When a processor that supports x86 protected mode is powered on, it begins executing instructions in [real mode](https://en.wikipedia.org/wiki/Real_mode), in order to maintain [backward compatibility](https://en.wikipedia.org/wiki/Backward_compatibility) with earlier x86 processors.[[4]](https://en.wikipedia.org/wiki/Protected_mode#cite_note-Real_mode_on_powered_on-4) Protected mode may only be entered after the system software sets up one descriptor table and enables the Protection Enable (PE) [bit](https://en.wikipedia.org/wiki/Bit) in the [control register](https://en.wikipedia.org/wiki/Control_register) 0 (CR0)_</blockquote>
+
+
+
+
+
+### boot/main.c这个文件在干什么
+
+
+
+    
+    #include <inc/x86.h>                                                                                                                                                                          
+    #include <inc/elf.h>                                                                                                                                                                          
+                                                                                                                                                                                                  
+    /**********************************************************************                                                                                                                       
+     * This a dirt simple boot loader, whose sole job is to boot                                                                                                                                  
+     * an ELF kernel image from the first IDE hard disk.                                                                                                                                          
+     *                                                                                                                                                                                            
+     * DISK LAYOUT                                                                                                                                                                                
+     *  * This program(boot.S and main.c) is the bootloader.  It should                                                                                                                           
+     *    be stored in the first sector of the disk.                                                                                                                                              
+     *                                                                                                                                                                                            
+     *  * The 2nd sector onward holds the kernel image.                                                                                                                                           
+     *                                                                                                                                                                                            
+     *  * The kernel image must be in ELF format.                                                                                                                                                 
+     *                                                                                                                                                                                            
+     * BOOT UP STEPS                                                                                                                                                                              
+     *  * when the CPU boots it loads the BIOS into memory and executes it                                                                                                                        
+     *                                                                                                                                                                                            
+     *  * the BIOS intializes devices, sets of the interrupt routines, and
+     *    reads the first sector of the boot device(e.g., hard-drive)
+     *    into memory and jumps to it.
+     *
+     *  * Assuming this boot loader is stored in the first sector of the
+     *    hard-drive, this code takes over...
+     *
+     *  * control starts in boot.S -- which sets up protected mode,
+     *    and a stack so C code then run, then calls bootmain()
+     *
+     *  * bootmain() in this file takes over, reads in the kernel and jumps to it.
+     **********************************************************************/
+    
+    #define SECTSIZE        512
+    #define ELFHDR          ((struct Elf *) 0x10000) // scratch space
+    
+    void readsect(void*, uint32_t);
+    void readseg(uint32_t, uint32_t, uint32_t);
+    
+    void
+    bootmain(void)
+    {
+            struct Proghdr *ph, *eph;
+    
+            // read 1st page off disk
+            readseg((uint32_t) ELFHDR, SECTSIZE*8, 0);
+    
+            // is this a valid ELF?
+            if (ELFHDR->e_magic != ELF_MAGIC)
+                    goto bad;
+    
+            // load each program segment (ignores ph flags)
+            ph = (struct Proghdr *) ((uint8_t *) ELFHDR + ELFHDR->e_phoff);
+            eph = ph + ELFHDR->e_phnum;
+            for (; ph < eph; ph++)
+                    // p_pa is the load address of this segment (as well
+                    // as the physical address)
+                    readseg(ph->p_pa, ph->p_memsz, ph->p_offset);
+    
+            // call the entry point from the ELF header
+            // note: does not return!
+            ((void (*)(void)) (ELFHDR->e_entry))();
+    
+    bad:
+            outw(0x8A00, 0x8A00);
+            outw(0x8A00, 0x8E00);
+            while (1)
+                    /* do nothing */;
+    }
+    
+    // Read 'count' bytes at 'offset' from kernel into physical address 'pa'.
+    // Might copy more than asked
+    void
+    readseg(uint32_t pa, uint32_t count, uint32_t offset)
+    {
+            uint32_t end_pa;
+    
+            end_pa = pa + count;
+    
+            // round down to sector boundary
+            pa &= ~(SECTSIZE - 1);
+    
+            // translate from bytes to sectors, and kernel starts at sector 1
+            offset = (offset / SECTSIZE) + 1;
+    
+            // If this is too slow, we could read lots of sectors at a time.
+            // We'd write more to memory than asked, but it doesn't matter --
+            // we load in increasing order.
+            while (pa < end_pa) {
+                    // Since we haven't enabled paging yet and we're using
+                    // an identity segment mapping (see boot.S), we can
+                    // use physical addresses directly.  This won't be the
+                    // case once JOS enables the MMU.
+                    readsect((uint8_t*) pa, offset);
+                    pa += SECTSIZE;
+                    offset++;
+            }
+    }
+    
+    void
+    waitdisk(void)
+    {
+            // wait for disk reaady
+            while ((inb(0x1F7) & 0xC0) != 0x40)
+                    /* do nothing */;
+    }
+    
+    void
+    readsect(void *dst, uint32_t offset)
+    {
+            // wait for disk to be ready
+            waitdisk();
+    
+            outb(0x1F2, 1);         // count = 1
+            outb(0x1F3, offset);
+            outb(0x1F4, offset >> 8);
+            outb(0x1F5, offset >> 16);
+            outb(0x1F6, (offset >> 24) | 0xE0);
+            outb(0x1F7, 0x20);      // cmd 0x20 - read sectors
+    
+            // wait for disk to be ready
+            waitdisk();
+    
+            // read a sector
+            insl(0x1F0, dst, SECTSIZE/4);
+    }
+
+
+先注意到一些看起来像是汇编指令的东西...比如outb之类。查看inc/x86.h文件，找到他们的定义。
+
+    
+    static inline void
+    outb(int port, uint8_t data)
+    {
+            asm volatile("outb %0,%w1" : : "a" (data), "d" (port));
+    }
+    
+    
+    static inline void
+    insl(int port, void *addr, int cnt)
+    {
+            asm volatile("cld\n\trepne\n\tinsl"
+                         : "=D" (addr), "=c" (cnt)
+                         : "d" (port), "0" (addr), "1" (cnt)
+                         : "memory", "cc");
+    }
+    static inline uint8_t
+    inb(int port)
+    {       
+            uint8_t data;
+            asm volatile("inb %w1,%0" : "=a" (data) : "d" (port));
+            return data;
+    }
+
+
+发现就是用c将汇编封装了一层。这个东西应该叫“inline assembly”，具体可以参考[Brennan's Guide to Inline Assembly](http://www.delorie.com/djgpp/doc/brennan/brennan_att_inline_djgpp.html)　其中volatile关键字表示禁止gcc优化这段代码。
+
+
+<blockquote>If your assembly statement _must_ execute where you put it, (i.e. must not be moved out of a loop as an optimization), put the keyword **volatile** after **asm** and before the ()'s. To be ultra-careful, use
+
+__asm__ __volatile__ (...whatever...);
+
+However, I would like to point out that if your assembly's only purpose is to calculate the output registers, with no other side effects, you should leave off the **volatile** keyword so your statement will be processed into GCC's common subexpression elimination optimization.</blockquote>
+
+
+注释上写的要"boot  an ELF kernel image from the first IDE hard disk",那么，首先要知道什么是ELF.　ELF其实就是一种文件格式，全称为“Executable and Linkable Format”可以参考[Executable_and_Linkable_Format#File_layout](https://en.wikipedia.org/wiki/Executable_and_Linkable_Format#File_layout)，建议通读这一部分，内容不多，不过对之后很有用。
+
+参考一下inc/elf.h文件,以及main.c中的注释，就可以整体上知道这段代码是在干什么了：将ELF格式的kernel image从硬盘读到内存中，并将控制权交给kernel image.
+
+    
+    #ifndef JOS_INC_ELF_H
+    #define JOS_INC_ELF_H
+    
+    #define ELF_MAGIC 0x464C457FU	/* "\x7FELF" in little endian */
+    
+    struct Elf {
+    	uint32_t e_magic;	// must equal ELF_MAGIC
+    	uint8_t e_elf[12];
+    	/* e_elf[0] 1 for signed 32 bit , 2 for signed 64-bit
+    	        [1] 1 for little endianness ,2 for big endianness
+                    [2] version type
+                    [3] target OS
+                    [4] ABI version
+                    [5..11]  unused
+    	*/
+    	uint16_t e_type;     // object file type
+    	uint16_t e_machine;  // instruction set arch , x86/MIPS/IA-64 and etc.
+    	uint32_t e_version; 
+    	uint32_t e_entry;    // the memory address of the entry point where process start executing.
+    	uint32_t e_phoff;    // points to the start of the program header table.
+    	uint32_t e_shoff;    // Points to the start of the section header table.
+    	uint32_t e_flags;  
+    	uint16_t e_ehsize;   // size of this header. 64byte for 64-bit,52bytes for 32-bit
+    	uint16_t e_phentsize; // the size of a program header table entry.
+    	uint16_t e_phnum;    // the number of entries in the program header table.
+    	uint16_t e_shentsize; // the size of a section  header table entry.
+    	uint16_t e_shnum;    // the number of entries in the section header table.
+    	uint16_t e_shstrndx; 
+    };
+    
+    struct Proghdr {
+    	uint32_t p_type;    // type of the segment
+    	uint32_t p_offset;  //  offset of the segment in the file image
+    	uint32_t p_va;      // virtual address of the segment in memory
+    	uint32_t p_pa;      // physical address for segment(?)
+    	uint32_t p_filesz;  // Size in bytes of the segment in the file image. May be 0.
+    	uint32_t p_memsz;   // Size in bytes of the segment in memory. May be 0.
+    	uint32_t p_flags;
+    	uint32_t p_align;   // 0 and 1 specify no alignment. Otherwise should be a positive, integral power of 2
+    };
+    
+    struct Secthdr {
+    	uint32_t sh_name; // An offset to a string in the .shstrtab section that represents the name of this section
+    	uint32_t sh_type; // the type of this header
+    	uint32_t sh_flags; // the attributes of the section
+    	uint32_t sh_addr; // Virtual address of the section in memory
+    	uint32_t sh_offset;  // Offset of the section in the file image
+    	uint32_t sh_size;    // Size in bytes of the section in the file image. May be 0.
+    	uint32_t sh_link;    // 
+    	uint32_t sh_info;
+    	uint32_t sh_addralign;
+    	uint32_t sh_entsize;
+            /*
+              Contains the size, in bytes, of each entry, for sections that contain fixed-size entries. 
+              Otherwise, this field contains zero.
+             */
+    };
+    
+    // Values for Proghdr::p_type
+    #define ELF_PROG_LOAD		1
+    
+    // Flag bits for Proghdr::p_flags
+    #define ELF_PROG_FLAG_EXEC	1
+    #define ELF_PROG_FLAG_WRITE	2
+    #define ELF_PROG_FLAG_READ	4
+    
+    // Values for Secthdr::sh_type
+    #define ELF_SHT_NULL		0
+    #define ELF_SHT_PROGBITS	1
+    #define ELF_SHT_SYMTAB		2
+    #define ELF_SHT_STRTAB		3
+    
+    // Values for Secthdr::sh_name
+    #define ELF_SHN_UNDEF		0
+    
+    #endif /* !JOS_INC_ELF_H */
+
+
+下面说几个细节。我们知道readsect是在读一个扇区，但是我怎么知道扇区是这样读的？可以参考[ATA_PIO_Mode的x86 Directions部分](https://wiki.osdev.org/ATA_PIO_Mode)
+
+第二个细节是“((void (*)(void)) (ELFHDR->e_entry))()”，乍一看有点不明觉厉，其实就是一个函数指针，e_entry是入口函数的地址。通知调用该函数，将控制权交给elf格式的kernel image.
+
+接下来我们看一下根据编译boot.s和main.c得到的反汇编文件
+
+    
+    obj/boot/boot.out:     file format elf32-i386                                                                                                                                                 
+                                                                                                                                                                                                  
+                                                                                                                                                                                                  
+    Disassembly of section .text:                                                                                                                                                                 
+                                                                                                                                                                                                  
+    00007c00 <start>:                                                                                                                                                                             
+    .set CR0_PE_ON,      0x1         # protected mode enable flag                                                                                                                                 
+                                                                                                                                                                                                  
+    .globl start                                                                                                                                                                                  
+    start:                                                                                                                                                                                        
+      .code16                     # Assemble for 16-bit mode                                                                                                                                      
+      cli                         # Disable interrupts                                                                                                                                            
+        7c00:       fa                      cli                                                                                                                                                   
+      cld                         # String operations increment                                                                                                                                   
+        7c01:       fc                      cld                                                                                                                                                   
+                                                                                                                                                                                                  
+      # Set up the important data segment registers (DS, ES, SS).                                                                                                                                 
+      xorw    %ax,%ax             # Segment number zero                                                                                                                                           
+        7c02:       31 c0                   xor    x,x                                                                                                                                      
+      movw    %ax,%ds             # -> Data Segment                                                                                                                                               
+        7c04:       8e d8                   mov    x,%ds                                                                                                                                       
+      movw    %ax,%es             # -> Extra Segment                                                                                                                                              
+        7c06:       8e c0                   mov    x,%es                                                                                                                                       
+      movw    %ax,%ss             # -> Stack Segment                                                                                                                                              
+        7c08:       8e d0                   mov    x,%ss                                                                                                                                       
+                                                                                                                                                                                                  
+    00007c0a <seta20.1>:
+      # Enable A20:
+      #   For backwards compatibility with the earliest PCs, physical
+      #   address line 20 is tied low, so that addresses higher than
+      #   1MB wrap around to zero by default.  This code undoes this.
+    seta20.1:
+      inb     $0x64,%al               # Wait for not busy
+        7c0a:       e4 64                   in     $0x64,%al
+      testb   $0x2,%al
+        7c0c:       a8 02                   test   $0x2,%al
+      jnz     seta20.1
+        7c0e:       75 fa                   jne    7c0a <seta20.1>
+    
+      movb    $0xd1,%al               # 0xd1 -> port 0x64
+        7c10:       b0 d1                   mov    $0xd1,%al
+      outb    %al,$0x64
+        7c12:       e6 64                   out    %al,$0x64
+    
+    00007c14 <seta20.2>:
+    
+    seta20.2:
+      inb     $0x64,%al               # Wait for not busy
+        7c14:       e4 64                   in     $0x64,%al
+      testb   $0x2,%al
+        7c16:       a8 02                   test   $0x2,%al
+      jnz     seta20.2
+        7c18:       75 fa                   jne    7c14 <seta20.2>
+    
+      movb    $0xdf,%al               # 0xdf -> port 0x60
+        7c1a:       b0 df                   mov    $0xdf,%al
+      outb    %al,$0x60
+        7c1c:       e6 60                   out    %al,$0x60
+    
+      # Switch from real to protected mode, using a bootstrap GDT
+      # and segment translation that makes virtual addresses 
+      # identical to their physical addresses, so that the 
+      # effective memory map does not change during the switch.
+      lgdt    gdtdesc  # lgdt means load global descriptor table
+        7c1e:       0f 01 16                lgdtl  (%esi)
+        7c21:       64 7c 0f                fs jl  7c33 <protcseg+0x1>
+      movl    %cr0, x
+        7c24:       20 c0                   and    %al,%al
+      orl     $CR0_PE_ON, x  # crx = crx | 1
+        7c26:       66 83 c8 01             or     $0x1,%ax
+      movl    x, %cr0
+        7c2a:       0f 22 c0                mov    x,%cr0
+      
+      # Jump to next instruction, but in 32-bit code segment.
+      # Switches processor into 32-bit mode.
+      ljmp    $PROT_MODE_CSEG, $protcseg
+        7c2d:       ea                      .byte 0xea
+        7c2e:       32 7c 08 00             xor    0x0(x,x,1),%bh
+    
+    00007c32 <protcseg>:
+    
+      .code32                     # Assemble for 32-bit mode
+    protcseg:
+      # Set up the protected-mode data segment registers
+      movw    $PROT_MODE_DSEG, %ax    # Our data segment selector
+        7c32:       66 b8 10 00             mov    $0x10,%ax
+      movw    %ax, %ds                # -> DS: Data Segment
+        7c36:       8e d8                   mov    x,%ds
+      movw    %ax, %es                # -> ES: Extra Segment
+        7c38:       8e c0                   mov    x,%es
+      movw    %ax, %fs                # -> FS
+        7c3a:       8e e0                   mov    x,%fs
+      movw    %ax, %gs                # -> GS
+        7c3c:       8e e8                   mov    x,%gs
+      movw    %ax, %ss                # -> SS: Stack Segment
+        7c3e:       8e d0                   mov    x,%ss
+      
+      # Set up the stack pointer and call into C.
+      movl    $start, %esp
+        7c40:       bc 00 7c 00 00          mov    $0x7c00,%esp
+      call bootmain
+        7c45:       e8 c0 00 00 00          call   7d0a <bootmain>
+    
+    00007c4a <spin>:
+    
+      # If bootmain returns (it shouldn't), loop.
+    spin:
+      jmp spin
+        7c4a:       eb fe                   jmp    7c4a <spin>
+    
+    00007c4c <gdt>:
+            ...
+        7c54:       ff                      (bad)  
+        7c55:       ff 00                   incl   (x)
+        7c57:       00 00                   add    %al,(x)
+        7c59:       9a cf 00 ff ff 00 00    lcall  $0x0,$0xffff00cf
+        7c60:       00                      .byte 0x0
+        7c61:       92                      xchg   x,x
+        7c62:       cf                      iret   
+            ...
+    
+    00007c64 <gdtdesc>:
+        7c64:       17                      pop    %ss
+        7c65:       00 4c 7c 00             add    %cl,0x0(%esp,i,2)
+            ...
+    
+    00007c6a <waitdisk>:
+            }
+    }
+    
+    void
+    waitdisk(void)
+    {
+        7c6a:       55                      push   p
+    
+    static inline uint8_t
+    inb(int port)
+    {
+            uint8_t data;
+            asm volatile("inb %w1,%0" : "=a" (data) : "d" (port));
+        7c6b:       ba f7 01 00 00          mov    $0x1f7,x
+        7c70:       89 e5                   mov    %esp,p
+        7c72:       ec                      in     (%dx),%al
+            // wait for disk reaady
+            while ((inb(0x1F7) & 0xC0) != 0x40)
+        7c73:       83 e0 c0                and    $0xffffffc0,x
+        7c76:       3c 40                   cmp    $0x40,%al
+        7c78:       75 f8                   jne    7c72 <waitdisk+0x8>
+                    /* do nothing */;
+    }
+        7c7a:       5d                      pop    p
+        7c7b:       c3                      ret    
+    
+    00007c7c <readsect>:
+    
+    void
+    readsect(void *dst, uint32_t offset)
+    {
+        7c7c:       55                      push   p
+        7c7d:       89 e5                   mov    %esp,p
+        7c7f:       57                      push   i
+        7c80:       53                      push   x
+        7c81:       8b 5d 0c                mov    0xc(p),x
+            // wait for disk to be ready
+            waitdisk();
+        7c84:       e8 e1 ff ff ff          call   7c6a <waitdisk>
+    }
+    
+    static inline void
+    outb(int port, uint8_t data)
+    {
+            asm volatile("outb %0,%w1" : : "a" (data), "d" (port));
+        7c89:       ba f2 01 00 00          mov    $0x1f2,x
+        7c8e:       b0 01                   mov    $0x1,%al
+        7c90:       ee                      out    %al,(%dx)
+        7c91:       0f b6 c3                movzbl %bl,x
+        7c94:       b2 f3                   mov    $0xf3,%dl
+        7c96:       ee                      out    %al,(%dx)
+        7c97:       0f b6 c7                movzbl %bh,x
+        7c9a:       b2 f4                   mov    $0xf4,%dl
+        7c9c:       ee                      out    %al,(%dx)
+    
+            outb(0x1F2, 1);         // count = 1
+            outb(0x1F3, offset);
+            outb(0x1F4, offset >> 8);
+            outb(0x1F5, offset >> 16);
+        7c9d:       89 d8                   mov    x,x
+        7c9f:       b2 f5                   mov    $0xf5,%dl
+        7ca1:       c1 e8 10                shr    $0x10,x
+        7ca4:       0f b6 c0                movzbl %al,x
+        7ca7:       ee                      out    %al,(%dx)
+            outb(0x1F6, (offset >> 24) | 0xE0);
+        7ca8:       c1 eb 18                shr    $0x18,x
+        7cab:       b2 f6                   mov    $0xf6,%dl
+        7cad:       88 d8                   mov    %bl,%al
+        7caf:       83 c8 e0                or     $0xffffffe0,x
+        7cb2:       ee                      out    %al,(%dx)
+        7cb3:       b0 20                   mov    $0x20,%al
+        7cb5:       b2 f7                   mov    $0xf7,%dl
+        7cb7:       ee                      out    %al,(%dx)
+            outb(0x1F7, 0x20);      // cmd 0x20 - read sectors
+    
+            // wait for disk to be ready
+            waitdisk();
+        7cb8:       e8 ad ff ff ff          call   7c6a <waitdisk>
+    }
+    
+    static inline void
+    insl(int port, void *addr, int cnt)
+    {
+            asm volatile("cld\n\trepne\n\tinsl"
+        7cbd:       8b 7d 08                mov    0x8(p),i
+        7cc0:       b9 80 00 00 00          mov    $0x80,x
+        7cc5:       ba f0 01 00 00          mov    $0x1f0,x
+        7cca:       fc                      cld    
+        7ccb:       f2 6d                   repnz insl (%dx),%es:(i)
+    
+            // read a sector
+            insl(0x1F0, dst, SECTSIZE/4);
+    }
+        7ccd:       5b                      pop    x
+        7cce:       5f                      pop    i
+        7ccf:       5d                      pop    p
+        7cd0:       c3                      ret    
+    
+    00007cd1 <readseg>:
+    
+    // Read 'count' bytes at 'offset' from kernel into physical address 'pa'.
+    // Might copy more than asked
+    void
+    readseg(uint32_t pa, uint32_t count, uint32_t offset)
+    {
+        7cd1:       55                      push   p
+        7cd2:       89 e5                   mov    %esp,p
+        7cd4:       57                      push   i
+            uint32_t end_pa;
+    
+            end_pa = pa + count;
+        7cd5:       8b 7d 0c                mov    0xc(p),i
+    
+    // Read 'count' bytes at 'offset' from kernel into physical address 'pa'.
+    // Might copy more than asked
+    void
+    readseg(uint32_t pa, uint32_t count, uint32_t offset)
+    {
+        7cd8:       56                      push   %esi
+        7cd9:       8b 75 10                mov    0x10(p),%esi
+        7cdc:       53                      push   x
+        7cdd:       8b 5d 08                mov    0x8(p),x
+    
+            // round down to sector boundary
+            pa &= ~(SECTSIZE - 1);
+    
+            // translate from bytes to sectors, and kernel starts at sector 1
+            offset = (offset / SECTSIZE) + 1;
+        7ce0:       c1 ee 09                shr    $0x9,%esi
+    void
+    readseg(uint32_t pa, uint32_t count, uint32_t offset)
+    {
+            uint32_t end_pa;
+    
+            end_pa = pa + count;
+        7ce3:       01 df                   add    x,i
+    
+            // round down to sector boundary
+            pa &= ~(SECTSIZE - 1);
+    
+            // translate from bytes to sectors, and kernel starts at sector 1
+            offset = (offset / SECTSIZE) + 1;
+        7ce5:       46                      inc    %esi
+            uint32_t end_pa;
+    
+            end_pa = pa + count;
+    
+            // round down to sector boundary
+            pa &= ~(SECTSIZE - 1);
+        7ce6:       81 e3 00 fe ff ff       and    $0xfffffe00,x
+            offset = (offset / SECTSIZE) + 1;
+    
+            // If this is too slow, we could read lots of sectors at a time.
+            // We'd write more to memory than asked, but it doesn't matter --
+            // we load in increasing order.
+            while (pa < end_pa) {
+        7cec:       39 fb                   cmp    i,x
+        7cee:       73 12                   jae    7d02 <readseg+0x31>
+                    // Since we haven't enabled paging yet and we're using
+                    // an identity segment mapping (see boot.S), we can
+                    // use physical addresses directly.  This won't be the
+                    // case once JOS enables the MMU.
+                    readsect((uint8_t*) pa, offset);
+        7cf0:       56                      push   %esi
+                    pa += SECTSIZE;
+                    offset++;
+        7cf1:       46                      inc    %esi
+            while (pa < end_pa) {
+                    // Since we haven't enabled paging yet and we're using
+                    // an identity segment mapping (see boot.S), we can
+                    // use physical addresses directly.  This won't be the
+                    // case once JOS enables the MMU.
+                    readsect((uint8_t*) pa, offset);
+        7cf2:       53                      push   x
+                    pa += SECTSIZE;
+        7cf3:       81 c3 00 02 00 00       add    $0x200,x
+            while (pa < end_pa) {
+                    // Since we haven't enabled paging yet and we're using
+                    // an identity segment mapping (see boot.S), we can
+                    // use physical addresses directly.  This won't be the
+                    // case once JOS enables the MMU.
+                    readsect((uint8_t*) pa, offset);
+        7cf9:       e8 7e ff ff ff          call   7c7c <readsect>
+                    pa += SECTSIZE;
+                    offset++;
+        7cfe:       58                      pop    x
+        7cff:       5a                      pop    x
+        7d00:       eb ea                   jmp    7cec <readseg+0x1b>
+            }
+    }
+        7d02:       8d 65 f4                lea    -0xc(p),%esp
+        7d05:       5b                      pop    x
+        7d06:       5e                      pop    %esi
+        7d07:       5f                      pop    i
+        7d08:       5d                      pop    p
+        7d09:       c3                      ret    
+    
+    00007d0a <bootmain>:
+    void readsect(void*, uint32_t);
+    void readseg(uint32_t, uint32_t, uint32_t);
+    
+    void
+    bootmain(void)
+    {
+        7d0a:       55                      push   p
+        7d0b:       89 e5                   mov    %esp,p
+        7d0d:       56                      push   %esi
+        7d0e:       53                      push   x
+            struct Proghdr *ph, *eph;
+    
+            // read 1st page off disk
+            readseg((uint32_t) ELFHDR, SECTSIZE*8, 0);
+        7d0f:       6a 00                   push   $0x0
+        7d11:       68 00 10 00 00          push   $0x1000
+        7d16:       68 00 00 01 00          push   $0x10000
+        7d1b:       e8 b1 ff ff ff          call   7cd1 <readseg>
+    
+            // is this a valid ELF?
+            if (ELFHDR->e_magic != ELF_MAGIC)
+        7d20:       83 c4 0c                add    $0xc,%esp
+        7d23:       81 3d 00 00 01 00 7f    cmpl   $0x464c457f,0x10000
+        7d2a:       45 4c 46 
+        7d2d:       75 38                   jne    7d67 <bootmain+0x5d>
+                    goto bad;
+    
+            // load each program segment (ignores ph flags)
+            ph = (struct Proghdr *) ((uint8_t *) ELFHDR + ELFHDR->e_phoff);
+        7d2f:       a1 1c 00 01 00          mov    0x1001c,x
+        7d34:       8d 98 00 00 01 00       lea    0x10000(x),x
+            eph = ph + ELFHDR->e_phnum;
+        7d3a:       0f b7 05 2c 00 01 00    movzwl 0x1002c,x
+        7d41:       c1 e0 05                shl    $0x5,x
+        7d44:       8d 34 03                lea    (x,x,1),%esi
+            for (; ph < eph; ph++)
+        7d47:       39 f3                   cmp    %esi,x
+        7d49:       73 16                   jae    7d61 <bootmain+0x57>
+                    // p_pa is the load address of this segment (as well
+                    // as the physical address)
+                    readseg(ph->p_pa, ph->p_memsz, ph->p_offset);
+        7d4b:       ff 73 04                pushl  0x4(x)
+                    goto bad;
+    
+            // load each program segment (ignores ph flags)
+            ph = (struct Proghdr *) ((uint8_t *) ELFHDR + ELFHDR->e_phoff);
+            eph = ph + ELFHDR->e_phnum;
+            for (; ph < eph; ph++)
+        7d4e:       83 c3 20                add    $0x20,x
+                    // p_pa is the load address of this segment (as well
+                    // as the physical address)
+                    readseg(ph->p_pa, ph->p_memsz, ph->p_offset);
+        7d51:       ff 73 f4                pushl  -0xc(x)
+        7d54:       ff 73 ec                pushl  -0x14(x)
+        7d57:       e8 75 ff ff ff          call   7cd1 <readseg>
+                    goto bad;
+    
+            // load each program segment (ignores ph flags)
+            ph = (struct Proghdr *) ((uint8_t *) ELFHDR + ELFHDR->e_phoff);
+            eph = ph + ELFHDR->e_phnum;
+            for (; ph < eph; ph++)
+        7d5c:       83 c4 0c                add    $0xc,%esp
+        7d5f:       eb e6                   jmp    7d47 <bootmain+0x3d>
+                    // as the physical address)
+                    readseg(ph->p_pa, ph->p_memsz, ph->p_offset);
+    
+            // call the entry point from the ELF header
+            // note: does not return!
+            ((void (*)(void)) (ELFHDR->e_entry))();
+        7d61:       ff 15 18 00 01 00       call   *0x10018
+    }
+    
+    static inline void
+    outw(int port, uint16_t data)
+    {
+            asm volatile("outw %0,%w1" : : "a" (data), "d" (port));
+        7d67:       ba 00 8a 00 00          mov    $0x8a00,x
+        7d6c:       b8 00 8a ff ff          mov    $0xffff8a00,x
+        7d71:       66 ef                   out    %ax,(%dx)
+        7d73:       b8 00 8e ff ff          mov    $0xffff8e00,x
+        7d78:       66 ef                   out    %ax,(%dx)
+        7d7a:       eb fe                   jmp    7d7a <bootmain+0x70>
+    
+
+
+
+
+可以看到，上面的代码是从0x7c00开始执行的，而用gdb调试发现BIOS执行的第一条指令的位置其实是在0xf000:0xfff0　　那么问题来了...CS段是什么时候从0xf000到0的呢？　在0x7c00之前，BIOS是在做什么呢？
+
+我们用gdb看一下这一部分的代码:
+
+    
+    [f000:fff0]    0xffff0: ljmp   $0xf000,$0xe05b
+    [f000:e05b]    0xfe05b: cmpl   $0x0,%cs:0x6ac8
+    [f000:e062]    0xfe062: jne    0xfd2e1
+    [f000:e066]    0xfe066: xor    %dx,%dx
+    [f000:e068]    0xfe068: mov    %dx,%ss
+    [f000:e06a]    0xfe06a: mov    $0x7000,%esp
+    [f000:e070]    0xfe070: mov    $0xf34c2,x
+    [f000:e076]    0xfe076: jmp    0xfd15c
+    [f000:d15c]    0xfd15c: mov    x,x
+    [f000:d15f]    0xfd15f: cli  
+    [f000:d160]    0xfd160: cld 
+    [f000:d161]    0xfd161: mov    $0x8f,x
+    [f000:d167]    0xfd167: out    %al,$0x70
+    [f000:d169]    0xfd169: in     $0x71,%al
+    [f000:d16b]    0xfd16b: in     $0x92,%al
+    [f000:d16d]    0xfd16d: or     $0x2,%al
+    [f000:d16f]    0xfd16f: out    %al,$0x92
+    [f000:d171]    0xfd171: lidtw  %cs:0x6ab8
+    [f000:d177]    0xfd177: lgdtw  %cs:0x6a74
+    [f000:d17d]    0xfd17d: mov    %cr0,x
+    [f000:d180]    0xfd180: or     $0x1,x
+    [f000:d184]    0xfd184: mov    x,%cr0
+    [f000:d187]    0xfd187: ljmpl  $0x8,$0xfd18f
+    
+    The target architecture is assumed to be i386
+    0xfd18f:     mov    $0x10,x
+    0xfd194:     mov    x,%ds
+    0xfd196:     mov    x,%es
+    0xfd198:     mov    x,%ss
+    0xfd19a:     mov    x,%fs
+    0xfd19c:     mov    x,%gs
+    0xfd19e:     mov    x,x
+    0xfd1a0:     jmp    *x
+    0xf34c2:     push   x
+    0xf34c3:     sub    $0x2c,%esp
+    0xf34c6:     movl   $0xf5b5c,0x4(%esp)
+    0xf34ce:     movl   $0xf447b,(%esp)
+    0xf34d5:     call   0xf099e
+    0xf099e:     lea    0x8(%esp),x
+    0xf09a2:     mov    0x4(%esp),x
+    0xf09a6:     mov    $0xf5b58,x
+    0xf09ab:     call   0xf0574
+    0xf0574:     push   p
+    0xf0575:     push   i
+    0xf0576:     push   %esi
+    0xf0577:     push   x
+    0xf0578:     sub    $0xc,%esp
+    0xf057b:     mov    x,0x4(%esp)
+    0xf057f:     mov    x,p
+    0xf0581:     mov    x,%esi
+    0xf0583:     movsbl 0x0(p),x
+    0xf0587:     test   %dl,%dl
+    0xf0589:     je     0xf0758
+    0xf058f:     cmp    $0x25,%dl
+    0xf0592:     jne    0xf0741
+    0xf0741:     mov    0x4(%esp),x
+    
+    
+    
+    
+    
+
+
+其中的lidtw是加载向量描述表(load interrupt descriptor table), lgdtw是加载全局描述表(global descriptor table,GDT) 可以参考[ LGDT/LIDT -- Load Global/Interrupt Descriptor Table Register](https://www.fermimn.edu.it/linux/quarta/x86/lgdt.htm)
+
+第16,17行的0x70,0x71可以参考[CMOS#Accessing_CMOS_Registers](https://wiki.osdev.org/CMOS#Accessing_CMOS_Registers)，虽然我觉得这太细节了，不看也罢。
+
+18-20行的内容，是快速enbale A20的方法，可以参考[A20_Line ](https://wiki.osdev.org/A20_Line)
+
+然后第21-26行...似曾相识啊..这不就是启动protected mode的步骤吗...
+
+可是这还没有加载boot loader啊..怎么就进入protected mode了呢。。参考[bootloader - switching processor to protected mode](https://stackoverflow.com/questions/5211541/bootloader-switching-processor-to-protected-mode)，发现有些BIOS在实现的时候，会在加载boot loader之前，先短暂进入保护模式，目的可能是为了使用在保护模式下的一些特性(比如32-bit的register)，然后在进入bootloader之前，再切换回实模式。 以及据某6.828学习群大佬说...在进入boot loader之前进入保护模式的方法和boot loader中进入保护模式的方法是不一样的...进入保护模式的方法一共有四种... 感觉太过细节，暂且不去关心了。
+
+第26行之后的代码...抱歉我也不是很懂...看起来无关紧要，如果之后发现这段是重要的再说。
+
+来回答一下几个问题吧。
+
+
+<blockquote>
+
+> 
+> 
+ 	  * At what point does the processor start executing 32-bit code? What exactly causes the switch from 16- to 32-bit mode?
+
+</blockquote>
+
+
+开始执行32-bit code是从位置0x7c32,执行的命令为mov    $0x10,%ax
+从16-bit mode转化到32-bit mode是将control register 0 的 第1位(PE)设置为1导致的。
+
+
+<blockquote>
+
+> 
+> 
+ 	  * What is the _last_ instruction of the boot loader executed, and what is the _first_ instruction of the kernel it just loaded?
+
+</blockquote>
+
+
+boot loader执行的最后一条指令是0x7d61:      call   *0x10018  ,对应的c语言代码是 ((void (*)(void)) (ELFHDR->e_entry))();   kernel加载后执行的第一条指令为 movw   $0x1234,0x472
+
+
+
+<blockquote>
+
+> 
+> 
+ 	  * _Where_ is the first instruction of the kernel?
+
+</blockquote>
+
+
+kernel的第一条指令的地址为0x10000c
+
+
+<blockquote>
+
+> 
+> 
+ 	  * How does the boot loader decide how many sectors it must read in order to fetch the entire kernel from disk? Where does it find this information?
+
+</blockquote>
+
+
+boot loader先读一小部分kernel，具体来说是8个sector，也就是1 page,对应的代码为 readseg((uint32_t) ELFHDR, SECTSIZE*8, 0); 然后读进来的这部分里面包含了整个kernel有多大的信息，这些信息存储在inc/elf.h文件中。
+
+
+### Loading the Kernel
+
+
+练习4提到了要熟悉c语言的指针..去看了下推荐的"_The C Programming Language_ "..发现真是一本非常棒的入门书...之前还以为是像《算法导论》一样只可远观的大部头...可惜已经不适初学者了... 练习4中给出了一段使用c语言指针的代码，第5个输出要注意一下大小端...
+
+    
+    #include <stdio.h>
+    #include <stdlib.h>
+    
+    void
+    f(void)
+    {
+        int a[4];
+        int *b = malloc(16);
+        int *c;
+        int i;
+    
+        printf("1: a = %p, b = %p, c = %p\n", a, b, c);
+    
+        c = a;
+        for (i = 0; i < 4; i++)
+    	a[i] = 100 + i;
+        c[0] = 200;
+        printf("2: a[0] = %d, a[1] = %d, a[2] = %d, a[3] = %d\n",
+    	   a[0], a[1], a[2], a[3]);
+    
+        c[1] = 300;
+        *(c + 2) = 301;
+        3[c] = 302;
+        printf("3: a[0] = %d, a[1] = %d, a[2] = %d, a[3] = %d\n",
+    	   a[0], a[1], a[2], a[3]);
+    
+        c = c + 1;
+        *c = 400;
+        printf("4: a[0] = %d, a[1] = %d, a[2] = %d, a[3] = %d\n",
+    	   a[0], a[1], a[2], a[3]);
+    
+        c = (int *) ((char *) c + 1);
+        *c = 500;
+        printf("5: a[0] = %d, a[1] = %d, a[2] = %d, a[3] = %d\n",
+    	   a[0], a[1], a[2], a[3]);
+    
+        b = (int *) a + 1;
+        c = (int *) ((char *) a + 1);
+        printf("6: a = %p, b = %p, c = %p\n", a, b, c);
+    }
+    
+    int
+    main(int ac, char **av)
+    {
+        f();
+        return 0;
+    }
+    
+
+
+
+
+在继续之前，需要仔细看一下elf文件的内容[ELF](https://wiki.osdev.org/ELF)
+
+
+### ELF文件
+
+
+elf文件分成了很多个section,通常.data section存放初始化的global/static variable,.text 存放代码，.rodata section 用来存放字符串常量，.bss section用来存放未初始化的global/static variabel.  .bss section没有对应的变量内容，原因是未初始化的变量按照规定会默认为0，因此没必要再存一次。“Thus there is no need to store contents for .bss in the ELF binary; instead, the linker records just the address and size of the .bss section. The loader or the program itself must arrange to zero the.bss section.”
+
+我们比较关心的是.data section, .text section, .rodata section
+
+我们可以用 objdump -h 命令查看一个ELF文件的 section header,
+
+    
+    objdump -h obj/kern/kernel
+    
+    obj/kern/kernel:     file format elf32-i386
+    
+    Sections:
+    Idx Name          Size      VMA       LMA       File off  Algn
+      0 .text         00001917  f0100000  00100000  00001000  2**4
+                      CONTENTS, ALLOC, LOAD, READONLY, CODE
+      1 .rodata       00000714  f0101920  00101920  00002920  2**5
+                      CONTENTS, ALLOC, LOAD, READONLY, DATA
+      2 .stab         00003889  f0102034  00102034  00003034  2**2
+                      CONTENTS, ALLOC, LOAD, READONLY, DATA
+      3 .stabstr      000018af  f01058bd  001058bd  000068bd  2**0
+                      CONTENTS, ALLOC, LOAD, READONLY, DATA
+      4 .data         0000a300  f0108000  00108000  00009000  2**12
+                      CONTENTS, ALLOC, LOAD, DATA
+      5 .bss          00000648  f0112300  00112300  00013300  2**5
+                      CONTENTS, ALLOC, LOAD, DATA
+      6 .comment      00000023  00000000  00000000  00013948  2**0
+                      CONTENTS, READONLY
+
+
+
+
+其中size是这个section的大小，VMA (Virtual Memory Address，6.828中叫link address) 是section开始执行时所在的memory address,LMA (Load Memory Address)是这个section被加载到memory中所处的位置。通常这两个地址是一样的。
+
+boot loader使用elf文件中的program header来决定如何记载section, program header指明了ELF文件的哪一部分需要记载到memory中，以及加载到memory的什么位置。我们可以用bjdump -x obj/kern/kernel查看ELF的全部header文件
+
+
+<blockquote>练习5 Trace through the first few instructions of the boot loader again and identify the first instruction that would "break" or otherwise do the wrong thing if you were to get the boot loader's link address wrong. Then change the link address in boot/Makefrag to something wrong, run make clean, recompile the lab with make, and trace into the boot loader again to see what happens. Don't forget to change the link address back and make clean again afterward!</blockquote>
+
+
+把boot loader的link address从0x7c00改成了0x9c00... 然后进入gdb单步调试。
+
+发现lgdtw的参数出现了负数 [ 0:7c1e] => 0x7c1e: lgdtw -0x639c  ，然后继续执行，到[ 0:7c2d] => 0x7c2d: ljmp $0x8,$0x9c32  ,发生了crash.
+
+我们观察到生成的boot.asm文件，地址确实是从0x9c00开始了。
+
+    
+    protcseg:
+      # Set up the protected-mode data segment registers
+      movw    $PROT_MODE_DSEG, %ax    # Our data segment selector
+        9c32:       66 b8 10 00             mov    $0x10,%ax
+      movw    %ax, %ds                # -> DS: Data Segment
+        9c36:       8e d8                   mov    x,%ds
+      movw    %ax, %es                # -> ES: Extra Segment
+        9c38:       8e c0                   mov    x,%es
+      movw    %ax, %fs                # -> FS
+        9c3a:       8e e0                   mov    x,%fs
+      movw    %ax, %gs                # -> GS
+        9c3c:       8e e8                   mov    x,%gs
+      movw    %ax, %ss                # -> SS: Stack Segment
+        9c3e:       8e d0                   mov    x,%ss
+    
+      # Set up the stack pointer and call into C.
+      movl    $start, %esp
+        9c40:       bc 00 9c 00 00          mov    $0x9c00,%esp
+      call bootmain
+        9c45:       e8 c0 00 00 00          call   9d0a <bootmain>
+    
+    00009c4a <spin>:
+    
+      # If bootmain returns (it shouldn't), loop.
+    spin:
+      jmp spin
+        9c4a:       eb fe                   jmp    9c4a <spin>
+
+
+但是实际上。。BIOS仍然把boot loader记载到了0x7c00....这是约定俗成吗？ BIOS无视Boot loader的link address，直接加载到0x7c00?   没有找到相关资料，有待进一步探寻。
+
+
+<blockquote>练习6 Reset the machine (exit QEMU/GDB and start them again). Examine the 8 words of memory at 0x00100000 at the point the BIOS enters the boot loader, and then again at the point the boot loader enters the kernel. Why are they different? What is there at the second breakpoint? (You do not really need to use QEMU to answer this question. Just think.)</blockquote>
+
+
+这个问题是问，BIOS进入boot loader时（也就是在0x7c00时）和boot loader进入kernel时(0x10000c)，地址0x00100000开始的8个word单位的值，为什么不同。
+
+0x7c00时，0x00100000处的8个word的值都为0...
+
+在0x10000c时，0x00100000处的值翻译成指令之后是：
+
+    
+    0x100000:    add    0x1bad(x),%dh                                                                                                                                    │·······································
+       0x100006:    add    %al,(x)                                                                                                                                          │·······································
+       0x100008:    decb   0x52(i)                                                                                                                                          │·······································
+       0x10000b:    in     $0x66,%al                                                                                                                                           │·······································
+       0x10000d:    movl   $0xb81234,0x472                                                                                                                                     │·······································
+       0x100017:    add    %dl,(x)                                                                                                                                          │·······································
+       0x100019:    add    %cl,(i)                                                                                                                                          │·······································
+       0x10001b:    and    %al,%bl
+
+
+不一样的原因是，在刚刚进入boot loader时，kernel还没有加载进内存，因此是空的.
+
+
+## Part 3: The Kernel
+
+
+
+
+### Using virtual memory to work around position dependence
+
+
+OS的kernel通常喜欢运行再较高地址的虚拟内存中，比如0xf0100000，为的是低地址留给用户程序。但是有的机器可能没有那么大的memory，因此不存在0xf0100000这个物理地址。因此这里需要做一个虚拟内存到物理内存的映射。在这个部分实验中，我们不需要至少地址映射是如何work的，只需要知道效果就好。
+
+具体来说，当CR0_PG被置为1之前，内存地址为物理内存地址(严格地说，其实是线性地址，不过在boot/boot.S中做了线性地址到物理地址的等价映射），当CRO_PG flag被置为1之后，地址就变成了虚拟内存地址。我们可以用gdb调试看一下发生了什么。
+
+
+<blockquote>Exercise 7.  Use QEMU and GDB to trace into the JOS kernel and stop at the `movl x, %cr0`. Examine memory at 0x00100000 and at 0xf0100000. Now, single step over that instruction using the stepi GDB command. Again, examine memory at 0x00100000 and at 0xf0100000. Make sure you understand what just happened.
+
+What is the first instruction _after_ the new mapping is established that would fail to work properly if the mapping weren't in place? Comment out the `movl x, %cr0` in kern/entry.S, trace into it, and see if you were right.</blockquote>
+
+
+先用b *0x10000c处设置断点，这个是JOS kernel开始运行的地址。然后单步几步，在movl x , %cr0处停留，也就是cr0_PG flag恰好也被制为1之前。观察一下0x00100000和0xf0100000的内容:
+
+    
+    (gdb) x/8x 0xf0100000                                                                                                 
+    0xf0100000 <_start+4026531828>: 0x00000000      0x00000000      0x00000000      0x00000000                                                                                 
+    0xf0100010 <entry+4>:   0x00000000      0x00000000      0x00000000      0x00000000 
+    
+    x/8i 0x00100000                                                                                                                                                      │·······································
+       0x100000:    add    0x1bad(x),%dh                                                                                                                                    │·······································
+       0x100006:    add    %al,(x)                                                                                                                                          │·······································
+       0x100008:    decb   0x52(i)                                                                                                                                          │·······································
+       0x10000b:    in     $0x66,%al                                                                                                                                           │·······································
+       0x10000d:    movl   $0xb81234,0x472                                                                                                                                     │·······································
+       0x100017:    add    %dl,(x)                                                                                                                                          │·······································
+       0x100019:    add    %cl,(i)                                                                                                                                          │·······································
+       0x10001b:    and    %al,%bl
+
+
+
+
+然后接着单步一次，再次用x/8i观察8条0x00100000和0xf0100000处的内容
+
+    
+    (gdb) x/8i 0x00100000                                                                                                                                                      │·······································
+       0x100000:    add    0x1bad(x),%dh                                                                                                                                    │·······································
+       0x100006:    add    %al,(x)                                                                                                                                          │·······································
+       0x100008:    decb   0x52(i)                                                                                                                                          │·······································
+       0x10000b:    in     $0x66,%al                                                                                                                                           │·······································
+       0x10000d:    movl   $0xb81234,0x472                                                                                                                                     │·······································
+       0x100017:    add    %dl,(x)                                                                                                                                          │·······································
+       0x100019:    add    %cl,(i)                                                                                                                                          │·······································
+       0x10001b:    and    %al,%bl                                                                                                                                             │·······································
+    (gdb) x/8i 0xf0100000                                                                                                                                                      │·······································
+       0xf0100000 <_start+4026531828>:      add    0x1bad(x),%dh                                                                                                            │·······································
+       0xf0100006 <_start+4026531834>:      add    %al,(x)                                                                                                                  │·······································
+       0xf0100008 <_start+4026531836>:      decb   0x52(i)                                                                                                                  │·······································
+       0xf010000b <_start+4026531839>:      in     $0x66,%al                                                                                                                   │·······································
+       0xf010000d <entry+1>:        movl   $0xb81234,0x472                                                                                                                     │·······································
+       0xf0100017 <entry+11>:       add    %dl,(x)                                                                                                                          │·······································
+       0xf0100019 <entry+13>:       add    %cl,(i)                                                                                                                          │·······································
+       0xf010001b <entry+15>:       and    %al,%bl
+
+
+可以观察到，在cx0_PG flag被置为1之前，地址0xf0100000处是一片虚无。
+
+置为1之后，地址0xf0100000处的内容和0x00100000处的内容一致。需要注意，此时这两个地址都是虚拟内存地址了。具体来说
+
+
+<blockquote>Once `CR0_PG` is set, memory references are virtual addresses that get translated by the virtual memory hardware to physical addresses. `entry_pgdir` translates virtual addresses in the range 0xf0000000 through 0xf0400000 to physical addresses 0x00000000 through 0x00400000, as well as virtual addresses 0x00000000 through 0x00400000 to physical addresses 0x00000000 through 0x00400000</blockquote>
+
+
+然后我们注释掉`movl x, %cr0` in kern/entry.S
+
+再次用gdb调试，发现0x10002a: jmp *x  crash了。 原因显然是由于没有开启保护模式，eax的地址值不合法。
+
+
+### Formatted Printing to the Console
+
+
+printf的格式化输出并不是天生就有的，首先阅读一下相关的几个代码。kern/printf.c, kern/console.c和lib/printfmt.c
+
+
+<blockquote>Exercise 8. We have omitted a small fragment of code - the code necessary to print octal numbers using patterns of the form "%o". Find and fill in this code fragment.</blockquote>
+
+
+很简单，修改之后代码为
+
+    
+    case 'o':
+    			// Replace this with your code.
+    			num = getuint(&ap,lflag);
+    			base = 8;
+    			goto number;
+
+
+接下来来回答几个问题
+
+
+<blockquote>
+
+> 
+> 
+ 	  1. Explain the interface between printf.c and console.c. Specifically, what function does console.c export? How is this function used by printf.c?
+
+</blockquote>
+
+
+printf.c与console.c的接口是console.c中的cputchar()，作用是向console中打印一个字符。printf.c在patch()函数中使用了cputchar()
+
+
+<blockquote>2.Explain the following from console.c:
+
+>     
+>     if (crt_pos >= CRT_SIZE) {
+>              int i;
+>              memmove(crt_buf, crt_buf + CRT_COLS, (CRT_SIZE - CRT_COLS) * sizeof(uint16_t));
+>              for (i = CRT_SIZE - CRT_COLS; i < CRT_SIZE; i++)
+>              crt_buf[i] = 0x0700 | ' ';
+>              crt_pos -= CRT_COLS;
+>     }
+> 
+> 
+</blockquote>
+
+
+这段代码很显然，含义是屏幕的字符数超过了屏幕能显示的最大数目的情况下，将第二行到最后一行的字符整体上移一行（这样原先的第一行就被覆盖了），然后将最后一行的内容清空（因为已经上移到倒数第二行了)   应该是类似屏幕滚动的效果
+
+
+<blockquote>3. For the following questions you might wish to consult the notes for Lecture 2. These notes cover GCC's calling convention on the x86.
+
+Trace the execution of the following code step-by-step:
+
+>     
+>     int x = 1, y = 3, z = 4;
+>     cprintf("x %d, y %x, z %d\n", x, y, z);
+>     
+> 
+> 
+
+> 
+> 
+ 	  * In the call to `cprintf()`, to what does `fmt` point? To what does `ap` point?
+ 	  * List (in order of execution) each call to `cons_putc`, `va_arg`, and `vcprintf`. For `cons_putc`, list its argument as well. For `va_arg`, list what `ap` points to before and after the call. For `vcprintf` list the values of its two arguments.
+
+这个问题的解答可以先参考一下[c语言变长参数](https://111qqz.com/2019/02/variadic-function-of-c/)和[x86 calling conventions](https://111qqz.com/2019/01/x86-calling-conventions/)
+
+我们先看一下print.c的代码:
+
+>     
+>     static void
+>     putch(int ch, int *cnt)
+>     {
+>     	cputchar(ch);
+>     	*cnt++;
+>     }
+>     
+>     int
+>     vcprintf(const char *fmt, va_list ap)
+>     {
+>     	int cnt = 0;
+>     
+>     	vprintfmt((void*)putch, &cnt, fmt, ap);
+>     	return cnt;
+>     }
+>     
+>     int
+>     cprintf(const char *fmt, ...)
+>     {
+>     	va_list ap;
+>     	int cnt;
+>     
+>     	va_start(ap, fmt);
+>     	cnt = vcprintf(fmt, ap);
+>     	va_end(ap);
+>     
+>     	return cnt;
+>     }
+>     
+> 
+> 
+从int cprintf(const char *fmt, ...)开始看，参数*fmt应该就是 我们熟悉的c语言的printf的格式化部分，也就是第一个参数。
+
+然后整体就是c语言变长参数的routine，但是没有使用va_arg, 而是用cnt = cvprintf(fmt,ap)，返回了一个不知道什么的个数。
+
+接下来看int vcprintf(const char *fmt, va_list ap)，好像没什么好看的.... 然后是vprintfmt，代码如下:
+
+>     
+>     void
+>     vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
+>     {
+>     	register const char *p;
+>     	register int ch, err;
+>     	unsigned long long num;
+>     	int base, lflag, width, precision, altflag;
+>     	char padc;
+>     
+>     	while (1) {
+>     		while ((ch = *(unsigned char *) fmt++) != '%') {
+>     			if (ch == '\0')
+>     				return;
+>     			putch(ch, putdat);
+>     		}
+>     
+>     		// Process a %-escape sequence
+>     		padc = ' ';
+>     		width = -1;
+>     		precision = -1;
+>     		lflag = 0;
+>     		altflag = 0;
+>     	reswitch:
+>     		switch (ch = *(unsigned char *) fmt++) {
+>     
+>     		// flag to pad on the right
+>     		case '-':
+>     			padc = '-';
+>     			goto reswitch;
+>     
+>     		// flag to pad with 0's instead of spaces
+>     		case '0':
+>     			padc = '0';
+>     			goto reswitch;
+>     
+>     		// width field
+>     		case '1':
+>     		case '2':
+>     		case '3':
+>     		case '4':
+>     		case '5':
+>     		case '6':
+>     		case '7':
+>     		case '8':
+>     		case '9':
+>     			for (precision = 0; ; ++fmt) {
+>     				precision = precision * 10 + ch - '0';
+>     				ch = *fmt;
+>     				if (ch < '0' || ch > '9')
+>     					break;
+>     			}
+>     			goto process_precision;
+>     
+>     		case '*':
+>     			precision = va_arg(ap, int);
+>     			goto process_precision;
+>     
+>     		case '.':
+>     			if (width < 0)
+>     				width = 0;
+>     			goto reswitch;
+>     
+>     		case '#':
+>     			altflag = 1;
+>     			goto reswitch;
+>     
+>     		process_precision:
+>     			if (width < 0)
+>     				width = precision, precision = -1;
+>     			goto reswitch;
+>     
+>     		// long flag (doubled for long long)
+>     		case 'l':
+>     			lflag++;
+>     			goto reswitch;
+>     
+>     		// character
+>     		case 'c':
+>     			putch(va_arg(ap, int), putdat);
+>     			break;
+>     
+>     		// error message
+>     		case 'e':
+>     			err = va_arg(ap, int);
+>     			if (err < 0)
+>     				err = -err;
+>     			if (err >= MAXERROR || (p = error_string[err]) == NULL)
+>     				printfmt(putch, putdat, "error %d", err);
+>     			else
+>     				printfmt(putch, putdat, "%s", p);
+>     			break;
+>     
+>     		// string
+>     		case 's':
+>     			if ((p = va_arg(ap, char *)) == NULL)
+>     				p = "(null)";
+>     			if (width > 0 && padc != '-')
+>     				for (width -= strnlen(p, precision); width > 0; width--)
+>     					putch(padc, putdat);
+>     			for (; (ch = *p++) != '\0' && (precision < 0 || --precision >= 0); width--)
+>     				if (altflag && (ch < ' ' || ch > '~'))
+>     					putch('?', putdat);
+>     				else
+>     					putch(ch, putdat);
+>     			for (; width > 0; width--)
+>     				putch(' ', putdat);
+>     			break;
+>     
+>     		// (signed) decimal
+>     		case 'd':
+>     			num = getint(&ap, lflag);
+>     			if ((long long) num < 0) {
+>     				putch('-', putdat);
+>     				num = -(long long) num;
+>     			}
+>     			base = 10;
+>     			goto number;
+>     
+>     		// unsigned decimal
+>     		case 'u':
+>     			num = getuint(&ap, lflag);
+>     			base = 10;
+>     			goto number;
+>     
+>     		// (unsigned) octal
+>     		case 'o':
+>     			// Replace this with your code.
+>     			putch('X', putdat);
+>     			putch('X', putdat);
+>     			putch('X', putdat);
+>     			break;
+>     
+>     		// pointer
+>     		case 'p':
+>     			putch('0', putdat);
+>     			putch('x', putdat);
+>     			num = (unsigned long long)
+>     				(uintptr_t) va_arg(ap, void *);
+>     			base = 16;
+>     			goto number;
+>     
+>     		// (unsigned) hexadecimal
+>     		case 'x':
+>     			num = getuint(&ap, lflag);
+>     			base = 16;
+>     		number:
+>     			printnum(putch, putdat, num, base, width, padc);
+>     			break;
+>     
+>     		// escaped '%' character
+>     		case '%':
+>     			putch(ch, putdat);
+>     			break;
+>     
+>     		// unrecognized escape sequence - just print it literally
+>     		default:
+>     			putch('%', putdat);
+>     			for (fmt--; fmt[-1] != '%'; fmt--)
+>     				/* do nothing */;
+>     			break;
+>     		}
+>     	}
+>     }
+> 
+> 
+大致扫一眼可以发现这段代码是处理输出的格式化参数的，包括输出类型，精度，场宽之类。
+
+我们注意到putch函数的作用是向console输出一个字符，并统计当前累计的输出字符个数。
+
+接下来我们来回答问题:
+
+> 
+> 
+ 	  * 在cprintf的调用中，fmt指向的是"x %d, y %x, z %d\n", ap指向的是第一个变长参数，也就是变量x在调用栈中的地址。
+ 	  * cons_putc调用的过程按先后顺序为:
+
+ 	    * cons_putc('x')
+ 	    * cons_putc(' ')
+ 	    * cons_putc('1')
+ 	    * cons_putc(',')
+ 	    * cons_putc(' ')
+ 	    * cons_putc('y')
+ 	    * cons_putc(' ')
+ 	    * cons_putc('3')
+ 	    * cons_putc(',')
+ 	    * cons_putc(' ')
+ 	    * cons_putc('z')
+ 	    * cons_putc(' ')
+ 	    * cons_putc('4')
+ 	    * cons_putc('\n')
+
+
+ 	  * va_arg一共调用了三次
+
+ 	    * 第一次调用前,ap指向参数x在栈中的地址,调用之后,ap指向参数y在栈中的地址。
+ 	    * 第二次调用前,ap指向参数y在栈中的地址,调用之后,ap指向参数z在栈中的地址。
+ 	    * 第三次调用前,ap指向参数z在栈中的地址,调用之后,ap指向参数z之后4字节的地址。
+
+
+ 	  * vcprintf的参数值为"x %d, y %x, z %d\n" 和 参数x在调用栈中的地址。
+
+4.Run the following code.
+
+>     
+>         unsigned int i = 0x00646c72;
+>         cprintf("H%x Wo%s", 57616, &i);
+>     
+> 
+> 
+What is the output? Explain how this output is arrived at in the step-by-step manner of the previous exercise. [Here's an ASCII table](http://web.cs.mun.ca/~michael/c/ascii-table.html) that maps bytes to characters.
+
+The output depends on that fact that the x86 is little-endian. If the x86 were instead big-endian what would you set `i` to in order to yield the same output? Would you need to change `57616` to a different value?</blockquote>
+
+
+输出结果为  "He110 World" 前半部分的e110就是57616的十六进制表示。后半部分将unsiged int i 当成unsigned char类型输出，十六进制64,6c,72对应的字符分别为‘d’,‘l’,'r'.
+
+然后先复习一下字节序。**整数类型static_cast不会有字节序问题，指针++和--操作不涉及cast和字节序问题。把指针类型reinterpret_cast才会有字节序问题**，例如：
+
+    
+    int a = 0x12345678
+    char *c = reinterpret_cast<char*>(&a);
+    printf("%x %x %x %x\n",c[0],c[1],c[2],c[3]);
+    //小端输出:78 56 34 12
+    //大端输出:12 34 56 78
+
+
+由于x86体系架构字节序为little-endian,因此实际输出为'r','l','d'.
+
+如果x86体系架构为large-endian,那么i的值应该改为0x00726c64，以实现相同的输出结果。
+
+57616不需要做修改，因为整数类型staic_cast不存在字节序问题。
+
+
+<blockquote>5.In the following code, what is going to be printed after `'y='`? (note: the answer is not a specific value.) Why does this happen?
+
+>     
+>         cprintf("x=%d y=%d", 3);
+> 
+> 
+</blockquote>
+
+
+x的结果就是3，y的输出是没意义的一个整数。原因是，这句话会发生当va_list中没有下一个变量时，仍然使用va_arg去取下一个变量。而根据[va_arg](http://en.cppreference.com/w/cpp/utility/variadic/va_arg)，此时的行为是undefined behaviour.
+
+
+<blockquote>6.Let's say that GCC changed its calling convention so that it pushed arguments on the stack in declaration order, so that the last argument is pushed last. How would you have to change `cprintf` or its interface so that it would still be possible to pass it a variable number of arguments?
+
+感觉如果知识修改cprintf来达到目的有点难？ 因为压栈顺序和之前相反了，那么va_arg这个宏需要修改一下...或者，添加一个buffer，不是一次处理一个参数，而是先将参数全部读取，然后调换顺序，之后再进行处理。</blockquote>
+
+
+
+
+
+### The Stack
+
+
+
+
+<blockquote>Exercise 9. Determine where the kernel initializes its stack, and exactly where in memory its stack is located. How does the kernel reserve space for its stack? And at which "end" of this reserved area is the stack pointer initialized to point to?</blockquote>
+
+
+参考obj/kernel.asm
+
+    
+    f010002c <relocated>:
+    relocated:
+    
+            # Clear the frame pointer register (EBP)
+            # so that once we get into debugging C code,
+            # stack backtraces will be terminated properly.
+            movl    $0x0,p                       # nuke frame pointer
+    f010002c:       bd 00 00 00 00          mov    $0x0,p
+    
+            # Set the stack pointer
+            movl    $(bootstacktop),%esp
+    f0100031:       bc 00 00 11 f0          mov    $0xf0110000,%esp
+
+
+得知kernel初始化stack是在地址0xf010002c和0xf0100031完成的。stack被加载到了地址0xf01100000. 至于kernel如何为stack保留空间这个问题，我的理解是，stack现在有了初始位置，但是它如何知道自己有多大空间呢？ 换句话说，这个问题问的是kernel如何决定stack的大小。这一部分其实定义在inc/memlayout.h中，
+
+    
+    // All physical memory mapped at this address
+    #define	KERNBASE	0xF0000000
+    
+    // At IOPHYSMEM (640K) there is a 384K hole for I/O.  From the kernel,
+    // IOPHYSMEM can be addressed at KERNBASE + IOPHYSMEM.  The hole ends
+    // at physical address EXTPHYSMEM.
+    #define IOPHYSMEM	0x0A0000
+    #define EXTPHYSMEM	0x100000
+    
+    // Kernel stack.
+    #define KSTACKTOP	KERNBASE
+    #define KSTKSIZE	(8*PGSIZE)   		// size of a kernel stack
+    #define KSTKGAP		(8*PGSIZE)   		// size of a kernel stack guard
+    
+    // Memory-mapped IO.
+    #define MMIOLIM		(KSTACKTOP - PTSIZE)
+    #define MMIOBASE	(MMIOLIM - PTSIZE)
+
+
+最后一个问题，由于x86体系架构下栈是向下增长的。因此stack pointer初始指向这段保留区域的大地址端（也就是上面)
+
+
+
+
+<blockquote>Exercise 10. To become familiar with the C calling conventions on the x86, find the address of the `test_backtrace` function in obj/kern/kernel.asm, set a breakpoint there, and examine what happens each time it gets called after the kernel starts. How many 32-bit words does each recursive nesting level of `test_backtrace` push on the stack, and what are those words?
+
+Note that, for this exercise to work properly, you should be using the patched version of QEMU available on the [tools](https://pdos.csail.mit.edu/6.828/2018/tools.html) page or on Athena. Otherwise, you'll have to manually translate all breakpoint and memory addresses to linear addresses.</blockquote>
+
+
+test_backtrace的入口地址在0xf0100040,在这里设置断点，然后最后的输出结果如下:
+
+    
+    entering test_backtrace 5
+    entering test_backtrace 4
+    entering test_backtrace 3
+    entering test_backtrace 2
+    entering test_backtrace 1
+    entering test_backtrace 0
+    leaving test_backtrace 0
+    leaving test_backtrace 1
+    leaving test_backtrace 2
+    leaving test_backtrace 3
+    leaving test_backtrace 4
+    leaving test_backtrace 5
+    Welcome to the JOS kernel monitor!
+
+
+对于每次调用函数test_backtrace,有三个32-bit的变量被压栈，可以参考
+
+    
+    // Test the stack backtrace function (lab 1 only)
+    void
+    test_backtrace(int x)
+    {
+    f0100040:       55                      push   p
+    f0100041:       89 e5                   mov    %esp,p
+    f0100043:       53                      push   x
+    f0100044:       83 ec 14                sub    $0x14,%esp
+    f0100047:       8b 5d 08                mov    0x8(p),x
+            cprintf("entering test_backtrace %d\n", x);
+    f010004a:       89 5c 24 04             mov    x,0x4(%esp)
+    f010004e:       c7 04 24 e0 18 10 f0    movl   $0xf01018e0,(%esp)
+    f0100055:       e8 d7 08 00 00          call   f0100931 <cprintf>
+            if (x > 0)
+    f010005a:       85 db                   test   x,x
+    f010005c:       7e 0d                   jle    f010006b <test_backtrace+0x2b>
+                    test_backtrace(x-1);
+    f010005e:       8d 43 ff                lea    -0x1(x),x
+    f0100061:       89 04 24                mov    x,(%esp)
+    f0100064:       e8 d7 ff ff ff          call   f0100040 <test_backtrace>
+    f0100069:       eb 1c                   jmp    f0100087 <test_backtrace+0x47>
+            else
+                    mon_backtrace(0, 0, 0);
+    f010006b:       c7 44 24 08 00 00 00    movl   $0x0,0x8(%esp)
+    f0100072:       00 
+    f0100073:       c7 44 24 04 00 00 00    movl   $0x0,0x4(%esp)
+    f010007a:       00 
+    f010007b:       c7 04 24 00 00 00 00    movl   $0x0,(%esp)
+    f0100082:       e8 18 07 00 00          call   f010079f <mon_backtrace>
+            cprintf("leaving test_backtrace %d\n", x);
+    f0100087:       89 5c 24 04             mov    x,0x4(%esp)
+    f010008b:       c7 04 24 fc 18 10 f0    movl   $0xf01018fc,(%esp)
+    f0100092:       e8 9a 08 00 00          call   f0100931 <cprintf>
+    }
+    f0100097:       83 c4 14                add    $0x14,%esp
+    f010009a:       5b                      pop    x
+    f010009b:       5d                      pop    p
+    f010009c:       c3                      ret
+
+
+分别是参数x,ebp和ebx. 参数x和ebp的压栈是常规操作，就不解释了。ebx的压栈可能有些疑问，可以参考[Why are these registers pushed to stack?](https://stackoverflow.com/questions/9797335/why-are-these-registers-pushed-to-stack)
+
+下一个练习:
+
+
+<blockquote>Exercise 11. Implement the backtrace function as specified above. Use the same format as in the example, since otherwise the grading script will be confused. When you think you have it working right, run make grade to see if its output conforms to what our grading script expects, and fix it if it doesn't. _After_ you have handed in your Lab 1 code, you are welcome to change the output format of the backtrace function any way you like.
+
+If you use `read_ebp()`, note that GCC may generate "optimized" code that calls `read_ebp()` _before_`mon_backtrace()`'s function prologue, which results in an incomplete stack trace (the stack frame of the most recent function call is missing). While we have tried to disable optimizations that cause this reordering, you may want to examine the assembly of `mon_backtrace()` and make sure the call to`read_ebp()` is happening after the function prologue.</blockquote>
+
+
+这个练习主要参考[x86-calling-conventions](https://111qqz.com/2019/01/x86-calling-conventions/), 主要是需要知道ebp的内容是上一个stack frame中的ebp,以及ebp+4是返回地址,ebp+8是第一个参数，还有ebp的初始值是0.
+
+最后的实现为:
+
+    
+    int
+    mon_backtrace(int argc, char **argv, struct Trapframe *tf)
+    {
+            // Your code here.
+            uint32_t *ebp = (uint32_t*)read_ebp();
+            int i ;
+            while (ebp)
+            {
+                    cprintf("ebp x  eip x  ",ebp,*(ebp+1));
+                    cprintf("args");
+                    for ( i = 2 ; i < 7 ; i++)
+                    {
+                            cprintf(" x",*(ebp+i));
+                    }
+                    cprintf("\n");
+                    ebp = (uint32_t*)*ebp;
+            }
+            return 0;
+    }
+
+
+
+
+然后是最后一个练习:
+
+
+<blockquote>Exercise 12. Modify your stack backtrace function to display, for each eip, the function name, source file name, and line number corresponding to that eip.
+
+In `debuginfo_eip`, where do __STAB_* come from? This question has a long answer; to help you to discover the answer, here are some things you might want to do:
+
+> 
+> 
+ 	  * look in the file kern/kernel.ld for __STAB_*
+ 	  * run objdump -h obj/kern/kernel
+ 	  * run objdump -G obj/kern/kernel
+ 	  * run gcc -pipe -nostdinc -O2 -fno-builtin -I. -MD -Wall -Wno-format -DJOS_KERNEL -gstabs -c -S kern/init.c, and look at init.s.
+ 	  * see if the bootloader loads the symbol table in memory as part of loading the kernel binary
+
+Complete the implementation of `debuginfo_eip` by inserting the call to `stab_binsearch` to find the line number for an address.
+
+Add a backtrace command to the kernel monitor, and extend your implementation of `mon_backtrace` to call `debuginfo_eip` and print a line for each stack frame of the form:
+
+>     
+>     K> backtrace
+>     Stack backtrace:
+>       ebp f010ff78  eip f01008ae  args 00000001 f010ff8c 00000000 f0110580 00000000
+>              kern/monitor.c:143: monitor+106
+>       ebp f010ffd8  eip f0100193  args 00000000 00001aac 00000660 00000000 00000000
+>              kern/init.c:49: i386_init+59
+>       ebp f010fff8  eip f010003d  args 00000000 00000000 0000ffff 10cf9a00 0000ffff
+>              kern/entry.S:70: <unknown>+0
+>     K> 
+>     
+> 
+> 
+Each line gives the file name and line within that file of the stack frame's eip, followed by the name of the function and the offset of the eip from the first instruction of the function (e.g., monitor+106 means the return eip is 106 bytes past the beginning of monitor).
+
+Be sure to print the file and function names on a separate line, to avoid confusing the grading script.
+
+Tip: printf format strings provide an easy, albeit obscure, way to print non-null-terminated strings like those in STABS tables. `printf("%.*s", length, string)` prints at most `length` characters of `string`. Take a look at the printf man page to find out why this works.
+
+You may find that some functions are missing from the backtrace. For example, you will probably see a call to `monitor()` but not to `runcmd()`. This is because the compiler in-lines some function calls. Other optimizations may cause you to see unexpected line numbers. If you get rid of the -O2 fromGNUMakefile, the backtraces may make more sense (but your kernel will run more slowly).</blockquote>
+
+
+需要先了解一下stab,简单来说是一种调试数据格式。具体可以参考[stabs](https://en.wikipedia.org/wiki/Stabs) 和 [调试 DWARF 和 STAB 格式](https://www.ibm.com/developerworks/cn/opensource/os-debugging/) 。
+
+objdump -h obj/kern/kernel的输出为
+
+    
+    obj/kern/kernel:     file format elf32-i386
+    
+    Sections:
+    Idx Name          Size      VMA       LMA       File off  Algn
+      0 .text         00001937  f0100000  00100000  00001000  2**4
+                      CONTENTS, ALLOC, LOAD, READONLY, CODE
+      1 .rodata       0000079c  f0101940  00101940  00002940  2**5
+                      CONTENTS, ALLOC, LOAD, READONLY, DATA
+      2 .stab         000038e9  f01020dc  001020dc  000030dc  2**2
+                      CONTENTS, ALLOC, LOAD, READONLY, DATA
+      3 .stabstr      000018f0  f01059c5  001059c5  000069c5  2**0
+                      CONTENTS, ALLOC, LOAD, READONLY, DATA
+      4 .data         0000a300  f0108000  00108000  00009000  2**12
+                      CONTENTS, ALLOC, LOAD, DATA
+      5 .bss          00000648  f0112300  00112300  00013300  2**5
+                      CONTENTS, ALLOC, LOAD, DATA
+      6 .comment      00000023  00000000  00000000  00013948  2**0
+                      CONTENTS, READONLY
+
+
+我们可以看到stabstr段的link address(VMA)为f01059c5.
+
+然后用gdb调试，先断点到0x10000c,也就是bootloader记载kernel的位置。然后再单步执行几步，直到开启保护模式。此时查看 地址f01059c5，结果如下，说明boot loader在加载kernel的同时也将符号表加载到了内存中
+
+    
+    (gdb) x/8s 0xf01059c5
+    0xf01059c5:     ""
+    0xf01059c6:     "{standard input}"
+    0xf01059d7:     "kern/entry.S"
+    0xf01059e4:     "kern/entrypgdir.c"
+    0xf01059f6:     "gcc2_compiled."
+    0xf0105a05:     "int:t(0,1)=r(0,1);-2147483648;2147483647;"
+    0xf0105a2f:     "char:t(0,2)=r(0,2);0;127;"
+    0xf0105a49:     "long int:t(0,3)=r(0,3);-2147483648;2147483647;"
+    
+
+
+
+
+接下来先看一下我们要补全的kern/kdebug.c文件
+
+    
+    int
+    debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
+    {
+    	const struct Stab *stabs, *stab_end;
+    	const char *stabstr, *stabstr_end;
+    	int lfile, rfile, lfun, rfun, lline, rline;
+    
+    	// Initialize *info
+    	info->eip_file = "<unknown>";
+    	info->eip_line = 0;
+    	info->eip_fn_name = "<unknown>";
+    	info->eip_fn_namelen = 9;
+    	info->eip_fn_addr = addr;
+    	info->eip_fn_narg = 0;
+    
+    	// Find the relevant set of stabs
+    	if (addr >= ULIM) {
+    		stabs = __STAB_BEGIN__;
+    		stab_end = __STAB_END__;
+    		stabstr = __STABSTR_BEGIN__;
+    		stabstr_end = __STABSTR_END__;
+    	} else {
+    		// Can't search for user-level addresses yet!
+      	        panic("User address");
+    	}
+    
+    	// String table validity checks
+    	if (stabstr_end <= stabstr || stabstr_end[-1] != 0)
+    		return -1;
+    
+    	// Now we find the right stabs that define the function containing
+    	// 'eip'.  First, we find the basic source file containing 'eip'.
+    	// Then, we look in that source file for the function.  Then we look
+    	// for the line number.
+    
+    	// Search the entire set of stabs for the source file (type N_SO).
+    	lfile = 0;
+    	rfile = (stab_end - stabs) - 1;
+    	stab_binsearch(stabs, &lfile, &rfile, N_SO, addr);
+    	if (lfile == 0)
+    		return -1;
+    
+    	// Search within that file's stabs for the function definition
+    	// (N_FUN).
+    	lfun = lfile;
+    	rfun = rfile;
+    	stab_binsearch(stabs, &lfun, &rfun, N_FUN, addr);
+    
+    	if (lfun <= rfun) {
+    		// stabs[lfun] points to the function name
+    		// in the string table, but check bounds just in case.
+    		if (stabs[lfun].n_strx < stabstr_end - stabstr)
+    			info->eip_fn_name = stabstr + stabs[lfun].n_strx;
+    		info->eip_fn_addr = stabs[lfun].n_value;
+    		addr -= info->eip_fn_addr;
+    		// Search within the function definition for the line number.
+    		lline = lfun;
+    		rline = rfun;
+    	} else {
+    		// Couldn't find function stab!  Maybe we're in an assembly
+    		// file.  Search the whole file for the line number.
+    		info->eip_fn_addr = addr;
+    		lline = lfile;
+    		rline = rfile;
+    	}
+    	// Ignore stuff after the colon.
+    	info->eip_fn_namelen = strfind(info->eip_fn_name, ':') - info->eip_fn_name;
+    
+    
+    	// Search within [lline, rline] for the line number stab.
+    	// If found, set info->eip_line to the right line number.
+    	// If not found, return -1.
+    	//
+    	// Hint:
+    	//	There's a particular stabs type used for line numbers.
+    	//	Look at the STABS documentation and <inc/stab.h> to find
+    	//	which one.
+    	//   use N_SLINE
+    
+    	// Your code here.
+    
+    
+    
+    
+    
+    	// Search backwards from the line number for the relevant filename
+    	// stab.
+    	// We can't just use the "lfile" stab because inlined functions
+    	// can interpolate code from a different file!
+    	// Such included source files use the N_SOL stab type.
+    	while (lline >= lfile
+    	       && stabs[lline].n_type != N_SOL
+    	       && (stabs[lline].n_type != N_SO || !stabs[lline].n_value))
+    		lline--;
+    	if (lline >= lfile && stabs[lline].n_strx < stabstr_end - stabstr)
+    		info->eip_file = stabstr + stabs[lline].n_strx;
+    
+    
+    	// Set eip_fn_narg to the number of arguments taken by the function,
+    	// or 0 if there was no containing function.
+    	if (lfun < rfun)
+    		for (lline = lfun + 1;
+    		     lline < rfun && stabs[lline].n_type == N_PSYM;
+    		     lline++)
+    			info->eip_fn_narg++;
+    
+    	return 0;
+    }
+
+
+发现要补全的地方...其实很容易写？ 因为在要补全的二分之前，已经做了两次二分...照着写一下就好了。
+
+    
+            stab_binsearch(stabs, &lline, &rline, N_SLINE, addr);
+            if (lline == 0) return -1;
+            info->eip_line = stabs[rline].n_desc;
+
+
+然后就是在monitor.c中修改monitor.c中，调用debuginfo_eip，这部分也很容易。
+
+    
+    int
+    mon_backtrace(int argc, char **argv, struct Trapframe *tf)
+    {
+            // Your code here.
+            uint32_t *ebp = (uint32_t*)read_ebp();
+            cprintf("Stack backtrace:\n");
+            int i ;
+            struct Eipdebuginfo info;
+            while (ebp)
+            {
+                    uint32_t eip = ebp[1];
+                    cprintf("ebp x  eip x  ",ebp,eip);
+                    cprintf("args");
+                    for ( i = 2 ; i < 7 ; i++)
+                    {
+                            cprintf(" x",*(ebp+i));
+                    }
+                    cprintf("\n");
+                    int status = debuginfo_eip(eip,&info);
+                    if (status == 0)
+                    {
+     
+                      cprintf("%s:%d: ",info.eip_file,info.eip_line);
+                      cprintf("%.*s+%d\n",info.eip_fn_namelen,info.eip_fn_name,eip-info.eip_fn_addr);
+                    }
+                    ebp = (uint32_t*)*ebp;
+            }
+    
+    
+            return 0;
+    }
+
+
+
+
+最终效果大概如下：
+
+    
+    entering test_backtrace 5
+    entering test_backtrace 4
+    entering test_backtrace 3
+    entering test_backtrace 2
+    entering test_backtrace 1
+    entering test_backtrace 0
+    Stack backtrace:
+    ebp f0110ec8  eip f0100b09  args f0102499 f0102499 f0100b09 00000000 f0100d9c
+    kern/monitor.c:66: mon_backtrace+26
+    ebp f0110f18  eip f010008b  args 00000000 00000000 00000000 00000000 f0102238
+    kern/init.c:19: test_backtrace+75
+    ebp f0110f38  eip f010006d  args 00000000 00000001 f0110f64 00000000 f0102238
+    kern/init.c:16: test_backtrace+45
+    ebp f0110f58  eip f010006d  args 00000001 00000002 f0110f84 00000000 f0102238
+    kern/init.c:16: test_backtrace+45
+    ebp f0110f78  eip f010006d  args 00000002 00000003 f0110fa4 00000000 f0102238
+    kern/init.c:16: test_backtrace+45
+    ebp f0110f98  eip f010006d  args 00000003 00000004 f0110fc4 00000000 f010226f
+    kern/init.c:16: test_backtrace+45
+    ebp f0110fb8  eip f010006d  args 00000004 00000005 f0110fe4 00000000 00000000
+    kern/init.c:16: test_backtrace+45
+    ebp f0110fd8  eip f01000f1  args 00000005 00001aac 00000640 00000000 00000000
+    kern/init.c:43: i386_init+81
+    ebp f0110ff8  eip f010003e  args 00000003 00001003 00002003 00003003 00004003
+    kern/entry.S:83: <unknown>+0
+    leaving test_backtrace 0
+    leaving test_backtrace 1
+    leaving test_backtrace 2
+    leaving test_backtrace 3
+    leaving test_backtrace 4
+    leaving test_backtrace 5
+    Welcome to the JOS kernel monitor!
+    
+
+
+如果有些函数没有出现在上面，可能是被优化掉了，试着修改makefile中的编译选项，把O2或者O1修改为O0。
+
+至此，我们完成了lab1的全部内容。完结撒花～
+
+虽然做了三十个小时...不过真的收获蛮多，感觉像是在玩解谜游戏，线索就是每个练习前后的那些问题。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[routline](http://dict.youdao.com/search?q=routline&keyfrom=chrome.extension) [详细](http://www.youdao.com/search?q=routline&ue=utf8&keyfrom=chrome.extension)X
+
+
+
+
+
+
+
+  没有英汉互译结果
+[请尝试网页搜索](http://www.youdao.com/search?q=routline&ue=utf8&keyfrom=chrome.extension)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

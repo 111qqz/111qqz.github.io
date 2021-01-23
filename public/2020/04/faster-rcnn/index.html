@@ -1,0 +1,1956 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="111qqz的小窝">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="https://111qqz.github.io/img/2.png">
+    <meta property="twitter:image" content="https://111qqz.github.io/img/2.png" />
+    
+
+    
+    <meta name="title" content="Faster Rcnn 目标检测算法" />
+    <meta property="og:title" content="Faster Rcnn 目标检测算法" />
+    <meta property="twitter:title" content="Faster Rcnn 目标检测算法" />
+    
+
+    
+    <meta name="description" content="">
+    <meta property="og:description" content="" />
+    <meta property="twitter:description" content="" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="ACM,111qqz,商汤科技,hust,华中科技大学">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>Faster Rcnn 目标检测算法-111qqz的小窝</title>
+
+    <link rel="canonical" href="/2020/04/faster-rcnn">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+    <link rel="stylesheet" href="/css/hux-blog.min-custom.css">
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">111qqz的小窝</a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    
+                    
+		    
+                        <li><a href="/categories/acm/">ACM-ICPC</a></li>
+                    
+                        <li><a href="/categories/deep-learning/">深度学习</a></li>
+                    
+                        <li><a href="/categories/mooc/">公开课</a></li>
+                    
+                        <li><a href="/categories/%e5%85%b6%e4%bb%96/">其他</a></li>
+                    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('/img/2.png')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/faster-rcnn" title="faster-rcnn">
+                            faster-rcnn
+                        </a>
+                        
+                    </div>
+                    <h1>Faster Rcnn 目标检测算法</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    111qqz
+			 
+			on 
+			Sunday, April 5, 2020
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#背景">背景</a>
+<ul>
+<li><a href="#rcnn">rcnn</a></li>
+<li><a href="#fast-rcnn">fast rcnn</a></li>
+<li><a href="#faster-rcnn">faster rcnn</a></li>
+</ul></li>
+<li><a href="#region-proposal-network-rpn">Region proposal network(RPN)</a>
+<ul>
+<li><a href="#anchor">anchor</a></li>
+<li><a href="#rpn-网络结构">RPN 网络结构</a></li>
+</ul></li>
+<li><a href="#roi-pooling和roi-align-pooling">ROI Pooling和ROI Align Pooling</a></li>
+<li><a href="#总结">总结</a></li>
+<li><a href="#参考链接">参考链接</a></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<h2 id="背景">背景</h2>
+
+<p>2019年对了好几次faster rcnn，第一次是赛事之窗项目和北京的同事，对齐sdk和训练的实现。
+第二次是被tensorRT4和tensorRT5之间默认参数不一致的问题坑了一下。
+第三次是被caffe proto中roi align 的默认参数坑了。</p>
+
+<p>虽然debug了这么多次，踩了一堆坑，但是一段时间不用，细节就会慢慢不记得了。因此来记录一下。</p>
+
+<hr />
+
+<p>faster rcnn，是一种&rdquo;two stage&rdquo;的目标检测算法。</p>
+
+<p>所谓&rdquo;two stage&rdquo;，是说在实际进行目标检测之前，先会通过某种&rdquo;region proposals&rdquo; algorithm，来获得一定数量的RoI(Regions of Interest),我们下一阶段要检测的obejct有极大可能被包含在这些RoI. 这种&rdquo;Region based&rdquo;的方法是对基于&rdquo;sliding windows&rdquo;方法的极大改进，因为不需要遍历每一个可能的位置以及crop大小，只需要对这些RoI进行检测，有效地减小了计算量。</p>
+
+<p>下面简单说一下这一类&rdquo;Region based&rdquo;方法的历史脉络</p>
+
+<h3 id="rcnn">rcnn</h3>
+
+<p>RCNN的做法是通过一种传统方法&rdquo;selective search&rdquo;来得到若干RoI,然后把每一个RoI，后面接CNN进行后续的检测。 显然，这个方法的问题在于计算量非常大。</p>
+
+<blockquote>
+<p>selective search的策略是，既然是不知道尺度是怎样的，那我们就尽可能遍历所有的尺度，但是不同于暴力穷举，我们可以先得到小尺度的区域，然后一次次合并得到大的尺寸.</p>
+</blockquote>
+
+<h3 id="fast-rcnn">fast rcnn</h3>
+
+<p>明眼人可以看出，rcnn计算量过大的原因之一是做了非常多的重复计算。</p>
+
+<p>因此fast rcnn做的改进是，与其把每一个通过&rdquo;selective search&rdquo;得到的RoI在原图上crop出来送进CNN,不如先让整张图过一段CNN,然后把通过&rdquo;selective search&rdquo;在原图上得到的RoI先映射到这段CNN的某个conv feature map.  相当于这部分CNN只做了一次，与RoI数量无关，极大地减小了计算量。</p>
+
+<h3 id="faster-rcnn">faster rcnn</h3>
+
+<p>终于轮到主角登场了。 fast rcnn极大提高了检测的速度。 然后发现，速度的瓶颈已经不在后续的检测部分了，而是在于“region proposals” algorithm.</p>
+
+<p>于是，faster-rcnn提出&rdquo;Region proposal network&rdquo;来替代&rdquo;selective search&rdquo;,进一步提高了检测速度。</p>
+
+<p>放一张结构图，非常清楚。
+<img src="https://i.loli.net/2020/04/05/3PV9M287obyiWhv.png" alt="rcnn系列结构图.png" /></p>
+
+<h2 id="region-proposal-network-rpn">Region proposal network(RPN)</h2>
+
+<h3 id="anchor">anchor</h3>
+
+<p>介绍RPN网络首先就要介绍一下anchor.</p>
+
+<p>（被坑过一次，某个足球项目上，training和inference用的anchor竟然是不一致的。。）</p>
+
+<p>其实anchor这个概念很简单，用大白话说就是，根据要检测的物体的形状（高矮胖瘦等），<strong>预先</strong> 设置一些不同尺寸（高矮胖瘦）的粗略的框，然后对这些框做一个二分类，判断前景还是背景，同时做bbox regression 来微调坐标，最终得到proposals.</p>
+
+<p>设置anchor的思路其实就是修改了proposals的默认位置为生成的anchors的位置。对这些anchors进行微调总要比从零开始生成容易得多。</p>
+
+<p>要注意的是，anchors是在进入网络前预先生成的。
+实际项目中，通常设置长宽比为[1:1,2:1,1:2]三种比例，然后通过 <a href="https://github.com/rbgirshick/py-faster-rcnn/blob/master/lib/rpn/generate_anchors.py">generate_anchors.py</a> 来生成anchors.</p>
+
+<p><strong>值得强调的是，anchor的生成是与图像内容无关的．无论图像内容是什么，生成的anchor都是固定的，而RPN网络的目标就是去学习哪些anchor是好的anchor，以及学习到一组&rdquo;regression coefficients&rdquo;来用在好的anchor上，从而变成更好的anchor.</strong></p>
+
+<h3 id="rpn-网络结构">RPN 网络结构</h3>
+
+<p><img src="https://i.loli.net/2020/04/06/PjJhbluRQUBWr1T.png" alt="rpn结构.png" /></p>
+
+<p>最下面的conv feature map是经过一段CNN得到的，这部分和fast rcnn是类似的。</p>
+
+<p>这一段CNN是RPN和后面的detector共用的。</p>
+
+<p>然后用一个n*n的滑动窗口(原paper中用的3*3，其实就是做了个3*3的卷积)，得到256维的feature(是因为这个conv feature map的深度是256). 然后对于cls和reg 分别做两个fc,输入分别为2和4. 由于一共有k个anchor，因此一共输入2k个scores和4k个coordinates.</p>
+
+<p>最初我的一个疑惑是，为什么这里要做softmax二分类呢？ 为什么要关心背景的置信度呢？</p>
+
+<p>原文中的解释是:
+&gt;  For simplicity we implement the cls layer as a two-class
+&gt; softmax layer. Alternatively, one may use logistic regression to
+&gt; produce k scores.</p>
+
+<p>实际上，torchvision中rpn的时间就是使用了logistic来计算k个score. 代码如下:</p>
+
+<pre><code class="language-python">
+
+class RPNHead(nn.Module):
+    &quot;&quot;&quot;
+    Adds a simple RPN Head with classification and regression heads
+    Arguments:
+        in_channels (int): number of channels of the input feature
+        num_anchors (int): number of anchors to be predicted
+    &quot;&quot;&quot;
+
+    def __init__(self, in_channels, num_anchors):
+        super(RPNHead, self).__init__()
+        self.conv = nn.Conv2d(
+            in_channels, in_channels, kernel_size=3, stride=1, padding=1
+        )
+        self.cls_logits = nn.Conv2d(in_channels, num_anchors, kernel_size=1, stride=1)
+        self.bbox_pred = nn.Conv2d(
+            in_channels, num_anchors * 4, kernel_size=1, stride=1
+        )
+
+        for l in self.children():
+            torch.nn.init.normal_(l.weight, std=0.01)
+            torch.nn.init.constant_(l.bias, 0)
+
+    def forward(self, x):
+        # type: (List[Tensor])
+        logits = []
+        bbox_reg = []
+        for feature in x:
+            t = F.relu(self.conv(feature))
+            logits.append(self.cls_logits(t))
+            bbox_reg.append(self.bbox_pred(t))
+        return logits, bbox_reg
+</code></pre>
+
+<p>可以看到 self.cls_logits的输出是num_anchors 个。</p>
+
+<p>如果是使用softmax来得到2k个score,这里还有一个坑是softmax的维度
+&gt; &ldquo;Number of labels must match number of predictions; &ldquo;
+&gt; &ldquo;e.g., if softmax axis == 1 and prediction shape is (N, C, H, W), &ldquo;
+&gt; &ldquo;label count (number of labels) must be N*H*W, &ldquo;
+&gt; &ldquo;with integer values in {0, 1, &hellip;, C-1}.&rdquo;;</p>
+
+<p>所以经常要在softmax前后进行reshape
+把[1, 2x9, H, W] 变成 [1, 2, 9xH, W]。“腾空”出来一个维度以便softmax分类，之后再reshape回复原状。</p>
+
+<p>接下来我们整体看一下RPN的pytorch实现。 由于我们不关心training的过程，为了代码的整洁，这里省略了
+assign_targets_to_anchors和compute_loss 两个函数的代码。</p>
+
+<p>这个代码的核心在于 filter_proposals 这个函数，相当于对proposals做一些后处理。比如去掉出了边界框的，去掉太小的proposals,然后根据NMS来再去掉一些。 这里有几个参数要注意:</p>
+
+<ul>
+<li>pre_nms_top_n. 在进行nms之前保留的proposals个数</li>
+<li>post_nms_top_n. nms之后保留的proposals个数</li>
+</ul>
+
+<p>（某足球项目，nms还有decode_box 这里的bug和北京的同事联调了半个月才全部解决Orz.. 醉生梦死的经历。 这部分实现其实细节还挺多的，又没有统一的标准，很容易造成误差&hellip; 下次有机会讲一下。</p>
+
+<p><strong>然后forward函数就相当于某些框架中的(比如caffe)proposal layer.</strong></p>
+
+<pre><code class="language-python">
+class RegionProposalNetwork(torch.nn.Module):
+    &quot;&quot;&quot;
+    Implements Region Proposal Network (RPN).
+    Arguments:
+        anchor_generator (AnchorGenerator): module that generates the anchors for a set of feature
+            maps.
+        head (nn.Module): module that computes the objectness and regression deltas
+        fg_iou_thresh (float): minimum IoU between the anchor and the GT box so that they can be
+            considered as positive during training of the RPN.
+        bg_iou_thresh (float): maximum IoU between the anchor and the GT box so that they can be
+            considered as negative during training of the RPN.
+        batch_size_per_image (int): number of anchors that are sampled during training of the RPN
+            for computing the loss
+        positive_fraction (float): proportion of positive anchors in a mini-batch during training
+            of the RPN
+        pre_nms_top_n (Dict[int]): number of proposals to keep before applying NMS. It should
+            contain two fields: training and testing, to allow for different values depending
+            on training or evaluation
+        post_nms_top_n (Dict[int]): number of proposals to keep after applying NMS. It should
+            contain two fields: training and testing, to allow for different values depending
+            on training or evaluation
+        nms_thresh (float): NMS threshold used for postprocessing the RPN proposals
+    &quot;&quot;&quot;
+    __annotations__ = {
+        'box_coder': det_utils.BoxCoder,
+        'proposal_matcher': det_utils.Matcher,
+        'fg_bg_sampler': det_utils.BalancedPositiveNegativeSampler,
+        'pre_nms_top_n': Dict[str, int],
+        'post_nms_top_n': Dict[str, int],
+    }
+
+    def __init__(self,
+                 anchor_generator,
+                 head,
+                 #
+                 fg_iou_thresh, bg_iou_thresh,
+                 batch_size_per_image, positive_fraction,
+                 #
+                 pre_nms_top_n, post_nms_top_n, nms_thresh):
+        super(RegionProposalNetwork, self).__init__()
+        self.anchor_generator = anchor_generator
+        self.head = head
+        self.box_coder = det_utils.BoxCoder(weights=(1.0, 1.0, 1.0, 1.0))
+
+        # used during training
+        self.box_similarity = box_ops.box_iou
+
+        self.proposal_matcher = det_utils.Matcher(
+            fg_iou_thresh,
+            bg_iou_thresh,
+            allow_low_quality_matches=True,
+        )
+
+        self.fg_bg_sampler = det_utils.BalancedPositiveNegativeSampler(
+            batch_size_per_image, positive_fraction
+        )
+        # used during testing
+        self._pre_nms_top_n = pre_nms_top_n
+        self._post_nms_top_n = post_nms_top_n
+        self.nms_thresh = nms_thresh
+        self.min_size = 1e-3
+
+    def pre_nms_top_n(self):
+        if self.training:
+            return self._pre_nms_top_n['training']
+        return self._pre_nms_top_n['testing']
+
+    def post_nms_top_n(self):
+        if self.training:
+            return self._post_nms_top_n['training']
+        return self._post_nms_top_n['testing']
+
+    def assign_targets_to_anchors(self, anchors, targets):
+        # type: (List[Tensor], List[Dict[str, Tensor]])
+        pass
+    def _get_top_n_idx(self, objectness, num_anchors_per_level):
+        # type: (Tensor, List[int])
+        r = []
+        offset = 0
+        for ob in objectness.split(num_anchors_per_level, 1):
+            if torchvision._is_tracing():
+                num_anchors, pre_nms_top_n = _onnx_get_num_anchors_and_pre_nms_top_n(ob, self.pre_nms_top_n())
+            else:
+                num_anchors = ob.shape[1]
+                pre_nms_top_n = min(self.pre_nms_top_n(), num_anchors)
+            _, top_n_idx = ob.topk(pre_nms_top_n, dim=1)
+            r.append(top_n_idx + offset)
+            offset += num_anchors
+        return torch.cat(r, dim=1)
+
+    def filter_proposals(self, proposals, objectness, image_shapes, num_anchors_per_level):
+        # type: (Tensor, Tensor, List[Tuple[int, int]], List[int])
+        num_images = proposals.shape[0]
+        device = proposals.device
+        # do not backprop throught objectness
+        objectness = objectness.detach()
+        objectness = objectness.reshape(num_images, -1)
+
+        levels = [
+            torch.full((n,), idx, dtype=torch.int64, device=device)
+            for idx, n in enumerate(num_anchors_per_level)
+        ]
+        levels = torch.cat(levels, 0)
+        levels = levels.reshape(1, -1).expand_as(objectness)
+
+        # select top_n boxes independently per level before applying nms
+        top_n_idx = self._get_top_n_idx(objectness, num_anchors_per_level)
+
+        image_range = torch.arange(num_images, device=device)
+        batch_idx = image_range[:, None]
+
+        objectness = objectness[batch_idx, top_n_idx]
+        levels = levels[batch_idx, top_n_idx]
+        proposals = proposals[batch_idx, top_n_idx]
+
+        final_boxes = []
+        final_scores = []
+        for boxes, scores, lvl, img_shape in zip(proposals, objectness, levels, image_shapes):
+            boxes = box_ops.clip_boxes_to_image(boxes, img_shape)
+            keep = box_ops.remove_small_boxes(boxes, self.min_size)
+            boxes, scores, lvl = boxes[keep], scores[keep], lvl[keep]
+            # non-maximum suppression, independently done per level
+            keep = box_ops.batched_nms(boxes, scores, lvl, self.nms_thresh)
+            # keep only topk scoring predictions
+            keep = keep[:self.post_nms_top_n()]
+            boxes, scores = boxes[keep], scores[keep]
+            final_boxes.append(boxes)
+            final_scores.append(scores)
+        return final_boxes, final_scores
+
+    def compute_loss(self, objectness, pred_bbox_deltas, labels, regression_targets):
+        # type: (Tensor, Tensor, List[Tensor], List[Tensor])
+        &quot;&quot;&quot;
+        Arguments:
+            objectness (Tensor)
+            pred_bbox_deltas (Tensor)
+            labels (List[Tensor])
+            regression_targets (List[Tensor])
+        Returns:
+            objectness_loss (Tensor)
+            box_loss (Tensor)
+        &quot;&quot;&quot;
+
+       pass 
+    def forward(self, images, features, targets=None):
+        # type: (ImageList, Dict[str, Tensor], Optional[List[Dict[str, Tensor]]])
+        &quot;&quot;&quot;
+        Arguments:
+            images (ImageList): images for which we want to compute the predictions
+            features (List[Tensor]): features computed from the images that are
+                used for computing the predictions. Each tensor in the list
+                correspond to different feature levels
+            targets (List[Dict[Tensor]]): ground-truth boxes present in the image (optional).
+                If provided, each element in the dict should contain a field `boxes`,
+                with the locations of the ground-truth boxes.
+        Returns:
+            boxes (List[Tensor]): the predicted boxes from the RPN, one Tensor per
+                image.
+            losses (Dict[Tensor]): the losses for the model during training. During
+                testing, it is an empty dict.
+        &quot;&quot;&quot;
+        # RPN uses all feature maps that are available
+        features = list(features.values())
+        objectness, pred_bbox_deltas = self.head(features)
+        anchors = self.anchor_generator(images, features)
+
+        num_images = len(anchors)
+        num_anchors_per_level_shape_tensors = [o[0].shape for o in objectness]
+        num_anchors_per_level = [s[0] * s[1] * s[2] for s in num_anchors_per_level_shape_tensors]
+        objectness, pred_bbox_deltas = \
+            concat_box_prediction_layers(objectness, pred_bbox_deltas)
+        # apply pred_bbox_deltas to anchors to obtain the decoded proposals
+        # note that we detach the deltas because Faster R-CNN do not backprop through
+        # the proposals
+        proposals = self.box_coder.decode(pred_bbox_deltas.detach(), anchors)
+        proposals = proposals.view(num_images, -1, 4)
+        boxes, scores = self.filter_proposals(proposals, objectness, images.image_sizes, num_anchors_per_level)
+
+        losses = {}
+        if self.training:
+            assert targets is not None
+            labels, matched_gt_boxes = self.assign_targets_to_anchors(anchors, targets)
+            regression_targets = self.box_coder.encode(matched_gt_boxes, anchors)
+            loss_objectness, loss_rpn_box_reg = self.compute_loss(
+                objectness, pred_bbox_deltas, labels, regression_targets)
+            losses = {
+                &quot;loss_objectness&quot;: loss_objectness,
+                &quot;loss_rpn_box_reg&quot;: loss_rpn_box_reg,
+            }
+        return boxes, losses
+
+</code></pre>
+
+<h2 id="roi-pooling和roi-align-pooling">ROI Pooling和ROI Align Pooling</h2>
+
+<p>接下来介绍一下ROI Pooling，以及对它的改进 ROI Align Pooling</p>
+
+<p>为什么需要ROI Pooling? 原因是在经过RPN网络后，得到的proposals的尺寸是不统一的。而CNN网络需要固定尺寸的输入。</p>
+
+<p><img src="https://i.loli.net/2020/04/06/BzR6ZM94rIvonlN.png" alt="roipooling.png" /></p>
+
+<p>举个例子，上面8*8的的featrue map和7*5的proposal,希望得到2*2的输出。
+但是没办法整除，roi pooling的做法是，直接取整，把7分成3,4两部分，把5分成2和3两部分。
+然后在这四个区域做pooling，得到2*2的尺寸。</p>
+
+<p>这部分torchvision的pytorch实现里面混合了mask rcnn还有其他关键点算法，不太直观，可以参考caffe的roi pooling layer.</p>
+
+<p>可以看到里面ceil和floor 的取整操作。</p>
+
+<pre><code class="language-c++">
+template &lt;typename Dtype&gt;
+void ROIPoolingLayer&lt;Dtype&gt;::Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
+  const Dtype* bottom_rois = bottom[1]-&gt;cpu_data();
+  // Number of ROIs
+  int num_rois = bottom[1]-&gt;num();
+  int batch_size = bottom[0]-&gt;num();
+  int top_count = top[0]-&gt;count();
+  Dtype* top_data = top[0]-&gt;mutable_cpu_data();
+  caffe_set(top_count, Dtype(-FLT_MAX), top_data);
+  int* argmax_data = max_idx_.mutable_cpu_data();
+  caffe_set(top_count, -1, argmax_data);
+
+  // For each ROI R = [batch_index x1 y1 x2 y2]: max pool over R
+  for (int n = 0; n &lt; num_rois; ++n) {
+    int roi_batch_ind = bottom_rois[0];
+    int roi_start_w = round(bottom_rois[1] * spatial_scale_);
+    int roi_start_h = round(bottom_rois[2] * spatial_scale_);
+    int roi_end_w = round(bottom_rois[3] * spatial_scale_);
+    int roi_end_h = round(bottom_rois[4] * spatial_scale_);
+    CHECK_GE(roi_batch_ind, 0);
+    CHECK_LT(roi_batch_ind, batch_size);
+
+    int roi_height = max(roi_end_h - roi_start_h + 1, 1);
+    int roi_width = max(roi_end_w - roi_start_w + 1, 1);
+    const Dtype bin_size_h = static_cast&lt;Dtype&gt;(roi_height)
+                             / static_cast&lt;Dtype&gt;(pooled_height_);
+    const Dtype bin_size_w = static_cast&lt;Dtype&gt;(roi_width)
+                             / static_cast&lt;Dtype&gt;(pooled_width_);
+
+    const Dtype* batch_data = bottom_data + bottom[0]-&gt;offset(roi_batch_ind);
+
+    for (int c = 0; c &lt; channels_; ++c) {
+      for (int ph = 0; ph &lt; pooled_height_; ++ph) {
+        for (int pw = 0; pw &lt; pooled_width_; ++pw) {
+          // Compute pooling region for this output unit:
+          //  start (included) = floor(ph * roi_height / pooled_height_)
+          //  end (excluded) = ceil((ph + 1) * roi_height / pooled_height_)
+          int hstart = static_cast&lt;int&gt;(floor(static_cast&lt;Dtype&gt;(ph)
+                                              * bin_size_h));
+          int wstart = static_cast&lt;int&gt;(floor(static_cast&lt;Dtype&gt;(pw)
+                                              * bin_size_w));
+          int hend = static_cast&lt;int&gt;(ceil(static_cast&lt;Dtype&gt;(ph + 1)
+                                           * bin_size_h));
+          int wend = static_cast&lt;int&gt;(ceil(static_cast&lt;Dtype&gt;(pw + 1)
+                                           * bin_size_w));
+
+          hstart = min(max(hstart + roi_start_h, 0), height_);
+          hend = min(max(hend + roi_start_h, 0), height_);
+          wstart = min(max(wstart + roi_start_w, 0), width_);
+          wend = min(max(wend + roi_start_w, 0), width_);
+
+          bool is_empty = (hend &lt;= hstart) || (wend &lt;= wstart);
+
+          const int pool_index = ph * pooled_width_ + pw;
+          if (is_empty) {
+            top_data[pool_index] = 0;
+            argmax_data[pool_index] = -1;
+          }
+
+          for (int h = hstart; h &lt; hend; ++h) {
+            for (int w = wstart; w &lt; wend; ++w) {
+              const int index = h * width_ + w;
+              if (batch_data[index] &gt; top_data[pool_index]) {
+                top_data[pool_index] = batch_data[index];
+                argmax_data[pool_index] = index;
+              }
+            }
+          }
+        }
+      }
+      // Increment all data pointers by one channel
+      batch_data += bottom[0]-&gt;offset(0, 1);
+      top_data += top[0]-&gt;offset(0, 1);
+      argmax_data += max_idx_.offset(0, 1);
+    }
+    // Increment ROI data pointer
+    bottom_rois += bottom[1]-&gt;offset(1);
+  }
+}
+
+
+
+</code></pre>
+
+<p>这个办法简单粗暴，而且很容易意识到，这样取整对真实的信息产生了偏差。大物体可能还好说，小物体的话这个问题就会比较严重。</p>
+
+<p>因此在<a href="https://arxiv.org/abs/1703.06870">Mask R-CNN</a> 提出了一种改进办法，称之为&rdquo;RoI Align Pooling&rdquo;.</p>
+
+<p>思路是说，如果不能整除，那么不取整，而是通过插值等手段近似出那个不整的点的值。</p>
+
+<p>代码可以参考caffe的GPU实现:</p>
+
+<pre><code class="language-c++">
+template &lt;typename T&gt;
+__global__ void RoIAlignForwardKernel(
+    const int nthreads,
+    const T* bottom_data,
+    const T spatial_scale,
+    const bool position_sensitive,
+    const int channels,
+    const int height,
+    const int width,
+    const int pooled_height,
+    const int pooled_width,
+    const int sampling_ratio,
+    const int num_roi_per_image,
+    const T* bottom_rois,
+    T* top_data) {
+  CUDA_KERNEL_LOOP(index, nthreads) {
+    // (n, c, ph, pw) is an element in the pooled output
+    int pw = index % pooled_width;
+    int ph = (index / pooled_width) % pooled_height;
+    int c = (index / pooled_width / pooled_height) % channels;
+    int n = index / pooled_width / pooled_height / channels;
+
+//    const T* offset_bottom_rois = bottom_rois + n * 5;
+    const T* offset_bottom_rois = bottom_rois + n * 4;
+    int roi_batch_ind = n / num_roi_per_image;
+
+    // Do not using rounding; this implementation detail is critical
+    T roi_start_w = offset_bottom_rois[0] * spatial_scale;
+    T roi_start_h = offset_bottom_rois[1] * spatial_scale;
+    T roi_end_w = offset_bottom_rois[2] * spatial_scale;
+    T roi_end_h = offset_bottom_rois[3] * spatial_scale;
+    // T roi_start_w = round(offset_bottom_rois[1] * spatial_scale);
+    // T roi_start_h = round(offset_bottom_rois[2] * spatial_scale);
+    // T roi_end_w = round(offset_bottom_rois[3] * spatial_scale);
+    // T roi_end_h = round(offset_bottom_rois[4] * spatial_scale);
+
+    // Force malformed ROIs to be 1x1
+    T roi_width = max(roi_end_w - roi_start_w, (T)1.);
+    T roi_height = max(roi_end_h - roi_start_h, (T)1.);
+    T bin_size_h = static_cast&lt;T&gt;(roi_height) / static_cast&lt;T&gt;(pooled_height);
+    T bin_size_w = static_cast&lt;T&gt;(roi_width) / static_cast&lt;T&gt;(pooled_width);
+
+    int c_unpooled = c;
+    int channels_unpooled = channels;
+    if (position_sensitive) {
+      c_unpooled = c * pooled_height * pooled_width + ph * pooled_width + pw;
+      channels_unpooled = channels * pooled_height * pooled_width;
+    }
+    const T* offset_bottom_data =
+        bottom_data + (roi_batch_ind * channels_unpooled + c_unpooled)
+            * height * width;
+
+    // We use roi_bin_grid to sample the grid and mimic integral
+    int roi_bin_grid_h = (sampling_ratio &gt; 0)
+                         ? sampling_ratio
+                         : ceil(roi_height / pooled_height);  // e.g., = 2
+    int roi_bin_grid_w =
+        (sampling_ratio &gt; 0) ? sampling_ratio : ceil(roi_width / pooled_width);
+
+    // We do average (integral) pooling inside a bin
+    const T count = roi_bin_grid_h * roi_bin_grid_w;  // e.g. = 4
+
+    T output_val = 0.;
+    for (int iy = 0; iy &lt; roi_bin_grid_h; iy++) {  // e.g., iy = 0, 1
+      const T y = roi_start_h + ph * bin_size_h +
+          static_cast&lt;T&gt;(iy + .5f) * bin_size_h /
+              static_cast&lt;T&gt;(roi_bin_grid_h);  // e.g., 0.5, 1.5
+      for (int ix = 0; ix &lt; roi_bin_grid_w; ix++) {
+        const T x = roi_start_w + pw * bin_size_w +
+            static_cast&lt;T&gt;(ix + .5f) * bin_size_w /
+                static_cast&lt;T&gt;(roi_bin_grid_w);
+
+        T val = bilinear_interpolate(
+            offset_bottom_data, height, width, y, x, index);
+        output_val += val;
+      }
+    }
+    output_val /= count;
+
+    top_data[index] = output_val;
+  }
+}
+
+
+</code></pre>
+
+<p>这里面有一个坑是，roi align layer有个参数叫num_roi_per_image</p>
+
+<pre><code class="language-protobuf">
+message RoIAlignParameter {
+  optional uint32 pooled_h = 1 [default = 0];
+  optional uint32 pooled_w = 2 [default = 0];
+  optional float spatial_scale = 3 [default = 1];
+  optional int32 sample_ratio = 4 [default = -1];
+  optional bool position_sensitive = 5 [default = false];
+  optional uint32 num_roi_per_image = 6 [default = 300];
+}
+
+
+</code></pre>
+
+<p>然后这东西是有一个默认值300的。 因为在roialign之前的proposal layer的post_nms的值一般是300. 所以一般不会有什么影响。
+但是如果nms之后的roi数量小于300,而num_roi_per_image又是默认300的话，就会把后面图片的roi分给第一张图，导致结果错误。</p>
+
+<p>具体请参考<a href="https://111qqz.github.io/2019/12/debug-faster-rcnn-once-again/">记一次faster-rcnn debug记录</a></p>
+
+<h2 id="总结">总结</h2>
+
+<ul>
+<li>R-CNN对图像选取若干提议区域，然后用卷积神经网络对每个提议区域做前向计算抽取特征，再用这些特征预测提议区域的类别和边界框。</li>
+<li>Fast R-CNN对R-CNN的一个主要改进在于只对整个图像做卷积神经网络的前向计算。它引入了兴趣区域池化层，从而令兴趣区域能够抽取出形状相同的特征。</li>
+<li>Faster R-CNN将Fast R-CNN中的选择性搜索替换成区域提议网络，从而减少提议区域的生成数量，并保证目标检测的精度。</li>
+
+<li><p>Mask R-CNN在Faster R-CNN基础上引入一个全卷积网络，从而借助目标的像素级位置进一步提升目标检测的精度。</p>
+
+<h2 id="参考链接">参考链接</h2></li>
+
+<li><p><a href="https://arxiv.org/abs/1506.01497">Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks</a></p></li>
+
+<li><p><a href="https://zhuanlan.zhihu.com/p/73138740">ROI Pooling和ROI Align</a></p></li>
+
+<li><p><a href="https://arxiv.org/abs/1703.06870">Mask R-CNN</a></p></li>
+</ul>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="https://111qqz.github.io"><img src="/img/favicon.png" />111qqz的小窝</a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2020/04/resnet-learning-notes" data-toggle="tooltip" data-placement="top" title="resnet 学习笔记">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2020/04/caffe-source-code-analysis-part4" data-toggle="tooltip" data-placement="top" title="caffe 源码学习笔记(4) 激活函数">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+
+
+
+<div id="git-comments"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://ihtcboy.com/script/gitment.browser.js"></script>
+<script>
+  var gitment = new Gitment({
+    id: decodeURI(window.location.pathname),  
+    owner: '111qqz',
+    repo: '111qqz.github.io',
+    oauth: {
+      client_id: '8839ce5e58d5197e2490',
+      client_secret: '2d475a8a7e27a8b509847a6c60f692b8cbaa274e',
+    }
+  })
+  gitment.render('git-comments')
+</script>
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/km" title="KM">
+                            KM
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/bfs" title="bfs">
+                            bfs
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/binary-search" title="binary search">
+                            binary search
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/brute-force" title="brute force">
+                            brute force
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/c&#43;&#43;" title="c&#43;&#43;">
+                            c&#43;&#43;
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/caffe" title="caffe">
+                            caffe
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dfs" title="dfs">
+                            dfs
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dp" title="dp">
+                            dp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/greedy" title="greedy">
+                            greedy
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/hash" title="hash">
+                            hash
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/kmp" title="kmp">
+                            kmp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/leetcode" title="leetcode">
+                            leetcode
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/math" title="math">
+                            math
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/number-theory" title="number theory">
+                            number theory
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/rmq" title="rmq">
+                            rmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/sg%E5%87%BD%E6%95%B0" title="sg函数">
+                            sg函数
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/stl" title="stl">
+                            stl
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/tensorflow" title="tensorflow">
+                            tensorflow
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%BA%8C%E5%88%86%E5%9B%BE%E6%9C%80%E4%BD%B3%E5%8C%B9%E9%85%8D" title="二分图最佳匹配">
+                            二分图最佳匹配
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%9D%97" title="分块">
+                            分块
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%89%8D%E7%BC%80%E5%92%8C" title="前缀和">
+                            前缀和
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8C%88%E7%89%99%E5%88%A9%E7%AE%97%E6%B3%95" title="匈牙利算法">
+                            匈牙利算法
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E5%8C%BA%E9%97%B4dp" title="区间dp">
+                            区间dp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8D%9A%E5%BC%88%E8%AE%BA" title="博弈论">
+                            博弈论
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%90%8E%E7%BC%80%E8%87%AA%E5%8A%A8%E6%9C%BA" title="后缀自动机">
+                            后缀自动机
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%9B%BE%E8%AE%BA" title="图论">
+                            图论
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2" title="字符串">
+                            字符串
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BF%AB%E9%80%9F%E5%B9%82" title="快速幂">
+                            快速幂
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E4%BD%8Ddp" title="数位dp">
+                            数位dp
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9E%84%E9%80%A0" title="构造">
+                            构造
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84" title="树状数组">
+                            树状数组
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%A6%82%E7%8E%87" title="概率">
+                            概率
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%A8%A1%E6%8B%9F" title="模拟">
+                            模拟
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%AF%8D%E5%87%BD%E6%95%B0" title="母函数">
+                            母函数
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%9F%A9%E9%98%B5" title="矩阵">
+                            矩阵
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%A6%BB%E6%95%A3%E5%8C%96" title="离散化">
+                            离散化
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%BA%BF%E6%AE%B5%E6%A0%91" title="线段树">
+                            线段树
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95" title="计算几何">
+                            计算几何
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://111qqz.com">111qqz的wordpress博客</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="111qqz的小窝" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:hust.111qqz@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/img/wechat.jpg">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/111qqz/">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy; 111qqz的小窝 2021
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>

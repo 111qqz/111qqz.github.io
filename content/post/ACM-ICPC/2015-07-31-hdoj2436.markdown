@@ -1,0 +1,300 @@
+---
+author: 111qqz
+date: 2015-07-31 20:16:00+00:00
+draft: false
+title: hdoj 2436 Collision Detection
+type: post
+url: /2015/07/hdoj2436/
+categories:
+- ACM
+tags:
+- 计算几何
+---
+
+# Collision Detection
+
+
+**Time Limit: 5000/1000 MS (Java/Others)    Memory Limit: 32768/32768 K (Java/Others)
+Total Submission(s): 1207    Accepted Submission(s): 367
+**
+
+
+Problem Description
+
+
+
+
+      In physical simulations, video games and computational geometry, collision detection involves algorithms for checking for collision, i.e. intersection, of two given objects. Collision detection algorithms are a basic component of 3D video games. Without them, characters could go through walls and other obstacles.
+Here comes an interesting problem, given a ball and a cuboid, you need to detect whether they collide. We say that two objects collide if and only if they share at least one point.
+
+
+
+
+
+
+
+
+Input
+
+
+
+
+      The first line of input is the number of test cases.
+Each test case contains two lines, the first line contains 24 integers X1, Y1, Z1, …, X8, Y8, Z8, representing the 8 vertexes of the cuboid. Vertexes are given in random order and you can make sure that all edges of the cuboid are parallel to coordinate axes; the second line contains 4 integers X,Y,Z,R representing the central point of the ball and its radius. All integers given are non-negative and will be less than 100000.
+
+
+
+
+
+
+
+
+Output
+
+
+
+
+      For each case output "Yes" Or "No" on a single line.
+
+
+
+
+
+
+
+
+Sample Input
+
+
+
+
+
+
+
+2
+0 0 0 0 0 1 0 1 0 1 0 0 1 1 0 1 0 1 0 1 1 1 1 1
+2 2 2 2
+0 0 0 0 0 1 0 1 0 1 0 0 1 1 0 1 0 1 0 1 1 1 1 1
+2 2 2 1
+
+
+
+
+
+
+
+
+
+
+
+Sample Output
+
+
+
+
+
+
+
+Yes
+No
+
+
+
+
+
+
+
+
+
+
+
+Source
+
+
+
+
+[2008 Asia Chengdu Regional Contest Online](http://acm.hdu.edu.cn/search.php?field=problem&key=2008+Asia+Chengdu+Regional+Contest+Online&source=1&searchmode=source)
+
+
+
+
+
+
+
+
+Recommend
+
+
+
+
+lcy   |   We have carefully selected several similar problems for you:  [2437](http://acm.hdu.edu.cn/showproblem.php?pid=2437) [2429](http://acm.hdu.edu.cn/showproblem.php?pid=2429) [2433](http://acm.hdu.edu.cn/showproblem.php?pid=2433) [2435](http://acm.hdu.edu.cn/showproblem.php?pid=2435) [2428](http://acm.hdu.edu.cn/showproblem.php?pid=2428)
+
+
+
+
+
+
+
+
+
+
+真是日了狗了。。。
+
+
+
+
+读错题wa到死。。。
+
+
+
+
+英文差的原因？
+
+
+
+
+我以为长方体是空心的。。
+
+
+
+
+然后球是有可能在内部
+
+
+
+
+我说我怎么写的那么麻烦，又是判断点，又是判断边，又是判断面。。。。
+
+
+
+
+
+
+
+然后全推了重写。。。
+
+
+
+
+又WA到死。。。
+
+
+
+
+最后发现又是强制转化类型的问题。。。
+
+
+
+
+如果变量是int 类型，即使一出赋值给long long ，在赋值之前的计算也会溢出。。。
+
+
+
+
+所以不溢出的办法就是之前的int 就写成 long long 类型的。。。
+
+
+
+
+
+
+
+
+
+ 
+
+    
+    /*************************************************************************
+    	> File Name: code/2015summer/#6/II.cpp
+    	> Author: 111qqz
+    	> Email: rkz2013@126.com 
+    	> Created Time: 2015年08月01日 星期六 03时09分18秒
+     ************************************************************************/
+    
+    #include<iostream>
+    #include<iomanip>
+    #include<cstdio>
+    #include<algorithm>
+    #include<cmath>
+    #include<cstring>
+    #include<string>
+    #include<map>
+    #include<set>
+    #include<queue>
+    #include<vector>
+    #include<stack>
+    #define y0 abc111qqz
+    #define y1 hust111qqz
+    #define yn hez111qqz
+    #define j1 cute111qqz
+    #define tm crazy111qqz
+    #define lr dying111qqz
+    using namespace std;
+    #define REP(i, n) for (int i=0;i<int(n);++i)  
+    typedef long long LL;
+    typedef unsigned long long ULL;
+    const int inf = 0x7fffffff;
+    
+    
+    LL dis(LL x1,LL x2,LL y1,LL y2,LL z1,LL z2)
+    {
+        
+        return (x1-x2)*(x1-x2)+(y1-y2)*(y1-y2)+(z1-z2)*(z1-z2);
+        
+    }
+    int main()
+    {
+        int T;                 //整体算法是寻找距离球最近的点，比较这个点到球心的距离和半径
+    			    // 。。。判断了边+点+面还没A的我好傻逼啊。。。。。。。。sad
+    			    // 卧槽，读错题了，长方体是实心的啊喂！怪不得我想的那么麻烦！
+        cin>>T;
+        while (T--)
+        {
+    	LL tx,ty,tz;
+    	LL x1 = inf;
+    	LL x2 = -inf;
+    	LL y1 = inf;
+    	LL y2 = -inf;
+    	LL z1 = inf;
+    	LL z2 = -inf;
+    	for ( int i = 1 ; i <= 8 ; i++ )
+    	{
+    
+    	    scanf("%lld %lld %lld",&tx,&ty,&tz);
+    	    x1 = min(tx,x1);
+    	    x2 = max(tx,x2);
+    	    y1 = min(ty,y1);
+    	    y2 = max(ty,y2);
+    	    z1 = min(tz,z1);
+    	    z2 = max(tz,z2);
+    	}
+    	LL bx,by,bz,r;
+    	    LL x,y,z;
+    	scanf("%lld %lld %lld %lld",&bx,&by,&bz,&r);
+    	x = bx;
+    	y = by;
+    	z = bz;
+    	if (x>x2) x=x2;
+    	if (x<x1) x=x1;
+    	if (y>y2) y=y2;
+    	if (y<y1) y=y1;
+    	if (z>z2) z=z2;
+    	if (z<z1) z=z1;
+    	if (r*r>=dis(x,bx,y,by,z,bz))
+    	{
+    	    puts("Yes");
+    	}
+    	else
+    	{
+    	    puts("No");
+    	}
+    
+    
+        }
+      
+    	return 0;
+    }
+    
+
+
+

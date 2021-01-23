@@ -1,0 +1,239 @@
+---
+author: 111qqz
+date: 2016-02-29 11:00:49+00:00
+draft: false
+title: 'hdu 4336 Card Collector (2012多校 #4) （容斥原理模板题）'
+type: post
+url: /2016/02/hdu4336/
+categories:
+- ACM
+
+tags:
+- math
+- 容斥原理
+- 概率
+---
+
+http://acm.hdu.edu.cn/showproblem.php?pid=4336
+
+题意：有n种卡片，买一包干脆面得到第i种卡片的概率是p[i],每包干脆面最多有一张卡片，问收集齐所有卡片要买的干脆面的包数的数学期望。
+
+思路：容斥模板题。1.0/p[i]就是拿到某张卡片需要买的包数的数学期望
+
+注意体会这种具体应用容斥的模拟方法，把1<<n转化成二进制来模拟有1个元素的集合，有2个元素的集合...有n个元素的集合。 
+核心代码： 
+
+    
+     for ( int msk = 1 ; msk <(1<<n) ; msk++)
+    	    {
+    		double res = 0.0;
+    		int bits  = 0;
+    		for ( int i = 0 ; i < n ; i++)
+    		{
+    		  //  cout<<"msk:"<<msk<<" "<<(1<<i)<<endl;
+    		    if (msk&(1<<i))
+    		    {
+    			bits++;
+    			res +=p[i];
+    		    }
+    		}
+    		if (bits%2==1)
+    		{
+    		    ans += 1.0/res;
+    		}
+    		else
+    		{
+    		    ans -= 1.0/res;
+    		}
+    	    }
+    
+
+
+
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年02月29日 星期一 18时39分23秒
+    File Name :code/hdu/4336.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=25;
+    double p[N];
+    int n;
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	while (~scanf("%d",&n))
+    	{
+    	    ms(p,0);
+    	    double ans = 0 ;
+    	    for ( int i = 0 ; i < n ; i++) scanf("%lf",&p[i]);
+    
+    	    for ( int msk = 1 ; msk <(1<<n) ; msk++)
+    	    {
+    		double res = 0.0;
+    		int bits  = 0;
+    		for ( int i = 0 ; i < n ; i++)
+    		{
+    		  //  cout<<"msk:"<<msk<<" "<<(1<<i)<<endl;
+    		    if (msk&(1<<i))
+    		    {
+    			bits++;
+    			res +=p[i];
+    		    }
+    		}
+    		if (bits%2==1)
+    		{
+    		    ans += 1.0/res;
+    		}
+    		else
+    		{
+    		    ans -= 1.0/res;
+    		}
+    	    }
+    
+    	    printf("%.8f\n",ans);
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+20160305update:前几天有道题没写递归形式tle掉了。。。所以来学习一下容斥原理的递归形式。
+ 
+
+    
+    
+    
+    
+    dfs(int beg,set S,int sym)
+    {
+         ans+=num(S)*sym;
+         for(int i=beg;i<=n;i++)
+             dfs(i,S∩A[i],sym*-1);
+    }
+    
+    for(int i=1;i<=n;i++)
+         dfs(i,A[i],1);
+
+
+
+
+
+以及这道题用递归的形式写了一遍。
+
+ 
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年03月05日 星期六 15时02分43秒
+    File Name :code/hdu/r4336.cpp
+    ************************************************ */
+    
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=25;
+    double p[N];
+    int n;
+    double ans;
+    
+    void  dfs( int id,double x,int flag)   //flag表示当前是要加还是减..和元素个数的奇偶性相关（奇数+，偶数-）
+    {
+        ans +=(1.0/x)*flag;
+     //   cout<<"id:"<<id<<" x:"<<x<<" flag:"<<flag<<" ans:"<<ans<<endl;
+        for ( int i = id+1 ; i < n ; i++)
+    	dfs(i,x+p[i],flag*-1);
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    
+    	while (~scanf("%d",&n))
+    	{
+    	    ms(p,0);
+    	    ans = 0 ;
+    	    for ( int i = 0 ; i <  n; i++) scanf("%lf",&p[i]);
+    	    
+    
+    	    for ( int i = 0; i < n ; i++)
+    	    {
+    		dfs(i,p[i],1);
+    	    }
+    
+    	    printf("%.8f\n",ans);
+    	}
+    
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+

@@ -1,0 +1,194 @@
+---
+author: 111qqz
+date: 2016-08-15 15:54:40+00:00
+draft: false
+title: hdu 5536 || 2015 长春区域赛 J  Chip Factory (带删除操作的trie树)
+type: post
+url: /2016/08/hdu-5536/
+categories:
+- ACM
+tags:
+- trie
+---
+
+[hdu 5536 题目链接](http://acm.hdu.edu.cn/showproblem.php?pid=5536)
+
+题意：给出n个数，然后问最大的(a[i]+a[j])^a[k]  (i,j,k互不相同)
+
+思路：异或和最大很容易想到字典树。。但是如何保证i,j,k互不相同这里没有想明白。。。。。我的想法是加一个标记代表之前的id，但是我加的标记是只有在叶子节点上才有的。。。也就是会出现走到了最后一步才发现这个节点是不能走的情况。。。
+
+**正确的做法是，加一个cnt标记。**
+
+**每次插入的时候，这个数从根节点到叶子节点每个节点的cnt都+1**
+
+**删除的时候做就是每个节点的cnt都-1.**
+
+**这样子每次Find的时候只走cnt>0的点。。**
+
+
+
+这种做法的正确性基与：
+
+**两个不同的数。。一定有至少一位的二进制数不同**。。。保证了当只出现过一次的数x被删掉以后，其他的数y的存在不会导致经过x的路径
+
+** 两个相同的数，每一位二进制数位都是相同搞的。  **保证了id不同的相同的数。。即使一个被删掉。。另外的也可以继续访问。。。因为cnt仍然是大于0的。。。
+
+
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年08月15日 星期一 22时54分03秒
+    File Name :code/hdu/5536.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <stack>
+    #include <set>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <deque>
+    #include <ctime>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int LEN=32;
+    const int N=1005;
+    int n;
+    char str[35];
+    int a[N];
+    struct Trie
+    {
+        struct Node
+        {
+    	Node *nxt[2];
+    	int val;
+    	int cnt;
+    	Node()
+    	{
+    	    for (int i = 0 ; i < 2 ; i++) nxt[i] = NULL;
+    	    cnt = 0 ;
+    	}
+        }; 
+        Node *root;
+        void init()
+        {
+    	root = new Node();
+        }
+        Trie()
+        {
+    	root = new Node();
+        }
+        void Insert(char *s,int num)
+        {
+    	Node *u = root;
+    	int len = strlen(s);
+    	for ( int i = 0 ; i < len ; i++)
+    	{
+    	    int v = s[i]-'0';
+    	    if (u->nxt[v]==NULL) u->nxt[v] = new Node();
+    	    u=u->nxt[v];
+    	    u->cnt++;
+    	}
+    	u->val = num;
+        }
+        void Delete(char *s)
+        {
+    	Node *u = root;
+    	int len  = strlen(s);
+    	for ( int i = 0 ; i < len ; i++)
+    	{
+    	    int v = s[i]-'0';
+    	    if (u->nxt[v]!=NULL)
+    	    {	
+    	       u=u->nxt[v];
+    	       u->cnt--;
+    	    }
+    	}
+        }
+        int Find(char *s)
+        {
+    	Node *u = root;
+    	int len = strlen(s);
+    	for ( int i = 0 ; i < len ; i++)
+    	{
+    	    int x = s[i]-'0';
+    	    int y = !x;
+    	    if (u->nxt[y]!=NULL&&u->nxt[y]->cnt>0)
+    		u = u->nxt[y];
+    	    else u = u->nxt[x];
+    	}
+    	return u->val;
+        }
+    }trie;
+    void change(int x)
+    {
+        for ( int i = LEN-1,j=0; i>=0 ; i--,j++)
+    	str[i]=((x>>j)&1)+'0';
+    }
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	int T;
+    	cin>>T;
+    	while (T--)
+    	{
+    	    scanf("%d",&n);
+    	    trie.init();
+    	    for ( int i = 1 ; i <= n ; i++)
+    	    {
+    		scanf("%d",&a[i]);
+    		change(a[i]);
+    //		cout<<" str:"<<str<<endl;
+    		trie.Insert(str,a[i]);
+    	    }
+    	    int ans = 0 ;
+    	    for ( int i = 1 ; i <= n-1 ; i++)
+    	    {
+    		change(a[i]);
+    		trie.Delete(str);
+    		for  ( int j = i+1 ; j <= n ; j++)
+    		{
+    		    change(a[j]);
+    		    trie.Delete(str);
+    		    change(a[i]+a[j]);
+    		    int cur = trie.Find(str)^(a[i]+a[j]);
+    //		    cout<<"cur:"<<cur<<endl;
+    		    ans = max(ans,cur);
+    		    change(a[j]);
+    		    trie.Insert(str,a[j]);
+    		}
+    		change(a[i]);
+    		trie.Insert(str,a[i]); //只是暂时性的删除。。查询玩记得再插回去。。。
+    	    }
+    	    printf("%d\n",ans);
+    	}
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
+
+

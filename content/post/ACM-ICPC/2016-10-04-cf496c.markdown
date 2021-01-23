@@ -1,0 +1,113 @@
+---
+author: 111qqz
+date: 2016-10-04 11:37:22+00:00
+draft: false
+title: codeforces 496 C Removing Columns (构造)
+type: post
+url: /2016/10/cf496c/
+categories:
+- ACM
+tags:
+- 构造
+---
+
+[题目链接](http://codeforces.com/problemset/problem/496/C)
+
+题意：给一个n*m的由小写字母组成的table.要求从上往下每一行字典序不严格递增。问最少删除几列才能满足。
+
+思路：一开始想的是用一个left数组维护每次删除后某一列左边是哪一列，目的是为了下次的判断。
+
+再想了下，发现没必要。我们只需要知道，两行之间的关系是否确定就好了。over[i][j]为真表示第i行和第j行的胜负已分，对于胜负已分的行，大小无所谓。
+
+对于胜负未分的行，如果table[i][j]>table[i+1][j]，就必须要删掉这一列了。。。。
+
+需要注意的是，某一列最多删一次，记得打上标记。
+
+以及ove标记的时候，要在最后确定这一列没有被删以后再标记。。。用一个set存下可能的胜负已分的行的下标即可。
+
+1A
+
+    
+    /* ***********************************************
+    Author :111qqz
+    Created Time :2016年10月04日 星期二 19时10分39秒
+    File Name :code/cf/problem/496C.cpp
+    ************************************************ */
+    #include <cstdio>
+    #include <cstring>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    #include <set>
+    #include <deque>
+    #include <map>
+    #include <string>
+    #include <cmath>
+    #include <cstdlib>
+    #include <bitset>
+    #define fst first
+    #define sec second
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    #define ms(a,x) memset(a,x,sizeof(a))
+    typedef long long LL;
+    #define pi pair < int ,int >
+    #define MP make_pair
+    using namespace std;
+    const double eps = 1E-8;
+    const int dx4[4]={1,0,0,-1};
+    const int dy4[4]={0,-1,1,0};
+    const int inf = 0x3f3f3f3f;
+    const int N=105;
+    char table[N][N];
+    int n,m;
+    bool mark[N];
+    bool over[N][N];
+    int left[N];
+    int main()
+    {
+    	#ifndef  ONLINE_JUDGE 
+    	freopen("code/in.txt","r",stdin);
+      #endif
+    	cin>>n>>m;
+    	ms(mark,false);
+    	ms(over,false);
+    	for ( int i = 0 ; i < n ; i++) scanf("%s",table[i]);
+    	int cnt = 0 ;
+    	for ( int j = 0 ; j < m ; j++)
+    	{
+    	    set< int >se;
+    	    bool del = false;
+    	    for ( int i = 0 ; i < n-1 ; i++)
+    	    {
+    		if (table[i][j]<table[i+1][j])
+    		{
+    		    se.insert(i);
+    		}
+    		else if (table[i][j]>table[i+1][j]&&!over[i][i+1]&&!mark[j])
+    		{
+    		        cnt++;
+    			del = true;
+    			mark[j] = true;
+    		//	cout<<"delete:"<<j<<endl;
+    		}
+    	    }
+    	    if (!del)
+    	    {
+    		for ( auto it = se.begin (); it!=se.end(); it++)
+    		{
+    		    over[*it][*it+1] = true;
+    		}
+    	    }
+    	}
+    	printf("%d\n",cnt);
+      #ifndef ONLINE_JUDGE  
+      fclose(stdin);
+      #endif
+        return 0;
+    }
+    
+
+
+
