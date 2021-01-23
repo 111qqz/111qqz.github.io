@@ -14,72 +14,72 @@ post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p>C.
 </code></pre><p>output</p><pre><code>6
 </code></pre><p>input</p><pre><code>5&lt;br&gt;&lt;/br&gt;1 100 101 100 1
 </code></pre><p>output</p><pre><code>102
-</code></pre><p>并不会做.</p><p>接触了一个交单调栈的东西&mldr;</p><p>又是单调栈又是单调队列</p><p>是时候仔细了解下了.</p><pre><code class=language-c++>
+</code></pre><p>并不会做.</p><p>接触了一个交单调栈的东西&mldr;</p><p>又是单调栈又是单调队列</p><p>是时候仔细了解下了.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
     
-    /*************************************************************************
-    	&gt; File Name: code/2015summer/#3/D.cpp
-    	&gt; Author: 111qqz
-    	&gt; Email: rkz2013@126.com 
-    	&gt; Created Time: 2015年07月28日 星期二 13时47分48秒
-     ************************************************************************/
+    <span style=color:#75715e>/*************************************************************************
+</span><span style=color:#75715e>    	&gt; File Name: code/2015summer/#3/D.cpp
+</span><span style=color:#75715e>    	&gt; Author: 111qqz
+</span><span style=color:#75715e>    	&gt; Email: rkz2013@126.com 
+</span><span style=color:#75715e>    	&gt; Created Time: 2015年07月28日 星期二 13时47分48秒
+</span><span style=color:#75715e>     ************************************************************************/</span>
     
-    #include&lt;iostream&gt;
-    #include&lt;iomanip&gt;
-    #include&lt;cstdio&gt;
-    #include&lt;algorithm&gt;
-    #include&lt;cmath&gt;
-    #include&lt;cstring&gt;
-    #include&lt;string&gt;
-    #include&lt;map&gt;
-    #include&lt;set&gt;
-    #include&lt;queue&gt;
-    #include&lt;vector&gt;
-    #include&lt;stack&gt;
-    #define y0 abc111qqz
-    #define y1 hust111qqz
-    #define yn hez111qqz
-    #define j1 cute111qqz
-    #define tm crazy111qqz
-    #define lr dying111qqz
-    using namespace std;
-    #define REP(i, n) for (int i=0;i&lt;int(n);++i)  
-    typedef long long LL;
-    typedef unsigned long long ULL;
-    const int N=5E5+7;
-    int a[N],b[N];
-    int n;
-    int main()
+    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;iomanip&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;string&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;map&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;set&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;queue&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;vector&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;stack&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define y0 abc111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define y1 hust111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define yn hez111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define j1 cute111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define tm crazy111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define lr dying111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+    <span style=color:#75715e>#</span><span style=color:#75715e>define REP(i, n) for (int i=0;i&lt;int(n);++i)  </span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> LL;
+    <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>unsigned</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> ULL;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>5E5</span><span style=color:#f92672>+</span><span style=color:#ae81ff>7</span>;
+    <span style=color:#66d9ef>int</span> a[N],b[N];
+    <span style=color:#66d9ef>int</span> n;
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
     {
-        cin&gt;&gt;n;
-        int x;
-        int top = -1;
-        LL ans = 0;
-        for ( int i = 1 ; i &lt;= n ; i++ )
+        cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>n;
+        <span style=color:#66d9ef>int</span> x;
+        <span style=color:#66d9ef>int</span> top <span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>;
+        LL ans <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
         {
-    	  scanf(&quot;%d&quot;,&amp;x);
-    	  while (top&gt;=1&amp;&amp;a[top-1]&gt;=a[top]&amp;&amp;a[top]&lt;=x)
+    	  scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>x);
+    	  <span style=color:#66d9ef>while</span> (top<span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span><span style=color:#ae81ff>1</span><span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>a[top<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>]<span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span>a[top]<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>a[top]<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>x)
     	  {
-    	      ans = ans + min(x,a[top-1]);
-    	      top--;
+    	      ans <span style=color:#f92672>=</span> ans <span style=color:#f92672>+</span> min(x,a[top<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>]);
+    	      top<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
     	  }
-    	  top++;
-    	  a[top]=x;
+    	  top<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+    	  a[top]<span style=color:#f92672>=</span>x;
         }                                                        
     
     
-        sort(a,a+top+1);
-        for ( int i = 0 ; i &lt;top-1 ; i++)
+        sort(a,a<span style=color:#f92672>+</span>top<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>);
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span> ; i <span style=color:#f92672>&lt;</span>top<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
         {
-    	ans = ans + a[i];
+    	ans <span style=color:#f92672>=</span> ans <span style=color:#f92672>+</span> a[i];
         }
-        cout&lt;&lt;ans&lt;&lt;endl;
+        cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>ans<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
         
       
-    	return 0;
+    	<span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
     }
     
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

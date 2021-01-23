@@ -11,102 +11,102 @@ col-md-10 col-md-offset-1
 post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><ol><li><a href=#halide-is-a-programming-language-designed-to-make-it-easier-to-write-high-performance-image-and-array-processing-code-on-modern-machines>**Halide is a programming language designed to make it easier to write high-performance image and array processing code on modern machines. **</a></li></ol></li><li><a href=#make_interleaved>make_interleaved()</a></li></ol></nav><blockquote><blockquote><h3 id=halide-is-a-programming-language-designed-to-make-it-easier-to-write-high-performance-image-and-array-processing-code-on-modern-machines>**Halide is a programming language designed to make it easier to write high-performance image and array processing code on modern machines. **</h3></blockquote></blockquote><p>halide有两个特性比较吸引人。一个是对于各种平台架构的支持。</p><blockquote><blockquote></blockquote><pre><code>  * CPU architectures: X86, ARM, MIPS, Hexagon, PowerPC
   * Operating systems: Linux, Windows, macOS, Android, iOS, Qualcomm QuRT
   * GPU Compute APIs: CUDA, OpenCL, OpenGL, OpenGL Compute Shaders, Apple Metal, Microsoft Direct X 12
-</code></pre></blockquote><p>另一个是把计算什么和怎么计算(何时计算)分离开来。</p><blockquote><p><strong>Halide的Schedule可以由程序员来指定一些策略，指定硬件的buffer大小，缓冲线的相关设置，这样可以根据不同的计算硬件的特性来实现高效率的计算单元的调度，而图像算法的计算实现却不需要修改。</strong></p></blockquote><blockquote><p><strong>Halide的运行有两种方式，一种是JIT的模式，另一种是AOT的模式。JIT模式使用起来比较方便，可以直接将算法和Halide的代码生成generator封装成一个类，在程序的其他部分调用这个类即可。在嵌入式环境和交叉编译环境下一般使用AOT模式，此时需要调用compiler函数将算法代码和Halide的代码生成generator编译位目标机器的代码，生成一个.o目标文件和.h头文件。然后在独立的目标机器的应用的工程的源代码中通过头文件调用算法实现的计算函数，并在build的时候链接上.o文件，这样就得到一个可以在目标机器上运行的用Halide实现算法的程序了。一般DSP上都是这种方式来做的。</strong></p></blockquote><blockquote></blockquote><p>可以直接参考<a href=http://halide-lang.org/tutorials/tutorial_introduction.html>tutorials</a> 来学习</p><p>下面是一段将Halide Buffer转化成opencv Mat的代码，用于调试。</p><pre><code class=language-c++>    
-    // Include some support code for loading pngs.
-    // #include &quot;halide_image_io.h&quot;
-    #include &lt;iostream&gt;
-    #include &quot;para_norm.h&quot;
-    #include &quot;HalideBuffer.h&quot;
-    #include &quot;clock.h&quot;
-    #include &quot;halide_image_io.h&quot;  // for Halide::tools to load image. just for debug
-    #include &lt;opencv2/opencv.hpp&gt; // to show image
-    
-    // #include &quot;Halide.h&quot;
-    using namespace std;
-    using namespace cv;
-    using namespace Halide;
-    using namespace Halide::Runtime;
-    // using namespace Halide::Tools;
-    void convertHalide2Mat(const Buffer&lt;uint8_t&gt; &amp;src, cv::Mat &amp;dest)
+</code></pre></blockquote><p>另一个是把计算什么和怎么计算(何时计算)分离开来。</p><blockquote><p><strong>Halide的Schedule可以由程序员来指定一些策略，指定硬件的buffer大小，缓冲线的相关设置，这样可以根据不同的计算硬件的特性来实现高效率的计算单元的调度，而图像算法的计算实现却不需要修改。</strong></p></blockquote><blockquote><p><strong>Halide的运行有两种方式，一种是JIT的模式，另一种是AOT的模式。JIT模式使用起来比较方便，可以直接将算法和Halide的代码生成generator封装成一个类，在程序的其他部分调用这个类即可。在嵌入式环境和交叉编译环境下一般使用AOT模式，此时需要调用compiler函数将算法代码和Halide的代码生成generator编译位目标机器的代码，生成一个.o目标文件和.h头文件。然后在独立的目标机器的应用的工程的源代码中通过头文件调用算法实现的计算函数，并在build的时候链接上.o文件，这样就得到一个可以在目标机器上运行的用Halide实现算法的程序了。一般DSP上都是这种方式来做的。</strong></p></blockquote><blockquote></blockquote><p>可以直接参考<a href=http://halide-lang.org/tutorials/tutorial_introduction.html>tutorials</a> 来学习</p><p>下面是一段将Halide Buffer转化成opencv Mat的代码，用于调试。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>    
+    <span style=color:#75715e>// Include some support code for loading pngs.
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// #include &#34;halide_image_io.h&#34;
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&#34;para_norm.h&#34;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&#34;HalideBuffer.h&#34;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&#34;clock.h&#34;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&#34;halide_image_io.h&#34;  // for Halide::tools to load image. just for debug</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;opencv2/opencv.hpp&gt; // to show image</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    
+    <span style=color:#75715e>// #include &#34;Halide.h&#34;
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> cv;
+    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> Halide;
+    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> Halide<span style=color:#f92672>:</span><span style=color:#f92672>:</span>Runtime;
+    <span style=color:#75715e>// using namespace Halide::Tools;
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>convertHalide2Mat</span>(<span style=color:#66d9ef>const</span> Buffer<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>uint8_t</span><span style=color:#f92672>&gt;</span> <span style=color:#f92672>&amp;</span>src, cv<span style=color:#f92672>:</span><span style=color:#f92672>:</span>Mat <span style=color:#f92672>&amp;</span>dest)
     {
-        if (dest.empty())
-            dest.create(cv::Size(src.width(), src.height()), CV_MAKETYPE(CV_8U, src.channels()));
-        const int ch = dest.channels();
-        if (ch == 1)
+        <span style=color:#66d9ef>if</span> (dest.empty())
+            dest.create(cv<span style=color:#f92672>:</span><span style=color:#f92672>:</span>Size(src.width(), src.height()), CV_MAKETYPE(CV_8U, src.channels()));
+        <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> ch <span style=color:#f92672>=</span> dest.channels();
+        <span style=color:#66d9ef>if</span> (ch <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>)
         {
-            for (int j = 0; j &lt; dest.rows; j++)
+            <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; j <span style=color:#f92672>&lt;</span> dest.rows; j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
             {
-                for (int i = 0; i &lt; dest.cols; i++)
+                <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> dest.cols; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
                 {
-                    dest.at&lt;uchar&gt;(j, i) = src(i, j);
+                    dest.at<span style=color:#f92672>&lt;</span>uchar<span style=color:#f92672>&gt;</span>(j, i) <span style=color:#f92672>=</span> src(i, j);
                 }
             }
         }
-        else if (ch == 3)
+        <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (ch <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>3</span>)
         {
-            for (int j = 0; j &lt; dest.rows; j++)
+            <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; j <span style=color:#f92672>&lt;</span> dest.rows; j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
             {
-                for (int i = 0; i &lt; dest.cols; i++)
+                <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> dest.cols; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
                 {
-                    dest.at&lt;uchar&gt;(j, 3 * i + 0) = src(i, j, 2);
-                    dest.at&lt;uchar&gt;(j, 3 * i + 1) = src(i, j, 1);
-                    dest.at&lt;uchar&gt;(j, 3 * i + 2) = src(i, j, 0);
+                    dest.at<span style=color:#f92672>&lt;</span>uchar<span style=color:#f92672>&gt;</span>(j, <span style=color:#ae81ff>3</span> <span style=color:#f92672>*</span> i <span style=color:#f92672>+</span> <span style=color:#ae81ff>0</span>) <span style=color:#f92672>=</span> src(i, j, <span style=color:#ae81ff>2</span>);
+                    dest.at<span style=color:#f92672>&lt;</span>uchar<span style=color:#f92672>&gt;</span>(j, <span style=color:#ae81ff>3</span> <span style=color:#f92672>*</span> i <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>) <span style=color:#f92672>=</span> src(i, j, <span style=color:#ae81ff>1</span>);
+                    dest.at<span style=color:#f92672>&lt;</span>uchar<span style=color:#f92672>&gt;</span>(j, <span style=color:#ae81ff>3</span> <span style=color:#f92672>*</span> i <span style=color:#f92672>+</span> <span style=color:#ae81ff>2</span>) <span style=color:#f92672>=</span> src(i, j, <span style=color:#ae81ff>0</span>);
                 }
             }
         }
     }
-    int main(int argc, char **argv)
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>(<span style=color:#66d9ef>int</span> argc, <span style=color:#66d9ef>char</span> <span style=color:#f92672>*</span><span style=color:#f92672>*</span>argv)
     {
     
-        Halide::Runtime::Buffer&lt;uint8_t&gt; input = Halide::Tools::load_image(&quot;/data/github/learnhalide/png.png&quot;);
-        cv::Mat Img;
+        Halide<span style=color:#f92672>:</span><span style=color:#f92672>:</span>Runtime<span style=color:#f92672>:</span><span style=color:#f92672>:</span>Buffer<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>uint8_t</span><span style=color:#f92672>&gt;</span> input <span style=color:#f92672>=</span> Halide<span style=color:#f92672>:</span><span style=color:#f92672>:</span>Tools<span style=color:#f92672>:</span><span style=color:#f92672>:</span>load_image(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>/data/github/learnhalide/png.png</span><span style=color:#e6db74>&#34;</span>);
+        cv<span style=color:#f92672>:</span><span style=color:#f92672>:</span>Mat Img;
         convertHalide2Mat(input,Img);
-        cv::imshow(&quot;debug&quot;, Img);
-        cv::waitKey(0);
-        return 0;
+        cv<span style=color:#f92672>:</span><span style=color:#f92672>:</span>imshow(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>debug</span><span style=color:#e6db74>&#34;</span>, Img);
+        cv<span style=color:#f92672>:</span><span style=color:#f92672>:</span>waitKey(<span style=color:#ae81ff>0</span>);
+        <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
     }
     
 
-</code></pre><p>吐槽下hahide的文档&mldr;各种函数全靠试&mldr;</p><p>试了好久得到的,opencv Mat转halide::buffer的办法:</p><pre><code class=language-c++>    
-    cv::Mat image = cv::imread(&quot;/data/github/learnhalide/png.png&quot;);
-        cv::imshow(&quot;input&quot;,image);
-        cv::waitKey(0);
+</code></pre></div><p>吐槽下hahide的文档&mldr;各种函数全靠试&mldr;</p><p>试了好久得到的,opencv Mat转halide::buffer的办法:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>    
+    cv<span style=color:#f92672>:</span><span style=color:#f92672>:</span>Mat image <span style=color:#f92672>=</span> cv<span style=color:#f92672>:</span><span style=color:#f92672>:</span>imread(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>/data/github/learnhalide/png.png</span><span style=color:#e6db74>&#34;</span>);
+        cv<span style=color:#f92672>:</span><span style=color:#f92672>:</span>imshow(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>input</span><span style=color:#e6db74>&#34;</span>,image);
+        cv<span style=color:#f92672>:</span><span style=color:#f92672>:</span>waitKey(<span style=color:#ae81ff>0</span>);
         halide_buffer_t buffer;
-        // memset(&amp;buffer, 0, sizeof(buffer));
-    
-        buffer.host = image.data;
-        printf(&quot;image.data %d %d %d\n&quot;,image.data[0],image.data[1],image.data[2]);
-        printf(&quot;buffer.host %d %d %d\n&quot;,buffer.host[0],buffer.host[1],buffer.host[2]);
-        // 数据没有copy过来
-        buffer.type = halide_type_t(halide_type_uint,8);
-        buffer.dimensions = 3;
-        buffer.dim = (halide_dimension_t *)malloc(3*4*sizeof(uint32_t));
-        buffer.dim[0].extent = image.cols;
-        buffer.dim[1].extent = image.rows;
-        buffer.dim[2].extent = image.channels();
-        buffer.dim[0].min = buffer.dim[1].min = buffer.dim[2].min = 0;
-    
-    
-        buffer.dim[0].stride = image.step1(1);
-        buffer.dim[1].stride = image.step1(0);
-        buffer.dim[2].stride = 1;
-    
-        Halide::Runtime::Buffer&lt;uint8_t&gt; input(buffer);
-        printf(&quot;input buffer:%d %d %d\n&quot;,input.width(),input.height(),input.channels());
-        // printf(&quot;%d\n&quot;,input(2,2));
-        const halide_buffer_t * 	raw_buffer = input.raw_buffer();
-        printf(&quot;raw buffer: %d %d %d\n&quot;,raw_buffer-&gt;host[0],raw_buffer-&gt;host[1],raw_buffer-&gt;host[2]);
+        <span style=color:#75715e>// memset(&amp;buffer, 0, sizeof(buffer));
+</span><span style=color:#75715e></span>    
+        buffer.host <span style=color:#f92672>=</span> image.data;
+        printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>image.data %d %d %d</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>,image.data[<span style=color:#ae81ff>0</span>],image.data[<span style=color:#ae81ff>1</span>],image.data[<span style=color:#ae81ff>2</span>]);
+        printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>buffer.host %d %d %d</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>,buffer.host[<span style=color:#ae81ff>0</span>],buffer.host[<span style=color:#ae81ff>1</span>],buffer.host[<span style=color:#ae81ff>2</span>]);
+        <span style=color:#75715e>// 数据没有copy过来
+</span><span style=color:#75715e></span>        buffer.type <span style=color:#f92672>=</span> halide_type_t(halide_type_uint,<span style=color:#ae81ff>8</span>);
+        buffer.dimensions <span style=color:#f92672>=</span> <span style=color:#ae81ff>3</span>;
+        buffer.dim <span style=color:#f92672>=</span> (halide_dimension_t <span style=color:#f92672>*</span>)malloc(<span style=color:#ae81ff>3</span><span style=color:#f92672>*</span><span style=color:#ae81ff>4</span><span style=color:#f92672>*</span><span style=color:#66d9ef>sizeof</span>(<span style=color:#66d9ef>uint32_t</span>));
+        buffer.dim[<span style=color:#ae81ff>0</span>].extent <span style=color:#f92672>=</span> image.cols;
+        buffer.dim[<span style=color:#ae81ff>1</span>].extent <span style=color:#f92672>=</span> image.rows;
+        buffer.dim[<span style=color:#ae81ff>2</span>].extent <span style=color:#f92672>=</span> image.channels();
+        buffer.dim[<span style=color:#ae81ff>0</span>].min <span style=color:#f92672>=</span> buffer.dim[<span style=color:#ae81ff>1</span>].min <span style=color:#f92672>=</span> buffer.dim[<span style=color:#ae81ff>2</span>].min <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
     
     
-        cv::Mat Img;
+        buffer.dim[<span style=color:#ae81ff>0</span>].stride <span style=color:#f92672>=</span> image.step1(<span style=color:#ae81ff>1</span>);
+        buffer.dim[<span style=color:#ae81ff>1</span>].stride <span style=color:#f92672>=</span> image.step1(<span style=color:#ae81ff>0</span>);
+        buffer.dim[<span style=color:#ae81ff>2</span>].stride <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+    
+        Halide<span style=color:#f92672>:</span><span style=color:#f92672>:</span>Runtime<span style=color:#f92672>:</span><span style=color:#f92672>:</span>Buffer<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>uint8_t</span><span style=color:#f92672>&gt;</span> input(buffer);
+        printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>input buffer:%d %d %d</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>,input.width(),input.height(),input.channels());
+        <span style=color:#75715e>// printf(&#34;%d\n&#34;,input(2,2));
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>const</span> halide_buffer_t <span style=color:#f92672>*</span> 	raw_buffer <span style=color:#f92672>=</span> input.raw_buffer();
+        printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>raw buffer: %d %d %d</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>,raw_buffer<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>host[<span style=color:#ae81ff>0</span>],raw_buffer<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>host[<span style=color:#ae81ff>1</span>],raw_buffer<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>host[<span style=color:#ae81ff>2</span>]);
+    
+    
+        cv<span style=color:#f92672>:</span><span style=color:#f92672>:</span>Mat Img;
         convertHalide2Mat(input, Img);
-        printf(&quot;Mat(%d %d)\n&quot;, Img.cols, Img.rows);
-        cv::imshow(&quot;debug&quot;, Img);
-        cv::waitKey(0);
+        printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Mat(%d %d)</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, Img.cols, Img.rows);
+        cv<span style=color:#f92672>:</span><span style=color:#f92672>:</span>imshow(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>debug</span><span style=color:#e6db74>&#34;</span>, Img);
+        cv<span style=color:#f92672>:</span><span style=color:#f92672>:</span>waitKey(<span style=color:#ae81ff>0</span>);
     
-</code></pre><p>可能会报错Error: Constraint violated: input.stride.0 (3) == 1 (1),原因是:</p><blockquote>**We have a default constraint of stride==1 on the innermost dimension, so that vectorization works out well**</blockquote><p><a href=https://github.com/halide/Halide/issues/3109>Constraint violated: f.stride.0 (2) == 1 (1) #3109</a></p><p>解决办法是(对于AOT的编译方式):</p><p>ImageParam input(type_of&lt;uint8_t>(), 3);</p><p>input.dim(0).set_stride(Expr());</p><p>一种更简便的opencv Mat得到halide buffer的办法.　一个关键的问题是opencv Mat的memory layout是Interleaved的方式，也就是如下:</p><p>// RGBRGBRGBRGBRGBRGBRGBRGB</p><p>// RGBRGBRGBRGBRGBRGBRGBRGB</p><p>// RGBRGBRGBRGBRGBRGBRGBRGB</p><p>// RGBRGBRGBRGBRGBRGBRGBRGB</p><p>但是Halide::buffer的默认memory layout是Planar的方式：</p><p>// RRRRRRRR</p><p>// RRRRRRRR</p><p>// RRRRRRRR</p><p>// RRRRRRRR</p><p>// GGGGGGGG</p><p>// GGGGGGGG</p><p>// GGGGGGGG</p><p>// GGGGGGGG</p><p>// BBBBBBBB</p><p>// BBBBBBBB</p><p>// BBBBBBBB</p><p>// BBBBBBBB</p><p>因此需要用到函数</p><h2 id=make_interleaved>make_interleaved()</h2><pre><code class=language-c++>cv::Mat image = cv::imread(&quot;/data/github/learnhalide/png.png&quot;);
-Halide::Runtime::Buffer&lt;uint8_t&gt; input = Halide::Runtime::Buffer&lt;uint8_t&gt;::make_interleaved(image.data,1240, 460, 3);
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><p>可能会报错Error: Constraint violated: input.stride.0 (3) == 1 (1),原因是:</p><blockquote>**We have a default constraint of stride==1 on the innermost dimension, so that vectorization works out well**</blockquote><p><a href=https://github.com/halide/Halide/issues/3109>Constraint violated: f.stride.0 (2) == 1 (1) #3109</a></p><p>解决办法是(对于AOT的编译方式):</p><p>ImageParam input(type_of&lt;uint8_t>(), 3);</p><p>input.dim(0).set_stride(Expr());</p><p>一种更简便的opencv Mat得到halide buffer的办法.　一个关键的问题是opencv Mat的memory layout是Interleaved的方式，也就是如下:</p><p>// RGBRGBRGBRGBRGBRGBRGBRGB</p><p>// RGBRGBRGBRGBRGBRGBRGBRGB</p><p>// RGBRGBRGBRGBRGBRGBRGBRGB</p><p>// RGBRGBRGBRGBRGBRGBRGBRGB</p><p>但是Halide::buffer的默认memory layout是Planar的方式：</p><p>// RRRRRRRR</p><p>// RRRRRRRR</p><p>// RRRRRRRR</p><p>// RRRRRRRR</p><p>// GGGGGGGG</p><p>// GGGGGGGG</p><p>// GGGGGGGG</p><p>// GGGGGGGG</p><p>// BBBBBBBB</p><p>// BBBBBBBB</p><p>// BBBBBBBB</p><p>// BBBBBBBB</p><p>因此需要用到函数</p><h2 id=make_interleaved>make_interleaved()</h2><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>cv<span style=color:#f92672>:</span><span style=color:#f92672>:</span>Mat image <span style=color:#f92672>=</span> cv<span style=color:#f92672>:</span><span style=color:#f92672>:</span>imread(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>/data/github/learnhalide/png.png</span><span style=color:#e6db74>&#34;</span>);
+Halide<span style=color:#f92672>:</span><span style=color:#f92672>:</span>Runtime<span style=color:#f92672>:</span><span style=color:#f92672>:</span>Buffer<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>uint8_t</span><span style=color:#f92672>&gt;</span> input <span style=color:#f92672>=</span> Halide<span style=color:#f92672>:</span><span style=color:#f92672>:</span>Runtime<span style=color:#f92672>:</span><span style=color:#f92672>:</span>Buffer<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>uint8_t</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>make_interleaved(image.data,<span style=color:#ae81ff>1240</span>, <span style=color:#ae81ff>460</span>, <span style=color:#ae81ff>3</span>);
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

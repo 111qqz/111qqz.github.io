@@ -8,68 +8,68 @@ $navbar.className+=" in";}}</script><style type=text/css>header.intro-header{bac
 on
 Tuesday, April 14, 2015</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p><a href=http://codeforces.com/problemset/problem/534/B>http://codeforces.com/problemset/problem/534/B</a></p><p>题意是说一辆车，每秒内的速度恒定&mldr;第I秒到第I+1秒的速度变化不超过D。初始速度为V1，末速度为V2，经过时间t，问最远能走多远。</p><p>策略就是尽可能加速&mldr;加到某个时间，如果在这个时间不开始减速就回不到V2了。</p><p>从后往前预处理下每秒钟能达到的最大速度（如果超过这个速度，将不能减回到V2）</p><pre><code class=language-c++>    
-    /* ***********************************************
-    Author :111qqz
-    Created Time :2016年02月22日 星期一 23时49分32秒
-    File Name :code/cf/problem/534B.cpp
-    ************************************************ */
+post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p><a href=http://codeforces.com/problemset/problem/534/B>http://codeforces.com/problemset/problem/534/B</a></p><p>题意是说一辆车，每秒内的速度恒定&mldr;第I秒到第I+1秒的速度变化不超过D。初始速度为V1，末速度为V2，经过时间t，问最远能走多远。</p><p>策略就是尽可能加速&mldr;加到某个时间，如果在这个时间不开始减速就回不到V2了。</p><p>从后往前预处理下每秒钟能达到的最大速度（如果超过这个速度，将不能减回到V2）</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>    
+    <span style=color:#75715e>/* ***********************************************
+</span><span style=color:#75715e>    Author :111qqz
+</span><span style=color:#75715e>    Created Time :2016年02月22日 星期一 23时49分32秒
+</span><span style=color:#75715e>    File Name :code/cf/problem/534B.cpp
+</span><span style=color:#75715e>    ************************************************ */</span>
     
-    #include &lt;iostream&gt;
-    #include &lt;cmath&gt;
-    #include &lt;cstring&gt;
-    #include &lt;algorithm&gt;
+    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    
+    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>1E2</span><span style=color:#f92672>+</span><span style=color:#ae81ff>5</span>;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> inf<span style=color:#f92672>=</span><span style=color:#ae81ff>8E9</span>;
+    <span style=color:#66d9ef>int</span> a[N],m[N];
+    <span style=color:#66d9ef>int</span> v1,v2,t,d,tmp,p,ans,n;
     
-    using namespace std;
-    const int N=1E2+5;
-    const int inf=8E9;
-    int a[N],m[N];
-    int v1,v2,t,d,tmp,p,ans,n;
     
-    
-    int main()
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
     {
-        cin&gt;&gt;v1&gt;&gt;v2&gt;&gt;t&gt;&gt;d;
-        p = inf;
-        memset(a,0,sizeof(a));
-        a[1]= v1;
-        tmp = v2;
-        m[t]= v2;
-        for ( int i = t-1 ; i &gt;= 1; i--)
+        cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>v1<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>v2<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>t<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>d;
+        p <span style=color:#f92672>=</span> inf;
+        memset(a,<span style=color:#ae81ff>0</span>,<span style=color:#66d9ef>sizeof</span>(a));
+        a[<span style=color:#ae81ff>1</span>]<span style=color:#f92672>=</span> v1;
+        tmp <span style=color:#f92672>=</span> v2;
+        m[t]<span style=color:#f92672>=</span> v2;
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> t<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; i<span style=color:#f92672>-</span><span style=color:#f92672>-</span>)
         {
-            tmp = tmp+d;
-            m[i] = tmp;
+            tmp <span style=color:#f92672>=</span> tmp<span style=color:#f92672>+</span>d;
+            m[i] <span style=color:#f92672>=</span> tmp;
         }
-        for ( int i =2 ;i &lt;= t; i++ )
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span><span style=color:#ae81ff>2</span> ;i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> t; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
         {
-            if (a[i-1]+d&lt;=m[i])
+            <span style=color:#66d9ef>if</span> (a[i<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>]<span style=color:#f92672>+</span>d<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>m[i])
             {
-                a[i] = a[i-1] + d;
+                a[i] <span style=color:#f92672>=</span> a[i<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>] <span style=color:#f92672>+</span> d;
             }
-            else
+            <span style=color:#66d9ef>else</span>
             {
-                a[i] = m[i];
-                p = i;
-                break;
+                a[i] <span style=color:#f92672>=</span> m[i];
+                p <span style=color:#f92672>=</span> i;
+                <span style=color:#66d9ef>break</span>;
             }
         }
-        ans = 0;
-        for ( int i = p ; i &lt;= t; i++ )
-            a[i] = m[i];
-        for ( int i = 1; i &lt;= t ; i++ )
+        ans <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> p ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> t; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+            a[i] <span style=color:#f92672>=</span> m[i];
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> t ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
         {
-            if (i&lt;p)
-                ans = ans + a[i];
-            else ans = ans + m[i];
+            <span style=color:#66d9ef>if</span> (i<span style=color:#f92672>&lt;</span>p)
+                ans <span style=color:#f92672>=</span> ans <span style=color:#f92672>+</span> a[i];
+            <span style=color:#66d9ef>else</span> ans <span style=color:#f92672>=</span> ans <span style=color:#f92672>+</span> m[i];
         }
-       // for ( int i = 1; i &lt;= t ; i++)
-       //     cout&lt;&lt;&quot;a[i]:&quot;&lt;&lt;a[i]&lt;&lt;endl;
-        cout&lt;&lt;ans&lt;&lt;endl;
+       <span style=color:#75715e>// for ( int i = 1; i &lt;= t ; i++)
+</span><span style=color:#75715e></span>       <span style=color:#75715e>//     cout&lt;&lt;&#34;a[i]:&#34;&lt;&lt;a[i]&lt;&lt;endl;
+</span><span style=color:#75715e></span>        cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>ans<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
     
-        return 0;
+        <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
     }
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

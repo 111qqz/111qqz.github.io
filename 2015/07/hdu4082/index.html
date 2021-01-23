@@ -8,171 +8,171 @@ $navbar.className+=" in";}}</script><style type=text/css>header.intro-header{bac
 on
 Wednesday, July 22, 2015</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p><a href="http://acm.hust.edu.cn/vjudge/contest/view.action?cid=83295#problem/I">http://acm.hust.edu.cn/vjudge/contest/view.action?cid=83295#problem/I</a></p><p>最多18个点，选3个点，能够成的三角形不超过1000个，O(n2)暴力就可以。</p><p>思路就是枚举三个点点，对于每一个构成的三角形，把这个三角形的最小角和次小角存起来。</p><p>然后枚举三角形，判断是否有两个三角形的最小角和次小角分别对应相等。</p><p>需要注意的是题目中问的是相似三角形的最大个数</p><p>如果A  B 相似 C D 相似，但是B C 不相似，答案应该是2.</p><p>还有三角形自身和自身是相似的。</p><p>一开始求角度的时候只求了cos值，忘了求下acos了。</p><p>需要注意的是，枚举的到时候，三个点可能共线，这个还挺好，题目中说的是“** you may get a triangle**”</p><p>may算是提示了</p><p>如果共线，就不能构成三角形，何谈相似？</p><p>我共线的判断是用斜率搞的，特判下斜率不存在的情况（三个点的横坐标都相同）</p><p>然后又交，又WA&mldr;.妈蛋。。。</p><p>然后想，会不会是他射到了同一个点上？</p><p>不管多少次射到同一个点上，就只会出现一个hole，也就算作一个点。</p><p>于是判重。</p><p>判重还没写全。</p><p>一开始只把因为重复而不能构成三角形的情况给cut掉了</p><p>就是枚举的三个点有至少两个一样，这个时候实际上只有两个点，所以不能够成三角形。</p><p>但是马上就发现，对于能构成的三角形的情况，一个点重复了几次，就算了几次，而实际上应该只算一次。</p><p>所以改在枚举之前判重。</p><p>至于精度问题，我是没遇到。。。</p><p>相等都是写成&lt;=eqs 的形式了。。。</p><p>注意是fabs而不是abs</p><p>最后终于A了。</p><pre><code class=language-c++>
+post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p><a href="http://acm.hust.edu.cn/vjudge/contest/view.action?cid=83295#problem/I">http://acm.hust.edu.cn/vjudge/contest/view.action?cid=83295#problem/I</a></p><p>最多18个点，选3个点，能够成的三角形不超过1000个，O(n2)暴力就可以。</p><p>思路就是枚举三个点点，对于每一个构成的三角形，把这个三角形的最小角和次小角存起来。</p><p>然后枚举三角形，判断是否有两个三角形的最小角和次小角分别对应相等。</p><p>需要注意的是题目中问的是相似三角形的最大个数</p><p>如果A  B 相似 C D 相似，但是B C 不相似，答案应该是2.</p><p>还有三角形自身和自身是相似的。</p><p>一开始求角度的时候只求了cos值，忘了求下acos了。</p><p>需要注意的是，枚举的到时候，三个点可能共线，这个还挺好，题目中说的是“** you may get a triangle**”</p><p>may算是提示了</p><p>如果共线，就不能构成三角形，何谈相似？</p><p>我共线的判断是用斜率搞的，特判下斜率不存在的情况（三个点的横坐标都相同）</p><p>然后又交，又WA&mldr;.妈蛋。。。</p><p>然后想，会不会是他射到了同一个点上？</p><p>不管多少次射到同一个点上，就只会出现一个hole，也就算作一个点。</p><p>于是判重。</p><p>判重还没写全。</p><p>一开始只把因为重复而不能构成三角形的情况给cut掉了</p><p>就是枚举的三个点有至少两个一样，这个时候实际上只有两个点，所以不能够成三角形。</p><p>但是马上就发现，对于能构成的三角形的情况，一个点重复了几次，就算了几次，而实际上应该只算一次。</p><p>所以改在枚举之前判重。</p><p>至于精度问题，我是没遇到。。。</p><p>相等都是写成&lt;=eqs 的形式了。。。</p><p>注意是fabs而不是abs</p><p>最后终于A了。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
     
     
-    /* ***********************************************
-    Author :111qqz
-    Created Time :2016年03月03日 星期四 14时43分22秒
-    File Name :code/hdu/4082.cpp
-    ************************************************ */
+    <span style=color:#75715e>/* ***********************************************
+</span><span style=color:#75715e>    Author :111qqz
+</span><span style=color:#75715e>    Created Time :2016年03月03日 星期四 14时43分22秒
+</span><span style=color:#75715e>    File Name :code/hdu/4082.cpp
+</span><span style=color:#75715e>    ************************************************ */</span>
     
-    #include&lt;iostream&gt;
-    #include&lt;iomanip&gt;
-    #include&lt;cstdio&gt;
-    #include&lt;algorithm&gt;
-    #include&lt;cmath&gt;
-    #include&lt;cstring&gt;
-    #include&lt;string&gt;
-    #include&lt;map&gt;
-    #include&lt;set&gt;
-    #include&lt;queue&gt;
-    #include&lt;vector&gt;
-    #include&lt;stack&gt;
-    #define y0 abc111qqz
-    #define y1 hust111qqz
-    #define yn hez111qqz
-    #define j1 cute111qqz
-    #define tm crazy111qqz
-    #define lr dying111qqz
-    using namespace std;
-    #define REP(i, n) for (int i=0;i&lt;int(n);++i)  
-    typedef long long LL;
-    typedef unsigned long long ULL;
-    const double eqs = 1E-6;
-    const int N = 25;
-    const int inf = 0x7fffffff;
-    int x[N],y[N];
-    int n;
-    double an[2000][5];
-    struct Q
+    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;iomanip&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;string&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;map&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;set&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;queue&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;vector&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;stack&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define y0 abc111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define y1 hust111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define yn hez111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define j1 cute111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define tm crazy111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define lr dying111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+    <span style=color:#75715e>#</span><span style=color:#75715e>define REP(i, n) for (int i=0;i&lt;int(n);++i)  </span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> LL;
+    <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>unsigned</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> ULL;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>double</span> eqs <span style=color:#f92672>=</span> <span style=color:#ae81ff>1E-6</span>;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N <span style=color:#f92672>=</span> <span style=color:#ae81ff>25</span>;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> inf <span style=color:#f92672>=</span> <span style=color:#ae81ff>0x7fffffff</span>;
+    <span style=color:#66d9ef>int</span> x[N],y[N];
+    <span style=color:#66d9ef>int</span> n;
+    <span style=color:#66d9ef>double</span> an[<span style=color:#ae81ff>2000</span>][<span style=color:#ae81ff>5</span>];
+    <span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>Q</span>
     {
-        int xx,yy;
+        <span style=color:#66d9ef>int</span> xx,yy;
     }q[N];
-    double dis(int a,int b)
+    <span style=color:#66d9ef>double</span> <span style=color:#a6e22e>dis</span>(<span style=color:#66d9ef>int</span> a,<span style=color:#66d9ef>int</span> b)
     {
-        double res;
-        res = (x[a]-x[b])*(x[a]-x[b])+(y[a]-y[b])*(y[a]-y[b]);
-        res = sqrt(res);
-        return res;
+        <span style=color:#66d9ef>double</span> res;
+        res <span style=color:#f92672>=</span> (x[a]<span style=color:#f92672>-</span>x[b])<span style=color:#f92672>*</span>(x[a]<span style=color:#f92672>-</span>x[b])<span style=color:#f92672>+</span>(y[a]<span style=color:#f92672>-</span>y[b])<span style=color:#f92672>*</span>(y[a]<span style=color:#f92672>-</span>y[b]);
+        res <span style=color:#f92672>=</span> sqrt(res);
+        <span style=color:#66d9ef>return</span> res;
     }
-    double angle(double a,double b,double c)
+    <span style=color:#66d9ef>double</span> <span style=color:#a6e22e>angle</span>(<span style=color:#66d9ef>double</span> a,<span style=color:#66d9ef>double</span> b,<span style=color:#66d9ef>double</span> c)
     {
-        double res;
-    	  res = (b*b+c*c-a*a)/(2*b*c);
-       // cout&lt;&lt;a&lt;&lt;&quot; &quot;&lt;&lt;b&lt;&lt;&quot; &quot;&lt;&lt;c&lt;&lt;&quot; &quot;&lt;&lt;res&lt;&lt;endl;
-    	  res = acos(res);
-        return res;
+        <span style=color:#66d9ef>double</span> res;
+    	  res <span style=color:#f92672>=</span> (b<span style=color:#f92672>*</span>b<span style=color:#f92672>+</span>c<span style=color:#f92672>*</span>c<span style=color:#f92672>-</span>a<span style=color:#f92672>*</span>a)<span style=color:#f92672>/</span>(<span style=color:#ae81ff>2</span><span style=color:#f92672>*</span>b<span style=color:#f92672>*</span>c);
+       <span style=color:#75715e>// cout&lt;&lt;a&lt;&lt;&#34; &#34;&lt;&lt;b&lt;&lt;&#34; &#34;&lt;&lt;c&lt;&lt;&#34; &#34;&lt;&lt;res&lt;&lt;endl;
+</span><span style=color:#75715e></span>    	  res <span style=color:#f92672>=</span> acos(res);
+        <span style=color:#66d9ef>return</span> res;
     }
     
-    bool cmp(Q a,Q b)
+    <span style=color:#66d9ef>bool</span> <span style=color:#a6e22e>cmp</span>(Q a,Q b)
     {
-        if (a.xx&lt;b.xx) return true;
-        if (a.xx==b.xx&amp;&amp;a.yy&lt;b.yy) return true;
-        return false;
+        <span style=color:#66d9ef>if</span> (a.xx<span style=color:#f92672>&lt;</span>b.xx) <span style=color:#66d9ef>return</span> true;
+        <span style=color:#66d9ef>if</span> (a.xx<span style=color:#f92672>=</span><span style=color:#f92672>=</span>b.xx<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>a.yy<span style=color:#f92672>&lt;</span>b.yy) <span style=color:#66d9ef>return</span> true;
+        <span style=color:#66d9ef>return</span> false;
     }
-    bool ok(int t)
+    <span style=color:#66d9ef>bool</span> <span style=color:#a6e22e>ok</span>(<span style=color:#66d9ef>int</span> t)
     {
-        if (q[t].xx==q[t+1].xx&amp;&amp;q[t].yy==q[t+1].yy)
-    	  return false;
-        return true;
+        <span style=color:#66d9ef>if</span> (q[t].xx<span style=color:#f92672>=</span><span style=color:#f92672>=</span>q[t<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>].xx<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>q[t].yy<span style=color:#f92672>=</span><span style=color:#f92672>=</span>q[t<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>].yy)
+    	  <span style=color:#66d9ef>return</span> false;
+        <span style=color:#66d9ef>return</span> true;
     }
-    int main()
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
     {
-        while (scanf(&quot;%d&quot;,&amp;n)!=EOF)
+        <span style=color:#66d9ef>while</span> (scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>n)<span style=color:#f92672>!</span><span style=color:#f92672>=</span>EOF)
      {  
-    	  if (n==0) break;
+    	  <span style=color:#66d9ef>if</span> (n<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>) <span style=color:#66d9ef>break</span>;
     
-     //   memset(ang,0,sizeof(ang));
-     //   memset(angl,0,sizeof(angl));
-        memset(an,0,sizeof(an));
-        int sum = 0; //三角形的个数
-        for ( int i =1 ; i &lt;= n ; i++ )
+     <span style=color:#75715e>//   memset(ang,0,sizeof(ang));
+</span><span style=color:#75715e></span>     <span style=color:#75715e>//   memset(angl,0,sizeof(angl));
+</span><span style=color:#75715e></span>        memset(an,<span style=color:#ae81ff>0</span>,<span style=color:#66d9ef>sizeof</span>(an));
+        <span style=color:#66d9ef>int</span> sum <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#75715e>//三角形的个数
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span><span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
         {
-    	  cin&gt;&gt;q[i].xx&gt;&gt;q[i].yy;
+    	  cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>q[i].xx<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>q[i].yy;
         }
-        sort(q+1,q+n+1,cmp);
-        q[n+1].xx=inf;
-        q[n+1].yy=inf;
+        sort(q<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>,q<span style=color:#f92672>+</span>n<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>,cmp);
+        q[n<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>].xx<span style=color:#f92672>=</span>inf;
+        q[n<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>].yy<span style=color:#f92672>=</span>inf;
     
-        int n_dif=0;
-        for ( int i = 1; i &lt;= n ; i++)
+        <span style=color:#66d9ef>int</span> n_dif<span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>;
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
         {
-    	  if (ok(i))
+    	  <span style=color:#66d9ef>if</span> (ok(i))
     	  {
-    		n_dif++;
-    		x[n_dif]=q[i].xx;
-    		y[n_dif]=q[i].yy;
+    		n_dif<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+    		x[n_dif]<span style=color:#f92672>=</span>q[i].xx;
+    		y[n_dif]<span style=color:#f92672>=</span>q[i].yy;
     	  }
     
         }
-        n = n_dif;
-       // cout&lt;&lt;&quot;n_dif:&quot;&lt;&lt;n_dif&lt;&lt;endl;
-        for ( int i = 1 ; i &lt;= n-2  ; i++ )
+        n <span style=color:#f92672>=</span> n_dif;
+       <span style=color:#75715e>// cout&lt;&lt;&#34;n_dif:&#34;&lt;&lt;n_dif&lt;&lt;endl;
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n<span style=color:#f92672>-</span><span style=color:#ae81ff>2</span>  ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
         {
-    	  for ( int j = i + 1 ; j &lt;= n-1 ; j++)
+    	  <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> i <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span> ; j <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> ; j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
     	  {
-    		for ( int k = j +1 ; k &lt;= n ; k++)
+    		<span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> k <span style=color:#f92672>=</span> j <span style=color:#f92672>+</span><span style=color:#ae81ff>1</span> ; k <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; k<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
     		{
-    		    if (x[i]==x[j]&amp;&amp;y[i]==y[j]) continue;
-    		    if (x[i]==x[k]&amp;&amp;y[i]==y[k]) continue;
-    		    if (x[j]==x[k]&amp;&amp;y[j]==y[k]) continue; //难道还有一样的点？？？
-    		    if (x[i]==x[j]&amp;&amp;x[i]==x[k]) continue;  //三点共线，且斜率不存在，构不成三角形。
-    		    //相同的三角形的点只算一个？
-    		    double k1,k2;
-    		    k1 = (y[i]-y[j])*1.0/(x[i]-x[j]);
-    		    k2 = (y[i]-y[k])*1.0/(x[i]-x[k]);
-    		    if (fabs(k1-k2)&lt;=eqs) continue;   //共线，不恩能够构成三角形
-    		    double si = dis(j,k);
-    		    double sj = dis(i,k);
-    		    double sk = dis(i,j);
-    		    double ai = angle(si,sj,sk);
-    		    double aj = angle(sj,si,sk);
-    		    double ak = angle(sk,si,sj);
-    		    double ang[10];
-    		 //   cout&lt;&lt;&quot;si:&quot;&lt;&lt;si&lt;&lt;&quot; sj:&quot;&lt;&lt;sj&lt;&lt;&quot; sk:&quot;&lt;&lt;sk&lt;&lt;endl;
-    		 //   cout&lt;&lt;&quot;ai:&quot;&lt;&lt;ai&lt;&lt;&quot; aj:&quot;&lt;&lt;aj&lt;&lt;&quot; ak:&quot;&lt;&lt;ak&lt;&lt;endl;
-    		    ang[0]=ai;
-    		    ang[1]=aj;
-    		    ang[2]=ak;
-    		    sort(ang,ang+3); //把角度从小到大排序
-    		 //   angl[i][j][k][0]=ang[0];
-    		 //   angl[i][j][k][1]=ang[1];
-    		 //   angl[i][j][k][2]=ang[2];       //重要的是角度是多少，某个三角形是哪三个点得到的并不重要。
-    		    sum++;
-    		    an[sum][0]=ang[0];
-    		    an[sum][1]=ang[1];
-    		    an[sum][2]=ang[2];
+    		    <span style=color:#66d9ef>if</span> (x[i]<span style=color:#f92672>=</span><span style=color:#f92672>=</span>x[j]<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>y[i]<span style=color:#f92672>=</span><span style=color:#f92672>=</span>y[j]) <span style=color:#66d9ef>continue</span>;
+    		    <span style=color:#66d9ef>if</span> (x[i]<span style=color:#f92672>=</span><span style=color:#f92672>=</span>x[k]<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>y[i]<span style=color:#f92672>=</span><span style=color:#f92672>=</span>y[k]) <span style=color:#66d9ef>continue</span>;
+    		    <span style=color:#66d9ef>if</span> (x[j]<span style=color:#f92672>=</span><span style=color:#f92672>=</span>x[k]<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>y[j]<span style=color:#f92672>=</span><span style=color:#f92672>=</span>y[k]) <span style=color:#66d9ef>continue</span>; <span style=color:#75715e>//难道还有一样的点？？？
+</span><span style=color:#75715e></span>    		    <span style=color:#66d9ef>if</span> (x[i]<span style=color:#f92672>=</span><span style=color:#f92672>=</span>x[j]<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>x[i]<span style=color:#f92672>=</span><span style=color:#f92672>=</span>x[k]) <span style=color:#66d9ef>continue</span>;  <span style=color:#75715e>//三点共线，且斜率不存在，构不成三角形。
+</span><span style=color:#75715e></span>    		    <span style=color:#75715e>//相同的三角形的点只算一个？
+</span><span style=color:#75715e></span>    		    <span style=color:#66d9ef>double</span> k1,k2;
+    		    k1 <span style=color:#f92672>=</span> (y[i]<span style=color:#f92672>-</span>y[j])<span style=color:#f92672>*</span><span style=color:#ae81ff>1.0</span><span style=color:#f92672>/</span>(x[i]<span style=color:#f92672>-</span>x[j]);
+    		    k2 <span style=color:#f92672>=</span> (y[i]<span style=color:#f92672>-</span>y[k])<span style=color:#f92672>*</span><span style=color:#ae81ff>1.0</span><span style=color:#f92672>/</span>(x[i]<span style=color:#f92672>-</span>x[k]);
+    		    <span style=color:#66d9ef>if</span> (fabs(k1<span style=color:#f92672>-</span>k2)<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>eqs) <span style=color:#66d9ef>continue</span>;   <span style=color:#75715e>//共线，不恩能够构成三角形
+</span><span style=color:#75715e></span>    		    <span style=color:#66d9ef>double</span> si <span style=color:#f92672>=</span> dis(j,k);
+    		    <span style=color:#66d9ef>double</span> sj <span style=color:#f92672>=</span> dis(i,k);
+    		    <span style=color:#66d9ef>double</span> sk <span style=color:#f92672>=</span> dis(i,j);
+    		    <span style=color:#66d9ef>double</span> ai <span style=color:#f92672>=</span> angle(si,sj,sk);
+    		    <span style=color:#66d9ef>double</span> aj <span style=color:#f92672>=</span> angle(sj,si,sk);
+    		    <span style=color:#66d9ef>double</span> ak <span style=color:#f92672>=</span> angle(sk,si,sj);
+    		    <span style=color:#66d9ef>double</span> ang[<span style=color:#ae81ff>10</span>];
+    		 <span style=color:#75715e>//   cout&lt;&lt;&#34;si:&#34;&lt;&lt;si&lt;&lt;&#34; sj:&#34;&lt;&lt;sj&lt;&lt;&#34; sk:&#34;&lt;&lt;sk&lt;&lt;endl;
+</span><span style=color:#75715e></span>    		 <span style=color:#75715e>//   cout&lt;&lt;&#34;ai:&#34;&lt;&lt;ai&lt;&lt;&#34; aj:&#34;&lt;&lt;aj&lt;&lt;&#34; ak:&#34;&lt;&lt;ak&lt;&lt;endl;
+</span><span style=color:#75715e></span>    		    ang[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>=</span>ai;
+    		    ang[<span style=color:#ae81ff>1</span>]<span style=color:#f92672>=</span>aj;
+    		    ang[<span style=color:#ae81ff>2</span>]<span style=color:#f92672>=</span>ak;
+    		    sort(ang,ang<span style=color:#f92672>+</span><span style=color:#ae81ff>3</span>); <span style=color:#75715e>//把角度从小到大排序
+</span><span style=color:#75715e></span>    		 <span style=color:#75715e>//   angl[i][j][k][0]=ang[0];
+</span><span style=color:#75715e></span>    		 <span style=color:#75715e>//   angl[i][j][k][1]=ang[1];
+</span><span style=color:#75715e></span>    		 <span style=color:#75715e>//   angl[i][j][k][2]=ang[2];       //重要的是角度是多少，某个三角形是哪三个点得到的并不重要。
+</span><span style=color:#75715e></span>    		    sum<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+    		    an[sum][<span style=color:#ae81ff>0</span>]<span style=color:#f92672>=</span>ang[<span style=color:#ae81ff>0</span>];
+    		    an[sum][<span style=color:#ae81ff>1</span>]<span style=color:#f92672>=</span>ang[<span style=color:#ae81ff>1</span>];
+    		    an[sum][<span style=color:#ae81ff>2</span>]<span style=color:#f92672>=</span>ang[<span style=color:#ae81ff>2</span>];
     		    
     		}
     	  }
         }
-        int ans = 0;  //初始是０不是１，因为可能恰好所有点共线，没有三角形，也就没有相似的三角形
-        if (sum!=0) ans = 1;
-     //   for ( int i = 1 ; i &lt;= sum ; i++ ) cout&lt;&lt;&quot;an[i][0]&quot;&lt;&lt;an[i][0]&lt;&lt;&quot;  an[i][1] &quot;&lt;&lt;an[i][1]&lt;&lt;endl; 
-        for ( int i = 1; i &lt;= sum -1 ; i++ )
+        <span style=color:#66d9ef>int</span> ans <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;  <span style=color:#75715e>//初始是０不是１，因为可能恰好所有点共线，没有三角形，也就没有相似的三角形
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>if</span> (sum<span style=color:#f92672>!</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>) ans <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+     <span style=color:#75715e>//   for ( int i = 1 ; i &lt;= sum ; i++ ) cout&lt;&lt;&#34;an[i][0]&#34;&lt;&lt;an[i][0]&lt;&lt;&#34;  an[i][1] &#34;&lt;&lt;an[i][1]&lt;&lt;endl; 
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> sum <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
         {
-    	  int cnt = 1;
-    	  for ( int j = i+1 ; j &lt;= sum ; j++ )
+    	  <span style=color:#66d9ef>int</span> cnt <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+    	  <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> i<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span> ; j <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> sum ; j<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
     	  {
-    		double tmp1 = fabs(an[i][0]-an[j][0]);
-    		double tmp2 = fabs(an[i][1]-an[j][1]);
-    		if (tmp1&lt;=eqs&amp;&amp;tmp2&lt;=eqs)
+    		<span style=color:#66d9ef>double</span> tmp1 <span style=color:#f92672>=</span> fabs(an[i][<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span>an[j][<span style=color:#ae81ff>0</span>]);
+    		<span style=color:#66d9ef>double</span> tmp2 <span style=color:#f92672>=</span> fabs(an[i][<span style=color:#ae81ff>1</span>]<span style=color:#f92672>-</span>an[j][<span style=color:#ae81ff>1</span>]);
+    		<span style=color:#66d9ef>if</span> (tmp1<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>eqs<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>tmp2<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>eqs)
     		{
-    		    cnt++;
+    		    cnt<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
     		}
-    		ans = max(ans,cnt);
+    		ans <span style=color:#f92672>=</span> max(ans,cnt);
     	  }
         }
-        cout&lt;&lt;ans&lt;&lt;endl;
+        cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>ans<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
     		
     }
-    	return 0;
+    	<span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
     }
 
 
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

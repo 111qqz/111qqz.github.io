@@ -15,58 +15,58 @@ post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a 
 假设源码的repo称为A,渲染得到的静态页面的repo称为B
 那么先生成一对ssh-key
 然后在 A里，settings->secrets 添加一个secret,名称为"ACTIONS_DEPLOY_KEY&rdquo;，内容为private key的内容
-然后在B里，settings->deploy keys, 添加一个key,名称无所谓，内容为public key的内容</p><p>这样每次push到源码的repo A,就可以自动触发github actions,将静态页面推送到repo B.然后repo B 自动触发github pages机制</p><p>附一个github actions的配置文件</p><pre><code class=language-yaml># This is a basic workflow to help you get started with Actions
+然后在B里，settings->deploy keys, 添加一个key,名称无所谓，内容为public key的内容</p><p>这样每次push到源码的repo A,就可以自动触发github actions,将静态页面推送到repo B.然后repo B 自动触发github pages机制</p><p>附一个github actions的配置文件</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#75715e># This is a basic workflow to help you get started with Actions</span>
 
 name: CI
 
-# Controls when the action will run. 
+<span style=color:#75715e># Controls when the action will run. </span>
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
+  <span style=color:#75715e># Triggers the workflow on push or pull request events but only for the master branch</span>
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
 
-  # Allows you to run this workflow manually from the Actions tab
+  <span style=color:#75715e># Allows you to run this workflow manually from the Actions tab</span>
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+<span style=color:#75715e># A workflow run is made up of one or more jobs that can run sequentially or in parallel</span>
 jobs:
-  # This workflow contains a single job called &quot;build&quot;
+  <span style=color:#75715e># This workflow contains a single job called &#34;build&#34;</span>
   build:
-    # The type of runner that the job will run on
-    runs-on:  ubuntu-18.04
+    <span style=color:#75715e># The type of runner that the job will run on</span>
+    runs-on:  ubuntu<span style=color:#ae81ff>-18.04</span>
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    <span style=color:#75715e># Steps represent a sequence of tasks that will be executed as part of the job</span>
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      <span style=color:#75715e># Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it</span>
       - uses: actions/checkout@v1
         with:
-          submodules:  true
+          submodules:  <span style=color:#66d9ef>true</span>
       
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v2
         with:
-          hugo-version: '0.62.2'
+          hugo-version: <span style=color:#e6db74>&#39;0.62.2&#39;</span>
 
 
-      # Runs a set of commands using the runners shell
+      <span style=color:#75715e># Runs a set of commands using the runners shell</span>
       - name: Run a multi-line script
-        run: |
-          git config --global user.email &quot;hust.111qqz@gmail.com&quot;
-          git config --global user.name &quot;111qqz&quot;
+        run: <span style=color:#e6db74>|
+</span><span style=color:#e6db74>         </span><span style=color:#e6db74> </span><span style=color:#e6db74>git config --global user.email &#34;hust.111qqz@gmail.com&#34;</span>
+          git config --global user.name <span style=color:#e6db74>&#34;111qqz&#34;</span>
           hugo --minify
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
-          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }} # 这里的 ACTIONS_DEPLOY_KEY 则是上面设置 Private Key的变量名
-          external_repository: 111qqz/111qqz.github.io # Pages 远程仓库 
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }} <span style=color:#75715e># 这里的 ACTIONS_DEPLOY_KEY 则是上面设置 Private Key的变量名</span>
+          external_repository: 111qqz/111qqz.github.io <span style=color:#75715e># Pages 远程仓库 </span>
           publish_dir: public
-          keep_files: false # remove existing files
-          publish_branch: master  # deploying branch
+          keep_files: <span style=color:#66d9ef>false</span> <span style=color:#75715e># remove existing files</span>
+          publish_branch: master  <span style=color:#75715e># deploying branch</span>
           commit_message: ${{ github.event.head_commit.message }}
 
-</code></pre><h2 id=参考资料>参考资料</h2><ul><li><a href=https://cloud.tencent.com/developer/article/1647964>折腾Hugo | GitHub Pages | Github Actions自动构建发布免费个人网站</a></li></ul><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><h2 id=参考资料>参考资料</h2><ul><li><a href=https://cloud.tencent.com/developer/article/1647964>折腾Hugo | GitHub Pages | Github Actions自动构建发布免费个人网站</a></li></ul><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

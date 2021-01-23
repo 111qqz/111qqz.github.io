@@ -8,58 +8,58 @@ $navbar.className+=" in";}}</script><style type=text/css>header.intro-header{bac
 on
 Tuesday, April 14, 2015</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p><a href=http://codeforces.com/problemset/problem/534/C>http://codeforces.com/problemset/problem/534/C</a></p><p>题意是说一共有N个骰子，第I个筛子一共有di面&mldr;现在知道这些骰子的点数之和，问对于每一个骰子不能取得值有多少个。</p><p>乍一看有点不明觉厉&mldr;稍微再想下，求取值范围即可。</p><p>先把所有di相加，得到所有骰子点数之和的最大值&mldr;然后点数之和的最小值当然就是N</p><p>对于每个骰子，将最大值和最小值减去这个骰子的对应数值&mldr;然后与总和A进行比较。</p><p>注意要开long long ！！！</p><p>比赛的时候我明明写了typedef。。。结果后面还是忘记了。。。真是悲伤。</p><pre><code class=language-c++>
-    /* ***********************************************
-    Author :111qqz
-    Created Time :2016年03月03日 星期四 13时54分19秒
-    File Name :code/cf/problem/534C.cpp
-    ************************************************ */
+post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p><a href=http://codeforces.com/problemset/problem/534/C>http://codeforces.com/problemset/problem/534/C</a></p><p>题意是说一共有N个骰子，第I个筛子一共有di面&mldr;现在知道这些骰子的点数之和，问对于每一个骰子不能取得值有多少个。</p><p>乍一看有点不明觉厉&mldr;稍微再想下，求取值范围即可。</p><p>先把所有di相加，得到所有骰子点数之和的最大值&mldr;然后点数之和的最小值当然就是N</p><p>对于每个骰子，将最大值和最小值减去这个骰子的对应数值&mldr;然后与总和A进行比较。</p><p>注意要开long long ！！！</p><p>比赛的时候我明明写了typedef。。。结果后面还是忘记了。。。真是悲伤。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+    <span style=color:#75715e>/* ***********************************************
+</span><span style=color:#75715e>    Author :111qqz
+</span><span style=color:#75715e>    Created Time :2016年03月03日 星期四 13时54分19秒
+</span><span style=color:#75715e>    File Name :code/cf/problem/534C.cpp
+</span><span style=color:#75715e>    ************************************************ */</span>
     
-    #include &lt;iostream&gt;
-    #include &lt;algorithm&gt;
-    #include &lt;cstring&gt;
-    #include &lt;cmath&gt;
-    #include &lt;cstdio&gt;
-    typedef long long LL;
-    const int N=2E5+7;
+    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> LL;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>2E5</span><span style=color:#f92672>+</span><span style=color:#ae81ff>7</span>;
     LL n,d[N],ans[N];
     LL A,MAX,MIN,TMAX,TMIN;
     
-    using namespace std;
+    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
     
-    int main()
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
     {
-        scanf(&quot;%I64d %I64d&quot;,&amp;n,&amp;A);
-        memset(ans,0,sizeof(ans));
-        for ( int i = 1; i &lt;= n ;i ++ )
-            scanf(&quot;%I64d&quot;,&amp;d[i]);
-        MAX = 0;
-        MIN = n;
-        for ( int i = 1; i &lt;= n ; i++ )
-            MAX = MAX + d[i];
-        for ( int i = 1 ; i &lt;= n ; i++ )
+        scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%I64d %I64d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>n,<span style=color:#f92672>&amp;</span>A);
+        memset(ans,<span style=color:#ae81ff>0</span>,<span style=color:#66d9ef>sizeof</span>(ans));
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ;i <span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+            scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%I64d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>d[i]);
+        MAX <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+        MIN <span style=color:#f92672>=</span> n;
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+            MAX <span style=color:#f92672>=</span> MAX <span style=color:#f92672>+</span> d[i];
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
         {
-            TMAX = MAX - d[i];
-            TMIN = MIN - 1;
-            if (d[i]&gt;=(A-TMIN))
+            TMAX <span style=color:#f92672>=</span> MAX <span style=color:#f92672>-</span> d[i];
+            TMIN <span style=color:#f92672>=</span> MIN <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>;
+            <span style=color:#66d9ef>if</span> (d[i]<span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span>(A<span style=color:#f92672>-</span>TMIN))
             {
-                ans[i] =ans[i]+d[i]-(A-TMIN);
+                ans[i] <span style=color:#f92672>=</span>ans[i]<span style=color:#f92672>+</span>d[i]<span style=color:#f92672>-</span>(A<span style=color:#f92672>-</span>TMIN);
             }
-            if (A&gt;=TMAX+1)
+            <span style=color:#66d9ef>if</span> (A<span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span>TMAX<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>)
             {
-                ans[i] =ans[i]+A-TMAX-1;
+                ans[i] <span style=color:#f92672>=</span>ans[i]<span style=color:#f92672>+</span>A<span style=color:#f92672>-</span>TMAX<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>;
             }
     
         }
-        for ( int i = 1; i &lt; n ; i++)
-            cout&lt;&lt;ans[i]&lt;&lt;&quot; &quot;;
-            cout&lt;&lt;ans[n];
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; i <span style=color:#f92672>&lt;</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+            cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>ans[i]<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74> </span><span style=color:#e6db74>&#34;</span>;
+            cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>ans[n];
     
     
-        return 0;
+        <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
     }
     
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

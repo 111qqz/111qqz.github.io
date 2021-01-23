@@ -9,116 +9,116 @@ on
 Sunday, May 3, 2020</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
 post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#背景>背景</a></li><li><a href=#proto>proto</a></li><li><a href=#c-实现>c++ 实现</a></li></ol></nav><h2 id=背景>背景</h2><p>这个layer和reduce layer有一些相似,就干脆一起看了.
-作用是输入至少两个blob,然后对每个blob中的元素所一些运算,最后得到一个blob.</p><p>caffe 支持的运算有"PROD&rdquo;,&ldquo;SUM&rdquo;,&ldquo;MAX"三种</p><p>顺便提一句,TensorRT支持的要多一些:</p><pre><code class=language-c++>
-enum class ElementWiseOperation : int
+作用是输入至少两个blob,然后对每个blob中的元素所一些运算,最后得到一个blob.</p><p>caffe 支持的运算有"PROD&rdquo;,&ldquo;SUM&rdquo;,&ldquo;MAX"三种</p><p>顺便提一句,TensorRT支持的要多一些:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+<span style=color:#66d9ef>enum</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ElementWiseOperation</span> <span style=color:#f92672>:</span> <span style=color:#66d9ef>int</span>
 {
-    kSUM = 0,  //!&lt; Sum of the two elements.
-    kPROD = 1, //!&lt; Product of the two elements.
-    kMAX = 2,  //!&lt; Maximum of the two elements.
-    kMIN = 3,  //!&lt; Minimum of the two elements.
-    kSUB = 4,  //!&lt; Substract the second element from the first.
-    kDIV = 5,  //!&lt; Divide the first element by the second.
-    kPOW = 6   //!&lt; The first element to the power of the second element.
-};
+    kSUM <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>,  <span style=color:#75715e>//!&lt; Sum of the two elements.
+</span><span style=color:#75715e></span>    kPROD <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>, <span style=color:#75715e>//!&lt; Product of the two elements.
+</span><span style=color:#75715e></span>    kMAX <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>,  <span style=color:#75715e>//!&lt; Maximum of the two elements.
+</span><span style=color:#75715e></span>    kMIN <span style=color:#f92672>=</span> <span style=color:#ae81ff>3</span>,  <span style=color:#75715e>//!&lt; Minimum of the two elements.
+</span><span style=color:#75715e></span>    kSUB <span style=color:#f92672>=</span> <span style=color:#ae81ff>4</span>,  <span style=color:#75715e>//!&lt; Substract the second element from the first.
+</span><span style=color:#75715e></span>    kDIV <span style=color:#f92672>=</span> <span style=color:#ae81ff>5</span>,  <span style=color:#75715e>//!&lt; Divide the first element by the second.
+</span><span style=color:#75715e></span>    kPOW <span style=color:#f92672>=</span> <span style=color:#ae81ff>6</span>   <span style=color:#75715e>//!&lt; The first element to the power of the second element.
+</span><span style=color:#75715e></span>};
 
-</code></pre><h2 id=proto>proto</h2><pre><code class=language-protobuf>
-message EltwiseParameter {
-  enum EltwiseOp {
-    PROD = 0;
-    SUM = 1;
-    MAX = 2;
+</code></pre></div><h2 id=proto>proto</h2><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-protobuf data-lang=protobuf><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#66d9ef>message</span> <span style=color:#a6e22e>EltwiseParameter</span> {<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#66d9ef>enum</span> EltwiseOp {<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>    PROD <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>    SUM <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>    MAX <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>;<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  }<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#66d9ef>optional</span> EltwiseOp operation <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> SUM]; <span style=color:#75715e>// element-wise operation
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>repeated</span> <span style=color:#66d9ef>float</span> coeff <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; <span style=color:#75715e>// blob-wise coefficient for SUM operation
+</span><span style=color:#75715e></span><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#75715e>// Whether to use an asymptotically slower (for &gt;2 inputs) but stabler method
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// of computing the gradient for the PROD operation. (No effect for SUM op.)
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>bool</span> stable_prod_grad <span style=color:#f92672>=</span> <span style=color:#ae81ff>3</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>true</span>];<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>}<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#960050;background-color:#1e0010>
+</span></code></pre></div><p>proto里面的coeff是对于SUM操作,可以给每一个bottom blob一个加权系数, stable_prod_grad是backward用的,不用管.</p><h2 id=c-实现>c++ 实现</h2><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+<span style=color:#960050;background-color:#1e0010>代</span><span style=color:#960050;background-color:#1e0010>码</span><span style=color:#960050;background-color:#1e0010>比</span><span style=color:#960050;background-color:#1e0010>较</span><span style=color:#960050;background-color:#1e0010>容</span><span style=color:#960050;background-color:#1e0010>易</span><span style=color:#960050;background-color:#1e0010>看</span><span style=color:#960050;background-color:#1e0010>懂</span>,<span style=color:#960050;background-color:#1e0010>加</span><span style=color:#960050;background-color:#1e0010>了</span><span style=color:#960050;background-color:#1e0010>一</span><span style=color:#960050;background-color:#1e0010>些</span><span style=color:#960050;background-color:#1e0010>注</span><span style=color:#960050;background-color:#1e0010>释</span>. <span style=color:#960050;background-color:#1e0010>有</span><span style=color:#960050;background-color:#1e0010>两</span><span style=color:#960050;background-color:#1e0010>个</span><span style=color:#960050;background-color:#1e0010>地</span><span style=color:#960050;background-color:#1e0010>方</span><span style=color:#960050;background-color:#1e0010>可</span><span style=color:#960050;background-color:#1e0010>以</span><span style=color:#960050;background-color:#1e0010>提</span><span style=color:#960050;background-color:#1e0010>一</span><span style=color:#960050;background-color:#1e0010>下</span>. <span style=color:#960050;background-color:#1e0010>一</span><span style=color:#960050;background-color:#1e0010>个</span><span style=color:#960050;background-color:#1e0010>是</span>PROD和MAX的做法,<span style=color:#960050;background-color:#1e0010>都</span><span style=color:#960050;background-color:#1e0010>是</span><span style=color:#960050;background-color:#1e0010>先</span><span style=color:#960050;background-color:#1e0010>求</span><span style=color:#960050;background-color:#1e0010>前</span><span style=color:#960050;background-color:#1e0010>两</span><span style=color:#960050;background-color:#1e0010>个</span>,<span style=color:#960050;background-color:#1e0010>再</span><span style=color:#960050;background-color:#1e0010>把</span><span style=color:#960050;background-color:#1e0010>得</span><span style=color:#960050;background-color:#1e0010>到</span><span style=color:#960050;background-color:#1e0010>的</span><span style=color:#960050;background-color:#1e0010>结</span><span style=color:#960050;background-color:#1e0010>果</span><span style=color:#960050;background-color:#1e0010>和</span><span style=color:#960050;background-color:#1e0010>后</span><span style=color:#960050;background-color:#1e0010>面</span><span style=color:#960050;background-color:#1e0010>的</span>blob进行运算.(<span style=color:#960050;background-color:#1e0010>其</span><span style=color:#960050;background-color:#1e0010>实</span><span style=color:#960050;background-color:#1e0010>是</span><span style=color:#960050;background-color:#1e0010>很</span><span style=color:#960050;background-color:#1e0010>自</span><span style=color:#960050;background-color:#1e0010>然</span><span style=color:#960050;background-color:#1e0010>的</span><span style=color:#960050;background-color:#1e0010>操</span><span style=color:#960050;background-color:#1e0010>作</span>...<span style=color:#960050;background-color:#1e0010>似</span><span style=color:#960050;background-color:#1e0010>乎</span><span style=color:#960050;background-color:#1e0010>也</span><span style=color:#960050;background-color:#1e0010>没</span><span style=color:#960050;background-color:#1e0010>什</span><span style=color:#960050;background-color:#1e0010>么</span><span style=color:#960050;background-color:#1e0010>可</span><span style=color:#960050;background-color:#1e0010>说</span><span style=color:#960050;background-color:#1e0010>的</span>orz)
+
+<span style=color:#960050;background-color:#1e0010>另</span><span style=color:#960050;background-color:#1e0010>外</span><span style=color:#960050;background-color:#1e0010>一</span><span style=color:#960050;background-color:#1e0010>个</span><span style=color:#960050;background-color:#1e0010>是</span>mask这个变量,<span style=color:#960050;background-color:#1e0010>是</span><span style=color:#960050;background-color:#1e0010>在</span>MAX操作时用来标记在哪个bottom blob <span style=color:#960050;background-color:#1e0010>取</span><span style=color:#960050;background-color:#1e0010>到</span><span style=color:#960050;background-color:#1e0010>了</span><span style=color:#960050;background-color:#1e0010>最</span><span style=color:#960050;background-color:#1e0010>大</span><span style=color:#960050;background-color:#1e0010>值</span>,<span style=color:#960050;background-color:#1e0010>反</span><span style=color:#960050;background-color:#1e0010>向</span><span style=color:#960050;background-color:#1e0010>传</span><span style=color:#960050;background-color:#1e0010>播</span><span style=color:#960050;background-color:#1e0010>时</span><span style=color:#960050;background-color:#1e0010>要</span><span style=color:#960050;background-color:#1e0010>用</span>.
+
+
+
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> EltwiseLayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Reshape(<span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom,
+      <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top) {
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; i <span style=color:#f92672>&lt;</span> bottom.size(); <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+    CHECK(bottom[i]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>shape() <span style=color:#f92672>=</span><span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>shape());
   }
-  optional EltwiseOp operation = 1 [default = SUM]; // element-wise operation
-  repeated float coeff = 2; // blob-wise coefficient for SUM operation
-
-  // Whether to use an asymptotically slower (for &gt;2 inputs) but stabler method
-  // of computing the gradient for the PROD operation. (No effect for SUM op.)
-  optional bool stable_prod_grad = 3 [default = true];
+  <span style=color:#75715e>//  check所有的bottom blob的shape都一样. 至少存在两个bottom blob
+</span><span style=color:#75715e></span>  top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>ReshapeLike(<span style=color:#f92672>*</span>bottom[<span style=color:#ae81ff>0</span>]);
+  <span style=color:#75715e>// If max operation, we will initialize the vector index part.
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>if</span> (<span style=color:#66d9ef>this</span><span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>layer_param_.eltwise_param().operation() <span style=color:#f92672>=</span><span style=color:#f92672>=</span>
+      EltwiseParameter_EltwiseOp_MAX <span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span> top.size() <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>) {
+    max_idx_.Reshape(bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>shape());
+  }
 }
 
-
-</code></pre><p>proto里面的coeff是对于SUM操作,可以给每一个bottom blob一个加权系数, stable_prod_grad是backward用的,不用管.</p><h2 id=c-实现>c++ 实现</h2><pre><code class=language-c++>
-代码比较容易看懂,加了一些注释. 有两个地方可以提一下. 一个是PROD和MAX的做法,都是先求前两个,再把得到的结果和后面的blob进行运算.(其实是很自然的操作...似乎也没什么可说的orz)
-
-另外一个是mask这个变量,是在MAX操作时用来标记在哪个bottom blob 取到了最大值,反向传播时要用.
-
-
-
-template &lt;typename Dtype&gt;
-void EltwiseLayer&lt;Dtype&gt;::Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  for (int i = 1; i &lt; bottom.size(); ++i) {
-    CHECK(bottom[i]-&gt;shape() == bottom[0]-&gt;shape());
-  }
-  //  check所有的bottom blob的shape都一样. 至少存在两个bottom blob
-  top[0]-&gt;ReshapeLike(*bottom[0]);
-  // If max operation, we will initialize the vector index part.
-  if (this-&gt;layer_param_.eltwise_param().operation() ==
-      EltwiseParameter_EltwiseOp_MAX &amp;&amp; top.size() == 1) {
-    max_idx_.Reshape(bottom[0]-&gt;shape());
-  }
-}
-
-template &lt;typename Dtype&gt;
-void EltwiseLayer&lt;Dtype&gt;::Forward_cpu(
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  int* mask = NULL;
-  const Dtype* bottom_data_a = NULL;
-  const Dtype* bottom_data_b = NULL;
-  const int count = top[0]-&gt;count();
-  Dtype* top_data = top[0]-&gt;mutable_cpu_data();
-  switch (op_) {
-  case EltwiseParameter_EltwiseOp_PROD:
-    caffe_mul(count, bottom[0]-&gt;cpu_data(), bottom[1]-&gt;cpu_data(), top_data);
-    for (int i = 2; i &lt; bottom.size(); ++i) {
-      caffe_mul(count, top_data, bottom[i]-&gt;cpu_data(), top_data);
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> EltwiseLayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Forward_cpu(
+    <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom, <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top) {
+  <span style=color:#66d9ef>int</span><span style=color:#f92672>*</span> mask <span style=color:#f92672>=</span> NULL;
+  <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> bottom_data_a <span style=color:#f92672>=</span> NULL;
+  <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> bottom_data_b <span style=color:#f92672>=</span> NULL;
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> count <span style=color:#f92672>=</span> top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count();
+  Dtype<span style=color:#f92672>*</span> top_data <span style=color:#f92672>=</span> top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>mutable_cpu_data();
+  <span style=color:#66d9ef>switch</span> (op_) {
+  <span style=color:#66d9ef>case</span> EltwiseParameter_EltwiseOp_PROD:
+    caffe_mul(count, bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data(), bottom[<span style=color:#ae81ff>1</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data(), top_data);
+    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; i <span style=color:#f92672>&lt;</span> bottom.size(); <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+      caffe_mul(count, top_data, bottom[i]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data(), top_data);
     }
-    //  先算前两个,然后把结果和后面的每一个blob(如果还有的话)做运算
-    break;
-  case EltwiseParameter_EltwiseOp_SUM:
-    caffe_set(count, Dtype(0), top_data);
-    // 初始化top data为0
-    // TODO(shelhamer) does BLAS optimize to sum for coeff = 1?
-    for (int i = 0; i &lt; bottom.size(); ++i) {
-      caffe_axpy(count, coeffs_[i], bottom[i]-&gt;cpu_data(), top_data);
+    <span style=color:#75715e>//  先算前两个,然后把结果和后面的每一个blob(如果还有的话)做运算
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>break</span>;
+  <span style=color:#66d9ef>case</span> EltwiseParameter_EltwiseOp_SUM:
+    caffe_set(count, Dtype(<span style=color:#ae81ff>0</span>), top_data);
+    <span style=color:#75715e>// 初始化top data为0
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// TODO(shelhamer) does BLAS optimize to sum for coeff = 1?
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> bottom.size(); <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+      caffe_axpy(count, coeffs_[i], bottom[i]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data(), top_data);
     }
-    break;
-  //  mask干啥用的??? 
-  //  forward应该用不到,是backward求梯度需要知道在哪个位置得到了最大值
-  case EltwiseParameter_EltwiseOp_MAX:
-    // Initialize
-    mask = max_idx_.mutable_cpu_data();
-    caffe_set(count, -1, mask);
-    caffe_set(count, Dtype(-FLT_MAX), top_data);
-    // bottom 0 &amp; 1
-    bottom_data_a = bottom[0]-&gt;cpu_data();
-    bottom_data_b = bottom[1]-&gt;cpu_data();
-    for (int idx = 0; idx &lt; count; ++idx) {
-      if (bottom_data_a[idx] &gt; bottom_data_b[idx]) {
-        top_data[idx] = bottom_data_a[idx];  // maxval
-        mask[idx] = 0;  // maxid
-      } else {
-        top_data[idx] = bottom_data_b[idx];  // maxval
-        mask[idx] = 1;  // maxid
+    <span style=color:#66d9ef>break</span>;
+  <span style=color:#75715e>//  mask干啥用的??? 
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//  forward应该用不到,是backward求梯度需要知道在哪个位置得到了最大值
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>case</span> EltwiseParameter_EltwiseOp_MAX:
+    <span style=color:#75715e>// Initialize
+</span><span style=color:#75715e></span>    mask <span style=color:#f92672>=</span> max_idx_.mutable_cpu_data();
+    caffe_set(count, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, mask);
+    caffe_set(count, Dtype(<span style=color:#f92672>-</span>FLT_MAX), top_data);
+    <span style=color:#75715e>// bottom 0 &amp; 1
+</span><span style=color:#75715e></span>    bottom_data_a <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+    bottom_data_b <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>1</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> idx <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; idx <span style=color:#f92672>&lt;</span> count; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>idx) {
+      <span style=color:#66d9ef>if</span> (bottom_data_a[idx] <span style=color:#f92672>&gt;</span> bottom_data_b[idx]) {
+        top_data[idx] <span style=color:#f92672>=</span> bottom_data_a[idx];  <span style=color:#75715e>// maxval
+</span><span style=color:#75715e></span>        mask[idx] <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;  <span style=color:#75715e>// maxid
+</span><span style=color:#75715e></span>      } <span style=color:#66d9ef>else</span> {
+        top_data[idx] <span style=color:#f92672>=</span> bottom_data_b[idx];  <span style=color:#75715e>// maxval
+</span><span style=color:#75715e></span>        mask[idx] <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;  <span style=color:#75715e>// maxid
+</span><span style=color:#75715e></span>      }
+    }
+    <span style=color:#75715e>// bottom 2++
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> blob_idx <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; blob_idx <span style=color:#f92672>&lt;</span> bottom.size(); <span style=color:#f92672>+</span><span style=color:#f92672>+</span>blob_idx) {
+      bottom_data_b <span style=color:#f92672>=</span> bottom[blob_idx]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+      <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> idx <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; idx <span style=color:#f92672>&lt;</span> count; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>idx) {
+        <span style=color:#66d9ef>if</span> (bottom_data_b[idx] <span style=color:#f92672>&gt;</span> top_data[idx]) {
+          top_data[idx] <span style=color:#f92672>=</span> bottom_data_b[idx];  <span style=color:#75715e>// maxval
+</span><span style=color:#75715e></span>          mask[idx] <span style=color:#f92672>=</span> blob_idx;  <span style=color:#75715e>// maxid
+</span><span style=color:#75715e></span>        }
       }
     }
-    // bottom 2++
-    for (int blob_idx = 2; blob_idx &lt; bottom.size(); ++blob_idx) {
-      bottom_data_b = bottom[blob_idx]-&gt;cpu_data();
-      for (int idx = 0; idx &lt; count; ++idx) {
-        if (bottom_data_b[idx] &gt; top_data[idx]) {
-          top_data[idx] = bottom_data_b[idx];  // maxval
-          mask[idx] = blob_idx;  // maxid
-        }
-      }
-    }
-    break;
-  default:
-    LOG(FATAL) &lt;&lt; &quot;Unknown elementwise operation.&quot;;
+    <span style=color:#66d9ef>break</span>;
+  <span style=color:#66d9ef>default</span><span style=color:#f92672>:</span>
+    LOG(FATAL) <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Unknown elementwise operation.</span><span style=color:#e6db74>&#34;</span>;
   }
 }
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

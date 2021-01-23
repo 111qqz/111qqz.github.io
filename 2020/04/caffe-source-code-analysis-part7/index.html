@@ -8,118 +8,118 @@ $navbar.className+=" in";}}</script><style type=text/css>header.intro-header{bac
 on
 Monday, April 13, 2020</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#背景>背景　</a></li><li><a href=#proto>proto</a></li><li><a href=#c实现>c++实现</a></li></ol></nav><h2 id=背景>背景　</h2><p>ocr组那边有个shuffle net 的网络,里面有个pytorch op叫chunk,转成的onnx对应的op是 <a href=https://github.com/onnx/onnx/blob/master/docs/Operators.md#Split>split</a></p><p>作用是:</p><blockquote><p>Split a tensor into a list of tensors, along the specified &lsquo;axis&rsquo;. Lengths of the parts can be specified using argument &lsquo;split&rsquo;. Otherwise, the tensor is split to equal sized parts.</p></blockquote><p>然后发现这个op模型转换里不支持转到caffe的layer,于是想办法支持了一下. 发现是要转到caffe的slice layer.(<strong>caffe也有一个split layer,但是这个split layer是除了一个输出blob作为多个layer的输入时用的</strong>)</p><h2 id=proto>proto</h2><pre><code class=language-protobuf>
-message SliceParameter {
-  // The axis along which to slice -- may be negative to index from the end
-  // (e.g., -1 for the last axis).
-  // By default, SliceLayer concatenates blobs along the &quot;channels&quot; axis (1).
-  optional int32 axis = 3 [default = 1];
-  repeated uint32 slice_point = 2;
-
-  // DEPRECATED: alias for &quot;axis&quot; -- does not support negative indexing.
-  optional uint32 slice_dim = 1 [default = 1];
-}
-
-
-</code></pre><p>看起来slice_dim和axis是新旧两种写法,slice_point应该就是切割点. 这个layer文档仍然是"to do"状态,因此只能看代码了.</p><h2 id=c实现>c++实现</h2><pre><code class=language-c++>
-template &lt;typename Dtype&gt;
-void SliceLayer&lt;Dtype&gt;::LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  const SliceParameter&amp; slice_param = this-&gt;layer_param_.slice_param();
-  CHECK(!(slice_param.has_axis() &amp;&amp; slice_param.has_slice_dim()))
-      &lt;&lt; &quot;Either axis or slice_dim should be specified; not both.&quot;;
+post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#背景>背景　</a></li><li><a href=#proto>proto</a></li><li><a href=#c实现>c++实现</a></li></ol></nav><h2 id=背景>背景　</h2><p>ocr组那边有个shuffle net 的网络,里面有个pytorch op叫chunk,转成的onnx对应的op是 <a href=https://github.com/onnx/onnx/blob/master/docs/Operators.md#Split>split</a></p><p>作用是:</p><blockquote><p>Split a tensor into a list of tensors, along the specified &lsquo;axis&rsquo;. Lengths of the parts can be specified using argument &lsquo;split&rsquo;. Otherwise, the tensor is split to equal sized parts.</p></blockquote><p>然后发现这个op模型转换里不支持转到caffe的layer,于是想办法支持了一下. 发现是要转到caffe的slice layer.(<strong>caffe也有一个split layer,但是这个split layer是除了一个输出blob作为多个layer的输入时用的</strong>)</p><h2 id=proto>proto</h2><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-protobuf data-lang=protobuf><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#66d9ef>message</span> <span style=color:#a6e22e>SliceParameter</span> {<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#75715e>// The axis along which to slice -- may be negative to index from the end
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// (e.g., -1 for the last axis).
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// By default, SliceLayer concatenates blobs along the &#34;channels&#34; axis (1).
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>int32</span> axis <span style=color:#f92672>=</span> <span style=color:#ae81ff>3</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>];<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#66d9ef>repeated</span> <span style=color:#66d9ef>uint32</span> slice_point <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>;<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#75715e>// DEPRECATED: alias for &#34;axis&#34; -- does not support negative indexing.
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>uint32</span> slice_dim <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>];<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>}<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#960050;background-color:#1e0010>
+</span></code></pre></div><p>看起来slice_dim和axis是新旧两种写法,slice_point应该就是切割点. 这个layer文档仍然是"to do"状态,因此只能看代码了.</p><h2 id=c实现>c++实现</h2><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> SliceLayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>LayerSetUp(<span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom,
+      <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top) {
+  <span style=color:#66d9ef>const</span> SliceParameter<span style=color:#f92672>&amp;</span> slice_param <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span><span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>layer_param_.slice_param();
+  CHECK(<span style=color:#f92672>!</span>(slice_param.has_axis() <span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span> slice_param.has_slice_dim()))
+      <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Either axis or slice_dim should be specified; not both.</span><span style=color:#e6db74>&#34;</span>;
   slice_point_.clear();
-  std::copy(slice_param.slice_point().begin(),
+  std<span style=color:#f92672>:</span><span style=color:#f92672>:</span>copy(slice_param.slice_point().begin(),
       slice_param.slice_point().end(),
-      std::back_inserter(slice_point_));
+      std<span style=color:#f92672>:</span><span style=color:#f92672>:</span>back_inserter(slice_point_));
 }
 
-</code></pre><p>layerSetUp就是单纯把slice_point用成员函数来存储.</p><p>reshape 其实是比较重点的部分,注意不提供slice_point的默认情况. 其他部分很好懂,就是把切割点计算成每一部分切割线段的长度.</p><pre><code class=language-c++>template &lt;typename Dtype&gt;
-void SliceLayer&lt;Dtype&gt;::Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  const int num_axes = bottom[0]-&gt;num_axes();
-  const SliceParameter&amp; slice_param = this-&gt;layer_param_.slice_param();
-  if (slice_param.has_slice_dim()) {
-    slice_axis_ = static_cast&lt;int&gt;(slice_param.slice_dim());
-    // Don't allow negative indexing for slice_dim, a uint32 -- almost
-    // certainly unintended.
-    CHECK_GE(slice_axis_, 0) &lt;&lt; &quot;casting slice_dim from uint32 to int32 &quot;
-        &lt;&lt; &quot;produced negative result; slice_dim must satisfy &quot;
-        &lt;&lt; &quot;0 &lt;= slice_dim &lt; &quot; &lt;&lt; kMaxBlobAxes;
-    CHECK_LT(slice_axis_, num_axes) &lt;&lt; &quot;slice_dim out of range.&quot;;
-  } else {
-    slice_axis_ = bottom[0]-&gt;CanonicalAxisIndex(slice_param.axis());
+</code></pre></div><p>layerSetUp就是单纯把slice_point用成员函数来存储.</p><p>reshape 其实是比较重点的部分,注意不提供slice_point的默认情况. 其他部分很好懂,就是把切割点计算成每一部分切割线段的长度.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> SliceLayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Reshape(<span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom,
+      <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top) {
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> num_axes <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num_axes();
+  <span style=color:#66d9ef>const</span> SliceParameter<span style=color:#f92672>&amp;</span> slice_param <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span><span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>layer_param_.slice_param();
+  <span style=color:#66d9ef>if</span> (slice_param.has_slice_dim()) {
+    slice_axis_ <span style=color:#f92672>=</span> <span style=color:#66d9ef>static_cast</span><span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span>(slice_param.slice_dim());
+    <span style=color:#75715e>// Don&#39;t allow negative indexing for slice_dim, a uint32 -- almost
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// certainly unintended.
+</span><span style=color:#75715e></span>    CHECK_GE(slice_axis_, <span style=color:#ae81ff>0</span>) <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>casting slice_dim from uint32 to int32 </span><span style=color:#e6db74>&#34;</span>
+        <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>produced negative result; slice_dim must satisfy </span><span style=color:#e6db74>&#34;</span>
+        <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>0 &lt;= slice_dim &lt; </span><span style=color:#e6db74>&#34;</span> <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> kMaxBlobAxes;
+    CHECK_LT(slice_axis_, num_axes) <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>slice_dim out of range.</span><span style=color:#e6db74>&#34;</span>;
+  } <span style=color:#66d9ef>else</span> {
+    slice_axis_ <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>CanonicalAxisIndex(slice_param.axis());
   }
-  vector&lt;int&gt; top_shape = bottom[0]-&gt;shape();
-  const int bottom_slice_axis = bottom[0]-&gt;shape(slice_axis_);
-  // bottom_slice_axis为切割的那个维度的总数
-  num_slices_ = bottom[0]-&gt;count(0, slice_axis_);
-  //  计算[0,slice_axis_)的count
-  slice_size_ = bottom[0]-&gt;count(slice_axis_ + 1);
-  //  计算[slice_axis_+1,num_axes()]的体积
-  int count = 0;
-  if (slice_point_.size() != 0) {
-    CHECK_EQ(slice_point_.size(), top.size() - 1);
-    //  n个点把一条线段切割成n+1(top.size())份
-    CHECK_LE(top.size(), bottom_slice_axis);
-    //  抽屉原理,保证每一个输出blob至少有一份.
-    int prev = 0;
-    vector&lt;int&gt; slices;
-    //  slices保存每一个切割的长度
-    for (int i = 0; i &lt; slice_point_.size(); ++i) {
+  vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> top_shape <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>shape();
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> bottom_slice_axis <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>shape(slice_axis_);
+  <span style=color:#75715e>// bottom_slice_axis为切割的那个维度的总数
+</span><span style=color:#75715e></span>  num_slices_ <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count(<span style=color:#ae81ff>0</span>, slice_axis_);
+  <span style=color:#75715e>//  计算[0,slice_axis_)的count
+</span><span style=color:#75715e></span>  slice_size_ <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count(slice_axis_ <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>);
+  <span style=color:#75715e>//  计算[slice_axis_+1,num_axes()]的体积
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>int</span> count <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+  <span style=color:#66d9ef>if</span> (slice_point_.size() <span style=color:#f92672>!</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>) {
+    CHECK_EQ(slice_point_.size(), top.size() <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>);
+    <span style=color:#75715e>//  n个点把一条线段切割成n+1(top.size())份
+</span><span style=color:#75715e></span>    CHECK_LE(top.size(), bottom_slice_axis);
+    <span style=color:#75715e>//  抽屉原理,保证每一个输出blob至少有一份.
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>int</span> prev <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+    vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> slices;
+    <span style=color:#75715e>//  slices保存每一个切割的长度
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> slice_point_.size(); <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
       CHECK_GT(slice_point_[i], prev);
-      slices.push_back(slice_point_[i] - prev);
-      prev = slice_point_[i];
+      slices.push_back(slice_point_[i] <span style=color:#f92672>-</span> prev);
+      prev <span style=color:#f92672>=</span> slice_point_[i];
     }
-    slices.push_back(bottom_slice_axis - prev);
-    for (int i = 0; i &lt; top.size(); ++i) {
-      top_shape[slice_axis_] = slices[i];
-      top[i]-&gt;Reshape(top_shape);
-      count += top[i]-&gt;count();
+    slices.push_back(bottom_slice_axis <span style=color:#f92672>-</span> prev);
+    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> top.size(); <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+      top_shape[slice_axis_] <span style=color:#f92672>=</span> slices[i];
+      top[i]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>Reshape(top_shape);
+      count <span style=color:#f92672>+</span><span style=color:#f92672>=</span> top[i]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count();
     }
-  } else {
-    // 如果不填写 slice_point,默认是把slice维度平均分给所有输出的blob
-    // 比如输入为[1,3,M,224],在M所在的维度所slice,输出为3个blob
-    //  那么就会得到三个shape为 [1,3,M/3,224]的blob,并且保证M%3==0; 
-    CHECK_EQ(bottom_slice_axis % top.size(), 0)
-        &lt;&lt; &quot;Number of top blobs (&quot; &lt;&lt; top.size() &lt;&lt; &quot;) should evenly &quot;
-        &lt;&lt; &quot;divide input slice axis (&quot; &lt;&lt; bottom_slice_axis &lt;&lt; &quot;)&quot;;
-    top_shape[slice_axis_] = bottom_slice_axis / top.size();
-    for (int i = 0; i &lt; top.size(); ++i) {
-      top[i]-&gt;Reshape(top_shape);
-      count += top[i]-&gt;count();
+  } <span style=color:#66d9ef>else</span> {
+    <span style=color:#75715e>// 如果不填写 slice_point,默认是把slice维度平均分给所有输出的blob
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// 比如输入为[1,3,M,224],在M所在的维度所slice,输出为3个blob
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//  那么就会得到三个shape为 [1,3,M/3,224]的blob,并且保证M%3==0; 
+</span><span style=color:#75715e></span>    CHECK_EQ(bottom_slice_axis <span style=color:#f92672>%</span> top.size(), <span style=color:#ae81ff>0</span>)
+        <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Number of top blobs (</span><span style=color:#e6db74>&#34;</span> <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> top.size() <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>) should evenly </span><span style=color:#e6db74>&#34;</span>
+        <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>divide input slice axis (</span><span style=color:#e6db74>&#34;</span> <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> bottom_slice_axis <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>)</span><span style=color:#e6db74>&#34;</span>;
+    top_shape[slice_axis_] <span style=color:#f92672>=</span> bottom_slice_axis <span style=color:#f92672>/</span> top.size();
+    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> top.size(); <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+      top[i]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>Reshape(top_shape);
+      count <span style=color:#f92672>+</span><span style=color:#f92672>=</span> top[i]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count();
     }
   }
-  CHECK_EQ(count, bottom[0]-&gt;count());
-  if (top.size() == 1) {
-    top[0]-&gt;ShareData(*bottom[0]);
-    top[0]-&gt;ShareDiff(*bottom[0]);
-  }
-}
-
-</code></pre><p>然后是forward,没什么好说的.</p><pre><code class=language-c++>
-template &lt;typename Dtype&gt;
-void SliceLayer&lt;Dtype&gt;::Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  if (top.size() == 1) { return; }
-  int offset_slice_axis = 0;
-  const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
-  const int bottom_slice_axis = bottom[0]-&gt;shape(slice_axis_);
-  for (int i = 0; i &lt; top.size(); ++i) {
-    Dtype* top_data = top[i]-&gt;mutable_cpu_data();
-    const int top_slice_axis = top[i]-&gt;shape(slice_axis_);
-    for (int n = 0; n &lt; num_slices_; ++n) {
-      const int top_offset = n * top_slice_axis * slice_size_;
-      const int bottom_offset =
-          (n * bottom_slice_axis + offset_slice_axis) * slice_size_;
-      caffe_copy(top_slice_axis * slice_size_,
-          bottom_data + bottom_offset, top_data + top_offset);
-    }
-    offset_slice_axis += top_slice_axis;
+  CHECK_EQ(count, bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count());
+  <span style=color:#66d9ef>if</span> (top.size() <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>) {
+    top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>ShareData(<span style=color:#f92672>*</span>bottom[<span style=color:#ae81ff>0</span>]);
+    top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>ShareDiff(<span style=color:#f92672>*</span>bottom[<span style=color:#ae81ff>0</span>]);
   }
 }
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><p>然后是forward,没什么好说的.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> SliceLayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Forward_cpu(<span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom,
+      <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top) {
+  <span style=color:#66d9ef>if</span> (top.size() <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>) { <span style=color:#66d9ef>return</span>; }
+  <span style=color:#66d9ef>int</span> offset_slice_axis <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+  <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> bottom_data <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> bottom_slice_axis <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>shape(slice_axis_);
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> top.size(); <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+    Dtype<span style=color:#f92672>*</span> top_data <span style=color:#f92672>=</span> top[i]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>mutable_cpu_data();
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> top_slice_axis <span style=color:#f92672>=</span> top[i]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>shape(slice_axis_);
+    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> n <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; n <span style=color:#f92672>&lt;</span> num_slices_; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>n) {
+      <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> top_offset <span style=color:#f92672>=</span> n <span style=color:#f92672>*</span> top_slice_axis <span style=color:#f92672>*</span> slice_size_;
+      <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> bottom_offset <span style=color:#f92672>=</span>
+          (n <span style=color:#f92672>*</span> bottom_slice_axis <span style=color:#f92672>+</span> offset_slice_axis) <span style=color:#f92672>*</span> slice_size_;
+      caffe_copy(top_slice_axis <span style=color:#f92672>*</span> slice_size_,
+          bottom_data <span style=color:#f92672>+</span> bottom_offset, top_data <span style=color:#f92672>+</span> top_offset);
+    }
+    offset_slice_axis <span style=color:#f92672>+</span><span style=color:#f92672>=</span> top_slice_axis;
+  }
+}
+
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

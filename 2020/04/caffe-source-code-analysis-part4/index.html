@@ -8,234 +8,234 @@ $navbar.className+=" in";}}</script><style type=text/css>header.intro-header{bac
 on
 Tuesday, April 7, 2020</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#sigmoid>sigmoid</a></li><li><a href=#tanh>tanh</a></li><li><a href=#relu及其变种>relu及其变种</a></li><li><a href=#总结>总结</a></li></ol></nav><p>在看过caffe代码的三个核心部分,blob,layer,net之后，陷入了不知道以什么顺序继续看的困境。</p><p>blob,layer,net只是三个最基本的概念，关键还是在于各个layer. 但是layer这么多，要怎么看呢？ 想了一下决定把相同作用的layer放在一起分析。 今天打算先分析一下激活函数。</p><h2 id=sigmoid>sigmoid</h2><p><img src=https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Sigmoid_function_01.png/220px-Sigmoid_function_01.png alt=sigmoid函数></p><p>表达式为 f(t) = 1/(1+e^-t)</p><p>caffe GPU实现，非常直接</p><pre><code class=language-c++>
-template &lt;typename Dtype&gt;
-__global__ void SigmoidForward(const int n, const Dtype* in, Dtype* out) {
+post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#sigmoid>sigmoid</a></li><li><a href=#tanh>tanh</a></li><li><a href=#relu及其变种>relu及其变种</a></li><li><a href=#总结>总结</a></li></ol></nav><p>在看过caffe代码的三个核心部分,blob,layer,net之后，陷入了不知道以什么顺序继续看的困境。</p><p>blob,layer,net只是三个最基本的概念，关键还是在于各个layer. 但是layer这么多，要怎么看呢？ 想了一下决定把相同作用的layer放在一起分析。 今天打算先分析一下激活函数。</p><h2 id=sigmoid>sigmoid</h2><p><img src=https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Sigmoid_function_01.png/220px-Sigmoid_function_01.png alt=sigmoid函数></p><p>表达式为 f(t) = 1/(1+e^-t)</p><p>caffe GPU实现，非常直接</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+__global__ <span style=color:#66d9ef>void</span> SigmoidForward(<span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> n, <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> in, Dtype<span style=color:#f92672>*</span> out) {
   CUDA_KERNEL_LOOP(index, n) {
-    out[index] = 1. / (1. + exp(-in[index]));
+    out[index] <span style=color:#f92672>=</span> <span style=color:#ae81ff>1.</span> <span style=color:#f92672>/</span> (<span style=color:#ae81ff>1.</span> <span style=color:#f92672>+</span> exp(<span style=color:#f92672>-</span>in[index]));
   }
 }
 
-</code></pre><p>sigmoid激活函数的一大优点是求导非常容易，因此backward函数其实也很简单。</p><pre><code class=language-c++>
-template &lt;typename Dtype&gt;
-__global__ void SigmoidBackward(const int n, const Dtype* in_diff,
-    const Dtype* out_data, Dtype* out_diff) {
+</code></pre></div><p>sigmoid激活函数的一大优点是求导非常容易，因此backward函数其实也很简单。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+__global__ <span style=color:#66d9ef>void</span> SigmoidBackward(<span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> n, <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> in_diff,
+    <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> out_data, Dtype<span style=color:#f92672>*</span> out_diff) {
   CUDA_KERNEL_LOOP(index, n) {
-    const Dtype sigmoid_x = out_data[index];
-    out_diff[index] = in_diff[index] * sigmoid_x * (1 - sigmoid_x);
+    <span style=color:#66d9ef>const</span> Dtype sigmoid_x <span style=color:#f92672>=</span> out_data[index];
+    out_diff[index] <span style=color:#f92672>=</span> in_diff[index] <span style=color:#f92672>*</span> sigmoid_x <span style=color:#f92672>*</span> (<span style=color:#ae81ff>1</span> <span style=color:#f92672>-</span> sigmoid_x);
   }
 }
 
-</code></pre><p>然后proto里面也没什么内容。因为sigmoid函数没什么参数</p><pre><code class=language-proto>
-message SigmoidParameter {
-  enum Engine {
-    DEFAULT = 0;
-    CAFFE = 1;
-    CUDNN = 2;
-  }
-  optional Engine engine = 1 [default = DEFAULT];
-}
-
-</code></pre><p>还值得注意的是sigmoid有文件里的注释:</p><blockquote><p>/**
+</code></pre></div><p>然后proto里面也没什么内容。因为sigmoid函数没什么参数</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-proto data-lang=proto><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#66d9ef>message</span> <span style=color:#a6e22e>SigmoidParameter</span> {<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#66d9ef>enum</span> Engine {<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>    DEFAULT <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>    CAFFE <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>    CUDNN <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>;<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  }<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#66d9ef>optional</span> Engine engine <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> DEFAULT];<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>}<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#960050;background-color:#1e0010>
+</span></code></pre></div><p>还值得注意的是sigmoid有文件里的注释:</p><blockquote><p>/**
 @brief Sigmoid function non-linearity @f$
 y = (1 + \exp(-x))^{-1}
 @f$, a classic choice in neural networks.</p><p>Note that the gradient vanishes as the values move away from 0.
-The ReLULayer is often a better choice for this reason.</p></blockquote><p>sigmoid函数大概是早期的一个比较常用的选择。但是其有几个缺点:</p><ul><li>梯度弥散（除了中间的位置，其他位置的梯度都接近0)</li><li>sigmoid函数的输出不是0均值的,导致权重的梯度全部为正或者为负，只能往一个方向更新，学习的效率比较低。</li><li>算exp比较慢</li></ul><p>因此现在已经几乎不会用sigmoid来做激活函数了。</p><p><strong>但是sigmoid函数其实还有其他用途，比如对于一个多标签的分类任务，常常在fc后面接sigmoid作为神经网络的输出，来判断是否包含这些标签中的一个或者几个。</strong></p><p>（多标签和多分类任务的区别在于，多分类任务通常只有一个标签，一个物体属于这个类别就不会属于另外的类别。）</p><h2 id=tanh>tanh</h2><p>和sigmoid比较相似，比起sigmoid的优点是值域在[-1,1]，均值是为0的，梯度更新的效率比sigmoid好一些。</p><p>没什么可说的，直接放代码吧</p><p>工业界用得也不太多</p><pre><code class=language-c++>
-template &lt;typename Dtype&gt;
-void TanHLayer&lt;Dtype&gt;::Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
-  Dtype* top_data = top[0]-&gt;mutable_cpu_data();
-  const int count = bottom[0]-&gt;count();
-  for (int i = 0; i &lt; count; ++i) {
-    top_data[i] = tanh(bottom_data[i]);
+The ReLULayer is often a better choice for this reason.</p></blockquote><p>sigmoid函数大概是早期的一个比较常用的选择。但是其有几个缺点:</p><ul><li>梯度弥散（除了中间的位置，其他位置的梯度都接近0)</li><li>sigmoid函数的输出不是0均值的,导致权重的梯度全部为正或者为负，只能往一个方向更新，学习的效率比较低。</li><li>算exp比较慢</li></ul><p>因此现在已经几乎不会用sigmoid来做激活函数了。</p><p><strong>但是sigmoid函数其实还有其他用途，比如对于一个多标签的分类任务，常常在fc后面接sigmoid作为神经网络的输出，来判断是否包含这些标签中的一个或者几个。</strong></p><p>（多标签和多分类任务的区别在于，多分类任务通常只有一个标签，一个物体属于这个类别就不会属于另外的类别。）</p><h2 id=tanh>tanh</h2><p>和sigmoid比较相似，比起sigmoid的优点是值域在[-1,1]，均值是为0的，梯度更新的效率比sigmoid好一些。</p><p>没什么可说的，直接放代码吧</p><p>工业界用得也不太多</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> TanHLayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Forward_cpu(<span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom,
+    <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top) {
+  <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> bottom_data <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+  Dtype<span style=color:#f92672>*</span> top_data <span style=color:#f92672>=</span> top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>mutable_cpu_data();
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> count <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count();
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> count; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+    top_data[i] <span style=color:#f92672>=</span> tanh(bottom_data[i]);
   }
 }
 
-template &lt;typename Dtype&gt;
-void TanHLayer&lt;Dtype&gt;::Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-    const vector&lt;bool&gt;&amp; propagate_down,
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
-  if (propagate_down[0]) {
-    const Dtype* top_data = top[0]-&gt;cpu_data();
-    const Dtype* top_diff = top[0]-&gt;cpu_diff();
-    Dtype* bottom_diff = bottom[0]-&gt;mutable_cpu_diff();
-    const int count = bottom[0]-&gt;count();
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> TanHLayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Backward_cpu(<span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top,
+    <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>bool</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> propagate_down,
+    <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom) {
+  <span style=color:#66d9ef>if</span> (propagate_down[<span style=color:#ae81ff>0</span>]) {
+    <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> top_data <span style=color:#f92672>=</span> top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+    <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> top_diff <span style=color:#f92672>=</span> top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_diff();
+    Dtype<span style=color:#f92672>*</span> bottom_diff <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>mutable_cpu_diff();
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> count <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count();
     Dtype tanhx;
-    for (int i = 0; i &lt; count; ++i) {
-      tanhx = top_data[i];
-      bottom_diff[i] = top_diff[i] * (1 - tanhx * tanhx);
+    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> count; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+      tanhx <span style=color:#f92672>=</span> top_data[i];
+      bottom_diff[i] <span style=color:#f92672>=</span> top_diff[i] <span style=color:#f92672>*</span> (<span style=color:#ae81ff>1</span> <span style=color:#f92672>-</span> tanhx <span style=color:#f92672>*</span> tanhx);
     }
   }
 }
 
-</code></pre><h2 id=relu及其变种>relu及其变种</h2><p>表达式为f(x) = max(0,x)</p><p><img src=https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Ramp_function.svg/325px-Ramp_function.svg.png alt=relu></p><p>我们看caffe的proto,发现relu和leaky relu是在一起实现的，因此干脆一起说了。</p><pre><code class=language-protobuf>
-// Message that stores parameters used by ReLULayer
-message ReLUParameter {
-  // Allow non-zero slope for negative inputs to speed up optimization
-  // Described in:
-  // Maas, A. L., Hannun, A. Y., &amp; Ng, A. Y. (2013). Rectifier nonlinearities
-  // improve neural network acoustic models. In ICML Workshop on Deep Learning
-  // for Audio, Speech, and Language Processing.
-  optional float negative_slope = 1 [default = 0];
-  enum Engine {
-    DEFAULT = 0;
-    CAFFE = 1;
-    CUDNN = 2;
+</code></pre></div><h2 id=relu及其变种>relu及其变种</h2><p>表达式为f(x) = max(0,x)</p><p><img src=https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Ramp_function.svg/325px-Ramp_function.svg.png alt=relu></p><p>我们看caffe的proto,发现relu和leaky relu是在一起实现的，因此干脆一起说了。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-protobuf data-lang=protobuf><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#75715e>// Message that stores parameters used by ReLULayer
+</span><span style=color:#75715e></span><span style=color:#66d9ef>message</span> <span style=color:#a6e22e>ReLUParameter</span> {<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#75715e>// Allow non-zero slope for negative inputs to speed up optimization
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// Described in:
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// Maas, A. L., Hannun, A. Y., &amp; Ng, A. Y. (2013). Rectifier nonlinearities
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// improve neural network acoustic models. In ICML Workshop on Deep Learning
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// for Audio, Speech, and Language Processing.
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>float</span> negative_slope <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>];<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#66d9ef>enum</span> Engine {<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>    DEFAULT <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>    CAFFE <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>    CUDNN <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>;<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  }<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#66d9ef>optional</span> Engine engine <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> DEFAULT];<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>}<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#960050;background-color:#1e0010>
+</span></code></pre></div><p>leaky relu是relu的改进，表达式为 <img src=https://wikimedia.org/api/rest_v1/media/math/render/svg/7ef462b36056ff49700914fc305a39cd0d8c1ef1 alt="leaky relu"></p><p>其中lambda是一个用户设定的超参，就是上面的negative_slope</p><p>看一下代码. backward部分也很简单，就一起看一下。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> ReLULayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Forward_cpu(<span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom,
+    <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top) {
+  <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> bottom_data <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+  Dtype<span style=color:#f92672>*</span> top_data <span style=color:#f92672>=</span> top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>mutable_cpu_data();
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> count <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count();
+  Dtype negative_slope <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span><span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>layer_param_.relu_param().negative_slope();
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> count; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+    top_data[i] <span style=color:#f92672>=</span> std<span style=color:#f92672>:</span><span style=color:#f92672>:</span>max(bottom_data[i], Dtype(<span style=color:#ae81ff>0</span>))
+        <span style=color:#f92672>+</span> negative_slope <span style=color:#f92672>*</span> std<span style=color:#f92672>:</span><span style=color:#f92672>:</span>min(bottom_data[i], Dtype(<span style=color:#ae81ff>0</span>));
   }
-  optional Engine engine = 2 [default = DEFAULT];
 }
 
-</code></pre><p>leaky relu是relu的改进，表达式为 <img src=https://wikimedia.org/api/rest_v1/media/math/render/svg/7ef462b36056ff49700914fc305a39cd0d8c1ef1 alt="leaky relu"></p><p>其中lambda是一个用户设定的超参，就是上面的negative_slope</p><p>看一下代码. backward部分也很简单，就一起看一下。</p><pre><code class=language-c++>
-template &lt;typename Dtype&gt;
-void ReLULayer&lt;Dtype&gt;::Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
-  Dtype* top_data = top[0]-&gt;mutable_cpu_data();
-  const int count = bottom[0]-&gt;count();
-  Dtype negative_slope = this-&gt;layer_param_.relu_param().negative_slope();
-  for (int i = 0; i &lt; count; ++i) {
-    top_data[i] = std::max(bottom_data[i], Dtype(0))
-        + negative_slope * std::min(bottom_data[i], Dtype(0));
-  }
-}
-
-template &lt;typename Dtype&gt;
-void ReLULayer&lt;Dtype&gt;::Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-    const vector&lt;bool&gt;&amp; propagate_down,
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
-  if (propagate_down[0]) {
-    const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
-    const Dtype* top_diff = top[0]-&gt;cpu_diff();
-    Dtype* bottom_diff = bottom[0]-&gt;mutable_cpu_diff();
-    const int count = bottom[0]-&gt;count();
-    Dtype negative_slope = this-&gt;layer_param_.relu_param().negative_slope();
-    for (int i = 0; i &lt; count; ++i) {
-      bottom_diff[i] = top_diff[i] * ((bottom_data[i] &gt; 0)
-          + negative_slope * (bottom_data[i] &lt;= 0));
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> ReLULayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Backward_cpu(<span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top,
+    <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>bool</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> propagate_down,
+    <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom) {
+  <span style=color:#66d9ef>if</span> (propagate_down[<span style=color:#ae81ff>0</span>]) {
+    <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> bottom_data <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+    <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> top_diff <span style=color:#f92672>=</span> top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_diff();
+    Dtype<span style=color:#f92672>*</span> bottom_diff <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>mutable_cpu_diff();
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> count <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count();
+    Dtype negative_slope <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span><span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>layer_param_.relu_param().negative_slope();
+    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> count; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+      bottom_diff[i] <span style=color:#f92672>=</span> top_diff[i] <span style=color:#f92672>*</span> ((bottom_data[i] <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>)
+          <span style=color:#f92672>+</span> negative_slope <span style=color:#f92672>*</span> (bottom_data[i] <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>));
     }
   }
 }
-</code></pre><p>relu激活函数应该是目前业界默认的激活函数，简单，效果也挺不错。 优点是:</p><ul><li>收敛速度快</li><li>在x>0的区域，不会出现梯度饱和和梯度消失的情况。</li><li>计算复杂度低，不需要进行指数运算，只要一个阈值就可以得到激活值。</li></ul><p>当然也有一些缺点:</p><ul><li>ReLU的输出不是0均值的。</li><li>Dead ReLU Problem(神经元坏死现象)：ReLU在负数区域被kill的现象叫做dead relu。ReLU在训练的时很“脆弱”。在x&lt;0时，梯度为0。这个神经元及之后的神经元梯度永远为0，不再对任何数据有所响应，导致相应参数永远不会被更新。
+</code></pre></div><p>relu激活函数应该是目前业界默认的激活函数，简单，效果也挺不错。 优点是:</p><ul><li>收敛速度快</li><li>在x>0的区域，不会出现梯度饱和和梯度消失的情况。</li><li>计算复杂度低，不需要进行指数运算，只要一个阈值就可以得到激活值。</li></ul><p>当然也有一些缺点:</p><ul><li>ReLU的输出不是0均值的。</li><li>Dead ReLU Problem(神经元坏死现象)：ReLU在负数区域被kill的现象叫做dead relu。ReLU在训练的时很“脆弱”。在x&lt;0时，梯度为0。这个神经元及之后的神经元梯度永远为0，不再对任何数据有所响应，导致相应参数永远不会被更新。
 产生这种现象的两个原因：参数初始化问题；learning rate太高导致在训练过程中参数更新太大。
 解决方法：采用Xavier初始化方法，以及避免将learning rate设置太大或使用adagrad等自动调节learning rate的算法。</li></ul><p>leaky relu主要是为了解决dead relu 现象提出来的。。。 因为避免出现了激活值总为0的问题。</p><p><strong>但是在实际应用中，并不明显比relu效果好，因此人们还是经常用relu</strong></p><hr><p>leaky relu中的lambda是一个用户设定的超参，如果不手动设定，而是把这个参数通过数据学习出来，就是prelu(p for Parametric)</p><p>具体的区别在于:</p><ul><li>negative slope是通过数据学习得到的。</li><li>每个channel可以学到不同的negative slope(也可以设置所有channel的negative slope统一)</li></ul><blockquote><p>@brief Parameterized Rectified Linear Unit non-linearity @f$
 y_i = \max(0, x_i) + a_i \min(0, x_i)
 @f$. The differences from ReLULayer are 1) negative slopes are
 learnable though backprop and 2) negative slopes can vary across
 channels. The number of axes of input blob should be greater than or
-equal to 2. The 1st axis (0-based) is seen as channels.</p></blockquote><p>我们先看一下proto</p><pre><code class=language-protobuf>
-message PReLUParameter {
-  // Parametric ReLU described in K. He et al, Delving Deep into Rectifiers:
-  // Surpassing Human-Level Performance on ImageNet Classification, 2015.
+equal to 2. The 1st axis (0-based) is seen as channels.</p></blockquote><p>我们先看一下proto</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-protobuf data-lang=protobuf><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#66d9ef>message</span> <span style=color:#a6e22e>PReLUParameter</span> {<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#75715e>// Parametric ReLU described in K. He et al, Delving Deep into Rectifiers:
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// Surpassing Human-Level Performance on ImageNet Classification, 2015.
+</span><span style=color:#75715e></span><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#75715e>// Initial value of a_i. Default is a_i=0.25 for all i.
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> FillerParameter filler <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#75715e>// Whether or not slope paramters are shared across channels.
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>bool</span> channel_shared <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>false</span>];<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>}<span style=color:#960050;background-color:#1e0010>
+</span></code></pre></div><p>这里面的filler的作用是决定每个channel的lambda的初始值</p><p>forward函数和之前比较相似，重点关注一下 slope_data</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> PReLULayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Forward_cpu(<span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom,
+    <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top) {
+  <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> bottom_data <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+  Dtype<span style=color:#f92672>*</span> top_data <span style=color:#f92672>=</span> top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>mutable_cpu_data();
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> count <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count();
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> dim <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count(<span style=color:#ae81ff>2</span>);
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> channels <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>channels();
+  <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> slope_data <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span><span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>blobs_[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
 
-  // Initial value of a_i. Default is a_i=0.25 for all i.
-  optional FillerParameter filler = 1;
-  // Whether or not slope paramters are shared across channels.
-  optional bool channel_shared = 2 [default = false];
-}
-</code></pre><p>这里面的filler的作用是决定每个channel的lambda的初始值</p><p>forward函数和之前比较相似，重点关注一下 slope_data</p><pre><code class=language-c++>
-template &lt;typename Dtype&gt;
-void PReLULayer&lt;Dtype&gt;::Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
-  Dtype* top_data = top[0]-&gt;mutable_cpu_data();
-  const int count = bottom[0]-&gt;count();
-  const int dim = bottom[0]-&gt;count(2);
-  const int channels = bottom[0]-&gt;channels();
-  const Dtype* slope_data = this-&gt;blobs_[0]-&gt;cpu_data();
-
-  // For in-place computation
-  if (bottom[0] == top[0]) {
+  <span style=color:#75715e>// For in-place computation
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>if</span> (bottom[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span><span style=color:#f92672>=</span> top[<span style=color:#ae81ff>0</span>]) {
     caffe_copy(count, bottom_data, bottom_memory_.mutable_cpu_data());
   }
 
-  // if channel_shared, channel index in the following computation becomes
-  // always zero.
-  const int div_factor = channel_shared_ ? channels : 1;
-  for (int i = 0; i &lt; count; ++i) {
-    int c = (i / dim) % channels / div_factor;
-    top_data[i] = std::max(bottom_data[i], Dtype(0))
-        + slope_data[c] * std::min(bottom_data[i], Dtype(0));
+  <span style=color:#75715e>// if channel_shared, channel index in the following computation becomes
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// always zero.
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> div_factor <span style=color:#f92672>=</span> channel_shared_ <span style=color:#f92672>?</span> channels : <span style=color:#ae81ff>1</span>;
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> count; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+    <span style=color:#66d9ef>int</span> c <span style=color:#f92672>=</span> (i <span style=color:#f92672>/</span> dim) <span style=color:#f92672>%</span> channels <span style=color:#f92672>/</span> div_factor;
+    top_data[i] <span style=color:#f92672>=</span> std<span style=color:#f92672>:</span><span style=color:#f92672>:</span>max(bottom_data[i], Dtype(<span style=color:#ae81ff>0</span>))
+        <span style=color:#f92672>+</span> slope_data[c] <span style=color:#f92672>*</span> std<span style=color:#f92672>:</span><span style=color:#f92672>:</span>min(bottom_data[i], Dtype(<span style=color:#ae81ff>0</span>));
   }
 }
-</code></pre><p>然后在backward部分，我们可以看到 slope_data是通过BP学习得到的。</p><pre><code class=language-c++>
-template &lt;typename Dtype&gt;
-void PReLULayer&lt;Dtype&gt;::Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-    const vector&lt;bool&gt;&amp; propagate_down,
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
-  const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
-  const Dtype* slope_data = this-&gt;blobs_[0]-&gt;cpu_data();
-  const Dtype* top_diff = top[0]-&gt;cpu_diff();
-  const int count = bottom[0]-&gt;count();
-  const int dim = bottom[0]-&gt;count(2);
-  const int channels = bottom[0]-&gt;channels();
+</code></pre></div><p>然后在backward部分，我们可以看到 slope_data是通过BP学习得到的。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> PReLULayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Backward_cpu(<span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top,
+    <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>bool</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> propagate_down,
+    <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom) {
+  <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> bottom_data <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+  <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> slope_data <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span><span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>blobs_[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+  <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> top_diff <span style=color:#f92672>=</span> top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_diff();
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> count <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count();
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> dim <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count(<span style=color:#ae81ff>2</span>);
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> channels <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>channels();
 
-  // For in-place computation
-  if (top[0] == bottom[0]) {
-    bottom_data = bottom_memory_.cpu_data();
+  <span style=color:#75715e>// For in-place computation
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>if</span> (top[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span><span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]) {
+    bottom_data <span style=color:#f92672>=</span> bottom_memory_.cpu_data();
   }
 
-  // if channel_shared, channel index in the following computation becomes
-  // always zero.
-  const int div_factor = channel_shared_ ? channels : 1;
+  <span style=color:#75715e>// if channel_shared, channel index in the following computation becomes
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// always zero.
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> div_factor <span style=color:#f92672>=</span> channel_shared_ <span style=color:#f92672>?</span> channels : <span style=color:#ae81ff>1</span>;
 
-  // Propagte to param
-  // Since to write bottom diff will affect top diff if top and bottom blobs
-  // are identical (in-place computaion), we first compute param backward to
-  // keep top_diff unchanged.
-  if (this-&gt;param_propagate_down_[0]) {
-    Dtype* slope_diff = this-&gt;blobs_[0]-&gt;mutable_cpu_diff();
-    for (int i = 0; i &lt; count; ++i) {
-      int c = (i / dim) % channels / div_factor;
-      slope_diff[c] += top_diff[i] * bottom_data[i] * (bottom_data[i] &lt;= 0);
+  <span style=color:#75715e>// Propagte to param
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// Since to write bottom diff will affect top diff if top and bottom blobs
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// are identical (in-place computaion), we first compute param backward to
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// keep top_diff unchanged.
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>if</span> (<span style=color:#66d9ef>this</span><span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>param_propagate_down_[<span style=color:#ae81ff>0</span>]) {
+    Dtype<span style=color:#f92672>*</span> slope_diff <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span><span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>blobs_[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>mutable_cpu_diff();
+    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> count; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+      <span style=color:#66d9ef>int</span> c <span style=color:#f92672>=</span> (i <span style=color:#f92672>/</span> dim) <span style=color:#f92672>%</span> channels <span style=color:#f92672>/</span> div_factor;
+      slope_diff[c] <span style=color:#f92672>+</span><span style=color:#f92672>=</span> top_diff[i] <span style=color:#f92672>*</span> bottom_data[i] <span style=color:#f92672>*</span> (bottom_data[i] <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>);
     }
   }
-  // Propagate to bottom
-  if (propagate_down[0]) {
-    Dtype* bottom_diff = bottom[0]-&gt;mutable_cpu_diff();
-    for (int i = 0; i &lt; count; ++i) {
-      int c = (i / dim) % channels / div_factor;
-      bottom_diff[i] = top_diff[i] * ((bottom_data[i] &gt; 0)
-          + slope_data[c] * (bottom_data[i] &lt;= 0));
-    }
-  }
-}
-
-
-</code></pre><p>这个东西的优点基本上是leaky relu的优点，再加上参数可以通过数据学习，更加鲁棒。</p><p>然而在工业界，这东西用得很少，在加上tensorrt5现在还不支持prelu（似乎是caffe parser的锅）</p><p><a href=https://github.com/NVIDIA/TensorRT/issues/179>PReLU cant be converted #177</a></p><hr><p>还有个类似的叫elu</p><p><img src="https://www.zhihu.com/equation?tex=f%28z%29%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bll%7D%7Bz%7D+%26+%7Bz%3E0%7D+%5C%5C+%7B%5Calpha%28%5Cexp+%28z%29-1%29%7D+%26+%7Bz+%5Cleq+0%7D%5Cend%7Barray%7D%5Cright." alt=elu></p><p>和leaky relu其实非常类似，没什么好说的。</p><p>效果并不确定完全比relu好，而且还要做exp运算，差评。</p><pre><code class=language-c++>
-
-template &lt;typename Dtype&gt;
-void ELULayer&lt;Dtype&gt;::Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
-  Dtype* top_data = top[0]-&gt;mutable_cpu_data();
-  const int count = bottom[0]-&gt;count();
-  Dtype alpha = this-&gt;layer_param_.elu_param().alpha();
-  for (int i = 0; i &lt; count; ++i) {
-    top_data[i] = std::max(bottom_data[i], Dtype(0))
-        + alpha * (exp(std::min(bottom_data[i], Dtype(0))) - Dtype(1));
-  }
-}
-
-template &lt;typename Dtype&gt;
-void ELULayer&lt;Dtype&gt;::Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-    const vector&lt;bool&gt;&amp; propagate_down,
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
-  if (propagate_down[0]) {
-    const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
-    const Dtype* top_data = top[0]-&gt;cpu_data();
-    const Dtype* top_diff = top[0]-&gt;cpu_diff();
-    Dtype* bottom_diff = bottom[0]-&gt;mutable_cpu_diff();
-    const int count = bottom[0]-&gt;count();
-    Dtype alpha = this-&gt;layer_param_.elu_param().alpha();
-    for (int i = 0; i &lt; count; ++i) {
-      bottom_diff[i] = top_diff[i] * ((bottom_data[i] &gt; 0)
-          + (alpha + top_data[i]) * (bottom_data[i] &lt;= 0));
+  <span style=color:#75715e>// Propagate to bottom
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>if</span> (propagate_down[<span style=color:#ae81ff>0</span>]) {
+    Dtype<span style=color:#f92672>*</span> bottom_diff <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>mutable_cpu_diff();
+    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> count; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+      <span style=color:#66d9ef>int</span> c <span style=color:#f92672>=</span> (i <span style=color:#f92672>/</span> dim) <span style=color:#f92672>%</span> channels <span style=color:#f92672>/</span> div_factor;
+      bottom_diff[i] <span style=color:#f92672>=</span> top_diff[i] <span style=color:#f92672>*</span> ((bottom_data[i] <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>)
+          <span style=color:#f92672>+</span> slope_data[c] <span style=color:#f92672>*</span> (bottom_data[i] <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>));
     }
   }
 }
 
-</code></pre><h2 id=总结>总结</h2><p>无脑上relu一般效果不会太差。</p><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+
+</code></pre></div><p>这个东西的优点基本上是leaky relu的优点，再加上参数可以通过数据学习，更加鲁棒。</p><p>然而在工业界，这东西用得很少，在加上tensorrt5现在还不支持prelu（似乎是caffe parser的锅）</p><p><a href=https://github.com/NVIDIA/TensorRT/issues/179>PReLU cant be converted #177</a></p><hr><p>还有个类似的叫elu</p><p><img src="https://www.zhihu.com/equation?tex=f%28z%29%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bll%7D%7Bz%7D+%26+%7Bz%3E0%7D+%5C%5C+%7B%5Calpha%28%5Cexp+%28z%29-1%29%7D+%26+%7Bz+%5Cleq+0%7D%5Cend%7Barray%7D%5Cright." alt=elu></p><p>和leaky relu其实非常类似，没什么好说的。</p><p>效果并不确定完全比relu好，而且还要做exp运算，差评。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> ELULayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Forward_cpu(<span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom,
+    <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top) {
+  <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> bottom_data <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+  Dtype<span style=color:#f92672>*</span> top_data <span style=color:#f92672>=</span> top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>mutable_cpu_data();
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> count <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count();
+  Dtype alpha <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span><span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>layer_param_.elu_param().alpha();
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> count; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+    top_data[i] <span style=color:#f92672>=</span> std<span style=color:#f92672>:</span><span style=color:#f92672>:</span>max(bottom_data[i], Dtype(<span style=color:#ae81ff>0</span>))
+        <span style=color:#f92672>+</span> alpha <span style=color:#f92672>*</span> (exp(std<span style=color:#f92672>:</span><span style=color:#f92672>:</span>min(bottom_data[i], Dtype(<span style=color:#ae81ff>0</span>))) <span style=color:#f92672>-</span> Dtype(<span style=color:#ae81ff>1</span>));
+  }
+}
+
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> ELULayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Backward_cpu(<span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top,
+    <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>bool</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> propagate_down,
+    <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom) {
+  <span style=color:#66d9ef>if</span> (propagate_down[<span style=color:#ae81ff>0</span>]) {
+    <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> bottom_data <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+    <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> top_data <span style=color:#f92672>=</span> top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+    <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> top_diff <span style=color:#f92672>=</span> top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_diff();
+    Dtype<span style=color:#f92672>*</span> bottom_diff <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>mutable_cpu_diff();
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> count <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count();
+    Dtype alpha <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span><span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>layer_param_.elu_param().alpha();
+    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> count; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+      bottom_diff[i] <span style=color:#f92672>=</span> top_diff[i] <span style=color:#f92672>*</span> ((bottom_data[i] <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>)
+          <span style=color:#f92672>+</span> (alpha <span style=color:#f92672>+</span> top_data[i]) <span style=color:#f92672>*</span> (bottom_data[i] <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>));
+    }
+  }
+}
+
+</code></pre></div><h2 id=总结>总结</h2><p>无脑上relu一般效果不会太差。</p><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

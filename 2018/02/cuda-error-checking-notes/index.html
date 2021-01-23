@@ -10,14 +10,14 @@ Friday, February 9, 2018</span></div></div></div></div></header><article><div cl
 col-md-10 col-md-offset-1
 post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p>由于发现cuda c++ 的 debug方式和c++ 差别很大,因此打算再开一篇,专门记录一些和error checking 以及debug有关的内容.</p><p>Error checks in CUDA code can help catch CUDA errors at their source. There are 2 sources of errors in CUDA source code:</p><pre><code>  1. Errors from CUDA **API** calls. For example, a call to `cudaMalloc()` might fail.
   2. Errors from CUDA **kernel** calls. For example, there might be invalid memory access inside a kernel.
-</code></pre><p>All CUDA API calls return a <code>cudaError</code> value, so these calls are easy to check:</p><pre><code>
+</code></pre><p>All CUDA API calls return a <code>cudaError</code> value, so these calls are easy to check:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback>
     
     if ( cudaSuccess != cudaMalloc( &amp;fooPtr, fooSize ) )
-        printf( &quot;Error!\n&quot; );
+        printf( &#34;Error!\n&#34; );
     
 
 
-</code></pre><p>CUDA kernel invocations do not return any value. Error from a CUDA kernel call can be checked after its execution by calling <code>cudaGetLastError()</code>:</p><pre><code>fooKernel&lt;&lt;&lt; x, y &gt;&gt;&gt;(); // Kernel call
+</code></pre></div><p>CUDA kernel invocations do not return any value. Error from a CUDA kernel call can be checked after its execution by calling <code>cudaGetLastError()</code>:</p><pre><code>fooKernel&lt;&lt;&lt; x, y &gt;&gt;&gt;(); // Kernel call
 if ( cudaSuccess != cudaGetLastError() )
     printf( &quot;Error!\n&quot; );
 </code></pre><p>以及下面是一个check error的宏&mldr;</p><pre><code>#define CHECK_ERROR( err ) \

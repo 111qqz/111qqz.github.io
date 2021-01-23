@@ -11,214 +11,214 @@ col-md-10 col-md-offset-1
 post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p>题意是说用k重颜色填充n*m的方格，第i种颜色要用ci次，保证ci（i属于1..k）的和为n"m，问是否有可行解，若有，输出任意一种。
 第一感觉是dfs.。。而且数据范围还那么小。但是鉴于我上次dfs写成汪的经历&mldr;.嗯 不过群里有学长说似乎剪枝不太好想？
 我一开始分了四类，o行o列，e行e列，e行o列，o行e列，（o是odd，e是even）然后将c[i]排序，先填大的C[I]，感觉这样应该更容易找到解。交了一发,WA掉了。。发现当k较小的时候，也就是c[i]都相对较大的时候，先填大的C[I]的策略会出现错误。于是我换了下&mldr;.按c[i]的大小从两边往中间&mldr;然后我还发现其实o行o列和e行e列可以归为一类，同理，后两种也可以归为一类。又交，又WA2333333  然后想了好久。。。 发现对于上面说的两类的处理顺序不同会得到不同的结果&mldr;&mldr;.只有一种是对的。于是加了个judge函数判断冲突&mldr;如果冲突就换个顺序&mldr;..再交，A了。</p><p>过程中出现了两个语法上的错误&mldr;.**一个是=写成了==(从来都是把==写成=。。。)
-另一个是无参数的函数依然要写（）。。。。。。</p><p>确实不难&mldr;.的确是我生疏了。</p><pre><code class=language-c++>
+另一个是无参数的函数依然要写（）。。。。。。</p><p>确实不难&mldr;.的确是我生疏了。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
     
-    /* ***********************************************
-    Author :111qqz
-    Created Time :2016年02月19日 星期五 16时20分07秒
-    File Name :code/hdu/5113.cpp
-    ************************************************ */
+    <span style=color:#75715e>/* ***********************************************
+</span><span style=color:#75715e>    Author :111qqz
+</span><span style=color:#75715e>    Created Time :2016年02月19日 星期五 16时20分07秒
+</span><span style=color:#75715e>    File Name :code/hdu/5113.cpp
+</span><span style=color:#75715e>    ************************************************ */</span>
     
-    #include &lt;iostream&gt;
-    #include &lt;algorithm&gt;
-    #include &lt;cstring&gt;
+    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    
+    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
     
-    using namespace std;
-    
-        int c[100],cc[100];
-        int ans[10][10];
-        int colorid[100];
-        int n,m,k;
-        void look();
-    bool judge();
+        <span style=color:#66d9ef>int</span> c[<span style=color:#ae81ff>100</span>],cc[<span style=color:#ae81ff>100</span>];
+        <span style=color:#66d9ef>int</span> ans[<span style=color:#ae81ff>10</span>][<span style=color:#ae81ff>10</span>];
+        <span style=color:#66d9ef>int</span> colorid[<span style=color:#ae81ff>100</span>];
+        <span style=color:#66d9ef>int</span> n,m,k;
+        <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>look</span>();
+    <span style=color:#66d9ef>bool</span> <span style=color:#a6e22e>judge</span>();
     
     
-    int main()
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
     {
-        int tt;
-        int t;
-        int kk;
+        <span style=color:#66d9ef>int</span> tt;
+        <span style=color:#66d9ef>int</span> t;
+        <span style=color:#66d9ef>int</span> kk;
     
-        cin&gt;&gt;t;
-        tt=t;
+        cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>t;
+        tt<span style=color:#f92672>=</span>t;
     
     
-        int i,j;
-        int head;
-        int flag;
-       while (t--)
-        {  head=1;
-        flag=1;
-             memset(ans,0,sizeof(ans));
-            cin&gt;&gt;n&gt;&gt;m&gt;&gt;k;
-            kk=k;
-            for (i=1;i&lt;=k;i++)
-                cin&gt;&gt;c[i];
+        <span style=color:#66d9ef>int</span> i,j;
+        <span style=color:#66d9ef>int</span> head;
+        <span style=color:#66d9ef>int</span> flag;
+       <span style=color:#66d9ef>while</span> (t<span style=color:#f92672>-</span><span style=color:#f92672>-</span>)
+        {  head<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;
+        flag<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;
+             memset(ans,<span style=color:#ae81ff>0</span>,<span style=color:#66d9ef>sizeof</span>(ans));
+            cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>n<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>m<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>k;
+            kk<span style=color:#f92672>=</span>k;
+            <span style=color:#66d9ef>for</span> (i<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;i<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>k;i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>c[i];
     
-            for (i=1;i&lt;=k;i++)
-                colorid[i]=i;
-            for (i=1;i&lt;k;i++)
-                for (j=i+1;j&lt;=k;j++)
-                if (c[i]&gt;c[j])
+            <span style=color:#66d9ef>for</span> (i<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;i<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>k;i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                colorid[i]<span style=color:#f92672>=</span>i;
+            <span style=color:#66d9ef>for</span> (i<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;i<span style=color:#f92672>&lt;</span>k;i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                <span style=color:#66d9ef>for</span> (j<span style=color:#f92672>=</span>i<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>;j<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>k;j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                <span style=color:#66d9ef>if</span> (c[i]<span style=color:#f92672>&gt;</span>c[j])
                 {
                   swap(c[i],c[j]);
                   swap(colorid[i],colorid[j]);
                 }
-                 for (i=1;i&lt;=k;i++)
-                    cc[i]=c[i];
+                 <span style=color:#66d9ef>for</span> (i<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;i<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>k;i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                    cc[i]<span style=color:#f92672>=</span>c[i];
     
     
     
-            if (c[k]&gt;(n*m+1)/2)  { cout&lt;&lt;&quot;Case #&quot;&lt;&lt;tt-t&lt;&lt;&quot;:&quot;&lt;&lt;endl;cout&lt;&lt;&quot;NO&quot;&lt;&lt;endl;continue;}
+            <span style=color:#66d9ef>if</span> (c[k]<span style=color:#f92672>&gt;</span>(n<span style=color:#f92672>*</span>m<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>)<span style=color:#f92672>/</span><span style=color:#ae81ff>2</span>)  { cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Case #</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>tt<span style=color:#f92672>-</span>t<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>:</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>NO</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;<span style=color:#66d9ef>continue</span>;}
     
-            for (i=1;i&lt;=n;i++)
-                for (j=1;j&lt;=m;j++)
-                    if ((i%2+j%2)%2==1)
+            <span style=color:#66d9ef>for</span> (i<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;i<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>n;i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                <span style=color:#66d9ef>for</span> (j<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;j<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>m;j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                    <span style=color:#66d9ef>if</span> ((i<span style=color:#f92672>%</span><span style=color:#ae81ff>2</span><span style=color:#f92672>+</span>j<span style=color:#f92672>%</span><span style=color:#ae81ff>2</span>)<span style=color:#f92672>%</span><span style=color:#ae81ff>2</span><span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
                     {
-                      if (flag%2==1)
+                      <span style=color:#66d9ef>if</span> (flag<span style=color:#f92672>%</span><span style=color:#ae81ff>2</span><span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
                       {
     
     
-                         ans[i][j]=colorid[k];
-                        // cout&lt;&lt;&quot;i:&quot;&lt;&lt;i&lt;&lt;&quot;j:&quot;&lt;&lt;j&lt;&lt;&quot; &quot;&lt;&lt;colorid[k]&lt;&lt;endl;
-    
-                         c[k]--;
-                         if (c[k]==0)
+                         ans[i][j]<span style=color:#f92672>=</span>colorid[k];
+                        <span style=color:#75715e>// cout&lt;&lt;&#34;i:&#34;&lt;&lt;i&lt;&lt;&#34;j:&#34;&lt;&lt;j&lt;&lt;&#34; &#34;&lt;&lt;colorid[k]&lt;&lt;endl;
+</span><span style=color:#75715e></span>    
+                         c[k]<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
+                         <span style=color:#66d9ef>if</span> (c[k]<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>)
                             {
-                                k--;
-                                flag++;
+                                k<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
+                                flag<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
     
                             }
                       }
-                      else
+                      <span style=color:#66d9ef>else</span>
                         {
-                            ans[i][j]=colorid[head];
+                            ans[i][j]<span style=color:#f92672>=</span>colorid[head];
     
-                        //    cout&lt;&lt;&quot;i:&quot;&lt;&lt;i&lt;&lt;&quot;j:&quot;&lt;&lt;j&lt;&lt;&quot;  &quot;&lt;&lt;colorid[head]&lt;&lt;endl;
-                            c[head]--;
-                            if (c[head]==0)
+                        <span style=color:#75715e>//    cout&lt;&lt;&#34;i:&#34;&lt;&lt;i&lt;&lt;&#34;j:&#34;&lt;&lt;j&lt;&lt;&#34;  &#34;&lt;&lt;colorid[head]&lt;&lt;endl;
+</span><span style=color:#75715e></span>                            c[head]<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
+                            <span style=color:#66d9ef>if</span> (c[head]<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>)
                             {
-                                head++;
-                                flag++;
+                                head<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+                                flag<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
     
                             }
                         }
-                      //  look();
-                    }
+                      <span style=color:#75715e>//  look();
+</span><span style=color:#75715e></span>                    }
     
     
-                    for (i=1;i&lt;=n;i++)
-                for (j=1;j&lt;=m;j++)
-                    if ((i%2+j%2)%2==0)
+                    <span style=color:#66d9ef>for</span> (i<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;i<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>n;i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                <span style=color:#66d9ef>for</span> (j<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;j<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>m;j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                    <span style=color:#66d9ef>if</span> ((i<span style=color:#f92672>%</span><span style=color:#ae81ff>2</span><span style=color:#f92672>+</span>j<span style=color:#f92672>%</span><span style=color:#ae81ff>2</span>)<span style=color:#f92672>%</span><span style=color:#ae81ff>2</span><span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>)
                     {
     
     
-                        if (flag%2==1)
+                        <span style=color:#66d9ef>if</span> (flag<span style=color:#f92672>%</span><span style=color:#ae81ff>2</span><span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
                       {
     
     
-                         ans[i][j]=colorid[k];
-                      //   cout&lt;&lt;&quot;i:&quot;&lt;&lt;i&lt;&lt;&quot;j:&quot;&lt;&lt;j&lt;&lt;&quot; &quot;&lt;&lt;colorid[k]&lt;&lt;endl;
-                         c[k]--;
-                         if (c[k]==0)
+                         ans[i][j]<span style=color:#f92672>=</span>colorid[k];
+                      <span style=color:#75715e>//   cout&lt;&lt;&#34;i:&#34;&lt;&lt;i&lt;&lt;&#34;j:&#34;&lt;&lt;j&lt;&lt;&#34; &#34;&lt;&lt;colorid[k]&lt;&lt;endl;
+</span><span style=color:#75715e></span>                         c[k]<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
+                         <span style=color:#66d9ef>if</span> (c[k]<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>)
                             {
-                                k--;
-                                  flag++;
+                                k<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
+                                  flag<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
                             }
                       }
-                      else
+                      <span style=color:#66d9ef>else</span>
                         {
-                            ans[i][j]=colorid[head];
-                          // cout&lt;&lt;&quot;i:&quot;&lt;&lt;i&lt;&lt;&quot;j:&quot;&lt;&lt;j&lt;&lt;&quot;  &quot;&lt;&lt;colorid[head]&lt;&lt;endl;
-                            c[head]--;
-                            if (c[head]==0)
+                            ans[i][j]<span style=color:#f92672>=</span>colorid[head];
+                          <span style=color:#75715e>// cout&lt;&lt;&#34;i:&#34;&lt;&lt;i&lt;&lt;&#34;j:&#34;&lt;&lt;j&lt;&lt;&#34;  &#34;&lt;&lt;colorid[head]&lt;&lt;endl;
+</span><span style=color:#75715e></span>                            c[head]<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
+                            <span style=color:#66d9ef>if</span> (c[head]<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>)
                             {
-                                head++;
-                               flag++;
+                                head<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+                               flag<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
                             }
                         }
-                     //   look();
-                    }
-                   cout&lt;&lt;&quot;Case #&quot;&lt;&lt;tt-t&lt;&lt;&quot;:&quot;&lt;&lt;endl;
-                   cout&lt;&lt;&quot;YES&quot;&lt;&lt;endl;
+                     <span style=color:#75715e>//   look();
+</span><span style=color:#75715e></span>                    }
+                   cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Case #</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>tt<span style=color:#f92672>-</span>t<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>:</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
+                   cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>YES</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
     
-                    if (!judge())
+                    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span>judge())
                          look();
-                   else
+                   <span style=color:#66d9ef>else</span>
                    {
     
     
-                       k=kk;
-                       head=1;
-                       flag=1;
-                       for (i=1;i&lt;=k;i++)
-                           c[i]=cc[i];
-                       memset(ans,0,sizeof(ans));
+                       k<span style=color:#f92672>=</span>kk;
+                       head<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;
+                       flag<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;
+                       <span style=color:#66d9ef>for</span> (i<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;i<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>k;i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                           c[i]<span style=color:#f92672>=</span>cc[i];
+                       memset(ans,<span style=color:#ae81ff>0</span>,<span style=color:#66d9ef>sizeof</span>(ans));
     
-                       for (i=1;i&lt;=n;i++)
-                        for (j=1;j&lt;=m;j++)
-                            if ((i%2+j%2)%2==0)
+                       <span style=color:#66d9ef>for</span> (i<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;i<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>n;i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                        <span style=color:#66d9ef>for</span> (j<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;j<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>m;j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                            <span style=color:#66d9ef>if</span> ((i<span style=color:#f92672>%</span><span style=color:#ae81ff>2</span><span style=color:#f92672>+</span>j<span style=color:#f92672>%</span><span style=color:#ae81ff>2</span>)<span style=color:#f92672>%</span><span style=color:#ae81ff>2</span><span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>)
                         {
-                            if (flag%2==1)
+                            <span style=color:#66d9ef>if</span> (flag<span style=color:#f92672>%</span><span style=color:#ae81ff>2</span><span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
                             {
-                         ans[i][j]=colorid[k];
-                       //  cout&lt;&lt;&quot;i:&quot;&lt;&lt;i&lt;&lt;&quot;j:&quot;&lt;&lt;j&lt;&lt;&quot; &quot;&lt;&lt;colorid[k]&lt;&lt;endl;
-    
-                         c[k]--;
-                         if (c[k]==0)
+                         ans[i][j]<span style=color:#f92672>=</span>colorid[k];
+                       <span style=color:#75715e>//  cout&lt;&lt;&#34;i:&#34;&lt;&lt;i&lt;&lt;&#34;j:&#34;&lt;&lt;j&lt;&lt;&#34; &#34;&lt;&lt;colorid[k]&lt;&lt;endl;
+</span><span style=color:#75715e></span>    
+                         c[k]<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
+                         <span style=color:#66d9ef>if</span> (c[k]<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>)
                             {
-                                k--;
-                                flag++;
+                                k<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
+                                flag<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
     
                             }
                       }
-                      else
+                      <span style=color:#66d9ef>else</span>
                         {
-                            ans[i][j]=colorid[head];
+                            ans[i][j]<span style=color:#f92672>=</span>colorid[head];
     
-                         //   cout&lt;&lt;&quot;i:&quot;&lt;&lt;i&lt;&lt;&quot;j:&quot;&lt;&lt;j&lt;&lt;&quot;  &quot;&lt;&lt;colorid[head]&lt;&lt;endl;
-                            c[head]--;
-                            if (c[head]==0)
+                         <span style=color:#75715e>//   cout&lt;&lt;&#34;i:&#34;&lt;&lt;i&lt;&lt;&#34;j:&#34;&lt;&lt;j&lt;&lt;&#34;  &#34;&lt;&lt;colorid[head]&lt;&lt;endl;
+</span><span style=color:#75715e></span>                            c[head]<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
+                            <span style=color:#66d9ef>if</span> (c[head]<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>)
                             {
-                                head++;
-                                flag++;
+                                head<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+                                flag<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
     
                             }
                         }
-                      //  look();
-                    }
-                    for (i=1;i&lt;=n;i++)
-                for (j=1;j&lt;=m;j++)
-                    if ((i%2+j%2)%2==1)
+                      <span style=color:#75715e>//  look();
+</span><span style=color:#75715e></span>                    }
+                    <span style=color:#66d9ef>for</span> (i<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;i<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>n;i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                <span style=color:#66d9ef>for</span> (j<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;j<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>m;j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                    <span style=color:#66d9ef>if</span> ((i<span style=color:#f92672>%</span><span style=color:#ae81ff>2</span><span style=color:#f92672>+</span>j<span style=color:#f92672>%</span><span style=color:#ae81ff>2</span>)<span style=color:#f92672>%</span><span style=color:#ae81ff>2</span><span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
                     {
     
     
-                        if (flag%2==1)
+                        <span style=color:#66d9ef>if</span> (flag<span style=color:#f92672>%</span><span style=color:#ae81ff>2</span><span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
                       {
     
     
-                         ans[i][j]=colorid[k];
-                        // cout&lt;&lt;&quot;i:&quot;&lt;&lt;i&lt;&lt;&quot;j:&quot;&lt;&lt;j&lt;&lt;&quot; &quot;&lt;&lt;colorid[k]&lt;&lt;endl;
-                         c[k]--;
-                         if (c[k]==0)
+                         ans[i][j]<span style=color:#f92672>=</span>colorid[k];
+                        <span style=color:#75715e>// cout&lt;&lt;&#34;i:&#34;&lt;&lt;i&lt;&lt;&#34;j:&#34;&lt;&lt;j&lt;&lt;&#34; &#34;&lt;&lt;colorid[k]&lt;&lt;endl;
+</span><span style=color:#75715e></span>                         c[k]<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
+                         <span style=color:#66d9ef>if</span> (c[k]<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>)
                             {
-                                k--;
-                                  flag++;
+                                k<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
+                                  flag<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
                             }
                       }
-                      else
+                      <span style=color:#66d9ef>else</span>
                         {
-                            ans[i][j]=colorid[head];
-                         //  cout&lt;&lt;&quot;i:&quot;&lt;&lt;i&lt;&lt;&quot;j:&quot;&lt;&lt;j&lt;&lt;&quot;  &quot;&lt;&lt;colorid[head]&lt;&lt;endl;
-                            c[head]--;
-                            if (c[head]==0)
+                            ans[i][j]<span style=color:#f92672>=</span>colorid[head];
+                         <span style=color:#75715e>//  cout&lt;&lt;&#34;i:&#34;&lt;&lt;i&lt;&lt;&#34;j:&#34;&lt;&lt;j&lt;&lt;&#34;  &#34;&lt;&lt;colorid[head]&lt;&lt;endl;
+</span><span style=color:#75715e></span>                            c[head]<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
+                            <span style=color:#66d9ef>if</span> (c[head]<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>)
                             {
-                                head++;
-                               flag++;
+                                head<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+                               flag<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
                             }
                         }
-                     //   look();
-                    }
+                     <span style=color:#75715e>//   look();
+</span><span style=color:#75715e></span>                    }
                       look();
     
                    }
@@ -226,38 +226,38 @@ post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p>�
     
     
         }
-        return 0;
+        <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
     }
     
     
-    void look()
+    <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>look</span>()
     {
-        //  cout&lt;&lt;&quot;lookkkkkkkkkkkkkkkkkkkkk&quot;&lt;&lt;endl;
-        int i,j;
-        for (i=1;i&lt;=n;i++)
-            for (j=1;j&lt;=m;j++)
-                if (j!=m)
-              cout&lt;&lt;ans[i][j]&lt;&lt;&quot; &quot;;
-             else cout&lt;&lt;ans[i][j]&lt;&lt;endl;
+        <span style=color:#75715e>//  cout&lt;&lt;&#34;lookkkkkkkkkkkkkkkkkkkkk&#34;&lt;&lt;endl;
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>int</span> i,j;
+        <span style=color:#66d9ef>for</span> (i<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;i<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>n;i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+            <span style=color:#66d9ef>for</span> (j<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;j<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>m;j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                <span style=color:#66d9ef>if</span> (j<span style=color:#f92672>!</span><span style=color:#f92672>=</span>m)
+              cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>ans[i][j]<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74> </span><span style=color:#e6db74>&#34;</span>;
+             <span style=color:#66d9ef>else</span> cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>ans[i][j]<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
     
     }
-    bool judge()
+    <span style=color:#66d9ef>bool</span> <span style=color:#a6e22e>judge</span>()
     {
-        int i,j;
-        for (i=1;i&lt;=n;i++)
-            for (j=1;j&lt;m;j++)
-             if (ans[i][j]==ans[i][j+1])
-               return true;
-        for (i=1;i&lt;n;i++)
-            for (j=1;j&lt;=m;j++)
-            if (ans[i][j]==ans[i+1][j])
-              return true;
-          return false;
+        <span style=color:#66d9ef>int</span> i,j;
+        <span style=color:#66d9ef>for</span> (i<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;i<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>n;i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+            <span style=color:#66d9ef>for</span> (j<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;j<span style=color:#f92672>&lt;</span>m;j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+             <span style=color:#66d9ef>if</span> (ans[i][j]<span style=color:#f92672>=</span><span style=color:#f92672>=</span>ans[i][j<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>])
+               <span style=color:#66d9ef>return</span> true;
+        <span style=color:#66d9ef>for</span> (i<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;i<span style=color:#f92672>&lt;</span>n;i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+            <span style=color:#66d9ef>for</span> (j<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;j<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>m;j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+            <span style=color:#66d9ef>if</span> (ans[i][j]<span style=color:#f92672>=</span><span style=color:#f92672>=</span>ans[i<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>][j])
+              <span style=color:#66d9ef>return</span> true;
+          <span style=color:#66d9ef>return</span> false;
     }
     
 
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

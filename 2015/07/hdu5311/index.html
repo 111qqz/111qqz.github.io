@@ -20,119 +20,119 @@ post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p><a
 然后在给的字符串中按顺序查找这三部分
 如果都能找到,直接YES
 如果任何一种间隔的分段都无法YES 就NO&mldr;</p><p>妈蛋,if语句后面多写了个分号,调了半个多小时才发现(为啥总是这种傻逼错误&mldr;.)
-还有一点,因为是多组数据,而对于每组数据,将tar拆分的方法都是一样的,可以先预处理一下存到数组里.</p><pre><code class=language-c++>
-   #define yn hez111qqz
-   #define j1 cute111qqz
-   #define tm crazy111qqz
-   #define lr dying111qqz
-   using namespace std;
-   #define REP(i, n) for (int i=0;i&lt;int(n);++i)  
-   typedef long long LL;
-   typedef unsigned long long ULL;
-   const int N=1E2+5;
-   int d[N];
-   int len;
+还有一点,因为是多组数据,而对于每组数据,将tar拆分的方法都是一样的,可以先预处理一下存到数组里.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+   <span style=color:#75715e>#</span><span style=color:#75715e>define yn hez111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>define j1 cute111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>define tm crazy111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>define lr dying111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+   <span style=color:#75715e>#</span><span style=color:#75715e>define REP(i, n) for (int i=0;i&lt;int(n);++i)  </span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> LL;
+   <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>unsigned</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> ULL;
+   <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>1E2</span><span style=color:#f92672>+</span><span style=color:#ae81ff>5</span>;
+   <span style=color:#66d9ef>int</span> d[N];
+   <span style=color:#66d9ef>int</span> len;
    string st,tar,s1,s2,s3;
-   bool flag;
+   <span style=color:#66d9ef>bool</span> flag;
    
-   void solve (string x,string y,string z)
+   <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>solve</span> (string x,string y,string z)
    {
-       int lx = x.length();
-       int ly = y.length();
-       int lz = z.length();
-       bool debug = false;
-       if (x==&quot;anniv&quot;&amp;&amp;y==&quot;er&quot;&amp;&amp;z==&quot;sary&quot;)
-       debug = true;
-       int p;
-       int k = 0;
-       for ( int i = 0 ; i  &lt; len-lx+1 ; i++ )
+       <span style=color:#66d9ef>int</span> lx <span style=color:#f92672>=</span> x.length();
+       <span style=color:#66d9ef>int</span> ly <span style=color:#f92672>=</span> y.length();
+       <span style=color:#66d9ef>int</span> lz <span style=color:#f92672>=</span> z.length();
+       <span style=color:#66d9ef>bool</span> debug <span style=color:#f92672>=</span> false;
+       <span style=color:#66d9ef>if</span> (x<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>anniv</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>y<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>er</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>z<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>sary</span><span style=color:#e6db74>&#34;</span>)
+       debug <span style=color:#f92672>=</span> true;
+       <span style=color:#66d9ef>int</span> p;
+       <span style=color:#66d9ef>int</span> k <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+       <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span> ; i  <span style=color:#f92672>&lt;</span> len<span style=color:#f92672>-</span>lx<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span> ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
        {
-       string tmps = st.substr(i,lx);
-   //	if (debug) cout&lt;&lt;&quot;tmaaaps:&quot;&lt;&lt;tmps&lt;&lt;endl;
-       if (tmps==x);
+       string tmps <span style=color:#f92672>=</span> st.substr(i,lx);
+   <span style=color:#75715e>//	if (debug) cout&lt;&lt;&#34;tmaaaps:&#34;&lt;&lt;tmps&lt;&lt;endl;
+</span><span style=color:#75715e></span>       <span style=color:#66d9ef>if</span> (tmps<span style=color:#f92672>=</span><span style=color:#f92672>=</span>x);
        {
-           p = i;
-          // cout&lt;&lt;&quot;tmps1:&quot;&lt;&lt;tmps&lt;&lt;endl;
-           k++;
-           break;
+           p <span style=color:#f92672>=</span> i;
+          <span style=color:#75715e>// cout&lt;&lt;&#34;tmps1:&#34;&lt;&lt;tmps&lt;&lt;endl;
+</span><span style=color:#75715e></span>           k<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+           <span style=color:#66d9ef>break</span>;
        }
        }
-       if (k==0) return;
+       <span style=color:#66d9ef>if</span> (k<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>) <span style=color:#66d9ef>return</span>;
    
-       for ( int i =  p+lx ;  i &lt; len - ly +1 ;i++)
+       <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span>  p<span style=color:#f92672>+</span>lx ;  i <span style=color:#f92672>&lt;</span> len <span style=color:#f92672>-</span> ly <span style=color:#f92672>+</span><span style=color:#ae81ff>1</span> ;i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
        {
-       string tmps = st.substr(i,ly);
-       //	if (debug) cout&lt;&lt;&quot;tms2:&quot;&lt;&lt;tmps&lt;&lt;endl;
-       if (tmps==y)
+       string tmps <span style=color:#f92672>=</span> st.substr(i,ly);
+       <span style=color:#75715e>//	if (debug) cout&lt;&lt;&#34;tms2:&#34;&lt;&lt;tmps&lt;&lt;endl;
+</span><span style=color:#75715e></span>       <span style=color:#66d9ef>if</span> (tmps<span style=color:#f92672>=</span><span style=color:#f92672>=</span>y)
        {
-           p = i ;
-         //  cout&lt;&lt;&quot;tmps2:&quot;&lt;&lt;tmps&lt;&lt;endl;
-           k++;
-           break;
+           p <span style=color:#f92672>=</span> i ;
+         <span style=color:#75715e>//  cout&lt;&lt;&#34;tmps2:&#34;&lt;&lt;tmps&lt;&lt;endl;
+</span><span style=color:#75715e></span>           k<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+           <span style=color:#66d9ef>break</span>;
        }
        }
-       if (k==1) return ;
-       for ( int i = p+ly;  i &lt; len - lz +1 ; i ++)
+       <span style=color:#66d9ef>if</span> (k<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>) <span style=color:#66d9ef>return</span> ;
+       <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> p<span style=color:#f92672>+</span>ly;  i <span style=color:#f92672>&lt;</span> len <span style=color:#f92672>-</span> lz <span style=color:#f92672>+</span><span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
        {
-       string tmps = st.substr(i,lz);
-       if (tmps==z)
+       string tmps <span style=color:#f92672>=</span> st.substr(i,lz);
+       <span style=color:#66d9ef>if</span> (tmps<span style=color:#f92672>=</span><span style=color:#f92672>=</span>z)
        {
-       //    cout&lt;&lt;&quot;tmps3:&quot;&lt;&lt;tmps&lt;&lt;endl;
-           k++;
-           break;
+       <span style=color:#75715e>//    cout&lt;&lt;&#34;tmps3:&#34;&lt;&lt;tmps&lt;&lt;endl;
+</span><span style=color:#75715e></span>           k<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+           <span style=color:#66d9ef>break</span>;
        }
        }
-       if (k==3)
+       <span style=color:#66d9ef>if</span> (k<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>3</span>)
        {
-       flag = true;
-       return;
+       flag <span style=color:#f92672>=</span> true;
+       <span style=color:#66d9ef>return</span>;
        }
    
    }
-   int main()
+   <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
    {
-       int T; 
-       cin&gt;&gt;T;
-       while (T--)
+       <span style=color:#66d9ef>int</span> T; 
+       cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>T;
+       <span style=color:#66d9ef>while</span> (T<span style=color:#f92672>-</span><span style=color:#f92672>-</span>)
        {
-         flag = false;
-         cin&gt;&gt;st;
-         len = st.length();
-         int k = 0;
-         int num = 0;
-         tar=&quot;anniversary&quot;;
-         for ( int i = 1 ; i &lt;=9 ;  i++ )
+         flag <span style=color:#f92672>=</span> false;
+         cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>st;
+         len <span style=color:#f92672>=</span> st.length();
+         <span style=color:#66d9ef>int</span> k <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+         <span style=color:#66d9ef>int</span> num <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+         tar<span style=color:#f92672>=</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>anniversary</span><span style=color:#e6db74>&#34;</span>;
+         <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span><span style=color:#ae81ff>9</span> ;  i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
          {
-           for ( int j = i+1 ; j &lt;= 10 ; j++ )
+           <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> i<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span> ; j <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>10</span> ; j<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
            {
-               s1 = tar.substr(0,i);
-               s2 = tar.substr(i,j-i);
-               s3 = tar.substr(j);
-            //   cout&lt;&lt;i&lt;&lt;&quot; &quot;&lt;&lt;j&lt;&lt;&quot; &quot;&lt;&lt;s1&lt;&lt;&quot; &quot;&lt;&lt;s2&lt;&lt;&quot; &quot;&lt;&lt;s3&lt;&lt;endl;
-               solve (s1,s2,s3);
-               if (flag)
+               s1 <span style=color:#f92672>=</span> tar.substr(<span style=color:#ae81ff>0</span>,i);
+               s2 <span style=color:#f92672>=</span> tar.substr(i,j<span style=color:#f92672>-</span>i);
+               s3 <span style=color:#f92672>=</span> tar.substr(j);
+            <span style=color:#75715e>//   cout&lt;&lt;i&lt;&lt;&#34; &#34;&lt;&lt;j&lt;&lt;&#34; &#34;&lt;&lt;s1&lt;&lt;&#34; &#34;&lt;&lt;s2&lt;&lt;&#34; &#34;&lt;&lt;s3&lt;&lt;endl;
+</span><span style=color:#75715e></span>               solve (s1,s2,s3);
+               <span style=color:#66d9ef>if</span> (flag)
                {
-               break;
+               <span style=color:#66d9ef>break</span>;
                }
            }
-           if (flag)
-           break;
+           <span style=color:#66d9ef>if</span> (flag)
+           <span style=color:#66d9ef>break</span>;
          }
-         if (flag)
+         <span style=color:#66d9ef>if</span> (flag)
            {
-           cout&lt;&lt;&quot;YES&quot;&lt;&lt;endl;
+           cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>YES</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
            }
-         else
+         <span style=color:#66d9ef>else</span>
            {
-           cout&lt;&lt;&quot;NO&quot;&lt;&lt;endl;
+           cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>NO</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
            }
    
        }
      
-       return 0;
+       <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
    }
    
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

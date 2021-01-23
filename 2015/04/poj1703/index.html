@@ -18,93 +18,93 @@ TLE了两次&mldr;.应该是用了cin的事。。。改成scanf就变WA了。。
 我开了一个v数组，记录在D下出现的人。
 我误以为出现的人的帮派一定是确定的。
 实际上并不是。
-比如 1,3 5,7 3和7都出现了。但是3和7是一组与否显然还是“not sure yet”</p><pre><code class=language-c++> 
+比如 1,3 5,7 3和7都出现了。但是3和7是一组与否显然还是“not sure yet”</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++> 
 
     
-    /* ***********************************************
-    Author :111qqz
-    Created Time :2016年03月03日 星期四 13时43分16秒
-    File Name :code/poj/1703.cpp
-    ************************************************ */
+    <span style=color:#75715e>/* ***********************************************
+</span><span style=color:#75715e>    Author :111qqz
+</span><span style=color:#75715e>    Created Time :2016年03月03日 星期四 13时43分16秒
+</span><span style=color:#75715e>    File Name :code/poj/1703.cpp
+</span><span style=color:#75715e>    ************************************************ */</span>
     
-    #include &lt;iostream&gt;
-    #include &lt;algorithm&gt;
-    #include &lt;cstring&gt;
-    #include &lt;cstdio&gt;
-    #include &lt;cmath&gt;
+    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    
+    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
     
-    using namespace std;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>2E5</span><span style=color:#f92672>+</span><span style=color:#ae81ff>7</span>;
+    <span style=color:#66d9ef>bool</span> v[N];
+    <span style=color:#66d9ef>int</span> f[N];
+    <span style=color:#66d9ef>int</span> T,n,m,x,y;
+    <span style=color:#66d9ef>char</span> ch;
     
-    const int N=2E5+7;
-    bool v[N];
-    int f[N];
-    int T,n,m,x,y;
-    char ch;
-    
-    int root (int x)
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>root</span> (<span style=color:#66d9ef>int</span> x)
     {
-        if (f[x]!=x)
-            f[x] = root(f[x]);
-        return f[x];
+        <span style=color:#66d9ef>if</span> (f[x]<span style=color:#f92672>!</span><span style=color:#f92672>=</span>x)
+            f[x] <span style=color:#f92672>=</span> root(f[x]);
+        <span style=color:#66d9ef>return</span> f[x];
     }
-    void u(int a,int b)
+    <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>u</span>(<span style=color:#66d9ef>int</span> a,<span style=color:#66d9ef>int</span> b)
     {
-        f[root(a)]=root(b);
+        f[root(a)]<span style=color:#f92672>=</span>root(b);
     }
-    void ask(int a,int b)
+    <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>ask</span>(<span style=color:#66d9ef>int</span> a,<span style=color:#66d9ef>int</span> b)
     {
-        //if (!v[a]||!v[b])
-       // {
-            
-         //   return;
-      //  }
-        if (root(a)==root(b)||root(a+n)==root(b+n))
+        <span style=color:#75715e>//if (!v[a]||!v[b])
+</span><span style=color:#75715e></span>       <span style=color:#75715e>// {
+</span><span style=color:#75715e></span>            
+         <span style=color:#75715e>//   return;
+</span><span style=color:#75715e></span>      <span style=color:#75715e>//  }
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>if</span> (root(a)<span style=color:#f92672>=</span><span style=color:#f92672>=</span>root(b)<span style=color:#f92672>|</span><span style=color:#f92672>|</span>root(a<span style=color:#f92672>+</span>n)<span style=color:#f92672>=</span><span style=color:#f92672>=</span>root(b<span style=color:#f92672>+</span>n))
         {
-            cout&lt;&lt;&quot;In the same gang.&quot;&lt;&lt;endl;
+            cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>In the same gang.</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
         }
-        else if (root(a)==root(b+n)||root(a+n)==root(b))
+        <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (root(a)<span style=color:#f92672>=</span><span style=color:#f92672>=</span>root(b<span style=color:#f92672>+</span>n)<span style=color:#f92672>|</span><span style=color:#f92672>|</span>root(a<span style=color:#f92672>+</span>n)<span style=color:#f92672>=</span><span style=color:#f92672>=</span>root(b))
         {
-            cout&lt;&lt;&quot;In different gangs.&quot;&lt;&lt;endl;
+            cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>In different gangs.</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
         }
-        else
+        <span style=color:#66d9ef>else</span>
         {
-            cout&lt;&lt;&quot;Not sure yet.&quot;&lt;&lt;endl;
+            cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Not sure yet.</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
         }
     }
     
     
-    int main()
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
     {
-        cin&gt;&gt;T;
-        while (T--)
+        cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>T;
+        <span style=color:#66d9ef>while</span> (T<span style=color:#f92672>-</span><span style=color:#f92672>-</span>)
         {
-            memset(v,false,sizeof(v));
-            for ( int i = 0 ; i &lt; N ; i++ )
-                f[i] = i;
-            scanf(&quot;%d %d&quot;,&amp;n,&amp;m);
-            for ( int i = 1 ; i &lt;= m ; i++ )
+            memset(v,false,<span style=color:#66d9ef>sizeof</span>(v));
+            <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span> ; i <span style=color:#f92672>&lt;</span> N ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+                f[i] <span style=color:#f92672>=</span> i;
+            scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d %d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>n,<span style=color:#f92672>&amp;</span>m);
+            <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> m ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
             {
     
-                scanf(&quot;%s %d %d&quot;,&amp;ch,&amp;x,&amp;y);
-                if (ch=='A')
+                scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%s %d %d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>ch,<span style=color:#f92672>&amp;</span>x,<span style=color:#f92672>&amp;</span>y);
+                <span style=color:#66d9ef>if</span> (ch<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>A</span><span style=color:#e6db74>&#39;</span>)
                 {
                     ask(x,y);
                 }
-                else
+                <span style=color:#66d9ef>else</span>
                 {
-                    v[x] = true;
-                    v[y] = true;
-                    u(x,y+n);
-                    u(x+n,y);
+                    v[x] <span style=color:#f92672>=</span> true;
+                    v[y] <span style=color:#f92672>=</span> true;
+                    u(x,y<span style=color:#f92672>+</span>n);
+                    u(x<span style=color:#f92672>+</span>n,y);
                 }
             }
         }
-        return 0;
+        <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
     }
     
 
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

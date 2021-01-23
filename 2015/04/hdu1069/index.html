@@ -31,80 +31,80 @@ Input is terminated by a value of zero (0) for n.</p><p>Output</p><p>For each te
 97 93 23
 84 62 64
 33 83 27
-0</p><p>Sample Output</p><p>Case 1: maximum height = 40</p><p>Case 2: maximum height = 21</p><p>Case 3: maximum height = 28</p><p>Case 4: maximum height = 342</p><p> 师傅给我准备的dp第二道。</p><p>dp比较渣，一开始看完题，看到有N种物品，每种无限个，加了些限制条件，感觉有点像完全背包。</p><p>不过那样想就完全歪掉了。</p><p>虽然说每种石块有无限个，但是由于条件限制&mldr;每种石块不可能取一个以上&mldr;.</p><p>正解应该是先排序再做一个最长下降子序列</p><p>注意每个石块有6种不同的方法（有人说三种&mldr;不明白）在读入的时候处理一下即可。</p><p>看到有人按面积排序也可以AC，感觉不对，每个边的限制，按面积排序显然是放宽条件了。。。难道是因为数据水？</p><pre><code class=language-c++>
+0</p><p>Sample Output</p><p>Case 1: maximum height = 40</p><p>Case 2: maximum height = 21</p><p>Case 3: maximum height = 28</p><p>Case 4: maximum height = 342</p><p> 师傅给我准备的dp第二道。</p><p>dp比较渣，一开始看完题，看到有N种物品，每种无限个，加了些限制条件，感觉有点像完全背包。</p><p>不过那样想就完全歪掉了。</p><p>虽然说每种石块有无限个，但是由于条件限制&mldr;每种石块不可能取一个以上&mldr;.</p><p>正解应该是先排序再做一个最长下降子序列</p><p>注意每个石块有6种不同的方法（有人说三种&mldr;不明白）在读入的时候处理一下即可。</p><p>看到有人按面积排序也可以AC，感觉不对，每个边的限制，按面积排序显然是放宽条件了。。。难道是因为数据水？</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
 
 
 
 
     
-    #include &lt;iostream&gt;
-    #include &lt;algorithm&gt;
-    #include &lt;cstring&gt;
-    #include &lt;cstdio&gt;
-    #include &lt;cmath&gt;
-    
-    using namespace std;
-        int n,k,a,b,c,tmp;
-        const int N=1E4+5;
-        int dp[N];
-        long long ans;
-    struct Q
+    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    
+    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+        <span style=color:#66d9ef>int</span> n,k,a,b,c,tmp;
+        <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>1E4</span><span style=color:#f92672>+</span><span style=color:#ae81ff>5</span>;
+        <span style=color:#66d9ef>int</span> dp[N];
+        <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> ans;
+    <span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>Q</span>
     {
-        int x,y,z;
+        <span style=color:#66d9ef>int</span> x,y,z;
     
     }q[N];
     
-    bool cmp(Q a,Q b)
+    <span style=color:#66d9ef>bool</span> <span style=color:#a6e22e>cmp</span>(Q a,Q b)
     {
-        if (a.x&gt;b.x) return true;
-        if (a.x==b.x&amp;&amp;a.y&gt;b.y) return true;
-        return false;
+        <span style=color:#66d9ef>if</span> (a.x<span style=color:#f92672>&gt;</span>b.x) <span style=color:#66d9ef>return</span> true;
+        <span style=color:#66d9ef>if</span> (a.x<span style=color:#f92672>=</span><span style=color:#f92672>=</span>b.x<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>a.y<span style=color:#f92672>&gt;</span>b.y) <span style=color:#66d9ef>return</span> true;
+        <span style=color:#66d9ef>return</span> false;
     }
     
-    int main()
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
     {
-        int cas=0;
-        while (scanf(&quot;%d&quot;,&amp;n)!=EOF&amp;&amp;n)
+        <span style=color:#66d9ef>int</span> cas<span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>;
+        <span style=color:#66d9ef>while</span> (scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>n)<span style=color:#f92672>!</span><span style=color:#f92672>=</span>EOF<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>n)
         {
-            cas++;
-            memset(dp,0,sizeof(dp));
-            k = 1;
-            ans = -1;
-            for ( int i = 1 ; i &lt;= n ; i++ )
+            cas<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+            memset(dp,<span style=color:#ae81ff>0</span>,<span style=color:#66d9ef>sizeof</span>(dp));
+            k <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+            ans <span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>;
+            <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
             {
-                scanf(&quot;%d%d%d&quot;,&amp;a,&amp;b,&amp;c);
-                q[k].x = a;q[k].y = b;q[k].z=c;k++;
-                q[k].x = a;q[k].y = c;q[k].z=b;k++;
-                q[k].x = b;q[k].y = a;q[k].z=c;k++;
-                q[k].x = b;q[k].y = c;q[k].z=a;k++;
-                q[k].x = c;q[k].y = a;q[k].z=b;k++;
-                q[k].x = c;q[k].y = b;q[k].z=a;k++;
+                scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d%d%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>a,<span style=color:#f92672>&amp;</span>b,<span style=color:#f92672>&amp;</span>c);
+                q[k].x <span style=color:#f92672>=</span> a;q[k].y <span style=color:#f92672>=</span> b;q[k].z<span style=color:#f92672>=</span>c;k<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+                q[k].x <span style=color:#f92672>=</span> a;q[k].y <span style=color:#f92672>=</span> c;q[k].z<span style=color:#f92672>=</span>b;k<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+                q[k].x <span style=color:#f92672>=</span> b;q[k].y <span style=color:#f92672>=</span> a;q[k].z<span style=color:#f92672>=</span>c;k<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+                q[k].x <span style=color:#f92672>=</span> b;q[k].y <span style=color:#f92672>=</span> c;q[k].z<span style=color:#f92672>=</span>a;k<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+                q[k].x <span style=color:#f92672>=</span> c;q[k].y <span style=color:#f92672>=</span> a;q[k].z<span style=color:#f92672>=</span>b;k<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+                q[k].x <span style=color:#f92672>=</span> c;q[k].y <span style=color:#f92672>=</span> b;q[k].z<span style=color:#f92672>=</span>a;k<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
             }
-            k--;
-            sort(q+1,q+k+1,cmp);
-            dp[1]=q[1].z;
+            k<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
+            sort(q<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>,q<span style=color:#f92672>+</span>k<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>,cmp);
+            dp[<span style=color:#ae81ff>1</span>]<span style=color:#f92672>=</span>q[<span style=color:#ae81ff>1</span>].z;
     
-            for ( int i = 2 ; i &lt;= k ; i++ )
+            <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> k ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
             {
-                tmp = 0;
-                for ( int j = 1 ; j &lt;= i-1 ; j++ )
-                    if (q[j].x&gt;q[i].x&amp;&amp;q[j].y&gt;q[i].y&amp;&amp;dp[j]&gt;tmp)
+                tmp <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+                <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; j <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> i<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> ; j<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+                    <span style=color:#66d9ef>if</span> (q[j].x<span style=color:#f92672>&gt;</span>q[i].x<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>q[j].y<span style=color:#f92672>&gt;</span>q[i].y<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>dp[j]<span style=color:#f92672>&gt;</span>tmp)
                     {
-                        tmp=dp[j];
+                        tmp<span style=color:#f92672>=</span>dp[j];
                     }
-                dp[i]=tmp+q[i].z;
+                dp[i]<span style=color:#f92672>=</span>tmp<span style=color:#f92672>+</span>q[i].z;
             }
-            for ( int i = 1 ; i &lt;= k ; i++)
-                if ( dp[i]&gt;ans )
-                    ans = dp[i];
-            printf(&quot;Case %d: maximum height = %I64d\n&quot;,cas,ans);
+            <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> k ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                <span style=color:#66d9ef>if</span> ( dp[i]<span style=color:#f92672>&gt;</span>ans )
+                    ans <span style=color:#f92672>=</span> dp[i];
+            printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Case %d: maximum height = %I64d</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>,cas,ans);
         }
-        return 0;
+        <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
     }
 
 
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

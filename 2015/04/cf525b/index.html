@@ -9,52 +9,52 @@ on
 Wednesday, April 8, 2015</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
 post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p><a href=http://codeforces.com/problemset/problem/525/B>http://codeforces.com/problemset/problem/525/B</a></p><pre><code>题意是说一个字符串，进行m次颠倒变换（从a[i]位置到a[l-i+1]位置），问得到的字符串。容易发现，对于越在里边（对称，也就是越靠近中间位置）的字符，调换的次数越多。我们可以把a[i]从小到大排序。然后经过分析发现，把两个相邻的a[i]分为一组，做处理，如果m为奇数，最后还剩下a[m]没有被分组，要单独处理a[m]细节上要注意st数组是从st[0]开始的...好吧的确不方便，适牛也说我了。。数组下标以后还是从0开始吧。。。主要是受高中OI用的pascal的影响。。。那个数组下标随便啊。代码：
-</code></pre><pre><code class=language-c++>
+</code></pre><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
     
-    /* ***********************************************
-    Author :111qqz
-    Created Time :2016年02月22日 星期一 23时39分51秒
-    File Name :code/cf/problem/525B.cpp
-    ************************************************ */
+    <span style=color:#75715e>/* ***********************************************
+</span><span style=color:#75715e>    Author :111qqz
+</span><span style=color:#75715e>    Created Time :2016年02月22日 星期一 23时39分51秒
+</span><span style=color:#75715e>    File Name :code/cf/problem/525B.cpp
+</span><span style=color:#75715e>    ************************************************ */</span>
     
-    #include &lt;iostream&gt;
-    #include &lt;algorithm&gt;
-    #include &lt;cstring&gt;
-    #include &lt;cmath&gt;
-    #include &lt;cstdio&gt;
+    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    
+    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
     
-    using namespace std;
+    <span style=color:#66d9ef>int</span> m,k,len;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>2E5</span><span style=color:#f92672>+</span><span style=color:#ae81ff>7</span>;
+    <span style=color:#66d9ef>int</span> a[N];
+    <span style=color:#66d9ef>char</span> st[N];
     
-    int m,k,len;
-    const int N=2E5+7;
-    int a[N];
-    char st[N];
-    
-    int main()
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
     {
-        cin&gt;&gt;st;
-        scanf(&quot;%d&quot;,&amp;m);
-        for ( int i = 1 ; i &lt;= m ; i++ )
-            scanf(&quot;%d&quot;,&amp;a[i]);
-        sort(a+1,a+m+1);
-        k = 1;
-        len = strlen(st);
-        while (k&lt;=m)
+        cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>st;
+        scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>m);
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> m ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+            scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>a[i]);
+        sort(a<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>,a<span style=color:#f92672>+</span>m<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>);
+        k <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+        len <span style=color:#f92672>=</span> strlen(st);
+        <span style=color:#66d9ef>while</span> (k<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>m)
         {
-            for ( int j = a[k] ; j &lt;= a[k+1]-1 ; j++)
-                swap(st[j-1],st[len-j]);
-            k = k + 2;
+            <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> a[k] ; j <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> a[k<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>]<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> ; j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                swap(st[j<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>],st[len<span style=color:#f92672>-</span>j]);
+            k <span style=color:#f92672>=</span> k <span style=color:#f92672>+</span> <span style=color:#ae81ff>2</span>;
         }
-        if ( m %2==1 )
-            for ( int i = a[m]; i &lt;= len/2 ; i++ )
-                swap(st[i-1],st[len-i]);
-        cout&lt;&lt;st&lt;&lt;endl;
-        return 0;
+        <span style=color:#66d9ef>if</span> ( m <span style=color:#f92672>%</span><span style=color:#ae81ff>2</span><span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>1</span> )
+            <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> a[m]; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> len<span style=color:#f92672>/</span><span style=color:#ae81ff>2</span> ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+                swap(st[i<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>],st[len<span style=color:#f92672>-</span>i]);
+        cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>st<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
+        <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
     }
 
 
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

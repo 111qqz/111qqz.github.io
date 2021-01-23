@@ -11,148 +11,148 @@ col-md-10 col-md-offset-1
 post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><h1 id=非常可乐>非常可乐</h1><p>**Time Limit: 2000/1000 MS (Java/Others) Memory Limit: 32768/32768 K (Java/Others)<br>Total Submission(s): 7194 Accepted Submission(s): 2865<br>**</p><p>Problem Description</p><p>大家一定觉的运动以后喝可乐是一件很惬意的事情，但是seeyou却不这么认为。因为每次当seeyou买了可乐以后，阿牛就要求和seeyou一起分享这一瓶可乐，而且一定要喝的和seeyou一样多。但seeyou的手中只有两个杯子，它们的容量分别是N 毫升和M 毫升 可乐的体积为S （S&lt;101）毫升　(正好装满一瓶) ，它们三个之间可以相互倒可乐 (都是没有刻度的，且 S==N+M，101＞S＞0，N＞0，M＞0) 。聪明的ACMER你们说他们能平分吗？如果能请输出倒可乐的最少的次数，如果不能输出"NO&rdquo;。</p><p>Input</p><p>三个整数 : S 可乐的体积 , N 和 M是两个杯子的容量，以"0 0 0"结束。</p><p>Output</p><p>如果能平分的话请输出最少要倒的次数，否则输出"NO&rdquo;。</p><p>Sample Input</p><p>7 4 3
 4 1 3
 0 0 0</p><p>Sample Output</p><p>NO
-3</p><p>平分可乐,不能剩.</p><p>奇数的话直接no</p><p>偶数的话bfs</p><p>妈蛋写了140+行,简直令人感动.</p><p>然后一直WA</p><p>郁闷了好久,结果今天一看,竟然已经A了&mldr;</p><p>是测评傲娇了嘛2333</p><pre><code class=language-c++> 
+3</p><p>平分可乐,不能剩.</p><p>奇数的话直接no</p><p>偶数的话bfs</p><p>妈蛋写了140+行,简直令人感动.</p><p>然后一直WA</p><p>郁闷了好久,结果今天一看,竟然已经A了&mldr;</p><p>是测评傲娇了嘛2333</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++> 
 
     
-    /*************************************************************************
-    	&gt; File Name: code/2015summer/searching/M.cpp
-    	&gt; Author: 111qqz
-    	&gt; Email: rkz2013@126.com 
-    	&gt; Created Time: 2015年07月25日 星期六 15时54分19秒
-     ************************************************************************/
+    <span style=color:#75715e>/*************************************************************************
+</span><span style=color:#75715e>    	&gt; File Name: code/2015summer/searching/M.cpp
+</span><span style=color:#75715e>    	&gt; Author: 111qqz
+</span><span style=color:#75715e>    	&gt; Email: rkz2013@126.com 
+</span><span style=color:#75715e>    	&gt; Created Time: 2015年07月25日 星期六 15时54分19秒
+</span><span style=color:#75715e>     ************************************************************************/</span>
     
-    #include&lt;iostream&gt;
-    #include&lt;iomanip&gt;
-    #include&lt;cstdio&gt;
-    #include&lt;algorithm&gt;
-    #include&lt;cmath&gt;
-    #include&lt;cstring&gt;
-    #include&lt;string&gt;
-    #include&lt;map&gt;
-    #include&lt;set&gt;
-    #include&lt;queue&gt;
-    #include&lt;vector&gt;
-    #include&lt;stack&gt;
-    #define y0 abc111qqz
-    #define y1 hust111qqz
-    #define yn hez111qqz
-    #define j1 cute111qqz
-    #define tm crazy111qqz
-    #define lr dying111qqz
-    using namespace std;
-    #define REP(i, n) for (int i=0;i&lt;int(n);++i)  
-    typedef long long LL;
-    typedef unsigned long long ULL;
-    const int N=1E2+2;
-    int s,m,n;
-    int a[10];
-    int lim[10];
-    int f[5][5];
-    int d[N][N][N];
-    int ans;
-    void bfs()
+    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;iomanip&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;string&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;map&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;set&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;queue&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;vector&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;stack&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define y0 abc111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define y1 hust111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define yn hez111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define j1 cute111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define tm crazy111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define lr dying111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+    <span style=color:#75715e>#</span><span style=color:#75715e>define REP(i, n) for (int i=0;i&lt;int(n);++i)  </span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> LL;
+    <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>unsigned</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> ULL;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>1E2</span><span style=color:#f92672>+</span><span style=color:#ae81ff>2</span>;
+    <span style=color:#66d9ef>int</span> s,m,n;
+    <span style=color:#66d9ef>int</span> a[<span style=color:#ae81ff>10</span>];
+    <span style=color:#66d9ef>int</span> lim[<span style=color:#ae81ff>10</span>];
+    <span style=color:#66d9ef>int</span> f[<span style=color:#ae81ff>5</span>][<span style=color:#ae81ff>5</span>];
+    <span style=color:#66d9ef>int</span> d[N][N][N];
+    <span style=color:#66d9ef>int</span> ans;
+    <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>bfs</span>()
     {
-        queue&lt;int&gt;q[10];
-        memset(d,-1,sizeof(d));
-        q[0].push(s);
-        q[1].push(0);
-        q[2].push(0);
-        d[s][0][0]=0;
-        int ne[4];
-        memset(ne,0,sizeof(ne));
-        while (!q[1].empty()&amp;&amp;!q[2].empty())
+        queue<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span>q[<span style=color:#ae81ff>10</span>];
+        memset(d,<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>,<span style=color:#66d9ef>sizeof</span>(d));
+        q[<span style=color:#ae81ff>0</span>].push(s);
+        q[<span style=color:#ae81ff>1</span>].push(<span style=color:#ae81ff>0</span>);
+        q[<span style=color:#ae81ff>2</span>].push(<span style=color:#ae81ff>0</span>);
+        d[s][<span style=color:#ae81ff>0</span>][<span style=color:#ae81ff>0</span>]<span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>;
+        <span style=color:#66d9ef>int</span> ne[<span style=color:#ae81ff>4</span>];
+        memset(ne,<span style=color:#ae81ff>0</span>,<span style=color:#66d9ef>sizeof</span>(ne));
+        <span style=color:#66d9ef>while</span> (<span style=color:#f92672>!</span>q[<span style=color:#ae81ff>1</span>].empty()<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span><span style=color:#f92672>!</span>q[<span style=color:#ae81ff>2</span>].empty())
         {
-    	  int p[3];
-    	  p[0]=q[0].front();q[0].pop();
-    	  p[1]=q[1].front();q[1].pop();
-    	  p[2]=q[2].front();q[2].pop();
-    	 // cout&lt;&lt;p[0]&lt;&lt;&quot; &quot;&lt;&lt;p[1]&lt;&lt;&quot; &quot;&lt;&lt;p[2]&lt;&lt;&quot;d:&quot;&lt;&lt;d[p[0]][p[1]][p[2]]&lt;&lt;endl;;
-    	  for ( int i = 0 ;  i &lt; 3  ; i++ )
+    	  <span style=color:#66d9ef>int</span> p[<span style=color:#ae81ff>3</span>];
+    	  p[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>=</span>q[<span style=color:#ae81ff>0</span>].front();q[<span style=color:#ae81ff>0</span>].pop();
+    	  p[<span style=color:#ae81ff>1</span>]<span style=color:#f92672>=</span>q[<span style=color:#ae81ff>1</span>].front();q[<span style=color:#ae81ff>1</span>].pop();
+    	  p[<span style=color:#ae81ff>2</span>]<span style=color:#f92672>=</span>q[<span style=color:#ae81ff>2</span>].front();q[<span style=color:#ae81ff>2</span>].pop();
+    	 <span style=color:#75715e>// cout&lt;&lt;p[0]&lt;&lt;&#34; &#34;&lt;&lt;p[1]&lt;&lt;&#34; &#34;&lt;&lt;p[2]&lt;&lt;&#34;d:&#34;&lt;&lt;d[p[0]][p[1]][p[2]]&lt;&lt;endl;;
+</span><span style=color:#75715e></span>    	  <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span> ;  i <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>3</span>  ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
     	  {
-    		if (p[i]==0) continue;
-    		for ( int j = i+1  ;  j &lt; 3 ; j++ )
+    		<span style=color:#66d9ef>if</span> (p[i]<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>) <span style=color:#66d9ef>continue</span>;
+    		<span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> i<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>  ;  j <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>3</span> ; j<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
     		{
     		
-    		    if (p[i]==p[j]&amp;&amp;p[i]+p[j]==s)
+    		    <span style=color:#66d9ef>if</span> (p[i]<span style=color:#f92672>=</span><span style=color:#f92672>=</span>p[j]<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>p[i]<span style=color:#f92672>+</span>p[j]<span style=color:#f92672>=</span><span style=color:#f92672>=</span>s)
     		    {
-    			 // cout&lt;&lt;&quot;fufffffffffffffffffffffffff&quot;&lt;&lt;endl;
-    			  ans = d[p[0]][p[1]][p[2]];
-    			//  cout&lt;&lt;&quot;ans:&quot;&lt;&lt;ans&lt;&lt;endl;
-    			  return;
+    			 <span style=color:#75715e>// cout&lt;&lt;&#34;fufffffffffffffffffffffffff&#34;&lt;&lt;endl;
+</span><span style=color:#75715e></span>    			  ans <span style=color:#f92672>=</span> d[p[<span style=color:#ae81ff>0</span>]][p[<span style=color:#ae81ff>1</span>]][p[<span style=color:#ae81ff>2</span>]];
+    			<span style=color:#75715e>//  cout&lt;&lt;&#34;ans:&#34;&lt;&lt;ans&lt;&lt;endl;
+</span><span style=color:#75715e></span>    			  <span style=color:#66d9ef>return</span>;
     		    }
     		}
     	  }
-    	  for ( int i = 0  ; i &lt; 3 ; i++ )   //i往j里倒
-    	  {
-    		if (p[i]==0) continue;  //为空时不能往其他里倒
-    		for ( int j = 0 ;  j &lt; 3 ; j++ )
+    	  <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>  ; i <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>3</span> ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )   <span style=color:#75715e>//i往j里倒
+</span><span style=color:#75715e></span>    	  {
+    		<span style=color:#66d9ef>if</span> (p[i]<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>) <span style=color:#66d9ef>continue</span>;  <span style=color:#75715e>//为空时不能往其他里倒
+</span><span style=color:#75715e></span>    		<span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span> ;  j <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>3</span> ; j<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
     		{
     	  
-    		    if(i==j)continue;//不能自己往倒给自己
-    		    if (p[j]==lim[j]) continue;//被倒的为满时不能倒入
-    		    if (p[i]+p[j]&lt;=lim[j])//可以完全倒入
-    		    {
-    			  int k = f[i][j];
-    			  ne[i]=0;
-    			  ne[j]=p[i]+p[j];
-    			  ne[k]=p[k];
-    			  if (d[ne[0]][ne[1]][ne[2]]!=-1) continue;  //出现重复
-    			  q[i].push(0);
-    			  q[j].push(p[i]+p[j]);
+    		    <span style=color:#66d9ef>if</span>(i<span style=color:#f92672>=</span><span style=color:#f92672>=</span>j)<span style=color:#66d9ef>continue</span>;<span style=color:#75715e>//不能自己往倒给自己
+</span><span style=color:#75715e></span>    		    <span style=color:#66d9ef>if</span> (p[j]<span style=color:#f92672>=</span><span style=color:#f92672>=</span>lim[j]) <span style=color:#66d9ef>continue</span>;<span style=color:#75715e>//被倒的为满时不能倒入
+</span><span style=color:#75715e></span>    		    <span style=color:#66d9ef>if</span> (p[i]<span style=color:#f92672>+</span>p[j]<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>lim[j])<span style=color:#75715e>//可以完全倒入
+</span><span style=color:#75715e></span>    		    {
+    			  <span style=color:#66d9ef>int</span> k <span style=color:#f92672>=</span> f[i][j];
+    			  ne[i]<span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>;
+    			  ne[j]<span style=color:#f92672>=</span>p[i]<span style=color:#f92672>+</span>p[j];
+    			  ne[k]<span style=color:#f92672>=</span>p[k];
+    			  <span style=color:#66d9ef>if</span> (d[ne[<span style=color:#ae81ff>0</span>]][ne[<span style=color:#ae81ff>1</span>]][ne[<span style=color:#ae81ff>2</span>]]<span style=color:#f92672>!</span><span style=color:#f92672>=</span><span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>) <span style=color:#66d9ef>continue</span>;  <span style=color:#75715e>//出现重复
+</span><span style=color:#75715e></span>    			  q[i].push(<span style=color:#ae81ff>0</span>);
+    			  q[j].push(p[i]<span style=color:#f92672>+</span>p[j]);
     			  q[k].push(p[k]);
-    			  d[ne[0]][ne[1]][ne[2]]=d[p[0]][p[1]][p[2]]+1;
+    			  d[ne[<span style=color:#ae81ff>0</span>]][ne[<span style=color:#ae81ff>1</span>]][ne[<span style=color:#ae81ff>2</span>]]<span style=color:#f92672>=</span>d[p[<span style=color:#ae81ff>0</span>]][p[<span style=color:#ae81ff>1</span>]][p[<span style=color:#ae81ff>2</span>]]<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>;
     		    }
-    		    else  // 不能完全倒入
-    		    {
-    			  int k = f[i][j];
-    			  ne[i]=p[i]-(lim[j]-p[j]);
-    			  ne[j]=lim[j];
-    			  ne[k]=p[k];
-    			  if (d[ne[0]][ne[1]][ne[2]]!=-1) continue; //出现重复
-    			  q[i].push(ne[i]);
+    		    <span style=color:#66d9ef>else</span>  <span style=color:#75715e>// 不能完全倒入
+</span><span style=color:#75715e></span>    		    {
+    			  <span style=color:#66d9ef>int</span> k <span style=color:#f92672>=</span> f[i][j];
+    			  ne[i]<span style=color:#f92672>=</span>p[i]<span style=color:#f92672>-</span>(lim[j]<span style=color:#f92672>-</span>p[j]);
+    			  ne[j]<span style=color:#f92672>=</span>lim[j];
+    			  ne[k]<span style=color:#f92672>=</span>p[k];
+    			  <span style=color:#66d9ef>if</span> (d[ne[<span style=color:#ae81ff>0</span>]][ne[<span style=color:#ae81ff>1</span>]][ne[<span style=color:#ae81ff>2</span>]]<span style=color:#f92672>!</span><span style=color:#f92672>=</span><span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>) <span style=color:#66d9ef>continue</span>; <span style=color:#75715e>//出现重复
+</span><span style=color:#75715e></span>    			  q[i].push(ne[i]);
     			  q[j].push(ne[j]);
     			  q[k].push(ne[k]);
-    			  d[ne[0]][ne[1]][ne[2]]=d[p[0]][p[1]][p[2]]+1;
+    			  d[ne[<span style=color:#ae81ff>0</span>]][ne[<span style=color:#ae81ff>1</span>]][ne[<span style=color:#ae81ff>2</span>]]<span style=color:#f92672>=</span>d[p[<span style=color:#ae81ff>0</span>]][p[<span style=color:#ae81ff>1</span>]][p[<span style=color:#ae81ff>2</span>]]<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>;
     		    }
     		}
     	  }
         }
     }
-    int main()
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
     {
-        f[0][1]=2;
-        f[0][2]=1;
-        f[1][2]=0;
-        f[1][0]=2;
-        f[2][0]=1;
-        f[2][1]=0;
-        while (scanf(&quot;%d %d %d&quot;,&amp;s,&amp;m,&amp;n)!=EOF)
+        f[<span style=color:#ae81ff>0</span>][<span style=color:#ae81ff>1</span>]<span style=color:#f92672>=</span><span style=color:#ae81ff>2</span>;
+        f[<span style=color:#ae81ff>0</span>][<span style=color:#ae81ff>2</span>]<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;
+        f[<span style=color:#ae81ff>1</span>][<span style=color:#ae81ff>2</span>]<span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>;
+        f[<span style=color:#ae81ff>1</span>][<span style=color:#ae81ff>0</span>]<span style=color:#f92672>=</span><span style=color:#ae81ff>2</span>;
+        f[<span style=color:#ae81ff>2</span>][<span style=color:#ae81ff>0</span>]<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;
+        f[<span style=color:#ae81ff>2</span>][<span style=color:#ae81ff>1</span>]<span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>;
+        <span style=color:#66d9ef>while</span> (scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d %d %d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>s,<span style=color:#f92672>&amp;</span>m,<span style=color:#f92672>&amp;</span>n)<span style=color:#f92672>!</span><span style=color:#f92672>=</span>EOF)
         {
-    	  ans = -1;
-    	  if (s==0&amp;&amp;n==0&amp;&amp;m==0) break;
-    	  if (s%2==1)
+    	  ans <span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>;
+    	  <span style=color:#66d9ef>if</span> (s<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span><span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>n<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span><span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>m<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>) <span style=color:#66d9ef>break</span>;
+    	  <span style=color:#66d9ef>if</span> (s<span style=color:#f92672>%</span><span style=color:#ae81ff>2</span><span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
     	  {
-    		cout&lt;&lt;&quot;NO&quot;&lt;&lt;endl;
-    		continue;
+    		cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>NO</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
+    		<span style=color:#66d9ef>continue</span>;
     	  }
-    	  lim[0] = s;
-    	  lim[1] = m;
-    	  lim[2] = n;
+    	  lim[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span> s;
+    	  lim[<span style=color:#ae81ff>1</span>] <span style=color:#f92672>=</span> m;
+    	  lim[<span style=color:#ae81ff>2</span>] <span style=color:#f92672>=</span> n;
     	  bfs();
-    	  if (ans==-1)
+    	  <span style=color:#66d9ef>if</span> (ans<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>)
     	  {
-    		cout&lt;&lt;&quot;NO&quot;&lt;&lt;endl;
+    		cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>NO</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
     	  }
-    	  else
+    	  <span style=color:#66d9ef>else</span>
     	  {
-    		cout&lt;&lt;ans&lt;&lt;endl;
+    		cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>ans<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
     	  }
         }
       
-    	return 0;
+    	<span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
     }
     
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

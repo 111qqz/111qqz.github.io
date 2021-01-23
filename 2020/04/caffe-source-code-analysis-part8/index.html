@@ -8,105 +8,105 @@ $navbar.className+=" in";}}</script><style type=text/css>header.intro-header{bac
 on
 Saturday, April 18, 2020</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#背景>背景</a></li><li><a href=#euclidean-loss-l2-loss>Euclidean Loss (L2 loss)</a></li><li><a href=#multinomiallogisticloss>MultinomialLogisticLoss</a></li><li><a href=#hinge-loss>hinge-loss</a></li><li><a href=#参考资料>参考资料</a></li></ol></nav><h2 id=背景>背景</h2><p>虽然不太care 训练的过程，<del>但是由于容易看懂的layer都看得差不多了</del> 所以打算看一下这些loss function.</p><h2 id=euclidean-loss-l2-loss>Euclidean Loss (L2 loss)</h2><p><img src=https://i.loli.net/2020/04/18/voT7jGEF1BabmpL.png alt="L2 loss.png"></p><p>一般用于“real-valued regression tasks” 。　比如之前的项目上用的人脸年龄模型，就是用了这个Loss</p><p>这个loss没什么额外的参数，实现也很简单。</p><pre><code class=language-c++>
-template &lt;typename Dtype&gt;
-void EuclideanLossLayer&lt;Dtype&gt;::Reshape(
-  const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  LossLayer&lt;Dtype&gt;::Reshape(bottom, top);
-  CHECK_EQ(bottom[0]-&gt;count(1), bottom[1]-&gt;count(1))
-      &lt;&lt; &quot;Inputs must have the same dimension.&quot;;
-  diff_.ReshapeLike(*bottom[0]);
+post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#背景>背景</a></li><li><a href=#euclidean-loss-l2-loss>Euclidean Loss (L2 loss)</a></li><li><a href=#multinomiallogisticloss>MultinomialLogisticLoss</a></li><li><a href=#hinge-loss>hinge-loss</a></li><li><a href=#参考资料>参考资料</a></li></ol></nav><h2 id=背景>背景</h2><p>虽然不太care 训练的过程，<del>但是由于容易看懂的layer都看得差不多了</del> 所以打算看一下这些loss function.</p><h2 id=euclidean-loss-l2-loss>Euclidean Loss (L2 loss)</h2><p><img src=https://i.loli.net/2020/04/18/voT7jGEF1BabmpL.png alt="L2 loss.png"></p><p>一般用于“real-valued regression tasks” 。　比如之前的项目上用的人脸年龄模型，就是用了这个Loss</p><p>这个loss没什么额外的参数，实现也很简单。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> EuclideanLossLayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Reshape(
+  <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom, <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top) {
+  LossLayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Reshape(bottom, top);
+  CHECK_EQ(bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count(<span style=color:#ae81ff>1</span>), bottom[<span style=color:#ae81ff>1</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count(<span style=color:#ae81ff>1</span>))
+      <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Inputs must have the same dimension.</span><span style=color:#e6db74>&#34;</span>;
+  diff_.ReshapeLike(<span style=color:#f92672>*</span>bottom[<span style=color:#ae81ff>0</span>]);
 }
 
-template &lt;typename Dtype&gt;
-void EuclideanLossLayer&lt;Dtype&gt;::Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  int count = bottom[0]-&gt;count();
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> EuclideanLossLayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Forward_cpu(<span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom,
+    <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top) {
+  <span style=color:#66d9ef>int</span> count <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count();
   caffe_sub(
       count,
-      bottom[0]-&gt;cpu_data(),
-      bottom[1]-&gt;cpu_data(),
+      bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data(),
+      bottom[<span style=color:#ae81ff>1</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data(),
       diff_.mutable_cpu_data());
-  Dtype dot = caffe_cpu_dot(count, diff_.cpu_data(), diff_.cpu_data());
-  Dtype loss = dot / bottom[0]-&gt;num() / Dtype(2);
-  top[0]-&gt;mutable_cpu_data()[0] = loss;
+  Dtype dot <span style=color:#f92672>=</span> caffe_cpu_dot(count, diff_.cpu_data(), diff_.cpu_data());
+  Dtype loss <span style=color:#f92672>=</span> dot <span style=color:#f92672>/</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num() <span style=color:#f92672>/</span> Dtype(<span style=color:#ae81ff>2</span>);
+  top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>mutable_cpu_data()[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span> loss;
 }
-</code></pre><p>注意要Reshape中，要求两个bottom blob（第一个为预测结果，第二个为gt)的batch维度可以不同,计算时按照预测结果的个数为准。</p><p>以及，Mean Square Error(MSE)　和L2 loss的差别只是一个系数1/2,可以放在一起说明。</p><p><img src=https://miro.medium.com/max/291/1*w9HQ9w30lpr_HYZqeRhm4A.png alt=MSE></p><h2 id=multinomiallogisticloss>MultinomialLogisticLoss</h2><p><img src=https://i.loli.net/2020/04/18/MdSGtml3JOYUzX6.png alt=MultinomialLogisticLoss.png></p><p>用于单标签多分类任务。　输入的预测blob是一个(通常是经过softmax后)得到的概率分布。</p><p>注意 <strong>&rdquo; The SoftmaxWithLossLayer should be preferred over separate SoftmaxLayer + MultinomialLogisticLossLayer as its gradient computation is more numerically stable."</strong></p><p>这个后面会提到。</p><p>同样，这个loss也没什么额外参数，
-forward也很简单</p><pre><code class=language-c++>
-template &lt;typename Dtype&gt;
-void MultinomialLogisticLossLayer&lt;Dtype&gt;::Forward_cpu(
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
-  //  predictions,ＮxCxHxW
-  const Dtype* bottom_label = bottom[1]-&gt;cpu_data();
-  // labels, Nx1x1x1
-  int num = bottom[0]-&gt;num();
-  int dim = bottom[0]-&gt;count() / bottom[0]-&gt;num();
-  // dim 表示类别总数
-  Dtype loss = 0;
-  //  bottom_data[i * dim + label]表示的是第i张图的gt对应的位置的预测分数
-  for (int i = 0; i &lt; num; ++i) {
-    int label = static_cast&lt;int&gt;(bottom_label[i]);
-    Dtype prob = std::max(
-        bottom_data[i * dim + label], Dtype(kLOG_THRESHOLD));
-    loss -= log(prob);
+</code></pre></div><p>注意要Reshape中，要求两个bottom blob（第一个为预测结果，第二个为gt)的batch维度可以不同,计算时按照预测结果的个数为准。</p><p>以及，Mean Square Error(MSE)　和L2 loss的差别只是一个系数1/2,可以放在一起说明。</p><p><img src=https://miro.medium.com/max/291/1*w9HQ9w30lpr_HYZqeRhm4A.png alt=MSE></p><h2 id=multinomiallogisticloss>MultinomialLogisticLoss</h2><p><img src=https://i.loli.net/2020/04/18/MdSGtml3JOYUzX6.png alt=MultinomialLogisticLoss.png></p><p>用于单标签多分类任务。　输入的预测blob是一个(通常是经过softmax后)得到的概率分布。</p><p>注意 <strong>&rdquo; The SoftmaxWithLossLayer should be preferred over separate SoftmaxLayer + MultinomialLogisticLossLayer as its gradient computation is more numerically stable."</strong></p><p>这个后面会提到。</p><p>同样，这个loss也没什么额外参数，
+forward也很简单</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> MultinomialLogisticLossLayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Forward_cpu(
+    <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom, <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top) {
+  <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> bottom_data <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+  <span style=color:#75715e>//  predictions,ＮxCxHxW
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> bottom_label <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>1</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+  <span style=color:#75715e>// labels, Nx1x1x1
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>int</span> num <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num();
+  <span style=color:#66d9ef>int</span> dim <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count() <span style=color:#f92672>/</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num();
+  <span style=color:#75715e>// dim 表示类别总数
+</span><span style=color:#75715e></span>  Dtype loss <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+  <span style=color:#75715e>//  bottom_data[i * dim + label]表示的是第i张图的gt对应的位置的预测分数
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> num; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+    <span style=color:#66d9ef>int</span> label <span style=color:#f92672>=</span> <span style=color:#66d9ef>static_cast</span><span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span>(bottom_label[i]);
+    Dtype prob <span style=color:#f92672>=</span> std<span style=color:#f92672>:</span><span style=color:#f92672>:</span>max(
+        bottom_data[i <span style=color:#f92672>*</span> dim <span style=color:#f92672>+</span> label], Dtype(kLOG_THRESHOLD));
+    loss <span style=color:#f92672>-</span><span style=color:#f92672>=</span> log(prob);
   }
-  top[0]-&gt;mutable_cpu_data()[0] = loss / num;
+  top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>mutable_cpu_data()[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span> loss <span style=color:#f92672>/</span> num;
 }
 
-</code></pre><p>需要注意的已经写在注释中了。
-kLOG_THRESHOLD是一个很小的值，1E-20,防止log0炸掉</p><h2 id=hinge-loss>hinge-loss</h2><p><img src=https://wikimedia.org/api/rest_v1/media/math/render/svg/a5f42d461f1a28b27438e8f1641e042ff2e40102 alt="hinge loss"></p><p>中文似乎叫"合页损失函数&rdquo;,因为很像一本书打开的样子(?</p><p><img src=https://pic1.zhimg.com/80/v2-3c6aa9626ee8e4609b0d7c5712baf624_720w.jpg alt=hinge-loss></p><p>主要用在svm中。。。所以其实没在工作中实际接触过这个。</p><p>这个loss的特点是更加严格。。严格的意思是说，分类的结果不仅需要正确，而且需要置信度足够高，损失才会是0.</p><p><img src=https://i.loli.net/2020/04/18/ZgKC2ONAmuTRYJ7.png alt=hinge_loss_caffe.png></p><p>forward代码稍微不是那么直接</p><pre><code class=language-c++>
-  const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
-  Dtype* bottom_diff = bottom[0]-&gt;mutable_cpu_diff();
-  const Dtype* label = bottom[1]-&gt;cpu_data();
-  int num = bottom[0]-&gt;num();
-  int count = bottom[0]-&gt;count();
-  int dim = count / num;
-  // dim是类别数
-
+</code></pre></div><p>需要注意的已经写在注释中了。
+kLOG_THRESHOLD是一个很小的值，1E-20,防止log0炸掉</p><h2 id=hinge-loss>hinge-loss</h2><p><img src=https://wikimedia.org/api/rest_v1/media/math/render/svg/a5f42d461f1a28b27438e8f1641e042ff2e40102 alt="hinge loss"></p><p>中文似乎叫"合页损失函数&rdquo;,因为很像一本书打开的样子(?</p><p><img src=https://pic1.zhimg.com/80/v2-3c6aa9626ee8e4609b0d7c5712baf624_720w.jpg alt=hinge-loss></p><p>主要用在svm中。。。所以其实没在工作中实际接触过这个。</p><p>这个loss的特点是更加严格。。严格的意思是说，分类的结果不仅需要正确，而且需要置信度足够高，损失才会是0.</p><p><img src=https://i.loli.net/2020/04/18/ZgKC2ONAmuTRYJ7.png alt=hinge_loss_caffe.png></p><p>forward代码稍微不是那么直接</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+  <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> bottom_data <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+  Dtype<span style=color:#f92672>*</span> bottom_diff <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>mutable_cpu_diff();
+  <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> label <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>1</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+  <span style=color:#66d9ef>int</span> num <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num();
+  <span style=color:#66d9ef>int</span> count <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count();
+  <span style=color:#66d9ef>int</span> dim <span style=color:#f92672>=</span> count <span style=color:#f92672>/</span> num;
+  <span style=color:#75715e>// dim是类别数
+</span><span style=color:#75715e></span>
   caffe_copy(count, bottom_data, bottom_diff);
-  // 把预测值bottom_data拷贝到bottom_diff
-  for (int i = 0; i &lt; num; ++i) {
-    bottom_diff[i * dim + static_cast&lt;int&gt;(label[i])] *= -1;
+  <span style=color:#75715e>// 把预测值bottom_data拷贝到bottom_diff
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> num; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+    bottom_diff[i <span style=color:#f92672>*</span> dim <span style=color:#f92672>+</span> <span style=color:#66d9ef>static_cast</span><span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span>(label[i])] <span style=color:#f92672>*</span><span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>;
   }
-  // 把gt的那一类的预测分数取了相反数(这里相当于算了condition函数，只不过差个负号)
-
-  for (int i = 0; i &lt; num; ++i) {
-    for (int j = 0; j &lt; dim; ++j) {
-      bottom_diff[i * dim + j] = std::max(
-        Dtype(0), 1 + bottom_diff[i * dim + j]);
+  <span style=color:#75715e>// 把gt的那一类的预测分数取了相反数(这里相当于算了condition函数，只不过差个负号)
+</span><span style=color:#75715e></span>
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> num; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; j <span style=color:#f92672>&lt;</span> dim; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>j) {
+      bottom_diff[i <span style=color:#f92672>*</span> dim <span style=color:#f92672>+</span> j] <span style=color:#f92672>=</span> std<span style=color:#f92672>:</span><span style=color:#f92672>:</span>max(
+        Dtype(<span style=color:#ae81ff>0</span>), <span style=color:#ae81ff>1</span> <span style=color:#f92672>+</span> bottom_diff[i <span style=color:#f92672>*</span> dim <span style=color:#f92672>+</span> j]);
     }
 
 
-</code></pre><p>先算了一个bottom_diff。　这里其实是相当于算了condition function的结果，只不过差了一个负号。　后面我们也可以看到</p><pre><code class=language-c++>
-bottom_diff[i * dim + j] = std::max(
-        Dtype(0), 1 + bottom_diff[i * dim + j]);
+</code></pre></div><p>先算了一个bottom_diff。　这里其实是相当于算了condition function的结果，只不过差了一个负号。　后面我们也可以看到</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+bottom_diff[i <span style=color:#f92672>*</span> dim <span style=color:#f92672>+</span> j] <span style=color:#f92672>=</span> std<span style=color:#f92672>:</span><span style=color:#f92672>:</span>max(
+        Dtype(<span style=color:#ae81ff>0</span>), <span style=color:#ae81ff>1</span> <span style=color:#f92672>+</span> bottom_diff[i <span style=color:#f92672>*</span> dim <span style=color:#f92672>+</span> j]);
 
-</code></pre><p>中是计算了<strong>bottom_diff[i * dim + j] = std::max(
-Dtype(0), 1 + bottom_diff[i * dim + j]);</strong></p><p>还值得一提的是,caffe的hinge loss 同时支持L1 norm和L2 norm(在L2-SVM中使用)</p><pre><code class=language-protobuf>
-message HingeLossParameter {
-  enum Norm {
-    L1 = 1;
-    L2 = 2;
-  }
-  // Specify the Norm to use L1 or L2
-  optional Norm norm = 1 [default = L1];
-}
-</code></pre><pre><code class=language-c++>
-  Dtype* loss = top[0]-&gt;mutable_cpu_data();
-  switch (this-&gt;layer_param_.hinge_loss_param().norm()) {
-  case HingeLossParameter_Norm_L1:
-    loss[0] = caffe_cpu_asum(count, bottom_diff) / num;
-    break;
-  case HingeLossParameter_Norm_L2:
-    loss[0] = caffe_cpu_dot(count, bottom_diff, bottom_diff) / num;
-    break;
-  default:
-    LOG(FATAL) &lt;&lt; &quot;Unknown Norm&quot;;
+</code></pre></div><p>中是计算了<strong>bottom_diff[i * dim + j] = std::max(
+Dtype(0), 1 + bottom_diff[i * dim + j]);</strong></p><p>还值得一提的是,caffe的hinge loss 同时支持L1 norm和L2 norm(在L2-SVM中使用)</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-protobuf data-lang=protobuf><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#66d9ef>message</span> <span style=color:#a6e22e>HingeLossParameter</span> {<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#66d9ef>enum</span> Norm {<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>    L1 <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>    L2 <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>;<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  }<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#75715e>// Specify the Norm to use L1 or L2
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> Norm norm <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> L1];<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>}<span style=color:#960050;background-color:#1e0010>
+</span></code></pre></div><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+  Dtype<span style=color:#f92672>*</span> loss <span style=color:#f92672>=</span> top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>mutable_cpu_data();
+  <span style=color:#66d9ef>switch</span> (<span style=color:#66d9ef>this</span><span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>layer_param_.hinge_loss_param().norm()) {
+  <span style=color:#66d9ef>case</span> HingeLossParameter_Norm_L1:
+    loss[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span> caffe_cpu_asum(count, bottom_diff) <span style=color:#f92672>/</span> num;
+    <span style=color:#66d9ef>break</span>;
+  <span style=color:#66d9ef>case</span> HingeLossParameter_Norm_L2:
+    loss[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span> caffe_cpu_dot(count, bottom_diff, bottom_diff) <span style=color:#f92672>/</span> num;
+    <span style=color:#66d9ef>break</span>;
+  <span style=color:#66d9ef>default</span><span style=color:#f92672>:</span>
+    LOG(FATAL) <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Unknown Norm</span><span style=color:#e6db74>&#34;</span>;
   }
 }
 
-</code></pre><h2 id=参考资料>参考资料</h2><ul><li><p><a href=https://heartbeat.fritz.ai/5-regression-loss-functions-all-machine-learners-should-know-4fb140e9d4b0>5 Regression Loss Functions All Machine Learners Should Know</a></p></li><li><p><a href=https://en.wikipedia.org/wiki/Hinge_loss>Hinge loss</a></p></li></ul><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><h2 id=参考资料>参考资料</h2><ul><li><p><a href=https://heartbeat.fritz.ai/5-regression-loss-functions-all-machine-learners-should-know-4fb140e9d4b0>5 Regression Loss Functions All Machine Learners Should Know</a></p></li><li><p><a href=https://en.wikipedia.org/wiki/Hinge_loss>Hinge loss</a></p></li></ul><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

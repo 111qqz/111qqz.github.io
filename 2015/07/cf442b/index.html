@@ -12,82 +12,82 @@ post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p>B.
 </code></pre><p>output</p><pre><code>0.800000000000
 </code></pre><p>input</p><pre><code>2&lt;br&gt;&lt;/br&gt;0.1 0.2
 </code></pre><p>output</p><pre><code>0.260000000000
-</code></pre><p>Note</p><p>In the first sample the best strategy for Andrey is to ask only one of his friends, the most reliable one.</p><p>In the second sample the best strategy for Andrey is to ask all of his friends to come up with a problem. Then the probability that he will get exactly one problem is 0.1<em>0.8 + 0.9</em>0.2 = 0.26.</p><p>可以选1个,可以选2个,选i个&mldr;.</p><p>但是选哪i个,似乎还要枚举&mldr;这样计算起来很麻烦</p><p>但是再一看,很容易发现,选i个概率最大的情况一定是选本身概率最大的i个的情况</p><p>那么我们只需要枚举选的个数,取每种情况的最大值就好了.</p><pre><code class=language-c++>
+</code></pre><p>Note</p><p>In the first sample the best strategy for Andrey is to ask only one of his friends, the most reliable one.</p><p>In the second sample the best strategy for Andrey is to ask all of his friends to come up with a problem. Then the probability that he will get exactly one problem is 0.1<em>0.8 + 0.9</em>0.2 = 0.26.</p><p>可以选1个,可以选2个,选i个&mldr;.</p><p>但是选哪i个,似乎还要枚举&mldr;这样计算起来很麻烦</p><p>但是再一看,很容易发现,选i个概率最大的情况一定是选本身概率最大的i个的情况</p><p>那么我们只需要枚举选的个数,取每种情况的最大值就好了.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
    
-   /*************************************************************************
-       &gt; File Name: code/2015summer/#3/C.cpp
-       &gt; Author: 111qqz
-       &gt; Email: rkz2013@126.com 
-       &gt; Created Time: 2015年07月28日 星期二 12时27分50秒
-    ************************************************************************/
+   <span style=color:#75715e>/*************************************************************************
+</span><span style=color:#75715e>       &gt; File Name: code/2015summer/#3/C.cpp
+</span><span style=color:#75715e>       &gt; Author: 111qqz
+</span><span style=color:#75715e>       &gt; Email: rkz2013@126.com 
+</span><span style=color:#75715e>       &gt; Created Time: 2015年07月28日 星期二 12时27分50秒
+</span><span style=color:#75715e>    ************************************************************************/</span>
    
-   #include&lt;iostream&gt;
-   #include&lt;iomanip&gt;
-   #include&lt;cstdio&gt;
-   #include&lt;algorithm&gt;
-   #include&lt;cmath&gt;
-   #include&lt;cstring&gt;
-   #include&lt;string&gt;
-   #include&lt;map&gt;
-   #include&lt;set&gt;
-   #include&lt;queue&gt;
-   #include&lt;vector&gt;
-   #include&lt;stack&gt;
-   #define y0 abc111qqz
-   #define y1 hust111qqz
-   #define yn hez111qqz
-   #define j1 cute111qqz
-   #define tm crazy111qqz
-   #define lr dying111qqz
-   using namespace std;
-   #define REP(i, n) for (int i=0;i&lt;int(n);++i)  
-   typedef long long LL;
-   typedef unsigned long long ULL;
-   const int N=1E2+7;
-   double p[N];
-   int n;
+   <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;iomanip&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;string&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;map&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;set&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;queue&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;vector&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;stack&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>define y0 abc111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>define y1 hust111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>define yn hez111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>define j1 cute111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>define tm crazy111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>define lr dying111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+   <span style=color:#75715e>#</span><span style=color:#75715e>define REP(i, n) for (int i=0;i&lt;int(n);++i)  </span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> LL;
+   <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>unsigned</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> ULL;
+   <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>1E2</span><span style=color:#f92672>+</span><span style=color:#ae81ff>7</span>;
+   <span style=color:#66d9ef>double</span> p[N];
+   <span style=color:#66d9ef>int</span> n;
    
-   bool cmp(double a,double b)
+   <span style=color:#66d9ef>bool</span> <span style=color:#a6e22e>cmp</span>(<span style=color:#66d9ef>double</span> a,<span style=color:#66d9ef>double</span> b)
    {
-       if (a&gt;b) return true;
-       return false;
+       <span style=color:#66d9ef>if</span> (a<span style=color:#f92672>&gt;</span>b) <span style=color:#66d9ef>return</span> true;
+       <span style=color:#66d9ef>return</span> false;
    }
-   double solve (int x)
+   <span style=color:#66d9ef>double</span> <span style=color:#a6e22e>solve</span> (<span style=color:#66d9ef>int</span> x)
    {
-       double res=0;
-       double poss;
-       for  ( int i = 1 ; i &lt;= x; i++)
+       <span style=color:#66d9ef>double</span> res<span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>;
+       <span style=color:#66d9ef>double</span> poss;
+       <span style=color:#66d9ef>for</span>  ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> x; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
        {
-       poss = 1.0;
-       for ( int j = 1 ; j &lt;= x;  j++ )
+       poss <span style=color:#f92672>=</span> <span style=color:#ae81ff>1.0</span>;
+       <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; j <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> x;  j<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
        {
-           if (j==i) poss=poss*p[j-1];
-           else poss = poss * (1-p[j-1]);
+           <span style=color:#66d9ef>if</span> (j<span style=color:#f92672>=</span><span style=color:#f92672>=</span>i) poss<span style=color:#f92672>=</span>poss<span style=color:#f92672>*</span>p[j<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>];
+           <span style=color:#66d9ef>else</span> poss <span style=color:#f92672>=</span> poss <span style=color:#f92672>*</span> (<span style=color:#ae81ff>1</span><span style=color:#f92672>-</span>p[j<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>]);
        }
-       res = res + poss;
+       res <span style=color:#f92672>=</span> res <span style=color:#f92672>+</span> poss;
        }
-       return res;
+       <span style=color:#66d9ef>return</span> res;
    }
-   int main()
+   <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
    {
-       cin&gt;&gt;n;
-       for ( int i = 0 ; i &lt; n ; i++ )
+       cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>n;
+       <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span> ; i <span style=color:#f92672>&lt;</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
        {
-       cin&gt;&gt;p[i];
+       cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>p[i];
        }
-       sort(p,p+n,cmp);
-       double ans = 0;
-       for ( int i = 0 ; i &lt; n ; i++ )
+       sort(p,p<span style=color:#f92672>+</span>n,cmp);
+       <span style=color:#66d9ef>double</span> ans <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+       <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span> ; i <span style=color:#f92672>&lt;</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
        {
-       ans = max(ans,solve(i+1));
+       ans <span style=color:#f92672>=</span> max(ans,solve(i<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>));
        }
-       cout&lt;&lt;fixed&lt;&lt;setprecision(12)&lt;&lt;ans&lt;&lt;endl;
+       cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>fixed<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>setprecision(<span style=color:#ae81ff>12</span>)<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>ans<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
      
-       return 0;
+       <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
    }
    
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

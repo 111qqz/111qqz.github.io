@@ -21,100 +21,100 @@ post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><h1 i
 4
 5
 9
-7</p><p>先排序，然后求一个最长上升子序列。</p><p>第一次做记录路径的题，比较无力。</p><p>调了很久，后来调到样例都不对整个人都无奈了。</p><p>可能也是调了太久的缘故，整个人比较烦躁，也忘记了题目中的那句"如果有多组接那么任意输出一种&rdquo;，结果白白浪费了好久。sad</p><p>还是不要浮躁。</p><p>AC代码：</p><pre><code class=language-c++> 
+7</p><p>先排序，然后求一个最长上升子序列。</p><p>第一次做记录路径的题，比较无力。</p><p>调了很久，后来调到样例都不对整个人都无奈了。</p><p>可能也是调了太久的缘故，整个人比较烦躁，也忘记了题目中的那句"如果有多组接那么任意输出一种&rdquo;，结果白白浪费了好久。sad</p><p>还是不要浮躁。</p><p>AC代码：</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++> 
 
     
-    /* ***********************************************
-    Author :111qqz
-    Created Time :2016年02月22日 星期一 23时23分41秒
-    File Name :code/hdu/1160.cpp
-    ************************************************ */
+    <span style=color:#75715e>/* ***********************************************
+</span><span style=color:#75715e>    Author :111qqz
+</span><span style=color:#75715e>    Created Time :2016年02月22日 星期一 23时23分41秒
+</span><span style=color:#75715e>    File Name :code/hdu/1160.cpp
+</span><span style=color:#75715e>    ************************************************ */</span>
     
-    #include &lt;iostream&gt;
-    #include &lt;algorithm&gt;
-    #include &lt;cstring&gt;
-    #include &lt;cstdio&gt;
-    #include &lt;cmath&gt;
+    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    
+    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
     
-    using namespace std;
+    <span style=color:#66d9ef>int</span> n,tmp,tmppre,m,index;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>1E5</span><span style=color:#f92672>+</span><span style=color:#ae81ff>5</span>;
+    <span style=color:#66d9ef>int</span> dp[N],ans[N],pre[N],k;
     
-    int n,tmp,tmppre,m,index;
-    const int N=1E5+5;
-    int dp[N],ans[N],pre[N],k;
-    
-    struct ST
+    <span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>ST</span>
     {
-        int w,s,id;
+        <span style=color:#66d9ef>int</span> w,s,id;
     }st[N];
     
-    bool cmp(ST a,ST b)
+    <span style=color:#66d9ef>bool</span> <span style=color:#a6e22e>cmp</span>(ST a,ST b)
     {
-        if ( a.w&lt;b.w) return true;
-        if ( a.w==b.w&amp;&amp;a.s&gt;b.s ) return true;
-        return false;
+        <span style=color:#66d9ef>if</span> ( a.w<span style=color:#f92672>&lt;</span>b.w) <span style=color:#66d9ef>return</span> true;
+        <span style=color:#66d9ef>if</span> ( a.w<span style=color:#f92672>=</span><span style=color:#f92672>=</span>b.w<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>a.s<span style=color:#f92672>&gt;</span>b.s ) <span style=color:#66d9ef>return</span> true;
+        <span style=color:#66d9ef>return</span> false;
     }
-    int main()
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
     {
-        n = 1;
-        while(scanf(&quot;%d %d&quot;,&amp;st[n].w,&amp;st[n].s)!=EOF)
+        n <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+        <span style=color:#66d9ef>while</span>(scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d %d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>st[n].w,<span style=color:#f92672>&amp;</span>st[n].s)<span style=color:#f92672>!</span><span style=color:#f92672>=</span>EOF)
         {
     
-                st[n].id = n;
-                n++;
-             //   if (n&gt;9) break;
-    
+                st[n].id <span style=color:#f92672>=</span> n;
+                n<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+             <span style=color:#75715e>//   if (n&gt;9) break;
+</span><span style=color:#75715e></span>    
         }
-        n--;
-         memset(dp,0,sizeof(dp));
-        memset(ans,0,sizeof(ans));
-        memset(pre,-1,sizeof(pre));zixulie
-        sort(st+1,st+n+1,cmp);
+        n<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
+         memset(dp,<span style=color:#ae81ff>0</span>,<span style=color:#66d9ef>sizeof</span>(dp));
+        memset(ans,<span style=color:#ae81ff>0</span>,<span style=color:#66d9ef>sizeof</span>(ans));
+        memset(pre,<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>,<span style=color:#66d9ef>sizeof</span>(pre));zixulie
+        sort(st<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>,st<span style=color:#f92672>+</span>n<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>,cmp);
     
     
-        dp[1] = 1;
-        for ( int i = 2; i &lt;= n; i++)
+        dp[<span style=color:#ae81ff>1</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
         {
-           dp[i] = 1;
-            for ( int j = 1 ; j &lt;= i -1 ; j++ )
-                if (st[j].w&lt;st[i].w&amp;&amp;st[j].s&gt;st[i].s&amp;&amp;dp[j]+1&gt;dp[i])
+           dp[i] <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+            <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; j <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> i <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> ; j<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+                <span style=color:#66d9ef>if</span> (st[j].w<span style=color:#f92672>&lt;</span>st[i].w<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>st[j].s<span style=color:#f92672>&gt;</span>st[i].s<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>dp[j]<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span><span style=color:#f92672>&gt;</span>dp[i])
                 {
     
-                    dp[i] = dp[j]+1;
-                    pre[i] = j;
+                    dp[i] <span style=color:#f92672>=</span> dp[j]<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>;
+                    pre[i] <span style=color:#f92672>=</span> j;
                 }
         }
-      //  cout&lt;&lt;endl;
-      //  for ( int i = 1 ; i &lt;= n ; i++ )
-       //     cout&lt;&lt;st[i].w&lt;&lt;&quot; &quot;&lt;&lt;st[i].s&lt;&lt;endl;
-       // for ( int i = 1 ;  i &lt;= n ; i++ )
-         //   cout&lt;&lt;&quot;pre[i]:&quot;&lt;&lt;pre[st[i].id]&lt;&lt;&quot;dp[i]:&quot;&lt;&lt;dp[i]&lt;&lt;endl;
+      <span style=color:#75715e>//  cout&lt;&lt;endl;
+</span><span style=color:#75715e></span>      <span style=color:#75715e>//  for ( int i = 1 ; i &lt;= n ; i++ )
+</span><span style=color:#75715e></span>       <span style=color:#75715e>//     cout&lt;&lt;st[i].w&lt;&lt;&#34; &#34;&lt;&lt;st[i].s&lt;&lt;endl;
+</span><span style=color:#75715e></span>       <span style=color:#75715e>// for ( int i = 1 ;  i &lt;= n ; i++ )
+</span><span style=color:#75715e></span>         <span style=color:#75715e>//   cout&lt;&lt;&#34;pre[i]:&#34;&lt;&lt;pre[st[i].id]&lt;&lt;&#34;dp[i]:&#34;&lt;&lt;dp[i]&lt;&lt;endl;
+</span><span style=color:#75715e></span>    
     
-    
-        m = -1;
-        for ( int i = 1 ; i &lt;= n;i++ )
-            if ( dp[i] &gt; m)
+        m <span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>;
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n;i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+            <span style=color:#66d9ef>if</span> ( dp[i] <span style=color:#f92672>&gt;</span> m)
             {
-                m = dp[i];
-                index = i;
+                m <span style=color:#f92672>=</span> dp[i];
+                index <span style=color:#f92672>=</span> i;
             }
-        cout&lt;&lt;m&lt;&lt;endl;
-       // cout&lt;&lt;&quot;index &quot;&lt;&lt;index&lt;&lt;endl;
-        k = 0;
-        while (index!=-1)
+        cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>m<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
+       <span style=color:#75715e>// cout&lt;&lt;&#34;index &#34;&lt;&lt;index&lt;&lt;endl;
+</span><span style=color:#75715e></span>        k <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+        <span style=color:#66d9ef>while</span> (index<span style=color:#f92672>!</span><span style=color:#f92672>=</span><span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>)
         {
-            k++;
-            ans[k] = index;
-            index=pre[index];
+            k<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+            ans[k] <span style=color:#f92672>=</span> index;
+            index<span style=color:#f92672>=</span>pre[index];
         }
-        for ( int i = k; i &gt;= 1; i-- )
-            cout&lt;&lt;st[ans[i]].id&lt;&lt;endl;
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> k; i <span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; i<span style=color:#f92672>-</span><span style=color:#f92672>-</span> )
+            cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>st[ans[i]].id<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
     
     
-        return 0;
+        <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
     }
 
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

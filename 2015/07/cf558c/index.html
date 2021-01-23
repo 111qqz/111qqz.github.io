@@ -9,104 +9,104 @@ $navbar.className+=" in";}}</script><style type=text/css>header.intro-header{bac
 on
 Tuesday, July 21, 2015</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p><a href=http://codeforces.com/contest/558/problem/C>http://codeforces.com/contest/558/problem/C</a></p><p>题目大意是说，给定N个数，可以对任意数进行任意次两种操作，×2，和/2（整除）</p><p>问最少操作多少次，可以让所有数相等。</p><p>嘛，前半个小时A掉了前两个提，d E貌似都是线段树。。并不会。。。就一直搞C。。。。</p><p>然而并没有做出来。位运算是什么神奇的黑魔法。</p><p>转载一份题解：http://blog.csdn.net/qq_24451605/article/details/46906813</p><p>思路是声明两个数组，一个数组表示到达i的步数，另一个数组表示n个数中能够达到i的数的个数（包括本身）</p><pre><code class=language-c++>    
-    /*************************************************************************
-      &gt; File Name: code/#312C.cpp
-      &gt; Author: 111qqz
-      &gt; Email: rkz2013@126.com
-      &gt; Created Time: Mon 20 Jul 2015 11:36:50 PM CST
-     ************************************************************************/
+post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p><a href=http://codeforces.com/contest/558/problem/C>http://codeforces.com/contest/558/problem/C</a></p><p>题目大意是说，给定N个数，可以对任意数进行任意次两种操作，×2，和/2（整除）</p><p>问最少操作多少次，可以让所有数相等。</p><p>嘛，前半个小时A掉了前两个提，d E貌似都是线段树。。并不会。。。就一直搞C。。。。</p><p>然而并没有做出来。位运算是什么神奇的黑魔法。</p><p>转载一份题解：http://blog.csdn.net/qq_24451605/article/details/46906813</p><p>思路是声明两个数组，一个数组表示到达i的步数，另一个数组表示n个数中能够达到i的数的个数（包括本身）</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>    
+    <span style=color:#75715e>/*************************************************************************
+</span><span style=color:#75715e>      &gt; File Name: code/#312C.cpp
+</span><span style=color:#75715e>      &gt; Author: 111qqz
+</span><span style=color:#75715e>      &gt; Email: rkz2013@126.com
+</span><span style=color:#75715e>      &gt; Created Time: Mon 20 Jul 2015 11:36:50 PM CST
+</span><span style=color:#75715e>     ************************************************************************/</span>
     
-    #include&lt;iostream&gt;
-    #include&lt;iomanip&gt;
-    #include&lt;cstdio&gt;
-    #include&lt;algorithm&gt;
-    #include&lt;cmath&gt;
-    #include&lt;cstring&gt;
-    #include&lt;string&gt;
-    #include&lt;map&gt;
-    #include&lt;set&gt;
-    #include&lt;queue&gt;
-    #include&lt;vector&gt;
-    #include&lt;stack&gt;
-    using namespace std;
-    #define REP(i, n) for (int i=0;i&lt;int(n);++i)
-    typedef long long LL;
-    typedef unsigned long long ULL;
-    const int N= 1E5+7;
-    const int inf = 0x7fffffff;
-    int a[N];
-    int  vis[N],step[N];
-    bool cmp (int a,int b)
+    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;iomanip&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;string&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;map&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;set&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;queue&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;vector&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;stack&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+    <span style=color:#75715e>#</span><span style=color:#75715e>define REP(i, n) for (int i=0;i&lt;int(n);++i)</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> LL;
+    <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>unsigned</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> ULL;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span> <span style=color:#ae81ff>1E5</span><span style=color:#f92672>+</span><span style=color:#ae81ff>7</span>;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> inf <span style=color:#f92672>=</span> <span style=color:#ae81ff>0x7fffffff</span>;
+    <span style=color:#66d9ef>int</span> a[N];
+    <span style=color:#66d9ef>int</span>  vis[N],step[N];
+    <span style=color:#66d9ef>bool</span> <span style=color:#a6e22e>cmp</span> (<span style=color:#66d9ef>int</span> a,<span style=color:#66d9ef>int</span> b)
     {
-        if (a&gt;b) return true;
-        return false;
+        <span style=color:#66d9ef>if</span> (a<span style=color:#f92672>&gt;</span>b) <span style=color:#66d9ef>return</span> true;
+        <span style=color:#66d9ef>return</span> false;
     }
-    int main()
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
     {
-        int n;
-        cin&gt;&gt;n;
-        int mx = -1;
-        memset(vis,0,sizeof(vis));
-        memset(step,0,sizeof(step));
+        <span style=color:#66d9ef>int</span> n;
+        cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>n;
+        <span style=color:#66d9ef>int</span> mx <span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>;
+        memset(vis,<span style=color:#ae81ff>0</span>,<span style=color:#66d9ef>sizeof</span>(vis));
+        memset(step,<span style=color:#ae81ff>0</span>,<span style=color:#66d9ef>sizeof</span>(step));
     
-        for ( int i = 1 ;  i &lt;= n ; i++ )
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ;  i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
         {
-    	cin&gt;&gt;a[i];
-    	if (a[i]&gt;mx)
-    	    mx = a[i];
+    	cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>a[i];
+    	<span style=color:#66d9ef>if</span> (a[i]<span style=color:#f92672>&gt;</span>mx)
+    	    mx <span style=color:#f92672>=</span> a[i];
         }
-        for ( int i = 1 ; i &lt;= n ; i++ )f
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )f
         {
-    	int tmp = a[i];
-    	int num = 0;
-    	while (tmp&lt;=mx)
+    	<span style=color:#66d9ef>int</span> tmp <span style=color:#f92672>=</span> a[i];
+    	<span style=color:#66d9ef>int</span> num <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+    	<span style=color:#66d9ef>while</span> (tmp<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>mx)
     	{
-    	    step[tmp]+=num;   //到达tmp需要的操作数是之前的数到达tmo的操作数加上当前
-    	    vis[tmp]++;     //能够到达i的数的个数存在vis数组
-    	    num++;
-    	    tmp = tmp &lt;&lt; 1;
+    	    step[tmp]<span style=color:#f92672>+</span><span style=color:#f92672>=</span>num;   <span style=color:#75715e>//到达tmp需要的操作数是之前的数到达tmo的操作数加上当前
+</span><span style=color:#75715e></span>    	    vis[tmp]<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;     <span style=color:#75715e>//能够到达i的数的个数存在vis数组
+</span><span style=color:#75715e></span>    	    num<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+    	    tmp <span style=color:#f92672>=</span> tmp <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>1</span>;
     	}
-    	num = 0;
-    	int tmpa = a[i];
-    	while (tmpa)
+    	num <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+    	<span style=color:#66d9ef>int</span> tmpa <span style=color:#f92672>=</span> a[i];
+    	<span style=color:#66d9ef>while</span> (tmpa)
     	{
-    	    if (tmpa&amp;1&amp;&amp;tmpa!=1)    //a[i]&amp;1为真当且仅当a[i]的二进制表示的最后一位是1，即a[i]为奇数
-    	    {               //但是如果a[i]为1，/2为0，就无法变大了。
-    		int tmp = (tmpa&gt;&gt;1)&lt;&lt;1;
-    		int sum = num + 2;  //奇数a[i]变为偶数a[i]-1的需要两步。
-    		while (tmp&lt;=mx) //再从a[i]-1扩展下去，看能达到哪些数。
-    		{
-    		    step[tmp]=step[tmp]+sum;
-    		    vis[tmp]++;
-    		    sum++;
-    		    tmp = tmp &lt;&lt; 1;
+    	    <span style=color:#66d9ef>if</span> (tmpa<span style=color:#f92672>&amp;</span><span style=color:#ae81ff>1</span><span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>tmpa<span style=color:#f92672>!</span><span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)    <span style=color:#75715e>//a[i]&amp;1为真当且仅当a[i]的二进制表示的最后一位是1，即a[i]为奇数
+</span><span style=color:#75715e></span>    	    {               <span style=color:#75715e>//但是如果a[i]为1，/2为0，就无法变大了。
+</span><span style=color:#75715e></span>    		<span style=color:#66d9ef>int</span> tmp <span style=color:#f92672>=</span> (tmpa<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span><span style=color:#ae81ff>1</span>)<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#ae81ff>1</span>;
+    		<span style=color:#66d9ef>int</span> sum <span style=color:#f92672>=</span> num <span style=color:#f92672>+</span> <span style=color:#ae81ff>2</span>;  <span style=color:#75715e>//奇数a[i]变为偶数a[i]-1的需要两步。
+</span><span style=color:#75715e></span>    		<span style=color:#66d9ef>while</span> (tmp<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>mx) <span style=color:#75715e>//再从a[i]-1扩展下去，看能达到哪些数。
+</span><span style=color:#75715e></span>    		{
+    		    step[tmp]<span style=color:#f92672>=</span>step[tmp]<span style=color:#f92672>+</span>sum;
+    		    vis[tmp]<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+    		    sum<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+    		    tmp <span style=color:#f92672>=</span> tmp <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>1</span>;
     		}
     	    }
-    	    num++;          //往反方向扩展，看能达到哪些数。
-    	    tmpa = tmpa&gt;&gt;1;     //注意a[i]在之前已经达到过了。
-    	    step[tmpa]+=num;
-    	    vis[tmpa]++;
+    	    num<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;          <span style=color:#75715e>//往反方向扩展，看能达到哪些数。
+</span><span style=color:#75715e></span>    	    tmpa <span style=color:#f92672>=</span> tmpa<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span><span style=color:#ae81ff>1</span>;     <span style=color:#75715e>//注意a[i]在之前已经达到过了。
+</span><span style=color:#75715e></span>    	    step[tmpa]<span style=color:#f92672>+</span><span style=color:#f92672>=</span>num;
+    	    vis[tmpa]<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
     	}
     
         }
-        int ans = inf;
-        for ( int i = 1 ; i &lt;= mx ; i++ )
+        <span style=color:#66d9ef>int</span> ans <span style=color:#f92672>=</span> inf;
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> mx ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
         {
-    	//     cout&lt;&lt;&quot;i:&quot;&lt;&lt;i&lt;&lt;&quot; vis[i]:&quot;&lt;&lt;vis[i]&lt;&lt;&quot;  step[i]:&quot;&lt;&lt;step[i]&lt;&lt;endl;
-    	if (vis[i]==n)
+    	<span style=color:#75715e>//     cout&lt;&lt;&#34;i:&#34;&lt;&lt;i&lt;&lt;&#34; vis[i]:&#34;&lt;&lt;vis[i]&lt;&lt;&#34;  step[i]:&#34;&lt;&lt;step[i]&lt;&lt;endl;
+</span><span style=color:#75715e></span>    	<span style=color:#66d9ef>if</span> (vis[i]<span style=color:#f92672>=</span><span style=color:#f92672>=</span>n)
     	{
-    	    ans = min(ans,step[i]);
+    	    ans <span style=color:#f92672>=</span> min(ans,step[i]);
     	}
         }
-        cout&lt;&lt;ans&lt;&lt;endl;
+        cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>ans<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
     
     
     
-        return 0;
+        <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
     }
     
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

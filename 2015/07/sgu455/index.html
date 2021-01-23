@@ -8,89 +8,89 @@ $navbar.className+=" in";}}</script><style type=text/css>header.intro-header{bac
 on
 Thursday, July 30, 2015</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><ol><li></li></ol></li></ol></nav><h4 id=455-sequence-analysis>455. Sequence analysis</h4><p>比赛的时候逗了，往看空间限制了&mldr;.</p><p>直接开了个set判重。。。显然MLE 了。。。</p><p>然后这道题的正解是 floyd判圈算法（也叫龟兔算法？）</p><p><a href=http://www.cnblogs.com/oyking/p/4286916.html>http://www.cnblogs.com/oyking/p/4286916.html</a>  这份题解讲得很详细</p><pre><code class=language-c++>    /*************************************************************************
-    	&gt; File Name: code/2015summer/#5/CC.cpp
-    	&gt; Author: 111qqz
-    	&gt; Email: rkz2013@126.com 
-    	&gt; Created Time: 2015年07月30日 星期四 21时02分17秒
-     ************************************************************************/
-    #include&lt;iostream&gt;
-    #include&lt;iomanip&gt;
-    #include&lt;cstdio&gt;
-    #include&lt;algorithm&gt;
-    #include&lt;cmath&gt;
-    #include&lt;cstring&gt;
-    #include&lt;string&gt;
-    #include&lt;map&gt;
-    #include&lt;set&gt;
-    #include&lt;queue&gt;
-    #include&lt;vector&gt;
-    #include&lt;stack&gt;
-    #define y0 abc111qqz
-    #define y1 hust111qqz
-    #define yn hez111qqz
-    #define j1 cute111qqz
-    #define tm crazy111qqz
-    #define lr dying111qqz
-    using namespace std;
-    #define REP(i, n) for (int i=0;i&lt;int(n);++i)  
-    typedef long long LL;
-    typedef unsigned long long ULL;
-    const int inf = 0x7fffffff;
-    const int LIM = 2E6;
+post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><ol><li></li></ol></li></ol></nav><h4 id=455-sequence-analysis>455. Sequence analysis</h4><p>比赛的时候逗了，往看空间限制了&mldr;.</p><p>直接开了个set判重。。。显然MLE 了。。。</p><p>然后这道题的正解是 floyd判圈算法（也叫龟兔算法？）</p><p><a href=http://www.cnblogs.com/oyking/p/4286916.html>http://www.cnblogs.com/oyking/p/4286916.html</a>  这份题解讲得很详细</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>    <span style=color:#75715e>/*************************************************************************
+</span><span style=color:#75715e>    	&gt; File Name: code/2015summer/#5/CC.cpp
+</span><span style=color:#75715e>    	&gt; Author: 111qqz
+</span><span style=color:#75715e>    	&gt; Email: rkz2013@126.com 
+</span><span style=color:#75715e>    	&gt; Created Time: 2015年07月30日 星期四 21时02分17秒
+</span><span style=color:#75715e>     ************************************************************************/</span>
+    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;iomanip&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;string&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;map&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;set&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;queue&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;vector&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;stack&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define y0 abc111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define y1 hust111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define yn hez111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define j1 cute111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define tm crazy111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define lr dying111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+    <span style=color:#75715e>#</span><span style=color:#75715e>define REP(i, n) for (int i=0;i&lt;int(n);++i)  </span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> LL;
+    <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>unsigned</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> ULL;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> inf <span style=color:#f92672>=</span> <span style=color:#ae81ff>0x7fffffff</span>;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> LIM <span style=color:#f92672>=</span> <span style=color:#ae81ff>2E6</span>;
     LL a,b,c;
-    LL next (LL x)
+    LL <span style=color:#a6e22e>next</span> (LL x)
     {
-        return (a*x+x%b)%c;
+        <span style=color:#66d9ef>return</span> (a<span style=color:#f92672>*</span>x<span style=color:#f92672>+</span>x<span style=color:#f92672>%</span>b)<span style=color:#f92672>%</span>c;
     }
-    int main()
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
     {
-        cin&gt;&gt;a&gt;&gt;b&gt;&gt;c;
-        LL x = next(1);
-        LL y = next(next(1));
-        int v = 1;
-        while (v&lt;=LIM &amp;&amp;x!=y)
+        cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>a<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>b<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>c;
+        LL x <span style=color:#f92672>=</span> next(<span style=color:#ae81ff>1</span>);
+        LL y <span style=color:#f92672>=</span> next(next(<span style=color:#ae81ff>1</span>));
+        <span style=color:#66d9ef>int</span> v <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+        <span style=color:#66d9ef>while</span> (v<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>LIM <span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>x<span style=color:#f92672>!</span><span style=color:#f92672>=</span>y)
         {
-    	x = next(x);  //乌龟走一步
-    	y = next(next(y)); //兔子走两步
-    	v++;
+    	x <span style=color:#f92672>=</span> next(x);  <span style=color:#75715e>//乌龟走一步
+</span><span style=color:#75715e></span>    	y <span style=color:#f92672>=</span> next(next(y)); <span style=color:#75715e>//兔子走两步
+</span><span style=color:#75715e></span>    	v<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
         }
-        if (v&gt;LIM)   //在规定范围内找不到循环节（兔子没有和乌龟到同一个位置）
-        {
-    	puts(&quot;-1&quot;);  
-    	return 0;
+        <span style=color:#66d9ef>if</span> (v<span style=color:#f92672>&gt;</span>LIM)   <span style=color:#75715e>//在规定范围内找不到循环节（兔子没有和乌龟到同一个位置）
+</span><span style=color:#75715e></span>        {
+    	puts(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>-1</span><span style=color:#e6db74>&#34;</span>);  
+    	<span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
         }
     
-        x = 1;
-        int mu = 0;  //找到循环节的起点
-        while (x!=y) 
+        x <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+        <span style=color:#66d9ef>int</span> mu <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;  <span style=color:#75715e>//找到循环节的起点
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>while</span> (x<span style=color:#f92672>!</span><span style=color:#f92672>=</span>y) 
         {
-    	x = next(x);
-    	y = next(y);
-    	mu++;
+    	x <span style=color:#f92672>=</span> next(x);
+    	y <span style=color:#f92672>=</span> next(y);
+    	mu<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
         }
         
-        int lam = 1; //循环节的长度
-        y = next(x);
-        while (mu+lam &lt;= LIM  &amp;&amp;x!=y)
+        <span style=color:#66d9ef>int</span> lam <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; <span style=color:#75715e>//循环节的长度
+</span><span style=color:#75715e></span>        y <span style=color:#f92672>=</span> next(x);
+        <span style=color:#66d9ef>while</span> (mu<span style=color:#f92672>+</span>lam <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> LIM  <span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>x<span style=color:#f92672>!</span><span style=color:#f92672>=</span>y)
         {
-    	y = next(y);
-    	lam++;
+    	y <span style=color:#f92672>=</span> next(y);
+    	lam<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
         }
-        if (mu+lam&lt;=LIM)
+        <span style=color:#66d9ef>if</span> (mu<span style=color:#f92672>+</span>lam<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>LIM)
         {
-    	printf(&quot;%d\n&quot;,mu+lam);
+    	printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>,mu<span style=color:#f92672>+</span>lam);
         }
-        else
+        <span style=color:#66d9ef>else</span>
         {
-    	puts(&quot;-1&quot;);
+    	puts(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>-1</span><span style=color:#e6db74>&#34;</span>);
         }
     
-    	return 0;
+    	<span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
     }
     
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

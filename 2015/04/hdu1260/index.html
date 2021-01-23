@@ -14,80 +14,80 @@ post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><h1 i
 40
 1
 8</p><p>Sample Output</p><p>08:00:40 am
-08:00:08 am</p><p>dp</p><p>状态转移方程为dp[i]=min(dp[i-1]+a[i],dp[i-2]+b[i]) dp[i]为第i个人买完票所花的最少时间。a[i]和b[i]分别为单独买票和两个人一起买票的时间。</p><p>因为调试语句没删掉和错把B[I]的下表认为是从1开始（实际应从2开始） WA了两发 3A</p><pre><code class=language-c++>
+08:00:08 am</p><p>dp</p><p>状态转移方程为dp[i]=min(dp[i-1]+a[i],dp[i-2]+b[i]) dp[i]为第i个人买完票所花的最少时间。a[i]和b[i]分别为单独买票和两个人一起买票的时间。</p><p>因为调试语句没删掉和错把B[I]的下表认为是从1开始（实际应从2开始） WA了两发 3A</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
    
-   #include &lt;iostream&gt;
-   #include &lt;cstdio&gt;
-   #include &lt;algorithm&gt;
-   #include &lt;cmath&gt;
-   #include &lt;cstring&gt;
-   using namespace std;
+   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
    
-   int n,k;
-   const  int inf=99999999;
-   const int N=2E3+5;
-   bool am;
-   int a[N],b[N],dp[N],hour,mini,sec;
+   <span style=color:#66d9ef>int</span> n,k;
+   <span style=color:#66d9ef>const</span>  <span style=color:#66d9ef>int</span> inf<span style=color:#f92672>=</span><span style=color:#ae81ff>99999999</span>;
+   <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>2E3</span><span style=color:#f92672>+</span><span style=color:#ae81ff>5</span>;
+   <span style=color:#66d9ef>bool</span> am;
+   <span style=color:#66d9ef>int</span> a[N],b[N],dp[N],hour,mini,sec;
    
-   int main()
+   <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
    {
    
-       scanf(&quot;%d&quot;,&amp;n);
-       while ( n-- )
+       scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>n);
+       <span style=color:#66d9ef>while</span> ( n<span style=color:#f92672>-</span><span style=color:#f92672>-</span> )
        {
-           am = true;
-           memset(a,0,sizeof(a));
-           memset(b,0,sizeof(b));
-           hour = 8;
-           mini = 0;
-         //  cout&lt;&lt;&quot;hour1:&quot;&lt;&lt;hour&lt;&lt;endl;
-           for ( int i = 0 ; i &lt; N ; i++ )
-               dp[i] = 0;
-        //   cout&lt;&lt;&quot;hour2:&quot;&lt;&lt;hour&lt;&lt;endl;
-   
-           scanf(&quot;%d&quot;,&amp;k);
-           for ( int i = 1; i &lt;= k ; i++ )
-               scanf(&quot;%d&quot;,&amp;a[i]);
-           for ( int i = 2 ; i &lt;= k ; i++ )
-               scanf(&quot;%d&quot;,&amp;b[i]);
-           dp[1] = a[1];
-           for ( int i = 2; i &lt;= k ; i++ )
-               dp[i] = min(dp[i-1]+a[i],dp[i-2]+b[i]);
-       //    printf(&quot;%d\n&quot;,dp[k]);
-           sec = dp[k];
-        //   hour = 8;
-      //  cout&lt;&lt;&quot;hour:&quot;&lt;&lt;hour&lt;&lt;endl;
-           while (sec&gt;=3600)
+           am <span style=color:#f92672>=</span> true;
+           memset(a,<span style=color:#ae81ff>0</span>,<span style=color:#66d9ef>sizeof</span>(a));
+           memset(b,<span style=color:#ae81ff>0</span>,<span style=color:#66d9ef>sizeof</span>(b));
+           hour <span style=color:#f92672>=</span> <span style=color:#ae81ff>8</span>;
+           mini <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+         <span style=color:#75715e>//  cout&lt;&lt;&#34;hour1:&#34;&lt;&lt;hour&lt;&lt;endl;
+</span><span style=color:#75715e></span>           <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span> ; i <span style=color:#f92672>&lt;</span> N ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+               dp[i] <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+        <span style=color:#75715e>//   cout&lt;&lt;&#34;hour2:&#34;&lt;&lt;hour&lt;&lt;endl;
+</span><span style=color:#75715e></span>   
+           scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>k);
+           <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> k ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+               scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>a[i]);
+           <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> k ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+               scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>b[i]);
+           dp[<span style=color:#ae81ff>1</span>] <span style=color:#f92672>=</span> a[<span style=color:#ae81ff>1</span>];
+           <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> k ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+               dp[i] <span style=color:#f92672>=</span> min(dp[i<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>]<span style=color:#f92672>+</span>a[i],dp[i<span style=color:#f92672>-</span><span style=color:#ae81ff>2</span>]<span style=color:#f92672>+</span>b[i]);
+       <span style=color:#75715e>//    printf(&#34;%d\n&#34;,dp[k]);
+</span><span style=color:#75715e></span>           sec <span style=color:#f92672>=</span> dp[k];
+        <span style=color:#75715e>//   hour = 8;
+</span><span style=color:#75715e></span>      <span style=color:#75715e>//  cout&lt;&lt;&#34;hour:&#34;&lt;&lt;hour&lt;&lt;endl;
+</span><span style=color:#75715e></span>           <span style=color:#66d9ef>while</span> (sec<span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span><span style=color:#ae81ff>3600</span>)
            {
-               sec = sec - 3600 ;
-               hour++;
+               sec <span style=color:#f92672>=</span> sec <span style=color:#f92672>-</span> <span style=color:#ae81ff>3600</span> ;
+               hour<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
            }
-           while (sec&gt;=60)
+           <span style=color:#66d9ef>while</span> (sec<span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span><span style=color:#ae81ff>60</span>)
            {
-               sec = sec - 60 ;
-               mini++;
+               sec <span style=color:#f92672>=</span> sec <span style=color:#f92672>-</span> <span style=color:#ae81ff>60</span> ;
+               mini<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
            }
-           if ( hour&gt;12 )
+           <span style=color:#66d9ef>if</span> ( hour<span style=color:#f92672>&gt;</span><span style=color:#ae81ff>12</span> )
            {
-               am = false;
-               hour = hour - 12;
+               am <span style=color:#f92672>=</span> false;
+               hour <span style=color:#f92672>=</span> hour <span style=color:#f92672>-</span> <span style=color:#ae81ff>12</span>;
            }
-           if ( hour&lt;10 )
-               cout&lt;&lt;&quot;0&quot;;
-           cout&lt;&lt;hour&lt;&lt;&quot;:&quot;;
-           if ( mini&lt;10 )
-               cout&lt;&lt;&quot;0&quot;;
-           cout&lt;&lt;mini&lt;&lt;&quot;:&quot;;
-           if ( sec&lt;10 )
-               cout&lt;&lt;&quot;0&quot;;
-           if ( am )
-               cout&lt;&lt;sec&lt;&lt;&quot; am&quot;&lt;&lt;endl;
-           else cout&lt;&lt;sec&lt;&lt;&quot; pm&quot;&lt;&lt;endl;
+           <span style=color:#66d9ef>if</span> ( hour<span style=color:#f92672>&lt;</span><span style=color:#ae81ff>10</span> )
+               cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>0</span><span style=color:#e6db74>&#34;</span>;
+           cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>hour<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>:</span><span style=color:#e6db74>&#34;</span>;
+           <span style=color:#66d9ef>if</span> ( mini<span style=color:#f92672>&lt;</span><span style=color:#ae81ff>10</span> )
+               cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>0</span><span style=color:#e6db74>&#34;</span>;
+           cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>mini<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>:</span><span style=color:#e6db74>&#34;</span>;
+           <span style=color:#66d9ef>if</span> ( sec<span style=color:#f92672>&lt;</span><span style=color:#ae81ff>10</span> )
+               cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>0</span><span style=color:#e6db74>&#34;</span>;
+           <span style=color:#66d9ef>if</span> ( am )
+               cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>sec<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74> am</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
+           <span style=color:#66d9ef>else</span> cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>sec<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74> pm</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
        }
-       return 0;
+       <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
    }
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

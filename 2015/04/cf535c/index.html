@@ -15,63 +15,63 @@ post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p><a
 这题正解应该是二分&mldr;.直接Lower_bound。。。看到也有人用前缀和搞的。
 我是解方程了（貌似是个傻逼做法）&mldr;.
 可以列出一个关于r的一元二次方程。。。然后求根公式2333
-方程是：</p><p><img src=https://111qqz.com/wp-content/uploads/2015/11/161513291826463.jpg alt></p><p>然后再和第一个条件得到的r比较取小的就是结果&mldr;..</p><p>等周末把这题的二分解法也写一些。</p><p>下面是蒟蒻傻逼的数学方恒解法的代码：</p><pre><code class=language-c++>
+方程是：</p><p><img src=https://111qqz.com/wp-content/uploads/2015/11/161513291826463.jpg alt></p><p>然后再和第一个条件得到的r比较取小的就是结果&mldr;..</p><p>等周末把这题的二分解法也写一些。</p><p>下面是蒟蒻傻逼的数学方恒解法的代码：</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
    
-   /* ***********************************************
-   Author :111qqz
-   Created Time :2016年03月03日 星期四 13时49分13秒
-   File Name :code/cf/problem/535C.cpp
-   ************************************************ */
+   <span style=color:#75715e>/* ***********************************************
+</span><span style=color:#75715e>   Author :111qqz
+</span><span style=color:#75715e>   Created Time :2016年03月03日 星期四 13时49分13秒
+</span><span style=color:#75715e>   File Name :code/cf/problem/535C.cpp
+</span><span style=color:#75715e>   ************************************************ */</span>
    
-   #include &lt;iostream&gt;
-   #include &lt;algorithm&gt;
-   #include &lt;cstring&gt;
-   #include &lt;cmath&gt;
-   #include &lt;cstdio&gt;
-    
-   using namespace std;
-   typedef long long LL;
-   const int N=1e5+5;
+   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    
+   <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+   <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> LL;
+   <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>1e5</span><span style=color:#f92672>+</span><span style=color:#ae81ff>5</span>;
    LL A,B,n,l,t,m,p,q,k,ans,a,b,c,dd,q2;
-   long double d,pp;
-   int main()
+   <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>double</span> d,pp;
+   <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
    {
-       cin&gt;&gt;A&gt;&gt;B&gt;&gt;n;
-       for ( int i = 1; i &lt;= n ; i++ )
+       cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>A<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>B<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>n;
+       <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
        {
-           cin&gt;&gt;l&gt;&gt;t&gt;&gt;m;
-           if ( t&lt;A+B*(l-1) )
+           cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>l<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>t<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>m;
+           <span style=color:#66d9ef>if</span> ( t<span style=color:#f92672>&lt;</span>A<span style=color:#f92672>+</span>B<span style=color:#f92672>*</span>(l<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>) )
            {
-               cout&lt;&lt;-1&lt;&lt;endl;
-               continue;
+               cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>-</span><span style=color:#ae81ff>1</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
+               <span style=color:#66d9ef>continue</span>;
            }
-        //   l = A + (l-1)*B; //wtf。。。这行代码是什么鬼...
-           p = (int) ((t-A)/B);
-           p++;
-           a=B;
-           b=(2*A-B);
-           c=-B*l*l+3*B*l-2*m*t-2*A*l+2*A-2*B;
-           d=(-b+sqrt(b*b-4*a*c))/(2*a);
-           //cout&lt;&lt;&quot;a:&quot;&lt;&lt;a&lt;&lt;endl;
-           //cout&lt;&lt;&quot;b:&quot;&lt;&lt;b&lt;&lt;endl;
-           //cout&lt;&lt;&quot;c:&quot;&lt;&lt;c&lt;&lt;endl;
-          // cout&lt;&lt;&quot;d:&quot;&lt;&lt;d&lt;&lt;endl;
-           q = int (d);
-           q2 = int((2*t-2*A+2*B-l*B)/B);
-          // cout&lt;&lt;&quot;q1:&quot;&lt;&lt;q&lt;&lt;endl;
-         //  cout&lt;&lt;&quot;q2:&quot;&lt;&lt;q2&lt;&lt;endl;
-           q = min(q,q2);
-          // cout&lt;&lt;&quot;p:&quot;&lt;&lt;p&lt;&lt;endl;
-        //   cout&lt;&lt;&quot;q&quot;&lt;&lt;q&lt;&lt;endl;
-           ans = min (p,q);
-           cout&lt;&lt;ans&lt;&lt;endl;
+        <span style=color:#75715e>//   l = A + (l-1)*B; //wtf。。。这行代码是什么鬼...
+</span><span style=color:#75715e></span>           p <span style=color:#f92672>=</span> (<span style=color:#66d9ef>int</span>) ((t<span style=color:#f92672>-</span>A)<span style=color:#f92672>/</span>B);
+           p<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+           a<span style=color:#f92672>=</span>B;
+           b<span style=color:#f92672>=</span>(<span style=color:#ae81ff>2</span><span style=color:#f92672>*</span>A<span style=color:#f92672>-</span>B);
+           c<span style=color:#f92672>=</span><span style=color:#f92672>-</span>B<span style=color:#f92672>*</span>l<span style=color:#f92672>*</span>l<span style=color:#f92672>+</span><span style=color:#ae81ff>3</span><span style=color:#f92672>*</span>B<span style=color:#f92672>*</span>l<span style=color:#f92672>-</span><span style=color:#ae81ff>2</span><span style=color:#f92672>*</span>m<span style=color:#f92672>*</span>t<span style=color:#f92672>-</span><span style=color:#ae81ff>2</span><span style=color:#f92672>*</span>A<span style=color:#f92672>*</span>l<span style=color:#f92672>+</span><span style=color:#ae81ff>2</span><span style=color:#f92672>*</span>A<span style=color:#f92672>-</span><span style=color:#ae81ff>2</span><span style=color:#f92672>*</span>B;
+           d<span style=color:#f92672>=</span>(<span style=color:#f92672>-</span>b<span style=color:#f92672>+</span>sqrt(b<span style=color:#f92672>*</span>b<span style=color:#f92672>-</span><span style=color:#ae81ff>4</span><span style=color:#f92672>*</span>a<span style=color:#f92672>*</span>c))<span style=color:#f92672>/</span>(<span style=color:#ae81ff>2</span><span style=color:#f92672>*</span>a);
+           <span style=color:#75715e>//cout&lt;&lt;&#34;a:&#34;&lt;&lt;a&lt;&lt;endl;
+</span><span style=color:#75715e></span>           <span style=color:#75715e>//cout&lt;&lt;&#34;b:&#34;&lt;&lt;b&lt;&lt;endl;
+</span><span style=color:#75715e></span>           <span style=color:#75715e>//cout&lt;&lt;&#34;c:&#34;&lt;&lt;c&lt;&lt;endl;
+</span><span style=color:#75715e></span>          <span style=color:#75715e>// cout&lt;&lt;&#34;d:&#34;&lt;&lt;d&lt;&lt;endl;
+</span><span style=color:#75715e></span>           q <span style=color:#f92672>=</span> <span style=color:#66d9ef>int</span> (d);
+           q2 <span style=color:#f92672>=</span> <span style=color:#66d9ef>int</span>((<span style=color:#ae81ff>2</span><span style=color:#f92672>*</span>t<span style=color:#f92672>-</span><span style=color:#ae81ff>2</span><span style=color:#f92672>*</span>A<span style=color:#f92672>+</span><span style=color:#ae81ff>2</span><span style=color:#f92672>*</span>B<span style=color:#f92672>-</span>l<span style=color:#f92672>*</span>B)<span style=color:#f92672>/</span>B);
+          <span style=color:#75715e>// cout&lt;&lt;&#34;q1:&#34;&lt;&lt;q&lt;&lt;endl;
+</span><span style=color:#75715e></span>         <span style=color:#75715e>//  cout&lt;&lt;&#34;q2:&#34;&lt;&lt;q2&lt;&lt;endl;
+</span><span style=color:#75715e></span>           q <span style=color:#f92672>=</span> min(q,q2);
+          <span style=color:#75715e>// cout&lt;&lt;&#34;p:&#34;&lt;&lt;p&lt;&lt;endl;
+</span><span style=color:#75715e></span>        <span style=color:#75715e>//   cout&lt;&lt;&#34;q&#34;&lt;&lt;q&lt;&lt;endl;
+</span><span style=color:#75715e></span>           ans <span style=color:#f92672>=</span> min (p,q);
+           cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>ans<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
        }
-       return 0;
+       <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
    }
    
 
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

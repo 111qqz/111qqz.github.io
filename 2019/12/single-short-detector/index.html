@@ -17,211 +17,211 @@ post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a 
 那么feature map的每个location会生成<code> k*(c+4)</code> 个结果，其中c代表每一类的confidence. ４代表相对prior_box中心点的offset.
 整个feature_map会生成　<code> kmn(c+4)</code> 个结果．</p><p>prior_box的参数选择,以及一些训练有关的细节可以参考原论文,这里不再赘述.
 这里主要想强调一下和priox box有关的inference 细节.
-主要是decode box的部分.</p><p>由于模型输出的bbox其实是相对每个prior_box的offset,不是真正的bbox,因此需要由网络输出的box_pred和prior box得到真正的bbox 坐标.这部分通常称为decode box,其实已经算是后处理部分了.</p><p>pytorch中decode box的代码如下:</p><pre><code class=language-python> variance1, variance2 = variance
-        cx = box_prior[:, :,
-                       0] + box_pred[:, :, 0] * variance1 * box_prior[:, :, 2]
-        cy = box_prior[:, :,
-                       1] + box_pred[:, :, 1] * variance1 * box_prior[:, :, 3]
-        w = box_prior[:, :, 2] + torch.exp(box_pred[:, :, 2] * variance2)
-        h = box_prior[:, :, 3] + torch.exp(box_pred[:, :, 3] * variance2)
-        x1 = cx - w / 2
-        y1 = cy - h / 2
-        x2 = w + x1
-        y2 = h + y1
+主要是decode box的部分.</p><p>由于模型输出的bbox其实是相对每个prior_box的offset,不是真正的bbox,因此需要由网络输出的box_pred和prior box得到真正的bbox 坐标.这部分通常称为decode box,其实已经算是后处理部分了.</p><p>pytorch中decode box的代码如下:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python> variance1, variance2 <span style=color:#f92672>=</span> variance
+        cx <span style=color:#f92672>=</span> box_prior[:, :,
+                       <span style=color:#ae81ff>0</span>] <span style=color:#f92672>+</span> box_pred[:, :, <span style=color:#ae81ff>0</span>] <span style=color:#f92672>*</span> variance1 <span style=color:#f92672>*</span> box_prior[:, :, <span style=color:#ae81ff>2</span>]
+        cy <span style=color:#f92672>=</span> box_prior[:, :,
+                       <span style=color:#ae81ff>1</span>] <span style=color:#f92672>+</span> box_pred[:, :, <span style=color:#ae81ff>1</span>] <span style=color:#f92672>*</span> variance1 <span style=color:#f92672>*</span> box_prior[:, :, <span style=color:#ae81ff>3</span>]
+        w <span style=color:#f92672>=</span> box_prior[:, :, <span style=color:#ae81ff>2</span>] <span style=color:#f92672>+</span> torch<span style=color:#f92672>.</span>exp(box_pred[:, :, <span style=color:#ae81ff>2</span>] <span style=color:#f92672>*</span> variance2)
+        h <span style=color:#f92672>=</span> box_prior[:, :, <span style=color:#ae81ff>3</span>] <span style=color:#f92672>+</span> torch<span style=color:#f92672>.</span>exp(box_pred[:, :, <span style=color:#ae81ff>3</span>] <span style=color:#f92672>*</span> variance2)
+        x1 <span style=color:#f92672>=</span> cx <span style=color:#f92672>-</span> w <span style=color:#f92672>/</span> <span style=color:#ae81ff>2</span>
+        y1 <span style=color:#f92672>=</span> cy <span style=color:#f92672>-</span> h <span style=color:#f92672>/</span> <span style=color:#ae81ff>2</span>
+        x2 <span style=color:#f92672>=</span> w <span style=color:#f92672>+</span> x1
+        y2 <span style=color:#f92672>=</span> h <span style=color:#f92672>+</span> y1
 
-</code></pre><p>不考虑variance的话,box_prior存储的四个数据按顺序分别为cx,cy,w,h
+</code></pre></div><p>不考虑variance的话,box_prior存储的四个数据按顺序分别为cx,cy,w,h
 也就是prior_box的中心点坐标(cx,cy)以及宽和高.</p><p>而variance是一个原始paper中没有提到的实现细节.
-按照<a href=https://github.com/rykov8/ssd_keras/issues/53> What is the purpose of the variances?</a> 的说法,</p><blockquote><p>Probably, the naming comes from the idea, that the ground truth bounding boxes are not always precise, in other words, they vary from image to image probably for the same object in the same position just because human labellers cannot ideally repeat themselves. Thus, the encoded values are some random values, and we want them to have unit variance that is why we divide by some value.</p></blockquote><p>可以理解成一个用来消除由标注引入的随机因素的手段.</p><p>更多bbox encoding/decoding的内容可以参考 <a href=https://leimao.github.io/blog/Bounding-Box-Encoding-Decoding/>Bounding Box Encoding and Decoding in Object Detection</a></p><p>对应的cuda代码</p><pre><code class=language-c++>template &lt;typename Dtype&gt;
-__global__ void OneStageDecodeBBoxesSSDKernel_v2(const int nthreads, const Dtype* loc_data,
-        const Dtype* prior_data, const Dtype variance1, const Dtype variance2,
-        const int num_priors,const bool clip_bbox, Dtype* bbox_loc){
+按照<a href=https://github.com/rykov8/ssd_keras/issues/53> What is the purpose of the variances?</a> 的说法,</p><blockquote><p>Probably, the naming comes from the idea, that the ground truth bounding boxes are not always precise, in other words, they vary from image to image probably for the same object in the same position just because human labellers cannot ideally repeat themselves. Thus, the encoded values are some random values, and we want them to have unit variance that is why we divide by some value.</p></blockquote><p>可以理解成一个用来消除由标注引入的随机因素的手段.</p><p>更多bbox encoding/decoding的内容可以参考 <a href=https://leimao.github.io/blog/Bounding-Box-Encoding-Decoding/>Bounding Box Encoding and Decoding in Object Detection</a></p><p>对应的cuda代码</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+__global__ <span style=color:#66d9ef>void</span> OneStageDecodeBBoxesSSDKernel_v2(<span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> nthreads, <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> loc_data,
+        <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> prior_data, <span style=color:#66d9ef>const</span> Dtype variance1, <span style=color:#66d9ef>const</span> Dtype variance2,
+        <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> num_priors,<span style=color:#66d9ef>const</span> <span style=color:#66d9ef>bool</span> clip_bbox, Dtype<span style=color:#f92672>*</span> bbox_loc){
 
     CUDA_KERNEL_LOOP(index, nthreads) {
-        // loc: Batch, num_priors, 4, 1
-        // proir: 1, num_priors, 4, 1
-        // nthreads = Batch * num_priors * 2
-        const int x_or_y = index % 2;
-        const int pri_idx = 4 * int( (index %(2*num_priors)) / 2) + x_or_y;
-        const int loc_idx = 4 * int(index /2) + x_or_y;
-        Dtype box0 =  prior_data[pri_idx];
-        box0 = box0 + loc_data[loc_idx] * variance1 * box0; 
-        Dtype box2 = prior_data[pri_idx + 2] * exp(variance2* loc_data[loc_idx+2]);
-        // box0就是prior box的中心点坐标x或者y,
-        // box2 就是prior box的w或者h. 
-        // 下面的box0和box2复用了变量,但是实际上分别表示水平或者垂直方向的两个坐标.
-        box0 -= box2/2; 
-        box2 += box0;
-        bbox_loc[loc_idx]  = clip_bbox ? min(max(box0, 0.0),1.0): box0;
-        bbox_loc[loc_idx+2] = clip_bbox ? min(max(box2, 0.0),1.0): box2;
+        <span style=color:#75715e>// loc: Batch, num_priors, 4, 1
+</span><span style=color:#75715e></span>        <span style=color:#75715e>// proir: 1, num_priors, 4, 1
+</span><span style=color:#75715e></span>        <span style=color:#75715e>// nthreads = Batch * num_priors * 2
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> x_or_y <span style=color:#f92672>=</span> index <span style=color:#f92672>%</span> <span style=color:#ae81ff>2</span>;
+        <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> pri_idx <span style=color:#f92672>=</span> <span style=color:#ae81ff>4</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>int</span>( (index <span style=color:#f92672>%</span>(<span style=color:#ae81ff>2</span><span style=color:#f92672>*</span>num_priors)) <span style=color:#f92672>/</span> <span style=color:#ae81ff>2</span>) <span style=color:#f92672>+</span> x_or_y;
+        <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> loc_idx <span style=color:#f92672>=</span> <span style=color:#ae81ff>4</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>int</span>(index <span style=color:#f92672>/</span><span style=color:#ae81ff>2</span>) <span style=color:#f92672>+</span> x_or_y;
+        Dtype box0 <span style=color:#f92672>=</span>  prior_data[pri_idx];
+        box0 <span style=color:#f92672>=</span> box0 <span style=color:#f92672>+</span> loc_data[loc_idx] <span style=color:#f92672>*</span> variance1 <span style=color:#f92672>*</span> box0; 
+        Dtype box2 <span style=color:#f92672>=</span> prior_data[pri_idx <span style=color:#f92672>+</span> <span style=color:#ae81ff>2</span>] <span style=color:#f92672>*</span> exp(variance2<span style=color:#f92672>*</span> loc_data[loc_idx<span style=color:#f92672>+</span><span style=color:#ae81ff>2</span>]);
+        <span style=color:#75715e>// box0就是prior box的中心点坐标x或者y,
+</span><span style=color:#75715e></span>        <span style=color:#75715e>// box2 就是prior box的w或者h. 
+</span><span style=color:#75715e></span>        <span style=color:#75715e>// 下面的box0和box2复用了变量,但是实际上分别表示水平或者垂直方向的两个坐标.
+</span><span style=color:#75715e></span>        box0 <span style=color:#f92672>-</span><span style=color:#f92672>=</span> box2<span style=color:#f92672>/</span><span style=color:#ae81ff>2</span>; 
+        box2 <span style=color:#f92672>+</span><span style=color:#f92672>=</span> box0;
+        bbox_loc[loc_idx]  <span style=color:#f92672>=</span> clip_bbox <span style=color:#f92672>?</span> min(max(box0, <span style=color:#ae81ff>0.0</span>),<span style=color:#ae81ff>1.0</span>)<span style=color:#f92672>:</span> box0;
+        bbox_loc[loc_idx<span style=color:#f92672>+</span><span style=color:#ae81ff>2</span>] <span style=color:#f92672>=</span> clip_bbox <span style=color:#f92672>?</span> min(max(box2, <span style=color:#ae81ff>0.0</span>),<span style=color:#ae81ff>1.0</span>)<span style=color:#f92672>:</span> box2;
     }
 }
 
-</code></pre><p>如果涉及到部署,一个要注意的细节是,pytorch代码和caffe代码中prior_box 顺序的一致性.</p><h3 id=loss>loss</h3><p>由于不(wo)涉(bu)及(hui)训练,loss不是关注的重点,简单说一句.
+</code></pre></div><p>如果涉及到部署,一个要注意的细节是,pytorch代码和caffe代码中prior_box 顺序的一致性.</p><h3 id=loss>loss</h3><p>由于不(wo)涉(bu)及(hui)训练,loss不是关注的重点,简单说一句.
 loss function是localization loss 和confidence loss 的加权和.
 前半部分用来衡量bbox的loss,后半部分是分数的loss.
 其中localization loss 如下图:
 <img src=https://i.loli.net/2019/12/08/qtaCuV5vRD3y67n.png alt=ssd_loc_loss.png></p><p>而confidence loss就是 softmax loss.</p><h3 id=different-scales-of-feature-maps>different scales of feature maps</h3><p>神经网络越深的layer有着越大的感受野(receptive fileds),每个feature map cell包含着更抽象的信息. 我们可以用浅层的feature map来检测小物体,用深层的feture map来检测大物体.
 <img src=https://i.loli.net/2019/12/08/ZioIuOMHesyCPGV.png alt="Pyramidal feature hierarchy.png"></p><p><del>这个想法后面会延伸到FPN,因此这里不详细讲了.</del>
-还是可以讲一讲的</p><p>我们可以直接看torchvision的SSD代码，预测的Module部分</p><pre><code class=language-python>
-class PredictionConvolutions(nn.Module):
-    &quot;&quot;&quot;
-    Convolutions to predict class scores and bounding boxes using lower and higher-level feature maps.
-    The bounding boxes (locations) are predicted as encoded offsets w.r.t each of the 8732 prior (default) boxes.
-    See 'cxcy_to_gcxgcy' in utils.py for the encoding definition.
-    The class scores represent the scores of each object class in each of the 8732 bounding boxes located.
-    A high score for 'background' = no object.
-    &quot;&quot;&quot;
+还是可以讲一讲的</p><p>我们可以直接看torchvision的SSD代码，预测的Module部分</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>
+<span style=color:#66d9ef>class</span> <span style=color:#a6e22e>PredictionConvolutions</span>(nn<span style=color:#f92672>.</span>Module):
+    <span style=color:#e6db74></span><span style=color:#e6db74>&#34;&#34;&#34;</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>    Convolutions to predict class scores and bounding boxes using lower and higher-level feature maps.</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>    The bounding boxes (locations) are predicted as encoded offsets w.r.t each of the 8732 prior (default) boxes.</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>    See </span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>cxcy_to_gcxgcy</span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74> in utils.py for the encoding definition.</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>    The class scores represent the scores of each object class in each of the 8732 bounding boxes located.</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>    A high score for </span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>background</span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74> = no object.</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>    </span><span style=color:#e6db74>&#34;&#34;&#34;</span>
 
-    def __init__(self, n_classes):
-        &quot;&quot;&quot;
-        :param n_classes: number of different types of objects
-        &quot;&quot;&quot;
-        super(PredictionConvolutions, self).__init__()
+    <span style=color:#66d9ef>def</span> __init__(self, n_classes):
+        <span style=color:#e6db74></span><span style=color:#e6db74>&#34;&#34;&#34;</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>        :param n_classes: number of different types of objects</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>        </span><span style=color:#e6db74>&#34;&#34;&#34;</span>
+        super(PredictionConvolutions, self)<span style=color:#f92672>.</span>__init__()
 
-        self.n_classes = n_classes
+        self<span style=color:#f92672>.</span>n_classes <span style=color:#f92672>=</span> n_classes
 
-        # Number of prior-boxes we are considering per position in each feature map
-        n_boxes = {'conv4_3': 4,
-                   'conv7': 6,
-                   'conv8_2': 6,
-                   'conv9_2': 6,
-                   'conv10_2': 4,
-                   'conv11_2': 4}
-        # 4 prior-boxes implies we use 4 different aspect ratios, etc.
+        <span style=color:#75715e># Number of prior-boxes we are considering per position in each feature map</span>
+        n_boxes <span style=color:#f92672>=</span> {<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv4_3</span><span style=color:#e6db74>&#39;</span>: <span style=color:#ae81ff>4</span>,
+                   <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv7</span><span style=color:#e6db74>&#39;</span>: <span style=color:#ae81ff>6</span>,
+                   <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv8_2</span><span style=color:#e6db74>&#39;</span>: <span style=color:#ae81ff>6</span>,
+                   <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv9_2</span><span style=color:#e6db74>&#39;</span>: <span style=color:#ae81ff>6</span>,
+                   <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv10_2</span><span style=color:#e6db74>&#39;</span>: <span style=color:#ae81ff>4</span>,
+                   <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv11_2</span><span style=color:#e6db74>&#39;</span>: <span style=color:#ae81ff>4</span>}
+        <span style=color:#75715e># 4 prior-boxes implies we use 4 different aspect ratios, etc.</span>
 
-        # Localization prediction convolutions (predict offsets w.r.t prior-boxes)
-        self.loc_conv4_3 = nn.Conv2d(512, n_boxes['conv4_3'] * 4, kernel_size=3, padding=1)
-        self.loc_conv7 = nn.Conv2d(1024, n_boxes['conv7'] * 4, kernel_size=3, padding=1)
-        self.loc_conv8_2 = nn.Conv2d(512, n_boxes['conv8_2'] * 4, kernel_size=3, padding=1)
-        self.loc_conv9_2 = nn.Conv2d(256, n_boxes['conv9_2'] * 4, kernel_size=3, padding=1)
-        self.loc_conv10_2 = nn.Conv2d(256, n_boxes['conv10_2'] * 4, kernel_size=3, padding=1)
-        self.loc_conv11_2 = nn.Conv2d(256, n_boxes['conv11_2'] * 4, kernel_size=3, padding=1)
+        <span style=color:#75715e># Localization prediction convolutions (predict offsets w.r.t prior-boxes)</span>
+        self<span style=color:#f92672>.</span>loc_conv4_3 <span style=color:#f92672>=</span> nn<span style=color:#f92672>.</span>Conv2d(<span style=color:#ae81ff>512</span>, n_boxes[<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv4_3</span><span style=color:#e6db74>&#39;</span>] <span style=color:#f92672>*</span> <span style=color:#ae81ff>4</span>, kernel_size<span style=color:#f92672>=</span><span style=color:#ae81ff>3</span>, padding<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
+        self<span style=color:#f92672>.</span>loc_conv7 <span style=color:#f92672>=</span> nn<span style=color:#f92672>.</span>Conv2d(<span style=color:#ae81ff>1024</span>, n_boxes[<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv7</span><span style=color:#e6db74>&#39;</span>] <span style=color:#f92672>*</span> <span style=color:#ae81ff>4</span>, kernel_size<span style=color:#f92672>=</span><span style=color:#ae81ff>3</span>, padding<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
+        self<span style=color:#f92672>.</span>loc_conv8_2 <span style=color:#f92672>=</span> nn<span style=color:#f92672>.</span>Conv2d(<span style=color:#ae81ff>512</span>, n_boxes[<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv8_2</span><span style=color:#e6db74>&#39;</span>] <span style=color:#f92672>*</span> <span style=color:#ae81ff>4</span>, kernel_size<span style=color:#f92672>=</span><span style=color:#ae81ff>3</span>, padding<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
+        self<span style=color:#f92672>.</span>loc_conv9_2 <span style=color:#f92672>=</span> nn<span style=color:#f92672>.</span>Conv2d(<span style=color:#ae81ff>256</span>, n_boxes[<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv9_2</span><span style=color:#e6db74>&#39;</span>] <span style=color:#f92672>*</span> <span style=color:#ae81ff>4</span>, kernel_size<span style=color:#f92672>=</span><span style=color:#ae81ff>3</span>, padding<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
+        self<span style=color:#f92672>.</span>loc_conv10_2 <span style=color:#f92672>=</span> nn<span style=color:#f92672>.</span>Conv2d(<span style=color:#ae81ff>256</span>, n_boxes[<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv10_2</span><span style=color:#e6db74>&#39;</span>] <span style=color:#f92672>*</span> <span style=color:#ae81ff>4</span>, kernel_size<span style=color:#f92672>=</span><span style=color:#ae81ff>3</span>, padding<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
+        self<span style=color:#f92672>.</span>loc_conv11_2 <span style=color:#f92672>=</span> nn<span style=color:#f92672>.</span>Conv2d(<span style=color:#ae81ff>256</span>, n_boxes[<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv11_2</span><span style=color:#e6db74>&#39;</span>] <span style=color:#f92672>*</span> <span style=color:#ae81ff>4</span>, kernel_size<span style=color:#f92672>=</span><span style=color:#ae81ff>3</span>, padding<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
 
-        # Class prediction convolutions (predict classes in localization boxes)
-        self.cl_conv4_3 = nn.Conv2d(512, n_boxes['conv4_3'] * n_classes, kernel_size=3, padding=1)
-        self.cl_conv7 = nn.Conv2d(1024, n_boxes['conv7'] * n_classes, kernel_size=3, padding=1)
-        self.cl_conv8_2 = nn.Conv2d(512, n_boxes['conv8_2'] * n_classes, kernel_size=3, padding=1)
-        self.cl_conv9_2 = nn.Conv2d(256, n_boxes['conv9_2'] * n_classes, kernel_size=3, padding=1)
-        self.cl_conv10_2 = nn.Conv2d(256, n_boxes['conv10_2'] * n_classes, kernel_size=3, padding=1)
-        self.cl_conv11_2 = nn.Conv2d(256, n_boxes['conv11_2'] * n_classes, kernel_size=3, padding=1)
+        <span style=color:#75715e># Class prediction convolutions (predict classes in localization boxes)</span>
+        self<span style=color:#f92672>.</span>cl_conv4_3 <span style=color:#f92672>=</span> nn<span style=color:#f92672>.</span>Conv2d(<span style=color:#ae81ff>512</span>, n_boxes[<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv4_3</span><span style=color:#e6db74>&#39;</span>] <span style=color:#f92672>*</span> n_classes, kernel_size<span style=color:#f92672>=</span><span style=color:#ae81ff>3</span>, padding<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
+        self<span style=color:#f92672>.</span>cl_conv7 <span style=color:#f92672>=</span> nn<span style=color:#f92672>.</span>Conv2d(<span style=color:#ae81ff>1024</span>, n_boxes[<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv7</span><span style=color:#e6db74>&#39;</span>] <span style=color:#f92672>*</span> n_classes, kernel_size<span style=color:#f92672>=</span><span style=color:#ae81ff>3</span>, padding<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
+        self<span style=color:#f92672>.</span>cl_conv8_2 <span style=color:#f92672>=</span> nn<span style=color:#f92672>.</span>Conv2d(<span style=color:#ae81ff>512</span>, n_boxes[<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv8_2</span><span style=color:#e6db74>&#39;</span>] <span style=color:#f92672>*</span> n_classes, kernel_size<span style=color:#f92672>=</span><span style=color:#ae81ff>3</span>, padding<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
+        self<span style=color:#f92672>.</span>cl_conv9_2 <span style=color:#f92672>=</span> nn<span style=color:#f92672>.</span>Conv2d(<span style=color:#ae81ff>256</span>, n_boxes[<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv9_2</span><span style=color:#e6db74>&#39;</span>] <span style=color:#f92672>*</span> n_classes, kernel_size<span style=color:#f92672>=</span><span style=color:#ae81ff>3</span>, padding<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
+        self<span style=color:#f92672>.</span>cl_conv10_2 <span style=color:#f92672>=</span> nn<span style=color:#f92672>.</span>Conv2d(<span style=color:#ae81ff>256</span>, n_boxes[<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv10_2</span><span style=color:#e6db74>&#39;</span>] <span style=color:#f92672>*</span> n_classes, kernel_size<span style=color:#f92672>=</span><span style=color:#ae81ff>3</span>, padding<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
+        self<span style=color:#f92672>.</span>cl_conv11_2 <span style=color:#f92672>=</span> nn<span style=color:#f92672>.</span>Conv2d(<span style=color:#ae81ff>256</span>, n_boxes[<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv11_2</span><span style=color:#e6db74>&#39;</span>] <span style=color:#f92672>*</span> n_classes, kernel_size<span style=color:#f92672>=</span><span style=color:#ae81ff>3</span>, padding<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
 
-        # Initialize convolutions' parameters
-        self.init_conv2d()
+        <span style=color:#75715e># Initialize convolutions&#39; parameters</span>
+        self<span style=color:#f92672>.</span>init_conv2d()
 
-    def init_conv2d(self):
-        &quot;&quot;&quot;
-        Initialize convolution parameters.
-        &quot;&quot;&quot;
-        for c in self.children():
-            if isinstance(c, nn.Conv2d):
-                nn.init.xavier_uniform_(c.weight)
-                nn.init.constant_(c.bias, 0.)
+    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>init_conv2d</span>(self):
+        <span style=color:#e6db74></span><span style=color:#e6db74>&#34;&#34;&#34;</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>        Initialize convolution parameters.</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>        </span><span style=color:#e6db74>&#34;&#34;&#34;</span>
+        <span style=color:#66d9ef>for</span> c <span style=color:#f92672>in</span> self<span style=color:#f92672>.</span>children():
+            <span style=color:#66d9ef>if</span> isinstance(c, nn<span style=color:#f92672>.</span>Conv2d):
+                nn<span style=color:#f92672>.</span>init<span style=color:#f92672>.</span>xavier_uniform_(c<span style=color:#f92672>.</span>weight)
+                nn<span style=color:#f92672>.</span>init<span style=color:#f92672>.</span>constant_(c<span style=color:#f92672>.</span>bias, <span style=color:#ae81ff>0.</span>)
 
-    def forward(self, conv4_3_feats, conv7_feats, conv8_2_feats, conv9_2_feats, conv10_2_feats, conv11_2_feats):
-        &quot;&quot;&quot;
-        Forward propagation.
-        :param conv4_3_feats: conv4_3 feature map, a tensor of dimensions (N, 512, 38, 38)
-        :param conv7_feats: conv7 feature map, a tensor of dimensions (N, 1024, 19, 19)
-        :param conv8_2_feats: conv8_2 feature map, a tensor of dimensions (N, 512, 10, 10)
-        :param conv9_2_feats: conv9_2 feature map, a tensor of dimensions (N, 256, 5, 5)
-        :param conv10_2_feats: conv10_2 feature map, a tensor of dimensions (N, 256, 3, 3)
-        :param conv11_2_feats: conv11_2 feature map, a tensor of dimensions (N, 256, 1, 1)
-        :return: 8732 locations and class scores (i.e. w.r.t each prior box) for each image
-        &quot;&quot;&quot;
-        batch_size = conv4_3_feats.size(0)
+    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>forward</span>(self, conv4_3_feats, conv7_feats, conv8_2_feats, conv9_2_feats, conv10_2_feats, conv11_2_feats):
+        <span style=color:#e6db74></span><span style=color:#e6db74>&#34;&#34;&#34;</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>        Forward propagation.</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>        :param conv4_3_feats: conv4_3 feature map, a tensor of dimensions (N, 512, 38, 38)</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>        :param conv7_feats: conv7 feature map, a tensor of dimensions (N, 1024, 19, 19)</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>        :param conv8_2_feats: conv8_2 feature map, a tensor of dimensions (N, 512, 10, 10)</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>        :param conv9_2_feats: conv9_2 feature map, a tensor of dimensions (N, 256, 5, 5)</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>        :param conv10_2_feats: conv10_2 feature map, a tensor of dimensions (N, 256, 3, 3)</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>        :param conv11_2_feats: conv11_2 feature map, a tensor of dimensions (N, 256, 1, 1)</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>        :return: 8732 locations and class scores (i.e. w.r.t each prior box) for each image</span><span style=color:#e6db74>
+</span><span style=color:#e6db74></span><span style=color:#e6db74>        </span><span style=color:#e6db74>&#34;&#34;&#34;</span>
+        batch_size <span style=color:#f92672>=</span> conv4_3_feats<span style=color:#f92672>.</span>size(<span style=color:#ae81ff>0</span>)
 
-        # Predict localization boxes' bounds (as offsets w.r.t prior-boxes)
-        l_conv4_3 = self.loc_conv4_3(conv4_3_feats)  # (N, 16, 38, 38)
-        l_conv4_3 = l_conv4_3.permute(0, 2, 3,
-                                      1).contiguous()  # (N, 38, 38, 16), to match prior-box order (after .view())
-        # (.contiguous() ensures it is stored in a contiguous chunk of memory, needed for .view() below)
-        l_conv4_3 = l_conv4_3.view(batch_size, -1, 4)  # (N, 5776, 4), there are a total 5776 boxes on this feature map
+        <span style=color:#75715e># Predict localization boxes&#39; bounds (as offsets w.r.t prior-boxes)</span>
+        l_conv4_3 <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>loc_conv4_3(conv4_3_feats)  <span style=color:#75715e># (N, 16, 38, 38)</span>
+        l_conv4_3 <span style=color:#f92672>=</span> l_conv4_3<span style=color:#f92672>.</span>permute(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>,
+                                      <span style=color:#ae81ff>1</span>)<span style=color:#f92672>.</span>contiguous()  <span style=color:#75715e># (N, 38, 38, 16), to match prior-box order (after .view())</span>
+        <span style=color:#75715e># (.contiguous() ensures it is stored in a contiguous chunk of memory, needed for .view() below)</span>
+        l_conv4_3 <span style=color:#f92672>=</span> l_conv4_3<span style=color:#f92672>.</span>view(batch_size, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>4</span>)  <span style=color:#75715e># (N, 5776, 4), there are a total 5776 boxes on this feature map</span>
 
-        l_conv7 = self.loc_conv7(conv7_feats)  # (N, 24, 19, 19)
-        l_conv7 = l_conv7.permute(0, 2, 3, 1).contiguous()  # (N, 19, 19, 24)
-        l_conv7 = l_conv7.view(batch_size, -1, 4)  # (N, 2166, 4), there are a total 2116 boxes on this feature map
+        l_conv7 <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>loc_conv7(conv7_feats)  <span style=color:#75715e># (N, 24, 19, 19)</span>
+        l_conv7 <span style=color:#f92672>=</span> l_conv7<span style=color:#f92672>.</span>permute(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>1</span>)<span style=color:#f92672>.</span>contiguous()  <span style=color:#75715e># (N, 19, 19, 24)</span>
+        l_conv7 <span style=color:#f92672>=</span> l_conv7<span style=color:#f92672>.</span>view(batch_size, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>4</span>)  <span style=color:#75715e># (N, 2166, 4), there are a total 2116 boxes on this feature map</span>
 
-        l_conv8_2 = self.loc_conv8_2(conv8_2_feats)  # (N, 24, 10, 10)
-        l_conv8_2 = l_conv8_2.permute(0, 2, 3, 1).contiguous()  # (N, 10, 10, 24)
-        l_conv8_2 = l_conv8_2.view(batch_size, -1, 4)  # (N, 600, 4)
+        l_conv8_2 <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>loc_conv8_2(conv8_2_feats)  <span style=color:#75715e># (N, 24, 10, 10)</span>
+        l_conv8_2 <span style=color:#f92672>=</span> l_conv8_2<span style=color:#f92672>.</span>permute(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>1</span>)<span style=color:#f92672>.</span>contiguous()  <span style=color:#75715e># (N, 10, 10, 24)</span>
+        l_conv8_2 <span style=color:#f92672>=</span> l_conv8_2<span style=color:#f92672>.</span>view(batch_size, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>4</span>)  <span style=color:#75715e># (N, 600, 4)</span>
 
-        l_conv9_2 = self.loc_conv9_2(conv9_2_feats)  # (N, 24, 5, 5)
-        l_conv9_2 = l_conv9_2.permute(0, 2, 3, 1).contiguous()  # (N, 5, 5, 24)
-        l_conv9_2 = l_conv9_2.view(batch_size, -1, 4)  # (N, 150, 4)
+        l_conv9_2 <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>loc_conv9_2(conv9_2_feats)  <span style=color:#75715e># (N, 24, 5, 5)</span>
+        l_conv9_2 <span style=color:#f92672>=</span> l_conv9_2<span style=color:#f92672>.</span>permute(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>1</span>)<span style=color:#f92672>.</span>contiguous()  <span style=color:#75715e># (N, 5, 5, 24)</span>
+        l_conv9_2 <span style=color:#f92672>=</span> l_conv9_2<span style=color:#f92672>.</span>view(batch_size, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>4</span>)  <span style=color:#75715e># (N, 150, 4)</span>
 
-        l_conv10_2 = self.loc_conv10_2(conv10_2_feats)  # (N, 16, 3, 3)
-        l_conv10_2 = l_conv10_2.permute(0, 2, 3, 1).contiguous()  # (N, 3, 3, 16)
-        l_conv10_2 = l_conv10_2.view(batch_size, -1, 4)  # (N, 36, 4)
+        l_conv10_2 <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>loc_conv10_2(conv10_2_feats)  <span style=color:#75715e># (N, 16, 3, 3)</span>
+        l_conv10_2 <span style=color:#f92672>=</span> l_conv10_2<span style=color:#f92672>.</span>permute(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>1</span>)<span style=color:#f92672>.</span>contiguous()  <span style=color:#75715e># (N, 3, 3, 16)</span>
+        l_conv10_2 <span style=color:#f92672>=</span> l_conv10_2<span style=color:#f92672>.</span>view(batch_size, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>4</span>)  <span style=color:#75715e># (N, 36, 4)</span>
 
-        l_conv11_2 = self.loc_conv11_2(conv11_2_feats)  # (N, 16, 1, 1)
-        l_conv11_2 = l_conv11_2.permute(0, 2, 3, 1).contiguous()  # (N, 1, 1, 16)
-        l_conv11_2 = l_conv11_2.view(batch_size, -1, 4)  # (N, 4, 4)
+        l_conv11_2 <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>loc_conv11_2(conv11_2_feats)  <span style=color:#75715e># (N, 16, 1, 1)</span>
+        l_conv11_2 <span style=color:#f92672>=</span> l_conv11_2<span style=color:#f92672>.</span>permute(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>1</span>)<span style=color:#f92672>.</span>contiguous()  <span style=color:#75715e># (N, 1, 1, 16)</span>
+        l_conv11_2 <span style=color:#f92672>=</span> l_conv11_2<span style=color:#f92672>.</span>view(batch_size, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>4</span>)  <span style=color:#75715e># (N, 4, 4)</span>
 
-        # Predict classes in localization boxes
-        c_conv4_3 = self.cl_conv4_3(conv4_3_feats)  # (N, 4 * n_classes, 38, 38)
-        c_conv4_3 = c_conv4_3.permute(0, 2, 3,
-                                      1).contiguous()  # (N, 38, 38, 4 * n_classes), to match prior-box order (after .view())
-        c_conv4_3 = c_conv4_3.view(batch_size, -1,
-                                   self.n_classes)  # (N, 5776, n_classes), there are a total 5776 boxes on this feature map
+        <span style=color:#75715e># Predict classes in localization boxes</span>
+        c_conv4_3 <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>cl_conv4_3(conv4_3_feats)  <span style=color:#75715e># (N, 4 * n_classes, 38, 38)</span>
+        c_conv4_3 <span style=color:#f92672>=</span> c_conv4_3<span style=color:#f92672>.</span>permute(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>,
+                                      <span style=color:#ae81ff>1</span>)<span style=color:#f92672>.</span>contiguous()  <span style=color:#75715e># (N, 38, 38, 4 * n_classes), to match prior-box order (after .view())</span>
+        c_conv4_3 <span style=color:#f92672>=</span> c_conv4_3<span style=color:#f92672>.</span>view(batch_size, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>,
+                                   self<span style=color:#f92672>.</span>n_classes)  <span style=color:#75715e># (N, 5776, n_classes), there are a total 5776 boxes on this feature map</span>
 
-        c_conv7 = self.cl_conv7(conv7_feats)  # (N, 6 * n_classes, 19, 19)
-        c_conv7 = c_conv7.permute(0, 2, 3, 1).contiguous()  # (N, 19, 19, 6 * n_classes)
-        c_conv7 = c_conv7.view(batch_size, -1,
-                               self.n_classes)  # (N, 2166, n_classes), there are a total 2116 boxes on this feature map
+        c_conv7 <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>cl_conv7(conv7_feats)  <span style=color:#75715e># (N, 6 * n_classes, 19, 19)</span>
+        c_conv7 <span style=color:#f92672>=</span> c_conv7<span style=color:#f92672>.</span>permute(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>1</span>)<span style=color:#f92672>.</span>contiguous()  <span style=color:#75715e># (N, 19, 19, 6 * n_classes)</span>
+        c_conv7 <span style=color:#f92672>=</span> c_conv7<span style=color:#f92672>.</span>view(batch_size, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>,
+                               self<span style=color:#f92672>.</span>n_classes)  <span style=color:#75715e># (N, 2166, n_classes), there are a total 2116 boxes on this feature map</span>
 
-        c_conv8_2 = self.cl_conv8_2(conv8_2_feats)  # (N, 6 * n_classes, 10, 10)
-        c_conv8_2 = c_conv8_2.permute(0, 2, 3, 1).contiguous()  # (N, 10, 10, 6 * n_classes)
-        c_conv8_2 = c_conv8_2.view(batch_size, -1, self.n_classes)  # (N, 600, n_classes)
+        c_conv8_2 <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>cl_conv8_2(conv8_2_feats)  <span style=color:#75715e># (N, 6 * n_classes, 10, 10)</span>
+        c_conv8_2 <span style=color:#f92672>=</span> c_conv8_2<span style=color:#f92672>.</span>permute(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>1</span>)<span style=color:#f92672>.</span>contiguous()  <span style=color:#75715e># (N, 10, 10, 6 * n_classes)</span>
+        c_conv8_2 <span style=color:#f92672>=</span> c_conv8_2<span style=color:#f92672>.</span>view(batch_size, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, self<span style=color:#f92672>.</span>n_classes)  <span style=color:#75715e># (N, 600, n_classes)</span>
 
-        c_conv9_2 = self.cl_conv9_2(conv9_2_feats)  # (N, 6 * n_classes, 5, 5)
-        c_conv9_2 = c_conv9_2.permute(0, 2, 3, 1).contiguous()  # (N, 5, 5, 6 * n_classes)
-        c_conv9_2 = c_conv9_2.view(batch_size, -1, self.n_classes)  # (N, 150, n_classes)
+        c_conv9_2 <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>cl_conv9_2(conv9_2_feats)  <span style=color:#75715e># (N, 6 * n_classes, 5, 5)</span>
+        c_conv9_2 <span style=color:#f92672>=</span> c_conv9_2<span style=color:#f92672>.</span>permute(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>1</span>)<span style=color:#f92672>.</span>contiguous()  <span style=color:#75715e># (N, 5, 5, 6 * n_classes)</span>
+        c_conv9_2 <span style=color:#f92672>=</span> c_conv9_2<span style=color:#f92672>.</span>view(batch_size, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, self<span style=color:#f92672>.</span>n_classes)  <span style=color:#75715e># (N, 150, n_classes)</span>
 
-        c_conv10_2 = self.cl_conv10_2(conv10_2_feats)  # (N, 4 * n_classes, 3, 3)
-        c_conv10_2 = c_conv10_2.permute(0, 2, 3, 1).contiguous()  # (N, 3, 3, 4 * n_classes)
-        c_conv10_2 = c_conv10_2.view(batch_size, -1, self.n_classes)  # (N, 36, n_classes)
+        c_conv10_2 <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>cl_conv10_2(conv10_2_feats)  <span style=color:#75715e># (N, 4 * n_classes, 3, 3)</span>
+        c_conv10_2 <span style=color:#f92672>=</span> c_conv10_2<span style=color:#f92672>.</span>permute(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>1</span>)<span style=color:#f92672>.</span>contiguous()  <span style=color:#75715e># (N, 3, 3, 4 * n_classes)</span>
+        c_conv10_2 <span style=color:#f92672>=</span> c_conv10_2<span style=color:#f92672>.</span>view(batch_size, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, self<span style=color:#f92672>.</span>n_classes)  <span style=color:#75715e># (N, 36, n_classes)</span>
 
-        c_conv11_2 = self.cl_conv11_2(conv11_2_feats)  # (N, 4 * n_classes, 1, 1)
-        c_conv11_2 = c_conv11_2.permute(0, 2, 3, 1).contiguous()  # (N, 1, 1, 4 * n_classes)
-        c_conv11_2 = c_conv11_2.view(batch_size, -1, self.n_classes)  # (N, 4, n_classes)
+        c_conv11_2 <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>cl_conv11_2(conv11_2_feats)  <span style=color:#75715e># (N, 4 * n_classes, 1, 1)</span>
+        c_conv11_2 <span style=color:#f92672>=</span> c_conv11_2<span style=color:#f92672>.</span>permute(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>1</span>)<span style=color:#f92672>.</span>contiguous()  <span style=color:#75715e># (N, 1, 1, 4 * n_classes)</span>
+        c_conv11_2 <span style=color:#f92672>=</span> c_conv11_2<span style=color:#f92672>.</span>view(batch_size, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, self<span style=color:#f92672>.</span>n_classes)  <span style=color:#75715e># (N, 4, n_classes)</span>
 
-        # A total of 8732 boxes
-        # Concatenate in this specific order (i.e. must match the order of the prior-boxes)
-        locs = torch.cat([l_conv4_3, l_conv7, l_conv8_2, l_conv9_2, l_conv10_2, l_conv11_2], dim=1)  # (N, 8732, 4)
-        classes_scores = torch.cat([c_conv4_3, c_conv7, c_conv8_2, c_conv9_2, c_conv10_2, c_conv11_2],
-                                   dim=1)  # (N, 8732, n_classes)
+        <span style=color:#75715e># A total of 8732 boxes</span>
+        <span style=color:#75715e># Concatenate in this specific order (i.e. must match the order of the prior-boxes)</span>
+        locs <span style=color:#f92672>=</span> torch<span style=color:#f92672>.</span>cat([l_conv4_3, l_conv7, l_conv8_2, l_conv9_2, l_conv10_2, l_conv11_2], dim<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)  <span style=color:#75715e># (N, 8732, 4)</span>
+        classes_scores <span style=color:#f92672>=</span> torch<span style=color:#f92672>.</span>cat([c_conv4_3, c_conv7, c_conv8_2, c_conv9_2, c_conv10_2, c_conv11_2],
+                                   dim<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)  <span style=color:#75715e># (N, 8732, n_classes)</span>
 
-        return locs, classes_scores
-
-
-</code></pre><p>位置的预测和分数的预测可以分两部分来看</p><pre><code class=language-python>
-    self.loc_conv4_3 = nn.Conv2d(512, n_boxes['conv4_3'] * 4, kernel_size=3, padding=1)
-    # n_boxes里面是不同的feature_map中每个位置的prior box的数量 n_boxes['conv4_3'] * 4是因为bbox有四个坐标（以offset的形式)
-
-    # conv4_3_feats:(N, 512, 38, 38)
-    # Predict localization boxes' bounds (as offsets w.r.t prior-boxes)
-    l_conv4_3 = self.loc_conv4_3(conv4_3_feats)  # (N, 16, 38, 38)
-    # shape中的16的含义是，每个位置有4个prior box,每个box有4个坐标。 这16个值坐落在16个channel上
-    l_conv4_3 = l_conv4_3.permute(0, 2, 3,
-                                1).contiguous()  # (N, 38, 38, 16), to match prior-box order (after .view())
-    # (.contiguous() ensures it is stored in a contiguous chunk of memory, needed for .view() below)
-    l_conv4_3 = l_conv4_3.view(batch_size, -1, 4)  # (N, 5776, 4), there are a total 5776 boxes on this 
-
-    #  5776个box是 38*38的feature map上每个位置上有4个。 38*38*4=5776
-
-</code></pre><p>然后是分数的预测,我们注意到对于feature map上每个位置的每个prior box都有一个conf
-<strong>注意这里对于每个prior box，虽然有多个类别的分数，但是他们的位置预测只有一组值，这里和frcnn是不同的</strong></p><pre><code class=language-python>  # Class prediction convolutions (predict classes in localization boxes)
-    self.cl_conv4_3 = nn.Conv2d(512, n_boxes['conv4_3'] * n_classes, kernel_size=3, padding=1)
-
-    # Predict classes in localization boxes
-    c_conv4_3 = self.cl_conv4_3(conv4_3_feats)  # (N, 4 * n_classes, 38, 38)
-    c_conv4_3 = c_conv4_3.permute(0, 2, 3,
-                                    1).contiguous()  # (N, 38, 38, 4 * n_classes), to match prior-box order (after .view())
-    c_conv4_3 = c_conv4_3.view(batch_size, -1,
-                                self.n_classes)  # (N, 5776, n_classes), there are a total 5776 boxes on this feature map
+        <span style=color:#66d9ef>return</span> locs, classes_scores
 
 
-</code></pre><h2 id=总结>总结</h2><ul><li>使用不同scale的feature map来预测，提升了准确度。</li><li>预测bbox使用预测默认bbox(prior box)的offset的方式，使得使用small conv filters即可达到不错的效果，减少了计算。</li></ul><h2 id=参考资料>参考资料</h2><ul><li><a href=https://arxiv.org/pdf/1512.02325.pdf>原始论文</a></li><li><a href=https://arxiv.org/pdf/1612.03144.pdf>Feature Pyramid Networks for Object Detection</a></li><li><a href=https://medium.com/@smallfishbigsea/understand-ssd-and-implement-your-own-caa3232cd6ad>Understand Single Shot MultiBox Detector (SSD) and Implement It in Pytorch</a></li></ul><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><p>位置的预测和分数的预测可以分两部分来看</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>
+    self<span style=color:#f92672>.</span>loc_conv4_3 <span style=color:#f92672>=</span> nn<span style=color:#f92672>.</span>Conv2d(<span style=color:#ae81ff>512</span>, n_boxes[<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv4_3</span><span style=color:#e6db74>&#39;</span>] <span style=color:#f92672>*</span> <span style=color:#ae81ff>4</span>, kernel_size<span style=color:#f92672>=</span><span style=color:#ae81ff>3</span>, padding<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
+    <span style=color:#75715e># n_boxes里面是不同的feature_map中每个位置的prior box的数量 n_boxes[&#39;conv4_3&#39;] * 4是因为bbox有四个坐标（以offset的形式)</span>
+
+    <span style=color:#75715e># conv4_3_feats:(N, 512, 38, 38)</span>
+    <span style=color:#75715e># Predict localization boxes&#39; bounds (as offsets w.r.t prior-boxes)</span>
+    l_conv4_3 <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>loc_conv4_3(conv4_3_feats)  <span style=color:#75715e># (N, 16, 38, 38)</span>
+    <span style=color:#75715e># shape中的16的含义是，每个位置有4个prior box,每个box有4个坐标。 这16个值坐落在16个channel上</span>
+    l_conv4_3 <span style=color:#f92672>=</span> l_conv4_3<span style=color:#f92672>.</span>permute(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>,
+                                <span style=color:#ae81ff>1</span>)<span style=color:#f92672>.</span>contiguous()  <span style=color:#75715e># (N, 38, 38, 16), to match prior-box order (after .view())</span>
+    <span style=color:#75715e># (.contiguous() ensures it is stored in a contiguous chunk of memory, needed for .view() below)</span>
+    l_conv4_3 <span style=color:#f92672>=</span> l_conv4_3<span style=color:#f92672>.</span>view(batch_size, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>4</span>)  <span style=color:#75715e># (N, 5776, 4), there are a total 5776 boxes on this </span>
+
+    <span style=color:#75715e>#  5776个box是 38*38的feature map上每个位置上有4个。 38*38*4=5776</span>
+
+</code></pre></div><p>然后是分数的预测,我们注意到对于feature map上每个位置的每个prior box都有一个conf
+<strong>注意这里对于每个prior box，虽然有多个类别的分数，但是他们的位置预测只有一组值，这里和frcnn是不同的</strong></p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>  <span style=color:#75715e># Class prediction convolutions (predict classes in localization boxes)</span>
+    self<span style=color:#f92672>.</span>cl_conv4_3 <span style=color:#f92672>=</span> nn<span style=color:#f92672>.</span>Conv2d(<span style=color:#ae81ff>512</span>, n_boxes[<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>conv4_3</span><span style=color:#e6db74>&#39;</span>] <span style=color:#f92672>*</span> n_classes, kernel_size<span style=color:#f92672>=</span><span style=color:#ae81ff>3</span>, padding<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
+
+    <span style=color:#75715e># Predict classes in localization boxes</span>
+    c_conv4_3 <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>cl_conv4_3(conv4_3_feats)  <span style=color:#75715e># (N, 4 * n_classes, 38, 38)</span>
+    c_conv4_3 <span style=color:#f92672>=</span> c_conv4_3<span style=color:#f92672>.</span>permute(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>,
+                                    <span style=color:#ae81ff>1</span>)<span style=color:#f92672>.</span>contiguous()  <span style=color:#75715e># (N, 38, 38, 4 * n_classes), to match prior-box order (after .view())</span>
+    c_conv4_3 <span style=color:#f92672>=</span> c_conv4_3<span style=color:#f92672>.</span>view(batch_size, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>,
+                                self<span style=color:#f92672>.</span>n_classes)  <span style=color:#75715e># (N, 5776, n_classes), there are a total 5776 boxes on this feature map</span>
+
+
+</code></pre></div><h2 id=总结>总结</h2><ul><li>使用不同scale的feature map来预测，提升了准确度。</li><li>预测bbox使用预测默认bbox(prior box)的offset的方式，使得使用small conv filters即可达到不错的效果，减少了计算。</li></ul><h2 id=参考资料>参考资料</h2><ul><li><a href=https://arxiv.org/pdf/1512.02325.pdf>原始论文</a></li><li><a href=https://arxiv.org/pdf/1612.03144.pdf>Feature Pyramid Networks for Object Detection</a></li><li><a href=https://medium.com/@smallfishbigsea/understand-ssd-and-implement-your-own-caa3232cd6ad>Understand Single Shot MultiBox Detector (SSD) and Implement It in Pytorch</a></li></ul><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

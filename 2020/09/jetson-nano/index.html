@@ -15,9 +15,9 @@ post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a 
 这里主要记录在第一条路径上踩过的坑</p><h2 id=环境准备>环境准备</h2><p>先过一遍<a href=https://developer.download.nvidia.com/assets/embedded/secure/jetson/Nano/docs/NV_Jetson_Nano_Developer_Kit_User_Guide.pdf?fwGItta2EgdDJPznNGraYrYTih0vCRJeiTOuypPs9DEvHJ3qz4HscO9-M4HOLiAdV9AVmQabvyXS-ngkemZ6pi-i9Of-1yLcC_1QpiZKKfeNjIZ4HFst2wTuVA8fSFWdPCLFWIjjQw9_1HXTLWGyxKMWeTjU6QW8O8XFbt8HVGmhjCc2jNfXheOl_otXr8EkdIc>开发者手册</a>
 主要是介绍了下nano的硬件和jetpack的组件
 jetpack可以理解成一个nvidia用在嵌入式设备上的SDK工具包</p><h3 id=镜像烧录>镜像烧录</h3><p>然后需要烧录镜像，参考<a href=https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#write>Write Image to the microSD Card</a>
-最初使用 Etcher 来烧录，没有启动起来，原因未知。使用终端命令烧录就没问题了。</p><h3 id=更换国内apt源>更换国内apt源</h3><p>我拿到的jeston nano是基于ubuntu 18.04 lts的版本，默认源比较慢，换成国内源。需要注意要换<strong>arm</strong>版本的源</p><pre><code class=language-shell>wget -O /etc/apt/sources.list https://repo.huaweicloud.com/repository/conf/Ubuntu-Ports-bionic.list
+最初使用 Etcher 来烧录，没有启动起来，原因未知。使用终端命令烧录就没问题了。</p><h3 id=更换国内apt源>更换国内apt源</h3><p>我拿到的jeston nano是基于ubuntu 18.04 lts的版本，默认源比较慢，换成国内源。需要注意要换<strong>arm</strong>版本的源</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>wget -O /etc/apt/sources.list https://repo.huaweicloud.com/repository/conf/Ubuntu-Ports-bionic.list
 apt update
-</code></pre><h2 id=基于docker的模型转换>基于docker的模型转换</h2><p>由于在x86上模型转换的工具是基于docker的，因此最初的想法是在nano上也基于docker进行转模型，这样或许可以复用一些x86上的工作。</p><p>确认了Jetson Nano上是可以跑docker和<a href=https://github.com/NVIDIA/nvidia-docker/wiki/NVIDIA-Container-Runtime-on-Jetson>NVIDIA Container Runtime on Jetson (Beta)</a>的
+</code></pre></div><h2 id=基于docker的模型转换>基于docker的模型转换</h2><p>由于在x86上模型转换的工具是基于docker的，因此最初的想法是在nano上也基于docker进行转模型，这样或许可以复用一些x86上的工作。</p><p>确认了Jetson Nano上是可以跑docker和<a href=https://github.com/NVIDIA/nvidia-docker/wiki/NVIDIA-Container-Runtime-on-Jetson>NVIDIA Container Runtime on Jetson (Beta)</a>的
 但是最初发现arm的cuda docker image最低支持cuda11.0的版本
 <a href=https://hub.docker.com/r/nvidia/cuda-arm64/tags>cuda-arm64 docker image tag</a>
 然而目前(2020年9月)最新的<a href=https://developer.nvidia.com/embedded/jetpack>jetpack4.4版本</a>只支持到cuda10.2的版本
@@ -28,11 +28,11 @@ apt update
 提示找不到　 libjasper-dev..似乎是个可选的包，先不装试试看
 然后提示fata error: LAPACKE_H_PATH-NOTFOUND
 解决办法参考　<a href=https://stackoverflow.com/questions/48776408/opencv-installation>opencv install</a></p><ul><li>install package liblapacke-dev</li><li>manually define -DLAPACKE_H_PATH=/usr/include when calling cmake</li></ul><p>由于在nano上编译速度非常感人，因此在x86上配置了arm的交叉编译环境，所以实际上是在x86机器上的交叉编译环境中进行编译的。</p><h3 id=安装caffe2trt工具链>安装caffe2TRT工具链</h3><p>cmake版本3.10太低，需要升级，编译3.16版本cmake的时候报错:
-Could NOT find OpenSSL<br>通过</p><pre><code class=language-shell>
+Could NOT find OpenSSL<br>通过</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>
 sudo apt-get install openssl
 
 sudo apt-get install libssl-dev
-</code></pre><p>解决</p><p>然后需要装 libgoogle-glog-dev 和 libgflags-dev</p><p>报错: unrecognized command line option ‘-mavx2’
+</code></pre></div><p>解决</p><p>然后需要装 libgoogle-glog-dev 和 libgflags-dev</p><p>报错: unrecognized command line option ‘-mavx2’
 原因是这个是x86的编译选项，arm平台不支持，解决办法是在CMakeLists中去掉这个编译选项</p><p>编译caffe报错:
 fatal error: boost/random/mersenne_twister.hpp: No such file or directory
 #include &ldquo;boost/random/mersenne_twister.hpp&rdquo;
@@ -50,122 +50,122 @@ std::iota(idxs.begin(), idxs.end(), 0);</p><p>解决办法: 添加 #include <num
 error: &lsquo;CUDNN_MAJOR&rsquo; was not declared in this scope
 应该是编译的时候没找到cudnn导致的
 发现是cudnn8的头文件里没有了cudnn.h，caffe会去这个文件中找版本
-于是加了个软链接解决</p><pre><code class=language-shell>ln -s cudnn_version_v8.h  cudnn.h   
-</code></pre><p>接下里报错:
+于是加了个软链接解决</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>ln -s cudnn_version_v8.h  cudnn.h   
+</code></pre></div><p>接下里报错:
 caffe/util/cudnn.hpp(20): error: identifier &ldquo;cudnnStatus_t&rdquo; is undefined
 make VERBOSE=1观察，是已经有了头文件所在的/usr/include的路径的</p><p>发现是cudnn8里面，头文件不止需要一个cudnn.h，拆成了好多个头文件
-于是在cudnn.h里添加了</p><pre><code class=language-c++>#include &lt;cudnn_ops_infer_v8.h&gt; 
-</code></pre><p>解决</p><p>接下来报错 error: identifier &ldquo;cudnnConvolutionDescriptor_t&rdquo; is undefined
-在cudnn.h里添加了</p><pre><code class=language-c++>#include &lt;cudnn_cnn_infer_v8.h&gt; 
-</code></pre><p>解决</p><p>要改的内容太多了，工作量不可控，放弃进一步的修改，转而采用思路是移除掉转换工具对caffe的依赖</p><h2 id=直接在裸机上安装环境>直接在裸机上安装环境</h2><h3 id=安装pytorch>安装pytorch</h3><p>注意由于架构不同，不能直接pip install来安装pytorch
+于是在cudnn.h里添加了</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cudnn_ops_infer_v8.h&gt; </span><span style=color:#75715e>
+</span></code></pre></div><p>解决</p><p>接下来报错 error: identifier &ldquo;cudnnConvolutionDescriptor_t&rdquo; is undefined
+在cudnn.h里添加了</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cudnn_cnn_infer_v8.h&gt; </span><span style=color:#75715e>
+</span></code></pre></div><p>解决</p><p>要改的内容太多了，工作量不可控，放弃进一步的修改，转而采用思路是移除掉转换工具对caffe的依赖</p><h2 id=直接在裸机上安装环境>直接在裸机上安装环境</h2><h3 id=安装pytorch>安装pytorch</h3><p>注意由于架构不同，不能直接pip install来安装pytorch
 参考 <a href=https://forums.developer.nvidia.com/t/pytorch-for-jetson-version-1-6-0-now-available/72048>pytorch-for-jetson-version-1-6-0-now-available</a></p><p>先尝试安装pip3,用在x86上的方式没成功。。
 最后是使用https://pip.pypa.io/en/stable/installing/　中的 get-pip.py 来安装</p><p>于是尝试pip3 install torch1.5.whl
-安装正常结束，但是</p><pre><code class=language-shell>python -c 'import torch'
-</code></pre><p>的时候报错:
-&ldquo;OSError: libmpi_cxx.so.20: cannot open shared object file: No such file or directory&rdquo;</p><pre><code class=language-shell>apt install libopenmpi2
-</code></pre><p>后解决
+安装正常结束，但是</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>python -c <span style=color:#e6db74>&#39;import torch&#39;</span>
+</code></pre></div><p>的时候报错:
+&ldquo;OSError: libmpi_cxx.so.20: cannot open shared object file: No such file or directory&rdquo;</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>apt install libopenmpi2
+</code></pre></div><p>后解决
 接下来报错:
-　ImportError: libopenblas.so.0: cannot open shared object file: No such file or directory</p><pre><code class=language-shell>apt install  libopenblas-dev 
-</code></pre><p>后解决</p><p>再之后直接segment falut了
+　ImportError: libopenblas.so.0: cannot open shared object file: No such file or directory</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>apt install  libopenblas-dev 
+</code></pre></div><p>后解决</p><p>再之后直接segment falut了
 参考<a href=https://www.pythonf.cn/read/129464>在Jetson TX2上安装Python,JetsonTX2,傻瓜式,pytorch</a>等帖子，似乎是arm版本的pytorch 1.5安装包有问题
 尝试下pytorch 1.4和pytorch 1.6 果然都没问题，有点坑
 最后决定使用pytoch 1.6版本</p><h3 id=安装onnx>安装onnx</h3><p>参考<a href=https://github.com/onnx/onnx#build-onnx-on-arm-64>build-onnx-on-arm-64</a>
-执行了</p><pre><code class=language-shell>pip3 install cython protobuf numpy
+执行了</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>pip3 install cython protobuf numpy
 sudo apt-get install libprotobuf-dev protobuf-compiler
 pip3 install onnx
-</code></pre><p>然后在编译onnx的时候报错"报错 onnx/third_party/pybind11/include/pybind11/detail/common.h:112:10: fatal error: Python.h: No such file or directory&rdquo;
-参考<a href=https://github.com/CMU-Perceptual-Computing-Lab/openpose/issues/1038>Make Error, fatal error: Python.h: No such file or directory compilation terminated</a>,在执行</p><pre><code class=language-shell>apt install python3-dev
-</code></pre><p>后解决</p><p>之后在import caffe_pb2的时候，报错
+</code></pre></div><p>然后在编译onnx的时候报错"报错 onnx/third_party/pybind11/include/pybind11/detail/common.h:112:10: fatal error: Python.h: No such file or directory&rdquo;
+参考<a href=https://github.com/CMU-Perceptual-Computing-Lab/openpose/issues/1038>Make Error, fatal error: Python.h: No such file or directory compilation terminated</a>,在执行</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>apt install python3-dev
+</code></pre></div><p>后解决</p><p>之后在import caffe_pb2的时候，报错
 "  options=_descriptor._ParseOptions(descriptor_pb2.FieldOptions(), _b('\020\001&rsquo;)), file=DESCRIPTOR),                                                                                      
 TypeError: <strong>new</strong>() got an unexpected keyword argument &lsquo;file&rsquo;&rdquo;
-原因是protobuf版本是3.0.0太低了。。file这个参数是protobuf 3.5之后的版本引入的。。于是升级protobuf版本到3.5.1</p><pre><code class=language-shell>pip install protobuf==3.5.1
-</code></pre><p>问题解决</p><h2 id=在x86上交叉编译>在x86上交叉编译</h2><h3 id=构建交叉编译的镜像>构建交叉编译的镜像</h3><p>发现nano上编译速度过于感人，因此尝试使用交叉编译的方式
-参考<a href=https://github.com/NVIDIA/nvidia-docker/wiki/NVIDIA-Container-Runtime-on-Jetson#enabling-jetson-containers-on-an-x86-workstation-using-qemu>Enabling Jetson Containers on an x86 workstation (using qemu)</a></p><p>结果如下:</p><pre><code class=language-shell>$ sudo apt-get install qemu binfmt-support qemu-user-static
-# Check if the entries look good.
+原因是protobuf版本是3.0.0太低了。。file这个参数是protobuf 3.5之后的版本引入的。。于是升级protobuf版本到3.5.1</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>pip install protobuf<span style=color:#f92672>=</span><span style=color:#f92672>=</span>3.5.1
+</code></pre></div><p>问题解决</p><h2 id=在x86上交叉编译>在x86上交叉编译</h2><h3 id=构建交叉编译的镜像>构建交叉编译的镜像</h3><p>发现nano上编译速度过于感人，因此尝试使用交叉编译的方式
+参考<a href=https://github.com/NVIDIA/nvidia-docker/wiki/NVIDIA-Container-Runtime-on-Jetson#enabling-jetson-containers-on-an-x86-workstation-using-qemu>Enabling Jetson Containers on an x86 workstation (using qemu)</a></p><p>结果如下:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ sudo apt-get install qemu binfmt-support qemu-user-static
+<span style=color:#75715e># Check if the entries look good.</span>
 $ sudo cat /proc/sys/fs/binfmt_misc/status
 enabled
 
-# See if /usr/bin/qemu-aarch64-static exists as one of the interpreters.
+<span style=color:#75715e># See if /usr/bin/qemu-aarch64-static exists as one of the interpreters.</span>
 $ cat /proc/sys/fs/binfmt_misc/qemu-aarch64
 enabled
 interpreter /usr/bin/qemu-aarch64-static
 flags: OC
-offset 0
+offset <span style=color:#ae81ff>0</span>
 magic 7f454c460201010000000000000000000200b700
 mask ffffffffffffff00fffffffffffffffffeffffff
 
-</code></pre><p>注意少了个'F&rsquo; flag</p><blockquote><p>Make sure the F flag is present, if not head to the troubleshooting section, as this will result in a failure to start the Jetson container.</p></blockquote><p>参考<a href=https://github.com/NVIDIA/nvidia-docker/wiki/NVIDIA-Container-Runtime-on-Jetson#running-or-building-a-container-on-x86-using-qemubinfmt_misc-is-failing>Running or building a container on x86 (using qemu+binfmt_misc) is failing</a>
-执行</p><pre><code class=language-shell>
+</code></pre></div><p>注意少了个'F&rsquo; flag</p><blockquote><p>Make sure the F flag is present, if not head to the troubleshooting section, as this will result in a failure to start the Jetson container.</p></blockquote><p>参考<a href=https://github.com/NVIDIA/nvidia-docker/wiki/NVIDIA-Container-Runtime-on-Jetson#running-or-building-a-container-on-x86-using-qemubinfmt_misc-is-failing>Running or building a container on x86 (using qemu+binfmt_misc) is failing</a>
+执行</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>
 docker run --rm --privileged multiarch/qemu-user-static --reset -p yes -c yes
-</code></pre><p>喜提一屏幕报错</p><pre><code class=language-shell>
-Setting /usr/bin/qemu-alpha-static as binfmt interpreter for alpha
+</code></pre></div><p>喜提一屏幕报错</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>
+Setting /usr/bin/qemu-alpha-static as binfmt interpreter <span style=color:#66d9ef>for</span> alpha
 sh: write error: Invalid argument
-Setting /usr/bin/qemu-arm-static as binfmt interpreter for arm
+Setting /usr/bin/qemu-arm-static as binfmt interpreter <span style=color:#66d9ef>for</span> arm
 sh: write error: Invalid argument
-Setting /usr/bin/qemu-armeb-static as binfmt interpreter for armeb
-sh: write error: Invalid argument
-sh: write error: Invalid argument
-Setting /usr/bin/qemu-sparc-static as binfmt interpreter for sparc
-Setting /usr/bin/qemu-sparc32plus-static as binfmt interpreter for sparc32plus
-sh: write error: Invalid argument
-Setting /usr/bin/qemu-sparc64-static as binfmt interpreter for sparc64
-sh: write error: Invalid argument
-Setting /usr/bin/qemu-ppc-static as binfmt interpreter for ppc
-sh: write error: Invalid argument
-Setting /usr/bin/qemu-ppc64-static as binfmt interpreter for ppc64
-sh: write error: Invalid argument
-Setting /usr/bin/qemu-ppc64le-static as binfmt interpreter for ppc64le
-sh: write error: Invalid argument
-Setting /usr/bin/qemu-m68k-static as binfmt interpreter for m68k
+Setting /usr/bin/qemu-armeb-static as binfmt interpreter <span style=color:#66d9ef>for</span> armeb
 sh: write error: Invalid argument
 sh: write error: Invalid argument
-Setting /usr/bin/qemu-mips-static as binfmt interpreter for mips
-Setting /usr/bin/qemu-mipsel-static as binfmt interpreter for mipsel
+Setting /usr/bin/qemu-sparc-static as binfmt interpreter <span style=color:#66d9ef>for</span> sparc
+Setting /usr/bin/qemu-sparc32plus-static as binfmt interpreter <span style=color:#66d9ef>for</span> sparc32plus
 sh: write error: Invalid argument
-Setting /usr/bin/qemu-mipsn32-static as binfmt interpreter for mipsn32
+Setting /usr/bin/qemu-sparc64-static as binfmt interpreter <span style=color:#66d9ef>for</span> sparc64
 sh: write error: Invalid argument
-Setting /usr/bin/qemu-mipsn32el-static as binfmt interpreter for mipsn32el
+Setting /usr/bin/qemu-ppc-static as binfmt interpreter <span style=color:#66d9ef>for</span> ppc
 sh: write error: Invalid argument
+Setting /usr/bin/qemu-ppc64-static as binfmt interpreter <span style=color:#66d9ef>for</span> ppc64
 sh: write error: Invalid argument
-Setting /usr/bin/qemu-mips64-static as binfmt interpreter for mips64
-Setting /usr/bin/qemu-mips64el-static as binfmt interpreter for mips64el
+Setting /usr/bin/qemu-ppc64le-static as binfmt interpreter <span style=color:#66d9ef>for</span> ppc64le
 sh: write error: Invalid argument
-Setting /usr/bin/qemu-sh4-static as binfmt interpreter for sh4
-sh: write error: Invalid argument
-Setting /usr/bin/qemu-sh4eb-static as binfmt interpreter for sh4eb
-sh: write error: Invalid argument
-Setting /usr/bin/qemu-s390x-static as binfmt interpreter for s390x
-sh: write error: Invalid argument
-Setting /usr/bin/qemu-aarch64-static as binfmt interpreter for aarch64
-sh: write error: Invalid argument
-Setting /usr/bin/qemu-aarch64_be-static as binfmt interpreter for aarch64_be
+Setting /usr/bin/qemu-m68k-static as binfmt interpreter <span style=color:#66d9ef>for</span> m68k
 sh: write error: Invalid argument
 sh: write error: Invalid argument
-Setting /usr/bin/qemu-hppa-static as binfmt interpreter for hppa
-Setting /usr/bin/qemu-riscv32-static as binfmt interpreter for riscv32
+Setting /usr/bin/qemu-mips-static as binfmt interpreter <span style=color:#66d9ef>for</span> mips
+Setting /usr/bin/qemu-mipsel-static as binfmt interpreter <span style=color:#66d9ef>for</span> mipsel
 sh: write error: Invalid argument
-Setting /usr/bin/qemu-riscv64-static as binfmt interpreter for riscv64
+Setting /usr/bin/qemu-mipsn32-static as binfmt interpreter <span style=color:#66d9ef>for</span> mipsn32
 sh: write error: Invalid argument
-Setting /usr/bin/qemu-xtensa-static as binfmt interpreter for xtensa
+Setting /usr/bin/qemu-mipsn32el-static as binfmt interpreter <span style=color:#66d9ef>for</span> mipsn32el
 sh: write error: Invalid argument
-Setting /usr/bin/qemu-xtensaeb-static as binfmt interpreter for xtensaeb
 sh: write error: Invalid argument
-Setting /usr/bin/qemu-microblaze-static as binfmt interpreter for microblaze
+Setting /usr/bin/qemu-mips64-static as binfmt interpreter <span style=color:#66d9ef>for</span> mips64
+Setting /usr/bin/qemu-mips64el-static as binfmt interpreter <span style=color:#66d9ef>for</span> mips64el
 sh: write error: Invalid argument
-Setting /usr/bin/qemu-microblazeel-static as binfmt interpreter for microblazeel
+Setting /usr/bin/qemu-sh4-static as binfmt interpreter <span style=color:#66d9ef>for</span> sh4
 sh: write error: Invalid argument
-Setting /usr/bin/qemu-or1k-static as binfmt interpreter for or1k
+Setting /usr/bin/qemu-sh4eb-static as binfmt interpreter <span style=color:#66d9ef>for</span> sh4eb
+sh: write error: Invalid argument
+Setting /usr/bin/qemu-s390x-static as binfmt interpreter <span style=color:#66d9ef>for</span> s390x
+sh: write error: Invalid argument
+Setting /usr/bin/qemu-aarch64-static as binfmt interpreter <span style=color:#66d9ef>for</span> aarch64
+sh: write error: Invalid argument
+Setting /usr/bin/qemu-aarch64_be-static as binfmt interpreter <span style=color:#66d9ef>for</span> aarch64_be
+sh: write error: Invalid argument
+sh: write error: Invalid argument
+Setting /usr/bin/qemu-hppa-static as binfmt interpreter <span style=color:#66d9ef>for</span> hppa
+Setting /usr/bin/qemu-riscv32-static as binfmt interpreter <span style=color:#66d9ef>for</span> riscv32
+sh: write error: Invalid argument
+Setting /usr/bin/qemu-riscv64-static as binfmt interpreter <span style=color:#66d9ef>for</span> riscv64
+sh: write error: Invalid argument
+Setting /usr/bin/qemu-xtensa-static as binfmt interpreter <span style=color:#66d9ef>for</span> xtensa
+sh: write error: Invalid argument
+Setting /usr/bin/qemu-xtensaeb-static as binfmt interpreter <span style=color:#66d9ef>for</span> xtensaeb
+sh: write error: Invalid argument
+Setting /usr/bin/qemu-microblaze-static as binfmt interpreter <span style=color:#66d9ef>for</span> microblaze
+sh: write error: Invalid argument
+Setting /usr/bin/qemu-microblazeel-static as binfmt interpreter <span style=color:#66d9ef>for</span> microblazeel
+sh: write error: Invalid argument
+Setting /usr/bin/qemu-or1k-static as binfmt interpreter <span style=color:#66d9ef>for</span> or1k
 sh: write error: Invalid argument
 
-</code></pre><p>查到<a href=https://github.com/multiarch/qemu-user-static/issues/100#issuecomment-566030523>sh: write error: Invalid argument - Centos 7</a></p><p>发现原因是 &ldquo;-p yes"这个参数是在4.10版本的kernel后才支持的。。而我本地的机器ubuntu 14.04的kernel版本是4.2.0-27-generic</p><p>绕过去的办法是从qemu-user-static的docker里copy一些必要的文件出来</p><pre><code class=language-shell>$ docker build --rm -t my-aarch64-ubuntu -&lt;&lt;EOF
-FROM multiarch/qemu-user-static:x86_64-aarch64 as qemu
-FROM arm64v8/ubuntu
-COPY --from=qemu /usr/bin/qemu-aarch64-static /usr/bin
-EOF
+</code></pre></div><p>查到<a href=https://github.com/multiarch/qemu-user-static/issues/100#issuecomment-566030523>sh: write error: Invalid argument - Centos 7</a></p><p>发现原因是 &ldquo;-p yes"这个参数是在4.10版本的kernel后才支持的。。而我本地的机器ubuntu 14.04的kernel版本是4.2.0-27-generic</p><p>绕过去的办法是从qemu-user-static的docker里copy一些必要的文件出来</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ docker build --rm -t my-aarch64-ubuntu -<span style=color:#e6db74>&lt;&lt;EOF
+</span><span style=color:#e6db74>FROM multiarch/qemu-user-static:x86_64-aarch64 as qemu
+</span><span style=color:#e6db74>FROM arm64v8/ubuntu
+</span><span style=color:#e6db74>COPY --from=qemu /usr/bin/qemu-aarch64-static /usr/bin
+</span><span style=color:#e6db74>EOF</span>
 
 $ docker run --rm -t my-aarch64-ubuntu uname -m
 aarch64
-</code></pre><p>接下来可以参考 <a href=https://www.stereolabs.com/docs/docker/building-arm-container-on-x86/>Running and Building ARM Docker Containers on x86</a></p><h3 id=编译cuda有关的库>编译cuda有关的库</h3><p>然而上面这些步骤只是能够编译和cuda无关的部分
+</code></pre></div><p>接下来可以参考 <a href=https://www.stereolabs.com/docs/docker/building-arm-container-on-x86/>Running and Building ARM Docker Containers on x86</a></p><h3 id=编译cuda有关的库>编译cuda有关的库</h3><p>然而上面这些步骤只是能够编译和cuda无关的部分
 发现对于相同的镜像，在x86上启动时，/usr/local/cuda/lib64会少很多内容，但是在nano上启动就是正常的。
 怀疑是nano的nvidia-docker做了什么事情</p><p>参考 <a href=https://forums.developer.nvidia.com/t/cross-compile-cuda-engines/72265>cross-compile-cuda-engines</a>
 以及<a href=https://github.com/NVIDIA/nvidia-docker/issues/1179>[l4t-base] Building CUDA code in a Jetson Container on an x86 workstation</a>

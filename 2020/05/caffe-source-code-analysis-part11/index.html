@@ -8,94 +8,94 @@ $navbar.className+=" in";}}</script><style type=text/css>header.intro-header{bac
 on
 Wednesday, May 6, 2020</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#背景>背景</a></li><li><a href=#proto>proto</a></li><li><a href=#c-实现>c++ 实现</a></li></ol></nav><h2 id=背景>背景</h2><p>似乎没什么背景,继续看caffe代码</p><p>argmax的作用是返回一个blob某个维度或者batch_size之后的维度的top_k的index(或者pair(index,value))</p><h2 id=proto>proto</h2><p>还是先看proto</p><pre><code class=language-protobuf>
-message ArgMaxParameter {
-  // If true produce pairs (argmax, maxval)
-  optional bool out_max_val = 1 [default = false];
-  optional uint32 top_k = 2 [default = 1];
-  // The axis along which to maximise -- may be negative to index from the
-  // end (e.g., -1 for the last axis).
-  // By default ArgMaxLayer maximizes over the flattened trailing dimensions
-  // for each index of the first / num dimension.
-  optional int32 axis = 3;
+post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#背景>背景</a></li><li><a href=#proto>proto</a></li><li><a href=#c-实现>c++ 实现</a></li></ol></nav><h2 id=背景>背景</h2><p>似乎没什么背景,继续看caffe代码</p><p>argmax的作用是返回一个blob某个维度或者batch_size之后的维度的top_k的index(或者pair(index,value))</p><h2 id=proto>proto</h2><p>还是先看proto</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-protobuf data-lang=protobuf><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#66d9ef>message</span> <span style=color:#a6e22e>ArgMaxParameter</span> {<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#75715e>// If true produce pairs (argmax, maxval)
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>bool</span> out_max_val <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>false</span>];<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>uint32</span> top_k <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>];<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#75715e>// The axis along which to maximise -- may be negative to index from the
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// end (e.g., -1 for the last axis).
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// By default ArgMaxLayer maximizes over the flattened trailing dimensions
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// for each index of the first / num dimension.
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>int32</span> axis <span style=color:#f92672>=</span> <span style=color:#ae81ff>3</span>;<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>}<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#960050;background-color:#1e0010>
+</span></code></pre></div><p>out_max_val为真表示输出(index,val)的pair,否则只输出index(?,存疑)</p><p>top_k应该是要取最大的top k个元素</p><p>axis是要求最大的维度,默认情况是把batch_size之后的维度flatten之后求argmax.</p><h2 id=c-实现>c++ 实现</h2><p>先看Reshape的部分</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> ArgMaxLayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Reshape(<span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom,
+      <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top) {
+  <span style=color:#66d9ef>int</span> num_top_axes <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num_axes();
+  <span style=color:#66d9ef>if</span> ( num_top_axes <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>3</span> ) num_top_axes <span style=color:#f92672>=</span> <span style=color:#ae81ff>3</span>;
+  std<span style=color:#f92672>:</span><span style=color:#f92672>:</span>vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> shape(num_top_axes, <span style=color:#ae81ff>1</span>);
+  <span style=color:#66d9ef>if</span> (has_axis_) {
+    <span style=color:#75715e>// Produces max_ind or max_val per axis
+</span><span style=color:#75715e></span>    shape <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>shape();
+    shape[axis_] <span style=color:#f92672>=</span> top_k_;
+    <span style=color:#75715e>//  axis非默认参数的case: 只有求max的那个维度会变,其他都不变
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//  问题: out_max_val似乎只适用在axis为默认参数的情况?
+</span><span style=color:#75715e></span>  } <span style=color:#66d9ef>else</span> {
+    shape[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>shape(<span style=color:#ae81ff>0</span>);
+    <span style=color:#75715e>// Produces max_ind
+</span><span style=color:#75715e></span>    shape[<span style=color:#ae81ff>2</span>] <span style=color:#f92672>=</span> top_k_;
+    <span style=color:#75715e>//  不是只拿到第top_k,而是拿到top_k的k个结果
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>if</span> (out_max_val_) {
+      <span style=color:#75715e>// Produces max_ind and max_val
+</span><span style=color:#75715e></span>      shape[<span style=color:#ae81ff>1</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>;
+    }
+    <span style=color:#75715e>//  默认axis参数得到的top blob的shape 为(batch_size,1或者2,top_k)
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//  因为会把batch后面的维度flatten 然后求max
+</span><span style=color:#75715e></span>  }
+  top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>Reshape(shape);
 }
 
-
-</code></pre><p>out_max_val为真表示输出(index,val)的pair,否则只输出index(?,存疑)</p><p>top_k应该是要取最大的top k个元素</p><p>axis是要求最大的维度,默认情况是把batch_size之后的维度flatten之后求argmax.</p><h2 id=c-实现>c++ 实现</h2><p>先看Reshape的部分</p><pre><code class=language-c++>
-template &lt;typename Dtype&gt;
-void ArgMaxLayer&lt;Dtype&gt;::Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  int num_top_axes = bottom[0]-&gt;num_axes();
-  if ( num_top_axes &lt; 3 ) num_top_axes = 3;
-  std::vector&lt;int&gt; shape(num_top_axes, 1);
-  if (has_axis_) {
-    // Produces max_ind or max_val per axis
-    shape = bottom[0]-&gt;shape();
-    shape[axis_] = top_k_;
-    //  axis非默认参数的case: 只有求max的那个维度会变,其他都不变
-    //  问题: out_max_val似乎只适用在axis为默认参数的情况?
-  } else {
-    shape[0] = bottom[0]-&gt;shape(0);
-    // Produces max_ind
-    shape[2] = top_k_;
-    //  不是只拿到第top_k,而是拿到top_k的k个结果
-    if (out_max_val_) {
-      // Produces max_ind and max_val
-      shape[1] = 2;
+</code></pre></div><p>添加了一些注释. 有一个疑问是,axis和out_max_val_这两个参数似乎不支持同时处理</p><p>继续看forward</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> ArgMaxLayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Forward_cpu(<span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom,
+    <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top) {
+  <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> bottom_data <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>cpu_data();
+  Dtype<span style=color:#f92672>*</span> top_data <span style=color:#f92672>=</span> top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>mutable_cpu_data();
+  <span style=color:#66d9ef>int</span> dim, axis_dist;
+  <span style=color:#66d9ef>if</span> (has_axis_) {
+    dim <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>shape(axis_);
+    <span style=color:#75715e>// dim表示做argmax的维度一共有多少个值
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// Distance between values of axis in blob
+</span><span style=color:#75715e></span>    axis_dist <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count(axis_) <span style=color:#f92672>/</span> dim;
+    <span style=color:#75715e>//  因为可能不在最末尾的维度做argmax,因此值在内存中未必是连续的
+</span><span style=color:#75715e></span>  } <span style=color:#66d9ef>else</span> {
+    dim <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count(<span style=color:#ae81ff>1</span>);
+    <span style=color:#75715e>//  从batch_size之后的维度数到最后
+</span><span style=color:#75715e></span>    axis_dist <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+    <span style=color:#75715e>//  把末尾的几个维度flatten之后做argmax,在内存上这些值是连续的,因此axis_dist是1
+</span><span style=color:#75715e></span>  }
+  <span style=color:#66d9ef>int</span> num <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count() <span style=color:#f92672>/</span> dim;
+  std<span style=color:#f92672>:</span><span style=color:#f92672>:</span>vector<span style=color:#f92672>&lt;</span>std<span style=color:#f92672>:</span><span style=color:#f92672>:</span>pair<span style=color:#f92672>&lt;</span>Dtype, <span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> <span style=color:#f92672>&gt;</span> bottom_data_vector(dim);
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> num; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; j <span style=color:#f92672>&lt;</span> dim; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>j) {
+      bottom_data_vector[j] <span style=color:#f92672>=</span> std<span style=color:#f92672>:</span><span style=color:#f92672>:</span>make_pair(
+        bottom_data[(i <span style=color:#f92672>/</span> axis_dist <span style=color:#f92672>*</span> dim <span style=color:#f92672>+</span> j) <span style=color:#f92672>*</span> axis_dist <span style=color:#f92672>+</span> i <span style=color:#f92672>%</span> axis_dist], j);
     }
-    //  默认axis参数得到的top blob的shape 为(batch_size,1或者2,top_k)
-    //  因为会把batch后面的维度flatten 然后求max
-  }
-  top[0]-&gt;Reshape(shape);
-}
-
-</code></pre><p>添加了一些注释. 有一个疑问是,axis和out_max_val_这两个参数似乎不支持同时处理</p><p>继续看forward</p><pre><code class=language-c++>
-template &lt;typename Dtype&gt;
-void ArgMaxLayer&lt;Dtype&gt;::Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
-  Dtype* top_data = top[0]-&gt;mutable_cpu_data();
-  int dim, axis_dist;
-  if (has_axis_) {
-    dim = bottom[0]-&gt;shape(axis_);
-    // dim表示做argmax的维度一共有多少个值
-    // Distance between values of axis in blob
-    axis_dist = bottom[0]-&gt;count(axis_) / dim;
-    //  因为可能不在最末尾的维度做argmax,因此值在内存中未必是连续的
-  } else {
-    dim = bottom[0]-&gt;count(1);
-    //  从batch_size之后的维度数到最后
-    axis_dist = 1;
-    //  把末尾的几个维度flatten之后做argmax,在内存上这些值是连续的,因此axis_dist是1
-  }
-  int num = bottom[0]-&gt;count() / dim;
-  std::vector&lt;std::pair&lt;Dtype, int&gt; &gt; bottom_data_vector(dim);
-  for (int i = 0; i &lt; num; ++i) {
-    for (int j = 0; j &lt; dim; ++j) {
-      bottom_data_vector[j] = std::make_pair(
-        bottom_data[(i / axis_dist * dim + j) * axis_dist + i % axis_dist], j);
-    }
-  //  通过axis_dist控制,把要做argmax的元素从内存中不连续的位置传到一个连续的vector中,目的是做sort
-    std::partial_sort(
-        bottom_data_vector.begin(), bottom_data_vector.begin() + top_k_,
-        bottom_data_vector.end(), std::greater&lt;std::pair&lt;Dtype, int&gt; &gt;());
-      //  使得前top_k是最大的top_k个元素,后面的元素顺序任意
-    for (int j = 0; j &lt; top_k_; ++j) {
-      if (out_max_val_) {
-        if (has_axis_) {
-          // Produces max_val per axis
-          top_data[(i / axis_dist * top_k_ + j) * axis_dist + i % axis_dist]
-            = bottom_data_vector[j].first;
-            //这个地方感觉有点问题... 就算是有axis参数不支持out_max_val... 输出的不也应该是index吗?
-        } else {
-          // Produces max_ind and max_val
-          top_data[2 * i * top_k_ + j] = bottom_data_vector[j].second;
-          top_data[2 * i * top_k_ + top_k_ + j] = bottom_data_vector[j].first;
+  <span style=color:#75715e>//  通过axis_dist控制,把要做argmax的元素从内存中不连续的位置传到一个连续的vector中,目的是做sort
+</span><span style=color:#75715e></span>    std<span style=color:#f92672>:</span><span style=color:#f92672>:</span>partial_sort(
+        bottom_data_vector.begin(), bottom_data_vector.begin() <span style=color:#f92672>+</span> top_k_,
+        bottom_data_vector.end(), std<span style=color:#f92672>:</span><span style=color:#f92672>:</span>greater<span style=color:#f92672>&lt;</span>std<span style=color:#f92672>:</span><span style=color:#f92672>:</span>pair<span style=color:#f92672>&lt;</span>Dtype, <span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> <span style=color:#f92672>&gt;</span>());
+      <span style=color:#75715e>//  使得前top_k是最大的top_k个元素,后面的元素顺序任意
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; j <span style=color:#f92672>&lt;</span> top_k_; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>j) {
+      <span style=color:#66d9ef>if</span> (out_max_val_) {
+        <span style=color:#66d9ef>if</span> (has_axis_) {
+          <span style=color:#75715e>// Produces max_val per axis
+</span><span style=color:#75715e></span>          top_data[(i <span style=color:#f92672>/</span> axis_dist <span style=color:#f92672>*</span> top_k_ <span style=color:#f92672>+</span> j) <span style=color:#f92672>*</span> axis_dist <span style=color:#f92672>+</span> i <span style=color:#f92672>%</span> axis_dist]
+            <span style=color:#f92672>=</span> bottom_data_vector[j].first;
+            <span style=color:#75715e>//这个地方感觉有点问题... 就算是有axis参数不支持out_max_val... 输出的不也应该是index吗?
+</span><span style=color:#75715e></span>        } <span style=color:#66d9ef>else</span> {
+          <span style=color:#75715e>// Produces max_ind and max_val
+</span><span style=color:#75715e></span>          top_data[<span style=color:#ae81ff>2</span> <span style=color:#f92672>*</span> i <span style=color:#f92672>*</span> top_k_ <span style=color:#f92672>+</span> j] <span style=color:#f92672>=</span> bottom_data_vector[j].second;
+          top_data[<span style=color:#ae81ff>2</span> <span style=color:#f92672>*</span> i <span style=color:#f92672>*</span> top_k_ <span style=color:#f92672>+</span> top_k_ <span style=color:#f92672>+</span> j] <span style=color:#f92672>=</span> bottom_data_vector[j].first;
         }
-      } else {
-        // Produces max_ind per axis
-        top_data[(i / axis_dist * top_k_ + j) * axis_dist + i % axis_dist]
-          = bottom_data_vector[j].second;
+      } <span style=color:#66d9ef>else</span> {
+        <span style=color:#75715e>// Produces max_ind per axis
+</span><span style=color:#75715e></span>        top_data[(i <span style=color:#f92672>/</span> axis_dist <span style=color:#f92672>*</span> top_k_ <span style=color:#f92672>+</span> j) <span style=color:#f92672>*</span> axis_dist <span style=color:#f92672>+</span> i <span style=color:#f92672>%</span> axis_dist]
+          <span style=color:#f92672>=</span> bottom_data_vector[j].second;
       }
     }
   }
@@ -103,7 +103,7 @@ void ArgMaxLayer&lt;Dtype&gt;::Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt
 
 
 
-</code></pre><p>值得注意的是,由于可能不在末尾的维度求max,因此求max的值可能在内存上是不连续的,
+</code></pre></div><p>值得注意的是,由于可能不在末尾的维度求max,因此求max的值可能在内存上是不连续的,
 <strong>注意看axis_dist这个变量.表示的就是要求argmax的相邻元素在内存中的距离.</strong></p><p>然后接下来的代码有些让人困惑&mldr; 即使是不同时支持out_max_val和axis这两个参数&mldr;只有一个输出,那么输出的不也应该也是index吗?</p><p>这个输出好像不是很对啊????? 去官方的caffe确认了一下,也是这样写的.</p><p>不是很确定这是不是预期的行为.</p><p>update:</p><p>看来不止我发现了这个问题 <a href=https://github.com/BVLC/caffe/issues/6823>some doubts about argmax_layer (may be bug)</a> 可惜caffe看起来已经没人维护了2333</p><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>

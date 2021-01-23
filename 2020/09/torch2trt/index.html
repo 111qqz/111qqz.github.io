@@ -11,23 +11,23 @@ Friday, September 18, 2020</span></div></div></div></div></header><article><div 
 col-md-10 col-md-offset-1
 post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#前言>前言</a><ol><li><a href=#使用torch2trt>使用torch2trt</a></li><li><a href=#torch2trt源码分析>torch2trt源码分析</a></li></ol></li></ol></nav><h2 id=前言>前言</h2><p>偶然发现了 <a href=https://github.com/NVIDIA-AI-IOT/torch2trt>torch2trt</a> 的模型转换方案，思路是直接将pytorch op映射到TensorRT的python api. 在pytorch进行每个op　forward的时候，tensorrt也相应往network上添加op.
 这里会先涉及torch2trt的使用，后面会补充这个转换工具的代码学习</p><h3 id=使用torch2trt>使用torch2trt</h3><p><a href=https://github.com/NVIDIA-AI-IOT/torch2trt>torch2trt</a>
-pytorch可以直接安装，但是torchvision根据 <a href="https://forums.developer.nvidia.com/t/pytorch-for-jetson-version-1-6-0-now-available/72048/15?u=hust.111qqz">pytorch-for-jetson-version-1-6-0-now-available</a> 中的说法，需要编译安装</p><pre><code class=language-shell>git clone  https://github.com/pytorch/vision 
-</code></pre><p>然后切换到tag v0.7.0
-执行</p><pre><code class=language-shell>sudo python3 setup.py  install 
-</code></pre><p>可以正常安装</p><p>然后报错:
+pytorch可以直接安装，但是torchvision根据 <a href="https://forums.developer.nvidia.com/t/pytorch-for-jetson-version-1-6-0-now-available/72048/15?u=hust.111qqz">pytorch-for-jetson-version-1-6-0-now-available</a> 中的说法，需要编译安装</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>git clone  https://github.com/pytorch/vision 
+</code></pre></div><p>然后切换到tag v0.7.0
+执行</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>sudo python3 setup.py  install 
+</code></pre></div><p>可以正常安装</p><p>然后报错:
 ModuleNotFoundError: No module named &lsquo;termcolor&rsquo;</p><p>尝试 sudo apt install python3-termcolor 后解决</p><p>接下来尝试trt samples中的　/python/network_api_pytorch_mnist
 发现安装pycuda报错找不到cuda.h的头文件
 参考　<a href="https://forums.developer.nvidia.com/t/pycuda-installation-failure-on-jetson-nano/77152/12?u=hust.111qqz">pycuda installation failure on jetson nano</a>
-执行了如下命令后成功:</p><pre><code class=language-shell>export LIBRARY_PATH=/usr/local/cuda/targets/aarch64-linux/lib/:$LIBRARY_PATH
-export CPATH=/usr/local/cuda/include:$CPATH 
+执行了如下命令后成功:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>export LIBRARY_PATH<span style=color:#f92672>=</span>/usr/local/cuda/targets/aarch64-linux/lib/:$LIBRARY_PATH
+export CPATH<span style=color:#f92672>=</span>/usr/local/cuda/include:$CPATH 
 
-</code></pre><p>然后尝试使用TensorRT python api对一个engine file 做inference的时候，报错:
+</code></pre></div><p>然后尝试使用TensorRT python api对一个engine file 做inference的时候，报错:
 pycuda._driver.LogicError: explicit_context_dependent failed: invalid device context - no currently active context?
 在　import pycuda.autoinit　后解决</p><p>然后在尝试修改inference的input时报错:
 pycuda._driver.LogicError: cuMemcpyHtoDAsync failed: invalid argument
 参考<a href="https://forums.developer.nvidia.com/t/pycuda-driver-logicerror-cumemcpyhtodasync-failed-invalid-argument/83132/5?u=hust.111qqz">pycuda._driver.LogicError: cuMemcpyHtoDAsync failed: invalid argument</a>
-发现原因是numpy的类型不太对，修改为:</p><pre><code class=language-python> inputs[0].host = inp.astype(np.float32)
-</code></pre><p>就可以了</p><p>接下来是在plan文件前面加签名
+发现原因是numpy的类型不太对，修改为:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python> inputs[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>.</span>host <span style=color:#f92672>=</span> inp<span style=color:#f92672>.</span>astype(np<span style=color:#f92672>.</span>float32)
+</code></pre></div><p>就可以了</p><p>接下来是在plan文件前面加签名
 一开始用了numpy.tobytes() 。。发现每个字符占了4byte..与c++的caffe-tensorrt行为不一致
 后来尝试 c = bytes(header,&lsquo;utf-8&rsquo;) + model_data 问题似乎解决</p><h3 id=torch2trt源码分析>torch2trt源码分析</h3><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>

@@ -16,63 +16,63 @@ post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><h1 i
 1 2 3 2 1 1 2 3 2 1
 50
 0</p><p>Sample Output</p><p>-45
-32</p><p>Source</p><p><a href="http://acm.hdu.edu.cn/search.php?field=problem&key=UESTC+6th+Programming+Contest+Online&source=1&searchmode=source">UESTC 6th Programming Contest Online</a></p><p>在入门dp。</p><p>显然是01背包。 cost和value都是价钱。</p><p>但是有限制条件。</p><p>很容易想到，为了使得余额最少，我们要把最贵的留在最后买。</p><p>读入的时候把最贵的菜价拿出来</p><p>然后剩下的n-1个菜，做一个容量为m-5的01背包。</p><p>注意如果m&lt;5,直接输出即可。</p><pre><code class=language-c++>
+32</p><p>Source</p><p><a href="http://acm.hdu.edu.cn/search.php?field=problem&key=UESTC+6th+Programming+Contest+Online&source=1&searchmode=source">UESTC 6th Programming Contest Online</a></p><p>在入门dp。</p><p>显然是01背包。 cost和value都是价钱。</p><p>但是有限制条件。</p><p>很容易想到，为了使得余额最少，我们要把最贵的留在最后买。</p><p>读入的时候把最贵的菜价拿出来</p><p>然后剩下的n-1个菜，做一个容量为m-5的01背包。</p><p>注意如果m&lt;5,直接输出即可。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
    
-   /* ***********************************************
-   Author :111qqz
-   Created Time :2016年02月22日 星期一 22时44分27秒
-   File Name :code/hdu/2546.cpp
-   ************************************************ */
+   <span style=color:#75715e>/* ***********************************************
+</span><span style=color:#75715e>   Author :111qqz
+</span><span style=color:#75715e>   Created Time :2016年02月22日 星期一 22时44分27秒
+</span><span style=color:#75715e>   File Name :code/hdu/2546.cpp
+</span><span style=color:#75715e>   ************************************************ */</span>
    
-   #include &lt;iostream&gt;
-   #include &lt;algorithm&gt;
-   #include &lt;cstring&gt;
-   #include &lt;cstdio&gt;
-   #include &lt;cmath&gt;
+   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   
+   <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
    
-   using namespace std;
+   <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span>  N<span style=color:#f92672>=</span><span style=color:#ae81ff>2E3</span><span style=color:#f92672>+</span><span style=color:#ae81ff>5</span>;
+   <span style=color:#66d9ef>int</span> mmax;
+   <span style=color:#66d9ef>int</span> a[N],dp[N],posi;
+   <span style=color:#66d9ef>int</span> n,m;
    
-   const int  N=2E3+5;
-   int mmax;
-   int a[N],dp[N],posi;
-   int n,m;
-   
-   void ZeroOnePack(int value ,int cost)
+   <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>ZeroOnePack</span>(<span style=color:#66d9ef>int</span> value ,<span style=color:#66d9ef>int</span> cost)
    {
-        for ( int i = m - 5 ; i &gt;= cost ; i-- )
-           dp[i]=max(dp[i],dp[i-cost]+value);
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> m <span style=color:#f92672>-</span> <span style=color:#ae81ff>5</span> ; i <span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span> cost ; i<span style=color:#f92672>-</span><span style=color:#f92672>-</span> )
+           dp[i]<span style=color:#f92672>=</span>max(dp[i],dp[i<span style=color:#f92672>-</span>cost]<span style=color:#f92672>+</span>value);
    
    }
    
-   int main()
+   <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
    {
-       while (scanf(&quot;%d&quot;,&amp;n)!=EOF&amp;&amp;n)
-       {   mmax = -1;
-          memset(dp,0,sizeof(dp));
-          memset(a,0,sizeof(a));
-           for ( int i = 1 ; i &lt;= n ; i++)
-               scanf(&quot;%d&quot;,&amp;a[i]);
-           for ( int i = 1 ; i &lt;= n ; i++)
-               if ( a[i] &gt; mmax )
+       <span style=color:#66d9ef>while</span> (scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>n)<span style=color:#f92672>!</span><span style=color:#f92672>=</span>EOF<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>n)
+       {   mmax <span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>;
+          memset(dp,<span style=color:#ae81ff>0</span>,<span style=color:#66d9ef>sizeof</span>(dp));
+          memset(a,<span style=color:#ae81ff>0</span>,<span style=color:#66d9ef>sizeof</span>(a));
+           <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+               scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>a[i]);
+           <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+               <span style=color:#66d9ef>if</span> ( a[i] <span style=color:#f92672>&gt;</span> mmax )
                {
-                   mmax=a[i];
-                   posi=i;
+                   mmax<span style=color:#f92672>=</span>a[i];
+                   posi<span style=color:#f92672>=</span>i;
                }
-           scanf(&quot;%d&quot;,&amp;m);
-           if ( m&lt; 5) {printf(&quot;%d\n&quot;,m);continue;}
+           scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>m);
+           <span style=color:#66d9ef>if</span> ( m<span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>5</span>) {printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>,m);<span style=color:#66d9ef>continue</span>;}
    
    
-           for ( int i = 1 ; i &lt;= n ; i++ )
-               if ( i!=posi )
+           <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+               <span style=color:#66d9ef>if</span> ( i<span style=color:#f92672>!</span><span style=color:#f92672>=</span>posi )
                ZeroOnePack(a[i],a[i]);
-               printf(&quot;%d\n&quot;,m-dp[m-5]-mmax);
+               printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>,m<span style=color:#f92672>-</span>dp[m<span style=color:#f92672>-</span><span style=color:#ae81ff>5</span>]<span style=color:#f92672>-</span>mmax);
        }
-       return 0;
+       <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
    }
    
 
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

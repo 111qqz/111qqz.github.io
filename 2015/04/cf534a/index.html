@@ -8,80 +8,80 @@ $navbar.className+=" in";}}</script><style type=text/css>header.intro-header{bac
 on
 Monday, April 13, 2015</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p>A. Exam</p><p>time limit per test</p><p>1 second</p><p>memory limit per test</p><p>256 megabytes</p><p>input</p><p>standard input</p><p>output</p><p>standard output</p><p>An exam for <em>n</em> students will take place in a long and narrow room, so the students will sit in a line in some order. The teacher suspects that students with adjacent numbers (<em>i</em> and <em>i</em> + 1) always studied side by side and became friends and if they take an exam sitting next to each other, they will help each other for sure.</p><p>Your task is to choose the maximum number of students and make such an arrangement of students in the room that no two students with adjacent numbers sit side by side.</p><p>Input</p><p>A single line contains integer <em>n</em> (1 ≤ <em>n</em> ≤ 5000) &ndash; the number of students at an exam.</p><p>Output</p><p>In the first line print integer <em>k</em> &ndash; the maximum number of students who can be seated so that no two students with adjacent numbers sit next to each other.</p><p>In the second line print <em>k</em> distinct integers <em>a_1, <em>a_2, &mldr;, <em>a__k</em> (1 ≤ <em>a__i</em> ≤ <em>n</em>), where <em>a__i</em> is the number of the student on the <em>i</em>-th position. The students on adjacent positions mustn't have adjacent numbers. Formally, the following should be true: |_a__i</em> - <em>a__i</em> + 1| ≠ 1 for all <em>i</em> from 1 to_k</em> - 1.</p><p>If there are several possible answers, output any of them.</p><p>题意是有n个数（1..n），问构造一个最长的数列，使得相邻元素的差的绝对值不等于1.</p><p>1,2,3,4特判下。</p><p>剩下的直接先走奇数，后走偶数构造即可。</p><pre><code class=language-c++>
+post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p>A. Exam</p><p>time limit per test</p><p>1 second</p><p>memory limit per test</p><p>256 megabytes</p><p>input</p><p>standard input</p><p>output</p><p>standard output</p><p>An exam for <em>n</em> students will take place in a long and narrow room, so the students will sit in a line in some order. The teacher suspects that students with adjacent numbers (<em>i</em> and <em>i</em> + 1) always studied side by side and became friends and if they take an exam sitting next to each other, they will help each other for sure.</p><p>Your task is to choose the maximum number of students and make such an arrangement of students in the room that no two students with adjacent numbers sit side by side.</p><p>Input</p><p>A single line contains integer <em>n</em> (1 ≤ <em>n</em> ≤ 5000) &ndash; the number of students at an exam.</p><p>Output</p><p>In the first line print integer <em>k</em> &ndash; the maximum number of students who can be seated so that no two students with adjacent numbers sit next to each other.</p><p>In the second line print <em>k</em> distinct integers <em>a_1, <em>a_2, &mldr;, <em>a__k</em> (1 ≤ <em>a__i</em> ≤ <em>n</em>), where <em>a__i</em> is the number of the student on the <em>i</em>-th position. The students on adjacent positions mustn't have adjacent numbers. Formally, the following should be true: |_a__i</em> - <em>a__i</em> + 1| ≠ 1 for all <em>i</em> from 1 to_k</em> - 1.</p><p>If there are several possible answers, output any of them.</p><p>题意是有n个数（1..n），问构造一个最长的数列，使得相邻元素的差的绝对值不等于1.</p><p>1,2,3,4特判下。</p><p>剩下的直接先走奇数，后走偶数构造即可。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
    
-   /* ***********************************************
-   Author :111qqz
-   Created Time :2016年02月22日 星期一 23时46分25秒
-   File Name :code/cf/problem/534A.cpp
-   ************************************************ */
+   <span style=color:#75715e>/* ***********************************************
+</span><span style=color:#75715e>   Author :111qqz
+</span><span style=color:#75715e>   Created Time :2016年02月22日 星期一 23时46分25秒
+</span><span style=color:#75715e>   File Name :code/cf/problem/534A.cpp
+</span><span style=color:#75715e>   ************************************************ */</span>
    
-   #include &lt;iostream&gt;
-   #include &lt;algorithm&gt;
-   #include &lt;cstdio&gt;
-   #include &lt;cmath&gt;
-   #include &lt;cstring&gt;
-   using namespace std;
-   const int N=5E3+7;
-   int a[N],n,k,tmp;
+   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+   <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>5E3</span><span style=color:#f92672>+</span><span style=color:#ae81ff>7</span>;
+   <span style=color:#66d9ef>int</span> a[N],n,k,tmp;
    
-   int main()
+   <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
    {
-       cin&gt;&gt;n;
-       memset(a,0,sizeof(a));
-       if (n&lt;=2)
+       cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>n;
+       memset(a,<span style=color:#ae81ff>0</span>,<span style=color:#66d9ef>sizeof</span>(a));
+       <span style=color:#66d9ef>if</span> (n<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span><span style=color:#ae81ff>2</span>)
        {
    
-           k = 1;
-           a[1] = 1;
-           cout&lt;&lt;k&lt;&lt;endl;
-           cout&lt;&lt;a[1];
-           return 0;
+           k <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+           a[<span style=color:#ae81ff>1</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+           cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>k<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
+           cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>a[<span style=color:#ae81ff>1</span>];
+           <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
        }
-       if (n==3)
+       <span style=color:#66d9ef>if</span> (n<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>3</span>)
        {
-           k = 2;
-           a[1] = 1;
-           a[2] = 3;
-           cout&lt;&lt;k&lt;&lt;endl;
-           cout&lt;&lt;a[1]&lt;&lt;&quot; &quot;&lt;&lt;a[2];
-           return 0;
+           k <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>;
+           a[<span style=color:#ae81ff>1</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+           a[<span style=color:#ae81ff>2</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>3</span>;
+           cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>k<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
+           cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>a[<span style=color:#ae81ff>1</span>]<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74> </span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>a[<span style=color:#ae81ff>2</span>];
+           <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
        }
-       if (n==4)
+       <span style=color:#66d9ef>if</span> (n<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>4</span>)
        {
-           k = 4;
-           a[1] = 2;
-           a[2] = 4;
-           a[3] = 1;
-           a[4] = 3;
-           cout&lt;&lt;k&lt;&lt;endl;
-           cout&lt;&lt;a[1]&lt;&lt;&quot; &quot;&lt;&lt;a[2]&lt;&lt;&quot; &quot;&lt;&lt;a[3]&lt;&lt;&quot; &quot;&lt;&lt;a[4];
-           return 0;
+           k <span style=color:#f92672>=</span> <span style=color:#ae81ff>4</span>;
+           a[<span style=color:#ae81ff>1</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>;
+           a[<span style=color:#ae81ff>2</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>4</span>;
+           a[<span style=color:#ae81ff>3</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+           a[<span style=color:#ae81ff>4</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>3</span>;
+           cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>k<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
+           cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>a[<span style=color:#ae81ff>1</span>]<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74> </span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>a[<span style=color:#ae81ff>2</span>]<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74> </span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>a[<span style=color:#ae81ff>3</span>]<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74> </span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>a[<span style=color:#ae81ff>4</span>];
+           <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
        }
-        tmp = (n+1)/2;
-       for ( int i = 1 ; i &lt;= n ; i++)
+        tmp <span style=color:#f92672>=</span> (n<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>)<span style=color:#f92672>/</span><span style=color:#ae81ff>2</span>;
+       <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
        {
    
-           if (i&lt;=tmp)
+           <span style=color:#66d9ef>if</span> (i<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>tmp)
            {
-               a[i] = 2*i-1;
+               a[i] <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span><span style=color:#f92672>*</span>i<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>;
            }
-           else
+           <span style=color:#66d9ef>else</span>
            {
-               a[i]=a[i-tmp]+1;
+               a[i]<span style=color:#f92672>=</span>a[i<span style=color:#f92672>-</span>tmp]<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>;
            }
        }
-       cout&lt;&lt;n&lt;&lt;endl;
-       for ( int i = 1 ; i &lt;= n ; i++ )
-           cout&lt;&lt;a[i]&lt;&lt;&quot; &quot;;
+       cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>n<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
+       <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+           cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>a[i]<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74> </span><span style=color:#e6db74>&#34;</span>;
    
    
    
-       return 0;
+       <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
    }
 
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

@@ -8,14 +8,14 @@ $navbar.className+=" in";}}</script><style type=text/css>header.intro-header{bac
 on
 Wednesday, April 8, 2020</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#caffe中卷积运算的实现>caffe中卷积运算的实现</a></li><li><a href=#各种卷积>各种卷积</a><ol><li><a href=#2d卷积>2d卷积</a></li><li><a href=#3d卷积>3d卷积</a></li><li><a href=#1-x-1-卷积>1 x 1 卷积</a></li><li><a href=#transposed-convolution-deconvolution>Transposed Convolution (Deconvolution)</a></li><li><a href=#dilated-convolution--空洞卷积>Dilated Convolution (空洞卷积)</a></li><li><a href=#spatially-separable-convolutions>Spatially Separable Convolutions</a></li><li><a href=#grouped-convolution>Grouped Convolution</a></li></ol></li><li><a href=#参考链接>参考链接</a></li></ol></nav><h2 id=caffe中卷积运算的实现>caffe中卷积运算的实现</h2><p>暴力实现的卷积大概是这样子的</p><pre><code class=language-python>
-for w in 1..W
-  for h in 1..H
-    for x in 1..K
-      for y in 1..K
-        for m in 1..M
-          for d in 1..D
-            output(w, h, m) += input(w+x, h+y, d) * filter(m, x, y, d)
+post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#caffe中卷积运算的实现>caffe中卷积运算的实现</a></li><li><a href=#各种卷积>各种卷积</a><ol><li><a href=#2d卷积>2d卷积</a></li><li><a href=#3d卷积>3d卷积</a></li><li><a href=#1-x-1-卷积>1 x 1 卷积</a></li><li><a href=#transposed-convolution-deconvolution>Transposed Convolution (Deconvolution)</a></li><li><a href=#dilated-convolution--空洞卷积>Dilated Convolution (空洞卷积)</a></li><li><a href=#spatially-separable-convolutions>Spatially Separable Convolutions</a></li><li><a href=#grouped-convolution>Grouped Convolution</a></li></ol></li><li><a href=#参考链接>参考链接</a></li></ol></nav><h2 id=caffe中卷积运算的实现>caffe中卷积运算的实现</h2><p>暴力实现的卷积大概是这样子的</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>
+<span style=color:#66d9ef>for</span> w <span style=color:#f92672>in</span> <span style=color:#ae81ff>1.</span><span style=color:#f92672>.</span>W
+  <span style=color:#66d9ef>for</span> h <span style=color:#f92672>in</span> <span style=color:#ae81ff>1.</span><span style=color:#f92672>.</span>H
+    <span style=color:#66d9ef>for</span> x <span style=color:#f92672>in</span> <span style=color:#ae81ff>1.</span><span style=color:#f92672>.</span>K
+      <span style=color:#66d9ef>for</span> y <span style=color:#f92672>in</span> <span style=color:#ae81ff>1.</span><span style=color:#f92672>.</span>K
+        <span style=color:#66d9ef>for</span> m <span style=color:#f92672>in</span> <span style=color:#ae81ff>1.</span><span style=color:#f92672>.</span>M
+          <span style=color:#66d9ef>for</span> d <span style=color:#f92672>in</span> <span style=color:#ae81ff>1.</span><span style=color:#f92672>.</span>D
+            output(w, h, m) <span style=color:#f92672>+</span><span style=color:#f92672>=</span> input(w<span style=color:#f92672>+</span>x, h<span style=color:#f92672>+</span>y, d) <span style=color:#f92672>*</span> filter(m, x, y, d)
           end
         end
       end
@@ -23,96 +23,96 @@ for w in 1..W
   end
 end
 
-</code></pre><p>这种方式的效率显然很低，不意外地,caffe中并不是这样实现的．</p><p>注释里面说:</p><blockquote><p>Caffe convolves by reduction to matrix multiplication. This achieves high-throughput and generality of input and filter dimensions but comes at the cost of memory for matrices. This makes use of efficiency in BLAS.</p></blockquote><blockquote><p>The input is &ldquo;im2col&rdquo; transformed to a channel K&rsquo; x H x W data matrix for multiplication with the N x K&rsquo; x H x W filter matrix to yield a N&rsquo; x H x W output matrix that is then &ldquo;col2im&rdquo; restored. K&rsquo; is the input channel * kernel height * kernel width dimension of the unrolled inputs so that the im2col matrix has a column for each input region to be filtered. col2im restores the output spatial structure by rolling up the output channel N&rsquo; columns of the output matrix.</p></blockquote><p>大概意思是说把卷积运算转换成矩阵乘法，然后利用现有的矩阵乘法库来运算．</p><p><img src=https://pic2.zhimg.com/80/a54fea5b7e70bd25d3096126a6713d19_720w.jpg alt=conv1>
+</code></pre></div><p>这种方式的效率显然很低，不意外地,caffe中并不是这样实现的．</p><p>注释里面说:</p><blockquote><p>Caffe convolves by reduction to matrix multiplication. This achieves high-throughput and generality of input and filter dimensions but comes at the cost of memory for matrices. This makes use of efficiency in BLAS.</p></blockquote><blockquote><p>The input is &ldquo;im2col&rdquo; transformed to a channel K&rsquo; x H x W data matrix for multiplication with the N x K&rsquo; x H x W filter matrix to yield a N&rsquo; x H x W output matrix that is then &ldquo;col2im&rdquo; restored. K&rsquo; is the input channel * kernel height * kernel width dimension of the unrolled inputs so that the im2col matrix has a column for each input region to be filtered. col2im restores the output spatial structure by rolling up the output channel N&rsquo; columns of the output matrix.</p></blockquote><p>大概意思是说把卷积运算转换成矩阵乘法，然后利用现有的矩阵乘法库来运算．</p><p><img src=https://pic2.zhimg.com/80/a54fea5b7e70bd25d3096126a6713d19_720w.jpg alt=conv1>
 <img src=https://pic2.zhimg.com/80/314fb9af7d379ba2ea1f67ea982a60b2_720w.jpg alt=conv2>
 <img src=https://pic3.zhimg.com/80/69e44f61e8ede5ba84534ca3b764d302_720w.jpg alt=conv3>
 <img src=https://pic3.zhimg.com/80/6b1dde11bf30688b4f526ea77d54a196_720w.jpg alt=conv4></p><p>最后就是Filter Matrix乘以Feature Matrix的转置，得到输出矩阵Cout x (H x W)</p><p>所以我觉得注释里的filter matrix的尺寸说成是"N*K&rsquo;&ldquo;而不是＂N x K&rsquo; x H x W＂　更容易让人理解一些？</p><p><strong>需要注意的是,这里为了方便讨论,采用了让输入和输出的feature map的尺寸一致的设置.</strong></p><p>caffe代码中src/utill/im2col.cpp 中的 im2col和col2im,都是为了这个优化(指把卷积运算转换成矩阵乘法)
-这部分感觉过于detail了,不打算展开.</p><p>这里还有caffe作者对这个优化的思考 <a href=https://github.com/Yangqing/caffe/wiki/Convolution-in-Caffe:-a-memo>Convolution in Caffe: a memo</a></p><p>我觉得最值得我们学习的是,不要重复造轮子,先看要解决的问题有没有现成的实现,如果没有,那么能不能把我们要解决的问题转换成有现成实现的问题.</p><p>分析完这个运算感觉已经说完了. 我们看一下caffe proto</p><pre><code class=language-protobuf>
-message ConvolutionParameter {
-  optional uint32 num_output = 1; // The number of outputs for the layer
-  optional bool bias_term = 2 [default = true]; // whether to have bias terms
-
-  // Pad, kernel size, and stride are all given as a single value for equal
-  // dimensions in all spatial dimensions, or once per spatial dimension.
-  repeated uint32 pad = 3; // The padding size; defaults to 0
-  repeated uint32 kernel_size = 4; // The kernel size
-  repeated uint32 stride = 6; // The stride; defaults to 1
-  // Factor used to dilate the kernel, (implicitly) zero-filling the resulting
-  // holes. (Kernel dilation is sometimes referred to by its use in the
-  // algorithme à trous from Holschneider et al. 1987.)
-  repeated uint32 dilation = 18; // The dilation; defaults to 1
-
-  // For 2D convolution only, the *_h and *_w versions may also be used to
-  // specify both spatial dimensions.
-  optional uint32 pad_h = 9 [default = 0]; // The padding height (2D only)
-  optional uint32 pad_w = 10 [default = 0]; // The padding width (2D only)
-  optional uint32 kernel_h = 11; // The kernel height (2D only)
-  optional uint32 kernel_w = 12; // The kernel width (2D only)
-  optional uint32 stride_h = 13; // The stride height (2D only)
-  optional uint32 stride_w = 14; // The stride width (2D only)
-
-  optional uint32 group = 5 [default = 1]; // The group size for group conv
-
-  optional FillerParameter weight_filler = 7; // The filler for the weight
-  optional FillerParameter bias_filler = 8; // The filler for the bias
-  enum Engine {
-    DEFAULT = 0;
-    CAFFE = 1;
-    CUDNN = 2;
-  }
-  optional Engine engine = 15 [default = DEFAULT];
-
-  // The axis to interpret as &quot;channels&quot; when performing convolution.
-  // Preceding dimensions are treated as independent inputs;
-  // succeeding dimensions are treated as &quot;spatial&quot;.
-  // With (N, C, H, W) inputs, and axis == 1 (the default), we perform
-  // N independent 2D convolutions, sliding C-channel (or (C/g)-channels, for
-  // groups g&gt;1) filters across the spatial axes (H, W) of the input.
-  // With (N, C, D, H, W) inputs, and axis == 1, we perform
-  // N independent 3D convolutions, sliding (C/g)-channels
-  // filters across the spatial axes (D, H, W) of the input.
-  optional int32 axis = 16 [default = 1];
-
-  // Whether to force use of the general ND convolution, even if a specific
-  // implementation for blobs of the appropriate number of spatial dimensions
-  // is available. (Currently, there is only a 2D-specific convolution
-  // implementation; for input blobs with num_axes != 2, this option is
-  // ignored and the ND implementation will be used.)
-  optional bool force_nd_im2col = 17 [default = false];
-}
-
-</code></pre><p>可以看到,里面有很多参数. 说明caffe是把很多种卷积放在一起实现的. 之后我们逐个分析一下.</p><h2 id=各种卷积>各种卷积</h2><h3 id=2d卷积>2d卷积</h3><p>最最普通的一种</p><p>下面的图是一个filter的运算情况.
+这部分感觉过于detail了,不打算展开.</p><p>这里还有caffe作者对这个优化的思考 <a href=https://github.com/Yangqing/caffe/wiki/Convolution-in-Caffe:-a-memo>Convolution in Caffe: a memo</a></p><p>我觉得最值得我们学习的是,不要重复造轮子,先看要解决的问题有没有现成的实现,如果没有,那么能不能把我们要解决的问题转换成有现成实现的问题.</p><p>分析完这个运算感觉已经说完了. 我们看一下caffe proto</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-protobuf data-lang=protobuf><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#66d9ef>message</span> <span style=color:#a6e22e>ConvolutionParameter</span> {<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>uint32</span> num_output <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; <span style=color:#75715e>// The number of outputs for the layer
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>bool</span> bias_term <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>true</span>]; <span style=color:#75715e>// whether to have bias terms
+</span><span style=color:#75715e></span><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#75715e>// Pad, kernel size, and stride are all given as a single value for equal
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// dimensions in all spatial dimensions, or once per spatial dimension.
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>repeated</span> <span style=color:#66d9ef>uint32</span> pad <span style=color:#f92672>=</span> <span style=color:#ae81ff>3</span>; <span style=color:#75715e>// The padding size; defaults to 0
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>repeated</span> <span style=color:#66d9ef>uint32</span> kernel_size <span style=color:#f92672>=</span> <span style=color:#ae81ff>4</span>; <span style=color:#75715e>// The kernel size
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>repeated</span> <span style=color:#66d9ef>uint32</span> stride <span style=color:#f92672>=</span> <span style=color:#ae81ff>6</span>; <span style=color:#75715e>// The stride; defaults to 1
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// Factor used to dilate the kernel, (implicitly) zero-filling the resulting
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// holes. (Kernel dilation is sometimes referred to by its use in the
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// algorithme à trous from Holschneider et al. 1987.)
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>repeated</span> <span style=color:#66d9ef>uint32</span> dilation <span style=color:#f92672>=</span> <span style=color:#ae81ff>18</span>; <span style=color:#75715e>// The dilation; defaults to 1
+</span><span style=color:#75715e></span><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#75715e>// For 2D convolution only, the *_h and *_w versions may also be used to
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// specify both spatial dimensions.
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>uint32</span> pad_h <span style=color:#f92672>=</span> <span style=color:#ae81ff>9</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>]; <span style=color:#75715e>// The padding height (2D only)
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>uint32</span> pad_w <span style=color:#f92672>=</span> <span style=color:#ae81ff>10</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>]; <span style=color:#75715e>// The padding width (2D only)
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>uint32</span> kernel_h <span style=color:#f92672>=</span> <span style=color:#ae81ff>11</span>; <span style=color:#75715e>// The kernel height (2D only)
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>uint32</span> kernel_w <span style=color:#f92672>=</span> <span style=color:#ae81ff>12</span>; <span style=color:#75715e>// The kernel width (2D only)
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>uint32</span> stride_h <span style=color:#f92672>=</span> <span style=color:#ae81ff>13</span>; <span style=color:#75715e>// The stride height (2D only)
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>uint32</span> stride_w <span style=color:#f92672>=</span> <span style=color:#ae81ff>14</span>; <span style=color:#75715e>// The stride width (2D only)
+</span><span style=color:#75715e></span><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>uint32</span> <span style=color:#66d9ef>group</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>5</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>]; <span style=color:#75715e>// The group size for group conv
+</span><span style=color:#75715e></span><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#66d9ef>optional</span> FillerParameter weight_filler <span style=color:#f92672>=</span> <span style=color:#ae81ff>7</span>; <span style=color:#75715e>// The filler for the weight
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> FillerParameter bias_filler <span style=color:#f92672>=</span> <span style=color:#ae81ff>8</span>; <span style=color:#75715e>// The filler for the bias
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>enum</span> Engine {<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>    DEFAULT <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>    CAFFE <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>    CUDNN <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>;<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  }<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#66d9ef>optional</span> Engine engine <span style=color:#f92672>=</span> <span style=color:#ae81ff>15</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> DEFAULT];<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#75715e>// The axis to interpret as &#34;channels&#34; when performing convolution.
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// Preceding dimensions are treated as independent inputs;
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// succeeding dimensions are treated as &#34;spatial&#34;.
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// With (N, C, H, W) inputs, and axis == 1 (the default), we perform
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// N independent 2D convolutions, sliding C-channel (or (C/g)-channels, for
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// groups g&gt;1) filters across the spatial axes (H, W) of the input.
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// With (N, C, D, H, W) inputs, and axis == 1, we perform
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// N independent 3D convolutions, sliding (C/g)-channels
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// filters across the spatial axes (D, H, W) of the input.
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>int32</span> axis <span style=color:#f92672>=</span> <span style=color:#ae81ff>16</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>];<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#75715e>// Whether to force use of the general ND convolution, even if a specific
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// implementation for blobs of the appropriate number of spatial dimensions
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// is available. (Currently, there is only a 2D-specific convolution
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// implementation; for input blobs with num_axes != 2, this option is
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// ignored and the ND implementation will be used.)
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>bool</span> force_nd_im2col <span style=color:#f92672>=</span> <span style=color:#ae81ff>17</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>false</span>];<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>}<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#960050;background-color:#1e0010>
+</span></code></pre></div><p>可以看到,里面有很多参数. 说明caffe是把很多种卷积放在一起实现的. 之后我们逐个分析一下.</p><h2 id=各种卷积>各种卷积</h2><h3 id=2d卷积>2d卷积</h3><p>最最普通的一种</p><p>下面的图是一个filter的运算情况.
 <img src=https://miro.medium.com/max/1280/1*K_OsaLGJ7I8cGlPvvWYJdg.png alt=卷积></p><p>2d可以理解成filter只在height和width两个方向移动</p><p>值得一提的是卷积的尺寸计算:</p><p><img src="https://www.zhihu.com/equation?tex=+%5Cbegin%7Bcases%7D+height_%7Bout%7D+%26%3D+%28height_%7Bin%7D+-+height_%7Bkernel%7D+%2B+2+%2A+padding%29+~+%2F+~+stride+%2B+1%5C%5C%5B2ex%5D+width_%7Bout%7D+%26%3D+%28width_%7Bin%7D+-+width_%7Bkernel%7D+%2B+2+%2A+padding%29+~+%2F+~+stride+%2B+1+%5Cend%7Bcases%7D" alt=卷积尺寸计算></p><p>这里关于padding的尺寸还有两个特别有迷惑色彩的词,&ldquo;valid padding"和"same padding&rdquo;&rsquo;
 可以参考 <a href=https://stackoverflow.com/questions/37674306/what-is-the-difference-between-same-and-valid-padding-in-tf-nn-max-pool-of-t>What is the difference between &lsquo;SAME&rsquo; and &lsquo;VALID&rsquo; padding in tf.nn.max_pool of tensorflow?</a></p><ul><li>valid: 不做任何padding,只在"valid"的区域做卷积.如果filter的一部分超过了feature map的边界,那么就不做卷积.</li><li>same: <strong>并不表示input和output的size相同</strong>(只在stride 为1时成立) 而是说如果filter超出了feature map的边界,自动做padding.</li></ul><h3 id=3d卷积>3d卷积</h3><p>区别主要是 filter 的depth小于 input的depth. 因此在depth方向也可以移动.</p><p><img src=https://miro.medium.com/max/1280/1*wUVVgZnzBwYKgQyTBK_5sg.png alt=3d卷积></p><h3 id=1-x-1-卷积>1 x 1 卷积</h3><p><del>印象中应该是 <a href=https://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/43022.pdf>Going Deeper with Convolutions</a>中的inception module最先引入了1*1的卷积.</del></p><p>印象错误.. 不过至少算是让这种结构广为人知?</p><p>原因是inception module中计算量太大了,因此用1*1的卷积降低维度.</p><p><img src=https://miro.medium.com/max/1280/1*deVKbCzJs_7eL6p2ltkY0g.png alt=1*1卷积></p><p><strong>其实1*1的卷积本质上就是对不同channel的feature进行线性组合,只不过这种操作恰好可以通过一种1*1的卷积结构实现.</strong></p><h3 id=transposed-convolution-deconvolution>Transposed Convolution (Deconvolution)</h3><p>Transposed Convolution 其实是比较合适的叫法,但是人们也经常用"Deconvolution"来表示.</p><p>我们考虑一个 Semantic Segmentation 问题,需要做像素级别的分类.</p><p><img src=https://i.loli.net/2020/04/11/QlPR693KNAEGJWx.png alt="semantic seg.png"></p><p>这样的问题在于计算代价比较大,一般的做法是在encoder阶段抽特征,downsample到一个合适的尺寸,然后在decoder阶段upsample到原图的尺寸.</p><p><img src=https://i.loli.net/2020/04/11/t635KerJmXUNOoC.png alt="semantic sef 2.png"></p><p>Transposed Convolution 就是一种做upsample的方式.</p><p>正常的卷积是feature map的每个结果是filter和input做点积得到的.
 Transposed Convolution 是 input表示了filter在feature map上对应位置的权重.</p><p>大概长这样:</p><p><img src=https://i.loli.net/2020/04/11/itVqNXehEJPS72v.png alt=deconv1.png></p><p>和这样:</p><p><img src=https://i.loli.net/2020/04/11/GrSjDyYHfxaW3w2.png alt=deconv2.png></p><p>那么这个操作为啥叫"Transposed Convolution"呢 因为这个操作其实是把input feature map的矩阵做了转置,再做正常的卷积.</p><p><img src=https://i.loli.net/2020/04/11/MzsuvS3fJndipq5.png alt=deconv3.png></p><h3 id=dilated-convolution--空洞卷积>Dilated Convolution (空洞卷积)</h3><p><img src="https://github.com/vdumoulin/conv_arithmetic/blob/master/gif/dilation.gif?raw=true" alt="Dilated Convolution"></p><p>其中蓝色为输入的feature map,绿色会输出的feature map.</p><p>caffe的conv layer是直接支持这种结构的. 似乎是在 Semantic Segmentation 领域比较常见,在工作中没太接触过这种结构.</p><h3 id=spatially-separable-convolutions>Spatially Separable Convolutions</h3><p>之前完全没有接触过的一种卷积.似乎主要用在移动端设备上使用的网络结构上.主要作用是为了减少卷积的参数量.</p><p><img src=https://miro.medium.com/max/1280/1*o3mKhG3nHS-1dWa_plCeFw.png alt="Spatial Separable Convolutions"></p><h3 id=grouped-convolution>Grouped Convolution</h3><p>做鉴黄的同事提了新的需求，于是来看一下这种卷积．</p><p>主要作用是通过group conv替代一般的conv,来降低参数量．具体来说，参数为变成原来的1/G. 推倒过程见下图:</p><p><img src=https://i.loli.net/2020/05/08/ilt6ek5RYV9zrUm.png alt="2020-05-08 15_36_29屏幕截图.png"></p><p>截取自　<a href=https://www.cnblogs.com/shine-lee/p/10243114.html>Group Convolution分组卷积，以及Depthwise Convolution和Global Depthwise Convolution</a> (虽然感觉＂feature map的数量＂叫法怪怪的..感觉一般是把整个depth看做一个feature map？　不过不影响)</p><p>主要思想是做卷积时候把N个Filters分成G组，同时把输入的feature map也按照depth分成G组，每组Filters只和对应的feature map做卷积．</p><p>先看G=2的情况直观感受一下</p><p><img src=https://miro.medium.com/max/1400/1*oFVlkvZp848nh-QoD3pREw.png alt="Standard 2D convolution.">
 <img src=https://miro.medium.com/max/1104/1*dBrsVP0nt_PrBlICSBTttg.png alt="Grouped convolution with 2 filter groups."></p><p><strong>注意图上其实是单个filter的情况，filter的channel变成了一半，只和输入feature map的前一半或者后一半做卷积，然后只会得到一个二维的Wout*Hout的输出feature map. 然后每组的filter的数量也变成了分组前的一半，也就是N/2,加起来还是N.</strong></p><p>再来看一个描述全部filter的图，这里G=3
-<img src=https://i.loli.net/2020/05/09/zrTvKNSO1QJqs2i.png alt=FLPc1x.png></p><p>然后简单看一下caffe的实现,主要是看base_conv_layer，是conv_layer的基类. 只挑和group有关的部分．</p><pre><code class=language-c++>
-  group_ = this-&gt;layer_param_.convolution_param().group();
-  CHECK_EQ(channels_ % group_, 0);
-  CHECK_EQ(num_output_ % group_, 0)
-      &lt;&lt; &quot;Number of output should be multiples of group.&quot;;
+<img src=https://i.loli.net/2020/05/09/zrTvKNSO1QJqs2i.png alt=FLPc1x.png></p><p>然后简单看一下caffe的实现,主要是看base_conv_layer，是conv_layer的基类. 只挑和group有关的部分．</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+  group_ <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span><span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>layer_param_.convolution_param().group();
+  CHECK_EQ(channels_ <span style=color:#f92672>%</span> group_, <span style=color:#ae81ff>0</span>);
+  CHECK_EQ(num_output_ <span style=color:#f92672>%</span> group_, <span style=color:#ae81ff>0</span>)
+      <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Number of output should be multiples of group.</span><span style=color:#e6db74>&#34;</span>;
 
-</code></pre><p>可以看出group数目必须能被filter　num和 input feature channels数整除．</p><pre><code class=language-c++>
+</code></pre></div><p>可以看出group数目必须能被filter　num和 input feature channels数整除．</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
 
-template &lt;typename Dtype&gt;
-void BaseConvolutionLayer&lt;Dtype&gt;::forward_cpu_gemm(const Dtype* input,
-    const Dtype* weights, Dtype* output, bool skip_im2col) {
-  const Dtype* col_buff = input;
-  if (!is_1x1_) {
-    if (!skip_im2col) {
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> BaseConvolutionLayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>forward_cpu_gemm(<span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> input,
+    <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> weights, Dtype<span style=color:#f92672>*</span> output, <span style=color:#66d9ef>bool</span> skip_im2col) {
+  <span style=color:#66d9ef>const</span> Dtype<span style=color:#f92672>*</span> col_buff <span style=color:#f92672>=</span> input;
+  <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span>is_1x1_) {
+    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span>skip_im2col) {
       conv_im2col_cpu(input, col_buffer_.mutable_cpu_data());
     }
-    col_buff = col_buffer_.cpu_data();
+    col_buff <span style=color:#f92672>=</span> col_buffer_.cpu_data();
   }
-  for (int g = 0; g &lt; group_; ++g) {
-    caffe_cpu_gemm&lt;Dtype&gt;(CblasNoTrans, CblasNoTrans, conv_out_channels_ /
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> g <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; g <span style=color:#f92672>&lt;</span> group_; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>g) {
+    caffe_cpu_gemm<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span>(CblasNoTrans, CblasNoTrans, conv_out_channels_ <span style=color:#f92672>/</span>
         group_, conv_out_spatial_dim_, kernel_dim_,
-        (Dtype)1., weights + weight_offset_ * g, col_buff + col_offset_ * g,
-        (Dtype)0., output + output_offset_ * g);
+        (Dtype)<span style=color:#ae81ff>1.</span>, weights <span style=color:#f92672>+</span> weight_offset_ <span style=color:#f92672>*</span> g, col_buff <span style=color:#f92672>+</span> col_offset_ <span style=color:#f92672>*</span> g,
+        (Dtype)<span style=color:#ae81ff>0.</span>, output <span style=color:#f92672>+</span> output_offset_ <span style=color:#f92672>*</span> g);
   }
 }
 
-</code></pre><p>实现的也很朴素..就是for循环．．．group_参数默认为1,为1就是普通的卷积</p><h2 id=参考链接>参考链接</h2><ul><li><p><a href=https://towardsdatascience.com/a-comprehensive-introduction-to-different-types-of-convolutions-in-deep-learning-669281e58215>A Comprehensive Introduction to Different Types of Convolutions in Deep Learning</a></p></li><li><p><a href=https://www.cnblogs.com/shine-lee/p/10775831.html>im2col：将卷积运算转为矩阵相乘</a></p></li><li><p><a href=https://github.com/vdumoulin/conv_arithmetic/blob/master/README.md>Convolution arithmetic</a></p></li><li><p><a href=https://towardsdatascience.com/a-basic-introduction-to-separable-convolutions-b99ec3102728>A Basic Introduction to Separable Convolutions</a></p></li></ul><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><p>实现的也很朴素..就是for循环．．．group_参数默认为1,为1就是普通的卷积</p><h2 id=参考链接>参考链接</h2><ul><li><p><a href=https://towardsdatascience.com/a-comprehensive-introduction-to-different-types-of-convolutions-in-deep-learning-669281e58215>A Comprehensive Introduction to Different Types of Convolutions in Deep Learning</a></p></li><li><p><a href=https://www.cnblogs.com/shine-lee/p/10775831.html>im2col：将卷积运算转为矩阵相乘</a></p></li><li><p><a href=https://github.com/vdumoulin/conv_arithmetic/blob/master/README.md>Convolution arithmetic</a></p></li><li><p><a href=https://towardsdatascience.com/a-basic-introduction-to-separable-convolutions-b99ec3102728>A Basic Introduction to Separable Convolutions</a></p></li></ul><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

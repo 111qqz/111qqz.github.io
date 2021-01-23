@@ -12,84 +12,84 @@ post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p><a
 其实很容易想到一个o(q*(n+m))的做法&mldr;
 就是每次更新，要同时更新当前更新行的最大连续和&mldr;.O（m）可以完成&mldr;然后在O（n）扫一遍，找到所有行中的最大值。
 然后需要注意的是，在第一次更改之前就要把每个行的最大值处理出来l..
-然后cf机器真是够快，O(n*m*q)的1.2S过。。。。</p><pre><code class=language-c++>
+然后cf机器真是够快，O(n*m*q)的1.2S过。。。。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
 
 
 
 
 
     
-    /* ***********************************************
-    Author :111qqz
-    Created Time :2016年02月19日 星期五 17时01分58秒
-    File Name :code/cf/problem/548B.cpp
-    ************************************************ */
+    <span style=color:#75715e>/* ***********************************************
+</span><span style=color:#75715e>    Author :111qqz
+</span><span style=color:#75715e>    Created Time :2016年02月19日 星期五 17时01分58秒
+</span><span style=color:#75715e>    File Name :code/cf/problem/548B.cpp
+</span><span style=color:#75715e>    ************************************************ */</span>
     
-    #include &lt;algorithm&gt;
-    #include &lt;cstdio&gt;
-    #include &lt;iostream&gt;
-    #include &lt;cstring&gt;
-    #include &lt;string&gt;
-    #include &lt;cmath&gt;
-    #include &lt;map&gt;
-    
-    using namespace std;
-    const int N=5E2+5;
-    int a[N][N];
-    int fans;
-    int n,m,q,x,y,cur,ans[N];
-    int main()
+    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;string&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;map&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    
+    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>5E2</span><span style=color:#f92672>+</span><span style=color:#ae81ff>5</span>;
+    <span style=color:#66d9ef>int</span> a[N][N];
+    <span style=color:#66d9ef>int</span> fans;
+    <span style=color:#66d9ef>int</span> n,m,q,x,y,cur,ans[N];
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
     {
-        cin&gt;&gt;n&gt;&gt;m&gt;&gt;q;
-        for (int i = 1 ; i &lt;= n;i++ )
+        cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>n<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>m<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>q;
+        <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n;i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
         {
-            for (int j = 1; j &lt;= m ; j++ )
-                    scanf(&quot;%d&quot;,&amp;a[i][j]);
-            cur = 0;
-            for (int j = 1; j &lt;=m ;j++ )
-                if (a[i][j]==1)
+            <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; j <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> m ; j<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+                    scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>a[i][j]);
+            cur <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+            <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; j <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>m ;j<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+                <span style=color:#66d9ef>if</span> (a[i][j]<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
                 {
-                    cur++;
-                    ans[i]=max(cur,ans[i]);
+                    cur<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+                    ans[i]<span style=color:#f92672>=</span>max(cur,ans[i]);
                 }
-                else
+                <span style=color:#66d9ef>else</span>
                 {
-                   cur = 0;
+                   cur <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
                 }
         }
-        for ( int i = 1 ; i &lt;= q; i++ )
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> q; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
         {
-            scanf(&quot;%d %d&quot;,&amp;x,&amp;y);
-            a[x][y]=a[x][y]^1;
-           // if (i==3) cout&lt;&lt;a[x][y]&lt;&lt;&quot;sadsadasd&quot;&lt;&lt;endl;
-            cur = 0;
-            ans[x]=0;
-            for (int j = 1; j &lt;=m ;j++ )
-                if (a[x][j]==1)
+            scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d %d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>x,<span style=color:#f92672>&amp;</span>y);
+            a[x][y]<span style=color:#f92672>=</span>a[x][y]<span style=color:#f92672>^</span><span style=color:#ae81ff>1</span>;
+           <span style=color:#75715e>// if (i==3) cout&lt;&lt;a[x][y]&lt;&lt;&#34;sadsadasd&#34;&lt;&lt;endl;
+</span><span style=color:#75715e></span>            cur <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+            ans[x]<span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>;
+            <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; j <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>m ;j<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+                <span style=color:#66d9ef>if</span> (a[x][j]<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
                 {
-                    cur++;
-                    ans[x]=max(cur,ans[x]);
+                    cur<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+                    ans[x]<span style=color:#f92672>=</span>max(cur,ans[x]);
                 }
-                else
+                <span style=color:#66d9ef>else</span>
                 {
-                   cur = 0;
+                   cur <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
                 }
-            fans=-1;
-            for (int j = 1;j &lt;= n ; j++ )
-                if (ans[j]&gt;fans)
+            fans<span style=color:#f92672>=</span><span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>;
+            <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;j <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; j<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+                <span style=color:#66d9ef>if</span> (ans[j]<span style=color:#f92672>&gt;</span>fans)
                 {
-                    fans=ans[j];
+                    fans<span style=color:#f92672>=</span>ans[j];
                 }
-            cout&lt;&lt;fans&lt;&lt;endl;
+            cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>fans<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
         }
     
     
-        return 0;
+        <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
     }
     
 
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

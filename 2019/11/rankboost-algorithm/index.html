@@ -8,20 +8,20 @@ $navbar.className+=" in";}}</script><style type=text/css>header.intro-header{bac
 on
 Tuesday, November 26, 2019</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#boosting-算法是什么>boosting 算法是什么．</a></li><li><a href=#ranking-task是什么>ranking task是什么</a></li><li><a href=#rankboost-算法>rankboost 算法</a></li><li><a href=#bipartite-ranking>Bipartite ranking</a></li><li><a href=#参考资料>参考资料</a></li></ol></nav><h2 id=boosting-算法是什么>boosting 算法是什么．</h2><p>机缘使然，接触到了 Boosting 算法．Boosting是一种通过组合弱学习器来产生强学习器的通用且有效的方法.</p><p>动机是基于如下观察:尽管委员会中每个成员只提供一些不成熟的判断,但整个委员会却产生较为准确的决策。通过组合多个弱学习器来解决学习问题。给定训练数据,弱学习算法(如决策树)可以训练产生弱学习器,这些弱学习器只需要比随机猜测的准确率好一些。用不同的训练数据训练可以得到不同的弱学习器。这些弱学习器作为委员会成员,共同决策。</p><h2 id=ranking-task是什么>ranking task是什么</h2><p>此处的ranking task指的的pairwise ranking</p><p>排名(ranking)的学习问题出现在许多现代应用程序中，包括搜索引擎，信息提取平台和电影推荐系统的设计。 在这些应用程序中，返回文档或电影的顺序是系统的关键方面。 在二进制情况下，对分类进行排名的主要动机是资源的限制：对于非常大的数据集，显示或处理由分类器标记为相关的所有项目可能是不切实际的，甚至是不可能的。 搜索引擎的标准用户不愿意查询响应查询而返回的所有文档，而只查询前十名左右。 同样，信用卡公司欺诈检测部门的成员不能调查被分类为潜在欺诈的数千笔交易，而只能调查几十个最可疑的交易。</p><p>所以到底什么才是一个ranking task呢?</p><p>ranking task是一种有监督学习，通过label 信息，来对所有的数据点做出排名的预测．这里的label是一种关系信息，与数据点对一一对应的．设label函数为f,一般来说，假设有数据点x1,x2,那么有</p><pre><code class=language-c>f(x1,x2) = 1 if x1 ranks higher than x2
-f(x1,x2) = -1 if x1 ranks lower than x2
-f(x1,x2) = 0 if there is no enough info to compare x1 and x2
-</code></pre><p>需要注意的是，通常来说label并没有传递性．也就是说，从f(x1,x2) = 1和　f(x2,x3) =1 并不能推断出f(x1,x3) = 1.原因是在比较x1,x2,x3时，可能使用了不同的feature(通俗的解释就是，我喜欢A胜过B是因为A比B有钱，我喜欢B胜过C是因为B比C可爱，但是我可能因为其他原因喜欢C胜过A)</p><h2 id=rankboost-算法>rankboost 算法</h2><p>字面理解，rankboost算法就是将boosting算法用于pairwise ranking task.
+post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#boosting-算法是什么>boosting 算法是什么．</a></li><li><a href=#ranking-task是什么>ranking task是什么</a></li><li><a href=#rankboost-算法>rankboost 算法</a></li><li><a href=#bipartite-ranking>Bipartite ranking</a></li><li><a href=#参考资料>参考资料</a></li></ol></nav><h2 id=boosting-算法是什么>boosting 算法是什么．</h2><p>机缘使然，接触到了 Boosting 算法．Boosting是一种通过组合弱学习器来产生强学习器的通用且有效的方法.</p><p>动机是基于如下观察:尽管委员会中每个成员只提供一些不成熟的判断,但整个委员会却产生较为准确的决策。通过组合多个弱学习器来解决学习问题。给定训练数据,弱学习算法(如决策树)可以训练产生弱学习器,这些弱学习器只需要比随机猜测的准确率好一些。用不同的训练数据训练可以得到不同的弱学习器。这些弱学习器作为委员会成员,共同决策。</p><h2 id=ranking-task是什么>ranking task是什么</h2><p>此处的ranking task指的的pairwise ranking</p><p>排名(ranking)的学习问题出现在许多现代应用程序中，包括搜索引擎，信息提取平台和电影推荐系统的设计。 在这些应用程序中，返回文档或电影的顺序是系统的关键方面。 在二进制情况下，对分类进行排名的主要动机是资源的限制：对于非常大的数据集，显示或处理由分类器标记为相关的所有项目可能是不切实际的，甚至是不可能的。 搜索引擎的标准用户不愿意查询响应查询而返回的所有文档，而只查询前十名左右。 同样，信用卡公司欺诈检测部门的成员不能调查被分类为潜在欺诈的数千笔交易，而只能调查几十个最可疑的交易。</p><p>所以到底什么才是一个ranking task呢?</p><p>ranking task是一种有监督学习，通过label 信息，来对所有的数据点做出排名的预测．这里的label是一种关系信息，与数据点对一一对应的．设label函数为f,一般来说，假设有数据点x1,x2,那么有</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c>f(x1,x2) <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> <span style=color:#66d9ef>if</span> x1 ranks higher than x2
+f(x1,x2) <span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> <span style=color:#66d9ef>if</span> x1 ranks lower than x2
+f(x1,x2) <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span> <span style=color:#66d9ef>if</span> there is no enough info to compare x1 and x2
+</code></pre></div><p>需要注意的是，通常来说label并没有传递性．也就是说，从f(x1,x2) = 1和　f(x2,x3) =1 并不能推断出f(x1,x3) = 1.原因是在比较x1,x2,x3时，可能使用了不同的feature(通俗的解释就是，我喜欢A胜过B是因为A比B有钱，我喜欢B胜过C是因为B比C可爱，但是我可能因为其他原因喜欢C胜过A)</p><h2 id=rankboost-算法>rankboost 算法</h2><p>字面理解，rankboost算法就是将boosting算法用于pairwise ranking task.
 该过程的伪代码为:
-<img src=https://i.loli.net/2019/12/01/ZR61l3JWuGsxMYz.png alt=rankboost.png></p><p>要注意的是算法的输入为</p><pre><code class=language-c>S=((x1,x1',y1),...(xm,xm',ym))
-</code></pre><p>其中　(x1,x1&rsquo;)为一个pair,y1为与这个pair对应的label.</p><p>这与传统的分类，回归问题明显不同．　前者是每一个数据对应一个label,但是后者是每一个pair对应一个label. 可能需要对数据做一些预处理．
+<img src=https://i.loli.net/2019/12/01/ZR61l3JWuGsxMYz.png alt=rankboost.png></p><p>要注意的是算法的输入为</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c>S<span style=color:#f92672>=</span>((x1,x1<span style=color:#960050;background-color:#1e0010>&#39;</span>,y1),...(xm,xm<span style=color:#960050;background-color:#1e0010>&#39;</span>,ym))
+</code></pre></div><p>其中　(x1,x1&rsquo;)为一个pair,y1为与这个pair对应的label.</p><p>这与传统的分类，回归问题明显不同．　前者是每一个数据对应一个label,但是后者是每一个pair对应一个label. 可能需要对数据做一些预处理．
 一般来说，对于n个数据样本，并不会直接生成n*n个pair，而是从中随机生成指定个数个pair.
 此时</p><h2 id=bipartite-ranking>Bipartite ranking</h2><p>Bipartite ranking是pairwise ranking task中一种特殊的情形．
 在这种情形下，样本被分为不相交的正负两部分
 ranking问题变成了使得正样本的rank高于负样本．
-对于这个情形，算法的输入变为</p><pre><code class=language-c>S+ =(x1',x2',...,xm')
-S- =(x1,x2,...,xn)
-</code></pre><p>没有了label.原因是正负样本的集合本来就暗含了label信息．
+对于这个情形，算法的输入变为</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c>S<span style=color:#f92672>+</span> <span style=color:#f92672>=</span>(x1<span style=color:#960050;background-color:#1e0010>&#39;</span>,x2<span style=color:#960050;background-color:#1e0010>&#39;</span>,...,xm<span style=color:#960050;background-color:#1e0010>&#39;</span>)
+S<span style=color:#f92672>-</span> <span style=color:#f92672>=</span>(x1,x2,...,xn)
+</code></pre></div><p>没有了label.原因是正负样本的集合本来就暗含了label信息．
 如果直接按照一般的rankboost算法实现，复杂度是O(n*m)的，其中m和n为正负样本的个数．</p><p>但是通过一种高效的实现，复杂度可以降低为O(m+n)
 这种实现基于算法的目标函数是指数函数，指数函数是积性函数．
 因此可以将目标函数分为正负样本两部分分别计算，每部分只与自身相关．

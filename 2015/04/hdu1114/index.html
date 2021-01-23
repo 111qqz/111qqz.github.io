@@ -11,73 +11,73 @@ on
 Sunday, April 5, 2015</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
 post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p>F - Piggy-Bank</p><p>**Time Limit:**1000MS **Memory Limit:**32768KB <strong>64bit IO Format:</strong>%I64d & %I64u</p><p>Submit <a href="http://acm.hust.edu.cn/vjudge/contest/view.action?cid=73774#status//F/0">Status</a></p><p>Description</p><p>Before ACM can do anything, a budget must be prepared and the necessary financial support obtained. The main income for this action comes from Irreversibly Bound Money (IBM). The idea behind is simple. Whenever some ACM member has any small money, he takes all the coins and throws them into a piggy-bank. You know that this process is irreversible, the coins cannot be removed without breaking the pig. After a sufficiently long time, there should be enough cash in the piggy-bank to pay everything that needs to be paid.</p><p>But there is a big problem with piggy-banks. It is not possible to determine how much money is inside. So we might break the pig into pieces only to find out that there is not enough money. Clearly, we want to avoid this unpleasant situation. The only possibility is to weigh the piggy-bank and try to guess how many coins are inside. Assume that we are able to determine the weight of the pig exactly and that we know the weights of all coins of a given currency. Then there is some minimum amount of money in the piggy-bank that we can guarantee. Your task is to find out this worst case and determine the minimum amount of cash inside the piggy-bank. We need your help. No more prematurely broken pigs!</p><p>Input</p><p>The input consists of T test cases. The number of them (T) is given on the first line of the input file. Each test case begins with a line containing two integers E and F. They indicate the weight of an empty pig and of the pig filled with coins. Both weights are given in grams. No pig will weigh more than 10 kg, that means 1 &lt;= E &lt;= F &lt;= 10000. On the second line of each test case, there is an integer number N (1 &lt;= N &lt;= 500) that gives the number of various coins used in the given currency. Following this are exactly N lines, each specifying one coin type. These lines contain two integers each, Pand W (1 &lt;= P &lt;= 50000, 1 &lt;= W &lt;=10000). P is the value of the coin in monetary units, W is it's weight in grams.</p><p>Output</p><p>Print exactly one line of output for each test case. The line must contain the sentence &ldquo;The minimum amount of money in the piggy-bank is X.&rdquo; where X is the minimum amount of money that can be achieved using coins with the given total weight. If the weight cannot be reached exactly, print a line &ldquo;This is impossible.".</p><p>Sample Input</p><p>3</p><p>10 110</p><p>2</p><p>1 1</p><p>30 50</p><p>10 110</p><p>2
-1 1</p><p>50 30</p><p>1 6</p><p>2</p><p>10 3</p><p>20 4</p><p>完全背包。</p><p>注意是要放满，但是由于想要的是value的最小值，所以不合法的状态要赋值成inf而不是-1</p><pre><code class=language-c++>
+1 1</p><p>50 30</p><p>1 6</p><p>2</p><p>10 3</p><p>20 4</p><p>完全背包。</p><p>注意是要放满，但是由于想要的是value的最小值，所以不合法的状态要赋值成inf而不是-1</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
    
-   /* ***********************************************
-   Author :111qqz
-   Created Time :2016年02月22日 星期一 23时13分34秒
-   File Name :code/hdu/1114.cpp
-   ************************************************ */
+   <span style=color:#75715e>/* ***********************************************
+</span><span style=color:#75715e>   Author :111qqz
+</span><span style=color:#75715e>   Created Time :2016年02月22日 星期一 23时13分34秒
+</span><span style=color:#75715e>   File Name :code/hdu/1114.cpp
+</span><span style=color:#75715e>   ************************************************ */</span>
    
-   #include &lt;iostream&gt;
-   #include &lt;algorithm&gt;
-   #include &lt;cstring&gt;
-   #include &lt;cstdio&gt;
-   #include &lt;cmath&gt;
+   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   
+   <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+   <span style=color:#66d9ef>int</span> T,E,F,V,n;
+   <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>1E4</span><span style=color:#f92672>+</span><span style=color:#ae81ff>5</span>;
+   <span style=color:#66d9ef>int</span> dp[N],w[N],p[N];
+   <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> inf<span style=color:#f92672>=</span><span style=color:#ae81ff>99999999</span>;
    
-   using namespace std;
-   int T,E,F,V,n;
-   const int N=1E4+5;
-   int dp[N],w[N],p[N];
-   const int inf=99999999;
-   
-   void solve (int cost,int value)
+   <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>solve</span> (<span style=color:#66d9ef>int</span> cost,<span style=color:#66d9ef>int</span> value)
    {
-       for ( int i = cost ; i &lt;= V ; i++)
-           if (dp[i]&gt;0)
-           dp[i] = min(dp[i],dp[i-cost]+value);
+       <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> cost ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> V ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+           <span style=color:#66d9ef>if</span> (dp[i]<span style=color:#f92672>&gt;</span><span style=color:#ae81ff>0</span>)
+           dp[i] <span style=color:#f92672>=</span> min(dp[i],dp[i<span style=color:#f92672>-</span>cost]<span style=color:#f92672>+</span>value);
    }
    
-   void init()
+   <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>init</span>()
    {
-       for ( int i = 0 ; i &lt;= N ; i++)
-           dp[i] = inf ;
-       dp[0]=0;
+       <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> N ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+           dp[i] <span style=color:#f92672>=</span> inf ;
+       dp[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>;
    }
    
-   int main()
+   <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
    {
-       scanf(&quot;%d&quot;,&amp;T);
-       while ( T--)
+       scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>T);
+       <span style=color:#66d9ef>while</span> ( T<span style=color:#f92672>-</span><span style=color:#f92672>-</span>)
        {
            init();
-           scanf(&quot;%d %d&quot;,&amp;E,&amp;F);
-           V =F - E;
-           scanf(&quot;%d&quot;,&amp;n);
-           for ( int i = 1 ; i &lt;= n ; i++ )
-               scanf(&quot;%d %d&quot;,&amp;p[i],&amp;w[i]);
-           for ( int i = 1 ; i &lt;= n ; i++ )
+           scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d %d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>E,<span style=color:#f92672>&amp;</span>F);
+           V <span style=color:#f92672>=</span>F <span style=color:#f92672>-</span> E;
+           scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>n);
+           <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+               scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d %d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>p[i],<span style=color:#f92672>&amp;</span>w[i]);
+           <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
                solve(w[i],p[i]);
-         //  for ( int i = 1 ; i &lt;= V ; i++)
-         //      if (dp[i]&gt;0)
-          //     cout&lt;&lt;&quot;dp[i]:&quot;&lt;&lt;dp[i]&lt;&lt;endl;
-   
-           if (dp[V]==inf)
+         <span style=color:#75715e>//  for ( int i = 1 ; i &lt;= V ; i++)
+</span><span style=color:#75715e></span>         <span style=color:#75715e>//      if (dp[i]&gt;0)
+</span><span style=color:#75715e></span>          <span style=color:#75715e>//     cout&lt;&lt;&#34;dp[i]:&#34;&lt;&lt;dp[i]&lt;&lt;endl;
+</span><span style=color:#75715e></span>   
+           <span style=color:#66d9ef>if</span> (dp[V]<span style=color:#f92672>=</span><span style=color:#f92672>=</span>inf)
            {
-               printf(&quot;This is impossible.\n&quot;);
+               printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>This is impossible.</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>);
            }
-           else
+           <span style=color:#66d9ef>else</span>
            {
-               printf(&quot;The minimum amount of money in the piggy-bank is %d.\n&quot;,dp[V]);
+               printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>The minimum amount of money in the piggy-bank is %d.</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>,dp[V]);
            }
    
        }
-       return 0;
+       <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
    }
 
 
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

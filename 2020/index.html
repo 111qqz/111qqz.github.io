@@ -12,354 +12,354 @@ post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a 
 分成了两个部分，第一部分是模拟一下cache的miss,hit,evict的规则。第二部分是优化一个矩阵的转置，使得miss尽可能少。</p><h2 id=part-a>PART A</h2><p>给了一个标程csim-ref,要求实现一个程序，输出与该标程一致。</p><p>写的时候太心急了。。导致没看完作业要求就开始写了。。 然后就纠结了好久。。如果要访问的地址超过了一个block line的边界该怎么办。。</p><p>然而实际上题目里已经把这种情况排除了。。</p><blockquote><p>For this this lab, you should assume that memory accesses are aligned properly, such that a single
 memory access never crosses block boundaries. By making this assumption, you can ignore the
 request sizes in the valgrind traces</p></blockquote><p>这样的话。。就没什么难度了。。
-LRU的替换策略用纯c去撸hashmap+list有点烦。。。干脆就写了暴力的实现。。反正是模拟题(x</p><pre><code class=language-c++>
-#include &lt;getopt.h&gt;
-#include &lt;stdbool.h&gt;
-#include &lt;stdio.h&gt;
-#include &lt;stdlib.h&gt;
-#include &lt;string.h&gt;
-#include &lt;unistd.h&gt;
-
-#include &quot;cachelab.h&quot;
-
-const unsigned int address_space_size = 64;
-// https://stackoverflow.com/questions/9642732/parsing-command-line-arguments-in-c
-
-typedef struct {
-  bool verbose;
-  int set_index_bits;
-  int lines_per_set;
-  int block_bits;
-  char *tracefile;
+LRU的替换策略用纯c去撸hashmap+list有点烦。。。干脆就写了暴力的实现。。反正是模拟题(x</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+<span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;getopt.h&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span><span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;stdbool.h&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span><span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;stdio.h&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span><span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;stdlib.h&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span><span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;string.h&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span><span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;unistd.h&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>
+<span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&#34;cachelab.h&#34;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>
+<span style=color:#66d9ef>const</span> <span style=color:#66d9ef>unsigned</span> <span style=color:#66d9ef>int</span> address_space_size <span style=color:#f92672>=</span> <span style=color:#ae81ff>64</span>;
+<span style=color:#75715e>// https://stackoverflow.com/questions/9642732/parsing-command-line-arguments-in-c
+</span><span style=color:#75715e></span>
+<span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>struct</span> {
+  <span style=color:#66d9ef>bool</span> verbose;
+  <span style=color:#66d9ef>int</span> set_index_bits;
+  <span style=color:#66d9ef>int</span> lines_per_set;
+  <span style=color:#66d9ef>int</span> block_bits;
+  <span style=color:#66d9ef>char</span> <span style=color:#f92672>*</span>tracefile;
 
 } Arg;
 
-void ParseArgs(int argc, char **argv, Arg *arg) {
-  int opt;
-  while ((opt = getopt(argc, argv, &quot;hvs:E:b:t:&quot;)) != -1) {
-    switch (opt) {
-      case 'h':
-        printf(&quot;Usage: ./csim-ref [-hv] -s &lt;s&gt; -E &lt;E&gt; -b &lt;b&gt; -t &lt;tracefile&gt;\n&quot;);
-        break;
-      case 'v':
-        arg-&gt;verbose = true;
-        break;
-      case 's':
-        arg-&gt;set_index_bits = atoi(optarg);
-        break;
-      case 'E':
-        arg-&gt;lines_per_set = atoi(optarg);
-        break;
-      case 'b':
-        arg-&gt;block_bits = atoi(optarg);
-        break;
-      case 't':
-        arg-&gt;tracefile = optarg;
-        break;
-      default:
+<span style=color:#66d9ef>void</span> <span style=color:#a6e22e>ParseArgs</span>(<span style=color:#66d9ef>int</span> argc, <span style=color:#66d9ef>char</span> <span style=color:#f92672>*</span><span style=color:#f92672>*</span>argv, Arg <span style=color:#f92672>*</span>arg) {
+  <span style=color:#66d9ef>int</span> opt;
+  <span style=color:#66d9ef>while</span> ((opt <span style=color:#f92672>=</span> getopt(argc, argv, <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>hvs:E:b:t:</span><span style=color:#e6db74>&#34;</span>)) <span style=color:#f92672>!</span><span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>) {
+    <span style=color:#66d9ef>switch</span> (opt) {
+      <span style=color:#66d9ef>case</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>h</span><span style=color:#e6db74>&#39;</span><span style=color:#f92672>:</span>
+        printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Usage: ./csim-ref [-hv] -s &lt;s&gt; -E &lt;E&gt; -b &lt;b&gt; -t &lt;tracefile&gt;</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>);
+        <span style=color:#66d9ef>break</span>;
+      <span style=color:#66d9ef>case</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>v</span><span style=color:#e6db74>&#39;</span><span style=color:#f92672>:</span>
+        arg<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>verbose <span style=color:#f92672>=</span> true;
+        <span style=color:#66d9ef>break</span>;
+      <span style=color:#66d9ef>case</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>s</span><span style=color:#e6db74>&#39;</span><span style=color:#f92672>:</span>
+        arg<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>set_index_bits <span style=color:#f92672>=</span> atoi(optarg);
+        <span style=color:#66d9ef>break</span>;
+      <span style=color:#66d9ef>case</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>E</span><span style=color:#e6db74>&#39;</span><span style=color:#f92672>:</span>
+        arg<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>lines_per_set <span style=color:#f92672>=</span> atoi(optarg);
+        <span style=color:#66d9ef>break</span>;
+      <span style=color:#66d9ef>case</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>b</span><span style=color:#e6db74>&#39;</span><span style=color:#f92672>:</span>
+        arg<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>block_bits <span style=color:#f92672>=</span> atoi(optarg);
+        <span style=color:#66d9ef>break</span>;
+      <span style=color:#66d9ef>case</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>t</span><span style=color:#e6db74>&#39;</span><span style=color:#f92672>:</span>
+        arg<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>tracefile <span style=color:#f92672>=</span> optarg;
+        <span style=color:#66d9ef>break</span>;
+      <span style=color:#66d9ef>default</span><span style=color:#f92672>:</span>
         abort();
     }
   }
 }
 
-typedef unsigned long long ULL;
-// 注意: 地址是十六进制表示。。。debug 到去世。。
-typedef struct {
+<span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>unsigned</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> ULL;
+<span style=color:#75715e>// 注意: 地址是十六进制表示。。。debug 到去世。。
+</span><span style=color:#75715e></span><span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>struct</span> {
   ULL tag_bits;
   ULL index_bits;
   ULL offset_bits;
   ULL block_number;
 
 } AddressBits;
-// 64 bit address,m=64
-// tag bit t = m-(b+s)
-// parse 64 address bits into tag bits,index bits and offset bits
-void ParseAddress(const Arg *arg, const ULL raw_addr, AddressBits *addr) {
-  const unsigned int index_and_block_bit_length =
-      arg-&gt;block_bits + arg-&gt;set_index_bits;
-  ULL block_bit_mask = (1ULL &lt;&lt; arg-&gt;block_bits) - 1;
-  ULL index_bit_mask = ((1ULL &lt;&lt; arg-&gt;set_index_bits) - 1) &lt;&lt; arg-&gt;block_bits;
-  ULL tag_bit_mask =
-      ((1ULL &lt;&lt; (address_space_size - index_and_block_bit_length)) - 1)
-      &lt;&lt; index_and_block_bit_length;
-  // printf(&quot;index_and_block_bit_length:%d\n&quot;,index_and_block_bit_length);
-  // printf(&quot;mask:%lld %lld %lld\n&quot;, block_bit_mask, index_bit_mask,
-  // tag_bit_mask);
-  addr-&gt;tag_bits = (raw_addr &amp; tag_bit_mask) &gt;&gt; index_and_block_bit_length;
-  addr-&gt;index_bits = (raw_addr &amp; index_bit_mask) &gt;&gt; arg-&gt;block_bits;
-  addr-&gt;offset_bits = raw_addr &amp; block_bit_mask;
-  addr-&gt;block_number = raw_addr / (1ULL &lt;&lt; arg-&gt;block_bits);
-  // printf(&quot;addr:%llx tag:%lld index:%lld osset:%lld block:%lld \n&quot;, raw_addr,
-  //        addr-&gt;tag_bits, addr-&gt;index_bits, addr-&gt;offset_bits,
-  //        addr-&gt;block_number);
-}
-void TestParseAddress(const Arg *arg) {
-  for (int addr = 0; addr &lt; (1ULL &lt;&lt; address_space_size); addr++) {
+<span style=color:#75715e>// 64 bit address,m=64
+</span><span style=color:#75715e></span><span style=color:#75715e>// tag bit t = m-(b+s)
+</span><span style=color:#75715e></span><span style=color:#75715e>// parse 64 address bits into tag bits,index bits and offset bits
+</span><span style=color:#75715e></span><span style=color:#66d9ef>void</span> <span style=color:#a6e22e>ParseAddress</span>(<span style=color:#66d9ef>const</span> Arg <span style=color:#f92672>*</span>arg, <span style=color:#66d9ef>const</span> ULL raw_addr, AddressBits <span style=color:#f92672>*</span>addr) {
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>unsigned</span> <span style=color:#66d9ef>int</span> index_and_block_bit_length <span style=color:#f92672>=</span>
+      arg<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>block_bits <span style=color:#f92672>+</span> arg<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>set_index_bits;
+  ULL block_bit_mask <span style=color:#f92672>=</span> (<span style=color:#ae81ff>1ULL</span> <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> arg<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>block_bits) <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>;
+  ULL index_bit_mask <span style=color:#f92672>=</span> ((<span style=color:#ae81ff>1ULL</span> <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> arg<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>set_index_bits) <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>) <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> arg<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>block_bits;
+  ULL tag_bit_mask <span style=color:#f92672>=</span>
+      ((<span style=color:#ae81ff>1ULL</span> <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> (address_space_size <span style=color:#f92672>-</span> index_and_block_bit_length)) <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>)
+      <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> index_and_block_bit_length;
+  <span style=color:#75715e>// printf(&#34;index_and_block_bit_length:%d\n&#34;,index_and_block_bit_length);
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// printf(&#34;mask:%lld %lld %lld\n&#34;, block_bit_mask, index_bit_mask,
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// tag_bit_mask);
+</span><span style=color:#75715e></span>  addr<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>tag_bits <span style=color:#f92672>=</span> (raw_addr <span style=color:#f92672>&amp;</span> tag_bit_mask) <span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span> index_and_block_bit_length;
+  addr<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>index_bits <span style=color:#f92672>=</span> (raw_addr <span style=color:#f92672>&amp;</span> index_bit_mask) <span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span> arg<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>block_bits;
+  addr<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>offset_bits <span style=color:#f92672>=</span> raw_addr <span style=color:#f92672>&amp;</span> block_bit_mask;
+  addr<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>block_number <span style=color:#f92672>=</span> raw_addr <span style=color:#f92672>/</span> (<span style=color:#ae81ff>1ULL</span> <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> arg<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>block_bits);
+  <span style=color:#75715e>// printf(&#34;addr:%llx tag:%lld index:%lld osset:%lld block:%lld \n&#34;, raw_addr,
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//        addr-&gt;tag_bits, addr-&gt;index_bits, addr-&gt;offset_bits,
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//        addr-&gt;block_number);
+</span><span style=color:#75715e></span>}
+<span style=color:#66d9ef>void</span> <span style=color:#a6e22e>TestParseAddress</span>(<span style=color:#66d9ef>const</span> Arg <span style=color:#f92672>*</span>arg) {
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> addr <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; addr <span style=color:#f92672>&lt;</span> (<span style=color:#ae81ff>1ULL</span> <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> address_space_size); addr<span style=color:#f92672>+</span><span style=color:#f92672>+</span>) {
     AddressBits tmp_addr;
-    ParseAddress(arg, addr, &amp;tmp_addr);
+    ParseAddress(arg, addr, <span style=color:#f92672>&amp;</span>tmp_addr);
   }
 }
-typedef struct {
-  enum operation { instruction_load, data_load, data_store, data_modify } op;
+<span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>struct</span> {
+  <span style=color:#66d9ef>enum</span> <span style=color:#a6e22e>operation</span> { instruction_load, data_load, data_store, data_modify } op;
   ULL address;
-  int size;
+  <span style=color:#66d9ef>int</span> size;
 } Trace;
-#define MAX_NUM_OF_TRACE 300000
-Trace trace[MAX_NUM_OF_TRACE];
-int lines_in_trace_file = 0;
-void ParseTraceFile(const char *file) {
-  FILE *fptr = fopen(file, &quot;r&quot;);
-  if (fptr == NULL) {
-    printf(&quot;Error!&quot;);
-    exit(1);
+<span style=color:#75715e>#</span><span style=color:#75715e>define MAX_NUM_OF_TRACE 300000</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>Trace trace[MAX_NUM_OF_TRACE];
+<span style=color:#66d9ef>int</span> lines_in_trace_file <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+<span style=color:#66d9ef>void</span> <span style=color:#a6e22e>ParseTraceFile</span>(<span style=color:#66d9ef>const</span> <span style=color:#66d9ef>char</span> <span style=color:#f92672>*</span>file) {
+  FILE <span style=color:#f92672>*</span>fptr <span style=color:#f92672>=</span> fopen(file, <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>r</span><span style=color:#e6db74>&#34;</span>);
+  <span style=color:#66d9ef>if</span> (fptr <span style=color:#f92672>=</span><span style=color:#f92672>=</span> NULL) {
+    printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Error!</span><span style=color:#e6db74>&#34;</span>);
+    exit(<span style=color:#ae81ff>1</span>);
   }
 
-  char op[5];
+  <span style=color:#66d9ef>char</span> op[<span style=color:#ae81ff>5</span>];
   ULL addr;
-  int cnt = 0, siz;
-  while (fscanf(fptr, &quot;%s %llx,%d&quot;, op, &amp;addr, &amp;siz) != EOF) {
-    // printf(&quot;op:%s addr:%lld size:%d\n&quot;, op, addr, siz);
-    trace[cnt].address = addr;
-    trace[cnt].size = siz;
-    if (op[0] == 'L') {
-      trace[cnt].op = data_load;
-    } else if (op[0] == 'I') {
-      trace[cnt].op = instruction_load;
-    } else if (op[0] == 'S') {
-      trace[cnt].op = data_store;
-    } else if (op[0] == 'M') {
-      trace[cnt].op = data_modify;
+  <span style=color:#66d9ef>int</span> cnt <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>, siz;
+  <span style=color:#66d9ef>while</span> (fscanf(fptr, <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%s %llx,%d</span><span style=color:#e6db74>&#34;</span>, op, <span style=color:#f92672>&amp;</span>addr, <span style=color:#f92672>&amp;</span>siz) <span style=color:#f92672>!</span><span style=color:#f92672>=</span> EOF) {
+    <span style=color:#75715e>// printf(&#34;op:%s addr:%lld size:%d\n&#34;, op, addr, siz);
+</span><span style=color:#75715e></span>    trace[cnt].address <span style=color:#f92672>=</span> addr;
+    trace[cnt].size <span style=color:#f92672>=</span> siz;
+    <span style=color:#66d9ef>if</span> (op[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>L</span><span style=color:#e6db74>&#39;</span>) {
+      trace[cnt].op <span style=color:#f92672>=</span> data_load;
+    } <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (op[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>I</span><span style=color:#e6db74>&#39;</span>) {
+      trace[cnt].op <span style=color:#f92672>=</span> instruction_load;
+    } <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (op[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>S</span><span style=color:#e6db74>&#39;</span>) {
+      trace[cnt].op <span style=color:#f92672>=</span> data_store;
+    } <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (op[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>M</span><span style=color:#e6db74>&#39;</span>) {
+      trace[cnt].op <span style=color:#f92672>=</span> data_modify;
     }
-    cnt++;
+    cnt<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
   }
-  lines_in_trace_file = cnt;
+  lines_in_trace_file <span style=color:#f92672>=</span> cnt;
 
   fclose(fptr);
 }
 
-void TestParseTraceFile() {
-  char *file = &quot;direct-mapped-4-bit.trace&quot;;
+<span style=color:#66d9ef>void</span> <span style=color:#a6e22e>TestParseTraceFile</span>() {
+  <span style=color:#66d9ef>char</span> <span style=color:#f92672>*</span>file <span style=color:#f92672>=</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>direct-mapped-4-bit.trace</span><span style=color:#e6db74>&#34;</span>;
   ParseTraceFile(file);
 }
 
-// 不需要真的做cache,只需要模拟hit,miss,evition 的次数即可
-
-typedef struct {
-  unsigned int valid;
-  unsigned int tag;
-  // used for LRU policy
-  // use line number of trace file as age
-  // the smallest age is the least recent used line
-  unsigned int age;
+<span style=color:#75715e>// 不需要真的做cache,只需要模拟hit,miss,evition 的次数即可
+</span><span style=color:#75715e></span>
+<span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>struct</span> {
+  <span style=color:#66d9ef>unsigned</span> <span style=color:#66d9ef>int</span> valid;
+  <span style=color:#66d9ef>unsigned</span> <span style=color:#66d9ef>int</span> tag;
+  <span style=color:#75715e>// used for LRU policy
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// use line number of trace file as age
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// the smallest age is the least recent used line
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>unsigned</span> <span style=color:#66d9ef>int</span> age;
 } Line;
 
-typedef struct {
-  int num_of_lines;
-  Line *lines;
+<span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>struct</span> {
+  <span style=color:#66d9ef>int</span> num_of_lines;
+  Line <span style=color:#f92672>*</span>lines;
 } Set;
 
-Set *set;
-struct cache_summary_t {
-  int hits;
-  int misses;
-  int evitions;
+Set <span style=color:#f92672>*</span>set;
+<span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>cache_summary_t</span> {
+  <span style=color:#66d9ef>int</span> hits;
+  <span style=color:#66d9ef>int</span> misses;
+  <span style=color:#66d9ef>int</span> evitions;
 } cache_summary;
-char operation_table[5] = {'I', 'L', 'S', 'M'};
+<span style=color:#66d9ef>char</span> operation_table[<span style=color:#ae81ff>5</span>] <span style=color:#f92672>=</span> {<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>I</span><span style=color:#e6db74>&#39;</span>, <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>L</span><span style=color:#e6db74>&#39;</span>, <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>S</span><span style=color:#e6db74>&#39;</span>, <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>M</span><span style=color:#e6db74>&#39;</span>};
 
-bool CheckCacheLineHit(const AddressBits addr, Set *cur_set, const int index) {
-  bool any_of_line_hit = false;
-  for (int j = 0; j &lt; cur_set-&gt;num_of_lines; j++) {
-    Line *cur_line = &amp;cur_set-&gt;lines[j];
-    if (cur_line-&gt;valid == 1 &amp;&amp; cur_line-&gt;tag == addr.tag_bits) {
-      // printf(&quot;addr.tag_bits:%lld\n&quot;, addr.tag_bits);
-      cache_summary.hits++;
-      cur_line-&gt;age = index;
-      any_of_line_hit = true;
-      break;
+<span style=color:#66d9ef>bool</span> <span style=color:#a6e22e>CheckCacheLineHit</span>(<span style=color:#66d9ef>const</span> AddressBits addr, Set <span style=color:#f92672>*</span>cur_set, <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> index) {
+  <span style=color:#66d9ef>bool</span> any_of_line_hit <span style=color:#f92672>=</span> false;
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; j <span style=color:#f92672>&lt;</span> cur_set<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num_of_lines; j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>) {
+    Line <span style=color:#f92672>*</span>cur_line <span style=color:#f92672>=</span> <span style=color:#f92672>&amp;</span>cur_set<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>lines[j];
+    <span style=color:#66d9ef>if</span> (cur_line<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>valid <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> <span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span> cur_line<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>tag <span style=color:#f92672>=</span><span style=color:#f92672>=</span> addr.tag_bits) {
+      <span style=color:#75715e>// printf(&#34;addr.tag_bits:%lld\n&#34;, addr.tag_bits);
+</span><span style=color:#75715e></span>      cache_summary.hits<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+      cur_line<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>age <span style=color:#f92672>=</span> index;
+      any_of_line_hit <span style=color:#f92672>=</span> true;
+      <span style=color:#66d9ef>break</span>;
     }
   }
-  return any_of_line_hit;
+  <span style=color:#66d9ef>return</span> any_of_line_hit;
 }
 
-bool CheckCacheLineEmpty(const AddressBits addr, Set *cur_set,
-                         const int index) {
-  bool any_of_line_empty = false;
-  for (int j = 0; j &lt; cur_set-&gt;num_of_lines; j++) {
-    Line *cur_line = &amp;cur_set-&gt;lines[j];
-    if (cur_line-&gt;valid == 0) {
-      cache_summary.misses++;
-      cur_line-&gt;valid = 1;
-      cur_line-&gt;tag = addr.tag_bits;
-      cur_line-&gt;age = index;
+<span style=color:#66d9ef>bool</span> <span style=color:#a6e22e>CheckCacheLineEmpty</span>(<span style=color:#66d9ef>const</span> AddressBits addr, Set <span style=color:#f92672>*</span>cur_set,
+                         <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> index) {
+  <span style=color:#66d9ef>bool</span> any_of_line_empty <span style=color:#f92672>=</span> false;
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; j <span style=color:#f92672>&lt;</span> cur_set<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num_of_lines; j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>) {
+    Line <span style=color:#f92672>*</span>cur_line <span style=color:#f92672>=</span> <span style=color:#f92672>&amp;</span>cur_set<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>lines[j];
+    <span style=color:#66d9ef>if</span> (cur_line<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>valid <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>) {
+      cache_summary.misses<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+      cur_line<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>valid <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+      cur_line<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>tag <span style=color:#f92672>=</span> addr.tag_bits;
+      cur_line<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>age <span style=color:#f92672>=</span> index;
 
-      any_of_line_empty = true;
-      break;
+      any_of_line_empty <span style=color:#f92672>=</span> true;
+      <span style=color:#66d9ef>break</span>;
     }
   }
-  return any_of_line_empty;
+  <span style=color:#66d9ef>return</span> any_of_line_empty;
 }
 
-void NaiveLru(const AddressBits addr, Set *cur_set, const int index) {
-  int evict_line;
-  int min_age = lines_in_trace_file;
-  // printf(&quot;set[%lld]-&gt;num_of_lines:%d\n&quot;,addr.index_bits,cur_set-&gt;num_of_lines);
-  for (int j = 0; j &lt; cur_set-&gt;num_of_lines; j++) {
-    Line *cur_line = &amp;cur_set-&gt;lines[j];
-    // printf(&quot;cur_line age:%d\n&quot;,cur_line-&gt;age);
-    if (cur_line-&gt;age &lt; min_age) {
-      min_age = cur_line-&gt;age;
-      evict_line = j;
+<span style=color:#66d9ef>void</span> <span style=color:#a6e22e>NaiveLru</span>(<span style=color:#66d9ef>const</span> AddressBits addr, Set <span style=color:#f92672>*</span>cur_set, <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> index) {
+  <span style=color:#66d9ef>int</span> evict_line;
+  <span style=color:#66d9ef>int</span> min_age <span style=color:#f92672>=</span> lines_in_trace_file;
+  <span style=color:#75715e>// printf(&#34;set[%lld]-&gt;num_of_lines:%d\n&#34;,addr.index_bits,cur_set-&gt;num_of_lines);
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; j <span style=color:#f92672>&lt;</span> cur_set<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num_of_lines; j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>) {
+    Line <span style=color:#f92672>*</span>cur_line <span style=color:#f92672>=</span> <span style=color:#f92672>&amp;</span>cur_set<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>lines[j];
+    <span style=color:#75715e>// printf(&#34;cur_line age:%d\n&#34;,cur_line-&gt;age);
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>if</span> (cur_line<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>age <span style=color:#f92672>&lt;</span> min_age) {
+      min_age <span style=color:#f92672>=</span> cur_line<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>age;
+      evict_line <span style=color:#f92672>=</span> j;
     }
   }
-  // printf(&quot;evict_line:%d min_age:%d\n&quot;,evict_line,min_age);
-  cache_summary.misses++;
-  cache_summary.evitions++;
-  cur_set-&gt;lines[evict_line].tag = addr.tag_bits;
-  cur_set-&gt;lines[evict_line].age = index;
+  <span style=color:#75715e>// printf(&#34;evict_line:%d min_age:%d\n&#34;,evict_line,min_age);
+</span><span style=color:#75715e></span>  cache_summary.misses<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+  cache_summary.evitions<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+  cur_set<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>lines[evict_line].tag <span style=color:#f92672>=</span> addr.tag_bits;
+  cur_set<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>lines[evict_line].age <span style=color:#f92672>=</span> index;
 }
 
-void EvicteCacheLine(const AddressBits addr, Set *cur_set, const int index) {
-  // I'm too lazy to use Doubly linked list and hashmap
-  NaiveLru(addr, cur_set, index);
+<span style=color:#66d9ef>void</span> <span style=color:#a6e22e>EvicteCacheLine</span>(<span style=color:#66d9ef>const</span> AddressBits addr, Set <span style=color:#f92672>*</span>cur_set, <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> index) {
+  <span style=color:#75715e>// I&#39;m too lazy to use Doubly linked list and hashmap
+</span><span style=color:#75715e></span>  NaiveLru(addr, cur_set, index);
 }
 
-void SimulateCache(const Arg *arg) {
-  memset(&amp;cache_summary, 0, sizeof(cache_summary));
-  //   instruction_load, data_load, data_store, data_modify
-
-  for (int i = 0; i &lt; lines_in_trace_file; i++) {
-    // ignore instruction load
-    if (trace[i].op == 0) continue;
+<span style=color:#66d9ef>void</span> <span style=color:#a6e22e>SimulateCache</span>(<span style=color:#66d9ef>const</span> Arg <span style=color:#f92672>*</span>arg) {
+  memset(<span style=color:#f92672>&amp;</span>cache_summary, <span style=color:#ae81ff>0</span>, <span style=color:#66d9ef>sizeof</span>(cache_summary));
+  <span style=color:#75715e>//   instruction_load, data_load, data_store, data_modify
+</span><span style=color:#75715e></span>
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> lines_in_trace_file; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>) {
+    <span style=color:#75715e>// ignore instruction load
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>if</span> (trace[i].op <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>) <span style=color:#66d9ef>continue</span>;
     AddressBits addr;
-    ParseAddress(arg, trace[i].address, &amp;addr);
-    Set *cur_set = &amp;set[addr.index_bits];
-    // data load or data store
-    if (trace[i].op &lt;= 2) {
-      bool any_of_line_hit = CheckCacheLineHit(addr, cur_set, i);
-      if (any_of_line_hit) {
-        if (arg-&gt;verbose) {
-          printf(&quot;%c %lld,%d hit\n&quot;, operation_table[trace[i].op],
+    ParseAddress(arg, trace[i].address, <span style=color:#f92672>&amp;</span>addr);
+    Set <span style=color:#f92672>*</span>cur_set <span style=color:#f92672>=</span> <span style=color:#f92672>&amp;</span>set[addr.index_bits];
+    <span style=color:#75715e>// data load or data store
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>if</span> (trace[i].op <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>) {
+      <span style=color:#66d9ef>bool</span> any_of_line_hit <span style=color:#f92672>=</span> CheckCacheLineHit(addr, cur_set, i);
+      <span style=color:#66d9ef>if</span> (any_of_line_hit) {
+        <span style=color:#66d9ef>if</span> (arg<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>verbose) {
+          printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%c %lld,%d hit</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, operation_table[trace[i].op],
                  trace[i].address, trace[i].size);
         }
-        continue;
+        <span style=color:#66d9ef>continue</span>;
       }
-      bool any_of_line_empty = CheckCacheLineEmpty(addr, cur_set, i);
-      if (any_of_line_empty) {
-        if (arg-&gt;verbose) {
-          printf(&quot;%c %lld,%d miss\n&quot;, operation_table[trace[i].op],
+      <span style=color:#66d9ef>bool</span> any_of_line_empty <span style=color:#f92672>=</span> CheckCacheLineEmpty(addr, cur_set, i);
+      <span style=color:#66d9ef>if</span> (any_of_line_empty) {
+        <span style=color:#66d9ef>if</span> (arg<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>verbose) {
+          printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%c %lld,%d miss</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, operation_table[trace[i].op],
                  trace[i].address, trace[i].size);
         }
-        continue;
+        <span style=color:#66d9ef>continue</span>;
       }
       EvicteCacheLine(addr, cur_set, i);
-      if (arg-&gt;verbose) {
-        printf(&quot;%c %lld,%d miss eviction\n&quot;, operation_table[trace[i].op],
+      <span style=color:#66d9ef>if</span> (arg<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>verbose) {
+        printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%c %lld,%d miss eviction</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, operation_table[trace[i].op],
                trace[i].address, trace[i].size);
       }
-    } else {
-      // data modify
-      bool any_of_line_hit_in_data_load = CheckCacheLineHit(addr, cur_set, i);
-      if (any_of_line_hit_in_data_load) {
-        // if 'data load' hit cache, then 'data store' must also hit cache
-        cache_summary.hits++;
-        if (arg-&gt;verbose) {
-          printf(&quot;%c %lld,%d hit hit \n&quot;, operation_table[trace[i].op],
+    } <span style=color:#66d9ef>else</span> {
+      <span style=color:#75715e>// data modify
+</span><span style=color:#75715e></span>      <span style=color:#66d9ef>bool</span> any_of_line_hit_in_data_load <span style=color:#f92672>=</span> CheckCacheLineHit(addr, cur_set, i);
+      <span style=color:#66d9ef>if</span> (any_of_line_hit_in_data_load) {
+        <span style=color:#75715e>// if &#39;data load&#39; hit cache, then &#39;data store&#39; must also hit cache
+</span><span style=color:#75715e></span>        cache_summary.hits<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+        <span style=color:#66d9ef>if</span> (arg<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>verbose) {
+          printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%c %lld,%d hit hit </span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, operation_table[trace[i].op],
                  trace[i].address, trace[i].size);
         }
-        continue;
+        <span style=color:#66d9ef>continue</span>;
       }
-      bool any_of_line_empty = CheckCacheLineEmpty(addr, cur_set, i);
-      if (any_of_line_empty) {
-        cache_summary.hits++;
-        if (arg-&gt;verbose) {
-          printf(&quot;%c %lld,%d miss hit\n&quot;, operation_table[trace[i].op],
+      <span style=color:#66d9ef>bool</span> any_of_line_empty <span style=color:#f92672>=</span> CheckCacheLineEmpty(addr, cur_set, i);
+      <span style=color:#66d9ef>if</span> (any_of_line_empty) {
+        cache_summary.hits<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+        <span style=color:#66d9ef>if</span> (arg<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>verbose) {
+          printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%c %lld,%d miss hit</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, operation_table[trace[i].op],
                  trace[i].address, trace[i].size);
         }
-        continue;
+        <span style=color:#66d9ef>continue</span>;
       }
       EvicteCacheLine(addr, cur_set, i);
-      if (arg-&gt;verbose) {
-        cache_summary.hits++;
-        printf(&quot;%c %lld,%d miss eviction hit\n&quot;, operation_table[trace[i].op],
+      <span style=color:#66d9ef>if</span> (arg<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>verbose) {
+        cache_summary.hits<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+        printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%c %lld,%d miss eviction hit</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, operation_table[trace[i].op],
                trace[i].address, trace[i].size);
       }
     }
   }
 }
-int main(int argc, char **argv) {
+<span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>(<span style=color:#66d9ef>int</span> argc, <span style=color:#66d9ef>char</span> <span style=color:#f92672>*</span><span style=color:#f92672>*</span>argv) {
   Arg arg;
-  ParseArgs(argc, argv, &amp;arg);
+  ParseArgs(argc, argv, <span style=color:#f92672>&amp;</span>arg);
   ParseTraceFile(arg.tracefile);
-  int total_set_num = 1 &lt;&lt; arg.set_index_bits;
-  // printf(&quot;total_set_num:%d\n&quot;,total_set_num);
-  set = (Set *)malloc(total_set_num * sizeof(Set));
-  memset(set, 0, total_set_num * sizeof(Set));
-  for (int i = 0; i &lt; total_set_num; i++) {
-    set[i].lines = (Line *)malloc(arg.lines_per_set * sizeof(Line));
-    memset(set[i].lines, 0, arg.lines_per_set * sizeof(Line));
-    set[i].num_of_lines = arg.lines_per_set;
+  <span style=color:#66d9ef>int</span> total_set_num <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> arg.set_index_bits;
+  <span style=color:#75715e>// printf(&#34;total_set_num:%d\n&#34;,total_set_num);
+</span><span style=color:#75715e></span>  set <span style=color:#f92672>=</span> (Set <span style=color:#f92672>*</span>)malloc(total_set_num <span style=color:#f92672>*</span> <span style=color:#66d9ef>sizeof</span>(Set));
+  memset(set, <span style=color:#ae81ff>0</span>, total_set_num <span style=color:#f92672>*</span> <span style=color:#66d9ef>sizeof</span>(Set));
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> total_set_num; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>) {
+    set[i].lines <span style=color:#f92672>=</span> (Line <span style=color:#f92672>*</span>)malloc(arg.lines_per_set <span style=color:#f92672>*</span> <span style=color:#66d9ef>sizeof</span>(Line));
+    memset(set[i].lines, <span style=color:#ae81ff>0</span>, arg.lines_per_set <span style=color:#f92672>*</span> <span style=color:#66d9ef>sizeof</span>(Line));
+    set[i].num_of_lines <span style=color:#f92672>=</span> arg.lines_per_set;
   }
-  SimulateCache(&amp;arg);
+  SimulateCache(<span style=color:#f92672>&amp;</span>arg);
   printSummary(cache_summary.hits, cache_summary.misses,
                cache_summary.evitions);
 
-  for (int i = 0; i &lt; total_set_num; i++) {
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> total_set_num; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>) {
     free(set[i].lines);
   }
   free(set);
 
-  return 0;
+  <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
 }
 
 
-</code></pre><h2 id=part-b>PART B</h2><p>三个小题。。矩阵的size分别是:</p><ul><li>32*32</li><li>64*64</li><li>61*67</li></ul><p>很重要的一点是。。输入就是这三组固定值。。。<strong>题目是允许根据不同的输入。。来用不同的实现应对的。</strong></p><h3 id=3232>32*32</h3><pre><code class=language-c++>
-int tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
-    for (int i = 0; i &lt; N; i += 8) {
-      for (int j = 0; j &lt; M; j++) {
-        tmp = A[i][j];
-        tmp1 = A[i + 1][j];
-        tmp2 = A[i + 2][j];
-        tmp3 = A[i + 3][j];
-        tmp4 = A[i + 4][j];
-        tmp5 = A[i + 5][j];
-        tmp6 = A[i + 6][j];
-        tmp7 = A[i + 7][j];
-        B[j][i] = tmp;
-        B[j][i + 1] = tmp1;
-        B[j][i + 2] = tmp2;
-        B[j][i + 3] = tmp3;
-        B[j][i + 4] = tmp4;
-        B[j][i + 5] = tmp5;
-        B[j][i + 6] = tmp6;
-        B[j][i + 7] = tmp7;
+</code></pre></div><h2 id=part-b>PART B</h2><p>三个小题。。矩阵的size分别是:</p><ul><li>32*32</li><li>64*64</li><li>61*67</li></ul><p>很重要的一点是。。输入就是这三组固定值。。。<strong>题目是允许根据不同的输入。。来用不同的实现应对的。</strong></p><h3 id=3232>32*32</h3><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+<span style=color:#66d9ef>int</span> tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> N; i <span style=color:#f92672>+</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>8</span>) {
+      <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; j <span style=color:#f92672>&lt;</span> M; j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>) {
+        tmp <span style=color:#f92672>=</span> A[i][j];
+        tmp1 <span style=color:#f92672>=</span> A[i <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>][j];
+        tmp2 <span style=color:#f92672>=</span> A[i <span style=color:#f92672>+</span> <span style=color:#ae81ff>2</span>][j];
+        tmp3 <span style=color:#f92672>=</span> A[i <span style=color:#f92672>+</span> <span style=color:#ae81ff>3</span>][j];
+        tmp4 <span style=color:#f92672>=</span> A[i <span style=color:#f92672>+</span> <span style=color:#ae81ff>4</span>][j];
+        tmp5 <span style=color:#f92672>=</span> A[i <span style=color:#f92672>+</span> <span style=color:#ae81ff>5</span>][j];
+        tmp6 <span style=color:#f92672>=</span> A[i <span style=color:#f92672>+</span> <span style=color:#ae81ff>6</span>][j];
+        tmp7 <span style=color:#f92672>=</span> A[i <span style=color:#f92672>+</span> <span style=color:#ae81ff>7</span>][j];
+        B[j][i] <span style=color:#f92672>=</span> tmp;
+        B[j][i <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>] <span style=color:#f92672>=</span> tmp1;
+        B[j][i <span style=color:#f92672>+</span> <span style=color:#ae81ff>2</span>] <span style=color:#f92672>=</span> tmp2;
+        B[j][i <span style=color:#f92672>+</span> <span style=color:#ae81ff>3</span>] <span style=color:#f92672>=</span> tmp3;
+        B[j][i <span style=color:#f92672>+</span> <span style=color:#ae81ff>4</span>] <span style=color:#f92672>=</span> tmp4;
+        B[j][i <span style=color:#f92672>+</span> <span style=color:#ae81ff>5</span>] <span style=color:#f92672>=</span> tmp5;
+        B[j][i <span style=color:#f92672>+</span> <span style=color:#ae81ff>6</span>] <span style=color:#f92672>=</span> tmp6;
+        B[j][i <span style=color:#f92672>+</span> <span style=color:#ae81ff>7</span>] <span style=color:#f92672>=</span> tmp7;
       }
     }
 
-</code></pre><h3 id=6167>61*67</h3><pre><code class=language-c++>
- int tmp[8];
-    for (int block_i_start = 0; block_i_start &lt; N; block_i_start += 8) {
-      for (int block_j_start = 0; block_j_start &lt; M; block_j_start += 8) {
-        for (int i = block_i_start; i &lt; min(block_i_start + 8, N); i++) {
-          for (int j = block_j_start; j &lt; min(M, block_j_start + 8); j++) {
-            tmp[j - block_j_start] = A[i][j];
+</code></pre></div><h3 id=6167>61*67</h3><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+ <span style=color:#66d9ef>int</span> tmp[<span style=color:#ae81ff>8</span>];
+    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> block_i_start <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; block_i_start <span style=color:#f92672>&lt;</span> N; block_i_start <span style=color:#f92672>+</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>8</span>) {
+      <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> block_j_start <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; block_j_start <span style=color:#f92672>&lt;</span> M; block_j_start <span style=color:#f92672>+</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>8</span>) {
+        <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> block_i_start; i <span style=color:#f92672>&lt;</span> min(block_i_start <span style=color:#f92672>+</span> <span style=color:#ae81ff>8</span>, N); i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>) {
+          <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> block_j_start; j <span style=color:#f92672>&lt;</span> min(M, block_j_start <span style=color:#f92672>+</span> <span style=color:#ae81ff>8</span>); j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>) {
+            tmp[j <span style=color:#f92672>-</span> block_j_start] <span style=color:#f92672>=</span> A[i][j];
           }
-          for (int j = block_j_start; j &lt; min(M, block_j_start + 8); j++) {
-            B[j][i] = tmp[j - block_j_start];
+          <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> block_j_start; j <span style=color:#f92672>&lt;</span> min(M, block_j_start <span style=color:#f92672>+</span> <span style=color:#ae81ff>8</span>); j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>) {
+            B[j][i] <span style=color:#f92672>=</span> tmp[j <span style=color:#f92672>-</span> block_j_start];
           }
          
         }
       }
     }
-</code></pre><h3 id=6464>64*64</h3><p>略难。。留个坑。。日后填</p><h2 id=最终分数>最终分数</h2><p>64*64的没拿到分数。。其他部分是满分</p><pre><code class=language-shell>
+</code></pre></div><h3 id=6464>64*64</h3><p>略难。。留个坑。。日后填</p><h2 id=最终分数>最终分数</h2><p>64*64的没拿到分数。。其他部分是满分</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>
 Cache Lab summary:
                         Points   Max pts      Misses
-Csim correctness          27.0        27
-Trans perf 32x32           8.0         8         287
-Trans perf 64x64           0.0         8        4723
-Trans perf 61x67          10.0        10        1997
-          Total points    45.0        53
+Csim correctness          27.0        <span style=color:#ae81ff>27</span>
+Trans perf 32x32           8.0         <span style=color:#ae81ff>8</span>         <span style=color:#ae81ff>287</span>
+Trans perf 64x64           0.0         <span style=color:#ae81ff>8</span>        <span style=color:#ae81ff>4723</span>
+Trans perf 61x67          10.0        <span style=color:#ae81ff>10</span>        <span style=color:#ae81ff>1997</span>
+          Total points    45.0        <span style=color:#ae81ff>53</span>
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

@@ -8,18 +8,18 @@ $navbar.className+=" in";}}</script><style type=text/css>header.intro-header{bac
 on
 Wednesday, April 8, 2020</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p>背景是要把某个caffe model,转换成tensorrt的INT8 模型。 然后遇到如下报错:</p><pre><code class=language-bash>
-E0403 08:54:35.951987  5704 engine.h:62] engine.cpp (572) - Cuda Error in commonEmitTensor: 1 (invalid argument)
-E0403 08:54:35.952157  5704 engine.h:62] Failure while trying to emit debug blob.
-engine.cpp (572) - Cuda Error in commonEmitTensor: 1 (invalid argument)
-E0403 08:54:35.952235  5704 engine.h:62] cuda/caskConvolutionLayer.cpp (355) - Cuda Error in execute: 1 (invalid argument)
-E0403 08:54:35.952291  5704 engine.h:62] cuda/caskConvolutionLayer.cpp (355) - Cuda Error in execute: 1 (invalid argument)
-W0403 08:54:35.952324  5704 calibrator.cpp:45] [4, 3, 224, 224]
-F0403 08:54:35.992761  5704 tensor.h:149] Check failed: cudaMemcpy(raw_mutable_data(), b.raw_data(), size_in_bytes, cudaMemcpyDefault) == cudaSuccess (700 vs. 0) 
+post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p>背景是要把某个caffe model,转换成tensorrt的INT8 模型。 然后遇到如下报错:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>
+E0403 08:54:35.951987  <span style=color:#ae81ff>5704</span> engine.h:62<span style=color:#f92672>]</span> engine.cpp <span style=color:#f92672>(</span>572<span style=color:#f92672>)</span> - Cuda Error in commonEmitTensor: <span style=color:#ae81ff>1</span> <span style=color:#f92672>(</span>invalid argument<span style=color:#f92672>)</span>
+E0403 08:54:35.952157  <span style=color:#ae81ff>5704</span> engine.h:62<span style=color:#f92672>]</span> Failure <span style=color:#66d9ef>while</span> trying to emit debug blob.
+engine.cpp <span style=color:#f92672>(</span>572<span style=color:#f92672>)</span> - Cuda Error in commonEmitTensor: <span style=color:#ae81ff>1</span> <span style=color:#f92672>(</span>invalid argument<span style=color:#f92672>)</span>
+E0403 08:54:35.952235  <span style=color:#ae81ff>5704</span> engine.h:62<span style=color:#f92672>]</span> cuda/caskConvolutionLayer.cpp <span style=color:#f92672>(</span>355<span style=color:#f92672>)</span> - Cuda Error in execute: <span style=color:#ae81ff>1</span> <span style=color:#f92672>(</span>invalid argument<span style=color:#f92672>)</span>
+E0403 08:54:35.952291  <span style=color:#ae81ff>5704</span> engine.h:62<span style=color:#f92672>]</span> cuda/caskConvolutionLayer.cpp <span style=color:#f92672>(</span>355<span style=color:#f92672>)</span> - Cuda Error in execute: <span style=color:#ae81ff>1</span> <span style=color:#f92672>(</span>invalid argument<span style=color:#f92672>)</span>
+W0403 08:54:35.952324  <span style=color:#ae81ff>5704</span> calibrator.cpp:45<span style=color:#f92672>]</span> <span style=color:#f92672>[</span>4, 3, 224, 224<span style=color:#f92672>]</span>
+F0403 08:54:35.992761  <span style=color:#ae81ff>5704</span> tensor.h:149<span style=color:#f92672>]</span> Check failed: cudaMemcpy<span style=color:#f92672>(</span>raw_mutable_data<span style=color:#f92672>(</span><span style=color:#f92672>)</span>, b.raw_data<span style=color:#f92672>(</span><span style=color:#f92672>)</span>, size_in_bytes, cudaMemcpyDefault<span style=color:#f92672>)</span> <span style=color:#f92672>=</span><span style=color:#f92672>=</span> cudaSuccess <span style=color:#f92672>(</span><span style=color:#ae81ff>700</span> vs. 0<span style=color:#f92672>)</span> 
 *** Check failure stack trace: ***
-Aborted (core dumped)
+Aborted <span style=color:#f92672>(</span>core dumped<span style=color:#f92672>)</span>
 
-</code></pre><p>cuda error 700. 原来cuda error的错误号可以这么大。。</p><p>查了下，说</p><blockquote><p>in general, CUDA error 700 is drivers or timeout related.</p></blockquote><p>看起来是个环境问题，
+</code></pre></div><p>cuda error 700. 原来cuda error的错误号可以这么大。。</p><p>查了下，说</p><blockquote><p>in general, CUDA error 700 is drivers or timeout related.</p></blockquote><p>看起来是个环境问题，
 然后又试了下之前转的INT8的模型，依然没有报错。</p><p>我就很困惑了。。 想了下这两个模型的区别。 能转的模型是从pytorch开始转换的，中间会merge BN layer。而cuda error 700的模型是caffe 模型，保留了BN layer.</p><p>于是把第一个BN 以及之后的layer都删除。然而仍然是这个错误。</p><p>继续删除到只剩下一个input layer,一个conv layer. 还是报错。。 事情变得过于诡异了起来。看来不是模型的问题。。</p><p>然后检查了一下做校准用的预处理参数。。<strong>发现输入尺寸和模型的输入尺寸竟然是不一致的</strong>。。。 跪了。。</p><p>之前的模型由于是pytorch模型，input size和预处理size 是完全通过我控制的，因此不会有问题。</p><p>但是对于要转换的caffe 模型， 模型的参数和预处理部分是用户提供给我的，而我们的代码中没有做检查(似乎也不好做检查，因为校准的逻辑是在更顶层的)</p><p>但是这个cuda error 700的报错。。。也太不友好了吧。。。</p><p>因为之前查了cuda error 700，发现似乎没人提到这种情况，所以还是写出来分享一下。</p><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>

@@ -8,181 +8,181 @@ $navbar.className+=" in";}}</script><style type=text/css>header.intro-header{bac
 on
 Wednesday, July 29, 2015</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p>Sliding Window</p><p>看这个问题：An array of size <em>n</em> ≤ 106 is given to you. There is a sliding window of size <em>k</em> which is moving from the very left of the array to the very right. You can only see the <em>k</em> numbers in the window. Each time the sliding window moves rightwards by one position.Your task is to determine the maximum and minimum values in the sliding window at each position.</p><p>也就是有一个数列a，要求你求数列b和c，b[i]是a[i]…a[i+w-1]中的最小值，c[i]是最大值。如果a是1,3,-1,-3,5,3,6,7，则b为-1,-3,-3,-3,3,3，c为3,3,5,5,6,7。</p><p>这个问题相当于一个数据流（数列a）在不断地到来，而数据是不断过期的，相当于我们只能保存有限的数据（sliding window中的数据，此题中就是窗口的宽度w），对于到来的查询（此题中查询是每时刻都有的），我们要返回当前滑动窗口中的最大值最小值。注意，元素是不断过期的。</p><p>解决这个问题可以使用一种叫做单调队列的数据结构，它维护这样一种队列：</p><p>a)从队头到队尾，元素在我们所关注的指标下是递减的（严格递减，而不是非递增），比如查询如果每次问的是窗口内的最小值，那么队列中元素从左至右就应该递增，如果每次问的是窗口内的最大值，则应该递减，依此类推。这是为了保证每次查询只需要取队头元素。</p><p>b)从队头到队尾，元素对应的时刻（此题中是该元素在数列a中的下标）是递增的，但不要求连续，这是为了保证最左面的元素总是最先过期，且每当有新元素来临的时候一定是插入队尾。</p><p>满足以上两点的队列就是单调队列，首先，只有第一个元素的序列一定是单调队列。</p><p>那么怎么维护这个单调队列呢？无非是处理插入和查询两个操作。</p><p>对于插入，由于性质b，因此来的新元素插入到队列的最后就能维持b)继续成立。但是为了维护a)的成立，即元素在我们关注的指标下递减，从队尾插入新元素的时候可能要删除队尾的一些元素，具体说来就是，找到第一个大于（在所关注指标下）新元素的元素，删除其后所有元素，并将新元素插于其后。<strong>因为所有被删除的元素都比新元素要小，而且比新元素要旧，因此在以后的任何查询中都不可能成为答案，所以可以放心删除。</strong></p><p>对于查询，由于性质b，因此所有该时刻过期的元素一定都集中在队头，因此利用查询的时机删除队头所有过期的元素，在不含过期元素后，队头得元素就是查询的答案（性质a），将其返回即可。</p><p>由于每个元素都进队出队一次，因此摊销复杂度为O(n)。</p><p>POJ2823就是上面描述的那道题。</p><blockquote></blockquote></blockquote><p><a href=http://www.cnblogs.com/Jason-Damon/archive/2012/04/19/2457889.html>http://www.cnblogs.com/Jason-Damon/archive/2012/04/19/2457889.html</a></p><p>讲得很好.我认为重点的地方加颜色了.</p><p>如果要找最大值,那么比新加入的元素小且旧的元素是不可能成为答案的,可以放心删去!</p><p>理解了这句话就理解了单调队列&mldr;</p><p>上面那个博客将得是挺好,只是代码写得略丑.</p><p>自己按照思想写了个还看得过去的</p><pre><code class=language-c++>    
-    /*************************************************************************
-    	&gt; File Name: code/2015summer/单调队列/B.cpp
-    	&gt; Author: 111qqz
-    	&gt; Email: rkz2013@126.com 
-    	&gt; Created Time: 2015年07月29日 星期三 20时18分16秒
-     ************************************************************************/
+post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p>Sliding Window</p><p>看这个问题：An array of size <em>n</em> ≤ 106 is given to you. There is a sliding window of size <em>k</em> which is moving from the very left of the array to the very right. You can only see the <em>k</em> numbers in the window. Each time the sliding window moves rightwards by one position.Your task is to determine the maximum and minimum values in the sliding window at each position.</p><p>也就是有一个数列a，要求你求数列b和c，b[i]是a[i]…a[i+w-1]中的最小值，c[i]是最大值。如果a是1,3,-1,-3,5,3,6,7，则b为-1,-3,-3,-3,3,3，c为3,3,5,5,6,7。</p><p>这个问题相当于一个数据流（数列a）在不断地到来，而数据是不断过期的，相当于我们只能保存有限的数据（sliding window中的数据，此题中就是窗口的宽度w），对于到来的查询（此题中查询是每时刻都有的），我们要返回当前滑动窗口中的最大值最小值。注意，元素是不断过期的。</p><p>解决这个问题可以使用一种叫做单调队列的数据结构，它维护这样一种队列：</p><p>a)从队头到队尾，元素在我们所关注的指标下是递减的（严格递减，而不是非递增），比如查询如果每次问的是窗口内的最小值，那么队列中元素从左至右就应该递增，如果每次问的是窗口内的最大值，则应该递减，依此类推。这是为了保证每次查询只需要取队头元素。</p><p>b)从队头到队尾，元素对应的时刻（此题中是该元素在数列a中的下标）是递增的，但不要求连续，这是为了保证最左面的元素总是最先过期，且每当有新元素来临的时候一定是插入队尾。</p><p>满足以上两点的队列就是单调队列，首先，只有第一个元素的序列一定是单调队列。</p><p>那么怎么维护这个单调队列呢？无非是处理插入和查询两个操作。</p><p>对于插入，由于性质b，因此来的新元素插入到队列的最后就能维持b)继续成立。但是为了维护a)的成立，即元素在我们关注的指标下递减，从队尾插入新元素的时候可能要删除队尾的一些元素，具体说来就是，找到第一个大于（在所关注指标下）新元素的元素，删除其后所有元素，并将新元素插于其后。<strong>因为所有被删除的元素都比新元素要小，而且比新元素要旧，因此在以后的任何查询中都不可能成为答案，所以可以放心删除。</strong></p><p>对于查询，由于性质b，因此所有该时刻过期的元素一定都集中在队头，因此利用查询的时机删除队头所有过期的元素，在不含过期元素后，队头得元素就是查询的答案（性质a），将其返回即可。</p><p>由于每个元素都进队出队一次，因此摊销复杂度为O(n)。</p><p>POJ2823就是上面描述的那道题。</p><blockquote></blockquote></blockquote><p><a href=http://www.cnblogs.com/Jason-Damon/archive/2012/04/19/2457889.html>http://www.cnblogs.com/Jason-Damon/archive/2012/04/19/2457889.html</a></p><p>讲得很好.我认为重点的地方加颜色了.</p><p>如果要找最大值,那么比新加入的元素小且旧的元素是不可能成为答案的,可以放心删去!</p><p>理解了这句话就理解了单调队列&mldr;</p><p>上面那个博客将得是挺好,只是代码写得略丑.</p><p>自己按照思想写了个还看得过去的</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>    
+    <span style=color:#75715e>/*************************************************************************
+</span><span style=color:#75715e>    	&gt; File Name: code/2015summer/单调队列/B.cpp
+</span><span style=color:#75715e>    	&gt; Author: 111qqz
+</span><span style=color:#75715e>    	&gt; Email: rkz2013@126.com 
+</span><span style=color:#75715e>    	&gt; Created Time: 2015年07月29日 星期三 20时18分16秒
+</span><span style=color:#75715e>     ************************************************************************/</span>
     
-    #include&lt;iostream&gt;
-    #include&lt;iomanip&gt;
-    #include&lt;cstdio&gt;
-    #include&lt;algorithm&gt;
-    #include&lt;cmath&gt;
-    #include&lt;cstring&gt;
-    #include&lt;string&gt;
-    #include&lt;map&gt;
-    #include&lt;set&gt;
-    #include&lt;queue&gt;
-    #include&lt;vector&gt;
-    #include&lt;stack&gt;
-    #define y0 abc111qqz
-    #define y1 hust111qqz
-    #define yn hez111qqz
-    #define j1 cute111qqz
-    #define tm crazy111qqz
-    #define lr dying111qqz
-    using namespace std;
-    #define REP(i, n) for (int i=0;i&lt;int(n);++i)  
-    typedef long long LL;
-    typedef unsigned long long ULL;
-    const int inf = 0x7fffffff;
-    const int N=1E6+7;
-    int a[N],mxans[N],q[N],indx[N],mians[N];
-    int n,k;
-    int head,tail;
+    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;iomanip&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;string&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;map&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;set&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;queue&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;vector&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;stack&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define y0 abc111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define y1 hust111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define yn hez111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define j1 cute111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define tm crazy111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define lr dying111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+    <span style=color:#75715e>#</span><span style=color:#75715e>define REP(i, n) for (int i=0;i&lt;int(n);++i)  </span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> LL;
+    <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>unsigned</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> ULL;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> inf <span style=color:#f92672>=</span> <span style=color:#ae81ff>0x7fffffff</span>;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>1E6</span><span style=color:#f92672>+</span><span style=color:#ae81ff>7</span>;
+    <span style=color:#66d9ef>int</span> a[N],mxans[N],q[N],indx[N],mians[N];
+    <span style=color:#66d9ef>int</span> n,k;
+    <span style=color:#66d9ef>int</span> head,tail;
     
-    int main()
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
     {
-        cin&gt;&gt;n&gt;&gt;k;
-        for ( int   i = 0 ; i &lt; n ; i++ )
+        cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>n<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>k;
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span>   i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span> ; i <span style=color:#f92672>&lt;</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
         {
-    	scanf(&quot;%d&quot;,&amp;a[i]);
+    	scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>a[i]);
         }
-        head = 1 ; tail = 0;
-        for ( int i = 0; i &lt; n ; i++)
+        head <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; tail <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
         {
-    	if (indx[head]+k-1&lt;i)
+    	<span style=color:#66d9ef>if</span> (indx[head]<span style=color:#f92672>+</span>k<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span><span style=color:#f92672>&lt;</span>i)
     	{
-    	    head++;
+    	    head<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
     	}
-    	while (head&lt;=tail&amp;&amp;q[tail]&lt;=a[i]) tail--;
-    	tail++;
-    	q[tail]=a[i];
-    	indx[tail]=i;
-    	if (i&gt;=k-1)
+    	<span style=color:#66d9ef>while</span> (head<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>tail<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>q[tail]<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>a[i]) tail<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
+    	tail<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+    	q[tail]<span style=color:#f92672>=</span>a[i];
+    	indx[tail]<span style=color:#f92672>=</span>i;
+    	<span style=color:#66d9ef>if</span> (i<span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span>k<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>)
     	{
-    	    mxans[i-k+1]=q[head];
-    	}
-        }
-        head = 1 ; tail = 0;
-        memset(q,0,sizeof(q));
-        for ( int i  = 0 ; i &lt; n ; i++)
-        {
-    	if (indx[head]+k-1&lt;i)
-    	{
-    	    head++;
-    	}
-    	while (head&lt;=tail&amp;&amp;q[tail]&gt;=a[i]) tail--;
-    	tail++;
-    	q[tail]=a[i];
-    	indx[tail]=i;
-    	if (i&gt;=k-1)
-    	{
-    	    mians[i-k+1]=q[head];
+    	    mxans[i<span style=color:#f92672>-</span>k<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>]<span style=color:#f92672>=</span>q[head];
     	}
         }
-        for ( int i = 0 ; i &lt; n-k+1 ; i++ )
+        head <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; tail <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+        memset(q,<span style=color:#ae81ff>0</span>,<span style=color:#66d9ef>sizeof</span>(q));
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i  <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span> ; i <span style=color:#f92672>&lt;</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
         {
-    	if (i==0)
-    	    cout&lt;&lt;mians[i];
-    	else cout&lt;&lt;&quot; &quot;&lt;&lt;mians[i];
+    	<span style=color:#66d9ef>if</span> (indx[head]<span style=color:#f92672>+</span>k<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span><span style=color:#f92672>&lt;</span>i)
+    	{
+    	    head<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+    	}
+    	<span style=color:#66d9ef>while</span> (head<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>tail<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>q[tail]<span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span>a[i]) tail<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
+    	tail<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+    	q[tail]<span style=color:#f92672>=</span>a[i];
+    	indx[tail]<span style=color:#f92672>=</span>i;
+    	<span style=color:#66d9ef>if</span> (i<span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span>k<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>)
+    	{
+    	    mians[i<span style=color:#f92672>-</span>k<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>]<span style=color:#f92672>=</span>q[head];
+    	}
         }
-        cout&lt;&lt;endl;
-        for ( int i = 0 ; i &lt; n-k+1 ; i++ )
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span> ; i <span style=color:#f92672>&lt;</span> n<span style=color:#f92672>-</span>k<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span> ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
         {
-    	if (i==0)
-    	    cout&lt;&lt;mxans[i];
-    	else cout&lt;&lt;&quot; &quot;&lt;&lt;mxans[i];
+    	<span style=color:#66d9ef>if</span> (i<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>)
+    	    cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>mians[i];
+    	<span style=color:#66d9ef>else</span> cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74> </span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>mians[i];
+        }
+        cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span> ; i <span style=color:#f92672>&lt;</span> n<span style=color:#f92672>-</span>k<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span> ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+        {
+    	<span style=color:#66d9ef>if</span> (i<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>)
+    	    cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>mxans[i];
+    	<span style=color:#66d9ef>else</span> cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74> </span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>mxans[i];
         }
       
-    	return 0;
+    	<span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
     }
     
 
-</code></pre><p>更新一个双端队列实现的（为毛交g++会Tle，交c++才能过2333）：</p><pre><code class=language-c++>    
-    /* ***********************************************
-    Author :111qqz
-    Created Time :2016年08月05日 星期五 00时09分33秒
-    File Name :code/poj/2823.cpp
-    ************************************************ */
+</code></pre></div><p>更新一个双端队列实现的（为毛交g++会Tle，交c++才能过2333）：</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>    
+    <span style=color:#75715e>/* ***********************************************
+</span><span style=color:#75715e>    Author :111qqz
+</span><span style=color:#75715e>    Created Time :2016年08月05日 星期五 00时09分33秒
+</span><span style=color:#75715e>    File Name :code/poj/2823.cpp
+</span><span style=color:#75715e>    ************************************************ */</span>
     
-    #include &lt;cstdio&gt;
-    #include &lt;cstring&gt;
-    #include &lt;iostream&gt;
-    #include &lt;algorithm&gt;
-    #include &lt;vector&gt;
-    #include &lt;queue&gt;
-    #include &lt;set&gt;
-    #include &lt;map&gt;
-    #include &lt;string&gt;
-    #include &lt;cmath&gt;
-    #include &lt;cstdlib&gt;
-    #include &lt;ctime&gt;
-    #include &lt;deque&gt;
-    #define fst first
-    #define sec second
-    #define lson l,m,rt&lt;&lt;1
-    #define rson m+1,r,rt&lt;&lt;1|1
-    #define ms(a,x) memset(a,x,sizeof(a))
-    typedef long long LL;
-    #define pi pair &lt; int ,int &gt;
-    #define MP make_pair
-    
-    using namespace std;
-    const double eps = 1E-8;
-    const int dx4[4]={1,0,0,-1};
-    const int dy4[4]={0,-1,1,0};
-    const int inf = 0x3f3f3f3f;
-    const int N=1E6+7;
-    int n,k;
-    int a[N];
-    int mn[N],mx[N];
-    deque&lt;int&gt;dq;
-    int main()
+    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;vector&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;queue&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;set&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;map&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;string&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstdlib&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;ctime&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;deque&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define fst first</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define sec second</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define lson l,m,rt&lt;&lt;1</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define rson m+1,r,rt&lt;&lt;1|1</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define ms(a,x) memset(a,x,sizeof(a))</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> LL;
+    <span style=color:#75715e>#</span><span style=color:#75715e>define pi pair &lt; int ,int &gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define MP make_pair</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    
+    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>double</span> eps <span style=color:#f92672>=</span> <span style=color:#ae81ff>1E-8</span>;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> dx4[<span style=color:#ae81ff>4</span>]<span style=color:#f92672>=</span>{<span style=color:#ae81ff>1</span>,<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0</span>,<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>};
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> dy4[<span style=color:#ae81ff>4</span>]<span style=color:#f92672>=</span>{<span style=color:#ae81ff>0</span>,<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>,<span style=color:#ae81ff>1</span>,<span style=color:#ae81ff>0</span>};
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> inf <span style=color:#f92672>=</span> <span style=color:#ae81ff>0x3f3f3f3f</span>;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>1E6</span><span style=color:#f92672>+</span><span style=color:#ae81ff>7</span>;
+    <span style=color:#66d9ef>int</span> n,k;
+    <span style=color:#66d9ef>int</span> a[N];
+    <span style=color:#66d9ef>int</span> mn[N],mx[N];
+    deque<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span>dq;
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
     {
-    	#ifndef  ONLINE_JUDGE 
-    	freopen(&quot;code/in.txt&quot;,&quot;r&quot;,stdin);
-      #endif
-    	scanf(&quot;%d%d&quot;,&amp;n,&amp;k);
-    	for ( int i = 1 ; i &lt;= n ; i++) scanf(&quot;%d&quot;,&amp;a[i]);
-    	for ( int i = 1 ; i &lt;= n ; i++)
+    	<span style=color:#75715e>#</span><span style=color:#75715e>ifndef  ONLINE_JUDGE </span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    	freopen(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>code/in.txt</span><span style=color:#e6db74>&#34;</span>,<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>r</span><span style=color:#e6db74>&#34;</span>,stdin);
+      <span style=color:#75715e>#</span><span style=color:#75715e>endif</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    	scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>n,<span style=color:#f92672>&amp;</span>k);
+    	<span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>) scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>a[i]);
+    	<span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
     	{
-    	    while (!dq.empty()&amp;&amp;dq.front()&lt;i-k+1)dq.pop_front();
-    	    while (!dq.empty()&amp;&amp;a[dq.back()]&gt;=a[i]) dq.pop_back();
+    	    <span style=color:#66d9ef>while</span> (<span style=color:#f92672>!</span>dq.empty()<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>dq.front()<span style=color:#f92672>&lt;</span>i<span style=color:#f92672>-</span>k<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>)dq.pop_front();
+    	    <span style=color:#66d9ef>while</span> (<span style=color:#f92672>!</span>dq.empty()<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>a[dq.back()]<span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span>a[i]) dq.pop_back();
     	    dq.push_back(i);
-    	    if (i&gt;=k)
-    		mn[i-k+1] = a[dq.front()];
+    	    <span style=color:#66d9ef>if</span> (i<span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span>k)
+    		mn[i<span style=color:#f92672>-</span>k<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>] <span style=color:#f92672>=</span> a[dq.front()];
     	}
     	
     	dq.clear();
     
-    	for ( int i = 1 ; i &lt;= n ; i++)
+    	<span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
     	{
-    	    while (!dq.empty()&amp;&amp;dq.front()&lt;i-k+1) dq.pop_front();
-    	    while (!dq.empty()&amp;&amp;a[dq.back()]&lt;=a[i]) dq.pop_back();
+    	    <span style=color:#66d9ef>while</span> (<span style=color:#f92672>!</span>dq.empty()<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>dq.front()<span style=color:#f92672>&lt;</span>i<span style=color:#f92672>-</span>k<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>) dq.pop_front();
+    	    <span style=color:#66d9ef>while</span> (<span style=color:#f92672>!</span>dq.empty()<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>a[dq.back()]<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>a[i]) dq.pop_back();
     	    dq.push_back(i);
-    	    if (i&gt;=k)
-    		mx[i-k+1] = a[dq.front()];
+    	    <span style=color:#66d9ef>if</span> (i<span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span>k)
+    		mx[i<span style=color:#f92672>-</span>k<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>] <span style=color:#f92672>=</span> a[dq.front()];
     	}
     
-    	for ( int i = 1 ; i &lt;n-k+1 ; i++)
-    	    printf(&quot;%d &quot;,mn[i]);
-    	printf(&quot;%d\n&quot;,mn[n-k+1]);
-    	for ( int i = 1 ; i &lt; n-k+1 ; i++)
-    	    printf(&quot;%d &quot;,mx[i]);
-    	printf(&quot;%d\n&quot;,mx[n-k+1]);
+    	<span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span>n<span style=color:#f92672>-</span>k<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span> ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+    	    printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d </span><span style=color:#e6db74>&#34;</span>,mn[i]);
+    	printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>,mn[n<span style=color:#f92672>-</span>k<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>]);
+    	<span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span> n<span style=color:#f92672>-</span>k<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span> ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+    	    printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d </span><span style=color:#e6db74>&#34;</span>,mx[i]);
+    	printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>,mx[n<span style=color:#f92672>-</span>k<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>]);
     
-      #ifndef ONLINE_JUDGE  
-      fclose(stdin);
-      #endif
-        return 0;
+      <span style=color:#75715e>#</span><span style=color:#75715e>ifndef ONLINE_JUDGE  </span><span style=color:#75715e>
+</span><span style=color:#75715e></span>      fclose(stdin);
+      <span style=color:#75715e>#</span><span style=color:#75715e>endif</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
     }
     
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

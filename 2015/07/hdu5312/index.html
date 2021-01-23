@@ -8,89 +8,89 @@ $navbar.className+=" in";}}</script><style type=text/css>header.intro-header{bac
 on
 Tuesday, July 28, 2015</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p>比赛的时候没做出来.这道题需要用到的一个重要的性质是,任意一个自然数可以表示成至多三个三角形数(1,3,6,10,15&mldr;..)的和(orz高斯)然后也有推广到任意自然数可以表示成k个k角形数的和的结论(费马提出了猜想,柯西给了证明)然后官方题解说的比较好:</p><blockquote>**这个题看上去是一个贪心, 但是这个贪心显然是错的. 事实上这道题目很简单, 先判断1个是否可以, 然后判断2个是否可以. 之后找到最小的k (k > 2)k(k>2), 使得(m - k) mod 6 = 0(m−k)mod6=0即可.**<p><em><em>证明如下: 3n(n-1)+1 = 6(n</em>(n-1)/2)+13n(n−1)+1=6(n∗(n−1)/2)+1, 注意到n</em>(n-1)/2n∗(n−1)/2是三角形数, 任意一个自然数最多只需要3个三角形数即可表示. 枚举需要kk个, 那么显然m=6(km=6(k个三角形数的和)+k)+k, 由于k ge 3k≥3, 只要m-km−k是6的倍数就一定是有解的.**</p><p>**事实上, 打个表应该也能发现规律.**</blockquote></p><p>另外还有一点,特判一个和两个的情况时,一个的好判断,扫一遍就好了</p><p>两个的话,由于这个数列是递增的,我们可以从两边往中间,算是一个不错的优化,具体见代码.</p><pre><code class=language-c++>    /*************************************************************************
-    	&gt; File Name: code/nv/#ann/1003.cpp
-    	&gt; Author: 111qqz
-    	&gt; Email: rkz2013@126.com
-    	&gt; Created Time: 2015年07月28日 星期二 23时03分09秒
-     ************************************************************************/
+post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p>比赛的时候没做出来.这道题需要用到的一个重要的性质是,任意一个自然数可以表示成至多三个三角形数(1,3,6,10,15&mldr;..)的和(orz高斯)然后也有推广到任意自然数可以表示成k个k角形数的和的结论(费马提出了猜想,柯西给了证明)然后官方题解说的比较好:</p><blockquote>**这个题看上去是一个贪心, 但是这个贪心显然是错的. 事实上这道题目很简单, 先判断1个是否可以, 然后判断2个是否可以. 之后找到最小的k (k > 2)k(k>2), 使得(m - k) mod 6 = 0(m−k)mod6=0即可.**<p><em><em>证明如下: 3n(n-1)+1 = 6(n</em>(n-1)/2)+13n(n−1)+1=6(n∗(n−1)/2)+1, 注意到n</em>(n-1)/2n∗(n−1)/2是三角形数, 任意一个自然数最多只需要3个三角形数即可表示. 枚举需要kk个, 那么显然m=6(km=6(k个三角形数的和)+k)+k, 由于k ge 3k≥3, 只要m-km−k是6的倍数就一定是有解的.**</p><p>**事实上, 打个表应该也能发现规律.**</blockquote></p><p>另外还有一点,特判一个和两个的情况时,一个的好判断,扫一遍就好了</p><p>两个的话,由于这个数列是递增的,我们可以从两边往中间,算是一个不错的优化,具体见代码.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>    <span style=color:#75715e>/*************************************************************************
+</span><span style=color:#75715e>    	&gt; File Name: code/nv/#ann/1003.cpp
+</span><span style=color:#75715e>    	&gt; Author: 111qqz
+</span><span style=color:#75715e>    	&gt; Email: rkz2013@126.com
+</span><span style=color:#75715e>    	&gt; Created Time: 2015年07月28日 星期二 23时03分09秒
+</span><span style=color:#75715e>     ************************************************************************/</span>
     
-    #include&lt;iostream&gt;
-    #include&lt;iomanip&gt;
-    #include&lt;cstdio&gt;
-    #include&lt;algorithm&gt;
-    #include&lt;cmath&gt;
-    #include&lt;cstring&gt;
-    #include&lt;string&gt;
-    #include&lt;map&gt;
-    #include&lt;set&gt;
-    #include&lt;queue&gt;
-    #include&lt;vector&gt;
-    #include&lt;stack&gt;
-    #define y0 abc111qqz
-    #define y1 hust111qqz
-    #define yn hez111qqz
-    #define j1 cute111qqz
-    #define tm crazy111qqz
-    #define lr dying111qqz
-    using namespace std;
-    #define REP(i, n) for (int i=0;i&lt;int(n);++i)
-    typedef long long LL;
-    typedef unsigned long long ULL;
-    const int inf = 0x7fffffff;
-    const int N=1E5+7;
-    int k,m,f[N];
-    void init()
+    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;iomanip&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;string&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;map&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;set&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;queue&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;vector&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;stack&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define y0 abc111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define y1 hust111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define yn hez111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define j1 cute111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define tm crazy111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>define lr dying111qqz</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+    <span style=color:#75715e>#</span><span style=color:#75715e>define REP(i, n) for (int i=0;i&lt;int(n);++i)</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> LL;
+    <span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>unsigned</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> ULL;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> inf <span style=color:#f92672>=</span> <span style=color:#ae81ff>0x7fffffff</span>;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>1E5</span><span style=color:#f92672>+</span><span style=color:#ae81ff>7</span>;
+    <span style=color:#66d9ef>int</span> k,m,f[N];
+    <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>init</span>()
     {
-        for ( int i = 1 ; i &lt;N; i++)
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span>N; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
         {
-    	f[i]=3*i*(i-1)+1;
-    	if (f[i]&gt;1000000000)
+    	f[i]<span style=color:#f92672>=</span><span style=color:#ae81ff>3</span><span style=color:#f92672>*</span>i<span style=color:#f92672>*</span>(i<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>)<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>;
+    	<span style=color:#66d9ef>if</span> (f[i]<span style=color:#f92672>&gt;</span><span style=color:#ae81ff>1000000000</span>)
     	{
-    	    k = i-1;
-    	    break;
+    	    k <span style=color:#f92672>=</span> i<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>;
+    	    <span style=color:#66d9ef>break</span>;
     	}
         }
     }
-    int solve (int x)
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>solve</span> (<span style=color:#66d9ef>int</span> x)
     {
-        for ( int i = 1 ; f[i]&lt;=x ; i++ )
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; f[i]<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>x ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
         {
-    	if (x==f[i])
-    	    return 1;
+    	<span style=color:#66d9ef>if</span> (x<span style=color:#f92672>=</span><span style=color:#f92672>=</span>f[i])
+    	    <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>1</span>;
         }
-        int j = k;
-        for ( int i = 1 ; i &lt;= k-1&amp;&amp;f[i]&lt;x ; i++)
+        <span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> k;
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> k<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span><span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>f[i]<span style=color:#f92672>&lt;</span>x ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
         {
-    	while(f[i]+f[j]&gt;x) j--;
-    	if (f[i]+f[j]==x) return 2;
+    	<span style=color:#66d9ef>while</span>(f[i]<span style=color:#f92672>+</span>f[j]<span style=color:#f92672>&gt;</span>x) j<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
+    	<span style=color:#66d9ef>if</span> (f[i]<span style=color:#f92672>+</span>f[j]<span style=color:#f92672>=</span><span style=color:#f92672>=</span>x) <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>2</span>;
         }
-        for ( int i = 3 ; i &lt;= m ; i++ )
+        <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>3</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> m ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
         {
-    	if ((m-i)%6==0)
-    	    return i;
+    	<span style=color:#66d9ef>if</span> ((m<span style=color:#f92672>-</span>i)<span style=color:#f92672>%</span><span style=color:#ae81ff>6</span><span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>)
+    	    <span style=color:#66d9ef>return</span> i;
         }
     }
-    int main()
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
     {
-        int T;
+        <span style=color:#66d9ef>int</span> T;
         init();
-        cin&gt;&gt;T;
-        int ans;
-        while (T--)
+        cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>T;
+        <span style=color:#66d9ef>int</span> ans;
+        <span style=color:#66d9ef>while</span> (T<span style=color:#f92672>-</span><span style=color:#f92672>-</span>)
         {
     
-    	scanf(&quot;%d&quot;,&amp;m);
-    	cout&lt;&lt;solve(m)&lt;&lt;endl;
+    	scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>m);
+    	cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>solve(m)<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
     
         }
     
-    	return 0;
+    	<span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
     }
     
 
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

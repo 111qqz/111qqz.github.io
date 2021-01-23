@@ -16,55 +16,55 @@ post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p>De
 竟然是我第一次使用，大概是因为基本没怎么做过DP的题吧，而滚动数组这个优化貌似主要在Dp的题里需要&mldr;
 然后在搜滚动数组的时候，看到一篇博客里用异或来表示两个状态我觉得这一点也很赞&mldr;..
 我自己想的话的大概就要又加，又mod，然后还得再来一个变量了吧&mldr;..差评满满
-还有位运算&mldr;.是挺神的东西&mldr;.目前还处于一知半解的阶段&mldr;.ORZ  M67大神</p><pre><code class=language-c++>    
-    /* ***********************************************
-    Author :111qqz
-    Created Time :2016年02月19日 星期五 16时30分04秒
-    File Name :code/hdu/5119.cpp
-    ************************************************ */
+还有位运算&mldr;.是挺神的东西&mldr;.目前还处于一知半解的阶段&mldr;.ORZ  M67大神</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>    
+    <span style=color:#75715e>/* ***********************************************
+</span><span style=color:#75715e>    Author :111qqz
+</span><span style=color:#75715e>    Created Time :2016年02月19日 星期五 16时30分04秒
+</span><span style=color:#75715e>    File Name :code/hdu/5119.cpp
+</span><span style=color:#75715e>    ************************************************ */</span>
     
-    #include&lt;iostream&gt;
-    #include&lt;cmath&gt;
-    #include&lt;cstring&gt;
-    #include&lt;algorithm&gt;
-    const long long C=1&lt;&lt;21;
-    long long dp[2][C];
-    using namespace std;
+    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#75715e>#</span><span style=color:#75715e>include</span><span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> C<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#ae81ff>21</span>;
+    <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> dp[<span style=color:#ae81ff>2</span>][C];
+    <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
     
-    int main()
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
     {
-        int t,a[49];
-        cin&gt;&gt;t;
-        int tt;
-        tt=t;
-        while (t--)
+        <span style=color:#66d9ef>int</span> t,a[<span style=color:#ae81ff>49</span>];
+        cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>t;
+        <span style=color:#66d9ef>int</span> tt;
+        tt<span style=color:#f92672>=</span>t;
+        <span style=color:#66d9ef>while</span> (t<span style=color:#f92672>-</span><span style=color:#f92672>-</span>)
     
         {
-            int n,m,roll;
-            roll=0;
-             memset(dp,0,sizeof(dp));
-            dp[0][0]=1;
-            cin&gt;&gt;n&gt;&gt;m;
-            for(int i=0;i&lt;n;i++)
-                cin&gt;&gt;a[i];
+            <span style=color:#66d9ef>int</span> n,m,roll;
+            roll<span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>;
+             memset(dp,<span style=color:#ae81ff>0</span>,<span style=color:#66d9ef>sizeof</span>(dp));
+            dp[<span style=color:#ae81ff>0</span>][<span style=color:#ae81ff>0</span>]<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>;
+            cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>n<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>m;
+            <span style=color:#66d9ef>for</span>(<span style=color:#66d9ef>int</span> i<span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>;i<span style=color:#f92672>&lt;</span>n;i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                cin<span style=color:#f92672>&gt;</span><span style=color:#f92672>&gt;</span>a[i];
     
-            for(int i=0;i&lt;n;i++)
+            <span style=color:#66d9ef>for</span>(<span style=color:#66d9ef>int</span> i<span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>;i<span style=color:#f92672>&lt;</span>n;i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
             {
-                roll=roll^1;
-                for(int j=0;j&lt;=(C/2);j++)
-                    dp[roll][j]=dp[roll^1][j]+dp[roll^1][j^a[i]];
+                roll<span style=color:#f92672>=</span>roll<span style=color:#f92672>^</span><span style=color:#ae81ff>1</span>;
+                <span style=color:#66d9ef>for</span>(<span style=color:#66d9ef>int</span> j<span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>;j<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>(C<span style=color:#f92672>/</span><span style=color:#ae81ff>2</span>);j<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                    dp[roll][j]<span style=color:#f92672>=</span>dp[roll<span style=color:#f92672>^</span><span style=color:#ae81ff>1</span>][j]<span style=color:#f92672>+</span>dp[roll<span style=color:#f92672>^</span><span style=color:#ae81ff>1</span>][j<span style=color:#f92672>^</span>a[i]];
             }
-            long long ans=0;
-            for(int i=m;i&lt;=(C/2);i++)
-                ans=ans+dp[roll][i];
-                cout&lt;&lt;&quot;Case #&quot;&lt;&lt;tt-t&lt;&lt;&quot;: &quot;&lt;&lt;ans&lt;&lt;endl;
+            <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span> ans<span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>;
+            <span style=color:#66d9ef>for</span>(<span style=color:#66d9ef>int</span> i<span style=color:#f92672>=</span>m;i<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>(C<span style=color:#f92672>/</span><span style=color:#ae81ff>2</span>);i<span style=color:#f92672>+</span><span style=color:#f92672>+</span>)
+                ans<span style=color:#f92672>=</span>ans<span style=color:#f92672>+</span>dp[roll][i];
+                cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Case #</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>tt<span style=color:#f92672>-</span>t<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>: </span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>ans<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
     
         }
-        return 0;
+        <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
     }
     
     
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

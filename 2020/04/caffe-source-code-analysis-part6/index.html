@@ -9,166 +9,166 @@ on
 Thursday, April 9, 2020</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
 post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#背景>背景　</a></li><li><a href=#proto>proto</a></li><li><a href=#c实现>c++实现</a></li></ol></nav><h2 id=背景>背景　</h2><p>最近在魔改 tensorRT 的caffe parser
-之前caffe模型转到trt模型时，有一个修改是需要将reshape　layer的param末尾补1,比较繁琐，于是看了下caffe的reshape layer的实现．</p><h2 id=proto>proto</h2><pre><code class=language-protobuf>
-message ReshapeParameter {
-  // Specify the output dimensions. If some of the dimensions are set to 0,
-  // the corresponding dimension from the bottom layer is used (unchanged).
-  // Exactly one dimension may be set to -1, in which case its value is
-  // inferred from the count of the bottom blob and the remaining dimensions.
-  // For example, suppose we want to reshape a 2D blob &quot;input&quot; with shape 2 x 8:
-  //
-  //   layer {
-  //     type: &quot;Reshape&quot; bottom: &quot;input&quot; top: &quot;output&quot;
-  //     reshape_param { ... }
-  //   }
-  //
-  // If &quot;input&quot; is 2D with shape 2 x 8, then the following reshape_param
-  // specifications are all equivalent, producing a 3D blob &quot;output&quot; with shape
-  // 2 x 2 x 4:
-  //
-  //   reshape_param { shape { dim:  2  dim: 2  dim:  4 } }
-  //   reshape_param { shape { dim:  0  dim: 2  dim:  4 } }
-  //   reshape_param { shape { dim:  0  dim: 2  dim: -1 } }
-  //   reshape_param { shape { dim:  0  dim:-1  dim:  4 } }
-  //
-  optional BlobShape shape = 1;
-
-  // axis and num_axes control the portion of the bottom blob's shape that are
-  // replaced by (included in) the reshape. By default (axis == 0 and
-  // num_axes == -1), the entire bottom blob shape is included in the reshape,
-  // and hence the shape field must specify the entire output shape.
-  //
-  // axis may be non-zero to retain some portion of the beginning of the input
-  // shape (and may be negative to index from the end; e.g., -1 to begin the
-  // reshape after the last axis, including nothing in the reshape,
-  // -2 to include only the last axis, etc.).
-  //
-  // For example, suppose &quot;input&quot; is a 2D blob with shape 2 x 8.
-  // Then the following ReshapeLayer specifications are all equivalent,
-  // producing a blob &quot;output&quot; with shape 2 x 2 x 4:
-  //
-  //   reshape_param { shape { dim: 2  dim: 2  dim: 4 } }
-  //   reshape_param { shape { dim: 2  dim: 4 } axis:  1 }
-  //   reshape_param { shape { dim: 2  dim: 4 } axis: -3 }
-  //
-  // num_axes specifies the extent of the reshape.
-  // If num_axes &gt;= 0 (and axis &gt;= 0), the reshape will be performed only on
-  // input axes in the range [axis, axis+num_axes].
-  // num_axes may also be -1, the default, to include all remaining axes
-  // (starting from axis).
-  //
-  // For example, suppose &quot;input&quot; is a 2D blob with shape 2 x 8.
-  // Then the following ReshapeLayer specifications are equivalent,
-  // producing a blob &quot;output&quot; with shape 1 x 2 x 8.
-  //
-  //   reshape_param { shape { dim:  1  dim: 2  dim:  8 } }
-  //   reshape_param { shape { dim:  1  dim: 2  }  num_axes: 1 }
-  //   reshape_param { shape { dim:  1  }  num_axes: 0 }
-  //
-  // On the other hand, these would produce output blob shape 2 x 1 x 8:
-  //
-  //   reshape_param { shape { dim: 2  dim: 1  dim: 8  }  }
-  //   reshape_param { shape { dim: 1 }  axis: 1  num_axes: 0 }
-  //
-  optional int32 axis = 2 [default = 0];
-  optional int32 num_axes = 3 [default = -1];
-}
-
-</code></pre><p>emmm,是不是稍微复杂了点．．　其实主要复杂在两个可选参数axis和num_axes上．　
+之前caffe模型转到trt模型时，有一个修改是需要将reshape　layer的param末尾补1,比较繁琐，于是看了下caffe的reshape layer的实现．</p><h2 id=proto>proto</h2><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-protobuf data-lang=protobuf><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#66d9ef>message</span> <span style=color:#a6e22e>ReshapeParameter</span> {<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#75715e>// Specify the output dimensions. If some of the dimensions are set to 0,
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// the corresponding dimension from the bottom layer is used (unchanged).
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// Exactly one dimension may be set to -1, in which case its value is
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// inferred from the count of the bottom blob and the remaining dimensions.
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// For example, suppose we want to reshape a 2D blob &#34;input&#34; with shape 2 x 8:
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//   layer {
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//     type: &#34;Reshape&#34; bottom: &#34;input&#34; top: &#34;output&#34;
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//     reshape_param { ... }
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//   }
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// If &#34;input&#34; is 2D with shape 2 x 8, then the following reshape_param
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// specifications are all equivalent, producing a 3D blob &#34;output&#34; with shape
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// 2 x 2 x 4:
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//   reshape_param { shape { dim:  2  dim: 2  dim:  4 } }
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//   reshape_param { shape { dim:  0  dim: 2  dim:  4 } }
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//   reshape_param { shape { dim:  0  dim: 2  dim: -1 } }
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//   reshape_param { shape { dim:  0  dim:-1  dim:  4 } }
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> BlobShape shape <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#75715e>// axis and num_axes control the portion of the bottom blob&#39;s shape that are
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// replaced by (included in) the reshape. By default (axis == 0 and
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// num_axes == -1), the entire bottom blob shape is included in the reshape,
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// and hence the shape field must specify the entire output shape.
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// axis may be non-zero to retain some portion of the beginning of the input
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// shape (and may be negative to index from the end; e.g., -1 to begin the
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// reshape after the last axis, including nothing in the reshape,
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// -2 to include only the last axis, etc.).
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// For example, suppose &#34;input&#34; is a 2D blob with shape 2 x 8.
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// Then the following ReshapeLayer specifications are all equivalent,
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// producing a blob &#34;output&#34; with shape 2 x 2 x 4:
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//   reshape_param { shape { dim: 2  dim: 2  dim: 4 } }
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//   reshape_param { shape { dim: 2  dim: 4 } axis:  1 }
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//   reshape_param { shape { dim: 2  dim: 4 } axis: -3 }
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// num_axes specifies the extent of the reshape.
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// If num_axes &gt;= 0 (and axis &gt;= 0), the reshape will be performed only on
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// input axes in the range [axis, axis+num_axes].
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// num_axes may also be -1, the default, to include all remaining axes
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// (starting from axis).
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// For example, suppose &#34;input&#34; is a 2D blob with shape 2 x 8.
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// Then the following ReshapeLayer specifications are equivalent,
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// producing a blob &#34;output&#34; with shape 1 x 2 x 8.
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//   reshape_param { shape { dim:  1  dim: 2  dim:  8 } }
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//   reshape_param { shape { dim:  1  dim: 2  }  num_axes: 1 }
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//   reshape_param { shape { dim:  1  }  num_axes: 0 }
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// On the other hand, these would produce output blob shape 2 x 1 x 8:
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//   reshape_param { shape { dim: 2  dim: 1  dim: 8  }  }
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//   reshape_param { shape { dim: 1 }  axis: 1  num_axes: 0 }
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>int32</span> axis <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>];<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>  <span style=color:#66d9ef>optional</span> <span style=color:#66d9ef>int32</span> num_axes <span style=color:#f92672>=</span> <span style=color:#ae81ff>3</span> [<span style=color:#66d9ef>default</span> <span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>];<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span>}<span style=color:#960050;background-color:#1e0010>
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#960050;background-color:#1e0010>
+</span></code></pre></div><p>emmm,是不是稍微复杂了点．．　其实主要复杂在两个可选参数axis和num_axes上．　
 如果不考虑这两个参数，那么　reshape的维度只有两点需要注意．一个是0表示该维度不变，一个是-1表示该维度是需要推断出来．</p><blockquote><p>0 means “copy the respective dimension of the bottom layer”. That is, if the bottom has 2 as its 1st dimension, the top will have 2 as its 1st dimension as well, given dim: 0 as the 1st target dimension.</p></blockquote><blockquote><p>-1 stands for “infer this from the other dimensions”. This behavior is similar to that of -1 in numpy’s or [] for MATLAB’s reshape: this dimension is calculated to keep the overall element count the same as in the bottom layer. At most one -1 can be used in a reshape operation.</p></blockquote><p>然后axis和num_axes两个参数可以一起看．</p><p>其实就是表示只对输入维度的[axis, axis+num_axes]做reshape,其他维护维持现状．</p><p>不过axis的使用例子写错了，所以弄得有些费解,还是看了代码才弄清楚．给caffe提了个pr <a href=https://github.com/BVLC/caffe/pull/6936>fix an error of axis parameter in the example of ReshapeParameter #6936</a> 能不能merge随缘吧2333</p><p>然后还有两个case，其一是num_axes的默认情况，表示要处理"all remaining axes&rdquo;
-另外一个是axis为负数，此时不使用num_axes　参数</p><p>值得一提的是</p><blockquote><p>specifying reshape_param { shape { dim: 0 dim: -1 } } makes the layer behave in exactly the same way as the Flatten layer.</p></blockquote><h2 id=c实现>c++实现</h2><p>先看 LayerSetUp. 我们似乎很少关注layer的这部分．．原因是大部分layer这部分其实都没什么好关注的</p><pre><code class=language-c++>
-template &lt;typename Dtype&gt;
-void ReshapeLayer&lt;Dtype&gt;::LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  CHECK_NE(top[0], bottom[0]) &lt;&lt; this-&gt;type() &lt;&lt; &quot; Layer does not &quot;
-      &quot;allow in-place computation.&quot;;
-  inferred_axis_ = -1;
+另外一个是axis为负数，此时不使用num_axes　参数</p><p>值得一提的是</p><blockquote><p>specifying reshape_param { shape { dim: 0 dim: -1 } } makes the layer behave in exactly the same way as the Flatten layer.</p></blockquote><h2 id=c实现>c++实现</h2><p>先看 LayerSetUp. 我们似乎很少关注layer的这部分．．原因是大部分layer这部分其实都没什么好关注的</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> ReshapeLayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>LayerSetUp(<span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom,
+    <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top) {
+  CHECK_NE(top[<span style=color:#ae81ff>0</span>], bottom[<span style=color:#ae81ff>0</span>]) <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#66d9ef>this</span><span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>type() <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74> Layer does not </span><span style=color:#e6db74>&#34;</span>
+      <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>allow in-place computation.</span><span style=color:#e6db74>&#34;</span>;
+  inferred_axis_ <span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>;
   copy_axes_.clear();
-  const BlobShape&amp; top_blob_shape = this-&gt;layer_param_.reshape_param().shape();
-  const int top_num_axes = top_blob_shape.dim_size();
-  constant_count_ = 1;
-  for (int i = 0; i &lt; top_num_axes; ++i) {
-    const int top_dim = top_blob_shape.dim(i);
-    if (top_dim == 0) {
+  <span style=color:#66d9ef>const</span> BlobShape<span style=color:#f92672>&amp;</span> top_blob_shape <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span><span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>layer_param_.reshape_param().shape();
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> top_num_axes <span style=color:#f92672>=</span> top_blob_shape.dim_size();
+  constant_count_ <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> top_num_axes; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> top_dim <span style=color:#f92672>=</span> top_blob_shape.dim(i);
+    <span style=color:#66d9ef>if</span> (top_dim <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>) {
       copy_axes_.push_back(i);
-    } else if (top_dim == -1) {
-      CHECK_EQ(inferred_axis_, -1) &lt;&lt; &quot;new shape contains multiple &quot;
-          &lt;&lt; &quot;-1 dims; at most a single (1) value of -1 may be specified&quot;;
-      inferred_axis_ = i;
-    } else {
-      constant_count_ *= top_dim;
+    } <span style=color:#66d9ef>else</span> <span style=color:#a6e22e>if</span> (top_dim <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>) {
+      CHECK_EQ(inferred_axis_, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>) <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>new shape contains multiple </span><span style=color:#e6db74>&#34;</span>
+          <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>-1 dims; at most a single (1) value of -1 may be specified</span><span style=color:#e6db74>&#34;</span>;
+      inferred_axis_ <span style=color:#f92672>=</span> i;
+    } <span style=color:#66d9ef>else</span> {
+      constant_count_ <span style=color:#f92672>*</span><span style=color:#f92672>=</span> top_dim;
     }
   }
 }
 
-</code></pre><p>特殊处理了dim为0和-1的情况，然后把需要变换的维度count放在constant_count_，盲猜是之后做推断用．</p><p>接下来我们看下Reshape</p><pre><code class=language-c++>template &lt;typename Dtype&gt;
-void ReshapeLayer&lt;Dtype&gt;::Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  const int input_start_axis = this-&gt;layer_param_.reshape_param().axis();
-  const int start_axis = (input_start_axis &gt;= 0) ? input_start_axis :
-      bottom[0]-&gt;num_axes() + input_start_axis + 1;
-  CHECK_GE(start_axis, 0) &lt;&lt; &quot;axis &quot; &lt;&lt; input_start_axis &lt;&lt; &quot; out of range&quot;;
-  CHECK_LE(start_axis, bottom[0]-&gt;num_axes()) &lt;&lt; &quot;axis &quot; &lt;&lt; input_start_axis
-      &lt;&lt; &quot; out of range for &quot; &lt;&lt; bottom[0]-&gt;num_axes() &lt;&lt; &quot;-D input blob&quot;;
-  const int num_axes = this-&gt;layer_param_.reshape_param().num_axes();
-  CHECK_GE(num_axes, -1) &lt;&lt; &quot;num_axes must be &gt;= 0, or -1 for all&quot;;
-  const int end_axis =
-      (num_axes == -1) ? bottom[0]-&gt;num_axes() : (start_axis + num_axes);
-  CHECK_LE(end_axis, bottom[0]-&gt;num_axes())
-      &lt;&lt; &quot;end_axis = axis + num_axes is out of range&quot;;
-  const int num_axes_replaced = end_axis - start_axis;
-  const int num_axes_retained = bottom[0]-&gt;num_axes() - num_axes_replaced;
-  const BlobShape&amp; top_blob_shape = this-&gt;layer_param_.reshape_param().shape();
-  const int num_new_axes = top_blob_shape.dim_size();
-  vector&lt;int&gt; top_shape(num_axes_retained + num_new_axes);
-  int top_shape_index = 0;
-  for (int i = 0; i &lt; start_axis; ++i) {
-    top_shape[top_shape_index++] = bottom[0]-&gt;shape(i);
+</code></pre></div><p>特殊处理了dim为0和-1的情况，然后把需要变换的维度count放在constant_count_，盲猜是之后做推断用．</p><p>接下来我们看下Reshape</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> Dtype<span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>void</span> ReshapeLayer<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>:</span><span style=color:#f92672>:</span>Reshape(<span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> bottom,
+    <span style=color:#66d9ef>const</span> vector<span style=color:#f92672>&lt;</span>Blob<span style=color:#f92672>&lt;</span>Dtype<span style=color:#f92672>&gt;</span><span style=color:#f92672>*</span><span style=color:#f92672>&gt;</span><span style=color:#f92672>&amp;</span> top) {
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> input_start_axis <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span><span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>layer_param_.reshape_param().axis();
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> start_axis <span style=color:#f92672>=</span> (input_start_axis <span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>) <span style=color:#f92672>?</span> input_start_axis :
+      bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num_axes() <span style=color:#f92672>+</span> input_start_axis <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>;
+  CHECK_GE(start_axis, <span style=color:#ae81ff>0</span>) <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>axis </span><span style=color:#e6db74>&#34;</span> <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> input_start_axis <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74> out of range</span><span style=color:#e6db74>&#34;</span>;
+  CHECK_LE(start_axis, bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num_axes()) <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>axis </span><span style=color:#e6db74>&#34;</span> <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> input_start_axis
+      <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74> out of range for </span><span style=color:#e6db74>&#34;</span> <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num_axes() <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>-D input blob</span><span style=color:#e6db74>&#34;</span>;
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> num_axes <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span><span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>layer_param_.reshape_param().num_axes();
+  CHECK_GE(num_axes, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>) <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>num_axes must be &gt;= 0, or -1 for all</span><span style=color:#e6db74>&#34;</span>;
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> end_axis <span style=color:#f92672>=</span>
+      (num_axes <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>) <span style=color:#f92672>?</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num_axes() <span style=color:#f92672>:</span> (start_axis <span style=color:#f92672>+</span> num_axes);
+  CHECK_LE(end_axis, bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num_axes())
+      <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>end_axis = axis + num_axes is out of range</span><span style=color:#e6db74>&#34;</span>;
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> num_axes_replaced <span style=color:#f92672>=</span> end_axis <span style=color:#f92672>-</span> start_axis;
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> num_axes_retained <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num_axes() <span style=color:#f92672>-</span> num_axes_replaced;
+  <span style=color:#66d9ef>const</span> BlobShape<span style=color:#f92672>&amp;</span> top_blob_shape <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span><span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>layer_param_.reshape_param().shape();
+  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> num_new_axes <span style=color:#f92672>=</span> top_blob_shape.dim_size();
+  vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> top_shape(num_axes_retained <span style=color:#f92672>+</span> num_new_axes);
+  <span style=color:#66d9ef>int</span> top_shape_index <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> start_axis; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+    top_shape[top_shape_index<span style=color:#f92672>+</span><span style=color:#f92672>+</span>] <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>shape(i);
   }
-  for (int i = 0; i &lt; num_new_axes; ++i) {
-    top_shape[top_shape_index++] = top_blob_shape.dim(i);
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> num_new_axes; <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+    top_shape[top_shape_index<span style=color:#f92672>+</span><span style=color:#f92672>+</span>] <span style=color:#f92672>=</span> top_blob_shape.dim(i);
   }
-  for (int i = end_axis; i &lt; bottom[0]-&gt;num_axes(); ++i) {
-    top_shape[top_shape_index++] = bottom[0]-&gt;shape(i);
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> end_axis; i <span style=color:#f92672>&lt;</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num_axes(); <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+    top_shape[top_shape_index<span style=color:#f92672>+</span><span style=color:#f92672>+</span>] <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>shape(i);
   }
   CHECK_EQ(top_shape_index, top_shape.size());
-  for (int i = 0; i &lt; copy_axes_.size(); ++i) {
-    const int copy_axis_index = copy_axes_[i];
-    CHECK_GT(bottom[0]-&gt;num_axes(), start_axis + copy_axis_index)
-        &lt;&lt; &quot;new shape contains a 0, but there was no corresponding bottom axis &quot;
-        &lt;&lt; &quot;to copy&quot;;
-    top_shape[start_axis + copy_axis_index] =
-        bottom[0]-&gt;shape(start_axis + copy_axis_index);
+  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> copy_axes_.size(); <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> copy_axis_index <span style=color:#f92672>=</span> copy_axes_[i];
+    CHECK_GT(bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num_axes(), start_axis <span style=color:#f92672>+</span> copy_axis_index)
+        <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>new shape contains a 0, but there was no corresponding bottom axis </span><span style=color:#e6db74>&#34;</span>
+        <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>to copy</span><span style=color:#e6db74>&#34;</span>;
+    top_shape[start_axis <span style=color:#f92672>+</span> copy_axis_index] <span style=color:#f92672>=</span>
+        bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>shape(start_axis <span style=color:#f92672>+</span> copy_axis_index);
   }
-  if (inferred_axis_ &gt;= 0) {
-    // A -1 dim was specified; infer the correct dimension by computing the
-    // product of the other dimensions.
-    int explicit_count = constant_count_;
-    explicit_count *= bottom[0]-&gt;count(0, start_axis);
-    explicit_count *= bottom[0]-&gt;count(end_axis);
-    for (int i = 0; i &lt; copy_axes_.size(); ++i) {
-      const int copy_axis_index = copy_axes_[i];
-      explicit_count *= top_shape[start_axis + copy_axis_index];
+  <span style=color:#66d9ef>if</span> (inferred_axis_ <span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>) {
+    <span style=color:#75715e>// A -1 dim was specified; infer the correct dimension by computing the
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// product of the other dimensions.
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>int</span> explicit_count <span style=color:#f92672>=</span> constant_count_;
+    explicit_count <span style=color:#f92672>*</span><span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count(<span style=color:#ae81ff>0</span>, start_axis);
+    explicit_count <span style=color:#f92672>*</span><span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count(end_axis);
+    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> copy_axes_.size(); <span style=color:#f92672>+</span><span style=color:#f92672>+</span>i) {
+      <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> copy_axis_index <span style=color:#f92672>=</span> copy_axes_[i];
+      explicit_count <span style=color:#f92672>*</span><span style=color:#f92672>=</span> top_shape[start_axis <span style=color:#f92672>+</span> copy_axis_index];
     }
-    CHECK_EQ(0, bottom[0]-&gt;count() % explicit_count) &lt;&lt; &quot;bottom count (&quot;
-        &lt;&lt; bottom[0]-&gt;count() &lt;&lt; &quot;) must be divisible by the product of &quot;
-        &lt;&lt; &quot;the specified dimensions (&quot; &lt;&lt; explicit_count &lt;&lt; &quot;)&quot;;
-    const int inferred_dim = bottom[0]-&gt;count() / explicit_count;
-    top_shape[start_axis + inferred_axis_] = inferred_dim;
+    CHECK_EQ(<span style=color:#ae81ff>0</span>, bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count() <span style=color:#f92672>%</span> explicit_count) <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>bottom count (</span><span style=color:#e6db74>&#34;</span>
+        <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count() <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>) must be divisible by the product of </span><span style=color:#e6db74>&#34;</span>
+        <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>the specified dimensions (</span><span style=color:#e6db74>&#34;</span> <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> explicit_count <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>)</span><span style=color:#e6db74>&#34;</span>;
+    <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> inferred_dim <span style=color:#f92672>=</span> bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count() <span style=color:#f92672>/</span> explicit_count;
+    top_shape[start_axis <span style=color:#f92672>+</span> inferred_axis_] <span style=color:#f92672>=</span> inferred_dim;
   }
-  top[0]-&gt;Reshape(top_shape);
-  CHECK_EQ(top[0]-&gt;count(), bottom[0]-&gt;count())
-      &lt;&lt; &quot;output count must match input count&quot;;
-  top[0]-&gt;ShareData(*bottom[0]);
-  top[0]-&gt;ShareDiff(*bottom[0]);
+  top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>Reshape(top_shape);
+  CHECK_EQ(top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count(), bottom[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>count())
+      <span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>output count must match input count</span><span style=color:#e6db74>&#34;</span>;
+  top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>ShareData(<span style=color:#f92672>*</span>bottom[<span style=color:#ae81ff>0</span>]);
+  top[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>ShareDiff(<span style=color:#f92672>*</span>bottom[<span style=color:#ae81ff>0</span>]);
 }
 
 INSTANTIATE_CLASS(ReshapeLayer);
 REGISTER_LAYER_CLASS(Reshape);
 
-}  // namespace caffe
-
-</code></pre><p>代码似乎有些长，实际上很简单．后半部分是推断维度的，前半部分也很直观，就是做了比较多的check．</p><p>然后Reshape Layer是没有Forward函数的，因为没有做任何计算，只是改变了blob的reshape,也不存在数据的拷贝．</p><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+}  <span style=color:#75715e>// namespace caffe
+</span><span style=color:#75715e></span>
+</code></pre></div><p>代码似乎有些长，实际上很简单．后半部分是推断维度的，前半部分也很直观，就是做了比较多的check．</p><p>然后Reshape Layer是没有Forward函数的，因为没有做任何计算，只是改变了blob的reshape,也不存在数据的拷贝．</p><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>

@@ -9,95 +9,95 @@ $navbar.className+=" in";}}</script><style type=text/css>header.intro-header{bac
 on
 Wednesday, April 8, 2015</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p><a href=http://codeforces.com/problemset/problem/479/D>http://codeforces.com/problemset/problem/479/D</a></p><p>题意是说有一把尺子，本身有一些刻度，然后需要测量x和y，问最少需要添加多少个刻度，如果需要，这些刻度分别添加在什么位置。</p><p>一开始没有看清题目，以为答案最多为4，但是发现，a[1]=0 a[n]=l这两个是确定的，所以答案最多为2，</p><p>而不会出现中间有两个刻度，无论是往前刻还是往后都会越界的情况。</p><p>先去看看已知的刻度里有没有直接满足的。</p><p>除此之外，如果在已知的刻度下无法测量x也无法测量y，我们还可以找找是否能有公用点使得只刻一个刻度就可以满足题意。公用点分两种情况，一种是在两个刻度之间，另一种是在两个刻度的同侧。</p><p>前一种没什么坑，后一种要判断是否越界！！！</p><p>如果在已知的刻度下能测量x或者能测量出y但不能同时测量的话，就没有必要找公用点。</p><p>还有就是查找的话如果线性找复杂度是O(n2)，会TLE在第27个点。</p><p>我们用二分&mldr;</p><p>话说STL里竟然连二分查找也有。。。。简直orz。。。。真是省时省力。</p><p>代码：</p><pre><code class=language-c++>
+post-container"><header><h2>TOC</h2></header><nav id=TableOfContents></nav><p><a href=http://codeforces.com/problemset/problem/479/D>http://codeforces.com/problemset/problem/479/D</a></p><p>题意是说有一把尺子，本身有一些刻度，然后需要测量x和y，问最少需要添加多少个刻度，如果需要，这些刻度分别添加在什么位置。</p><p>一开始没有看清题目，以为答案最多为4，但是发现，a[1]=0 a[n]=l这两个是确定的，所以答案最多为2，</p><p>而不会出现中间有两个刻度，无论是往前刻还是往后都会越界的情况。</p><p>先去看看已知的刻度里有没有直接满足的。</p><p>除此之外，如果在已知的刻度下无法测量x也无法测量y，我们还可以找找是否能有公用点使得只刻一个刻度就可以满足题意。公用点分两种情况，一种是在两个刻度之间，另一种是在两个刻度的同侧。</p><p>前一种没什么坑，后一种要判断是否越界！！！</p><p>如果在已知的刻度下能测量x或者能测量出y但不能同时测量的话，就没有必要找公用点。</p><p>还有就是查找的话如果线性找复杂度是O(n2)，会TLE在第27个点。</p><p>我们用二分&mldr;</p><p>话说STL里竟然连二分查找也有。。。。简直orz。。。。真是省时省力。</p><p>代码：</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
    
-   /* ***********************************************
-   Author :111qqz
-   Created Time :2016年02月22日 星期一 23时42分46秒
-   File Name :code/cf/problem/479D.cpp
-   ************************************************ */
+   <span style=color:#75715e>/* ***********************************************
+</span><span style=color:#75715e>   Author :111qqz
+</span><span style=color:#75715e>   Created Time :2016年02月22日 星期一 23时42分46秒
+</span><span style=color:#75715e>   File Name :code/cf/problem/479D.cpp
+</span><span style=color:#75715e>   ************************************************ */</span>
    
-   #include &lt;iostream&gt;
-   #include &lt;algorithm&gt;
-   #include &lt;cstring&gt;
-   #include &lt;cstdio&gt;
-   #include &lt;cmath&gt;
+   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstring&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;cmath&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>   
+   <span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
    
-   using namespace std;
+   <span style=color:#66d9ef>int</span> n,l,x,y;
+   <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> N<span style=color:#f92672>=</span><span style=color:#ae81ff>1E5</span><span style=color:#f92672>+</span><span style=color:#ae81ff>7</span>;
+   <span style=color:#66d9ef>int</span> a[N];
+   <span style=color:#66d9ef>int</span> ans,p,q;
+   <span style=color:#66d9ef>bool</span> flag1,flag2,flag3,flag4;
    
-   int n,l,x,y;
-   const int N=1E5+7;
-   int a[N];
-   int ans,p,q;
-   bool flag1,flag2,flag3,flag4;
-   
-   int main()
+   <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>()
    {
-       scanf(&quot;%d %d %d %d&quot;,&amp;n,&amp;l,&amp;x,&amp;y);
-       flag1 = false;
-       flag2 = false;
-       flag3 = false;
-       flag4 = false;
+       scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d %d %d %d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>n,<span style=color:#f92672>&amp;</span>l,<span style=color:#f92672>&amp;</span>x,<span style=color:#f92672>&amp;</span>y);
+       flag1 <span style=color:#f92672>=</span> false;
+       flag2 <span style=color:#f92672>=</span> false;
+       flag3 <span style=color:#f92672>=</span> false;
+       flag4 <span style=color:#f92672>=</span> false;
    
-       for ( int i = 1 ; i &lt;= n ; i++ )
-           scanf(&quot;%d&quot;,&amp;a[i]);
-           ans = 2;
-           p = -1;
-           q = 0;
-       for ( int i = 1 ; i &lt;= n ; i++ )
+       <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
+           scanf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>,<span style=color:#f92672>&amp;</span>a[i]);
+           ans <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>;
+           p <span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>;
+           q <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+       <span style=color:#66d9ef>for</span> ( <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ; i <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> n ; i<span style=color:#f92672>+</span><span style=color:#f92672>+</span> )
        {
-           if(binary_search(a,a+n+1,a[i]+x))
+           <span style=color:#66d9ef>if</span>(binary_search(a,a<span style=color:#f92672>+</span>n<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>,a[i]<span style=color:#f92672>+</span>x))
            {
-               flag1 = true;
+               flag1 <span style=color:#f92672>=</span> true;
    
            }
-           if (binary_search(a,a+n+1,a[i]+y))
+           <span style=color:#66d9ef>if</span> (binary_search(a,a<span style=color:#f92672>+</span>n<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>,a[i]<span style=color:#f92672>+</span>y))
            {
-               flag2 = true;
+               flag2 <span style=color:#f92672>=</span> true;
            }
-           if (binary_search(a,a+n+1,a[i]+x+y))
+           <span style=color:#66d9ef>if</span> (binary_search(a,a<span style=color:#f92672>+</span>n<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>,a[i]<span style=color:#f92672>+</span>x<span style=color:#f92672>+</span>y))
            {
-               flag3 = true;
-               p = a[i];
+               flag3 <span style=color:#f92672>=</span> true;
+               p <span style=color:#f92672>=</span> a[i];
            }
-           if (binary_search(a,a+n+1,a[i]+y-x)&amp;&amp;((a[i]+y&lt;=l)||(a[i]-x&gt;=0)))
+           <span style=color:#66d9ef>if</span> (binary_search(a,a<span style=color:#f92672>+</span>n<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>,a[i]<span style=color:#f92672>+</span>y<span style=color:#f92672>-</span>x)<span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>((a[i]<span style=color:#f92672>+</span>y<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>l)<span style=color:#f92672>|</span><span style=color:#f92672>|</span>(a[i]<span style=color:#f92672>-</span>x<span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span><span style=color:#ae81ff>0</span>)))
            {
-               flag4 = true;
-               p = a[i];
+               flag4 <span style=color:#f92672>=</span> true;
+               p <span style=color:#f92672>=</span> a[i];
            }
        }
    
-           if ( flag1) {ans--;q = 1 ;}
-           if ( flag2 ){ ans--;q = 2 ;}
-           if ( ans==2&amp;&amp;(flag3||flag4))
+           <span style=color:#66d9ef>if</span> ( flag1) {ans<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;q <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> ;}
+           <span style=color:#66d9ef>if</span> ( flag2 ){ ans<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;q <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span> ;}
+           <span style=color:#66d9ef>if</span> ( ans<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>2</span><span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span>(flag3<span style=color:#f92672>|</span><span style=color:#f92672>|</span>flag4))
            {
-               ans--;
+               ans<span style=color:#f92672>-</span><span style=color:#f92672>-</span>;
            }
-           cout&lt;&lt;ans&lt;&lt;endl;
-       if ( ans==2 )
+           cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>ans<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
+       <span style=color:#66d9ef>if</span> ( ans<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>2</span> )
        {
-           cout&lt;&lt;a[1]+x&lt;&lt;&quot; &quot;&lt;&lt;a[1]+y&lt;&lt;endl;
+           cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>a[<span style=color:#ae81ff>1</span>]<span style=color:#f92672>+</span>x<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span><span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74> </span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>a[<span style=color:#ae81ff>1</span>]<span style=color:#f92672>+</span>y<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
        }
-       if ( ans==1 )
+       <span style=color:#66d9ef>if</span> ( ans<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>1</span> )
        {
-           if ( p==-1 )
+           <span style=color:#66d9ef>if</span> ( p<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> )
            {
-               if ( q==1 )
-                   cout&lt;&lt;a[1]+y&lt;&lt;endl;
-               else cout&lt;&lt;a[1]+x&lt;&lt;endl;
+               <span style=color:#66d9ef>if</span> ( q<span style=color:#f92672>=</span><span style=color:#f92672>=</span><span style=color:#ae81ff>1</span> )
+                   cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>a[<span style=color:#ae81ff>1</span>]<span style=color:#f92672>+</span>y<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
+               <span style=color:#66d9ef>else</span> cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>a[<span style=color:#ae81ff>1</span>]<span style=color:#f92672>+</span>x<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
            }
-           else
+           <span style=color:#66d9ef>else</span>
            {
-               if ( p+y&lt;=l )
-               cout&lt;&lt;p+y&lt;&lt;endl;
-               else cout&lt;&lt;p-x&lt;&lt;endl;
+               <span style=color:#66d9ef>if</span> ( p<span style=color:#f92672>+</span>y<span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span>l )
+               cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>p<span style=color:#f92672>+</span>y<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
+               <span style=color:#66d9ef>else</span> cout<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>p<span style=color:#f92672>-</span>x<span style=color:#f92672>&lt;</span><span style=color:#f92672>&lt;</span>endl;
            }
        }
-       return 0;
+       <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
    }
 
 
-</code></pre><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>
