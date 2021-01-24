@@ -8,7 +8,12 @@ $navbar.className+=" in";}}</script><style type=text/css>header.intro-header{bac
 <a class=tag href=/tags/linear-classification title="Linear classification">Linear classification</a></div><h1>stanford CS231n notes：Linear classification</h1><h2 class=subheading></h2><span class=meta>Posted by
 111qqz
 on
-Monday, July 17, 2017</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
+Monday, July 17, 2017
+<span id=/2017/07/cs231n-linear-classification/ class="leancloud_visitors meta_data_item" data-flag-title><span class=post-meta-item-icon><span class="octicon octicon-eye"></span></span><i class="fa fa-eye"></i><span class=old-visitors-count style=display:none></span><span class=leancloud-visitors-count></span></span><script src=https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js></script><script>AV.initialize("2dzJwxGKq4hbtg5R5NM8NTzJ-gzGzoHsz","RaYu8uGTiuiIjLISQppPVYWw");</script><script type=text/javascript>function showTime(Counter){var query=new AV.Query(Counter);var entries=[];var $visitors=$(".leancloud_visitors");$visitors.each(function(){entries.push($(this).attr("id").trim());});query.containedIn('url',entries);query.find().done(function(results){var COUNT_CONTAINER_REF='.leancloud-visitors-count';var OLD_COUNT_CONTAINER_REF='.old-visitors-count';for(var i=0;i<results.length;i++){var item=results[i];var url=item.get('url');var time=item.get('time');var element=document.getElementById(url);$(element).find(COUNT_CONTAINER_REF).text(time);}
+for(var i=0;i<entries.length;i++){var url=entries[i];var element=document.getElementById(url);var countSpan=$(element).find(COUNT_CONTAINER_REF);if(countSpan.text()==''){var oldCountSpan=$(element).find(OLD_COUNT_CONTAINER_REF).text();if(oldCountSpan!=''){countSpan.text(0+parseInt(oldCountSpan));}else{countSpan.text(0);}}}}).fail(function(object,error){console.log("Error: "+error.code+" "+error.message);});}
+function addCount(Counter){var $visitors=$(".leancloud_visitors");var url=$visitors.attr('id').trim();var title=$visitors.attr('data-flag-title').trim();var query=new AV.Query(Counter);query.equalTo("url",url);query.find({success:function(results){if(results.length>0){var counter=results[0];counter.fetchWhenSave(true);counter.increment("time");counter.save(null,{success:function(counter){var $element=$(document.getElementById(url));$element.find('.leancloud-visitors-count').text(counter.get('time'));},error:function(counter,error){console.log('Failed to save Visitor num, with error message: '+error.message);}});}else{var newcounter=new Counter();var acl=new AV.ACL();acl.setPublicReadAccess(true);acl.setPublicWriteAccess(true);newcounter.setACL(acl);newcounter.set("title",title);newcounter.set("url",url);var OLD_COUNT_CONTAINER_REF='.old-visitors-count';var $element=$(document.getElementById(url));var oldCountSpan=$element.find(OLD_COUNT_CONTAINER_REF).text();if(oldCountSpan!=''){newcounter.set("time",parseInt(oldCountSpan)+1);}else{newcounter.set("time",1);}
+newcounter.save(null,{success:function(newcounter){var $element=$(document.getElementById(url));$element.find('.leancloud-visitors-count').text(newcounter.get('time'));},error:function(newcounter,error){console.log('Failed to create');}});}},error:function(error){console.log('Error:'+error.code+" "+error.message);}});}
+$(function(){var Counter=AV.Object.extend("Counter");if($('.leancloud_visitors').length==1){addCount(Counter);}else{showTime(Counter);}});</script></span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
 post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><ol><li></li></ol></li><li><a href=#原文如下>原文如下</a></li><li><a href=#线性分类>线性分类</a></li><li><a href=#从图像到标签分值的参数化映射>从图像到标签分值的参数化映射</a></li><li><a href=#理解线性分类器>理解线性分类器</a></li><li><a href=#损失函数-loss-function>损失函数 Loss function</a></li><li><a href=#多类支持向量机损失-multiclass-support-vector-machine-loss>多类支持向量机损失 Multiclass Support Vector Machine Loss</a></li><li><a href=#实际考虑>实际考虑</a></li><li><a href=#softmax分类器>Softmax分类器</a></li><li><a href=#svm和softmax的比较>SVM和Softmax的比较</a></li><li><a href=#交互式的网页demo>交互式的网页Demo</a></li><li><a href=#小结>小结</a></li><li><a href=#拓展阅读>拓展阅读</a></li></ol></nav><h4 id=课程链接httpcs231ngithubio><a href=http://cs231n.github.io/>课程链接</a></h4><p><a href=https://zhuanlan.zhihu.com/p/21930884>知乎翻译链接</a></p><p>之前看的原版，后来发现知乎上有翻译，正好想到之前看完没有整理总结，干脆就写一下自己的理解，顺便贴一下课程翻译（感觉翻译的质量好像还可以？</p><p>分类器就是一个函数,自变量是图像信息，因变量是类别信息。</p><p>比如线性分类器，SVM,softmax</p><p>不同的分类器有着不同的score function,对应着不同的cost function.</p><p>之所以选择不同的cost function的原因是，要保证cost funtion是凸函数，不然会存在很多局部极值。</p><p>分类器使得分类问题变成了一个优化问题，在最优化过程中，将通过更新评分函数的参数来最小化损失函数值。</p><p>然后，所谓overfit,就是参数太多而训练集太小，导致可以完美符合这些训练集，但是无法一般化。</p><p>解决overfit有很多方法，这里介绍了<strong>正则化（Regularization）</strong></p><p>思路是在cost funtion中添加一项Regularization loss</p><p>,用作对参数值的惩罚，lambda为惩罚因子</p><p><img src="http://www.zhihu.com/equation?tex=Ldisplaystyle+underbrace+frac1Nsum_i+L_i_data+++lossunderbracelambda+RW_regularization++loss" alt="L=\displaystyle \underbrace{ \frac{1}{N}\sum_i L_i}{data \ loss}+\underbrace{\lambda R(W)}{regularization \ loss}"></p><p>这样就可以使得每个参数尽可能小，这样每个参数对于cost function的贡献就比较小，可以改善overfit的问题</p><blockquote><blockquote><h2 id=原文如下>原文如下</h2></blockquote><p>内容列表：</p><blockquote></blockquote><pre><code>  * 线性分类器简介
   * 线性评分函数
@@ -195,14 +200,7 @@ def L(X, y, W):
   * 介绍了偏差技巧，让我们能够将偏差向量和权重矩阵合二为一，然后就可以只跟踪一个矩阵。
   * 定义了损失函数（介绍了SVM和Softmax线性分类器最常用的2个损失函数）。损失函数能够衡量给出的参数集与训练集数据真实类别情况之间的一致性。在损失函数的定义中可以看到，对训练集数据做出良好预测与得到一个足够低的损失值这两件事是等价的。
 </code></pre><p>现在我们知道了如何基于参数，将数据集中的图像映射成为分类的评分，也知道了两种不同的损失函数，它们都能用来衡量算法分类预测的质量。但是，如何高效地得到能够使损失值最小的参数呢？这个求得最优参数的过程被称为最优化，将在下节课中进行介绍。</p><blockquote><h2 id=拓展阅读>拓展阅读</h2></blockquote><p>下面的内容读者可根据兴趣选择性阅读。</p><blockquote></blockquote><pre><code>  * [Deep Learning using Linear Support Vector Machines__](http://link.zhihu.com/?target=http//arxiv.org/abs/1306.0239)一文的作者是Tang Charlie，论文写于2013年，展示了一些L2SVM比Softmax表现更出色的结果。
-</code></pre></blockquote><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
-<span class=author><a href=https://111qqz.github.io><img src=/img/favicon.png>111qqz的小窝</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
-<button class="btn btn-blink" data-num=5>5元</button>
-<button class="btn btn-blink" data-num=10>10元</button>
-<button class="btn btn-blink" data-num=50>50元</button>
-<button class="btn btn-blink" data-num=100>100元</button>
-<button class="btn btn-blink" data-num=1>任意金额</button></div><div class=zs-modal-pay><button class="btn btn-bred" id=pay-text>2元</button><p>使用<span id=pay-type>微信</span>扫描二维码完成支付</p><img src=/img/reward/wechat-2.png id=pay-image></div></div><div class=zs-modal-footer><label><input type=radio name=zs-type value=wechat class=zs-type checked><span><span class=zs-wechat><img src=/img/reward/wechat-btn.png></span></label>
-<label><input type=radio name=zs-type value=alipay class=zs-type class=zs-alipay><img src=/img/reward/alipay-btn.png></span></label></div></div><script type=text/javascript src=/js/reward.js></script><hr><ul class=pager><li class=previous><a href=/2017/07/tensorflow-slim-code-notes/ data-toggle=tooltip data-placement=top title="tensorflow slim 源码分析">&larr;
+</code></pre></blockquote><hr><ul class=pager><li class=previous><a href=/2017/07/tensorflow-slim-code-notes/ data-toggle=tooltip data-placement=top title="tensorflow slim 源码分析">&larr;
 Previous Post</a></li><li class=next><a href=/2017/07/inception-resnet-notes/ data-toggle=tooltip data-placement=top title="Inception-v4,Inception-ResNet 和残差连接对学习的影响">Next
 Post &rarr;</a></li></ul><div class=post-comment><span id=/2017/07/cs231n-linear-classification/ class=leancloud_visitors data-flag-title="stanford CS231n notes：Linear classification"><span class=post-meta-item-text>访问量</span>
 <span class=leancloud-visitors-count></span><p></p></span><div id=vcomments></div><script src=//cdn1.lncld.net/static/js/3.0.4/av-min.js></script><script src=//unpkg.com/valine/dist/Valine.min.js></script><script type=text/javascript>new Valine({el:'#vcomments',appId:'2dzJwxGKq4hbtg5R5NM8NTzJ-gzGzoHsz',appKey:'RaYu8uGTiuiIjLISQppPVYWw',notify:true,verify:false,avatar:'retro',placeholder:'说点什么吧...',visitor:true});</script></div></div><div class="col-lg-8 col-lg-offset-2
@@ -210,39 +208,25 @@ col-md-10 col-md-offset-1
 sidebar-container"><section><hr class="hidden-sm hidden-xs"><h5><a href=/tags/>FEATURED TAGS</a></h5><div class=tags><a href=/tags/bfs title=bfs>bfs</a>
 <a href=/tags/binary-search title=binary-search>binary-search</a>
 <a href=/tags/brute-force title=brute-force>brute-force</a>
-<a href=/tags/c++ title=c++>c++</a>
-<a href=/tags/caffe title=caffe>caffe</a>
 <a href=/tags/dfs title=dfs>dfs</a>
 <a href=/tags/dp title=dp>dp</a>
 <a href=/tags/greedy title=greedy>greedy</a>
-<a href=/tags/hash title=hash>hash</a>
-<a href=/tags/km title=km>km</a>
 <a href=/tags/kmp title=kmp>kmp</a>
 <a href=/tags/leetcode title=leetcode>leetcode</a>
 <a href=/tags/math title=math>math</a>
 <a href=/tags/number-theory title=number-theory>number-theory</a>
 <a href=/tags/rmq title=rmq>rmq</a>
-<a href=/tags/sg%E5%87%BD%E6%95%B0 title=sg函数>sg函数</a>
 <a href=/tags/stl title=stl>stl</a>
-<a href=/tags/tensorflow title=tensorflow>tensorflow</a>
-<a href=/tags/%E4%BA%8C%E5%88%86%E5%9B%BE%E6%9C%80%E4%BD%B3%E5%8C%B9%E9%85%8D title=二分图最佳匹配>二分图最佳匹配</a>
-<a href=/tags/%E5%88%86%E5%9D%97 title=分块>分块</a>
 <a href=/tags/%E5%89%8D%E7%BC%80%E5%92%8C title=前缀和>前缀和</a>
-<a href=/tags/%E5%8C%88%E7%89%99%E5%88%A9%E7%AE%97%E6%B3%95 title=匈牙利算法>匈牙利算法</a>
-<a href=/tags/%E5%8C%BA%E9%97%B4dp title=区间dp>区间dp</a>
 <a href=/tags/%E5%8D%9A%E5%BC%88%E8%AE%BA title=博弈论>博弈论</a>
-<a href=/tags/%E5%90%8E%E7%BC%80%E8%87%AA%E5%8A%A8%E6%9C%BA title=后缀自动机>后缀自动机</a>
 <a href=/tags/%E5%9B%BE%E8%AE%BA title=图论>图论</a>
-<a href=/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2 title=字符串>字符串</a>
 <a href=/tags/%E5%BF%AB%E9%80%9F%E5%B9%82 title=快速幂>快速幂</a>
 <a href=/tags/%E6%95%B0%E4%BD%8Ddp title=数位dp>数位dp</a>
 <a href=/tags/%E6%9E%84%E9%80%A0 title=构造>构造</a>
 <a href=/tags/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84 title=树状数组>树状数组</a>
-<a href=/tags/%E6%A6%82%E7%8E%87 title=概率>概率</a>
 <a href=/tags/%E6%A8%A1%E6%8B%9F title=模拟>模拟</a>
 <a href=/tags/%E6%AF%8D%E5%87%BD%E6%95%B0 title=母函数>母函数</a>
 <a href=/tags/%E7%9F%A9%E9%98%B5 title=矩阵>矩阵</a>
-<a href=/tags/%E7%A6%BB%E6%95%A3%E5%8C%96 title=离散化>离散化</a>
 <a href=/tags/%E7%BA%BF%E6%AE%B5%E6%A0%91 title=线段树>线段树</a>
 <a href=/tags/%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95 title=计算几何>计算几何</a></div></section><section><hr><h5>FRIENDS</h5><ul class=list-inline><li><a target=_blank href=https://111qqz.com>111qqz的wordpress博客</a></li></ul></section></div></div></div></article><footer><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><ul class="list-inline text-center"><li><a href rel=alternate type=application/rss+xml title=111qqz的小窝><span class="fa-stack fa-lg"><i class="fa fa-circle fa-stack-2x"></i><i class="fa fa-rss fa-stack-1x fa-inverse"></i></span></a></li><li><a href=mailto:hust.111qqz@gmail.com><span class="fa-stack fa-lg"><i class="fa fa-circle fa-stack-2x"></i><i class="fa fa-envelope fa-stack-1x fa-inverse"></i></span></a></li><li><a target=_blank href=/img/wechat.jpg><span class="fa-stack fa-lg"><i class="fa fa-circle fa-stack-2x"></i><i class="fa fa-wechat fa-stack-1x fa-inverse"></i></span></a></li><li><a target=_blank href=https://github.com/111qqz/><span class="fa-stack fa-lg"><i class="fa fa-circle fa-stack-2x"></i><i class="fa fa-github fa-stack-1x fa-inverse"></i></span></a></li></ul><p class="copyright text-muted">Copyright &copy; 111qqz的小窝 2021<br><a href=https://themes.gohugo.io/hugo-theme-cleanwhite>CleanWhite Hugo Theme</a> by <a href=https://zhaohuabing.com>Huabing</a> |
 <iframe style=margin-left:2px;margin-bottom:-5px frameborder=0 scrolling=0 width=100px height=20px src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true"></iframe></p></div></div></div></footer><script>function async(u,c){var d=document,t='script',o=d.createElement(t),s=d.getElementsByTagName(t)[0];o.src=u;if(c){o.addEventListener('load',function(e){c(null,e);},false);}
