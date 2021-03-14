@@ -13,7 +13,397 @@ function addCount(Counter){var $visitors=$(".leancloud_visitors");var url=$visit
 newcounter.save(null,{success:function(newcounter){var $element=$(document.getElementById(url));$element.find('.leancloud-visitors-count').text(newcounter.get('time'));},error:function(newcounter,error){console.log('Failed to create');}});}},error:function(error){console.log('Error:'+error.code+" "+error.message);}});}
 $(function(){var Counter=AV.Object.extend("Counter");if($('.leancloud_visitors').length==1){addCount(Counter);}else{showTime(Counter);}});</script></span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#背景>背景</a></li><li><a href=#trace-file-结构分析>trace file 结构分析</a></li></ol></nav><h2 id=背景>背景</h2><h2 id=trace-file-结构分析>trace file 结构分析</h2><hr><ul class=pager><li class=previous><a href=/2020/01/toward-the-next-gen-of-recom-sys data-toggle=tooltip data-placement=top title="【推荐系统】Toward the Next Generation of Recommender Systems: A Survey of the State-of-the-Art and Possible Extensions">&larr;
+post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#背景>背景</a></li><li><a href=#trace-file-结构分析>trace file 结构分析</a></li><li><a href=#implicit-free-list>implicit free list</a></li></ol></nav><h2 id=背景>背景</h2><p>待补充</p><h2 id=trace-file-结构分析>trace file 结构分析</h2><p>trace file 是对allocator的输入的描述，可以从mdriver.c中的</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>static</span> trace_t <span style=color:#f92672>*</span><span style=color:#a6e22e>read_trace</span>(<span style=color:#66d9ef>char</span> <span style=color:#f92672>*</span>tracedir, <span style=color:#66d9ef>char</span> <span style=color:#f92672>*</span>filename);
+</code></pre></div><p>看到Parse的逻辑，从而得到trace file的结构。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>  fscanf(tracefile, <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>, <span style=color:#f92672>&amp;</span>(trace<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>sugg_heapsize)); <span style=color:#75715e>/* not used */</span>
+  fscanf(tracefile, <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>, <span style=color:#f92672>&amp;</span>(trace<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num_ids));
+  <span style=color:#75715e>// 似乎只有num_ops用到了。。
+</span><span style=color:#75715e></span>  fscanf(tracefile, <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>, <span style=color:#f92672>&amp;</span>(trace<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num_ops));
+  fscanf(tracefile, <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>, <span style=color:#f92672>&amp;</span>(trace<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>weight)); <span style=color:#75715e>/* not used */</span>
+</code></pre></div><p>trace file起始位置的4个数的含义，其中第二个和第三个比较重要。
+num_ids表示一共有多少个不同的内存块(对应后续的指令可以显示指定操作哪个内存块，从而确保allocator对malloc和free的顺序没有任何依赖的保证)，num_ops表示操作数，也就是malloc(对应'a&rsquo;),realloc(对应'r&rsquo;),free(对应'f&rsquo;)三种操作的个数。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++> <span style=color:#66d9ef>while</span> (fscanf(tracefile, <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%s</span><span style=color:#e6db74>&#34;</span>, type) <span style=color:#f92672>!</span><span style=color:#f92672>=</span> EOF) {
+    <span style=color:#66d9ef>switch</span> (type[<span style=color:#ae81ff>0</span>]) {
+      <span style=color:#66d9ef>case</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>a</span><span style=color:#e6db74>&#39;</span><span style=color:#f92672>:</span>
+        fscanf(tracefile, <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%u %u</span><span style=color:#e6db74>&#34;</span>, <span style=color:#f92672>&amp;</span>index, <span style=color:#f92672>&amp;</span>size);
+        trace<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>ops[op_index].type <span style=color:#f92672>=</span> ALLOC;
+        trace<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>ops[op_index].index <span style=color:#f92672>=</span> index;
+        trace<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>ops[op_index].size <span style=color:#f92672>=</span> size;
+        max_index <span style=color:#f92672>=</span> (index <span style=color:#f92672>&gt;</span> max_index) <span style=color:#f92672>?</span> index : max_index;
+        <span style=color:#66d9ef>break</span>;
+      <span style=color:#66d9ef>case</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>r</span><span style=color:#e6db74>&#39;</span><span style=color:#f92672>:</span>
+        fscanf(tracefile, <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%u %u</span><span style=color:#e6db74>&#34;</span>, <span style=color:#f92672>&amp;</span>index, <span style=color:#f92672>&amp;</span>size);
+        trace<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>ops[op_index].type <span style=color:#f92672>=</span> REALLOC;
+        trace<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>ops[op_index].index <span style=color:#f92672>=</span> index;
+        trace<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>ops[op_index].size <span style=color:#f92672>=</span> size;
+        max_index <span style=color:#f92672>=</span> (index <span style=color:#f92672>&gt;</span> max_index) <span style=color:#f92672>?</span> index : max_index;
+        <span style=color:#66d9ef>break</span>;
+      <span style=color:#66d9ef>case</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>f</span><span style=color:#e6db74>&#39;</span><span style=color:#f92672>:</span>
+        fscanf(tracefile, <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%ud</span><span style=color:#e6db74>&#34;</span>, <span style=color:#f92672>&amp;</span>index);
+        trace<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>ops[op_index].type <span style=color:#f92672>=</span> FREE;
+        trace<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>ops[op_index].index <span style=color:#f92672>=</span> index;
+        <span style=color:#66d9ef>break</span>;
+      <span style=color:#66d9ef>default</span><span style=color:#f92672>:</span>
+        printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Bogus type character (%c) in tracefile %s</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, type[<span style=color:#ae81ff>0</span>], path);
+        exit(<span style=color:#ae81ff>1</span>);
+    }
+    op_index<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+  }
+
+</code></pre></div><p>对于每一个操作，如果是malloc/relloc, 后面两个参数分别表示操作几号内存块，以及需要分配的内存大小是多少。如果是free,则只有一个参数，表示要操作几号内存块</p><h2 id=implicit-free-list>implicit free list</h2><p>这种也就是CS:APP3e text中着重描述的那种，补充了一些checker逻辑，放在这里作为baseline</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+<span style=color:#66d9ef>int</span> <span style=color:#a6e22e>mm_init</span>(<span style=color:#66d9ef>void</span>) {
+  <span style=color:#75715e>/* Create the initial empty heap */</span>
+  <span style=color:#66d9ef>if</span> ((heap_listp <span style=color:#f92672>=</span> mem_sbrk(<span style=color:#ae81ff>4</span> <span style=color:#f92672>*</span> WSIZE)) <span style=color:#f92672>=</span><span style=color:#f92672>=</span> (<span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>)<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>)  <span style=color:#75715e>// line:vm:mm:begininit
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>return</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>;
+  PUT(heap_listp, <span style=color:#ae81ff>0</span>);                            <span style=color:#75715e>/* Alignment padding */</span>
+  PUT(heap_listp <span style=color:#f92672>+</span> (<span style=color:#ae81ff>1</span> <span style=color:#f92672>*</span> WSIZE), PACK(DSIZE, <span style=color:#ae81ff>1</span>)); <span style=color:#75715e>/* Prologue header */</span>
+  PUT(heap_listp <span style=color:#f92672>+</span> (<span style=color:#ae81ff>2</span> <span style=color:#f92672>*</span> WSIZE), PACK(DSIZE, <span style=color:#ae81ff>1</span>)); <span style=color:#75715e>/* Prologue footer */</span>
+  PUT(heap_listp <span style=color:#f92672>+</span> (<span style=color:#ae81ff>3</span> <span style=color:#f92672>*</span> WSIZE), PACK(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>1</span>));     <span style=color:#75715e>/* Epilogue header */</span>
+  heap_listp <span style=color:#f92672>+</span><span style=color:#f92672>=</span> (<span style=color:#ae81ff>2</span> <span style=color:#f92672>*</span> WSIZE);                     <span style=color:#75715e>// line:vm:mm:endinit
+</span><span style=color:#75715e></span>  <span style=color:#75715e>/* $end mminit */</span>
+
+<span style=color:#75715e>#</span><span style=color:#75715e>ifdef NEXT_FIT</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>  rover <span style=color:#f92672>=</span> heap_listp;
+<span style=color:#75715e>#</span><span style=color:#75715e>endif</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>  <span style=color:#75715e>/* $begin mminit */</span>
+
+  <span style=color:#75715e>/* Extend the empty heap with a free block of CHUNKSIZE bytes */</span>
+  <span style=color:#66d9ef>if</span> (extend_heap(CHUNKSIZE <span style=color:#f92672>/</span> WSIZE) <span style=color:#f92672>=</span><span style=color:#f92672>=</span> NULL) <span style=color:#66d9ef>return</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>;
+  <span style=color:#75715e>//   checkheap(1);
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
+}
+<span style=color:#75715e>/* $end mminit */</span>
+
+<span style=color:#75715e>/*
+</span><span style=color:#75715e> * mm_malloc - Allocate a block with at least size bytes of payload
+</span><span style=color:#75715e> */</span>
+<span style=color:#75715e>/* $begin mmmalloc */</span>
+<span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>mm_malloc</span>(size_t size) {
+  size_t asize;      <span style=color:#75715e>/* Adjusted block size */</span>
+  size_t extendsize; <span style=color:#75715e>/* Amount to extend heap if no fit */</span>
+  <span style=color:#66d9ef>char</span> <span style=color:#f92672>*</span>bp;
+
+  <span style=color:#75715e>/* $end mmmalloc */</span>
+  <span style=color:#66d9ef>if</span> (heap_listp <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>) {
+    mm_init();
+  }
+  <span style=color:#75715e>/* $begin mmmalloc */</span>
+  <span style=color:#75715e>/* Ignore spurious requests */</span>
+  <span style=color:#66d9ef>if</span> (size <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>) <span style=color:#66d9ef>return</span> NULL;
+
+  <span style=color:#75715e>/* Adjust block size to include overhead and alignment reqs. */</span>
+  <span style=color:#66d9ef>if</span> (size <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> DSIZE)    <span style=color:#75715e>// line:vm:mm:sizeadjust1
+</span><span style=color:#75715e></span>    asize <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span> <span style=color:#f92672>*</span> DSIZE;  <span style=color:#75715e>// line:vm:mm:sizeadjust2
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>else</span>
+    asize <span style=color:#f92672>=</span> DSIZE <span style=color:#f92672>*</span>
+            ((size <span style=color:#f92672>+</span> (DSIZE) <span style=color:#f92672>+</span> (DSIZE <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>)) <span style=color:#f92672>/</span> DSIZE);  <span style=color:#75715e>// line:vm:mm:sizeadjust3
+</span><span style=color:#75715e></span>
+  <span style=color:#75715e>/* Search the free list for a fit */</span>
+  <span style=color:#66d9ef>if</span> ((bp <span style=color:#f92672>=</span> find_fit(asize)) <span style=color:#f92672>!</span><span style=color:#f92672>=</span> NULL) {  <span style=color:#75715e>// line:vm:mm:findfitcall
+</span><span style=color:#75715e></span>    place(bp, asize);                    <span style=color:#75715e>// line:vm:mm:findfitplace
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>return</span> bp;
+  }
+
+  <span style=color:#75715e>/* No fit found. Get more memory and place the block */</span>
+  extendsize <span style=color:#f92672>=</span> MAX(asize, CHUNKSIZE);  <span style=color:#75715e>// line:vm:mm:growheap1
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>if</span> ((bp <span style=color:#f92672>=</span> extend_heap(extendsize <span style=color:#f92672>/</span> WSIZE)) <span style=color:#f92672>=</span><span style=color:#f92672>=</span> NULL)
+    <span style=color:#66d9ef>return</span> NULL;     <span style=color:#75715e>// line:vm:mm:growheap2
+</span><span style=color:#75715e></span>  place(bp, asize);  <span style=color:#75715e>// line:vm:mm:growheap3
+</span><span style=color:#75715e></span>  mm_checkheap(<span style=color:#ae81ff>0</span>);
+
+  <span style=color:#66d9ef>return</span> bp;
+}
+<span style=color:#75715e>/* $end mmmalloc */</span>
+
+<span style=color:#75715e>/*
+</span><span style=color:#75715e> * mm_free - Free a block
+</span><span style=color:#75715e> */</span>
+<span style=color:#75715e>/* $begin mmfree */</span>
+<span style=color:#66d9ef>void</span> <span style=color:#a6e22e>mm_free</span>(<span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>bp) {
+  <span style=color:#75715e>/* $end mmfree */</span>
+  <span style=color:#66d9ef>if</span> (bp <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>) <span style=color:#66d9ef>return</span>;
+
+  <span style=color:#75715e>/* $begin mmfree */</span>
+  size_t size <span style=color:#f92672>=</span> GET_SIZE(HDRP(bp));
+  <span style=color:#75715e>/* $end mmfree */</span>
+  <span style=color:#66d9ef>if</span> (heap_listp <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>) {
+    mm_init();
+  }
+  <span style=color:#75715e>/* $begin mmfree */</span>
+
+  PUT(HDRP(bp), PACK(size, <span style=color:#ae81ff>0</span>));
+  PUT(FTRP(bp), PACK(size, <span style=color:#ae81ff>0</span>));
+  coalesce(bp);
+}
+
+<span style=color:#75715e>/* $end mmfree */</span>
+<span style=color:#75715e>/*
+</span><span style=color:#75715e> * coalesce - Boundary tag coalescing. Return ptr to coalesced block
+</span><span style=color:#75715e> */</span>
+<span style=color:#75715e>/* $begin mmfree */</span>
+<span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>coalesce</span>(<span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>bp) {
+  size_t prev_alloc <span style=color:#f92672>=</span> GET_ALLOC(FTRP(PREV_BLKP(bp)));
+  size_t next_alloc <span style=color:#f92672>=</span> GET_ALLOC(HDRP(NEXT_BLKP(bp)));
+  size_t size <span style=color:#f92672>=</span> GET_SIZE(HDRP(bp));
+
+  <span style=color:#66d9ef>if</span> (prev_alloc <span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span> next_alloc) { <span style=color:#75715e>/* Case 1 */</span>
+    <span style=color:#66d9ef>return</span> bp;
+  }
+
+  <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (prev_alloc <span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span> <span style=color:#f92672>!</span>next_alloc) { <span style=color:#75715e>/* Case 2 */</span>
+    size <span style=color:#f92672>+</span><span style=color:#f92672>=</span> GET_SIZE(HDRP(NEXT_BLKP(bp)));
+    PUT(HDRP(bp), PACK(size, <span style=color:#ae81ff>0</span>));
+    PUT(FTRP(bp), PACK(size, <span style=color:#ae81ff>0</span>));
+  }
+
+  <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span>prev_alloc <span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span> next_alloc) { <span style=color:#75715e>/* Case 3 */</span>
+    size <span style=color:#f92672>+</span><span style=color:#f92672>=</span> GET_SIZE(HDRP(PREV_BLKP(bp)));
+    PUT(FTRP(bp), PACK(size, <span style=color:#ae81ff>0</span>));
+    PUT(HDRP(PREV_BLKP(bp)), PACK(size, <span style=color:#ae81ff>0</span>));
+    bp <span style=color:#f92672>=</span> PREV_BLKP(bp);
+  }
+
+  <span style=color:#66d9ef>else</span> { <span style=color:#75715e>/* Case 4 */</span>
+    size <span style=color:#f92672>+</span><span style=color:#f92672>=</span> GET_SIZE(HDRP(PREV_BLKP(bp))) <span style=color:#f92672>+</span> GET_SIZE(FTRP(NEXT_BLKP(bp)));
+    PUT(HDRP(PREV_BLKP(bp)), PACK(size, <span style=color:#ae81ff>0</span>));
+    PUT(FTRP(NEXT_BLKP(bp)), PACK(size, <span style=color:#ae81ff>0</span>));
+    bp <span style=color:#f92672>=</span> PREV_BLKP(bp);
+  }
+  <span style=color:#75715e>/* $end mmfree */</span>
+<span style=color:#75715e>#</span><span style=color:#75715e>ifdef NEXT_FIT</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>  <span style=color:#75715e>/* Make sure the rover isn&#39;t pointing into the free block */</span>
+  <span style=color:#75715e>/* that we just coalesced */</span>
+  <span style=color:#66d9ef>if</span> ((rover <span style=color:#f92672>&gt;</span> (<span style=color:#66d9ef>char</span> <span style=color:#f92672>*</span>)bp) <span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span> (rover <span style=color:#f92672>&lt;</span> NEXT_BLKP(bp))) rover <span style=color:#f92672>=</span> bp;
+<span style=color:#75715e>#</span><span style=color:#75715e>endif</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>  <span style=color:#75715e>/* $begin mmfree */</span>
+  <span style=color:#66d9ef>return</span> bp;
+}
+<span style=color:#75715e>/* $end mmfree */</span>
+
+<span style=color:#75715e>/*
+</span><span style=color:#75715e> * mm_realloc - Naive implementation of realloc
+</span><span style=color:#75715e> */</span>
+<span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>mm_realloc</span>(<span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>ptr, size_t size) {
+  size_t oldsize;
+  <span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>newptr;
+
+  <span style=color:#75715e>/* If size == 0 then this is just free, and we return NULL. */</span>
+  <span style=color:#66d9ef>if</span> (size <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>) {
+    mm_free(ptr);
+    <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
+  }
+
+  <span style=color:#75715e>/* If oldptr is NULL, then this is just malloc. */</span>
+  <span style=color:#66d9ef>if</span> (ptr <span style=color:#f92672>=</span><span style=color:#f92672>=</span> NULL) {
+    <span style=color:#66d9ef>return</span> mm_malloc(size);
+  }
+
+  newptr <span style=color:#f92672>=</span> mm_malloc(size);
+
+  <span style=color:#75715e>/* If realloc() fails the original block is left untouched  */</span>
+  <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span>newptr) {
+    <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
+  }
+
+  <span style=color:#75715e>/* Copy the old data. */</span>
+  oldsize <span style=color:#f92672>=</span> GET_SIZE(HDRP(ptr));
+  <span style=color:#66d9ef>if</span> (size <span style=color:#f92672>&lt;</span> oldsize) oldsize <span style=color:#f92672>=</span> size;
+  memcpy(newptr, ptr, oldsize);
+
+  <span style=color:#75715e>/* Free the old block. */</span>
+  mm_free(ptr);
+
+  <span style=color:#66d9ef>return</span> newptr;
+}
+
+<span style=color:#75715e>/*
+</span><span style=color:#75715e> * mm_checkheap - Check the heap for correctness
+</span><span style=color:#75715e> */</span>
+<span style=color:#66d9ef>void</span> <span style=color:#a6e22e>mm_checkheap</span>(<span style=color:#66d9ef>int</span> verbose) { checkheap(verbose); }
+
+<span style=color:#75715e>/*
+</span><span style=color:#75715e> * The remaining routines are internal helper routines
+</span><span style=color:#75715e> */</span>
+
+<span style=color:#75715e>/*
+</span><span style=color:#75715e> * extend_heap - Extend heap with free block and return its block pointer
+</span><span style=color:#75715e> */</span>
+<span style=color:#75715e>/* $begin mmextendheap */</span>
+<span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>extend_heap</span>(size_t words) {
+  <span style=color:#66d9ef>char</span> <span style=color:#f92672>*</span>bp;
+  size_t size;
+
+  <span style=color:#75715e>/* Allocate an even number of words to maintain alignment */</span>
+  size <span style=color:#f92672>=</span> (words <span style=color:#f92672>%</span> <span style=color:#ae81ff>2</span>) <span style=color:#f92672>?</span> (words <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>) <span style=color:#f92672>*</span> WSIZE
+                     : words <span style=color:#f92672>*</span> WSIZE;                  <span style=color:#75715e>// line:vm:mm:beginextend
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>if</span> ((<span style=color:#66d9ef>long</span>)(bp <span style=color:#f92672>=</span> mem_sbrk(size)) <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>) <span style=color:#66d9ef>return</span> NULL;  <span style=color:#75715e>// line:vm:mm:endextend
+</span><span style=color:#75715e></span>
+  <span style=color:#75715e>/* Initialize free block header/footer and the epilogue header */</span>
+  PUT(HDRP(bp), PACK(size, <span style=color:#ae81ff>0</span>));
+  <span style=color:#75715e>/* Free block header */</span>  <span style=color:#75715e>// line:vm:mm:freeblockhdr
+</span><span style=color:#75715e></span>  PUT(FTRP(bp), PACK(size, <span style=color:#ae81ff>0</span>));
+  <span style=color:#75715e>/* Free block footer */</span>  <span style=color:#75715e>// line:vm:mm:freeblockftr
+</span><span style=color:#75715e></span>  PUT(HDRP(NEXT_BLKP(bp)), PACK(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>1</span>));
+  <span style=color:#75715e>/* New epilogue header */</span>  <span style=color:#75715e>// line:vm:mm:newepihdr
+</span><span style=color:#75715e></span>
+  <span style=color:#75715e>/* Coalesce if the previous block was free */</span>
+  <span style=color:#66d9ef>return</span> coalesce(bp);  <span style=color:#75715e>// line:vm:mm:returnblock
+</span><span style=color:#75715e></span>}
+<span style=color:#75715e>/* $end mmextendheap */</span>
+
+<span style=color:#75715e>/*
+</span><span style=color:#75715e> * place - Place block of asize bytes at start of free block bp
+</span><span style=color:#75715e> *         and split if remainder would be at least minimum block size
+</span><span style=color:#75715e> */</span>
+<span style=color:#75715e>/* $begin mmplace */</span>
+<span style=color:#75715e>/* $begin mmplace-proto */</span>
+<span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>place</span>(<span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>bp, size_t asize)
+<span style=color:#75715e>/* $end mmplace-proto */</span>
+{
+  size_t csize <span style=color:#f92672>=</span> GET_SIZE(HDRP(bp));
+
+  <span style=color:#66d9ef>if</span> ((csize <span style=color:#f92672>-</span> asize) <span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span> (<span style=color:#ae81ff>2</span> <span style=color:#f92672>*</span> DSIZE)) {
+    PUT(HDRP(bp), PACK(asize, <span style=color:#ae81ff>1</span>));
+    PUT(FTRP(bp), PACK(asize, <span style=color:#ae81ff>1</span>));
+    bp <span style=color:#f92672>=</span> NEXT_BLKP(bp);
+    PUT(HDRP(bp), PACK(csize <span style=color:#f92672>-</span> asize, <span style=color:#ae81ff>0</span>));
+    PUT(FTRP(bp), PACK(csize <span style=color:#f92672>-</span> asize, <span style=color:#ae81ff>0</span>));
+  } <span style=color:#66d9ef>else</span> {
+    PUT(HDRP(bp), PACK(csize, <span style=color:#ae81ff>1</span>));
+    PUT(FTRP(bp), PACK(csize, <span style=color:#ae81ff>1</span>));
+  }
+}
+<span style=color:#75715e>/* $end mmplace */</span>
+
+<span style=color:#75715e>/*
+</span><span style=color:#75715e> * find_fit - Find a fit for a block with asize bytes
+</span><span style=color:#75715e> */</span>
+<span style=color:#75715e>/* $begin mmfirstfit */</span>
+<span style=color:#75715e>/* $begin mmfirstfit-proto */</span>
+<span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>find_fit</span>(size_t asize)
+<span style=color:#75715e>/* $end mmfirstfit-proto */</span>
+{
+  <span style=color:#75715e>/* $end mmfirstfit */</span>
+
+<span style=color:#75715e>#</span><span style=color:#75715e>ifdef NEXT_FIT</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>  <span style=color:#75715e>/* Next fit search */</span>
+  <span style=color:#66d9ef>char</span> <span style=color:#f92672>*</span>oldrover <span style=color:#f92672>=</span> rover;
+
+  <span style=color:#75715e>/* Search from the rover to the end of list */</span>
+  <span style=color:#66d9ef>for</span> (; GET_SIZE(HDRP(rover)) <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>; rover <span style=color:#f92672>=</span> NEXT_BLKP(rover))
+    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span>GET_ALLOC(HDRP(rover)) <span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span> (asize <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> GET_SIZE(HDRP(rover))))
+      <span style=color:#66d9ef>return</span> rover;
+
+  <span style=color:#75715e>/* search from start of list to old rover */</span>
+  <span style=color:#66d9ef>for</span> (rover <span style=color:#f92672>=</span> heap_listp; rover <span style=color:#f92672>&lt;</span> oldrover; rover <span style=color:#f92672>=</span> NEXT_BLKP(rover))
+    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span>GET_ALLOC(HDRP(rover)) <span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span> (asize <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> GET_SIZE(HDRP(rover))))
+      <span style=color:#66d9ef>return</span> rover;
+
+  <span style=color:#66d9ef>return</span> NULL; <span style=color:#75715e>/* no fit found */</span>
+<span style=color:#75715e>#</span><span style=color:#75715e>else</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>  <span style=color:#75715e>/* $begin mmfirstfit */</span>
+  <span style=color:#75715e>/* First-fit search */</span>
+  <span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>bp;
+
+  <span style=color:#66d9ef>for</span> (bp <span style=color:#f92672>=</span> heap_listp; GET_SIZE(HDRP(bp)) <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>; bp <span style=color:#f92672>=</span> NEXT_BLKP(bp)) {
+    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span>GET_ALLOC(HDRP(bp)) <span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span> (asize <span style=color:#f92672>&lt;</span><span style=color:#f92672>=</span> GET_SIZE(HDRP(bp)))) {
+      <span style=color:#66d9ef>return</span> bp;
+    }
+  }
+  <span style=color:#66d9ef>return</span> NULL; <span style=color:#75715e>/* No fit */</span>
+<span style=color:#75715e>#</span><span style=color:#75715e>endif</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>}
+<span style=color:#75715e>/* $end mmfirstfit */</span>
+
+<span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>printblock</span>(<span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>bp) {
+  size_t hsize, halloc, fsize, falloc;
+
+  checkheap(<span style=color:#ae81ff>0</span>);
+  hsize <span style=color:#f92672>=</span> GET_SIZE(HDRP(bp));
+  halloc <span style=color:#f92672>=</span> GET_ALLOC(HDRP(bp));
+  fsize <span style=color:#f92672>=</span> GET_SIZE(FTRP(bp));
+  falloc <span style=color:#f92672>=</span> GET_ALLOC(FTRP(bp));
+
+  <span style=color:#66d9ef>if</span> (hsize <span style=color:#f92672>=</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>) {
+    printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%p: EOL</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, bp);
+    <span style=color:#66d9ef>return</span>;
+  }
+
+  printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%p: header: [%ld:%c] footer: [%ld:%c]</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, bp, hsize,
+         (halloc <span style=color:#f92672>?</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>a</span><span style=color:#e6db74>&#39;</span> <span style=color:#f92672>:</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>f</span><span style=color:#e6db74>&#39;</span>), fsize, (falloc <span style=color:#f92672>?</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>a</span><span style=color:#e6db74>&#39;</span> <span style=color:#f92672>:</span> <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>f</span><span style=color:#e6db74>&#39;</span>));
+}
+
+<span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>checkblock</span>(<span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>bp) {
+  <span style=color:#66d9ef>if</span> ((size_t)bp <span style=color:#f92672>%</span> <span style=color:#ae81ff>8</span>) printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Error: %p is not doubleword aligned</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, bp);
+  <span style=color:#66d9ef>if</span> (GET(HDRP(bp)) <span style=color:#f92672>!</span><span style=color:#f92672>=</span> GET(FTRP(bp)))
+    printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Error: header does not match footer</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>);
+  <span style=color:#75715e>// check last 3 bit: 001 or 000
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>int</span> last_three_bit_value <span style=color:#f92672>=</span> GET_LAST_THREE_BIT(HDRP(bp));
+  printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>last three bit value:%d</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, last_three_bit_value);
+  <span style=color:#66d9ef>if</span> (last_three_bit_value <span style=color:#f92672>!</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span> <span style=color:#f92672>&amp;</span><span style=color:#f92672>&amp;</span> last_three_bit_value <span style=color:#f92672>!</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>) {
+    printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>ERROR:invalid blocks bp:%p</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, bp);
+  }
+}
+
+<span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>checkoverlap</span>(<span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>bp, <span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>nxt) {
+  <span style=color:#75715e>// [begin,end), 左闭右开区间
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>cur_end <span style=color:#f92672>=</span> FTRP(bp) <span style=color:#f92672>+</span> WSIZE;
+  <span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>nxt_begin <span style=color:#f92672>=</span> HDRP(nxt);
+  <span style=color:#66d9ef>if</span> (cur_end <span style=color:#f92672>&gt;</span> nxt_begin) {
+    printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>ERROR: blocks overlap cur_end: %p  nxt_begin:%p </span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, cur_end,
+           nxt_begin);
+  }
+}
+
+<span style=color:#75715e>/*
+</span><span style=color:#75715e> * checkheap - Minimal check of the heap for consistency
+</span><span style=color:#75715e> */</span>
+<span style=color:#66d9ef>void</span> <span style=color:#a6e22e>checkheap</span>(<span style=color:#66d9ef>int</span> verbose) {
+  printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>in checkheap verbose:%d</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, verbose);
+  <span style=color:#66d9ef>char</span> <span style=color:#f92672>*</span>bp <span style=color:#f92672>=</span> heap_listp;
+
+  <span style=color:#66d9ef>if</span> (verbose) printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Heap (%p):</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, heap_listp);
+
+  <span style=color:#75715e>// prologue block 双字大小(8字节)，并且是allocate的状态。
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// 这里只检查了header，因为checkblock中检查了header和footer的一致性（指内容完全一致)
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>if</span> ((GET_SIZE(HDRP(heap_listp)) <span style=color:#f92672>!</span><span style=color:#f92672>=</span> DSIZE) <span style=color:#f92672>|</span><span style=color:#f92672>|</span> <span style=color:#f92672>!</span>GET_ALLOC(HDRP(heap_listp)))
+    printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Bad prologue header</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>);
+  checkblock(heap_listp);
+
+  <span style=color:#75715e>//连续空闲块的个数，遇到非free的清零，如果值大于等于2，说明有块躲过了合并
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>int</span> free_block_cnt <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+
+  <span style=color:#75715e>// 遍历所有block. 除了epilogue
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// block,所有block不管是allocate还是free,size都是大于0的
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>for</span> (bp <span style=color:#f92672>=</span> heap_listp; GET_SIZE(HDRP(bp)) <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>; bp <span style=color:#f92672>=</span> NEXT_BLKP(bp)) {
+    <span style=color:#66d9ef>if</span> (verbose) printblock(bp);
+    checkblock(bp);
+
+    <span style=color:#75715e>// 检查是否有没合并的free block
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>int</span> alloc <span style=color:#f92672>=</span> GET_ALLOC(HDRP(bp));
+    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span>alloc) {
+      free_block_cnt<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
+      <span style=color:#66d9ef>if</span> (free_block_cnt <span style=color:#f92672>&gt;</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>) {
+        printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>contiguous free blocks that somehow escaped coalescing</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>);
+        <span style=color:#66d9ef>if</span> (verbose) {
+          <span style=color:#75715e>// 打印当前Block和上一个block
+</span><span style=color:#75715e></span>          printblock(bp);
+          printblock(PREV_BLKP(bp));
+        }
+      }
+    } <span style=color:#66d9ef>else</span> {
+      free_block_cnt <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+    }
+
+    <span style=color:#75715e>// check (allocated) blocks overlap
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// 查看当前block的footer地址是否小于下一个block的header地址
+</span><span style=color:#75715e></span>    checkoverlap(bp, NEXT_BLKP(bp));
+  }
+
+  <span style=color:#66d9ef>if</span> (verbose) printblock(bp);
+  <span style=color:#66d9ef>if</span> ((GET_SIZE(HDRP(bp)) <span style=color:#f92672>!</span><span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>) <span style=color:#f92672>|</span><span style=color:#f92672>|</span> <span style=color:#f92672>!</span>(GET_ALLOC(HDRP(bp))))
+    printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Bad epilogue header</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>);
+}
+
+</code></pre></div><hr><ul class=pager><li class=previous><a href=/2020/01/toward-the-next-gen-of-recom-sys data-toggle=tooltip data-placement=top title="【推荐系统】Toward the Next Generation of Recommender Systems: A Survey of the State-of-the-Art and Possible Extensions">&larr;
 Previous Post</a></li><li class=next><a href=/2020/02/2020-to-do-list data-toggle=tooltip data-placement=top title="2020 to do List">Next
 Post &rarr;</a></li></ul><div class=post-comment><span id=/2020/ class=leancloud_visitors data-flag-title="[施工中] CSAPP Malloc lab"><span class=post-meta-item-text>访问量</span>
 <span class=leancloud-visitors-count></span><p></p></span><div id=vcomments></div><script src=//cdn1.lncld.net/static/js/3.0.4/av-min.js></script><script src=//unpkg.com/valine/dist/Valine.min.js></script><script type=text/javascript>new Valine({el:'#vcomments',appId:'2dzJwxGKq4hbtg5R5NM8NTzJ-gzGzoHsz',appKey:'RaYu8uGTiuiIjLISQppPVYWw',notify:true,verify:false,avatar:'retro',placeholder:'说点什么吧...',visitor:true});</script></div></div><div class="col-lg-8 col-lg-offset-2
