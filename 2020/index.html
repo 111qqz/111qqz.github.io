@@ -13,7 +13,7 @@ function addCount(Counter){var $visitors=$(".leancloud_visitors");var url=$visit
 newcounter.save(null,{success:function(newcounter){var $element=$(document.getElementById(url));$element.find('.leancloud-visitors-count').text(newcounter.get('time'));},error:function(newcounter,error){console.log('Failed to create');}});}},error:function(error){console.log('Error:'+error.code+" "+error.message);}});}
 $(function(){var Counter=AV.Object.extend("Counter");if($('.leancloud_visitors').length==1){addCount(Counter);}else{showTime(Counter);}});</script></span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#背景>背景</a></li><li><a href=#trace-file-结构分析>trace file 结构分析</a></li><li><a href=#implicit-free-list>implicit free list</a></li></ol></nav><h2 id=背景>背景</h2><p>待补充</p><h2 id=trace-file-结构分析>trace file 结构分析</h2><p>trace file 是对allocator的输入的描述，可以从mdriver.c中的</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>static</span> trace_t <span style=color:#f92672>*</span><span style=color:#a6e22e>read_trace</span>(<span style=color:#66d9ef>char</span> <span style=color:#f92672>*</span>tracedir, <span style=color:#66d9ef>char</span> <span style=color:#f92672>*</span>filename);
+post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#背景>背景</a></li><li><a href=#trace-file-结构分析>trace file 结构分析</a></li><li><a href=#implicit-free-list>implicit free list</a></li><li><a href=#explicit-free-lists>Explicit Free Lists</a></li><li><a href=#参考链接>参考链接</a></li></ol></nav><h2 id=背景>背景</h2><p>动手实现一个memory allocator,体会core到爆炸的乐趣(不是</p><h2 id=trace-file-结构分析>trace file 结构分析</h2><p>trace file 是对allocator的输入的描述，可以从mdriver.c中的</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>static</span> trace_t <span style=color:#f92672>*</span><span style=color:#a6e22e>read_trace</span>(<span style=color:#66d9ef>char</span> <span style=color:#f92672>*</span>tracedir, <span style=color:#66d9ef>char</span> <span style=color:#f92672>*</span>filename);
 </code></pre></div><p>看到Parse的逻辑，从而得到trace file的结构。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>  fscanf(tracefile, <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>, <span style=color:#f92672>&amp;</span>(trace<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>sugg_heapsize)); <span style=color:#75715e>/* not used */</span>
   fscanf(tracefile, <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>&#34;</span>, <span style=color:#f92672>&amp;</span>(trace<span style=color:#f92672>-</span><span style=color:#f92672>&gt;</span>num_ids));
   <span style=color:#75715e>// 似乎只有num_ops用到了。。
@@ -48,7 +48,9 @@ num_ids表示一共有多少个不同的内存块(对应后续的指令可以显
     op_index<span style=color:#f92672>+</span><span style=color:#f92672>+</span>;
   }
 
-</code></pre></div><p>对于每一个操作，如果是malloc/relloc, 后面两个参数分别表示操作几号内存块，以及需要分配的内存大小是多少。如果是free,则只有一个参数，表示要操作几号内存块</p><h2 id=implicit-free-list>implicit free list</h2><p>这种也就是CS:APP3e text中着重描述的那种，补充了一些checker逻辑，放在这里作为baseline</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+</code></pre></div><p>对于每一个操作，如果是malloc/relloc, 后面两个参数分别表示操作几号内存块，以及需要分配的内存大小是多少。如果是free,则只有一个参数，表示要操作几号内存块</p><h2 id=implicit-free-list>implicit free list</h2><p>这种也就是CS:APP3e text中着重描述的那种，补充了一些checker逻辑，放在这里作为baseline</p><p>结构图如下:
+<img src=https://us1.myximage.com/2021/04/03/98e0f58b268ec352f4362bbb4f58f8fa.png alt=98e0f58b268ec352f4362bbb4f58f8fa.png></p><p>这种是带一个boundary tag的，也就是一个footer. footer完全是header内容的副本。
+这样做的好处是可以很容易从当前block找到上一个block,只需要常数复杂度的操作，否则需要O(n)复杂度整个遍历一遍。 对应的代价是有效载荷的比例变低了。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
 <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>mm_init</span>(<span style=color:#66d9ef>void</span>) {
   <span style=color:#75715e>/* Create the initial empty heap */</span>
   <span style=color:#66d9ef>if</span> ((heap_listp <span style=color:#f92672>=</span> mem_sbrk(<span style=color:#ae81ff>4</span> <span style=color:#f92672>*</span> WSIZE)) <span style=color:#f92672>=</span><span style=color:#f92672>=</span> (<span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>)<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>)  <span style=color:#75715e>// line:vm:mm:begininit
@@ -403,7 +405,40 @@ num_ids表示一共有多少个不同的内存块(对应后续的指令可以显
     printf(<span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>Bad epilogue header</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>);
 }
 
-</code></pre></div><hr><ul class=pager><li class=previous><a href=/2020/01/toward-the-next-gen-of-recom-sys data-toggle=tooltip data-placement=top title="【推荐系统】Toward the Next Generation of Recommender Systems: A Survey of the State-of-the-Art and Possible Extensions">&larr;
+</code></pre></div><h2 id=explicit-free-lists>Explicit Free Lists</h2><p>隐式列表的坏处是。。每次allocate的时候，需要遍历全部block去找free block. 显然，我们可以维护一个free list的链表，使得每次allocate的时候，只需要遍历free block
+结构如图:</p><p><a href=https://img.so/image/gTqPb9><img src=https://us1.myximage.com/2021/04/03/9c05f9408157e3ac30f497772d0f436d.png alt=9c05f9408157e3ac30f497772d0f436d.png></a></p><p>这里很巧妙的一点是，由于free block中的payload是没有被使用的，因此把上一个free block和下一个free block的地址都放在了当前free block的payload中，而没有单独维护一个数据结构。</p><p><strong>需要注意的是，由于现在payload中存放了两个指针，因此目前一个block的最小size变成了16字节(heade,footer各4字节，payload要至少能放下两个指针，8字节，一共16字节)</strong></p><p>还有几个值得一提的是
+比如序言快的设计，是一个header紧跟着一个footer,没有payload</p><blockquote><p>序言快很重要的一点是, HDRP和FTPR中间没有payload,
+这其实意味着，可以把footer当成bp,
+往前4个字节就是header
+因此把free_list_star
+放在序言快的footer的部分，作为一个结尾标志。判断条件可以统一成SIZE(HEAD(bp))= 0 这里是个挺巧妙的做法</p></blockquote><p>还有就是一些链表操作，原来leetcode里面的链表题还是有实际用处的2333</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#75715e>// remove node in free list
+</span><span style=color:#75715e></span><span style=color:#75715e>// a-&gt;b-&gt;c ，remove b的做法是，将a-&gt;next指向c,c-&gt;prev 指向a
+</span><span style=color:#75715e></span><span style=color:#75715e>// 特殊情况: bp是free list的初始节点，此时直接调整free_list_start
+</span><span style=color:#75715e></span><span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>remove_node_from_free_list</span>(<span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>bp) {
+  <span style=color:#66d9ef>if</span> (GET_PREV_PTR(bp)) {
+    SET_NEXT_PTR(GET_PREV_PTR(bp), GET_NEXT_PTR(bp));
+  } <span style=color:#66d9ef>else</span> {
+    free_list_start <span style=color:#f92672>=</span> GET_NEXT_PTR(bp);
+  }
+  SET_PREV_PTR(GET_NEXT_PTR(bp), GET_PREV_PTR(bp));
+}
+
+<span style=color:#75715e>// 向free list中插入node
+</span><span style=color:#75715e></span><span style=color:#75715e>// 这里涉及插入到哪里的策略
+</span><span style=color:#75715e></span><span style=color:#75715e>// 暂时使用头插法,也就是每次插入到free list的头部
+</span><span style=color:#75715e></span><span style=color:#75715e>// 对于 b-&gt;c,插入a,做法是
+</span><span style=color:#75715e></span><span style=color:#75715e>// a-&gt;next = free_list_start
+</span><span style=color:#75715e></span><span style=color:#75715e>// a-&gt;prev = null
+</span><span style=color:#75715e></span><span style=color:#75715e>// free_list_start-&gt;prev = a
+</span><span style=color:#75715e></span><span style=color:#75715e>// free_list_start = a
+</span><span style=color:#75715e></span>
+<span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>insert_node_in_free_list</span>(<span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>bp) {
+  SET_NEXT_PTR(bp, free_list_start);
+  SET_PREV_PTR(free_list_start, bp);
+  SET_PREV_PTR(bp, NULL);
+  free_list_start <span style=color:#f92672>=</span> bp;
+}
+</code></pre></div><p>经验就是，由于涉及到比较底层的操作。。还挺难写的。。可以多定义一些宏来帮助开发。。（嗯。。也就core了100多次把。。</p><p>完整的代码在这里 <a href=https://github.com/111qqz/csapp-lab/tree/master/malloclab>111qqz's github</a></p><h2 id=参考链接>参考链接</h2><ul><li><a href=https://github.com/HarshTrivedi/malloc/blob/master/mm.c>HarshTrivedi/malloc</a></li></ul><hr><ul class=pager><li class=previous><a href=/2020/01/toward-the-next-gen-of-recom-sys data-toggle=tooltip data-placement=top title="【推荐系统】Toward the Next Generation of Recommender Systems: A Survey of the State-of-the-Art and Possible Extensions">&larr;
 Previous Post</a></li><li class=next><a href=/2020/02/2020-to-do-list data-toggle=tooltip data-placement=top title="2020 to do List">Next
 Post &rarr;</a></li></ul><div class=post-comment><span id=/2020/ class=leancloud_visitors data-flag-title="[施工中] CSAPP Malloc lab"><span class=post-meta-item-text>访问量</span>
 <span class=leancloud-visitors-count></span><p></p></span><div id=vcomments></div><script src=//cdn1.lncld.net/static/js/3.0.4/av-min.js></script><script src=//unpkg.com/valine/dist/Valine.min.js></script><script type=text/javascript>new Valine({el:'#vcomments',appId:'2dzJwxGKq4hbtg5R5NM8NTzJ-gzGzoHsz',appKey:'RaYu8uGTiuiIjLISQppPVYWw',notify:true,verify:false,avatar:'retro',placeholder:'说点什么吧...',visitor:true});</script></div></div><div class="col-lg-8 col-lg-offset-2
