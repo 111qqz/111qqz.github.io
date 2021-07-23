@@ -17,7 +17,8 @@ col-md-10 col-md-offset-1
 post-container"><header><h2>TOC</h2></header><nav id=TableOfContents><ol><li><a href=#背景>背景</a></li><li><a href=#初步排查>初步排查</a></li><li><a href=#new的对齐规则>new的对齐规则</a></li><li><a href=#解决办法>解决办法</a></li><li><a href=#参考链接>参考链接</a></li></ol></nav><h2 id=背景>背景</h2><p>起因是同事在实现int4的功能，结果流水线有一条死活过不了(gcc版本为4.8.5),一直core dump
 经过初步排查，找出了如下最小可以复现的代码:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
 <span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;immintrin.h&gt;</span><span style=color:#75715e>
-</span><span style=color:#75715e></span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Test</span>{
+</span><span style=color:#75715e></span>
+<span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Test</span>{
     <span style=color:#66d9ef>public</span><span style=color:#f92672>:</span>
     Test(){
         tmp <span style=color:#f92672>=</span> _mm256_set_epi32(<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0</span>);
@@ -65,7 +66,8 @@ main:
 Enable support for C++17 new of types that require more alignment than void* ::operator new(std::size_t) provides. A numeric argument such as -faligned-new=32 can be used to specify how much alignment (in bytes) is provided by that function, but few users will need to override the default of alignof(std::max_align_t).</p></blockquote><blockquote><p>This flag is enabled by default for -std=c++17.</p></blockquote><p>这个参数的作用其实是用来设置</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback>__STDCPP_DEFAULT_NEW_ALIGNMENT__
 </code></pre></div><p>这个值默认为“alignof(std::max_align_t)”</p><p>可以用如下代码来验证:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;immintrin.h&gt;</span><span style=color:#75715e>
 </span><span style=color:#75715e></span><span style=color:#75715e>#</span><span style=color:#75715e>include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
-</span><span style=color:#75715e></span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Test</span>{
+</span><span style=color:#75715e></span>
+<span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Test</span>{
     <span style=color:#66d9ef>public</span><span style=color:#f92672>:</span>
     Test(){
         tmp <span style=color:#f92672>=</span> _mm256_set_epi32(<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0</span>);
@@ -86,7 +88,8 @@ Enable support for C++17 new of types that require more alignment than void* ::o
 </code></pre></div><p>按照如上的推断，在gcc7.3,c++17下，通过设置-faligned-new，使得编译器不去调用带对齐参数的new，那么也应该发生core才对。</p><p>。。
 然而实际上并没有
 使用如下编译参数，无事发生</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>g++ -std<span style=color:#f92672>=</span>c++17 -mavx2  -faligned-new<span style=color:#f92672>=</span><span style=color:#ae81ff>32</span> c.cpp
-</code></pre></div><p>Why??? 为什么没有core?</p><blockquote><p>If you’re compiling in [c++17] mode only with a sufficiently recent compiler (e.g., GCC>=7, clang>=5, MSVC>=19.12), then everything is taken care by the compiler and you can stop reading.</p></blockquote><p>因为gcc7以后的编译器已经把对齐之类的事情帮我们做了。。</p><p>按照这个想法，在gcc6下，总会core吧？</p><p>待续</p><h2 id=解决办法>解决办法</h2><p>手动对齐一下就好了</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
+</code></pre></div><p>Why??? 为什么没有core?</p><blockquote><p>If you’re compiling in [c++17] mode only with a sufficiently recent compiler (e.g., GCC>=7, clang>=5, MSVC>=19.12), then everything is taken care by the compiler and you can stop reading.</p></blockquote><p>因为gcc7以后的编译器已经把对齐之类的事情帮我们做了。。</p><p>按照这个想法，在gcc6下，总会core吧？</p><p>然后发现也没有。。。</p><p>继续排查发现，gcc 4.9.4仍然会core
+但是gcc 5就没有问题了。</p><p>怀疑是gcc5做了什么修复，或者是gcc5对应的glibc做了什么修复。。</p><p>不过暂时没有找到。这里待补充。</p><h2 id=解决办法>解决办法</h2><p>手动对齐一下就好了</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>
 <span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span>size_t ALIGNMENT<span style=color:#f92672>&gt;</span>
 <span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>alignas</span>(ALIGNMENT) AlignedNew {
   <span style=color:#66d9ef>static_assert</span>(ALIGNMENT <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>, <span style=color:#e6db74></span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>ALIGNMENT must be positive</span><span style=color:#e6db74>&#34;</span>);
