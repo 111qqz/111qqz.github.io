@@ -14,7 +14,11 @@ Hash(1023) = 1023%8 = 7;
 回到顶部
 3. 文档相似度计算 我们通过利用LSH来实现文档的相似度计算这个实例来介绍一下LSH的具体用法。
 3.1 Shingling 假设现在有4个网页，我们将它们分别进行Shingling（将待查询的字符串集进行映射，映射到一个集合里，如字符串“abcdeeee&amp;quot;, 映射到集合”(a,b,c,d,e)&amp;quot;, 注意集合中元素是无重复的，这一步骤就叫做Shingling, 意即构建文档中的短字符串集合，即shingle集合。），得到如下的特征矩阵：
-Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !</description></item><item><title>文本相似度判断-simhash算法学习笔记</title><link>https://111qqz.com/2017/03/simhash/</link><pubDate>Fri, 10 Mar 2017 03:33:08 +0000</pubDate><guid>https://111qqz.com/2017/03/simhash/</guid><description>
+其中“1”代表对应位置的Shingles在文档中出现过，“0”则代表没有出现过。
+在衡量文档的相似度中，我们有很多的方法去完成，比如利用欧式距离、编辑距离、余弦距离、Jaccard距离等来进行相似度的度量。在这里我们运用Jaccard相似度。接下来我们就要去找一种哈希函数，使得在hash后尽量还能保持这些文档之间的Jaccard相似度，即：
+我们的目标就是找到这样一种哈希函数，如果原来文档的Jaccard相似度高，那么它们的hash值相同的概率高，如果原来文档的Jaccard相似度低，那么它们的hash值不相同的概率高，我们称之为Min-hashing(最小哈希)。
+3.2 Min-hashing Min-hashing定义为：特征矩阵按行进行一个随机的排列后，第一个列值为1的行的行号。举例说明如下，假设之前的特征矩阵按行进行的一个随机排列如下：
+元素 S1 S2 S3 S4 他 0 0 1 0 成功 0 0 1 1 我 1 0 0 0 减肥 1 0 1 1 要 0 1 0 1 最小哈希值：h(S1)=3，h(S2)=5，h(S3)=1，h(S4)=2.</description></item><item><title>文本相似度判断-simhash算法学习笔记</title><link>https://111qqz.com/2017/03/simhash/</link><pubDate>Fri, 10 Mar 2017 03:33:08 +0000</pubDate><guid>https://111qqz.com/2017/03/simhash/</guid><description>
 先放原始论文。。。以此表达对这个算法的敬意orz
 论文链接
 问题引出： 那天百度一面，frog学姐问了我如何判断两篇新闻稿的相似度的问题....我满篇口胡...也只是回答了一些诸如从图片上考虑。。或者去掉stop word之后得到特征向量然后计算余弦值之类得到传统想法。。。

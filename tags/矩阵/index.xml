@@ -20,10 +20,14 @@ dx[t] = k[t-1] + dx[t-1]
 /* *********************************************** Author :111qqz Created Time :2017年10月01日 星期日 18时39分17秒 File Name :10518.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define PB push_back #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; const int N = 5; LL n,base; struct Mat { LL mat[N][N]; void clear() { ms(mat,0); } }M,M1; Mat operator * ( Mat a,Mat b) { Mat c; c.</description></item><item><title>hdu 4686 Arc of Dream (构造矩阵，快速幂)</title><link>https://111qqz.com/2017/10/hdu-4686/</link><pubDate>Sun, 01 Oct 2017 06:33:48 +0000</pubDate><guid>https://111qqz.com/2017/10/hdu-4686/</guid><description>
 hdu4686题目链接
 题意： An Arc of Dream is a curve defined by following function:
-Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: /2017/10/hdu-4686/https://odzkskevi.qnssl.com/5bb0e0e69de61a673fbd079520fe97e2?v=1506621126
-Disk path: /content/post/ACM-ICPC/https://odzkskevi.qnssl.com/5bb0e0e69de61a673fbd079520fe97e2?v=1506621126
-Using Page Bundles: true
-where a 0 = A0 a i = a i-1_AX+AY b 0 = B0 b i = b i-1_BX+BY What is the value of AoD(N) modulo 1,000,000,007?</description></item><item><title>uva 10870 - Recurrences (矩阵加速线性递推式)</title><link>https://111qqz.com/2017/10/uva-10870/</link><pubDate>Sat, 30 Sep 2017 20:35:55 +0000</pubDate><guid>https://111qqz.com/2017/10/uva-10870/</guid><description>
+where a 0 = A0 a i = a i-1_AX+AY b 0 = B0 b i = b i-1_BX+BY What is the value of AoD(N) modulo 1,000,000,007?
+思路： 看n的1E18的范围也知道是矩阵快速幂。。
+难点还是构造矩阵。
+构造矩阵主要凭借经验，但是还是有一些规律可循：
+1. 对于求和的式子，如 s[n] = sum{F[1]..F[n]}类似的式子，我们只需要考虑如何构造F[n]即可。 2. 尽量将要构造的表达式展开成，第n项，与前面项(第n-1项等)有关的形式。 3. 观察2中展开的表达式的系数，每一个系数都亚奥出现在转移矩阵M中。 4. 观察2中展开的表达式的项，基本每一项都要整体或者以其他形式出现在初始矩阵M1中 5. 我们并不很关心初始项。 6. 难点其实在于构造M1矩阵，也就是说哪些项是重要的。一般而言，**可能有的项是，s[n],f[n],常数项，以及为了构造出f[n]的辅助项。** 对于这道题：
+然后矩阵快速幂即可。
+1A
+/* *********************************************** Author :111qqz Created Time :2017年10月01日 星期日 13时34分52秒 File Name :4686.</description></item><item><title>uva 10870 - Recurrences (矩阵加速线性递推式)</title><link>https://111qqz.com/2017/10/uva-10870/</link><pubDate>Sat, 30 Sep 2017 20:35:55 +0000</pubDate><guid>https://111qqz.com/2017/10/uva-10870/</guid><description>
 uva10870题目链接
 题意： f(n) = a1f(n − 1) + a2f(n − 2) + a3f(n − 3) + . . . + adf(n − d), for n &amp;gt; d
 给出f[1]..f[d],a[1]..a[d],问 f[n]%m是多少。
@@ -52,12 +56,11 @@ Input 　第一行输入N,M,K.接下来一行输入M位的数。 N&amp;lt;=10^9,
 Output 　阿申想知道不出现不吉利数字的号码有多少种，输出模K取余的结果.
 Sample Input 4 3 100 111
 Sample Output 81
-思路： 这次总算想对了状态表示：dp[i][j] 表示当前处理到第i位，最后j位与不吉利串相同的方案数。 然后此时考虑转移，也就是观察第i+1位。 根据第i+1位字符的不同，转移到的 位置也不相同。 从dp[i][j] 可以转移到dp[i+1][k]，这种转移表现为dp[i+1][k] += dp[i][j] (k取决于第i+1位字符) *我们可以用f[i+1][k]+=f[i][j]trans[j][k]，trans[j][k]表示串s后j位与不吉利串前j位相同， 添加一个字符后后k位与不吉利串前k位相同的方案数。 Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !</description></item><item><title>acdream oj 1124 喵喵的遗憾 (斐波那契数列循环节)</title><link>https://111qqz.com/2016/11/acdream-oj-1124--/</link><pubDate>Thu, 03 Nov 2016 00:39:54 +0000</pubDate><guid>https://111qqz.com/2016/11/acdream-oj-1124--/</guid><description>
+思路： 这次总算想对了状态表示：dp[i][j] 表示当前处理到第i位，最后j位与不吉利串相同的方案数。 然后此时考虑转移，也就是观察第i+1位。 根据第i+1位字符的不同，转移到的 位置也不相同。 从dp[i][j] 可以转移到dp[i+1][k]，这种转移表现为dp[i+1][k] += dp[i][j] (k取决于第i+1位字符) *我们可以用f[i+1][k]+=f[i][j]trans[j][k]，trans[j][k]表示串s后j位与不吉利串前j位相同， 添加一个字符后后k位与不吉利串前k位相同的方案数。
+就是说中间的那一部式子可以化简成矩阵的形式。。因此整个递推式就成了矩阵乘法的形式。 tran数组可以用kmp预处理出来。 重点是注意体会在字符串上dp的思想。
+/* *********************************************** Author :111qqz Created Time :2016年11月13日 星期日 13时54分33秒 File Name :code/bzoj/1009.</description></item><item><title>acdream oj 1124 喵喵的遗憾 (斐波那契数列循环节)</title><link>https://111qqz.com/2016/11/acdream-oj-1124--/</link><pubDate>Thu, 03 Nov 2016 00:39:54 +0000</pubDate><guid>https://111qqz.com/2016/11/acdream-oj-1124--/</guid><description>
 题目链接
 题意：
-Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: /2016/11/acdream-oj-1124--/http://acdream.info/img/prob/1124/1.jpeg
-Disk path: /content/post/ACM-ICPC/http://acdream.info/img/prob/1124/1.jpeg
-Using Page Bundles: true
 F0 = 1 , F1 = 1 , F2 = 2 , Fn = Fn-1+Fn-2
 求：
 FFFn Mod P
@@ -65,7 +68,7 @@ FFFn Mod P
 思路：原来这是适牛出的题2333.
 需要注意的是p可能为1，因此n==0或者1的时候，特判要输出1%p而不是1.
 其他的没了。就是求斐波那契数列循环节的经典做法。
-/* *********************************************** Author :111qqz Created Time :Thu 03 Nov 2016 08:09:26 AM CST File Name :1124.</description></item><item><title>hdu 4291 A Short problem (矩阵快速幂+广义斐波那契循环节||暴力找循环节)</title><link>https://111qqz.com/2016/10/hdu-4291/</link><pubDate>Mon, 31 Oct 2016 08:59:53 +0000</pubDate><guid>https://111qqz.com/2016/10/hdu-4291/</guid><description>
+/* *********************************************** Author :111qqz Created Time :Thu 03 Nov 2016 08:09:26 AM CST File Name :1124.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; struct Mat { LL mat[2][2]; void clear() { ms(mat,0); } }M,M1; Mat mul (Mat a,Mat b,LL mod) { Mat c; c.</description></item><item><title>hdu 4291 A Short problem (矩阵快速幂+广义斐波那契循环节||暴力找循环节)</title><link>https://111qqz.com/2016/10/hdu-4291/</link><pubDate>Mon, 31 Oct 2016 08:59:53 +0000</pubDate><guid>https://111qqz.com/2016/10/hdu-4291/</guid><description>
 题目链接
 题意：
 Given n (1 &amp;lt;= n &amp;lt;= 1018), You should solve for
@@ -115,9 +118,6 @@ HINT Source By Hzwer
 题意：给出n,k，以及n个正数，把n个数放在一个集合里，进行k次操作，每次操作取最大的数和次大的数放进集合。问k次操作结束后，集合中所有数的和。
 思路：假设初始时刻，次大和最大分别为a0,a1，那么得到的就是一个类斐波那契数列。初始为a0,a1,fn = fn-1 + fn
 最后求和。
-Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: /2016/10/hdu-5171-gtys-birthday-gift-/https://111qqz.com/wordpress/wp-content/uploads/2016/10/Screenshot-from-2016-10-25-18-48-09.png
-Disk path: /content/post/ACM-ICPC/https://111qqz.com/wordpress/wp-content/uploads/2016/10/Screenshot-from-2016-10-25-18-48-09.png
-Using Page Bundles: true
 利用这个性质。。。
 我们直接构造完矩阵。。。求出F(n+2)即可。。
 需要注意。。。矩阵中每一项是小于1E7+7的。。。矩乘的时候会爆int...
@@ -142,7 +142,9 @@ Given a n × n matrix A and a positive integer k, find the sum S = A + _A_2 + _A
 思路： 对k进行二分。
 比如，当k=6时，有： A + A^2 + A^3 + A^4 + A^5 + A^6 =(A + A^2 + A^3) + A^3*(A + A^2 + A^3) 应用这个式子后，规模k减小了一半。我们二分求出A^3后再递归地计算A + A^2 + A^3，即可得到原问题的答案。
 以及错误的递归方式：
-Image not found a.warning-link { color: inherit !important; font-weight: inherit !</description></item><item><title>poj 3070 Fibonacci (矩阵加速线性递推式)</title><link>https://111qqz.com/2016/10/poj-3070-fibonacci/</link><pubDate>Mon, 17 Oct 2016 18:36:15 +0000</pubDate><guid>https://111qqz.com/2016/10/poj-3070-fibonacci/</guid><description>
+无形中增加了多少次。。。。。。怎么像小学生呢。。。
+正确的写法。。。
+/* *********************************************** Author :111qqz Created Time :Tue 18 Oct 2016 05:10:53 PM CST File Name :code/poj/3233.</description></item><item><title>poj 3070 Fibonacci (矩阵加速线性递推式)</title><link>https://111qqz.com/2016/10/poj-3070-fibonacci/</link><pubDate>Mon, 17 Oct 2016 18:36:15 +0000</pubDate><guid>https://111qqz.com/2016/10/poj-3070-fibonacci/</guid><description>
 题目链接
 题意：求f[n] % 10000,f为斐波那契数。
 思路：按照题目给出的公式，或者按照加速线性递推式的方法都可以。。。

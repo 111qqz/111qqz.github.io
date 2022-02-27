@@ -42,10 +42,7 @@ CD直接扫一遍。。重点是CC和DD
 题意：给出n个数,q个查询，每组一个区间，询问区间中所有数的乘积的欧拉函数9+7的答案是多少。
 思路：这道题需要一点欧拉函数的知识。
 phi(n)是欧拉函数，意义为小于等于n并且与n互质的数的个数。
-To calculate the answer on every query let's use the formula Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: /2016/09/cf594d/http://codeforces.com/predownloaded/5a/dd/5add7e69f82f723e3ec1324e302d8958cf65e4b0.png
-Disk path: /content/post/ACM-ICPC/http://codeforces.com/predownloaded/5a/dd/5add7e69f82f723e3ec1324e302d8958cf65e4b0.png
-Using Page Bundles: true
-, where _p_1, p_2, ..., p__k — all prime numbers which divided_n.
+To calculate the answer on every query let's use the formula , where _p_1, p_2, ..., p__k — all prime numbers which divided_n.
 如果知道欧拉函数的这个公式。。。那么这道题就成了水题。。。。
 考虑两个数a,b的欧拉函数。
 一开始考虑也许有什么性质。。。查了下欧拉函数的wiki 欧拉函数_维基百科 欧拉函数是积性函数（但不是完全积性函数。。因此必须phi(ab) =phi(a)*phi(b)成立当且仅当gcd(a,b)==1)
@@ -54,7 +51,14 @@ Using Page Bundles: true
 直接把a*b看成一个数就好了。。。。
 后面质因子乘积部分只需要把两部分的并在一起就好了。。。
 所以根据上面欧拉函数的公式。。。答案分为两部分。。。
-一部分是区间中所有数的乘积。。。</description></item><item><title>codeforces #351 D. Jeff and Removing Periods (线段树/树状数组判断位置成等差数列)</title><link>https://111qqz.com/2016/09/cf351d/</link><pubDate>Sun, 18 Sep 2016 13:53:39 +0000</pubDate><guid>https://111qqz.com/2016/09/cf351d/</guid><description>
+一部分是区间中所有数的乘积。。。
+一部分是区间中所有数的不相同的素因子的p-1/p形式的乘积。。。
+第一部分预处理前缀积即可。。。由于有%运算。。。所以除的时候需要计算逆元。。。
+第二部分的做法同spoj_dquery解题报告
+也是离线处理，把询问按照区间右端点排序升序排列，然后lst数组记录上次该数出现的位置。。。用bit维护一个从1到某个数的乘积。。。在撤销的时候同样需要逆元。。。
+还要注意。。。太长的式子一定要分开写。。。。
+因为写错括号顺序调了半天orz...
+/* *********************************************** Author :111qqz Created Time :Thu 22 Sep 2016 02:07:39 PM CST File Name :code/cf/problem/594D.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; const int N=2E5+7; const int M=1E6+7; const LL MOD = 1E9+7; struct node { int l,r; int id; bool operator &amp;lt; (node b)const { return r&amp;lt;b.</description></item><item><title>codeforces #351 D. Jeff and Removing Periods (线段树/树状数组判断位置成等差数列)</title><link>https://111qqz.com/2016/09/cf351d/</link><pubDate>Sun, 18 Sep 2016 13:53:39 +0000</pubDate><guid>https://111qqz.com/2016/09/cf351d/</guid><description>
 题目链接 题意：有n个数，每次可以删除掉数值相同并且所在位置成等差数列（只删2个数或者只删1个数应该也是可以的），删掉这些数以后可以将剩下的数重新以任意顺序排列，称为一次操作。现在给出m个询问，每个询问一个区间[l,r]，问删光区间[l,r]中的数最少需要的操作次数。
 思路/题解：由于第一次操作之后可以重排，那么把相同的数放在一起得到一个位置的公差为1的等差数列，之后的答案显然是元素个数。所以需要判断初始的时候，是否能一次删光某个数值的数，也就是需要判断初始时刻是否有某个数出现的所有位置组成一个等差数列。
 (去icpc-camp的论坛问了一波。。。链接在这里)

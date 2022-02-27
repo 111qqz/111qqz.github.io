@@ -4,10 +4,22 @@
 思路：首先化简要求的式子。
 根据隔板法_维基百科
 现在有10个球，要放进3个盒子里 ●●●●●●●●●● 隔2个板子，把10个球被隔开成3个部分
-●|●|●●●●●●●●、●|●●|●●●●●●●、●|●●●|●●●●●●、●|●●●●|●●●●●、●|●●●●●|●●●●、●|●●●●●●|●●●、...... 如此类推，10个球放进3个盒子的方法总数为{ Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: /2016/10/hdu-4704-sum-/https://wikimedia.org/api/rest_v1/media/math/render/svg/551555038a784a1265b78d523a4ee4026f0b5c44
-Disk path: /content/post/ACM-ICPC/https://wikimedia.org/api/rest_v1/media/math/render/svg/551555038a784a1265b78d523a4ee4026f0b5c44
-Using Page Bundles: true
-n个球放进k个盒子的方法总数为{ Image not found a.warning-link { color: inherit !important; font-weight: inherit !</description></item><item><title>hdu 4549 M斐波那契数列 (矩阵快速幂+费马小定理+指数循环节)</title><link>https://111qqz.com/2016/10/hdu4549/</link><pubDate>Wed, 26 Oct 2016 09:12:43 +0000</pubDate><guid>https://111qqz.com/2016/10/hdu4549/</guid><description>
+●|●|●●●●●●●●、●|●●|●●●●●●●、●|●●●|●●●●●●、●|●●●●|●●●●●、●|●●●●●|●●●●、●|●●●●●●|●●●、...... 如此类推，10个球放进3个盒子的方法总数为{ n个球放进k个盒子的方法总数为{ 问题等价于求{ 的可行解数，其中 为正整数。
+于是问题转化成：
+n个木棍，n-1个缝， 分成1份则是C(n-1,0);
+分成2份则是C(n-1,1);
+分成3份则是C(n-1,2);
+...
+分成n份则是C(n-1,n-1);
+ans = sum( C(n-1,i) ) (0&amp;lt;=i&amp;lt;=n-1)
+=2^(n-1);
+这是我能理解的得到2^(n-1)的方式。。。
+看到有好多人说这个结论是显然的。。。求指教（说这是个结论记住就好的就算了23333）
+接下来，就是求A=2^(n-1)9+7的问题了。。。
+根据指数循环节公式A=2^((n-1)%(mod-1))*2^(mod-1)%mod (其中mod=1E9+7)
+由于gcd(2,1E9+7)=1,根据费马小定理2^(mod-1)%mod=1，因此A=2^((n-1)%(mod-1))
+然后快速幂搞之。
+/* *********************************************** Author :111qqz Created Time :Wed 26 Oct 2016 06:22:39 PM CST File Name :code/hdu/4704.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; const int N=1E5+7; const LL mod = 1E9+7; char st[N]; int len; LL n; LL ksm(LL a,LL b) { LL res = 1LL; while (b&amp;gt;0) { if (b&amp;amp;1) res = (res * a) % mod; b = b &amp;gt;&amp;gt; 1LL; a = ( a*a ) % mod; } return res; } int main() { #ifndef ONLINE_JUDGE freopen(&amp;quot;code/in.</description></item><item><title>hdu 4549 M斐波那契数列 (矩阵快速幂+费马小定理+指数循环节)</title><link>https://111qqz.com/2016/10/hdu4549/</link><pubDate>Wed, 26 Oct 2016 09:12:43 +0000</pubDate><guid>https://111qqz.com/2016/10/hdu4549/</guid><description>
 题意：M斐波那契数列F[n]是一种整数数列，它的定义如下：
 F[0] = a F[1] = b F[n] = F[n-1] * F[n-2] ( n &amp;gt; 1 )
 现在给出a, b, n，你能求出F[n]的值吗？

@@ -4,7 +4,18 @@
 官方题解
 以及前置技能点是：斜率优化+线段树
 思路：考虑一排数a[1]到a[n]，原问题可以转化成从a[y]走x-1步，每一步原地不动或者向左移动一个格子后的总的代价。
-Function is calculated as follows: Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: /2016/09/cf455e/http://codeforces.com/predownloaded/ff/64/ff6494b0e158a72527729ef1681f014ba09928a2.png
-Disk path: /content/post/ACM-ICPC/http://codeforces.com/predownloaded/ff/64/ff6494b0e158a72527729ef1681f014ba09928a2.png
-Using Page Bundles: true
-, k__i — how many times we visited the i th element of the array a.</description></item></channel></rss>
+Function is calculated as follows: , k__i — how many times we visited the i th element of the array a.
+这个式子感觉不是很明确。。。。
+窝来解释一下。。。l=y-x+1是可能走到的最左边的点。。。。
+终点在【L,Y】区间内都是合法的。。。。
+然后考虑代价最小的情况。。。
+一定是在最小的格子上尽可能多得停留，在其他格子上只停留一次。。。
+对于终点为l的情况，走到y要花费y-l步,一共要走x-1步，那么多出来x-1-(y-l)步，这些步停留在最小的点上是最优的，最小的点上之前停留了一次，现在再多停留x-1-(y-l)次，也就是停留了x-(y-l)次。
+那么，另一个结论是，区间[l,y]中，当a[l]为最小的时候才是最优的。。。
+为什么呢？
+假设a[k] (k&amp;gt;l)是最小，那么以a[k]为终点的情况一定比以a[l]为终点的情况优秀（因为多走了【l,k-1】之间的点。。。走这些点比停留在a[k]的代价大）
+因此对于l是终点的情况，一定在a[l]是最小值的时候是最优的。
+此时代价为：
+sum[y] - sum[l] + a[l]·(x - (y - l))
+我们变形得到：
+sum[y] - sum[l] + a[l]·(x - (y - l)) = sum[y] - sum[l] + a[l]·(x - y + l) = sum[y] - sum[l] + a[l]·l + a[l]·(x - y) = sum[y] + (a[l]·(x - y) + a[l]·l - sum[l])</description></item></channel></rss>

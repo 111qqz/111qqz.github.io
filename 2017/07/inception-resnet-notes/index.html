@@ -85,7 +85,7 @@
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Jul 18, 2017</span>
-<span class=post_time> · 5 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/inception title=Inception class="post_tag button button_translucent">Inception
+<span class=post_time> · 1 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/inception title=Inception class="post_tag button button_translucent">Inception
 </a><a href=https://111qqz.com/tags/resnet title=resnet class="post_tag button button_translucent">resnet
 </a>
 </span>
@@ -120,25 +120,11 @@ Share on:
 Inception深度卷积网络被称为GoogleLeNet或Incention-v1。继而我们通过各种方法对 Inception结构进行优化，首先引入batch normalization(Inception-v2)。后来在第三代中增加factorization因子，即本文中提到的Inception-v3。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/25b2acffee48ae5438f54a26871be517.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/25b2acffee48ae5438f54a26871be517.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/25b2acffee48ae5438f54a26871be517.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/25b2acffee48ae5438f54a26871be517.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图1.残差连接</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/0e4a677a7eb7ca7450b1892f2a780e6c.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/0e4a677a7eb7ca7450b1892f2a780e6c.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/0e4a677a7eb7ca7450b1892f2a780e6c.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/0e4a677a7eb7ca7450b1892f2a780e6c.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图2.优化版本的ResNet连接
@@ -148,85 +134,36 @@ Inception深度卷积网络被称为GoogleLeNet或Incention-v1。继而我们通
 相反，随着TensorFlow的引入，大部分最新的模型无需分布式的对副本进行训练。它通过反向传播（back propagation）进行内存优化，并仔细考虑梯度计算需要的tensors，以及通过结构化计算减少这类tensors的数量。从历史观点来讲，我们对网络结构的更迭已经做得非常保守，并限制实验改变独立网络的组分，同时保持其余网络的稳定性。 由于之前没有对网络进行简化，导致网络看起来更加复杂。在最新的实验中，针对 Inception-v4网络，我们决定丢掉不必要的包袱，对于inception块的每个网格大小进行统一。如图9，展示了大尺寸的Inceptionv4网络结构。图3至8是每个部分的详细结构。所有图中没有标记“V”的卷积使用same的填充原则，意即其输出网格与输入的尺寸正好匹配。使用“V”标记的卷积使用valid的填充原则，意即每个单元输入块全部包含在前几层中，同时输出激活图（output activation map）的网格尺寸也相应会减少。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/7428387881cddb3e24e9fa6ba03ab671.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/7428387881cddb3e24e9fa6ba03ab671.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/7428387881cddb3e24e9fa6ba03ab671.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/7428387881cddb3e24e9fa6ba03ab671.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图3 Inception-v4网络和Inception-ResNet-v2网络的结构。这是网络的输入部分。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/b2bd2c7b34acb2ebfe9f71718fb396aa.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/b2bd2c7b34acb2ebfe9f71718fb396aa.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/b2bd2c7b34acb2ebfe9f71718fb396aa.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/b2bd2c7b34acb2ebfe9f71718fb396aa.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 4 Inception-v4网络35×35网格的框架。对应图9中Inception-A块。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/8e9efd3354942ee931bab300f9564229.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/8e9efd3354942ee931bab300f9564229.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/8e9efd3354942ee931bab300f9564229.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/8e9efd3354942ee931bab300f9564229.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 5 Incep-v4网络17×17网格块的框架。对应图9中Inception-B块。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/21cd0f6792a17e7973f73d921c6342be.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/21cd0f6792a17e7973f73d921c6342be.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/21cd0f6792a17e7973f73d921c6342be.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/21cd0f6792a17e7973f73d921c6342be.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 6 Inception-v4网络的8×8网格模块的框架。对应图9中Inception-C块。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/a3609ab6eebc7b5db80928a52b8d9a95.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/a3609ab6eebc7b5db80928a52b8d9a95.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/a3609ab6eebc7b5db80928a52b8d9a95.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/a3609ab6eebc7b5db80928a52b8d9a95.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图7 35×35到17×17减少模块的框架。这个块不同的变化（不同滤波器）在图9和15中使用，同时在网络Inception(-v4,-ResNet-v1,-ResNet-v2).k,l,m,n数量表示滤波器尺寸大小，如表1所示。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/f68e6d9997152815047599fdf4ffe6b2.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/f68e6d9997152815047599fdf4ffe6b2.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/f68e6d9997152815047599fdf4ffe6b2.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/f68e6d9997152815047599fdf4ffe6b2.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 8 17×17到8×8网格缩减框架。减少的模块在图9中Inception-v4网络。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/8558e817e34cb8e183e120aa74367f06.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/8558e817e34cb8e183e120aa74367f06.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/8558e817e34cb8e183e120aa74367f06.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/8558e817e34cb8e183e120aa74367f06.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 9 Inception-v4网络的整个框架。具体模块，见图3，4，5，6，7，8</p>
@@ -236,73 +173,31 @@ Inception深度卷积网络被称为GoogleLeNet或Incention-v1。继而我们通
 残差和非残差Inception的另外一个技术性区别是，在Inception-ResNet网络中，我们在传统层的顶部而非所有层的顶部中使用batch-normalization。在全部层使用 batch-normalization是合情合理的，但是我们想保持每个模型副本在单个GPU上就可以训练。结果证明，使用更大激活尺寸在GPU内存上更加耗时。在部分层的顶部忽略 batch-normalization能够充分的增加Inception块的数量。我们希望可以更好的利用计算资源，因而这种trade-off变得没有必要。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/a5b05c632ca2a5484625a953f7f26ecd.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/a5b05c632ca2a5484625a953f7f26ecd.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/a5b05c632ca2a5484625a953f7f26ecd.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/a5b05c632ca2a5484625a953f7f26ecd.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 10 Inception-ResNet-v1网络使用35×35网格模块（Inception-ResNet-A）的框架</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/8e4a4178f7b86ae458b7c29063bf4a88.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/8e4a4178f7b86ae458b7c29063bf4a88.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/8e4a4178f7b86ae458b7c29063bf4a88.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/8e4a4178f7b86ae458b7c29063bf4a88.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 11 Inception-ResNet-v1网络的17×17网格模块的框架</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/862690e39d417e46c0cd522f4976adfb.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/862690e39d417e46c0cd522f4976adfb.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/862690e39d417e46c0cd522f4976adfb.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/862690e39d417e46c0cd522f4976adfb.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 12 “Reduction-B”17×17到8×8网格缩减模块。此模块在图15使用更小 Inception-ResNet-v1网络</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/02b6860095f5922bf4877a749437e853.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/02b6860095f5922bf4877a749437e853.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/02b6860095f5922bf4877a749437e853.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/02b6860095f5922bf4877a749437e853.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 13 Inception-ResNet-v1网络的8×8网格（Incepti-ResNet-C）模块的框架</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/2b88033f05f3cfda193ea28fa3f069ad.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/2b88033f05f3cfda193ea28fa3f069ad.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/2b88033f05f3cfda193ea28fa3f069ad.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/2b88033f05f3cfda193ea28fa3f069ad.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 14 Inception-ResNet-v1网络的主干</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/5577ae575f59c9ff99ac00267f0960a5.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/5577ae575f59c9ff99ac00267f0960a5.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/5577ae575f59c9ff99ac00267f0960a5.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/5577ae575f59c9ff99ac00267f0960a5.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 15 Inception-ResNet-v1和Inception-ResNet-v2网络的框架。
@@ -311,49 +206,21 @@ Inception-ResNet-v2使用图 3,16,7,17,18,19 描述的块。
 输出的尺寸涉及到Inception-ResNet-v1激活向量</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/8968bb6bd2f1f9d67c8b1dd40a133b31.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/8968bb6bd2f1f9d67c8b1dd40a133b31.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/8968bb6bd2f1f9d67c8b1dd40a133b31.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/8968bb6bd2f1f9d67c8b1dd40a133b31.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 16 Inception-ResNet-v2网络35×35网格模块（Inception-ResNet-A）的框架</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/850d0bd23d356e04820d6095342eadd2.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/850d0bd23d356e04820d6095342eadd2.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/850d0bd23d356e04820d6095342eadd2.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/850d0bd23d356e04820d6095342eadd2.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 17 Inception-ResNet-v2网络17×17网格模块（Inception-ResNet-B）的框架</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/1a7f08ab0dcc5f142494bc7e75ff8868.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/1a7f08ab0dcc5f142494bc7e75ff8868.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/1a7f08ab0dcc5f142494bc7e75ff8868.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/1a7f08ab0dcc5f142494bc7e75ff8868.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 18 17×15到8×8网格缩减模块的框架。Reduction-B模块使用更宽的 Inception-ResNet-v1网络，如图 15</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/691c0e567d64e1b7ce636ea6ab307d83.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/691c0e567d64e1b7ce636ea6ab307d83.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/691c0e567d64e1b7ce636ea6ab307d83.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/691c0e567d64e1b7ce636ea6ab307d83.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 19 Inception-ResNet-v2网络8×8网格（Inception-ResNet-C）模块的框架</p>
@@ -364,97 +231,41 @@ Inception-ResNet-v2使用图 3,16,7,17,18,19 描述的块。
 即使缩放并不是完全必须的，它似乎并不会影响最终准确率，但是放缩能有益于训练的稳定性。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/5c805a434d37e323542f0d93b3f453af.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/5c805a434d37e323542f0d93b3f453af.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/5c805a434d37e323542f0d93b3f453af.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/5c805a434d37e323542f0d93b3f453af.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>表 1 三个Inception中Reduction-A模块滤波器的数量。四个参数是图7中四个卷积的参数。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/3a3a322c2c278376e9bd92a1c9d262c7.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/3a3a322c2c278376e9bd92a1c9d262c7.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/3a3a322c2c278376e9bd92a1c9d262c7.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/3a3a322c2c278376e9bd92a1c9d262c7.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 20 结合Inception-ResNet模块的通用框架。我们期望相同的想法在resnet事例中也适用，除了Inception块任意的子网络都进行了使用。放缩模块仅仅适用于最后的线性激活。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/6721f978d4cb537bd659fbe8f6250449.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/6721f978d4cb537bd659fbe8f6250449.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/6721f978d4cb537bd659fbe8f6250449.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/6721f978d4cb537bd659fbe8f6250449.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 21 在训练单纯Inception-v3和残差网络相似计算代价的Top-1错误率。评估在 ILSVRC-2012验证集上进行不加入黑名单图像测量。相对于传统Inception-v3，残差模型训练的更快，但是准确率更差</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/fc07051d7d7d8a5428ca9686537f89ae.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/fc07051d7d7d8a5428ca9686537f89ae.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/fc07051d7d7d8a5428ca9686537f89ae.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/fc07051d7d7d8a5428ca9686537f89ae.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 22 在训练单纯Inception-v3和残差网络相似计算代价的Top-5错误率。评估在 ILSVRC-2012验证集上进行不加入黑名单图像测量。在验证集上，残差模型训练的更快，同时召回率更好。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/c5c65048b6967af33b1a45a25ac53cdf.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/c5c65048b6967af33b1a45a25ac53cdf.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/c5c65048b6967af33b1a45a25ac53cdf.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/c5c65048b6967af33b1a45a25ac53cdf.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 23 在训练单纯Inception-v3和残差网络相似计算代价的Top-1错误率。评估在 ILSVRC-2012验证集上进行不加入黑名单图像测量。相对于传统Inception-v4，残差模型训练的更快，但是准确率更高。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/227c68e321ac1877b76ed75cdb649820.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/227c68e321ac1877b76ed75cdb649820.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/227c68e321ac1877b76ed75cdb649820.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/227c68e321ac1877b76ed75cdb649820.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 24 在训练单纯Inception-v4和残差网络相似计算代价的Top-5错误率。评估在 ILSVRC-2012验证集上进行不加入黑名单图像测量。在验证集上，残差模型训练的更快，同时召回率更好。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/91dd37d73de3590dbdd67295d6bc3cfc.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/91dd37d73de3590dbdd67295d6bc3cfc.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/91dd37d73de3590dbdd67295d6bc3cfc.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/91dd37d73de3590dbdd67295d6bc3cfc.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 25 在四个模型（单个模型，一次裁剪）Top-5错误率。在更大模型尺寸上得到了改善。尽管残差版本收敛更快，但是最终的准确率依赖于模型尺寸</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/01bdbdb3f6d8a62d119a9463ca6578e7.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/01bdbdb3f6d8a62d119a9463ca6578e7.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/01bdbdb3f6d8a62d119a9463ca6578e7.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/01bdbdb3f6d8a62d119a9463ca6578e7.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>图 26 在四个模型（单个模型，一次裁剪）Top-1错误率。这个图同top-5评估。</p>
@@ -467,52 +278,24 @@ Inception-ResNet-v2使用图 3,16,7,17,18,19 描述的块。
 表2展示了在验证集上各种结构的单个模型以及单次裁剪的top-1和top-5错误率。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/08f083a9972e0b416c2d86b212aa2f1f.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/08f083a9972e0b416c2d86b212aa2f1f.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/08f083a9972e0b416c2d86b212aa2f1f.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/08f083a9972e0b416c2d86b212aa2f1f.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>表 2 一次裁剪-单个模型实验结果。在ILSVRC2012进行的没有删除包围框的验证实验结果
 表3展示了使用小数量裁剪的各种模型的性能比较：引文5中对ResNet做了10个裁剪，对于Inception，我们如引文14描述那样，使用12种裁剪进行验证。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/8652ca193b791666b210c93058e2ec9e.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/8652ca193b791666b210c93058e2ec9e.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/8652ca193b791666b210c93058e2ec9e.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/8652ca193b791666b210c93058e2ec9e.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>表 3 10/12裁剪评估-单一模型试验结果。在ILSVRC2012的50000张图像上进行的验证
 表4展示了单个模型的性能。对于残差网络dense的验证结果可参见引文14。对于Inception网络，[14]描述了针对inception网络的144种裁剪策略。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/ab4333f0ffa41d66350db6aeb1e51a69.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/ab4333f0ffa41d66350db6aeb1e51a69.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/ab4333f0ffa41d66350db6aeb1e51a69.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/ab4333f0ffa41d66350db6aeb1e51a69.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>表 4 144个裁剪评估，单一模型的实验结果。在ILSVRC2012所有50000张图像上进行验证。
 Table5比较了组合的结果。[5]描述了对于纯净的残差网络，6个模型的dense验证的结果。对于Inception网络4个模型的组合，144种裁剪策略正如[14]描述即可。</p>
 <blockquote>
 <p><a href=https://ask.julyedu.com/uploads/questions/20170322/dd9081b3b31937eb01b55259d29d4dfa.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/dd9081b3b31937eb01b55259d29d4dfa.png title="Open this web path in a new tab" target=_blank class=warning-link>/2017/07/inception-resnet-notes/https://ask.julyedu.com/uploads/questions/20170322/dd9081b3b31937eb01b55259d29d4dfa.png</a></p>
-<p>Disk path: /content/post/ACM-ICPC/https://ask.julyedu.com/uploads/questions/20170322/dd9081b3b31937eb01b55259d29d4dfa.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 </blockquote>
 <p>表 5 使用144裁剪/稠密进行组合结果的评估。在ILSVRC2012 50000张图像进行验证。对于Inception-v4(+残差)，组合模型由一个Inception-v4和三个Inception-ResNet-v2 模型组成。测试性能在top-5错误率达到3.08%，并且在验证集上没有过拟合。</p>

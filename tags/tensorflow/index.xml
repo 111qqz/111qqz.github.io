@@ -67,9 +67,6 @@ SyncReplicasOptimizer
 SO_How does ps work in distribute Tensorflow?
 update:在多个nodes（机）上跑。。。tf默认是异步更新的。。。同步的话。。大概需要syncreplicasoptimizer?
 来直观感受下，不同task的之间并不同步
-Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: /2017/08/tensorflow-notes/https://111qqz.com/wordpress/wp-content/uploads/2017/08/深度截图_选择区域_20170815095908.png
-Disk path: /content/post/ACM-ICPC/https://111qqz.com/wordpress/wp-content/uploads/2017/08/深度截图_选择区域_20170815095908.png
-Using Page Bundles: true
 创建一个cluster 每一个task唯一对应一个server,server中有一个master，还有若干个worker
 cluster是task的集合
 cluster是在处理分布式问题时抽象出的概念，类似缩点。
@@ -78,7 +75,7 @@ cluster也可以划分成一个或者多个job，每个job包含一个或者多�
 task的集合中的元素，job是task的（不相交？）子集，cluster是task的全集。
 （似乎要求所有job的交为空，所有job的补为全集，也就是似乎不能越过job直接到taks(?)）
 如下图：
-Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !</description></item><item><title>tensorflow Supervisor 学习笔记</title><link>https://111qqz.com/2017/08/tensorflow-supervisor-notes/</link><pubDate>Fri, 04 Aug 2017 09:22:44 +0000</pubDate><guid>https://111qqz.com/2017/08/tensorflow-supervisor-notes/</guid><description>
+_A TensorFlow "cluster" is a set of "tasks" that participate in the distributed execution of a TensorFlow graph. Each task is associated with a TensorFlow "server", which contains a "master" that can be used to create sessions, and a "worker" that executes operations in the graph.</description></item><item><title>tensorflow Supervisor 学习笔记</title><link>https://111qqz.com/2017/08/tensorflow-supervisor-notes/</link><pubDate>Fri, 04 Aug 2017 09:22:44 +0000</pubDate><guid>https://111qqz.com/2017/08/tensorflow-supervisor-notes/</guid><description>
 update:supervisor的缺点是遇到问题只会抛异常，所以现在有一个better的管理工具,MonitoredSession
 master,chief worker,Supervisor 这几个概念有点搞不清（我最菜.jpg 因此来学习一下。
 概述 原生的tensorflow 是各种东西都需要自己手动，如果是小规模的训练问题倒是不大，但是如果是训练的数据量比较大，可能需要训练几天或者几个月。。。
@@ -100,21 +97,15 @@ Adding a New Op * [目录](https://www.tensorflow.org/extend/adding_an_op#top_of
 这篇文章不会涉及tensorflow的具体使用，而是专注于介绍tensorflow的架构，目的是让开发者能够对tensorflow现有框架进行自定义的扩展。
 tensorflow被设计用来处理大规模分布式训练，但是也足够灵活去处理新的machine learning模型或是系统层面的优化。
 Overview tensorflow的结构图如下：
-Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: /2017/08/tensorflow-architecture-notes-1/https://www.tensorflow.org/images/layers.png
-Disk path: /content/post/ACM-ICPC/https://www.tensorflow.org/images/layers.png
-Using Page Bundles: true
 从下往上大致上抽象程度越来越高。
 其中C API那一层将tensorflow底层的runtime core 封装成不同语言（python,cpp,etc)的用户层代码，并提供相应的接口
 这篇文章主要侧重如下layer:
-* **Client**: * 将计算定义为数据流图. * 使用 **[session](https://www.github.com/tensorflow/tensorflow/blob/r1.2/tensorflow/python/client/session.py)(**会话)启动图 的执行 * **Distributed Master** * 通过Session.run()中参数的定义，修改图中特定的子图 * 将子图分成多个pieces,使之运行在不同的进程和设备中） * 将得到的pieces分发到 worker services上 * 由worker services 启动graph pieces * **Worker Services** (one for each task) * Schedule the execution of graph operations using kernel implementations appropriate to the available hardware (CPUs, GPUs, etc).</description></item><item><title>how to copy &amp; modify nets model on tensorflow slim</title><link>https://111qqz.com/2017/07/how-to-copy-modify-nets-model-on-tensorflow-slim/</link><pubDate>Wed, 19 Jul 2017 06:21:40 +0000</pubDate><guid>https://111qqz.com/2017/07/how-to-copy-modify-nets-model-on-tensorflow-slim/</guid><description>
+* **Client**: * 将计算定义为数据流图. * 使用 **[session](https://www.github.com/tensorflow/tensorflow/blob/r1.2/tensorflow/python/client/session.py)(**会话)启动图 的执行 * **Distributed Master** * 通过Session.run()中参数的定义，修改图中特定的子图 * 将子图分成多个pieces,使之运行在不同的进程和设备中） * 将得到的pieces分发到 worker services上 * 由worker services 启动graph pieces * **Worker Services** (one for each task) * Schedule the execution of graph operations using kernel implementations appropriate to the available hardware (CPUs, GPUs, etc). * 使用kernel中对于特定硬件设备(cpu,gpu,etc)合适的实现去安全图中操作的执行。 * 从其他worker service 处发送或接收运算结果 * **Kernel Implementations** * 完成各个操作的计算 client,master,worker的关系如下</description></item><item><title>how to copy &amp; modify nets model on tensorflow slim</title><link>https://111qqz.com/2017/07/how-to-copy-modify-nets-model-on-tensorflow-slim/</link><pubDate>Wed, 19 Jul 2017 06:21:40 +0000</pubDate><guid>https://111qqz.com/2017/07/how-to-copy-modify-nets-model-on-tensorflow-slim/</guid><description>
 想要修改tensorflow-slim 中 nets中的某个model,例如明明为kk_v2.py
 观察到train_image_classifier.py中调用模型的部分
 network_fn = nets_factory.get_network_fn( FLAGS.model_name, num_classes=(dataset.num_classes - FLAGS.labels_offset), weight_decay=FLAGS.weight_decay, is_training=True) 调用了nets_factory.get_network_fn，get_network如下：
 def get_network_fn(name, num_classes, weight_decay=0.0, is_training=False): &amp;quot;&amp;quot;&amp;quot;Returns a network_fn such as `logits, end_points = network_fn(images)`. Args: name: The name of the network. num_classes: The number of classes to use for classification. weight_decay: The l2 coefficient for the model weights. is_training: `True` if the model is being used for training and `False` otherwise. Returns: network_fn: A function that applies the model to a batch of images.</description></item><item><title>tensorflow slim 源码分析</title><link>https://111qqz.com/2017/07/tensorflow-slim-code-notes/</link><pubDate>Sun, 16 Jul 2017 13:10:04 +0000</pubDate><guid>https://111qqz.com/2017/07/tensorflow-slim-code-notes/</guid><description>
 py的源码看起来还是很愉快的。。。（虽然熟练成程度完全不如cpp。。。。
-Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: /2017/07/tensorflow-slim-code-notes/https://111qqz.com/wordpress/wp-content/uploads/2017/07/Selection_004.png
-Disk path: /content/post/ACM-ICPC/https://111qqz.com/wordpress/wp-content/uploads/2017/07/Selection_004.png
-Using Page Bundles: true
 datasets里是数据集相关
 deployment是部署相关
 nets里给了很多网络结构
@@ -122,4 +113,4 @@ preprocessing给了几种预处理的方式
 这些都和slim没有太大关系，就不多废话了。
 分析的部分见代码注释...
 由于刚刚入门machine learning 一周...还有很多内容还没有从理论层面接触...所以源码的理解也十分有限...希望能以后有机会补充一波
-# Copyright 2016 The TensorFlow Authors. All Rights Reserved. # # Licensed under the Apache License, Version 2.0 (the &amp;quot;License&amp;quot;); # you may not use this file except in compliance with the License.</description></item></channel></rss>
+# Copyright 2016 The TensorFlow Authors. All Rights Reserved. # # Licensed under the Apache License, Version 2.0 (the &amp;quot;License&amp;quot;); # you may not use this file except in compliance with the License. # You may obtain a copy of the License at # # http://www.apache.org/licenses/LICENSE-2.0 # # Unless required by applicable law or agreed to in writing, software # distributed under the License is distributed on an &amp;quot;AS IS&amp;quot; BASIS, # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</description></item></channel></rss>

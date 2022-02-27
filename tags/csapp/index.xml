@@ -6,7 +6,8 @@
 子进程中的log打印不正确 有些执行路径的log没有打印出来 可以调用flush(stdout) 确保打印
 在执行fg job的时候，会等待上一个未结束的bg job执行 这是因为waitpid中的option写了默认的0，没有传入正确的option导致的
 SIGCHLD的实现 感觉这个函数是整个Lab的难点
-注意这里除了要对正常结束的process处理以外，也要处理因为其他原因导致的进程退出 可以根据下图的内容来判断是因为哪种原因进程结束的 Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !</description></item><item><title>[施工完成] CSAPP Malloc lab</title><link>https://111qqz.com/2021/04/csapp-malloclab/</link><pubDate>Sun, 14 Mar 2021 16:05:42 +0800</pubDate><guid>https://111qqz.com/2021/04/csapp-malloclab/</guid><description>
+注意这里除了要对正常结束的process处理以外，也要处理因为其他原因导致的进程退出 可以根据下图的内容来判断是因为哪种原因进程结束的 这段调了好久。。虽然书上已经讲了比较多的情况。。。不过还是觉得略难
+1void sigchld_handler(int sig) { 2 int olderrno = errno; 3 sigset_t mask_all, prev_all; 4 pid_t pid; 5 int status; 6 Sigfillset(&amp;amp;mask_all); 7 8 while ((pid = waitpid(-1, &amp;amp;status, WNOHANG | WUNTRACED)) &amp;gt; 0) { 9 if (WIFEXITED(status)) { 10 Sigprocmask(SIG_BLOCK, &amp;amp;mask_all, &amp;amp;prev_all); 11 deletejob(jobs, pid); 12 Sigprocmask(SIG_SETMASK, &amp;amp;prev_all, NULL); 13 } else if (WIFSIGNALED(status)) { 14 printf(&amp;#34;Job (%d) [%d] terminated by signal %d\n&amp;#34;, 15 pid2jid(pid), pid, WTERMSIG(status)); 16 Sigprocmask(SIG_BLOCK, &amp;amp;mask_all, &amp;amp;prev_all); 17 18 deletejob(jobs, pid); 19 Sigprocmask(SIG_SETMASK, &amp;amp;prev_all, NULL); 20 } else if (WIFSTOPPED(status)) { 21 printf(&amp;#34;Job (%d) [%d] stopped by signal %d\n&amp;#34;, 22 pid2jid(pid), pid, WSTOPSIG(status)); 23 struct job_t* job = getjobpid(jobs, pid); 24 if (job !</description></item><item><title>[施工完成] CSAPP Malloc lab</title><link>https://111qqz.com/2021/04/csapp-malloclab/</link><pubDate>Sun, 14 Mar 2021 16:05:42 +0800</pubDate><guid>https://111qqz.com/2021/04/csapp-malloclab/</guid><description>
 背景 动手实现一个memory allocator,体会core到爆炸的乐趣(不是
 trace file 结构分析 trace file 是对allocator的输入的描述，可以从mdriver.c中的
 1static trace_t *read_trace(char *tracedir, char *filename); 看到Parse的逻辑，从而得到trace file的结构。
@@ -31,10 +32,10 @@ use tk&amp;lt;=8.5,8.6 or above will not compile Modify the corresponding header
 phase 1 第一个比较简单，利用buffer overflow 来将函数的返回地址，替换成一个已知函数的地址，达到执行特定函数的目的。
 回忆一下函数调用的机器代码实现，需要先把函数的返回地址压栈，然后开辟栈空间，做些有的没的，做完之后析构开辟的栈空间，并把之前压入栈中的地址赋值给%ip(或者叫PC)，作为下一条指定的地址。函数的返回地址通常就是函数后面第一条指令的地址。
 可以参考如下两张图。
-Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: /2020/02/csapp-attacklab/https://i.loli.net/2020/02/15/EB8zbtqpFKUAPH4.png
-Disk path: /content/post/公开课/https://i.loli.net/2020/02/15/EB8zbtqpFKUAPH4.png
-Using Page Bundles: true
-Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: /2020/02/csapp-attacklab/https://i.</description></item><item><title>【施工完成】CSAPP bomb lab</title><link>https://111qqz.com/2020/02/csapp-bomblab/</link><pubDate>Sat, 01 Feb 2020 19:36:23 +0800</pubDate><guid>https://111qqz.com/2020/02/csapp-bomblab/</guid><description>
+我们观察getbuf的反汇编代码:
+1 2(gdb) disas getbuf 3Dump of assembler code for function getbuf: 4 0x00000000004017a8 &amp;lt;+0&amp;gt;: sub $0x28,%rsp 5 0x00000000004017ac &amp;lt;+4&amp;gt;: mov %rsp,%rdi 6 0x00000000004017af &amp;lt;+7&amp;gt;: callq 0x401a40 &amp;lt;Gets&amp;gt; 7 0x00000000004017b4 &amp;lt;+12&amp;gt;: mov $0x1,%eax 8 0x00000000004017b9 &amp;lt;+17&amp;gt;: add $0x28,%rsp 9 0x00000000004017bd &amp;lt;+21&amp;gt;: retq 10End of assembler dump. 11 看到getbuf函数开辟了0x28大小的栈空间
+也就是说输入至多0x28个字符，不会有问题。
+那么为了达成我们的目的，我们可以前0x28个字符任意输入，后面输入我们希望执行的touch1函数的地址，也就是 0x00000000004017c0</description></item><item><title>【施工完成】CSAPP bomb lab</title><link>https://111qqz.com/2020/02/csapp-bomblab/</link><pubDate>Sat, 01 Feb 2020 19:36:23 +0800</pubDate><guid>https://111qqz.com/2020/02/csapp-bomblab/</guid><description>
 背景 疫情肆虐,在家百无聊赖,于是开始拆炸弹. 炸弹分为6个阶段,每个阶段必须输入一个特定的字符串,否则炸弹就会爆炸. 提供给我们的是一个.c文件和一个linux可执行文件bomb
 1 2/*************************************************************************** 3* Dr. Evil&amp;#39;s Insidious Bomb, Version 1.1 4* Copyright 2011, Dr. Evil Incorporated. All rights reserved. 5* 6* LICENSE: 7* 8* Dr. Evil Incorporated (the PERPETRATOR) hereby grants you (the 9* VICTIM) explicit permission to use this bomb (the BOMB). This is a 10* time limited license, which expires on the death of the VICTIM. 11* The PERPETRATOR takes no responsibility for damage, frustration, 12* insanity, bug-eyes, carpal-tunnel syndrome, loss of sleep, or other 13* harm to the VICTIM.</description></item><item><title>【施工完成】CSAPP data lab</title><link>https://111qqz.com/2019/02/csapp-data-lab/</link><pubDate>Thu, 28 Feb 2019 14:06:42 +0000</pubDate><guid>https://111qqz.com/2019/02/csapp-data-lab/</guid><description>
 CSAPP第二章的内容以前组成原理基本都学过...所以就简单翻了翻。

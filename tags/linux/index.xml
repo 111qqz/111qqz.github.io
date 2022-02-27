@@ -55,12 +55,13 @@ awk是一门比较古老但是很好用的文本处理工具（语言?）
 $ cat netstat.txt Proto Recv-Q Send-Q Local-Address Foreign-Address State tcp 0 0 0.0.0.0:3306 0.0.0.0:* LISTEN tcp 0 0 0.0.0.0:80 0.0.0.0:* LISTEN tcp 0 0 127.0.0.1:9000 0.0.0.0:* LISTEN tcp 0 0 coolshell.cn:80 124.205.5.146:18245 TIME_WAIT tcp 0 0 coolshell.cn:80 61.140.101.185:37538 FIN_WAIT2 tcp 0 0 coolshell.</description></item><item><title>Linux 下各个目录的作用及内容</title><link>https://111qqz.com/2017/03/common-linux-files/</link><pubDate>Wed, 15 Mar 2017 06:29:36 +0000</pubDate><guid>https://111qqz.com/2017/03/common-linux-files/</guid><description>
 参考：[wiki_FHS](http://Filesystem Hierarchy Standard)
 其实这东西。。。虽然有一个统一的标准。。。但是不同发行版。。。或者同一个发行版的不同版本。。。差异貌似都蛮大的。。。所以只是理论上各个目录的作用。。。可能和具体的发行版不符。。。
-Linux 目录 在 Linux 下，我们看到的是文件夹（目录）： Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: /2017/03/common-linux-files/http://ww3.sinaimg.cn/mw690/78f9859egw1etbt8e0vtfj20pc0c7jsx.jpg
-Disk path: /content/post/工程/http://ww3.sinaimg.cn/mw690/78f9859egw1etbt8e0vtfj20pc0c7jsx.jpg
-Using Page Bundles: true
-在早期的 UNIX 系统中，各个厂家各自定义了自己的 UNIX 系统文件目录，比较混乱。Linux 面世不久后，对文件目录进行了标准化，于1994年对根文件目录做了统一的规范，推出 FHS ( Filesystem Hierarchy Standard ) 的 Linux 文件系统层次结构标准。FHS 标准规定了 Linux 根目录各文件夹的名称及作用，统一了Linux界命名混乱的局面。
+Linux 目录 在 Linux 下，我们看到的是文件夹（目录）： 在早期的 UNIX 系统中，各个厂家各自定义了自己的 UNIX 系统文件目录，比较混乱。Linux 面世不久后，对文件目录进行了标准化，于1994年对根文件目录做了统一的规范，推出 FHS ( Filesystem Hierarchy Standard ) 的 Linux 文件系统层次结构标准。FHS 标准规定了 Linux 根目录各文件夹的名称及作用，统一了Linux界命名混乱的局面。
 无论何种版本的 Linux 发行版，桌面、应用是 Linux 的外衣，文件组织、目录结构才是Linux的内心。
-FHS（英文：Filesystem Hierarchy Standard 中文：文件系统层次结构标准），多数 Linux 版本采用这种文件组织形式，FHS 定义了系统中每个区域的用途、所需要的最小构成的文件和目录同时还给出了例外处理与矛盾处理。 FHS 定义了两层规范，第一层是， / 下面的各个目录应该要放什么文件数据，例如 /etc应该要放置设置文件，/bin 与 /sbin 则应该要放置可执行文件等等。</description></item><item><title>geekos project 1 （ELF文件相关）</title><link>https://111qqz.com/2016/06/geekos-project-1-elf/</link><pubDate>Sat, 18 Jun 2016 19:43:34 +0000</pubDate><guid>https://111qqz.com/2016/06/geekos-project-1-elf/</guid><description>
+FHS（英文：Filesystem Hierarchy Standard 中文：文件系统层次结构标准），多数 Linux 版本采用这种文件组织形式，FHS 定义了系统中每个区域的用途、所需要的最小构成的文件和目录同时还给出了例外处理与矛盾处理。 FHS 定义了两层规范，第一层是， / 下面的各个目录应该要放什么文件数据，例如 /etc应该要放置设置文件，/bin 与 /sbin 则应该要放置可执行文件等等。
+第二层则是针对 /usr 及 /var 这两个目录的子目录来定义。例如 /var/log 放置系统登录文件、/usr/share 放置共享数据等等。
+FHS 是根据以往无数 Linux 用户和开发者的经验总结出来的，并且会维持更新，FHS 依据文件系统使用的频繁与否以及是否允许用户随意改动（注意，不是不能，学习过程中，不要怕这些），将目录定义为四种交互作用的形态，如下表所示：
+/：根目录，一般根目录下只存放目录，不要存放件，/etc、/bin、/dev、/lib、/sbin应该和根目录放置在一个分区中
+/bin: /usr/bin: 可执行二进制文件的目录，如常用的命令ls、tar、mv、cat等。</description></item><item><title>geekos project 1 （ELF文件相关）</title><link>https://111qqz.com/2016/06/geekos-project-1-elf/</link><pubDate>Sat, 18 Jun 2016 19:43:34 +0000</pubDate><guid>https://111qqz.com/2016/06/geekos-project-1-elf/</guid><description>
 一、目的 熟悉ELF文件格式，了解GeekOS系统如何将ELF格式的可执行程序装入到内存，建立内核进程并运行的实现技术。 二、流程 1、修改/geekos/elf.c文件：在函数Parse_ELF_Executable( )中添加代码，分析ELF格式的可执行文件（包括分析得出ELF文件头、程序头，获取可执行文件长度，代码段、数据段等信息），并填充Exe_Format数据结构中的域值。 2、在Linux环境下编译系统得到GeekOS镜像文件。 3、编写一个相应的bochs配置文件。 4、在bochs中运行GeekOS系统显示结果。
 编译以及启动bochs同project0... project0遇到的那些错误还是都会遇到一遍233.
 然后在project1/src/geekos/ 目录下的elf.c中添加函数：int Parse_ELF_Executable(char *exeFileData, ulong_t exeFileLength, struct Exe_Format *exeFormat)

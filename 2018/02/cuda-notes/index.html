@@ -196,13 +196,6 @@ int main(void)
 </code></pre>
 <p>关于devide code 和 host code，参考下图。</p>
 <p><a href=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-145751.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2018/02/cuda-notes/https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-145751.png title="Open this web path in a new tab" target=_blank class=warning-link>/2018/02/cuda-notes/https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-145751.png</a></p>
-<p>Disk path: /content/post/工程/https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-145751.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 <p>现在我们单线程地跑了一个cuda kernel, 接下来是如何使它并行.关键在于&lt;&lt;&lt;1,1>>>这部分。</p>
 <p>这行代码告诉了cuda runtime 有多少个并行的线程要被执行。
@@ -267,13 +260,6 @@ threadIdx.x  表示当前运行的thread是block中的哪一个
 blockDim.x 表示block中的线程个数</p>
 <p>关于threadIdx.x等 下标问题，参考下图。</p>
 <p><a href=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-151308.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2018/02/cuda-notes/https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-151308.png title="Open this web path in a new tab" target=_blank class=warning-link>/2018/02/cuda-notes/https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-151308.png</a></p>
-<p>Disk path: /content/post/工程/https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-151308.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 <p>我们需要观察到使用cuda的方法之后时间的变化。</p>
 <p>可以使用nvprof命令</p>
@@ -318,24 +304,10 @@ Time(%)      Time     Calls       Avg       Min       Max  Name
 <p>我们不妨考虑一个例子，有2个数组a,b</p>
 <p>进行如下运算：</p>
 <p><a href=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-210339.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2018/02/cuda-notes/https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-210339.png title="Open this web path in a new tab" target=_blank class=warning-link>/2018/02/cuda-notes/https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-210339.png</a></p>
-<p>Disk path: /content/post/工程/https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-210339.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 <p>为了加快运行速度，我们还是考虑多线程的办法。</p>
 <p>让每一个线程处理一个输出。</p>
 <p><a href=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-095804.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2018/02/cuda-notes/https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-095804.png title="Open this web path in a new tab" target=_blank class=warning-link>/2018/02/cuda-notes/https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-095804.png</a></p>
-<p>Disk path: /content/post/工程/https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-095804.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 <p>然而我们发现，in中除了边界元素，每一个元素都被读了7次。</p>
 <p>这显然是没有必要的。</p>
@@ -346,13 +318,6 @@ Time(%)      Time     Calls       Avg       Min       Max  Name
 <p>由于线程的访问顺序是不固定的(?</p>
 <p>会发生如下的问题：</p>
 <p><a href=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-100824.png>
-<div class="notices warning image-warning">
-<div class=label>Image not found</div>
-<style>a.warning-link{color:inherit!important;font-weight:inherit!important;text-decoration:underline!important;border-bottom:none!important}</style>
-<p>Web path: <a href=/2018/02/cuda-notes/https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-100824.png title="Open this web path in a new tab" target=_blank class=warning-link>/2018/02/cuda-notes/https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-100824.png</a></p>
-<p>Disk path: /content/post/工程/https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-100824.png</p>
-<p>Using <a href=https://gohugo.io/content-management/page-bundles/ title="Information about Hugo Page Bundles" target=_blank class=warning-link>Page Bundles</a>: true</p>
-</div>
 </a></p>
 <p>解决办法很无脑。。。因为cuda并没有想象中得那么底层。。。</p>
 <p>就是使用__syncthreads(); 来同步一个block中的所有进程。。。</p>
