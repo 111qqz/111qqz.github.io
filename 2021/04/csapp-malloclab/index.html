@@ -147,6 +147,7 @@ num_ids表示一共有多少个不同的内存块(对应后续的指令可以显
 <h2 id=implicit-free-list>implicit free list</h2>
 <p>这种也就是CS:APP3e text中着重描述的那种，补充了一些checker逻辑，放在这里作为baseline</p>
 <p>结构图如下:
+<img class="image_figure image_external" loading=lazy src=https://us1.myximage.com/2021/04/03/98e0f58b268ec352f4362bbb4f58f8fa.png alt=98e0f58b268ec352f4362bbb4f58f8fa.png>
 </p>
 <p>这种是带一个boundary tag的，也就是一个footer. footer完全是header内容的副本。
 这样做的好处是可以很容易从当前block找到上一个block,只需要常数复杂度的操作，否则需要O(n)复杂度整个遍历一遍。 对应的代价是有效载荷的比例变低了。</p>
@@ -509,6 +510,7 @@ num_ids表示一共有多少个不同的内存块(对应后续的指令可以显
 <p>隐式列表的坏处是。。每次allocate的时候，需要遍历全部block去找free block. 显然，我们可以维护一个free list的链表，使得每次allocate的时候，只需要遍历free block
 结构如图:</p>
 <p><a href=https://img.so/image/gTqPb9>
+<img class="image_figure image_external" loading=lazy src=https://us1.myximage.com/2021/04/03/9c05f9408157e3ac30f497772d0f436d.png alt=9c05f9408157e3ac30f497772d0f436d.png>
 </a></p>
 <p>这里很巧妙的一点是，由于free block中的payload是没有被使用的，因此把上一个free block和下一个free block的地址都放在了当前free block的payload中，而没有单独维护一个数据结构。</p>
 <p><strong>需要注意的是，由于现在payload中存放了两个指针，因此目前一个block的最小size变成了16字节(heade,footer各4字节，payload要至少能放下两个指针，8字节，一共16字节)</strong></p>

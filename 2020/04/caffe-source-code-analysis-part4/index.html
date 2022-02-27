@@ -106,6 +106,7 @@ Share on:
 <p>blob,layer,net只是三个最基本的概念，关键还是在于各个layer. 但是layer这么多，要怎么看呢？ 想了一下决定把相同作用的layer放在一起分析。 今天打算先分析一下激活函数。</p>
 <h2 id=sigmoid>sigmoid</h2>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Sigmoid_function_01.png/220px-Sigmoid_function_01.png alt=sigmoid函数>
 </p>
 <p>表达式为 f(t) = 1/(1+e^-t)</p>
 <p>caffe GPU实现，非常直接</p>
@@ -193,6 +194,7 @@ The ReLULayer is often a better choice for this reason.</p>
 </code></pre></div><h2 id=relu及其变种>relu及其变种</h2>
 <p>表达式为f(x) = max(0,x)</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Ramp_function.svg/325px-Ramp_function.svg.png alt=relu>
 </p>
 <p>我们看caffe的proto,发现relu和leaky relu是在一起实现的，因此干脆一起说了。</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-protobuf data-lang=protobuf><span class=ln> 1</span><span class=err>
@@ -213,6 +215,7 @@ The ReLULayer is often a better choice for this reason.</p>
 </span><span class=ln>16</span><span class=err></span><span class=p>}</span><span class=err>
 </span><span class=ln>17</span><span class=err>
 </span></code></pre></div><p>leaky relu是relu的改进，表达式为
+<img class="image_figure image_external" loading=lazy src=https://wikimedia.org/api/rest_v1/media/math/render/svg/7ef462b36056ff49700914fc305a39cd0d8c1ef1 alt="leaky relu">
 </p>
 <p>其中lambda是一个用户设定的超参，就是上面的negative_slope</p>
 <p>看一下代码. backward部分也很简单，就一起看一下。</p>
@@ -365,6 +368,7 @@ equal to 2. The 1st axis (0-based) is seen as channels.</p>
 <hr>
 <p>还有个类似的叫elu</p>
 <p>
+<img class="image_figure image_external" loading=lazy src="https://www.zhihu.com/equation?tex=f%28z%29%3D%5Cleft%5C%7B%5Cbegin%7Barray%7D%7Bll%7D%7Bz%7D+%26+%7Bz%3E0%7D+%5C%5C+%7B%5Calpha%28%5Cexp+%28z%29-1%29%7D+%26+%7Bz+%5Cleq+0%7D%5Cend%7Barray%7D%5Cright." alt=elu>
 </p>
 <p>和leaky relu其实非常类似，没什么好说的。</p>
 <p>效果并不确定完全比relu好，而且还要做exp运算，差评。</p>

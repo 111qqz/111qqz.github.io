@@ -110,23 +110,36 @@ Share on:
 <pre><code>  * regression similarity learning  在这种方式中，给出的数据是 ![(x_{i}^{1},x_{i}^{2})](https://wikimedia.org/api/rest_v1/media/math/render/svg/cfa249357a1b4a7baf332041d67e480d6bb1f8fb)
 </code></pre>
 <p>  和他们的相似度 
+<img class="image_figure image_external" loading=lazy src=https://wikimedia.org/api/rest_v1/media/math/render/svg/e8a6d6289f0a0adb278812a8723b4077de79a421 alt="y_{i}\in R">
 .  目标是学习到一个函数
+<img class="image_figure image_external" loading=lazy src=https://wikimedia.org/api/rest_v1/media/math/render/svg/d91180d029bb8a4f43be5d76060581b861f65fb7 alt="f(x_{i}^{1},x_{i}^{2})\sim y_{i}">
 ，对于
+<img class="image_figure image_external" loading=lazy src=https://wikimedia.org/api/rest_v1/media/math/render/svg/cfa249357a1b4a7baf332041d67e480d6bb1f8fb alt=(x_{i}^{1},x_{i}^{2})>
  给出<strong>yi</strong>的近似值。
 * Classification similarity learning  给出数据 
+<img class="image_figure image_external" loading=lazy src=https://wikimedia.org/api/rest_v1/media/math/render/svg/cfa249357a1b4a7baf332041d67e480d6bb1f8fb alt=(x_{i}^{1},x_{i}^{2})>
   和他们是否相似
+<img class="image_figure image_external" loading=lazy src=https://wikimedia.org/api/rest_v1/media/math/render/svg/e5c2ebeb5127a5306baf27c9c622a86aa35625f2 alt="y_{i}\in {0,1}">
  。目标是训练出一个分类器，能够完成对一组
+<img class="image_figure image_external" loading=lazy src=https://wikimedia.org/api/rest_v1/media/math/render/svg/cfa249357a1b4a7baf332041d67e480d6bb1f8fb alt=(x_{i}^{1},x_{i}^{2})>
  是否相似的二分类判断。
 * Ranking similarity learning 给出有序三元组
+<img class="image_figure image_external" loading=lazy src=https://wikimedia.org/api/rest_v1/media/math/render/svg/1bb03478aa729d594350565f174c78a4b7d9e87c alt=(x_{i},x_{i}^{+},x_{i}^{-})>
 ，其中 
+<img class="image_figure image_external" loading=lazy src=https://wikimedia.org/api/rest_v1/media/math/render/svg/e87000dd6142b81d041896a30fe58f0c3acb2158 alt=x_{i}>
  is known to be more similar to 
+<img class="image_figure image_external" loading=lazy src=https://wikimedia.org/api/rest_v1/media/math/render/svg/89b5a4feb798c9d34d33200239a28f02cc6df2c4 alt=x_{i}^{+}>
  than to 
+<img class="image_figure image_external" loading=lazy src=https://wikimedia.org/api/rest_v1/media/math/render/svg/202021401f451c2ba4ab43eddb2f8644e2610249 alt=x_{i}^{-}>
  。目标是训练出一个函数，使得对于新的三元组 
+<img class="image_figure image_external" loading=lazy src=https://wikimedia.org/api/rest_v1/media/math/render/svg/2578f37761a5f2937eedca81f4c96b0ba45fbc15 alt=(x,x^{+},x^{-})>
 ，满足
+<img class="image_figure image_external" loading=lazy src=https://wikimedia.org/api/rest_v1/media/math/render/svg/c27924f2eec770183ce65e3c653e74a5c1c79c7e alt=f(x,x^{+})&amp;gt;f(x,x^{-})>
 。容易看出，这种方式采取了比回归更弱的监督形式，因为不需要提供精确的相似性度量，只需要提供相似性的相对顺序。因此，这种ranking-based的相似性学习更容易应用于实际的大规模应用
 * Locality sensitive hashing (LSH)   局部敏感哈希和普通哈希的不同就是，相似的项有更大的概率被放到同一个桶中。</p>
 <p>顺便一提，这里有一个叫triplet loss 的概念，</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=http://img.blog.csdn.net/20150707120209693 alt=这里写图片描述>
 </p>
 <p>如上图所示，triplet是一个三元组，这个三元组是这样构成的：从训练数据集中随机选一个样本，该样本称为Anchor，然后再随机选取一个和Anchor (记为x_a)属于同一类的样本和不同类的样本,这两个样本对应的称为Positive (记为x_p)和Negative (记为x_n)，由此构成一个（Anchor，Positive，Negative）三元组。</p>
 <p><strong>我们发现，triplet loss 其实就是在ranking similarity learning 问题中，学习similarity function时的loss</strong></p>

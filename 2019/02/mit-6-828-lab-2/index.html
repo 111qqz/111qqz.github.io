@@ -336,14 +336,19 @@ page_free(struct PageInfo *pp)
 <p><strong><em>Physical addresses</em></strong> are calculated from linear addresses through paging. The linear address is used as an index into the Page Table where the CPU locates the corresponding physical address. If paging is not enabled, linear addresses are always equal to physical addresses. Under RTTarget-32, linear addresses are equal to physical addresses except for remapped RAM regions</blockquote></p>
 <p>放几张重要的图:</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig5-2.gif alt>
 </p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig5-8.gif alt>
 </p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig5-9.gif alt>
 </p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig5-10.gif alt>
 </p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig5-12.gif alt>
 </p>
 <p>详细情况可以参考<a href=https://pdos.csail.mit.edu/6.828/2018/readings/i386/c05.htm>Intel 80386 Reference Programmer's Manual Chapter 5 Memory Management</a>  建议通读,非常短,却又把最重要的内容都讲清楚了.</p>
 <p>练习3和question 1都比较水,不说了.</p>
@@ -365,6 +370,7 @@ page_free(struct PageInfo *pp)
 <p>那么如何判断一个page是否存在?答案是使用present bit,** (<em>pgdir_entry & PTE_P)为True则表示一个page存在.</em>*</p>
 <p>第二个是create一个page的时候,需要两部分. page frame address和<strong>各种权限位</strong>.  page_alloc返回的是PageInfo* ,可以用page2pa得到对应的物理地址.</p>
 <p>权限位的设置可以参考<a href=https://pdos.csail.mit.edu/6.828/2018/readings/i386/s06_04.htm>6.4 Page-Level Protection</a>  或者下图
+<img class="image_figure image_external" loading=lazy src=https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig6-10.gif alt>
 </p>
 <p>然后第三点,返回的是一个pointer,必须是VA,需要做相应的转换.</p>
 <pre><code>// Given 'pgdir', a pointer to a page directory, pgdir_walk returns
@@ -788,6 +794,7 @@ boot_map_region(kern_pgdir,KERNBASE,0xffffffff-KERNBASE,0,PTE_W | PTE_P);// kern
 <p><strong>3.We have placed the kernel and user environment in the same address space. Why will user programs not be able to read or write the kernel's memory? What specific mechanisms protect the kernel memory?</strong></p>
 <p>对于JOS来说,主要就是"page-level protection"在起作用. 具体来说,就是PTE_W还有PTE_U两个bit.</p>
 <p><a href=https://111qqz.com/wp-content/uploads/2019/02/page-level-protection.png>
+<img class="image_figure image_external" loading=lazy src=https://111qqz.com/wp-content/uploads/2019/02/page-level-protection.png alt>
 </a></p>
 <p><strong>4.What is the maximum amount of physical memory that this operating system can support? Why?</strong></p>
 <p>最大能支持256MB.因为KERNBASE到4GB之间只有这么大的空间.</p>

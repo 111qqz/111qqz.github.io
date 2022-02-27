@@ -116,8 +116,10 @@ Share on:
 <p>回忆一下函数调用的机器代码实现，需要先把函数的返回地址压栈，然后开辟栈空间，做些有的没的，做完之后析构开辟的栈空间，并把之前压入栈中的地址赋值给%ip(或者叫PC)，作为下一条指定的地址。函数的返回地址通常就是函数后面第一条指令的地址。</p>
 <p>可以参考如下两张图。</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://i.loli.net/2020/02/15/EB8zbtqpFKUAPH4.png alt=函数调用.png>
 </p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://i.loli.net/2020/02/15/gBSsAm5NJrVWheo.jpg alt=函数调用2.jpg>
 </p>
 <p>我们观察getbuf的反汇编代码:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-GAS data-lang=GAS><span class=ln> 1</span>
@@ -273,6 +275,7 @@ Share on:
 <p>这种现成的代码我们称之为 gadget,以ret 命令结尾.</p>
 <p>我们可以通过在栈上放一串 gadget 的地址,达到执行一堆指令的目的.</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://i.loli.net/2020/02/17/napNV1BJbyvfz5X.png alt=gadget在栈上的示意图.png>
 </p>
 <p>注意这个栈是向上增长的...</p>
 <p>还有的一个疑问是,为什么我们(几乎总是)能在现成的指令中找到我们需要的指令?</p>
@@ -285,6 +288,7 @@ Share on:
 </blockquote>
 <p>于是我们来看一下gadget farm中都有什么指令</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://i.loli.net/2020/02/17/w6HjMPi9gBXCnuQ.png alt="gadget fram指令.png">
 </p>
 <p>然后发现,只有</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-GAS data-lang=GAS><span class=ln>1</span><span class=nf>movq</span> <span class=nv>%rax</span><span class=p>,</span><span class=nv>%rdi和</span> <span class=no>popq</span> <span class=nv>%rax</span>

@@ -107,6 +107,7 @@ Share on:
 <h1 id=overview>Overview</h1>
 <p>tensorflow的结构图如下：</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://www.tensorflow.org/images/layers.png alt="TensorFlow Layers">
 </p>
 <p>从下往上大致上抽象程度越来越高。</p>
 <p>其中C API那一层将tensorflow底层的runtime core 封装成不同语言（python,cpp,etc)的用户层代码，并提供相应的接口</p>
@@ -128,6 +129,7 @@ Share on:
 </code></pre>
 <p>client,master,worker的关系如下</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://www.tensorflow.org/images/diag1.svg alt="TensorFlow Architecture Diagram">
 </p>
 <p>"/job:worker/task:0" 和"/job:ps/task:0"都是运行在worker service上的tasks</p>
 <p>其中ps是“parameter server”的缩写，也就是参数服务器。</p>
@@ -140,6 +142,7 @@ Share on:
 <p>之后client 创建 一个session,session将刚刚定义好的图传到master节点，当client想要计算图中某个节点时，就会触发对master节点的调用从而开始计算。</p>
 <p>下面为运算 S+=w*x+b 所建的图：</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://www.tensorflow.org/images/graph_client.svg alt="TensorFlow Architecture Diagram: Client">
 </p>
 <h1 id=distributed-master>Distributed master</h1>
 <pre><code>  * 对graph进行修剪以获得 完成client要求的运算所需要的子图。
@@ -162,16 +165,20 @@ d = tmp * e;
 <p>而所谓constant folding，其实就是在编译期间，将可以化简的常数先计算出来。通常在编译的中间代码生成阶段完成。</p>
 <p>在进行完这些优化后，master将优化过的子图的执行分配到不同的task上（<strong>此时只是设定分配方案</strong>）</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://www.tensorflow.org/images/graph_master_cln.svg alt="TensorFlow Architecture Diagram: Master">
 </p>
 <p>下图是一个图的可能的划分（partition）</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://www.tensorflow.org/images/graph_split1.svg alt="Partitioned Graph">
 </p>
 <p>由于划分成了不同的task，在不同的卡上运行，因此出现了通信的问题。</p>
 <p>因此在被划分的位置，添加recv和send节点来在不同的task之间传递信息，如下图：</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://www.tensorflow.org/images/graph_split2.svg alt="Partitioned Graph">
 </p>
 <p>然后master节点按照之前的分配，将graph pieces 传送给不同的task</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://www.tensorflow.org/images/graph_workers_cln.svg alt="Partitioned Graph">
 </p>
 <h1 id=worker-service>Worker Service</h1>
 <pre><code>  * 处理来自master节点的请求
@@ -188,6 +195,7 @@ d = tmp * e;
 </code></pre>
 <p>除此之外，对于多个gpu之间的通信，我们也已经开始准备支持NVIDIA's NCCL library.</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://www.tensorflow.org/images/graph_send_recv.svg alt="Partitioned Graph">
 </p>
 <h1 id=kernel-implementations>Kernel Implementations</h1>
 <p>runtime本身包含200+个标准运算，对于有些通过标准运算难以构成的图，用户可以注册额外的kernel来实现自定义的运算。</p>

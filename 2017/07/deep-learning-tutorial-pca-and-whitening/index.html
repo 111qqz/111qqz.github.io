@@ -119,35 +119,43 @@ Share on:
 <p>PCA starts with computing the covariance matrix. I found <a href=http://stattrek.com/matrix-algebra/covariance-matrix.aspx>this tutorial</a> helpful for getting a basic understanding of covariance matrices (I only read a little bit of it to get the basic idea).</p>
 <p>The following equation is presented for computing the covariance matrix.</p>
 <p><a href=https://chrisjmccormick.files.wordpress.com/2014/06/covariance.png>
+<img class="image_figure image_external" loading=lazy src=http://chrisjmccormick.files.wordpress.com/2014/06/covariance.png alt=Covariance>
 </a></p>
 <p>Note that the placement of the transpose operator creates a matrix here, not a single value.</p>
 <p>Note that this function only computes the covariance matrix if the mean is zero. The proper function would be based on (x - mu)(x - mu)^T. For the tutorial example, the dataset has been adjusted to have a mean of 0.</p>
 <p>For 2D data, here are the equations for each individual cell of the 2x2 covariance matrix, so that you can get more of a feel for what each element represents.</p>
 <p><a href=https://chrisjmccormick.files.wordpress.com/2014/06/covariancematrix.png>
+<img class="image_figure image_external" loading=lazy src=http://chrisjmccormick.files.wordpress.com/2014/06/covariancematrix.png alt=CovarianceMatrix>
 </a></p>
 <p>If you subtract the means from the dataset ahead of time, then you can drop the “minus mu” terms from these equations. Subtracting the means causes the dataset to be centered around (0, 0).</p>
 <p>The top-left corner is just a measure of how much the data varies along the x_1 dimension. Similarly, the bottom-right corner is the variance in the x_2 dimension.</p>
 <p>The bottom-left and top-right corners are identical. These indicate the correlation between x_1 and x_2.</p>
 <p>If the data is mainly in quadrants one and three, then all of the x_1 * x_2 products are going to be positive, so there’s a <em>positive</em> correlation between x_1 and x_2.</p>
 <p><a href=https://chrisjmccormick.files.wordpress.com/2014/06/positivecorrelation.png>
+<img class="image_figure image_external" loading=lazy src=http://chrisjmccormick.files.wordpress.com/2014/06/positivecorrelation.png alt=PositiveCorrelation>
 </a></p>
 <p>If the data is all in quadrants two and four, then the all of the products will be negative, so there’s a <em>negative</em> correlation between x_1 and x_2.</p>
 <p><a href=https://chrisjmccormick.files.wordpress.com/2014/06/negativecorrelation.png>
+<img class="image_figure image_external" loading=lazy src=http://chrisjmccormick.files.wordpress.com/2014/06/negativecorrelation.png alt=NegativeCorrelation>
 </a></p>
 <p>If the data is evenly dispersed in all four quadrants, then the positive and negative products will cancel out, and the covariance will be roughly zero. This indicates that there is _no _correlation.</p>
 <p><a href=https://chrisjmccormick.files.wordpress.com/2014/06/nocorrelation.png>
+<img class="image_figure image_external" loading=lazy src=http://chrisjmccormick.files.wordpress.com/2014/06/nocorrelation.png alt=NoCorrelation>
 </a></p>
 <p><strong>Eigenvectors</strong></p>
 <p>After calculating the covariance matrix for the dataset, the next step is to compute the  eigenvectors of the covariance matrix. I found <a href=http://www.math.hmc.edu/calculus/tutorials/eigenstuff/>this tutorial</a>helpful. Again, I only skimmed it and got a high level understanding.</p>
 <p>The eigenvectors of the covariance matrix have the property that they point along the major directions of variation in the data.</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=http://ufldl.stanford.edu/wiki/images/thumb/b/b4/PCA-u1.png/600px-PCA-u1.png alt=PCA-u1.png>
 </p>
 <p>Why this is the case is beyond me. I suspect you’d have to be more intimately acquainted with how the eigenvectors are found in order to understand why they have this property. So I’m just taking it as a given for now.</p>
 <blockquote>
 <h3 id=projecting-onto-an-eigenvector>Projecting onto an eigenvector</h3>
 </blockquote>
 <p>The tutorial explains that taking the dot product between a data point, x, and an eigen vector, u_1, gives you “the length (magnitude) of the projection of
+<img class="image_figure image_external" loading=lazy src=http://deeplearning.stanford.edu/wiki/images/math/f/6/c/f6c0f8758a1eb9c99c0bbe309ff2c5a5.png alt="\textstyle x">
 onto the vector
+<img class="image_figure image_external" loading=lazy src=http://deeplearning.stanford.edu/wiki/images/math/3/f/c/3fc01c8dc5d4c8c57cd758ec3a76283f.png alt="\textstyle u_1">
 . “</p>
 <p>Take a look at the Wikipedia article on <a href=http://en.wikipedia.org/wiki/Scalar_projection>Scalar Projection</a> to help understand what this means.</p>
 <p>The resulting scalar value is a point along the line formed by the eigen vector.</p>
@@ -192,9 +200,11 @@ onto the vector
 <p>Here is the final output of my code, showing the original image patches and the whitened images.</p>
 <p>Before whitening:</p>
 <p><a href=https://chrisjmccormick.files.wordpress.com/2014/06/imagepatches_prewhitening.png>
+<img class="image_figure image_external" loading=lazy src=http://chrisjmccormick.files.wordpress.com/2014/06/imagepatches_prewhitening.png alt=imagePatches_preWhitening>
 </a></p>
 <p>After whitening:</p>
 <p><a href=https://chrisjmccormick.files.wordpress.com/2014/06/imagepatches_withwhitening.png>
+<img class="image_figure image_external" loading=lazy src=http://chrisjmccormick.files.wordpress.com/2014/06/imagepatches_withwhitening.png alt=imagePatches_withWhitening>
 </a></blockquote></p>
 <p>提到PCA和白化主要是为了介绍的完整性，实际上在卷积神经网络中并不会采用这些变换。然而对数据进行零中心化操作还是非常重要的，对每个像素进行归一化也很常见。</p>
 <p><strong>常见错误：进行预处理很重要的一点是：任何预处理策略（比如数据均值）都只能在训练集数据上进行计算，算法训练完毕后再应用到验证集或者测试集上。例如，如果先计算整个数据集图像的平均值然后每张图片都减去平均值，最后将整个数据集分成训练/验证/测试集，那么这个做法是错误的。应该怎么做呢？应该先分成训练/验证/测试集，只是从训练集中求图片平均值，然后各个集（训练/验证/测试集）中的图像再减去这个平均值。</strong></p>

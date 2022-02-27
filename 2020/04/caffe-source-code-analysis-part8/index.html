@@ -106,6 +106,7 @@ Share on:
 <p>虽然不太care 训练的过程，<del>但是由于容易看懂的layer都看得差不多了</del> 所以打算看一下这些loss function.</p>
 <h2 id=euclidean-loss-l2-loss>Euclidean Loss (L2 loss)</h2>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://i.loli.net/2020/04/18/voT7jGEF1BabmpL.png alt="L2 loss.png">
 </p>
 <p>一般用于“real-valued regression tasks” 。　比如之前的项目上用的人脸年龄模型，就是用了这个Loss</p>
 <p>这个loss没什么额外的参数，实现也很简单。</p>
@@ -135,9 +136,11 @@ Share on:
 </code></pre></div><p>注意要Reshape中，要求两个bottom blob（第一个为预测结果，第二个为gt)的batch维度可以不同,计算时按照预测结果的个数为准。</p>
 <p>以及，Mean Square Error(MSE)　和L2 loss的差别只是一个系数1/2,可以放在一起说明。</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://miro.medium.com/max/291/1*w9HQ9w30lpr_HYZqeRhm4A.png alt=MSE>
 </p>
 <h2 id=multinomiallogisticloss>MultinomialLogisticLoss</h2>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://i.loli.net/2020/04/18/MdSGtml3JOYUzX6.png alt=MultinomialLogisticLoss.png>
 </p>
 <p>用于单标签多分类任务。　输入的预测blob是一个(通常是经过softmax后)得到的概率分布。</p>
 <p>注意 <strong>" The SoftmaxWithLossLayer should be preferred over separate SoftmaxLayer + MultinomialLogisticLossLayer as its gradient computation is more numerically stable."</strong></p>
@@ -170,13 +173,16 @@ forward也很简单</p>
 kLOG_THRESHOLD是一个很小的值，1E-20,防止log0炸掉</p>
 <h2 id=hinge-loss>hinge-loss</h2>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://wikimedia.org/api/rest_v1/media/math/render/svg/a5f42d461f1a28b27438e8f1641e042ff2e40102 alt="hinge loss">
 </p>
 <p>中文似乎叫"合页损失函数",因为很像一本书打开的样子(?</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://pic1.zhimg.com/80/v2-3c6aa9626ee8e4609b0d7c5712baf624_720w.jpg alt=hinge-loss>
 </p>
 <p>主要用在svm中。。。所以其实没在工作中实际接触过这个。</p>
 <p>这个loss的特点是更加严格。。严格的意思是说，分类的结果不仅需要正确，而且需要置信度足够高，损失才会是0.</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=https://i.loli.net/2020/04/18/ZgKC2ONAmuTRYJ7.png alt=hinge_loss_caffe.png>
 </p>
 <p>forward代码稍微不是那么直接</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>

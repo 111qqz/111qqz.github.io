@@ -134,10 +134,12 @@ Share on:
 </blockquote>
 <p>假设现在有4个网页，我们将它们分别进行Shingling（将待查询的字符串集进行映射，映射到一个集合里，如字符串“abcdeeee", 映射到集合”(a,b,c,d,e)", 注意集合中元素是无重复的，这一步骤就叫做Shingling, 意即构建文档中的短字符串集合，即shingle集合。），得到如下的特征矩阵：</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=http://img.blog.csdn.net/20140830165556362 alt>
 </p>
 <p>其中“1”代表对应位置的Shingles在文档中出现过，“0”则代表没有出现过。</p>
 <p>在衡量文档的相似度中，我们有很多的方法去完成，比如利用欧式距离、编辑距离、余弦距离、Jaccard距离等来进行相似度的度量。在这里我们运用Jaccard相似度。接下来我们就要去找一种哈希函数，使得在hash后尽量还能保持这些文档之间的Jaccard相似度，即：</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=http://img.blog.csdn.net/20140830170203109 alt>
 </p>
 <p>我们的目标就是找到这样一种哈希函数，如果原来文档的Jaccard相似度高，那么它们的hash值相同的概率高，如果原来文档的Jaccard相似度低，那么它们的hash值不相同的概率高，我们称之为Min-hashing(最小哈希)。</p>
 <blockquote>
@@ -288,15 +290,18 @@ Share on:
 <p>特征矩阵相当稀疏，导致大部分的行都属于C类，但只有A、B类行的决定sim(Si,Sj)，假定A类行有a个，B类行有b个，那么sim(si,sj)=a/(a+b)。现在我们只需要证明对矩阵行进行随机排列，两个的最小hash值相等的概率P(h(Si)=h(Sj))=a/(a+b)，如果我们把C类行都删掉，那么第一行不是A类行就是B类行，如果第一行是A类行那么h(Si)=h(Sj)，因此P(h(Si)=h(Sj))=P(删掉C类行后，第一行为A类)=A类行的数目/所有行的数目=a/(a+b)，这就是最小hash的神奇之处。</p>
 <p>Min-hashing的具体做法可以根据如下进行表述：</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=http://img.blog.csdn.net/20140830171313030 alt>
 </p>
 <p>返回到我们的实例，我们首先生成一堆随机置换，把特征矩阵的每一行进行置换，然后hash function就定义为把一个列C hash成一个这样的值：就是在置换后的列C上，第一个值为1的行的行号。如下图所示：</p>
 <p>
+<img class="image_figure image_external" loading=lazy src=http://img.blog.csdn.net/20140830173451155 alt>
 </p>
 <blockquote>
 <p>　　图中展示了三个置换，就是彩色的那三个，我现在解释其中的一个，另外两个同理。比如现在看蓝色的那个置换，置换后的Signature Matrix为：</p>
 </blockquote>
 <blockquote>
 <p>
+<img class="image_figure image_external" loading=lazy src=http://img.blog.csdn.net/20140830173034426 alt>
 </p>
 </blockquote>
 <blockquote>
@@ -308,6 +313,7 @@ Share on:
 </blockquote>
 <blockquote>
 <p>
+<img class="image_figure image_external" loading=lazy src=http://img.blog.csdn.net/20140830173817980 alt>
 </p>
 </blockquote>
 <blockquote>
