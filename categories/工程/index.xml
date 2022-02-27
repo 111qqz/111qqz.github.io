@@ -2,4 +2,201 @@
 竟然一下子就2022年了，时间过得真快。 还是简单列一下TODO list吧。
 源码 levelDB workflow 书籍 课程 目前买了一年的极客时间，可以学6门课... 还没想好学哪些...</description></item><item><title>x86 calling conventions</title><link>https://111qqz.com/2019/01/x86-calling-conventions/</link><pubDate>Thu, 31 Jan 2019 12:12:22 +0000</pubDate><guid>https://111qqz.com/2019/01/x86-calling-conventions/</guid><description>
 x86的调用约定主要说的是这几件事:
-* The order in which atomic (scalar) parameters, or individual parts of a complex parameter, are allocated * How parameters are passed (pushed on the stack, placed in registers, or a mix of both) * Which registers the called function must preserve for the caller (also known as: callee-saved registers or non-volatile registers) * How the task of preparing the stack for, and restoring after, a function call is divided between the caller and the callee 调用约定实际上并不唯一</description></item></channel></rss>
+* The order in which atomic (scalar) parameters, or individual parts of a complex parameter, are allocated * How parameters are passed (pushed on the stack, placed in registers, or a mix of both) * Which registers the called function must preserve for the caller (also known as: callee-saved registers or non-volatile registers) * How the task of preparing the stack for, and restoring after, a function call is divided between the caller and the callee 调用约定实际上并不唯一</description></item><item><title>[C++11]std::condition_variable notes</title><link>https://111qqz.com/2018/09/condition_variable-notes/</link><pubDate>Sun, 23 Sep 2018 08:42:33 +0000</pubDate><guid>https://111qqz.com/2018/09/condition_variable-notes/</guid><description>
+condition_variable 类是同步原语，能用于阻塞一个线程，或同时阻塞多个线程，直至另一线程修改共享变量（条件）并通知 condition_variable 。 用人话来说,condition_variable，也就是条件变量，是线程间通信的一种方式。
+线程之间在很多时候需要通信，比如经典的生产者消费者问题
+一个比较naive的方案是，用mutex来保护一个flag,然后另一线程不停得check这个flag的状态是否改变。以及在这个方案上的改进:让另一个线程check之后，可以先睡一段时间。
+但是这两种方法都不够好。第一种不好的原因当然是不停得check，肯定会耗费大量的资源。而第二种，由于没办法准确估计要休眠的时间，因此不够实际。
+这个时候我们可以考虑使用条件变量。
+条件变量是可以用在如下场景: 一个或者多个线程在等某个条件的成立，而这个条件由另外的线程所控制。当该条件成立时，控制该条件的线程会主动通知这些线程，将这些线程唤醒。
+如下是一个最简单的例子:
+std::mutex mut; std::queue&amp;lt;data_chunk&amp;gt; data_queue; // 1 std::condition_variable data_cond; void data_preparation_thread() { while(more_data_to_prepare()) { data_chunk const data=prepare_data(); std::lock_guard&amp;lt;std::mutex&amp;gt; lk(mut); data_queue.push(data); // 2 data_cond.notify_one(); // 3 } } void data_processing_thread() { while(true) { std::unique_lock&amp;lt;std::mutex&amp;gt; lk(mut); // 4 data_cond.wait( lk,[]{return !data_queue.empty();}); // 5 data_chunk data=data_queue.front(); data_queue.pop(); lk.unlock(); // 6 process(data); if(is_last_chunk(data)) break; } } 接下来是一个较为复杂的例子，一个线程安全的队列的实现,
+#include &amp;lt;queue&amp;gt; #include &amp;lt;memory&amp;gt; #include &amp;lt;mutex&amp;gt; #include &amp;lt;condition_variable&amp;gt; template&amp;lt;typename T&amp;gt; class threadsafe_queue { private: mutable std::mutex mut; // 1 互斥量必须是可变的 std::queue&amp;lt;T&amp;gt; data_queue; std::condition_variable data_cond; public: threadsafe_queue() {} threadsafe_queue(threadsafe_queue const&amp;amp; other) { std::lock_guard&amp;lt;std::mutex&amp;gt; lk(other.</description></item><item><title>std::call_once &amp;&amp; std::once_flag notes</title><link>https://111qqz.com/2018/09/stdcall_once-stdonce_flag-notes/</link><pubDate>Thu, 20 Sep 2018 12:47:46 +0000</pubDate><guid>https://111qqz.com/2018/09/stdcall_once-stdonce_flag-notes/</guid><description>
+多线程保护数据时，一种较为特殊的情况是只需要保护资源的初始化。
+资源初始化一般遵循&amp;quot;lazy initialization&amp;quot;的原则，也就是在用到该资源最近的地方再初始化。
+比较容易想到的办法是用std::mutex，将资源初始化的地方锁起来，如下:
+std::shared_ptr&amp;lt;some_resource&amp;gt; resource_ptr; std::mutex resource_mutex; void foo() { std::unique_lock&amp;lt;std::mutex&amp;gt; lk(resource_mutex); if(!resource_ptr) { resource_ptr.reset(new some_resource); } lk.unlock(); resource_ptr-&amp;gt;do_something(); } 这确实是一个办法。但是初始化时如果需要耗费比较多的时间，当有比较多的线程时，一个线程初始化时，其他线程会耗时间在不必要的等待上。
+在c++11以后，我们可以使用std::once_flag和std::call_once来解决资源初始化时加锁的问题。比起显示调用std::mutex的好处是，资源消耗更少。
+下面是两个例子:
+std::shared_ptr&amp;lt;some_resource&amp;gt; resource_ptr; std::once_flag resource_flag; b void init_resource() { resource_ptr.reset(new some_resource); } void foo() { std::call_once(resource_flag,init_resource); resource_ptr-&amp;gt;do_something(); } class X { private: connection_info connection_details; connection_handle connection; std::once_flag connection_init_flag; void open_connection() { connection=connection_manager.open(connection_details); } public:62 C HAPTER 3 Sharing data between threads X(connection_info const&amp;amp; connection_details_): connection_details(connection_details_) {} void send_data(data_packet const&amp;amp; data) { std::call_once(connection_init_flag,&amp;amp;X::open_connection,this); connection.</description></item><item><title>[C++11] promise &amp;&amp; future leanrning notes</title><link>https://111qqz.com/2018/08/promise-future-notes/</link><pubDate>Thu, 23 Aug 2018 02:45:53 +0000</pubDate><guid>https://111qqz.com/2018/08/promise-future-notes/</guid><description>
+用人话就是，主线程传给附属线程一个promise Object,然后主线程想要获取附属线程set给promise Object的值（也就是该线程返回的某个结果），需要通过主线程中的promise object 得到对应的future object(每个promise 对应一个 future),然后调用future 的get方法。如果附属线程没有执行作为参数传入的promise的set方法去返回结果，那么程序就会block住。
+/* *********************************************** Author :111qqz mail: renkuanze@sensetime.com Created Time :2018年08月23日 星期四 10时37分07秒 File Name :future_sample.cpp ************************************************ */ #include &amp;lt;iostream&amp;gt; #include &amp;lt;thread&amp;gt; #include &amp;lt;future&amp;gt; void initiazer(std::promise&amp;lt;int&amp;gt; * promObj) { //std::cout&amp;lt;&amp;lt;&amp;quot;Inside Thread&amp;quot;&amp;lt;&amp;lt;std::endl; for ( int i = 1 ; i &amp;lt;= 2000000000 ; i++); //promObj-&amp;gt;set_value(35); } int main() { std::promise&amp;lt;int&amp;gt; promiseObj; std::future&amp;lt;int&amp;gt; futureObj = promiseObj.get_future(); std::thread th(initiazer, &amp;amp;promiseObj); std::cout&amp;lt;&amp;lt;futureObj.get()&amp;lt;&amp;lt;std::endl; th.join(); return 0; } 参考资料:</description></item><item><title>c++11 function 与bind 学习笔记</title><link>https://111qqz.com/2018/07/cpp11-function-bind-notes/</link><pubDate>Thu, 19 Jul 2018 10:46:26 +0000</pubDate><guid>https://111qqz.com/2018/07/cpp11-function-bind-notes/</guid><description>
+C++11 std::function 是一种通用、多态的函数封装,它的实例可以对任何可 以调用的目标实体进行存储、复制和调用操作
+见下面的例子
+/* *********************************************** Author :111qqz mail: renkuanze@sensetime.com Created Time :2018年07月19日 星期四 17时41分00秒 File Name :bind.cpp ************************************************ */ #include &amp;lt;functional&amp;gt; #include &amp;lt;iostream&amp;gt; using namespace std; float foo( int x,int y,int z){return x+y+z+1.;} int main() { function&amp;lt;int(int,int)&amp;gt;func = foo; int y = 10; function&amp;lt;int(int)&amp;gt;fun = [&amp;amp;]( int value)-&amp;gt;int { return 1+value+y; }; cout&amp;lt;&amp;lt;func(15,4,9)&amp;lt;&amp;lt;endl; cout&amp;lt;&amp;lt;fun(8)&amp;lt;&amp;lt;endl; return 0; } std::bind 则是用来绑定函数调用的参数的,它解决的需求是我们有时候可 能并不一定能够一次性获得调用某个函数的全部参数,通过这个函数,我们可以将 部分调用参数提前绑定到函数身上成为一个新的对象,然后在参数齐全后,完成调 用
+看下面的例子:
+#include &amp;lt;iostream&amp;gt; #include &amp;lt;functional&amp;gt; using namespace std; int FUN( int x,int y,int z) { return x+y+z; } int main() { using namespace std::placeholders; //int (*fp)(int ,int,int) = FUN; auto bindfoo = bind(FUN,_1,1,2); int ans = bindfoo(0); cout&amp;lt;&amp;lt;ans&amp;lt;&amp;lt;endl; return 0; }</description></item><item><title>C++ 记录代码运行时间</title><link>https://111qqz.com/2018/07/Record-code-run-time-with-cpp/</link><pubDate>Tue, 10 Jul 2018 02:26:50 +0000</pubDate><guid>https://111qqz.com/2018/07/Record-code-run-time-with-cpp/</guid><description>
+以前用的办法太老土啦
+看到一个since C++11的方法，我觉得比较优雅
+#include &amp;lt;iostream&amp;gt; #include &amp;lt;chrono&amp;gt; //#include &amp;lt;ratio&amp;gt; #include &amp;lt;thread&amp;gt; void f() { std::this_thread::sleep_for(std::chrono::seconds(1)); } int main() { auto t1 = std::chrono::high_resolution_clock::now(); f(); auto t2 = std::chrono::high_resolution_clock::now(); // floating-point duration: no duration_cast needed std::chrono::duration&amp;lt;double, std::milli&amp;gt; fp_ms = t2 - t1; // integral duration: requires duration_cast auto int_ms = std::chrono::duration_cast&amp;lt;std::chrono::milliseconds&amp;gt;(t2 - t1); // converting integral duration to integral duration of shorter divisible time unit: // no duration_cast needed std::chrono::duration&amp;lt;long, std::micro&amp;gt; int_usec = int_ms; std::cout &amp;lt;&amp;lt; &amp;quot;f() took &amp;quot; &amp;lt;&amp;lt; fp_ms.</description></item><item><title>gdb学习笔记</title><link>https://111qqz.com/2018/07/gdb-notes/</link><pubDate>Fri, 06 Jul 2018 07:44:38 +0000</pubDate><guid>https://111qqz.com/2018/07/gdb-notes/</guid><description>
+用gdb调试c++的时候，需要添加-g编译选项add_compile_options(-g)，并且关掉各种编译优化
+如果是多线程程序，可以用info threads 查看每个线程的信息
+然后用thread [id] 查看指定线程，并用bt查看调用栈。
+gdb调试的时候，可以用ctrl+c 停住程序，来查看调用栈，然后按c(continue)继续程序的运行。
+emmm
+先放一些相关的。
+Linux 下如何产生core文件（core dump设置）
+ulimit -a 查看限制
+ulimit -c unlimited 表示这只为不限制core文件大小
+用gdb的调试命令如下:
+gdb ./test core.2065</description></item><item><title>C++ STL Algotithms 学习笔记</title><link>https://111qqz.com/2018/05/c-stl-algotithms-notes/</link><pubDate>Sun, 06 May 2018 09:45:50 +0000</pubDate><guid>https://111qqz.com/2018/05/c-stl-algotithms-notes/</guid><description>
+迫于拙劣的cpp水平，这次来记录一些关于STL算法部分的内容。
+参考内容是CS106L的course reader
+Iterator Categories Iterators分为以下五种:
+* Output Iterators:可以使用&amp;quot;++&amp;quot;；可以用*myItr = value,不能用value = *myItr * Input Iterators:可以使用&amp;quot;++&amp;quot;;可以用value = *myItr，不能用*myItr = value * Forward Iterators: 可以使用&amp;quot;++&amp;quot;,可以同时用value = *myItr和*myItr = value * Bidirectional Iterators:比起Forward Iterator 对了&amp;quot;--&amp;quot;,但是不能+或者+= * Random-Access Iterators：比起Bidirectional Iterators多了+和+= Algorithm Naming Conventions 一些关于STL Algorithm的命名规则
+后缀_if表示只有当满足一定条件的时候该算法才会执行一定任务。
+比如:
+bool IsEven(int value) { return value % 2 == 0; } cout &amp;lt;&amp;lt; count_if(myVec.begin(), myVec.end(), IsEven) &amp;lt;&amp;lt; endl; _n表示执行一个特定的操作n次。
+比如:
+fill_n(myDeque.begin(), 10, 0); Reordering Algorithms * sort: 传入的必须是Random-Access Iterators，记得定义&amp;lt;函数 * random_shuffle:传入的必须是Random-Access Iterators,作用是将一个区间内的元素打乱重排。 可以在使用之前先使用srand函数。 * rotate：作用是循环改变容器中元素的顺序。rotate(v.</description></item><item><title>C++ IO Streams 学习笔记</title><link>https://111qqz.com/2018/05/cpp-io-streams-notes/</link><pubDate>Fri, 04 May 2018 03:48:37 +0000</pubDate><guid>https://111qqz.com/2018/05/cpp-io-streams-notes/</guid><description>
+迫于拙劣的cpp水平，来补补以前忽略掉的cpp细节。
+老规矩，先放资料。
+参考资料:
+A Gentle Introduction to C++ IO Streams
+"Designing and implementing a general input/output facility for a programming language is notoriously difficult" - Bjarne Stroustrup Stream的基本认识 说说我的理解。stream(流)可以看做输入输出的抽象。我们通过流可以忽略掉device的细节，采取同样的输入输出方式。
+对于任何原生的cpp类型，都可以用stream来处理。用户自定义的类，也可以通过重载&amp;lt;&amp;lt;和&amp;gt;&amp;gt;而让stream可以处理。
+#include &amp;lt;iostream&amp;gt; #include &amp;lt;ctime&amp;gt; #include &amp;lt;sstream&amp;gt; #include &amp;lt;fstream&amp;gt; using namespace std; // timestamp returns the current time as a string std::string timestamp(); class LogStatement; ostream&amp;amp; operator&amp;lt;&amp;lt;(ostream&amp;amp; ost, const LogStatement&amp;amp; ls); class LogStatement { public: LogStatement(std::string s): data(s), time_string( timestamp() ) { }; //This method handles all the outputs.</description></item><item><title>levelDB 使用笔记</title><link>https://111qqz.com/2018/04/leveldb-notes/</link><pubDate>Thu, 19 Apr 2018 15:58:40 +0000</pubDate><guid>https://111qqz.com/2018/04/leveldb-notes/</guid><description>
+2022-02-26 update:
+说学习笔记听起来像在分析代码。。。但是实际上什么都没干，还是写&amp;quot;使用笔记&amp;quot;好了
+大三的时候看过一点levelDB的源码，不过没有怎么用过。
+最近有个需求是存人脸的feature到硬盘，似乎使用levelDB比较合适，因此来学习一下使用。
+先放参考资料。
+关于levelDB的语法，看这里就好了。
+以及由于caffe中使用了levelDB，因此也可以参考下caffe源码。不过caffe中对levelDB的使用是又封装了一层。
+具体可以参考：
+#ifdef USE_LEVELDB #ifndef CAFFE_UTIL_DB_LEVELDB_HPP #define CAFFE_UTIL_DB_LEVELDB_HPP #include &amp;lt;string&amp;gt; #include &amp;quot;leveldb/db.h&amp;quot; #include &amp;quot;leveldb/write_batch.h&amp;quot; #include &amp;quot;caffe/util/db.hpp&amp;quot; namespace caffe { namespace db { class LevelDBCursor : public Cursor { public: explicit LevelDBCursor(leveldb::Iterator* iter) : iter_(iter) { SeekToFirst(); CHECK(iter_-&amp;gt;status().ok()) &amp;lt;&amp;lt; iter_-&amp;gt;status().ToString(); } ~LevelDBCursor() { delete iter_; } virtual void SeekToFirst() { iter_-&amp;gt;SeekToFirst(); } virtual void Next() { iter_-&amp;gt;Next(); } virtual string key() { return iter_-&amp;gt;key().ToString(); } virtual string value() { return iter_-&amp;gt;value().</description></item><item><title>cmake 学习笔记</title><link>https://111qqz.com/2018/03/cmake-notes/</link><pubDate>Sun, 18 Mar 2018 10:27:26 +0000</pubDate><guid>https://111qqz.com/2018/03/cmake-notes/</guid><description>
+前置技能点：
+gnu make
+linux下.so,.a,.o文件
+cmake是一个工具，也可以看成一门语言。
+学习cmake最大的障碍在于看不懂全是大写的英文
+学习cmake主要参考了《cmake practice》
+不过感觉作者有些啰嗦...不重要的东西讲了半天，重要的东西却一带而过。。。表述得也不是特别流畅。。。但是还是感谢作者的分享吧orz...
+cmake的定位是大型项目构建工具。
+目前适用于C/C++/JAVA的项目。
+可以不需要自己写makefile文件。
+既然cmake可以看做一门语言，那么自然就有语法。
+下面只是列举一些常用的。不常用的可以用到的时候再去查。这里也会不定期补充。
+cmake的语法中，对于变量大小写敏感，对于cmake的关键字大小写不敏感，不过习惯于全部大写。
+cmake有两种编译方式，一种叫in source 编译（就是直接在工程目录编译）
+一种叫out of source 编译，就是在工程目录下新建build,然后在build文件夹里编译。
+一般都采用out of source的方式编译，这样可以使得编译得到的结果都存放在build文件夹里，不会和源代码混在一起。
+set 命令用来定义变量：
+SET(HELLO_SRC main.SOURCE_PATHc)
+然后就可以用${HELLO_SRC}　来引用这个变量了（例外：在if语句中，是直接使用变量名引用，而不需要${}）
+ADD_EXECUTABLE来定义生成的可执行文件的名字：
+ADD_EXECUTABLE(hello SRC_LIST)
+表示源文件是SRC_LIST 中定义的源文件列表，生成一个文件名为hello的可执行文件。
+如果有多个参数，可以写成：
+ADD_EXECUTABLE(hello main.c func.c)或者 ADD_EXECUTABLE(hello main.c;func.c)
+ADD_SUBDIRECTORY指令：
+ADD_SUBDIRECTORY(source_dir [binary_dir] [EXCLUDE_FROM_ALL]) 这个指令用于向当前工程添加存放源文件的子目录,并可以指定中间二进制和目标二进制存 放的位置。EXCLUDE_FROM_ALL 参数的含义是将这个目录从编译过程中排除,比如,工程 的 example,可能就需要工程构建完成后,再进入 example 目录单独进行构建(当然,你 也可以通过定义依赖来解决此类问题)。
+ADD_LIBRARY(hello SHARED ${LIBHELLO_SRC})：生成动态(共享)库
+语法为：ADD_LIBRARY(libname [SHARED|STATIC|MODULE] [EXCLUDE_FROM_ALL] source1 source2 ... sourceN)
+常用到的是SHARED动态库，STATIC静态库
+SET_TARGET_PROPERTIES：可以修改生成的库的名字
+SET_TARGET_PROPERTIES(hello_static PROPERTIES OUTPUT_NAME &amp;quot;hello&amp;quot;)</description></item><item><title>CUDA C Best Practices Guide 阅读笔记（二） Heterogeneous Computing</title><link>https://111qqz.com/2018/02/cuda-c-best-practices-guide-heterogeneous-computing/</link><pubDate>Tue, 13 Feb 2018 06:38:38 +0000</pubDate><guid>https://111qqz.com/2018/02/cuda-c-best-practices-guide-heterogeneous-computing/</guid><description>
+CUDA 编程涉及到在不同的平台上同时运行代码:包含CPU的host 和包含GPU的device.
+所以了解host和device的对性能优化是非常重要的。
+2.1. Differences between Host and Device Threading resources host 上能同时运行的线程数目比较少（比如24个）
+device上能同时运行的线程数目比较多（数量级通常为1E3，1E4等）
+Threads 操作系统必须交换CPU执行通道上和下的线程以提供多线程功能。因此，上下文切换(当交换两个线程时)既慢又昂贵。
+相比之下，GPU上的线程非常轻量级。在典型的系统中，成千上万的线程排队等待工作(每个线程有32个线程)。如果GPU必须等待 one warp of threads，它只需开始在另一个线程上执行工作。
+简而言之，CPU内核被设计为每次最小化一个或两个线程的等待时间，而GPU被设计为处理大量并发的轻量级线程以最大化吞吐量。
+RAM host和device 各自具有各自不同的附接物理存储器。host和device内存由PCI Express ( PCIe )总线分隔，因此host内存中的项目必须偶尔通过总线传送到device内存，反之亦然
+2.2. What Runs on a CUDA-Enabled Device? 下面谈谈应该把应用的哪些部分放在device 上运行
+* 大数据集上的算术运算 * 为了获得最佳性能，设备上运行的相邻线程的内存访问应该具有一定的一致性。**某些内存访问模式使硬件能够将多个数据项的读或写组合并到一个操作中**。当在CUDA上的计算中使用时，无法布局以实现合并的数据，或者没有足够的局部性来有效地使用L1或纹理缓存的数据，将倾向于看到较小的加速比。 * host和device之间的数据交换尽可能少 * **换到device上执行的数据一定会被做足够多的运算**，不然数据从Host传送到device的代价 可能与该运算在device上并行计算的优势向抵消，甚至得不偿失。 * **数据应尽可能长时间保存在设备上。**因为传输应该最小化，所以在同一数据上运行多个内核的程序应该倾向于在内核调用之间将数据保留在设备上，而不是将中间结果传输到主机，然后再将它们发送回设备进行后续计算。就是说，如果有一段连续的操作要处理某些数据，就算其中的部分操作在host上运行要比在device上快（比如不是算数运算而是逻辑处理），那么考虑到数据传输的巨大代价，将所有数据都放在device上处理可能会更好。这种处理原则即使相对较慢的内核也可能是有利的，如果它避免了一个或多个PCIe传输。</description></item><item><title>cuda c++ 基础算法库 thrust 学习笔记</title><link>https://111qqz.com/2018/02/cuda-thrust-notes/</link><pubDate>Sat, 10 Feb 2018 08:43:54 +0000</pubDate><guid>https://111qqz.com/2018/02/cuda-thrust-notes/</guid><description>
+可以了解成并行版的STL(?
+过了一遍nvidia的官方网文档
+发现如果熟悉STL的话,thrust没什么太多好说的,看起来很简单...
+不过还是开一篇记录一下,一段时间内估计要和cuda c++ 打交道,就当记录使用过程中遇到的问题吧.</description></item><item><title>cuda error checking 学习笔记</title><link>https://111qqz.com/2018/02/cuda-error-checking-notes/</link><pubDate>Fri, 09 Feb 2018 06:55:00 +0000</pubDate><guid>https://111qqz.com/2018/02/cuda-error-checking-notes/</guid><description>
+由于发现cuda c++ 的 debug方式和c++ 差别很大,因此打算再开一篇,专门记录一些和error checking 以及debug有关的内容.
+Error checks in CUDA code can help catch CUDA errors at their source. There are 2 sources of errors in CUDA source code:
+1. Errors from CUDA **API** calls. For example, a call to `cudaMalloc()` might fail. 2. Errors from CUDA **kernel** calls. For example, there might be invalid memory access inside a kernel. All CUDA API calls return a cudaError value, so these calls are easy to check:</description></item><item><title>cuda 学习笔记</title><link>https://111qqz.com/2018/02/cuda-notes/</link><pubDate>Thu, 01 Feb 2018 07:20:04 +0000</pubDate><guid>https://111qqz.com/2018/02/cuda-notes/</guid><description>
+uodate:有毒吧。kernel中出问题原来是不会报错的。。。。
+请教了组里的hust学长orz..、
+学到了cuda-memcheck命令和cudaGetLastError来查看问题。。可以参考What is the canonical way to check for errors using the CUDA runtime API?
+先放一波资料。
+* &amp;lt;del&amp;gt;[An Even Easier Introduction to CUDA](https://devblogs.nvidia.com/even-easier-introduction-cuda/)&amp;lt;/del&amp;gt; * &amp;lt;del&amp;gt;[CUDA C/C++ Basics](https://drive.google.com/open?id=1kHYyM4yiJoyjkWjp7FJp0vae_TcvskjK)&amp;lt;/del&amp;gt; * &amp;lt;del&amp;gt;[nvidia-thrust 官方文档](http://docs.nvidia.com/cuda/thrust/index.html)&amp;lt;/del&amp;gt; * [how-access-global-memory-efficiently-cuda-c-kernels](https://devblogs.nvidia.com/how-access-global-memory-efficiently-cuda-c-kernels/) * [efficient-matrix-transpose-cuda-cc](https://devblogs.nvidia.com/efficient-matrix-transpose-cuda-cc/) * [很强大的warp内shuffle](https://devblogs.nvidia.com/faster-parallel-reductions-kepler/) * [cuda-GDB官方文档](http://docs.nvidia.com/cuda/cuda-gdb/index.html) * [cuda-c-best-practices-guide](http://docs.nvidia.com/cuda/cuda-c-best-practices-guide/) cuda 提出的目的是能够让程序员透明地使用GPU来高效地进行并行运算。
+kernel和c语言中的函数相似，函数名字前通常用global来标识。
+下面考虑一个2个大小的1M的数组相加的例子。
+总的思路是通过并行，来观察到计算速度的加快。
+如果不考虑并行，2个数组相加的代码，如下：
+#include &amp;lt;iostream&amp;gt; #include &amp;lt;math.h&amp;gt; // function to add the elements of two arrays void add(int n, float *x, float *y) { for (int i = 0; i &amp;lt; n; i++) y[i] = x[i] + y[i]; } int main(void) { int N = 1&amp;lt;&amp;lt;20; // 1M elements float *x = new float[N]; float *y = new float[N]; // initialize x and y arrays on the host for (int i = 0; i &amp;lt; N; i++) { x[i] = 1.</description></item><item><title>AWK 初探</title><link>https://111qqz.com/2017/03/awk-notes/</link><pubDate>Sun, 19 Mar 2017 10:02:58 +0000</pubDate><guid>https://111qqz.com/2017/03/awk-notes/</guid><description>
+参考资料：
+awk_维基百科
+awk简明教程
+awk是一门比较古老但是很好用的文本处理工具（语言?）
+语法还是很好懂的。。。转载了一篇文章。。。算是简明手册？ 不过台词有点糟糕orz
+有一些网友看了前两天的《[Linux下应该知道的技巧](http://coolshell.cn/articles/8883.html)》希望我能教教他们用awk和sed，所以，出现了这篇文章。我估计这些80后的年轻朋友可能对awk/sed这类上古神器有点陌生了，所以需要我这个老家伙来炒炒冷饭。**况且，AWK是贝尔实验室1977年搞出来的文本出现神器，今年是蛇年，是AWK的本命年，而且年纪和我相仿，所以非常有必要为他写篇文章**。 之所以叫AWK是因为其取了三位创始人 Alfred Aho，Peter Weinberger, 和 Brian Kernighan 的Family Name的首字符。要学AWK，就得提一提AWK的一本相当经典的书《The AWK Programming Language》，它在豆瓣上的评分是9.4分！在亚马逊上居然卖1022.30元。
+我在这里的教程并不想面面俱到，本文和我之前的Go语言简介一样，全是示例，基本无废话。
+我只想达到两个目的：
+1）你可以在乘坐公交地铁上下班，或是在坐马桶拉大便时读完（保证是一泡大便的工夫）。
+2）我只想让这篇博文像一个火辣的脱衣舞女挑起你的兴趣，然后还要你自己去下工夫去撸。
+废话少说，我们开始脱吧（注：这里只是topless）。
+起步上台 我从netstat命令中提取了如下信息作为用例：
+$ cat netstat.txt Proto Recv-Q Send-Q Local-Address Foreign-Address State tcp 0 0 0.0.0.0:3306 0.0.0.0:* LISTEN tcp 0 0 0.0.0.0:80 0.0.0.0:* LISTEN tcp 0 0 127.0.0.1:9000 0.0.0.0:* LISTEN tcp 0 0 coolshell.cn:80 124.205.5.146:18245 TIME_WAIT tcp 0 0 coolshell.cn:80 61.140.101.185:37538 FIN_WAIT2 tcp 0 0 coolshell.</description></item><item><title>C++ const 用法总结（转载）</title><link>https://111qqz.com/2017/03/cpp-const/</link><pubDate>Sat, 18 Mar 2017 12:22:32 +0000</pubDate><guid>https://111qqz.com/2017/03/cpp-const/</guid><description>
+基本全文照搬了：关于C++ const 的全面总结
+总结全面还是要一点时间的orz..感谢原作者，暂时没发现有什么错误（?
+其中对我而言比较陌生的是“const修饰成员函数”的用法。。已经加粗。
+ C++中的const关键字的用法非常灵活，而使用const将大大改善程序的健壮性，本人根据各方面查到的资料进行总结如下，期望对朋友们有所帮助。 Const 是C++中常用的类型修饰符,常类型是指使用类型修饰符const说明的类型，常类型的变量或对象的值是不能被更新的。
+一、Const作用
+** **如下表所示：
+**No.** **作用** **说明** **参考代码** 1 可以定义const常量 const int Max = 100; 2 便于进行类型检查 const常量有数据类型，而宏常量没有数据类型。编译器可以对前者进行类型安全检查，而对后者只进行字符替换，没有类型安全检查，并且在字符替换时可能会产生意料不到的错误 void f(const int i) { .........} //对传入的参数进行类型检查，不匹配进行提示
+3 可以保护被修饰的东西 防止意外的修改，增强程序的健壮性。 void f(const int i) { i=10;//error!</description></item><item><title>一致性哈希初探</title><link>https://111qqz.com/2017/03/overview-of-Consistent-Hashing/</link><pubDate>Wed, 15 Mar 2017 07:58:05 +0000</pubDate><guid>https://111qqz.com/2017/03/overview-of-Consistent-Hashing/</guid><description>
+原始论文：一致性哈希
+本来不打算放的。。被批评说太不严谨orz..
+说说自己的理解好了。。
+大概就是。。。hash的时候。。一开始有n个桶。。你设计的函数是y=x%n...看起来美滋滋。。。
+然后这时候突然一个桶不见了。。。如果按照之前设计的hash函数。。就变成了x%(n-1)...
+这可能会造成大量的数据改变自己之前所在的桶。。。这是不可接受的。。。
+或者是。。。当前的桶不够用了。。要增加一个桶。。。变成了x%(n+1)。。。也会出现类似情况。。。
+我们的目的就是设计一种算法。。。使得当减少一个桶或者增加一个桶的时候。。。。变化尽可能小。。。
+并且希望以后新放入的数据尽可能到新的桶中（？
+桶是简化的模型。。。实际应用上。。。一致性哈希主要用在分布式系统中。。。每个桶就相当于一台服务器（？or something...不是很懂分布式的术语）
+一致性哈希算法 tencent2012笔试题附加题
+问题描述： 例如手机朋友网有n个服务器，为了方便用户的访问会在服务器上缓存数据，因此用户每次访问的时候最好能保持同一台服务器。
+已有的做法是根据ServerIPIndex[QQNUM%n]得到请求的服务器，这种方法很方便将用户分到不同的服务器上去。但是如果一台服务器死掉了，那么n就变为了n-1，那么ServerIPIndex[QQNUM%n]与ServerIPIndex[QQNUM%（n-1）]基本上都不一样了，所以大多数用户的请求都会转到其他服务器，这样会发生大量访问错误。
+问： 如何改进或者换一种方法，使得：
+(1) 一台服务器死掉后，不会造成大面积的访问错误，
+(2)原有的访问基本还是停留在同一台服务器上；
+(3)尽量考虑负载均衡。（思路：往分布式一致哈希算法方面考虑。）
+1. 最土的办法还是用模余方法：做法很简单，假设有N台服务器，现在完好的是M（M&amp;lt;=N),先用N求模，如果不落在完好的机器上，然后再用N-1求模，直到M.这种方式对于坏的机器不多的情况下，具有更好的稳定性。 2. 一致性哈希算法。 下面，本文剩下部分重点来讲讲这个一致性哈希算法。
+应用场景 在做服务器负载均衡时候可供选择的负载均衡的算法有很多，包括： 轮循算法（Round Robin）、哈希算法（HASH）、最少连接算法（Least Connection）、响应速度算法（Response Time）、加权法（Weighted ）等。其中哈希算法是最为常用的算法.
+典型的应用场景是： 有N台服务器提供缓存服务，需要对服务器进行负载均衡，将请求平均分发到每台服务器上，每台机器负责1/N的服务。
+常用的算法是对hash结果取余数 (hash() mod N)：对机器编号从0到N-1，按照自定义的hash()算法，对每个请求的hash()值按N取模，得到余数i，然后将请求分发到编号为i的机器。但这样的算法方法存在致命问题，如果某一台机器宕机，那么应该落在该机器的请求就无法得到正确的处理，这时需要将当掉的服务器从算法从去除，此时候会有(N-1)/N的服务器的缓存数据需要重新进行计算；如果新增一台机器，会有N /(N+1)的服务器的缓存数据需要进行重新计算。对于系统而言，这通常是不可接受的颠簸（因为这意味着大量缓存的失效或者数据需要转移）。那么，如何设计一个负载均衡策略，使得受到影响的请求尽可能的少呢？
+在Memcached、Key-Value Store、Bittorrent DHT、LVS中都采用了Consistent Hashing算法，可以说Consistent Hashing 是分布式系统负载均衡的首选算法。
+Consistent Hashing算法描述 下面以Memcached中的Consisten Hashing算法为例说明。
+consistent hashing 算法早在 1997 年就在论文 Consistent hashing and random trees 中被提出，目前在 cache 系统中应用越来越广泛；</description></item><item><title>Linux 下各个目录的作用及内容</title><link>https://111qqz.com/2017/03/common-linux-files/</link><pubDate>Wed, 15 Mar 2017 06:29:36 +0000</pubDate><guid>https://111qqz.com/2017/03/common-linux-files/</guid><description>
+参考：[wiki_FHS](http://Filesystem Hierarchy Standard)
+其实这东西。。。虽然有一个统一的标准。。。但是不同发行版。。。或者同一个发行版的不同版本。。。差异貌似都蛮大的。。。所以只是理论上各个目录的作用。。。可能和具体的发行版不符。。。
+Linux 目录 在 Linux 下，我们看到的是文件夹（目录）： 在早期的 UNIX 系统中，各个厂家各自定义了自己的 UNIX 系统文件目录，比较混乱。Linux 面世不久后，对文件目录进行了标准化，于1994年对根文件目录做了统一的规范，推出 FHS ( Filesystem Hierarchy Standard ) 的 Linux 文件系统层次结构标准。FHS 标准规定了 Linux 根目录各文件夹的名称及作用，统一了Linux界命名混乱的局面。
+无论何种版本的 Linux 发行版，桌面、应用是 Linux 的外衣，文件组织、目录结构才是Linux的内心。
+FHS（英文：Filesystem Hierarchy Standard 中文：文件系统层次结构标准），多数 Linux 版本采用这种文件组织形式，FHS 定义了系统中每个区域的用途、所需要的最小构成的文件和目录同时还给出了例外处理与矛盾处理。 FHS 定义了两层规范，第一层是， / 下面的各个目录应该要放什么文件数据，例如 /etc应该要放置设置文件，/bin 与 /sbin 则应该要放置可执行文件等等。
+第二层则是针对 /usr 及 /var 这两个目录的子目录来定义。例如 /var/log 放置系统登录文件、/usr/share 放置共享数据等等。
+FHS 是根据以往无数 Linux 用户和开发者的经验总结出来的，并且会维持更新，FHS 依据文件系统使用的频繁与否以及是否允许用户随意改动（注意，不是不能，学习过程中，不要怕这些），将目录定义为四种交互作用的形态，如下表所示：
+/：根目录，一般根目录下只存放目录，不要存放件，/etc、/bin、/dev、/lib、/sbin应该和根目录放置在一个分区中
+/bin: /usr/bin: 可执行二进制文件的目录，如常用的命令ls、tar、mv、cat等。</description></item><item><title>压缩算法初探（科普向，转载）</title><link>https://111qqz.com/2017/03/Overview-of-Compression-Algorithms/</link><pubDate>Wed, 15 Mar 2017 02:55:56 +0000</pubDate><guid>https://111qqz.com/2017/03/Overview-of-Compression-Algorithms/</guid><description>
+参考链接
+简要概述原理： 每个文件都由各种不同代码组成，比如01代码。这类文件只有数字0与1组合。 压缩原理就是 【通过寻找其中的规律，简化数字的排列】。 比如 00000110001111111111 可以简化成 5个0,2个1,3个0,10个1的排列 100000000000 可以简化成数学的 10^10
+至于@yskin 说 没见过2G压缩到十几兆的。 实际上在极限压缩方式下其实28.1G压到25.8M都可以。 &amp;lt;img src=&amp;quot;https://pic1.zhimg.com/893534a767ddb047cc04dd66e2a43900_b.jpg&amp;quot; data-rawwidth=&amp;quot;773&amp;quot; data-rawheight=&amp;quot;235&amp;quot; class=&amp;quot;origin_image zh-lightbox-thumb&amp;quot; width=&amp;quot;773&amp;quot; data-original=&amp;quot;https://pic1.zhimg.com/893534a767ddb047cc04dd66e2a43900_r.jpg&amp;quot;&amp;gt;附下载 附下载 2^31-1 [AviSynth 16x16 60.000fps AVC-Lossless-yuv420p8]__
+打开看后基本都能理解这个压缩的大概原理了。
+下面是几种常见文件压缩算法原理介绍：
+字典算法
+字典算法是最为简单的压缩算法之一。它是把文本中出现频率比较多的单词或词汇组合做成一个对应的字典列表，并用特殊代码来表示这个单词或词汇。例如： 有字典列表： 00=Chinese 01=People 02=China 源文本：I am a Chinese people,I am from China 压缩后的编码为：I am a 00 01,I am from 02。压缩编码后的长度显著缩小，这样的编码在SLG游戏等专有名词比较多的游戏中比较容易出现，比如《SD高达》。 固定位长算法（Fixed Bit Length Packing）
+这种算法是把文本用需要的最少的位来进行压缩编码。 比 如八个十六进制数：1，2，3，4，5，6，7，8。转换为二进制为：00000001，00000010，00000011，00000100， 00000101，00000110，00000111，00001000。每个数只用到了低4位，而高4位没有用到（全为0），因此对低4位进行压缩编 码后得到：0001，0010，0011，0100，0101，0110，0111，1000。然后补充为字节得到：00010010， 00110100，01010110，01111000。所以原来的八个十六进制数缩短了一半，得到4个十六进制数：12，34，56，78。 这也是比较常见的压缩算法之一。 RLE（Run Length Encoding）
+是一个针对无损压缩的非常简单的算法。它用重复字节和重复的次数来简单描述来代替重复的字节。尽管简单并且对于通常的压缩非常低效，但它有的时候却非常有用（例如，JPEG就使用它）。 &amp;lt;img src=&amp;quot;https://pic3.</description></item><item><title>C++ sort学习笔记</title><link>https://111qqz.com/2017/03/cpp-sort/</link><pubDate>Wed, 01 Mar 2017 07:27:12 +0000</pubDate><guid>https://111qqz.com/2017/03/cpp-sort/</guid><description>
+回想起大一的时候打cf...那个时候对C++还不怎么熟悉。。。用sort不会自定义排序方式。。
+于是手写快排。。。直接取中间元素没加随机化。。。跪了。。。
+后来知道sort怎么写以后。。发现sort是可以通过的。。。
+于是我就一直以为sort是带随机化的快排。。。
+然而实际上是：
+sort在数据量比较大的时候用quick_sort...当分段后的数据量小于某个门槛，为了避免对此递归带来的额外负担。。采取插入排序的策略。。
+以及。。。快排在最快情况下还是会到达平方的复杂度。。。
+于是有人发明了introsort...中文翻译叫内省排序。。。？
+维基百科_introsort
+这个算法其实就是。。对于数据量大的时候。。。一开始还是快排。。。但是当递归深度过深时。。用堆排。。。
+据说现在的STL一般都是用了introsort....</description></item><item><title>cpp vector学习笔记</title><link>https://111qqz.com/2017/02/cpp-vector/</link><pubDate>Tue, 28 Feb 2017 07:21:49 +0000</pubDate><guid>https://111qqz.com/2017/02/cpp-vector/</guid><description>
+起因是百度实习二面的时候被问了一道类似这样的题：
+给我下面的代码，问有没有什么问题。
+/* *********************************************** Author :111qqz Created Time :2017年02月28日 星期二 14时49分37秒 File Name :vector.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;ctime&amp;gt; using namespace std; int func( int x ) //此处函数的条件是不单调...这样才可以触发问题. { return (x-50)*(x-50)+1; } int main() { vector&amp;lt;int&amp;gt;vec; int *pint = NULL; for ( int i = 0 ; i &amp;lt; 100 ; i++) { int x = func(i); vec.push_back(x); if (x&amp;lt;500) { pint = &amp;amp; vec[0]; } } if (pint) *pint = 0 ; int siz = vec.</description></item></channel></rss>

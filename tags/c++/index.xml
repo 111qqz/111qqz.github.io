@@ -22,68 +22,11 @@ std::vector&amp;lt;unsigned char&amp;gt; readFromFile1(const char* filePath) { F
 Introduction to symbol visibility
 readelf elf文件格式分析
 Hiding what's exposed in a shared library
-Why is the new C++ visibility support so useful?</description></item><item><title>C++ STL Algotithms 学习笔记</title><link>https://111qqz.com/2018/05/c-stl-algotithms-notes/</link><pubDate>Sun, 06 May 2018 09:45:50 +0000</pubDate><guid>https://111qqz.com/2018/05/c-stl-algotithms-notes/</guid><description>
-迫于拙劣的cpp水平，这次来记录一些关于STL算法部分的内容。
-参考内容是CS106L的course reader
-Iterator Categories Iterators分为以下五种:
-* Output Iterators:可以使用&amp;quot;++&amp;quot;；可以用*myItr = value,不能用value = *myItr * Input Iterators:可以使用&amp;quot;++&amp;quot;;可以用value = *myItr，不能用*myItr = value * Forward Iterators: 可以使用&amp;quot;++&amp;quot;,可以同时用value = *myItr和*myItr = value * Bidirectional Iterators:比起Forward Iterator 对了&amp;quot;--&amp;quot;,但是不能+或者+= * Random-Access Iterators：比起Bidirectional Iterators多了+和+= Algorithm Naming Conventions 一些关于STL Algorithm的命名规则
-后缀_if表示只有当满足一定条件的时候该算法才会执行一定任务。
-比如:
-bool IsEven(int value) { return value % 2 == 0; } cout &amp;lt;&amp;lt; count_if(myVec.begin(), myVec.end(), IsEven) &amp;lt;&amp;lt; endl; _n表示执行一个特定的操作n次。
-比如:
-fill_n(myDeque.begin(), 10, 0); Reordering Algorithms * sort: 传入的必须是Random-Access Iterators，记得定义&amp;lt;函数 * random_shuffle:传入的必须是Random-Access Iterators,作用是将一个区间内的元素打乱重排。 可以在使用之前先使用srand函数。 * rotate：作用是循环改变容器中元素的顺序。rotate(v.</description></item><item><title>C++ IO Streams 学习笔记</title><link>https://111qqz.com/2018/05/cpp-io-streams-notes/</link><pubDate>Fri, 04 May 2018 03:48:37 +0000</pubDate><guid>https://111qqz.com/2018/05/cpp-io-streams-notes/</guid><description>
-迫于拙劣的cpp水平，来补补以前忽略掉的cpp细节。
-老规矩，先放资料。
-参考资料:
-A Gentle Introduction to C++ IO Streams
-"Designing and implementing a general input/output facility for a programming language is notoriously difficult" - Bjarne Stroustrup Stream的基本认识 说说我的理解。stream(流)可以看做输入输出的抽象。我们通过流可以忽略掉device的细节，采取同样的输入输出方式。
-对于任何原生的cpp类型，都可以用stream来处理。用户自定义的类，也可以通过重载&amp;lt;&amp;lt;和&amp;gt;&amp;gt;而让stream可以处理。
-#include &amp;lt;iostream&amp;gt; #include &amp;lt;ctime&amp;gt; #include &amp;lt;sstream&amp;gt; #include &amp;lt;fstream&amp;gt; using namespace std; // timestamp returns the current time as a string std::string timestamp(); class LogStatement; ostream&amp;amp; operator&amp;lt;&amp;lt;(ostream&amp;amp; ost, const LogStatement&amp;amp; ls); class LogStatement { public: LogStatement(std::string s): data(s), time_string( timestamp() ) { }; //This method handles all the outputs.</description></item><item><title>Eigen: C++开源矩阵学习笔记</title><link>https://111qqz.com/2018/04/eigen-notes/</link><pubDate>Thu, 05 Apr 2018 07:14:54 +0000</pubDate><guid>https://111qqz.com/2018/04/eigen-notes/</guid><description>
+Why is the new C++ visibility support so useful?</description></item><item><title>Eigen: C++开源矩阵学习笔记</title><link>https://111qqz.com/2018/04/eigen-notes/</link><pubDate>Thu, 05 Apr 2018 07:14:54 +0000</pubDate><guid>https://111qqz.com/2018/04/eigen-notes/</guid><description>
 接触Eigen的原因是最近在看caffe/caffe2源码,caffe2中使用了Eigen库. Eigen 是一个基于C++模板的线性代数库，直接将库下载后放在项目目录下，然后包含头文件就能使用，非常方便。对于Linux用户,只需要把头文件放到/usr/include 下即可此外，Eigen的接口清晰，稳定高效。
 之后会更新一些,Eigen中我使用过的函数.
 ubuntu14.04LTS 下使用方式: sudo apt-get install libeigen3-dev cd /usr/include/eigen3 sudo cp -R Eigen /usr/include 然后尝试运行如下代码,直接编译即可.如果可以正常运行,表明安装完毕.
-#include &amp;lt;iostream&amp;gt; #include &amp;lt;Eigen/Dense&amp;gt; //using Eigen::MatrixXd; using namespace Eigen; using namespace Eigen::internal; using namespace Eigen::Architecture; using namespace std; int main() { cout&amp;lt;&amp;lt;&amp;quot;*******************1D-object****************&amp;quot;&amp;lt;&amp;lt;endl; Vector4d v1; v1&amp;lt;&amp;lt; 1,2,3,4; cout&amp;lt;&amp;lt;&amp;quot;v1=\n&amp;quot;&amp;lt;&amp;lt;v1&amp;lt;&amp;lt;endl; VectorXd v2(3); v2&amp;lt;&amp;lt;1,2,3; cout&amp;lt;&amp;lt;&amp;quot;v2=\n&amp;quot;&amp;lt;&amp;lt;v2&amp;lt;&amp;lt;endl; Array4i v3; v3&amp;lt;&amp;lt;1,2,3,4; cout&amp;lt;&amp;lt;&amp;quot;v3=\n&amp;quot;&amp;lt;&amp;lt;v3&amp;lt;&amp;lt;endl; ArrayXf v4(3); v4&amp;lt;&amp;lt;1,2,3; cout&amp;lt;&amp;lt;&amp;quot;v4=\n&amp;quot;&amp;lt;&amp;lt;v4&amp;lt;&amp;lt;endl; } map的使用办法: double arr[9]={1,2,3,4,5,6,7,8,9}; Map A(arr,3,3); 得到 1 4 7 2 5 8 3 6 9</description></item><item><title>cmake 学习笔记</title><link>https://111qqz.com/2018/03/cmake-notes/</link><pubDate>Sun, 18 Mar 2018 10:27:26 +0000</pubDate><guid>https://111qqz.com/2018/03/cmake-notes/</guid><description>
-前置技能点：
-gnu make
-linux下.so,.a,.o文件
-cmake是一个工具，也可以看成一门语言。
-学习cmake最大的障碍在于看不懂全是大写的英文
-学习cmake主要参考了《cmake practice》
-不过感觉作者有些啰嗦...不重要的东西讲了半天，重要的东西却一带而过。。。表述得也不是特别流畅。。。但是还是感谢作者的分享吧orz...
-cmake的定位是大型项目构建工具。
-目前适用于C/C++/JAVA的项目。
-可以不需要自己写makefile文件。
-既然cmake可以看做一门语言，那么自然就有语法。
-下面只是列举一些常用的。不常用的可以用到的时候再去查。这里也会不定期补充。
-cmake的语法中，对于变量大小写敏感，对于cmake的关键字大小写不敏感，不过习惯于全部大写。
-cmake有两种编译方式，一种叫in source 编译（就是直接在工程目录编译）
-一种叫out of source 编译，就是在工程目录下新建build,然后在build文件夹里编译。
-一般都采用out of source的方式编译，这样可以使得编译得到的结果都存放在build文件夹里，不会和源代码混在一起。
-set 命令用来定义变量：
-SET(HELLO_SRC main.SOURCE_PATHc)
-然后就可以用${HELLO_SRC}　来引用这个变量了（例外：在if语句中，是直接使用变量名引用，而不需要${}）
-ADD_EXECUTABLE来定义生成的可执行文件的名字：
-ADD_EXECUTABLE(hello SRC_LIST)
-表示源文件是SRC_LIST 中定义的源文件列表，生成一个文件名为hello的可执行文件。
-如果有多个参数，可以写成：
-ADD_EXECUTABLE(hello main.c func.c)或者 ADD_EXECUTABLE(hello main.c;func.c)
-ADD_SUBDIRECTORY指令：
-ADD_SUBDIRECTORY(source_dir [binary_dir] [EXCLUDE_FROM_ALL]) 这个指令用于向当前工程添加存放源文件的子目录,并可以指定中间二进制和目标二进制存 放的位置。EXCLUDE_FROM_ALL 参数的含义是将这个目录从编译过程中排除,比如,工程 的 example,可能就需要工程构建完成后,再进入 example 目录单独进行构建(当然,你 也可以通过定义依赖来解决此类问题)。
-ADD_LIBRARY(hello SHARED ${LIBHELLO_SRC})：生成动态(共享)库
-语法为：ADD_LIBRARY(libname [SHARED|STATIC|MODULE] [EXCLUDE_FROM_ALL] source1 source2 ... sourceN)
-常用到的是SHARED动态库，STATIC静态库
-SET_TARGET_PROPERTIES：可以修改生成的库的名字
-SET_TARGET_PROPERTIES(hello_static PROPERTIES OUTPUT_NAME &amp;quot;hello&amp;quot;)</description></item><item><title>CUDA C Best Practices Guide 阅读笔记（二） Heterogeneous Computing</title><link>https://111qqz.com/2018/02/cuda-c-best-practices-guide-heterogeneous-computing/</link><pubDate>Tue, 13 Feb 2018 06:38:38 +0000</pubDate><guid>https://111qqz.com/2018/02/cuda-c-best-practices-guide-heterogeneous-computing/</guid><description>
-CUDA 编程涉及到在不同的平台上同时运行代码:包含CPU的host 和包含GPU的device.
-所以了解host和device的对性能优化是非常重要的。
-2.1. Differences between Host and Device Threading resources host 上能同时运行的线程数目比较少（比如24个）
-device上能同时运行的线程数目比较多（数量级通常为1E3，1E4等）
-Threads 操作系统必须交换CPU执行通道上和下的线程以提供多线程功能。因此，上下文切换(当交换两个线程时)既慢又昂贵。
-相比之下，GPU上的线程非常轻量级。在典型的系统中，成千上万的线程排队等待工作(每个线程有32个线程)。如果GPU必须等待 one warp of threads，它只需开始在另一个线程上执行工作。
-简而言之，CPU内核被设计为每次最小化一个或两个线程的等待时间，而GPU被设计为处理大量并发的轻量级线程以最大化吞吐量。
-RAM host和device 各自具有各自不同的附接物理存储器。host和device内存由PCI Express ( PCIe )总线分隔，因此host内存中的项目必须偶尔通过总线传送到device内存，反之亦然
-2.2. What Runs on a CUDA-Enabled Device? 下面谈谈应该把应用的哪些部分放在device 上运行
-* 大数据集上的算术运算 * 为了获得最佳性能，设备上运行的相邻线程的内存访问应该具有一定的一致性。**某些内存访问模式使硬件能够将多个数据项的读或写组合并到一个操作中**。当在CUDA上的计算中使用时，无法布局以实现合并的数据，或者没有足够的局部性来有效地使用L1或纹理缓存的数据，将倾向于看到较小的加速比。 * host和device之间的数据交换尽可能少 * **换到device上执行的数据一定会被做足够多的运算**，不然数据从Host传送到device的代价 可能与该运算在device上并行计算的优势向抵消，甚至得不偿失。 * **数据应尽可能长时间保存在设备上。**因为传输应该最小化，所以在同一数据上运行多个内核的程序应该倾向于在内核调用之间将数据保留在设备上，而不是将中间结果传输到主机，然后再将它们发送回设备进行后续计算。就是说，如果有一段连续的操作要处理某些数据，就算其中的部分操作在host上运行要比在device上快（比如不是算数运算而是逻辑处理），那么考虑到数据传输的巨大代价，将所有数据都放在device上处理可能会更好。这种处理原则即使相对较慢的内核也可能是有利的，如果它避免了一个或多个PCIe传输。</description></item><item><title>qt 5.x　初探　(5)　</title><link>https://111qqz.com/2017/06/qt-5-notes-5/</link><pubDate>Sun, 04 Jun 2017 17:14:39 +0000</pubDate><guid>https://111qqz.com/2017/06/qt-5-notes-5/</guid><description>
+#include &amp;lt;iostream&amp;gt; #include &amp;lt;Eigen/Dense&amp;gt; //using Eigen::MatrixXd; using namespace Eigen; using namespace Eigen::internal; using namespace Eigen::Architecture; using namespace std; int main() { cout&amp;lt;&amp;lt;&amp;quot;*******************1D-object****************&amp;quot;&amp;lt;&amp;lt;endl; Vector4d v1; v1&amp;lt;&amp;lt; 1,2,3,4; cout&amp;lt;&amp;lt;&amp;quot;v1=\n&amp;quot;&amp;lt;&amp;lt;v1&amp;lt;&amp;lt;endl; VectorXd v2(3); v2&amp;lt;&amp;lt;1,2,3; cout&amp;lt;&amp;lt;&amp;quot;v2=\n&amp;quot;&amp;lt;&amp;lt;v2&amp;lt;&amp;lt;endl; Array4i v3; v3&amp;lt;&amp;lt;1,2,3,4; cout&amp;lt;&amp;lt;&amp;quot;v3=\n&amp;quot;&amp;lt;&amp;lt;v3&amp;lt;&amp;lt;endl; ArrayXf v4(3); v4&amp;lt;&amp;lt;1,2,3; cout&amp;lt;&amp;lt;&amp;quot;v4=\n&amp;quot;&amp;lt;&amp;lt;v4&amp;lt;&amp;lt;endl; } map的使用办法: double arr[9]={1,2,3,4,5,6,7,8,9}; Map A(arr,3,3); 得到 1 4 7 2 5 8 3 6 9</description></item><item><title>qt 5.x　初探　(5)　</title><link>https://111qqz.com/2017/06/qt-5-notes-5/</link><pubDate>Sun, 04 Jun 2017 17:14:39 +0000</pubDate><guid>https://111qqz.com/2017/06/qt-5-notes-5/</guid><description>
 qt_5.9_ui_doc
 还是比直接写代码方便点。。。所以不妨学习一个！
 以及。。。qt在2017年6月１号发布了5.9。。。所以之前是5.8。。。现在变成5.9了。。。
