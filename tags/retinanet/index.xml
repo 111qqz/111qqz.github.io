@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>retinanet on Clarity</title><link>https://111qqz.com/tags/retinanet/</link><description>Recent content in retinanet on Clarity</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>Copyright © 2008–2018, Steve Francia and the Hugo Authors; all rights reserved.</copyright><lastBuildDate>Sat, 02 May 2020 18:50:06 +0800</lastBuildDate><atom:link href="https://111qqz.com/tags/retinanet/index.xml" rel="self" type="application/rss+xml"/><item><title>Focal Loss for Dense Object Detection(RetinaNet) 学习笔记</title><link>https://111qqz.com/2020/05/retinanet-notes/</link><pubDate>Sat, 02 May 2020 18:50:06 +0800</pubDate><guid>https://111qqz.com/2020/05/retinanet-notes/</guid><description>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>retinanet on 111qqz's blog</title><link>https://111qqz.com/tags/retinanet/</link><description>Recent content in retinanet on 111qqz's blog</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sat, 02 May 2020 18:50:06 +0800</lastBuildDate><atom:link href="https://111qqz.com/tags/retinanet/index.xml" rel="self" type="application/rss+xml"/><item><title>Focal Loss for Dense Object Detection(RetinaNet) 学习笔记</title><link>https://111qqz.com/2020/05/retinanet-notes/</link><pubDate>Sat, 02 May 2020 18:50:06 +0800</pubDate><guid>https://111qqz.com/2020/05/retinanet-notes/</guid><description>
 先写个简略版的笔记..看之后的情况要不要读得更精细一点..
 背景 two stage的检测比one stage的检测效果好,原因是啥?
 作者认为是正负样本不平衡导致的. two stage的方法在proposal 的时候干掉了大部分负样本,所以效果好.
 因为作者提出了一种新的loss,称为Focal Loss 是对交叉熵loss的改进,作用是提高没有正确分类的样本的权重,降低正确分类的样本的权重.
 然后设计了个retinaNet 来验证效果. 主要是用了Focal Loss 作为损失函数,以及backbone比起之前的one stage的检测用上了FPN.
 Focal Loss 一图胜千言
-Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: https://i.loli.net/2020/05/02/MWEq3aOxcu1Y6P9.png
-Disk path: /static/https://i.loli.net/2020/05/02/MWEq3aOxcu1Y6P9.png
-Using Page Bundles: false
+Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: /2020/05/retinanet-notes/https://i.loli.net/2020/05/02/MWEq3aOxcu1Y6P9.png
+Disk path: /content/post/深度学习/https://i.loli.net/2020/05/02/MWEq3aOxcu1Y6P9.png
+Using Page Bundles: true
 Focal loss是在交叉熵loss的基础上增加了一个指数衰减. 对正确分类的样本影响很小,对错误分类的样本影响很大.
 从图上我们可以看出,CE对正确分类的样本仍然有不小的loss,这样的样本数很多的话,就会被训练的时候模型被带歪... 因此需要减少这些正确分类的样本对loss的影响.
 RetinaNet 单阶段检测,主要在于使用Focal Loss训练,以及backbone用上了FPN

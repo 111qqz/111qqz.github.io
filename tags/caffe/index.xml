@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>caffe on Clarity</title><link>https://111qqz.com/tags/caffe/</link><description>Recent content in caffe on Clarity</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>Copyright © 2008–2018, Steve Francia and the Hugo Authors; all rights reserved.</copyright><lastBuildDate>Tue, 30 Jun 2020 19:47:02 +0800</lastBuildDate><atom:link href="https://111qqz.com/tags/caffe/index.xml" rel="self" type="application/rss+xml"/><item><title>caffe 源码阅读笔记</title><link>https://111qqz.com/2020/06/caffe-notes/</link><pubDate>Tue, 30 Jun 2020 19:47:02 +0800</pubDate><guid>https://111qqz.com/2020/06/caffe-notes/</guid><description>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>caffe on 111qqz's blog</title><link>https://111qqz.com/tags/caffe/</link><description>Recent content in caffe on 111qqz's blog</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Tue, 30 Jun 2020 19:47:02 +0800</lastBuildDate><atom:link href="https://111qqz.com/tags/caffe/index.xml" rel="self" type="application/rss+xml"/><item><title>caffe 源码阅读笔记</title><link>https://111qqz.com/2020/06/caffe-notes/</link><pubDate>Tue, 30 Jun 2020 19:47:02 +0800</pubDate><guid>https://111qqz.com/2020/06/caffe-notes/</guid><description>
 blob
 layer
 net
@@ -25,9 +25,9 @@ caffe目前支持求和(SUM),绝对值的和(ASUM),平方和(SUMSQ),以及对得
 proto 先看proto
 12message ReductionParameter {3 enum ReductionOp {4 SUM = 1;5 ASUM = 2;6 SUMSQ = 3;7 MEAN = 4;8 }910 optional ReductionOp operation = 1 [default = SUM]; // reduction operation 1112 // The first axis to reduce to a scalar -- may be negative to index from the 13 // end (e.g., -1 for the last axis). 14 // (Currently, only reduction along ALL &amp;#34;tail&amp;#34; axes is supported; reduction 15 // of axis M through N, where N &amp;lt; num_axes - 1, is unsupported.</description></item><item><title>caffe 源码学习笔记(8) loss function</title><link>https://111qqz.com/2020/04/caffe-source-code-analysis-part8/</link><pubDate>Sat, 18 Apr 2020 18:33:29 +0800</pubDate><guid>https://111qqz.com/2020/04/caffe-source-code-analysis-part8/</guid><description>
 背景 虽然不太care 训练的过程，但是由于容易看懂的layer都看得差不多了 所以打算看一下这些loss function.
-Euclidean Loss (L2 loss) Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: https://i.loli.net/2020/04/18/voT7jGEF1BabmpL.png
-Disk path: /static/https://i.loli.net/2020/04/18/voT7jGEF1BabmpL.png
-Using Page Bundles: false
+Euclidean Loss (L2 loss) Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: /2020/04/caffe-source-code-analysis-part8/https://i.loli.net/2020/04/18/voT7jGEF1BabmpL.png
+Disk path: /content/post/深度学习/https://i.loli.net/2020/04/18/voT7jGEF1BabmpL.png
+Using Page Bundles: true
 一般用于“real-valued regression tasks” 。　比如之前的项目上用的人脸年龄模型，就是用了这个Loss
 这个loss没什么额外的参数，实现也很简单。
 1 2template &amp;lt;typename Dtype&amp;gt; 3void EuclideanLossLayer&amp;lt;Dtype&amp;gt;::Reshape( 4 const vector&amp;lt;Blob&amp;lt;Dtype&amp;gt;*&amp;gt;&amp;amp; bottom, const vector&amp;lt;Blob&amp;lt;Dtype&amp;gt;*&amp;gt;&amp;amp; top) { 5 LossLayer&amp;lt;Dtype&amp;gt;::Reshape(bottom, top); 6 CHECK_EQ(bottom[0]-&amp;gt;count(1), bottom[1]-&amp;gt;count(1)) 7 &amp;lt;&amp;lt; &amp;#34;Inputs must have the same dimension.</description></item><item><title>caffe 源码学习笔记(7) slice layer</title><link>https://111qqz.com/2020/04/caffe-source-code-analysis-part7/</link><pubDate>Mon, 13 Apr 2020 21:22:54 +0800</pubDate><guid>https://111qqz.com/2020/04/caffe-source-code-analysis-part7/</guid><description>
@@ -44,9 +44,9 @@ caffe中卷积运算的实现 暴力实现的卷积大概是这样子的
 Caffe convolves by reduction to matrix multiplication. This achieves high-throughput and generality of input and filter dimensions but comes at the cost of memory for matrices.</description></item><item><title>caffe 源码学习笔记(4) 激活函数</title><link>https://111qqz.com/2020/04/caffe-source-code-analysis-part4/</link><pubDate>Tue, 07 Apr 2020 23:21:40 +0800</pubDate><guid>https://111qqz.com/2020/04/caffe-source-code-analysis-part4/</guid><description>
 在看过caffe代码的三个核心部分,blob,layer,net之后，陷入了不知道以什么顺序继续看的困境。
 blob,layer,net只是三个最基本的概念，关键还是在于各个layer. 但是layer这么多，要怎么看呢？ 想了一下决定把相同作用的layer放在一起分析。 今天打算先分析一下激活函数。
-sigmoid Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Sigmoid_function_01.png/220px-Sigmoid_function_01.png
-Disk path: /static/https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Sigmoid_function_01.png/220px-Sigmoid_function_01.png
-Using Page Bundles: false
+sigmoid Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: /2020/04/caffe-source-code-analysis-part4/https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Sigmoid_function_01.png/220px-Sigmoid_function_01.png
+Disk path: /content/post/深度学习/https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Sigmoid_function_01.png/220px-Sigmoid_function_01.png
+Using Page Bundles: true
 表达式为 f(t) = 1/(1+e^-t)
 caffe GPU实现，非常直接
 1 2template &amp;lt;typename Dtype&amp;gt; 3__global__ void SigmoidForward(const int n, const Dtype* in, Dtype* out) { 4 CUDA_KERNEL_LOOP(index, n) { 5 out[index] = 1. / (1. + exp(-in[index])); 6 } 7} 8 sigmoid激活函数的一大优点是求导非常容易，因此backward函数其实也很简单。</description></item><item><title>caffe 源码学习笔记(3) Net</title><link>https://111qqz.com/2020/01/caffe-source-code-analysis-part3/</link><pubDate>Sun, 12 Jan 2020 19:18:15 +0800</pubDate><guid>https://111qqz.com/2020/01/caffe-source-code-analysis-part3/</guid><description>
@@ -54,12 +54,12 @@ Net 基本介绍 网络通过组成和自微分共同定义一个函数及其梯
 网络是一些Layer组成的DAG,也就是有向无环图，在caffe中通常由prototxt定义．
 比如
 1name: &amp;#34;LogReg&amp;#34;2layer {3 name: &amp;#34;mnist&amp;#34;4 type: &amp;#34;Data&amp;#34;5 top: &amp;#34;data&amp;#34;6 top: &amp;#34;label&amp;#34;7 data_param {8 source: &amp;#34;input_leveldb&amp;#34;9 batch_size: 6410 }11}12layer {13 name: &amp;#34;ip&amp;#34;14 type: &amp;#34;InnerProduct&amp;#34;15 bottom: &amp;#34;data&amp;#34;16 top: &amp;#34;ip&amp;#34;17 inner_product_param {18 num_output: 219 }20}21layer {22 name: &amp;#34;loss&amp;#34;23 type: &amp;#34;SoftmaxWithLoss&amp;#34;24 bottom: &amp;#34;ip&amp;#34;25 bottom: &amp;#34;label&amp;#34;26 top: &amp;#34;loss&amp;#34;27}定义了
-Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: https://caffe.</description></item><item><title>caffe 源码学习笔记(2) Layer</title><link>https://111qqz.com/2020/01/caffe-source-code-analysis-part2/</link><pubDate>Sat, 11 Jan 2020 17:47:05 +0800</pubDate><guid>https://111qqz.com/2020/01/caffe-source-code-analysis-part2/</guid><description>
+Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: /2020/01/caffe-source-code-analysis-part3/https://caffe.</description></item><item><title>caffe 源码学习笔记(2) Layer</title><link>https://111qqz.com/2020/01/caffe-source-code-analysis-part2/</link><pubDate>Sat, 11 Jan 2020 17:47:05 +0800</pubDate><guid>https://111qqz.com/2020/01/caffe-source-code-analysis-part2/</guid><description>
 layer 整体介绍 layer是模型计算的基本单元 类似于pytorch或者其他深度学习框架的op layer中的数据流向为,输入若干个blob，称之为&amp;quot;bottom blob&amp;quot;,然后经过layer的计算，输出若干个blob,称之为&amp;quot;top blob&amp;quot;
 也就是数据是从“bottom”流向“top”
-Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: https://caffe.berkeleyvision.org/tutorial/fig/layer.jpg
-Disk path: /static/https://caffe.berkeleyvision.org/tutorial/fig/layer.jpg
-Using Page Bundles: false
+Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: /2020/01/caffe-source-code-analysis-part2/https://caffe.berkeleyvision.org/tutorial/fig/layer.jpg
+Disk path: /content/post/深度学习/https://caffe.berkeleyvision.org/tutorial/fig/layer.jpg
+Using Page Bundles: true
 layer通常会进行两种计算，forward和backward
 forward是指，根据bottom blob计算得到top blob backward是指，根据top blob的结果和参数值计算得到的gradient,回传给前面的layer.
 layer 实现细节 layer作为一个base class,实现了所有layer都需要的common的部分。 比如:
