@@ -162,7 +162,7 @@ prior box prior box的概念其实与faster-rcnn中anchor的概念是一样的�
 prior_box的参数选择,以及一些训练有关的细节可以参考原论文,这里不再赘述. 这里主要想强调一下和priox box有关的inference 细节. 主要是decode box的部分.
 由于模型输出的bbox其实是相对每个prior_box的offset,不是真正的bbox,因此需要由网络输出的box_pred和prior box得到真正的bbox 坐标.这部分通常称为decode box,其实已经算是后处理部分了.
 pytorch中decode box的代码如下:
-1 variance1, variance2 = variance 2 cx = box_prior[:, :, 3 0] + box_pred[:, :, 0] * variance1 * box_prior[:, :, 2] 4 cy = box_prior[:, :, 5 1] + box_pred[:, :, 1] * variance1 * box_prior[:, :, 3] 6 w = box_prior[:, :, 2] + torch.</description></item><item><title>rankboost 算法学习笔记</title><link>https://111qqz.com/2019/11/rankboost-algorithm/</link><pubDate>Tue, 26 Nov 2019 20:59:04 +0800</pubDate><guid>https://111qqz.com/2019/11/rankboost-algorithm/</guid><description>
+1 variance1, variance2 = variance 2 cx = box_prior[:, :, 3 0] + box_pred[:, :, 0] * variance1 * box_prior[:, :, 2] 4 cy = box_prior[:, :, 5 1] + box_pred[:, :, 1] * variance1 * box_prior[:, :, 3] 6 w = box_prior[:, :, 2] + torch.</description></item><item><title>rankboost 算法学习笔记</title><link>https://111qqz.com/2019/11/rankboost-Algorithm/</link><pubDate>Tue, 26 Nov 2019 20:59:04 +0800</pubDate><guid>https://111qqz.com/2019/11/rankboost-Algorithm/</guid><description>
 boosting 算法是什么． 机缘使然，接触到了 Boosting 算法．Boosting是一种通过组合弱学习器来产生强学习器的通用且有效的方法.
 动机是基于如下观察:尽管委员会中每个成员只提供一些不成熟的判断,但整个委员会却产生较为准确的决策。通过组合多个弱学习器来解决学习问题。给定训练数据,弱学习算法(如决策树)可以训练产生弱学习器,这些弱学习器只需要比随机猜测的准确率好一些。用不同的训练数据训练可以得到不同的弱学习器。这些弱学习器作为委员会成员,共同决策。
 ranking task是什么 此处的ranking task指的的pairwise ranking
@@ -170,7 +170,7 @@ ranking task是什么 此处的ranking task指的的pairwise ranking
 所以到底什么才是一个ranking task呢?
 ranking task是一种有监督学习，通过label 信息，来对所有的数据点做出排名的预测．这里的label是一种关系信息，与数据点对一一对应的．设label函数为f,一般来说，假设有数据点x1,x2,那么有
 1f(x1,x2) = 1 if x1 ranks higher than x2 2f(x1,x2) = -1 if x1 ranks lower than x2 3f(x1,x2) = 0 if there is no enough info to compare x1 and x2 需要注意的是，通常来说label并没有传递性．也就是说，从f(x1,x2) = 1和　f(x2,x3) =1 并不能推断出f(x1,x3) = 1.原因是在比较x1,x2,x3时，可能使用了不同的feature(通俗的解释就是，我喜欢A胜过B是因为A比B有钱，我喜欢B胜过C是因为B比C可爱，但是我可能因为其他原因喜欢C胜过A)
-rankboost 算法 字面理解，rankboost算法就是将boosting算法用于pairwise ranking task. 该过程的伪代码为: Image not found a.</description></item><item><title>Kubernetes(k8s)在深度学习模型转换方面的探索</title><link>https://111qqz.com/2019/11/k8s-for-model-conversion/</link><pubDate>Fri, 22 Nov 2019 11:14:19 +0800</pubDate><guid>https://111qqz.com/2019/11/k8s-for-model-conversion/</guid><description>
+rankboost 算法 字面理解，rankboost算法就是将boosting算法用于pairwise ranking task. 该过程的伪代码为: Image not found a.</description></item><item><title>Kubernetes(k8s)在深度学习模型转换方面的探索</title><link>https://111qqz.com/2019/11/K8s-for-Model-Conversion/</link><pubDate>Fri, 22 Nov 2019 11:14:19 +0800</pubDate><guid>https://111qqz.com/2019/11/K8s-for-Model-Conversion/</guid><description>
 年中的时候接了离职的同事模型转换的锅，在不断地更新迭代的过程中，发现了一些痛点。 发现k8s能够解决一部分痛点，因此来分享一下在这方面的探索。
 什么是模型转换 简单来说，深度学习模型的流程分为training和inference两部分。训练时用的一般是pytorch等框架，这些框架训练出的model是没办法直接部署在各个硬件平台上做inference的。因此需要将使用训练框架得到的模型，转换为能够部署到各个硬件平台上的模型。这个过程就是模型转换。
 模型转换的一般流程为，先将pytorch等训练框架训练得到的模型转换为caffe model（是的，caffe才是业界中间表示的事实标准，而不是号称支持所有框架中间表示的onnx)，再将caffe model 转换到各种硬件上（包括但不限于nvidia系列显卡，华为的海思系列设备等）
@@ -191,7 +191,7 @@ k8s的引入使得用户不再能直接接触到docker image. 这直接解决了
 此外,k8s的label机制也很有用. 我们可以通过给node打上不同显卡型号的label.然后维护一个显卡的列表.这样用户不再需要知道哪台服务器上有哪个显卡,只需要添写显卡型号,k8s就可以分配一台对应的机器供用户进行模型转换.
 不过实际上k8s用户模型转换也有一些缺点:
 k8s对显卡的调度是对于pod(pod就是一组container)独占的.也就是说,在一台服务器上,通过k8s只能开启与显卡个数一样多的pod.目前来看不会有什么大的影响,不过这对于对性能要求不敏感的应用,确实算个缺点.
-pod名称的全局唯一性.由于开启任务需要显式提供一个名称,如果多个用户使用了相同的名称的话,结果显然不是我们期望的. 目前的解决方案是制定一个命名规范,要求用户遵守.但是这种规范并没有任何检查的机制,因此只能算一个tricky的办法,算不上真正的解决方案.</description></item><item><title>faster rcnn 模型 tensorrt4与tensorrt5 结果不一致 踩坑记录</title><link>https://111qqz.com/2019/11/debug-frcnn-model-when-upgrading-from-tensorrt4-to-tensorrt5/</link><pubDate>Thu, 07 Nov 2019 23:40:39 +0800</pubDate><guid>https://111qqz.com/2019/11/debug-frcnn-model-when-upgrading-from-tensorrt4-to-tensorrt5/</guid><description>
+pod名称的全局唯一性.由于开启任务需要显式提供一个名称,如果多个用户使用了相同的名称的话,结果显然不是我们期望的. 目前的解决方案是制定一个命名规范,要求用户遵守.但是这种规范并没有任何检查的机制,因此只能算一个tricky的办法,算不上真正的解决方案.</description></item><item><title>faster rcnn 模型 tensorrt4与tensorrt5 结果不一致 踩坑记录</title><link>https://111qqz.com/2019/11/debug-Frcnn-Model-When-Upgrading-From-Tensorrt4-to-Tensorrt5/</link><pubDate>Thu, 07 Nov 2019 23:40:39 +0800</pubDate><guid>https://111qqz.com/2019/11/debug-Frcnn-Model-When-Upgrading-From-Tensorrt4-to-Tensorrt5/</guid><description>
 最近有同事report给我们,用同一个模型转换工具,转同一个faster rcnn 模型, 同样的sdk代码,在有些显卡上结果正常,但是再比较新的显卡上(比如Titan V)上 结果完全不正确.
 听说之后我的内心其实是 **喵喵喵喵喵?**的
 先在模型转换工具中infer了一下,发现...结果竟然真的不一样!
@@ -206,7 +206,7 @@ cls_score 的维度应该为 N*K*C*H*W
 softmax应该按照C这一维度来做,因此softmax_param中axis应该为2.
 查阅&amp;quot;tensorrt support matrix&amp;quot; ，发现 tensorrt5中，softmax会按照用户指定的维度进行。
 Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: https://i.loli.net/2019/11/13/3nVKSDOAPB9Hfjm.png
-Disk path: /static/https://i.</description></item><item><title>Anchor Box Algorithm</title><link>https://111qqz.com/2019/07/anchor-box-algorithm/</link><pubDate>Mon, 01 Jul 2019 19:53:24 +0800</pubDate><guid>https://111qqz.com/2019/07/anchor-box-algorithm/</guid><description>
+Disk path: /static/https://i.</description></item><item><title>Anchor Box Algorithm</title><link>https://111qqz.com/2019/07/Anchor-Box-Algorithm/</link><pubDate>Mon, 01 Jul 2019 19:53:24 +0800</pubDate><guid>https://111qqz.com/2019/07/Anchor-Box-Algorithm/</guid><description>
 动机 将一张图分成多个grid cell进行检测之后,每个cell只能检测到一个object. 如果这个grid cell中不止有一个物体要怎么办呢? 因此提出了anchor box algorithm来解决这个问题.
 什么是anchor anchor其实就是一组预设的参考框,每个框有不同的长宽比和大小. 提供参考框可以将问题转换为&amp;quot;这个固定参考框中有没有认识的目标，目标框偏离参考框多远&amp;quot;. 这样如果一个grid cell中有多个物体,那么就可以形状最姐姐的anchor box来负责检测该物体. Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: https://i.loli.net/2019/07/01/5d19f9e2869ad32385.jpg
 Disk path: /static/https://i.loli.net/2019/07/01/5d19f9e2869ad32385.jpg
@@ -244,16 +244,16 @@ Using Page Bundles: false
 任务命名规则：
 如D1V2_a_1,D1表示使用第一个数据集，V2表示是第二个大版本，ａ表示在V２大版本上的微调，最后的数字表示这是第几次运行该任务（跑三次以减少波动的影响）
 logdir的地址为:/mnt/lustre/renkuanze/Data_t1/reid/log/｛$jobname｝
-* D1:使用ilivids 数据集 * D1V1表示最初始的　baseline model * D1V2表示改为使用一个fc * D1V2_a是一个在一个FC上，不添加光流的修改版本 * D1V2_b是在一个FC上的baseline版本（也就是有光流） * D1V2_c是在一个FC上，有光流，batchsize从３２改为６４，gpu数目从4改为8的版本 * D1V3表示将softmax改为sigmod * D1V3_b表示将softmax改为sigmod的baseline版本 * D2:使用prid2011数据集 * D2V1表示初始的baseline model * D2V2表示改为使用一个fc * D2V2_b是在一个FC上的baseline版本 *</description></item><item><title>分类评价指标之Cumulative Match Characteristi (CMC)曲线</title><link>https://111qqz.com/2018/02/cumulative-match-characteristi/</link><pubDate>Fri, 23 Feb 2018 08:20:55 +0000</pubDate><guid>https://111qqz.com/2018/02/cumulative-match-characteristi/</guid><description>
+* D1:使用ilivids 数据集 * D1V1表示最初始的　baseline model * D1V2表示改为使用一个fc * D1V2_a是一个在一个FC上，不添加光流的修改版本 * D1V2_b是在一个FC上的baseline版本（也就是有光流） * D1V2_c是在一个FC上，有光流，batchsize从３２改为６４，gpu数目从4改为8的版本 * D1V3表示将softmax改为sigmod * D1V3_b表示将softmax改为sigmod的baseline版本 * D2:使用prid2011数据集 * D2V1表示初始的baseline model * D2V2表示改为使用一个fc * D2V2_b是在一个FC上的baseline版本 *</description></item><item><title>分类评价指标之Cumulative Match Characteristi (CMC)曲线</title><link>https://111qqz.com/2018/02/cumulative-Match-characteristi/</link><pubDate>Fri, 23 Feb 2018 08:20:55 +0000</pubDate><guid>https://111qqz.com/2018/02/cumulative-Match-characteristi/</guid><description>
 CMC曲线全称是Cumulative Match Characteristic (CMC) curve，也就是累积匹配曲线，同ROC曲线Receiver Operating Characteristic (ROC) curve一样，是模式识别系统，如人脸，指纹，虹膜等的重要评价指标，尤其是在生物特征识别系统中，一般同ROC曲线（ 多标签图像分类任务的评价方法-mean average precision(mAP) 以及top x的评价方法）一起给出，能够综合评价出算法的好坏。
 转一篇通俗易懂的解释：
 Shortly speaking, imagine that you have 5 classes. For simplicity, imagine you have one test per class. Each test produces a score when compared to each class. Let's start from test1 which belongs to class1:
 As your similarity measure, here, is Euclidian distance, the more distance a test has compared to a class, the less similarity is obtained.</description></item><item><title>pytorch 函数笔记</title><link>https://111qqz.com/2018/02/pytorch-function-notes/</link><pubDate>Fri, 23 Feb 2018 02:55:25 +0000</pubDate><guid>https://111qqz.com/2018/02/pytorch-function-notes/</guid><description>
 记录一些常用的...总去查文档也是有点麻烦
-* tensor.view 的作用是reshape 比如 a = torch.range(1, 16) 得到一个tensor that has 16 elements from 1 to 16. 在a=a.view(4,4)就得到了一个44的tensor。 需要注意reshape之后元素的个数不能改变(16==44) 参数-1的作用是，我懒得算这一维度应该是多少,（由于元素个数不能改变）所以希望自动被计算。**需要注意的是，只有一个维度可以写-1。 **不过view和reshape有些区别：reshape always copies memory. view never copies memory * torch.squeeze 将输入张量形状中的1 去除并返回。 如果输入是形如(A×1×B×1×C×1×D)，那么输出形状就为： (A×B×C×D)当给定dim时，那么挤压操作只在给定维度上。例如，输入形状为: (A×1×B), squeeze(input, 0) 将会保持张量不变，只有用 squeeze(input, 1)，形状会变成 (A×B)。注意： 返回张量与输入张量共享内存，所以改变其中一个的内容会改变另一个。 * torch.unsqueeze 返回一个新的张量，对输入的制定位置插入维度 1 注意： 返回张量与输入张量共享内存，所以改变其中一个的内容会改变另一个。如果dim为负，则将会被转化dim+input.dim()+1 &amp;gt;&amp;gt;&amp;gt; x = torch.Tensor([1, 2, 3, 4]) &amp;gt;&amp;gt;&amp;gt; torch.unsqueeze(x, 0) 1 2 3 4 [torch.FloatTensor of size 1x4] &amp;gt;&amp;gt;&amp;gt; torch.</description></item><item><title>光流法初探</title><link>https://111qqz.com/2018/02/optical-flow-notes/</link><pubDate>Thu, 22 Feb 2018 09:03:48 +0000</pubDate><guid>https://111qqz.com/2018/02/optical-flow-notes/</guid><description>
+* tensor.view 的作用是reshape 比如 a = torch.range(1, 16) 得到一个tensor that has 16 elements from 1 to 16. 在a=a.view(4,4)就得到了一个44的tensor。 需要注意reshape之后元素的个数不能改变(16==44) 参数-1的作用是，我懒得算这一维度应该是多少,（由于元素个数不能改变）所以希望自动被计算。**需要注意的是，只有一个维度可以写-1。 **不过view和reshape有些区别：reshape always copies memory. view never copies memory * torch.squeeze 将输入张量形状中的1 去除并返回。 如果输入是形如(A×1×B×1×C×1×D)，那么输出形状就为： (A×B×C×D)当给定dim时，那么挤压操作只在给定维度上。例如，输入形状为: (A×1×B), squeeze(input, 0) 将会保持张量不变，只有用 squeeze(input, 1)，形状会变成 (A×B)。注意： 返回张量与输入张量共享内存，所以改变其中一个的内容会改变另一个。 * torch.unsqueeze 返回一个新的张量，对输入的制定位置插入维度 1 注意： 返回张量与输入张量共享内存，所以改变其中一个的内容会改变另一个。如果dim为负，则将会被转化dim+input.dim()+1 &amp;gt;&amp;gt;&amp;gt; x = torch.Tensor([1, 2, 3, 4]) &amp;gt;&amp;gt;&amp;gt; torch.unsqueeze(x, 0) 1 2 3 4 [torch.FloatTensor of size 1x4] &amp;gt;&amp;gt;&amp;gt; torch.</description></item><item><title>光流法初探</title><link>https://111qqz.com/2018/02/Optical-flow-notes/</link><pubDate>Thu, 22 Feb 2018 09:03:48 +0000</pubDate><guid>https://111qqz.com/2018/02/Optical-flow-notes/</guid><description>
 算是CV领域的传统算法了
 只写两句话就够了。
-**它是空间运动物体在观察成像平面上的像素运动的瞬时速度，是利用图像序列中像素在时间域上的变化以及相邻帧之间的相关性来找到上一帧跟当前帧之间存在的对应关系，从而计算出相邻帧之间物体的运动信息的一种方法。** **研究光流场的目的就是为了从图片序列中近似得到不能直接得到的运动场。运动场，其实就是物体在三维真实世界中的运动；光流场，是运动场在二维图像平面上（人的眼睛或者摄像头）的投影。**
+**它是空间运动物体在观察成像平面上的像素运动的瞬时速度，是利用图像序列中像素在时间域上的变化以及相邻帧之间的相关性来找到上一帧跟当前帧之间存在的对应关系，从而计算出相邻帧之间物体的运动信息的一种方法。** 研究光流场的目的就是为了从图片序列中近似得到不能直接得到的运动场。运动场，其实就是物体在三维真实世界中的运动；光流场，是运动场在二维图像平面上（人的眼睛或者摄像头）的投影。
 参考资料：
 光流Optical Flow介绍与OpenCV实现</description></item><item><title>end-to-end 神经网络</title><link>https://111qqz.com/2018/02/end-to-end-neural-network/</link><pubDate>Thu, 22 Feb 2018 02:53:01 +0000</pubDate><guid>https://111qqz.com/2018/02/end-to-end-neural-network/</guid><description>
 所谓end-to-end 神经网络，更多是一种思想。
@@ -564,7 +564,7 @@ preprocessing给了几种预处理的方式
 这些都和slim没有太大关系，就不多废话了。
 分析的部分见代码注释...
 由于刚刚入门machine learning 一周...还有很多内容还没有从理论层面接触...所以源码的理解也十分有限...希望能以后有机会补充一波
-# Copyright 2016 The TensorFlow Authors. All Rights Reserved. # # Licensed under the Apache License, Version 2.0 (the &amp;quot;License&amp;quot;); # you may not use this file except in compliance with the License.</description></item><item><title>几种梯度下降(GD)法的比较（转载）</title><link>https://111qqz.com/2017/07/gradient-descent-methods/</link><pubDate>Mon, 10 Jul 2017 01:49:04 +0000</pubDate><guid>https://111qqz.com/2017/07/gradient-descent-methods/</guid><description>
+# Copyright 2016 The TensorFlow Authors. All Rights Reserved. # # Licensed under the Apache License, Version 2.0 (the &amp;quot;License&amp;quot;); # you may not use this file except in compliance with the License.</description></item><item><title>几种梯度下降(GD)法的比较（转载）</title><link>https://111qqz.com/2017/07/Gradient-descent-methods/</link><pubDate>Mon, 10 Jul 2017 01:49:04 +0000</pubDate><guid>https://111qqz.com/2017/07/Gradient-descent-methods/</guid><description>
 参考资料
 机器学习中梯度下降（Gradient Descent， GD）算法只需要计算损失函数的一阶导数，计算代价小，非常适合训练数据非常大的应用。
 梯度下降法的物理意义很好理解，就是沿着当前点的梯度方向进行线搜索，找到下一个迭代点。但是，为什么有会派生出 batch、mini-batch、online这些GD算法呢？

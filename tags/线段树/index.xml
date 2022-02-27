@@ -84,12 +84,12 @@ Sample Output 96 93 96
 /* *********************************************** Author :111qqz Created Time :2017年04月01日 星期六 16时37分55秒 File Name :code/bzoj/1012.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define PB push_back #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int N=2E5+7; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; int m,D; int tree[N&amp;lt;&amp;lt;2]; //树最大为M个节点.</description></item><item><title>codeforces #381 div2 E. Alyona and towers (线段树 区间合并)</title><link>https://111qqz.com/2016/11/cf740e/</link><pubDate>Mon, 28 Nov 2016 07:16:52 +0000</pubDate><guid>https://111qqz.com/2016/11/cf740e/</guid><description>
 e:题意：那个数，定义hill为一段连续的区间，满足该区间为严格单峰。现在有若干操作，每个操作是对某段区间的数同时增加一个数，问每次操作后，所有的hill中，宽度最大的（区间长度最大）的是多少。
 思路：同时增加一个数很线段树。。。但是要维护什么呢。。。？
-_猜测：肯定要维护一个区间中hill的最大宽度..._ _但是合并的时候要怎么办呢。。。_
-_考虑两个方向的合并。。。_
-_所以还要维护一个区间中，包含右端点的向左单调减延伸的长度，以及左端点的值。_
-_同理，要维护一个区间中，包含左端点的向右单调增延伸的长度，以及右端点的值。_
-_那么每次pushup的时候，就是两个区间hill的最大值，以及两个方向合并的最大值中取最大。。。_
-_。。。上面是我口胡的。。。_
+_猜测：肯定要维护一个区间中hill的最大宽度..._ 但是合并的时候要怎么办呢。。。
+考虑两个方向的合并。。。
+所以还要维护一个区间中，包含右端点的向左单调减延伸的长度，以及左端点的值。
+同理，要维护一个区间中，包含左端点的向右单调增延伸的长度，以及右端点的值。
+那么每次pushup的时候，就是两个区间hill的最大值，以及两个方向合并的最大值中取最大。。。
+。。。上面是我口胡的。。。
 upd:
 口胡的还是有点靠谱的（并没有2333，还是漏了情况）
 具体题解见代码注释
@@ -401,7 +401,7 @@ Using Page Bundles: false
 其他的就是，要离散化，以及最后答案可能会爆long long?
 1A，好爽啊哈哈哈。
 /* *********************************************** Author :111qqz Created Time :Mon 05 Sep 2016 03:40:20 PM CST File Name :code/cf/problem/61E.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; const int N=1E6+7; int a[N]; int A[N]; int H[N]; int n; int m; int tree1[N&amp;lt;&amp;lt;2],tree2[N&amp;lt;&amp;lt;2]; pair&amp;lt;LL,LL&amp;gt;ans[N]; void PushUp(int rt,int *tree) { tree[rt] = tree[rt&amp;lt;&amp;lt;1] + tree[rt&amp;lt;&amp;lt;1|1]; } void update(int p,int l,int r,int rt,int *tree) { if (l==r) { tree[rt]++; return; } int m = (l+r)&amp;gt;&amp;gt;1; if (p&amp;lt;=m) update(p,lson,tree); else update(p,rson,tree); PushUp(rt,tree); } int query(int L,int R,int l,int r,int rt,int *tree) { // cout&amp;lt;&amp;lt;&amp;quot;L:&amp;quot;&amp;lt;&amp;lt;L&amp;lt;&amp;lt;&amp;quot; R:&amp;quot;&amp;lt;&amp;lt;R&amp;lt;&amp;lt;&amp;quot; l:&amp;quot;&amp;lt;&amp;lt;l&amp;lt;&amp;lt;&amp;quot; r:&amp;quot;&amp;lt;&amp;lt;r&amp;lt;&amp;lt;&amp;quot; rt:&amp;quot;&amp;lt;&amp;lt;rt&amp;lt;&amp;lt;endl; if (L&amp;gt;R) return 0; if (L&amp;lt;=l&amp;amp;&amp;amp;r&amp;lt;=R) return tree[rt]; int m = (l+r)&amp;gt;&amp;gt;1; int ret = 0 ; if (L&amp;lt;=m) { int res = query(L,R,lson,tree); ret+=res; } if (R&amp;gt;=m+1) { int res = query(L,R,rson,tree); ret +=res; } return ret; } int Hash( int x) { return lower_bound(H,H+m,x)-H; } int main() { #ifndef ONLINE_JUDGE freopen(&amp;quot;code/in.</description></item><item><title>codeforces 459 D. Pashmak and Parmida's problem (离散化+线段树求逆序对数)</title><link>https://111qqz.com/2016/09/cf459d/</link><pubDate>Mon, 05 Sep 2016 07:23:18 +0000</pubDate><guid>https://111qqz.com/2016/09/cf459d/</guid><description>
-题目链接 题意：定义_f_(_l_, _r_, _x_)为区间[l,r]中x出现的次数。现在要求calculate the number of pairs of indicies _i_, _j_ (1 ≤ _i_ &amp;lt; _j_ ≤ _n_) such that_f_(1, _i_, _a__i_) &amp;gt; _f_(_j_, _n_, _a__j_).
+题目链接 题意：定义_f_(l, r, x)为区间[l,r]中x出现的次数。现在要求calculate the number of pairs of indicies i, j (1 ≤ i &amp;lt; j ≤ n) such that_f_(1, i, a__i) &amp;gt; f(j, n, a__j).
 思路：可以通过o(n)预处理出f(1,i,a[i])和f[j,n,a[j]]，其实预处理的过程就是离散化的过程呢。。。
 分别得到
 1 1 2 3 2 3 4
