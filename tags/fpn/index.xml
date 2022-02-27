@@ -1,1 +1,13 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>FPN on 111qqz的小窝</title><link>https://111qqz.github.io/tags/fpn/</link><description>Recent content in FPN on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 08 Dec 2019 17:30:50 +0800</lastBuildDate><atom:link href="https://111qqz.github.io/tags/fpn/index.xml" rel="self" type="application/rss+xml"/><item><title>FPN:Feature Pyramid Networks 学习笔记</title><link>https://111qqz.github.io/2019/12/feature-pyramid-networks/</link><pubDate>Sun, 08 Dec 2019 17:30:50 +0800</pubDate><guid>https://111qqz.github.io/2019/12/feature-pyramid-networks/</guid><description>检测不同尺度的物体一直是计算机视觉领域中比较有挑战性的事情．我们先从之前的工作出发，并对比FPN比起之前的工作有哪些改进． 之前的工作 Featurized image pyramid 思</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>FPN on 111qqz的小窝</title><link>http://example.org/tags/fpn/</link><description>Recent content in FPN on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 08 Dec 2019 17:30:50 +0800</lastBuildDate><atom:link href="http://example.org/tags/fpn/index.xml" rel="self" type="application/rss+xml"/><item><title>FPN:Feature Pyramid Networks 学习笔记</title><link>http://example.org/2019/12/feature-pyramid-networks/</link><pubDate>Sun, 08 Dec 2019 17:30:50 +0800</pubDate><guid>http://example.org/2019/12/feature-pyramid-networks/</guid><description>检测不同尺度的物体一直是计算机视觉领域中比较有挑战性的事情．我们先从之前的工作出发，并对比FPN比起之前的工作有哪些改进．
+之前的工作 Featurized image pyramid 思路是对于同一张图，生成不同的scale，然后每个scale的image单独去做检测． 这个方法是手工设计feautre时代的常用办法． 这个办法是比较显然的，也的确可以解决检测不同尺度物体的问题． 缺点非常明显&amp;hellip;inference的速度几乎和scale的个数线性相关． 以及由于显存的开销，没办法做end-to-end 的training.
+Single feature map 再之后，手工设计的feature逐渐被由CNN生成的feature取代了． 这种办法更加鲁棒，对image的一些变化不敏感． 但是如果只有一个scale 的图片去过这个feature map,只有最终的feature map去做predict..准确率不太行．．因此还是要与Featurized image pyramid一起．只是优化了得到feature 的部分．
+Pyramidal feature hierarchy 就..CNN本身就有显然的层次结构啊．．． 为什么不直接拿来用，而是提前scale image呢．．．
+也就是选若干个feature map直接去做predict.. 这个办法美滋滋，既有多个feature map保证了一定的准确率，同时也没有增加很多inference的cost.
+SSD应该是率先使用这种方法的． 但是这种办法仍然有不足之处，就是低层的高分辨率的feature map的semantics 太弱了．． 这就导致说对小物体的检测效果不太理想．．．
+那么该怎么办呢．．．这时候就该介绍FPN啦
+Feature Pyramid Networks 后面再更．
+FPN 用于 faster rcnn FPN同时作用于RPN阶段和fast-rcnn detector
+以下的代码实现出自　fpn.pytorch
+FPN 作用于RPN 感觉直接上代码比较容易理解
+先看　整个网络的forward函数
+def forward(self, im_data, im_info, gt_boxes, num_boxes): batch_size = im_data.size(0) im_info = im_info.data gt_boxes = gt_boxes.</description></item></channel></rss>

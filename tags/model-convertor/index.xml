@@ -1,1 +1,21 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>model-convertor on 111qqz的小窝</title><link>https://111qqz.github.io/tags/model-convertor/</link><description>Recent content in model-convertor on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 22 Nov 2019 11:14:19 +0800</lastBuildDate><atom:link href="https://111qqz.github.io/tags/model-convertor/index.xml" rel="self" type="application/rss+xml"/><item><title>Kubernetes(k8s)在深度学习模型转换方面的探索</title><link>https://111qqz.github.io/2019/11/k8s-for-model-conversion/</link><pubDate>Fri, 22 Nov 2019 11:14:19 +0800</pubDate><guid>https://111qqz.github.io/2019/11/k8s-for-model-conversion/</guid><description>年中的时候接了离职的同事模型转换的锅，在不断地更新迭代的过程中，发现了一些痛点。 发现k8s能够解决一部分痛点，因此来分享一下在这方面的探索。</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>model-convertor on 111qqz的小窝</title><link>http://example.org/tags/model-convertor/</link><description>Recent content in model-convertor on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 22 Nov 2019 11:14:19 +0800</lastBuildDate><atom:link href="http://example.org/tags/model-convertor/index.xml" rel="self" type="application/rss+xml"/><item><title>Kubernetes(k8s)在深度学习模型转换方面的探索</title><link>http://example.org/2019/11/k8s-for-model-conversion/</link><pubDate>Fri, 22 Nov 2019 11:14:19 +0800</pubDate><guid>http://example.org/2019/11/k8s-for-model-conversion/</guid><description>年中的时候接了离职的同事模型转换的锅，在不断地更新迭代的过程中，发现了一些痛点。 发现k8s能够解决一部分痛点，因此来分享一下在这方面的探索。
+什么是模型转换 简单来说，深度学习模型的流程分为training和inference两部分。训练时用的一般是pytorch等框架，这些框架训练出的model是没办法直接部署在各个硬件平台上做inference的。因此需要将使用训练框架得到的模型，转换为能够部署到各个硬件平台上的模型。这个过程就是模型转换。
+模型转换的一般流程为，先将pytorch等训练框架训练得到的模型转换为caffe model（是的，caffe才是业界中间表示的事实标准，而不是号称支持所有框架中间表示的onnx)，再将caffe model 转换到各种硬件上（包括但不限于nvidia系列显卡，华为的海思系列设备等）
+（事实上这个转换流程是有硬伤存在的，这个硬伤在于pytorch的模型权重和模型结构是分离的。调研过业界一些其他模型转换的解决方案，包括百度的X2Paddle,其做法是不把pytorch模型作为模型转换的起点，而是从caffe model/onnx model 开始转换。还调研过微软的MMdnn,里面似乎也没有提到这个问题。不知道pytorch 1.0版本新增的torchscript是不是一条出路&amp;hellip;)
+模型转换的痛点 最初模型转换的痛点是依赖比较多，从pytorch,onnx,caffe再到tensorrt,cuda等．　尤其编译caffe,又是出了名的坑多．　解决办法是用了docker,将所有环境封装好．这样其他人可以直接拉镜像下来进行模型转换．
+然而，在用了docker之后，还是有其他痛点，主要是以下三个:
+权限申请的繁琐．
+caffe模型转换到不同硬件上（主要是nvidia显卡），需要在对应的机器上进行转换．通常是客户确定使用某型号的显卡，然后我们采购对应显卡的机器．接下来需要一系列权限申请，包括服务器的权限，docker命令的权限，以及docker镜像仓库的权限．　除此之外，用户还需要将模型文件从其他位置放置到新服务器上，这件事也非常麻烦．
+docker 镜像的版本控制.
+docker的image虽然可以打tag，但是这个tag几乎对版本控制没有帮助．由于模型转换工具更新频繁（包括但是不限于，添加新的op/layer,caffe对新显卡的编译支持，caffe2tensorrt工具的更新），这么弱的版本管理就是灾难．如果我们对于每次升级docker image,都使用一个新的tag来标记的话，docker似乎没有一个机制来通知这个新的tag的存在．用户还是可以在这个旧的镜像上用到天荒地老．如果复用之前的tag的话,同样，用户还是可以不更新．
+对docker commit 的滥用．
+本来docker image的大小只有7G+,但是由于用户非常钟爱docker cp命令以及docker commit 命令．曾经有用户把整个数据集都docker cp进去之后docker commit ..　然后现在镜像大小已经有35G了．．
+上述几个痛点，恰好k8s可以比较好的解决．
+k8s用于模型转换. 官方的说法是,k8s是一个生产级别的容器编排系统，用于容器化应用的自动部署、扩缩和管理
+然而似乎我对k8s的使用是非常非主流的(其实对docker的使用也很非主流&amp;hellip;)
+不过我觉得没有规定一项技术只能用来做什么,只要解决的问题多于引入的问题,就可以尝试.
+k8s的引入使得用户不再能直接接触到docker image. 这直接解决了第一和第三两个痛点. 以及可以使用 imagePullPolicy 来进行强制更新,也基本解决了版本控制的问题. 这样就不用天天push 其他用户&amp;rdquo; 你先docker pull一下&amp;rdquo;&amp;hellip;
+此外,k8s的label机制也很有用. 我们可以通过给node打上不同显卡型号的label.然后维护一个显卡的列表.这样用户不再需要知道哪台服务器上有哪个显卡,只需要添写显卡型号,k8s就可以分配一台对应的机器供用户进行模型转换.
+不过实际上k8s用户模型转换也有一些缺点:
+k8s对显卡的调度是对于pod(pod就是一组container)独占的.也就是说,在一台服务器上,通过k8s只能开启与显卡个数一样多的pod.目前来看不会有什么大的影响,不过这对于对性能要求不敏感的应用,确实算个缺点.
+pod名称的全局唯一性.由于开启任务需要显式提供一个名称,如果多个用户使用了相同的名称的话,结果显然不是我们期望的. 目前的解决方案是制定一个命名规范,要求用户遵守.但是这种规范并没有任何检查的机制,因此只能算一个tricky的办法,算不上真正的解决方案.</description></item></channel></rss>

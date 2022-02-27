@@ -1,1 +1,17 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>checkpoint on 111qqz的小窝</title><link>https://111qqz.github.io/tags/checkpoint/</link><description>Recent content in checkpoint on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 20 Aug 2017 09:36:00 +0000</lastBuildDate><atom:link href="https://111qqz.github.io/tags/checkpoint/index.xml" rel="self" type="application/rss+xml"/><item><title>tensorflow variable 学习笔记</title><link>https://111qqz.github.io/2017/08/tensorflow-variable-notes/</link><pubDate>Sun, 20 Aug 2017 09:36:00 +0000</pubDate><guid>https://111qqz.github.io/2017/08/tensorflow-variable-notes/</guid><description>参考资料： programmers_guide/variables tf/Variable 之前感觉对tensorflow 的variable的理解不是很深刻&amp;hellip;跑个模型啥的倒不会有什么问题，但是涉及分布式，</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>checkpoint on 111qqz的小窝</title><link>http://example.org/tags/checkpoint/</link><description>Recent content in checkpoint on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 20 Aug 2017 09:36:00 +0000</lastBuildDate><atom:link href="http://example.org/tags/checkpoint/index.xml" rel="self" type="application/rss+xml"/><item><title>tensorflow variable 学习笔记</title><link>http://example.org/2017/08/tensorflow-variable-notes/</link><pubDate>Sun, 20 Aug 2017 09:36:00 +0000</pubDate><guid>http://example.org/2017/08/tensorflow-variable-notes/</guid><description>参考资料：
+programmers_guide/variables
+tf/Variable
+之前感觉对tensorflow 的variable的理解不是很深刻&amp;hellip;跑个模型啥的倒不会有什么问题，但是涉及分布式，模型并行之类的，感觉有些地方还是要理解得仔细一点比较好。
+OVERVIEW variable的目的是将状态可持久化。
+Unlike tf.Tensor objects, a tf.Variable exists outside the context of a singlesession.run call.
+通俗地说就是，variable可以用来存储一个可持久化的tensor
+一些op允许读取或者修改tensor的值，这些修改是跨session可见的，也就是说，对于用variable可持久化过的tensor,多个worker（多卡之间）之间可以看到相同的值。
+Creating a Variable 创建变量可以通过调用tf.get_variable function的方法实现。这个函数要求指明变量名称，这个名称会被作为标识该变量的key。
+tf.get_variable也允许变量复用，意思是用之前创建过的有相同名字的变量，创建当前的变量。
+my_int_variable = tf.get_variable(&amp;quot;my_int_variable&amp;quot;, [1, 2, 3], dtype=tf.int32, initializer=tf.zeros_initializer) #分别是变量名，shape，变量类型，初始化方法。 #默认类型为tf.float32，默认初始化方法是随机数。 #tf提供很多其他的初始化方法，以及也可以用一个tensor作为初始化。 #注意用tensor作为初始化时，shape就不用提供了，因为会用tensor的shape作为variable的shape Variable collections 由于在不同的部分创建了的变量可能有是够想一起访问，所以我们需要一个简单的能访问一个集合的变量的方法。tensorflow提供了collecetions,可以理解成python list,
+是一个存储tensor，variable或者其他实例的容器。
+默认情况下，tf.variable被收集到如下两个collcetions:
+* tf.GraphKeys.GLOBAL_VARIABLES：放置可以被多个设备共享的variable(从名字中的GLOBAL也可以看出来...) * tf.GraphKeys.TRAINABLE_VARIABLES:用来放置用来计算梯度的variable 如果不想训练某个variable,那么将它加入名字叫tf.GraphKeys.LOCAL_VARIABLES 的默认collection&amp;hellip;
+下面是一个将名字叫my_local的variable加入tf.GraphKeys.LOCAL_VARIABLES的例子
+my_local = tf.get_variable(&amp;quot;my_local&amp;quot;, shape=(), collections=[tf.GraphKeys.LOCAL_VARIABLES]) 一个等价写法是，将trainable属性设置为False
+my_non_trainable = tf.get_variable(&amp;quot;my_non_trainable&amp;quot;, shape=(), trainable=False) 当然自定义collcetion也是可以的，名字可以是任何字符串。</description></item></channel></rss>

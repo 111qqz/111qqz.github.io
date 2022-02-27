@@ -1,1 +1,36 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>LRU on 111qqz的小窝</title><link>https://111qqz.github.io/tags/lru/</link><description>Recent content in LRU on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 18 Aug 2017 19:18:25 +0000</lastBuildDate><atom:link href="https://111qqz.github.io/tags/lru/index.xml" rel="self" type="application/rss+xml"/><item><title>leetcode 146. LRU Cache(list+unordered_map)</title><link>https://111qqz.github.io/2017/08/leetcode-146-lru-cache/</link><pubDate>Fri, 18 Aug 2017 19:18:25 +0000</pubDate><guid>https://111qqz.github.io/2017/08/leetcode-146-lru-cache/</guid><description>请实现最近最少使用缓存(Least Recently Used (LRU) cache)类,需要支持 get, set,操作。 get 操作,给出 key,获取到相应的 value (value 为非负数),如果不存在返</description></item><item><title>缓存淘汰算法之LRU（转载）</title><link>https://111qqz.github.io/2017/03/lru/</link><pubDate>Wed, 15 Mar 2017 00:34:50 +0000</pubDate><guid>https://111qqz.github.io/2017/03/lru/</guid><description>参考博客 计组块忘光了呜呜呜。。。来复习一波。。 1. LRU 1.1. 原理 LRU（Least recently used，最近最少使用）算法根据数据的历史访问记录来进行淘汰数据</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>LRU on 111qqz的小窝</title><link>http://example.org/tags/lru/</link><description>Recent content in LRU on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 18 Aug 2017 19:18:25 +0000</lastBuildDate><atom:link href="http://example.org/tags/lru/index.xml" rel="self" type="application/rss+xml"/><item><title>leetcode 146. LRU Cache(list+unordered_map)</title><link>http://example.org/2017/08/leetcode-146-lru-cache/</link><pubDate>Fri, 18 Aug 2017 19:18:25 +0000</pubDate><guid>http://example.org/2017/08/leetcode-146-lru-cache/</guid><description>请实现最近最少使用缓存(Least Recently Used (LRU) cache)类,需要支持 get, set,操作。 get 操作,给出 key,获取到相应的 value (value 为非负数),如果不存在返回-1, 如果存在此 key 算作被访问过。 set 操作,设置 key,如果 key 存在则覆盖之前的 value (此时相当于访问过一次)。 如果 key 不存在,需要进行插入操作,如果此时已经 key 的数量已经到达 capacity, 这样需要淘汰掉最近最少使用(也就是上次被使用的时间距离现在最久的)的那 一项。
+要求get和set的时间复杂度都是O(1)
+/* *********************************************** Author :111qqz Created Time :2017年08月18日 星期五 00时00分22秒 File Name :LRU.cpp ************************************************ */ class LRUCache{ private: //map:&amp;lt;key,Value&amp;gt; //Value:pair&amp;lt;value,time&amp;gt; //time:vector? list? typedef unordered_map&amp;lt;int, pair&amp;lt;int , list&amp;lt;int&amp;gt;::iterator &amp;gt; &amp;gt;Cache; Cache cache; list&amp;lt;int&amp;gt;hit_seq; //头部最新元素，尾部最旧元素 int siz; #define fst first #define sec second #define MP make_pair void hit(Cache::iterator it) //access once { int key = it-&amp;gt;fst; hit_seq.</description></item><item><title>缓存淘汰算法之LRU（转载）</title><link>http://example.org/2017/03/lru/</link><pubDate>Wed, 15 Mar 2017 00:34:50 +0000</pubDate><guid>http://example.org/2017/03/lru/</guid><description>参考博客
+计组块忘光了呜呜呜。。。来复习一波。。
+1. LRU 1.1. 原理
+LRU（Least recently used，最近最少使用）算法根据数据的历史访问记录来进行淘汰数据，其核心思想是“如果数据最近被访问过，那么将来被访问的几率也更高”。
+1.2. 实现 最常见的实现是使用一个链表保存缓存数据，详细算法实现如下：
+1. 新数据插入到链表头部；
+2. 每当缓存命中（即缓存数据被访问），则将数据移到链表头部；
+3. 当链表满的时候，将链表尾部的数据丢弃。
+1.3. 分析 【命中率】
+当存在热点数据时，LRU的效率很好，但偶发性的、周期性的批量操作会导致LRU命中率急剧下降，缓存污染情况比较严重。
+【复杂度】
+实现简单。
+【代价】
+命中时需要遍历链表，找到命中的数据块索引，然后需要将数据移到头部。
+2. LRU-K 2.1. 原理 LRU-K中的K代表最近使用的次数，因此LRU可以认为是LRU-1。LRU-K的主要目的是为了解决LRU算法“缓存污染”的问题，其核心思想是将“最近使用过1次”的判断标准扩展为“最近使用过K次”。
+2.2. 实现 相比LRU，LRU-K需要多维护一个队列，用于记录所有缓存数据被访问的历史。只有当数据的访问次数达到K次的时候，才将数据放入缓存。当需要淘汰数据时，LRU-K会淘汰第K次访问时间距当前时间最大的数据。详细实现如下：
+1. 数据第一次被访问，加入到访问历史列表；
+2. 如果数据在访问历史列表里后没有达到K次访问，则按照一定规则（FIFO，LRU）淘汰；
+3. 当访问历史队列中的数据访问次数达到K次后，将数据索引从历史队列删除，将数据移到缓存队列中，并缓存此数据，缓存队列重新按照时间排序；
+4. 缓存数据队列中被再次访问后，重新排序；
+5. 需要淘汰数据时，淘汰缓存队列中排在末尾的数据，即：淘汰“倒数第K次访问离现在最久”的数据。
+LRU-K具有LRU的优点，同时能够避免LRU的缺点，实际应用中LRU-2是综合各种因素后最优的选择，LRU-3或者更大的K值命中率会高，但适应性差，需要大量的数据访问才能将历史访问记录清除掉。
+2.3. 分析 【命中率】
+LRU-K降低了“缓存污染”带来的问题，命中率比LRU要高。
+【复杂度】
+LRU-K队列是一个优先级队列，算法复杂度和代价比较高。
+【代价】
+由于LRU-K还需要记录那些被访问过、但还没有放入缓存的对象，因此内存消耗会比LRU要多；当数据量很大的时候，内存消耗会比较可观。
+LRU-K需要基于时间进行排序（可以需要淘汰时再排序，也可以即时排序），CPU消耗比LRU要高。
+3. Two queues（2Q） 3.1. 原理 Two queues（以下使用2Q代替）算法类似于LRU-2，不同点在于2Q将LRU-2算法中的访问历史队列（注意这不是缓存数据的）改为一个FIFO缓存队列，即：2Q算法有两个缓存队列，一个是FIFO队列，一个是LRU队列。
+3.2. 实现 当数据第一次访问时，2Q算法将数据缓存在FIFO队列里面，当数据第二次被访问时，则将数据从FIFO队列移到LRU队列里面，两个队列各自按照自己的方法淘汰数据。详细实现如下：
+1. 新访问的数据插入到FIFO队列；
+2. 如果数据在FIFO队列中一直没有被再次访问，则最终按照FIFO规则淘汰；
+3. 如果数据在FIFO队列中被再次访问，则将数据移到LRU队列头部；</description></item></channel></rss>

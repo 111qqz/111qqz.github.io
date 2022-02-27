@@ -1,1 +1,44 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>无向图的环 on 111qqz的小窝</title><link>https://111qqz.github.io/tags/%E6%97%A0%E5%90%91%E5%9B%BE%E7%9A%84%E7%8E%AF/</link><description>Recent content in 无向图的环 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 02 Sep 2016 04:40:25 +0000</lastBuildDate><atom:link href="https://111qqz.github.io/tags/%E6%97%A0%E5%90%91%E5%9B%BE%E7%9A%84%E7%8E%AF/index.xml" rel="self" type="application/rss+xml"/><item><title>hdu 5215 Cycle(交叉染色法判断无向图的奇偶环)</title><link>https://111qqz.github.io/2016/09/hdu-5215/</link><pubDate>Fri, 02 Sep 2016 04:40:25 +0000</pubDate><guid>https://111qqz.github.io/2016/09/hdu-5215/</guid><description>hdu 5215 思路:询问一个无向图，是否存在奇数环，以及是否存在偶数环。（不同的环之间可以由相同的点，不能有相同的边） 思路：一开始的想法是，根据染色的</description></item><item><title>poj 3310 Caterpillar (树的直径+并查集判环+dfs判断连通性)</title><link>https://111qqz.github.io/2016/07/poj-3310/</link><pubDate>Wed, 13 Jul 2016 06:21:41 +0000</pubDate><guid>https://111qqz.github.io/2016/07/poj-3310/</guid><description>poj3310 题目链接 题意：给出一个无向图。。。问是否满足。。联通，并且无环，并且能找到一条路径，图中所有的顶点要么在这条路径上，要么与这条路径上的顶点</description></item><item><title>hdu 4514 湫湫系列故事——设计风景线 (无向图并查集判环+非联通图的最长路径)</title><link>https://111qqz.github.io/2016/07/hdu4514/</link><pubDate>Tue, 12 Jul 2016 07:59:55 +0000</pubDate><guid>https://111qqz.github.io/2016/07/hdu4514/</guid><description>hdu4514 题意：给出一个无向图。。问是否有环。。。有的话输出YES。。如果没有环的话。。输出最长路径。。 思路：无向图判环并查集就好。。。关于最长路径</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>无向图的环 on 111qqz的小窝</title><link>http://example.org/tags/%E6%97%A0%E5%90%91%E5%9B%BE%E7%9A%84%E7%8E%AF/</link><description>Recent content in 无向图的环 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 02 Sep 2016 04:40:25 +0000</lastBuildDate><atom:link href="http://example.org/tags/%E6%97%A0%E5%90%91%E5%9B%BE%E7%9A%84%E7%8E%AF/index.xml" rel="self" type="application/rss+xml"/><item><title>hdu 5215 Cycle(交叉染色法判断无向图的奇偶环)</title><link>http://example.org/2016/09/hdu-5215/</link><pubDate>Fri, 02 Sep 2016 04:40:25 +0000</pubDate><guid>http://example.org/2016/09/hdu-5215/</guid><description>hdu 5215
+思路:询问一个无向图，是否存在奇数环，以及是否存在偶数环。（不同的环之间可以由相同的点，不能有相同的边）
+思路：一开始的想法是，根据染色的奇偶性，如果染色到某个之前染色过的点，和当前要染的颜色相同，说明存在奇数环，不同，说明存在偶数环。
+感觉很有道理的做法。。。然而错了。。。发现是忽略了上面说的，不同的环之间由相同的点的情况。
+比如这组数据：
+1 2
+2 3
+3 1
+1 4
+4 5
+5 1两个三元环扣在一起。
+实际上是既有奇数环，又有偶数环的。
+但是按照我的做法，由于每次只去染没有染过的点，无法发现偶数环。
+因此正解是增加一步回溯，这样使得之前存在与某个环中的点还可以出现在其他环中。
+然而这样复杂度会炸。。。
+于是我们根据，每条边只能走一次，对边加一个vis，使得每条边只走一次，从而保证复杂度。
+好题！
+这道题我看到了三种解法，第一种是官方解法，tarjan什么（没仔细看）。
+第二种是交叉染色。
+做法：判断是否存在一个点，同时属于两个奇环，如果存在，那么这两个奇环一定可以构成偶环。
+证明：令两个奇环分别有x1、x2条边，如果两个环存在一个公共点，令他们存在y条公共边，则它们合并成的环有x1+x2-2*y条边，一定是偶环。因为题目中限制的是边的通过次数，所以即使像下面这组数据一样y=0，偶环是交叉的，也是符合题意的。第二种做法
+但是代码略长，而且还要记录路径。
+第三种做法就是我这里用到的做法。。。感觉很完美。。可以当模板23333
+/* *********************************************** Author :111qqz Created Time :2016年09月01日 星期四 14时47分32秒 File Name :code/hdu/5215.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define fst first #define sec secon #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; const int N=1E5+7; const int M=3E5+7; int n,m; int col[N]; bool even,odd; bool vis[N]; int cnt ; int head[N]; struct Edge { int v; int nxt; bool vis; }edge[2*M]; void addedge( int u,int v) { edge[cnt].</description></item><item><title>poj 3310 Caterpillar (树的直径+并查集判环+dfs判断连通性)</title><link>http://example.org/2016/07/poj-3310/</link><pubDate>Wed, 13 Jul 2016 06:21:41 +0000</pubDate><guid>http://example.org/2016/07/poj-3310/</guid><description>poj3310 题目链接
+题意：给出一个无向图。。。问是否满足。。联通，并且无环，并且能找到一条路径，图中所有的顶点要么在这条路径上，要么与这条路径上的顶点相邻。
+思路：一个一个来。。。联通的话任意起点开始跑一遍dfs? 开一个bool数组标记走过的点。。最后扫一遍。。看是否有点没走过
+环的话并查集就好。。
+关键是第三个条件。。。根据题中题中的例子。。感觉如果存在这样的路径。。。那么这样的路径应该尽可能长？
+于是想到求直径。。。然后在bfs的时候顺便记录路径。。。这样我就知道直径是哪些点。。。然后对于所有点。。判断是否在这条直径上或者与之相邻就好。。。
+具体做法是。。。开了一个bool数组ok标记直径上的点。。。在存边的时候用一个to[]数组表示相连。。。to[u]=v,to[v]=u&amp;hellip;
+然后只要ok[i]或者ok[to[i]]满足其一就好。。。
+又是1A，蛤蛤蛤蛤蛤，我好神啊（误
+/* *********************************************** Author :111qqz Created Time :2016年07月12日 星期二 20时27分28秒 File Name :code/poj/3310.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; const int N=305; int n,m; vector &amp;lt; int &amp;gt;edge[N]; int f[N]; bool vis[N]; bool die; int d[N]; int to[N]; int pre[N];//记录最长的路径。。。 int lst,beg; bool ok[N]; struct Edge { int u,v; }e[N]; void init() { ms(to,-1); ms(pre,-1); ms(vis,false); //for dfs ms(ok,false); for ( int i = 1 ; i &amp;lt;= n ; i++) f[i] = i; for ( int i = 1 ; i &amp;lt;= n ; i++) edge[i].</description></item><item><title>hdu 4514 湫湫系列故事——设计风景线 (无向图并查集判环+非联通图的最长路径)</title><link>http://example.org/2016/07/hdu4514/</link><pubDate>Tue, 12 Jul 2016 07:59:55 +0000</pubDate><guid>http://example.org/2016/07/hdu4514/</guid><description>hdu4514
+题意：给出一个无向图。。问是否有环。。。有的话输出YES。。如果没有环的话。。输出最长路径。。
+思路：无向图判环并查集就好。。。关于最长路径这里。。一开始以为就是树的直径。。。
+但是需要注意的是。。。题目并没有保证图一定是联通的。。。所以gg了。。
+也就是要在一个不联通的图中求最长路径。。。
+没想出来。。搜了一下。。有树形dp的做法。。。有并查集的时候带权的做法。。。
+不过感觉最容易想到的还是求多次直径的做法。。。
+也就是。。每一个联通块求一次直径。。。取最大。。。
+具体做的时候。。。加一个bool数组在bfs标记一下就好。。。
+以及bfs的时候。。。由于我之后是要得到最大值。。。而图本身可能是不联通的。。所以要注意d数组初始化的问题。。。不能初始化成0x3f&amp;hellip;（这么说来即使联通也没必要初始化成0x3f。。。。)
+还有一点，这道题数据量比较大。。。用vector存图会MLE &amp;hellip;
+/* *********************************************** Author :111qqz Created Time :2016年07月12日 星期二 14时31分09秒 File Name :code/hdu/4514.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; const int N=1E5+7; const int M=1E6+7; int n,m; int f[N]; int lst; int far; int cnt; bool cyc; struct Edge { int v,w; int nxt; }edge[M]; int d[N]; bool vis[N]; bool used[N]; int head[N]; int root ( int x) { if (x!</description></item></channel></rss>

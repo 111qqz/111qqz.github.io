@@ -1,1 +1,43 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>docker on 111qqz的小窝</title><link>https://111qqz.github.io/tags/docker/</link><description>Recent content in docker on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sat, 24 Nov 2018 08:31:19 +0000</lastBuildDate><atom:link href="https://111qqz.github.io/tags/docker/index.xml" rel="self" type="application/rss+xml"/><item><title>我在公司的服务器上执行了sudo rm -rf /*</title><link>https://111qqz.github.io/2018/11/when-i-execute-sudo-rm-rf-on-the-company-server/</link><pubDate>Sat, 24 Nov 2018 08:31:19 +0000</pubDate><guid>https://111qqz.github.io/2018/11/when-i-execute-sudo-rm-rf-on-the-company-server/</guid><description>TL;DR * 依靠人的小心谨慎是不靠谱的，人总有失误的时候 * 看了下docker volume的权限机制，貌似是从docker image中继承。 * 写了两个</description></item><item><title>docker network 与 本地 network 网段冲突</title><link>https://111qqz.github.io/2018/11/docker-network-conflict-with-local-subnetwork/</link><pubDate>Tue, 20 Nov 2018 08:33:20 +0000</pubDate><guid>https://111qqz.github.io/2018/11/docker-network-conflict-with-local-subnetwork/</guid><description>起因: 公司部署在hk的爬虫服务器突然挂掉了。后来发现只是在深圳办公区无法访问。排查后发现原因是docker的网络(包括docker netwo</description></item><item><title>记一次在 docker compose 中使用volume的踩坑记录</title><link>https://111qqz.github.io/2018/11/docker-compose-default-volume-name-makes-me-confused/</link><pubDate>Wed, 14 Nov 2018 08:06:57 +0000</pubDate><guid>https://111qqz.github.io/2018/11/docker-compose-default-volume-name-makes-me-confused/</guid><description>现象: 使用docker compose 挂载 named volume 无效（且没有错误提示) 排查过程: 一开始是没有使用docker-compose命令，直接使用docker run -v 命</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>docker on 111qqz的小窝</title><link>http://example.org/tags/docker/</link><description>Recent content in docker on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sat, 24 Nov 2018 08:31:19 +0000</lastBuildDate><atom:link href="http://example.org/tags/docker/index.xml" rel="self" type="application/rss+xml"/><item><title>我在公司的服务器上执行了sudo rm -rf /*</title><link>http://example.org/2018/11/when-i-execute-sudo-rm-rf-on-the-company-server/</link><pubDate>Sat, 24 Nov 2018 08:31:19 +0000</pubDate><guid>http://example.org/2018/11/when-i-execute-sudo-rm-rf-on-the-company-server/</guid><description>TL;DR
+* 依靠人的小心谨慎是不靠谱的，人总有失误的时候 * 看了下docker volume的权限机制，貌似是从docker image中继承。 * 写了两个脚本，用来把rm alias到mv，避免手滑 又是一个可以摸鱼的周五晚上，sensespider系统测试了一天，fix了几个Bug,似乎可以发布了。系统一直是部署在了docker中..这几天测试产生了不少结果文件在host的volume中&amp;hellip; 看着不舒服，干脆删一下好了
+嗯？怎么所有者是root。。。那我sudo一下，也没什么大不了的嘛
+然而手滑了&amp;hellip; 打了个 sudo rm -rf /* &amp;hellip;
+提示无法删除/boot device is busy&amp;hellip;
+吓了一跳，下意识Ctrl-C&amp;hellip;
+从新在本地ssh到服务器，发现已经登不上去了&amp;hellip;报错在找不到sh
+看了一下，果然服务器的/bin 目录已经被删干净了&amp;hellip;
+google了一些从rm中恢复文件的帖子&amp;hellip;
+试图用 sudo apt-get install 装一些工具包&amp;hellip;
+这个时候已经提示我找不到apt-get 了。。。
+非常慌。花了3分钟思考了我到目前为止的一生看了下scp命令还在，赶紧趁着这个终端回话还没关，把本地的/bin目录拷贝了上来。
+试了下，ssh命令可以用了。 这样至少后续的修复（在不麻烦IT同事的情况下)不用跑机房了。有些镇定。
+然后发现apt-get 命令还是用不了。。。思考了1分钟。。。
+然后发现服务器用的是centos&amp;hellip;&amp;hellip;.
+再试了各种常用命令，试了docker相关的各种命令，都可以正常工作。
+然而整个人都被吓傻了&amp;hellip;.睡了一觉才回过神。
+又查了下docker volume权限的事情，发现挂载目录继承docker image中用户的权限是feature Volumes files have root owner when running docker with non-root user. 那似乎就没办法了。
+以及写了两个脚本，来避免手滑，分别是zsh环境和bash环境下的。
+kkrm</description></item><item><title>docker network 与 本地 network 网段冲突</title><link>http://example.org/2018/11/docker-network-conflict-with-local-subnetwork/</link><pubDate>Tue, 20 Nov 2018 08:33:20 +0000</pubDate><guid>http://example.org/2018/11/docker-network-conflict-with-local-subnetwork/</guid><description>起因: 公司部署在hk的爬虫服务器突然挂掉了。后来发现只是在深圳办公区无法访问。排查后发现原因是docker的网络(包括docker network的subnet或者是某个容器的ip)与该host在内网的ip段相同，导致冲突。
+排查过程： 有两个方面需要排查。一个是docker服务启动时的默认网络。
+默认网络使用bridge桥接模式，是容器与宿主机进行通讯的默认办法。
+修改默认网段可以参考 http://blog.51cto.com/wsxxsl/2060761
+除此之外，还需要注意docker创建的network的网段。
+使用docker network ls 命令查看当前的网络
+然后可以使用docker inspect 查看每个network的详细信息。
+也可以直接使用ip addr 来查看各种奇怪的虚拟网卡的ip,是否有前两位的地址和host的ip地址相同的。
+解决办法: 本想在docker-compose up 时指定默认网络的subnet
+结果发现好像并不支持？version 1.10.0 error on gateway spec
+Now while upgrading my dev environment to Docker 1.13 it took me hours to stumble into this Github issue, because the removal of those options was completely undocumented.
+So please, if I am working on a network which requires a custom docker subnet, how am I supposed to use Docker Compose and Docker Swarm?</description></item><item><title>记一次在 docker compose 中使用volume的踩坑记录</title><link>http://example.org/2018/11/docker-compose-default-volume-name-makes-me-confused/</link><pubDate>Wed, 14 Nov 2018 08:06:57 +0000</pubDate><guid>http://example.org/2018/11/docker-compose-default-volume-name-makes-me-confused/</guid><description>现象: 使用docker compose 挂载 named volume 无效（且没有错误提示)
+排查过程: 一开始是没有使用docker-compose命令，直接使用docker run -v 命令，挂载两个绝对路径，没有问题。
+然后使用named volume，在这里使用了local-persist 插件，来指定数据卷(volume)在host上的位置。直接用docker run -v 命令，依然没有问题。
+接下里打算放到docker compose里面，发现并没有挂载成功。
+但是在docker compose里面，挂载两个绝对路径是ok的。
+于是怀疑是volume的问题
+此时使用docker inspect 查看 用docker compose 启动起来的，挂载named volume的容器
+发现mount里面，挂载的named volume并不是我在docker-compose.yml填写的名称，而是多了一个前缀，这个前缀恰好是docker-compose.yml 文件所在的目录名称。
+查了一下，发现果然不止我一个人被坑到orz Docker-compose prepends directory name to named volumes
+其实应该直接使用docker inspect来排查的&amp;hellip;应该会更快找到问题
+解决办法： 有几种解决办法：
+* 不手动创建volume，而是在docker-compose.yml中，设置volume的mountpoint * 在docker-compose.yml中，添加external: true的选项到 volume中，参考[external](https://docs.docker.com/compose/compose-file/#external) 顺便附上我的docker-compose.yml文件
+version: '3' services: django: image: &amp;quot;registry.sensetime.com/spider/sensespider:v1.0&amp;quot; volumes: - spiderdata:/data privileged: true ports: - &amp;quot;8000:8000&amp;quot; working_dir: /home/renkuanze/workspace/sensespider entrypoint: bash run.</description></item></channel></rss>

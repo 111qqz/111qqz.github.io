@@ -1,1 +1,18 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>simhash on 111qqz的小窝</title><link>https://111qqz.github.io/tags/simhash/</link><description>Recent content in simhash on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 10 Mar 2017 03:33:08 +0000</lastBuildDate><atom:link href="https://111qqz.github.io/tags/simhash/index.xml" rel="self" type="application/rss+xml"/><item><title>文本相似度判断-simhash算法学习笔记</title><link>https://111qqz.github.io/2017/03/simhash/</link><pubDate>Fri, 10 Mar 2017 03:33:08 +0000</pubDate><guid>https://111qqz.github.io/2017/03/simhash/</guid><description>先放原始论文。。。以此表达对这个算法的敬意orz 论文链接 问题引出： 那天百度一面，frog学姐问了我如何判断两篇新闻稿的相似度的问题&amp;hell</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>simhash on 111qqz的小窝</title><link>http://example.org/tags/simhash/</link><description>Recent content in simhash on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 10 Mar 2017 03:33:08 +0000</lastBuildDate><atom:link href="http://example.org/tags/simhash/index.xml" rel="self" type="application/rss+xml"/><item><title>文本相似度判断-simhash算法学习笔记</title><link>http://example.org/2017/03/simhash/</link><pubDate>Fri, 10 Mar 2017 03:33:08 +0000</pubDate><guid>http://example.org/2017/03/simhash/</guid><description>先放原始论文。。。以此表达对这个算法的敬意orz
+论文链接
+问题引出： 那天百度一面，frog学姐问了我如何判断两篇新闻稿的相似度的问题&amp;hellip;.我满篇口胡&amp;hellip;也只是回答了一些诸如从图片上考虑。。或者去掉stop word之后得到特征向量然后计算余弦值之类得到传统想法。。。
+今天看到了google在用的网页去重的算法（？。。。感觉好神奇。。。准备面试到现在，第一个让我感到惊异而不是套路的算法orz
+对于处理**大规模文本（500字以上吧）**的时候效果很好。。。但是算法思想却又非常简单。
+这才是算法的美丽之处吧。。。。leetcode上的那些纱布技巧也好意思叫算法。。。？
+网页去重，其实本质还是网页相似度的计算&amp;hellip;.首先是两篇，之后还可以推广到海量数据。
+算法初探： simhash算法。。。字面上也可以看出。。是一种hash算法。。。那么它和一般的hash有什么不同呢？
+最大的问题在于。。。传统hash的设计目的之一是使得映射后的值的分布尽可能均匀&amp;hellip;对于同样的key会有同样的value,但是每当key有轻微的变化的时候，value就会千差万别。
+举个例子：
+通过simhash计算结果为：
+1000010010101101111111100000101011010001001111100001001011001011
+1000010010101101011111100000101011010001001111100001101010001011
+通过 hashcode计算为：
+1111111111111111111111111111111110001000001100110100111011011110
+1010010001111111110010110011101也就是说。。。没办法通过hash之后得到的值的差异，去分析key的相似程度。
+而simhash就是通过某种方法进行hash，使得hash之后得到的value可以反应key的相似度。
+流程 * 分词 * 给定一段语句，进行分词，得到有效的特征向量，然后为每一个特征向量设置1-5等5个级别的权重（如果是给定一个文本，那么特征向量可以是文本中的词，其权重可以是这个词出现的次数）。例如给定一段语句：“CSDN博客结构之法算法之道的作者July”，分词后为：“CSDN 博客 结构 之 法 算法 之 道 的 作者 July”，然后为每个特征向量赋予权值：CSDN(4) 博客(5) 结构(3) 之(1) 法(2) 算法(3) 之(1) 道(2) 的(1) 作者(5) July(5)，其中括号里的数字代表这个单词在整条语句中的重要程度，数字越大代表越重要。 * hash * 通过hash函数计算各个特征向量的hash值，hash值为二进制数01组成的n-bit签名。比如“CSDN”的hash值Hash(CSDN)为100101，“博客”的hash值Hash(博客)为“101011”。就这样，字符串就变成了一系列数字。 * 加权 * 在hash值的基础上，给所有特征向量进行加权，即W = Hash * weight，且遇到1则hash值和权值正相乘，遇到0则hash值和权值负相乘。例如给“CSDN”的hash值“100101”加权得到：W(CSDN) = 100101 _4 = 4 -4 -4 4 -4 4，给“博客”的hash值“101011”加权得到：W(博客)=101011 _5 = 5 -5 5 -5 5 5，其余特征向量类似此般操作。 * 合并 * 将上述各个特征向量的加权结果累加，变成只有一个序列串。拿前两个特征向量举例，例如“CSDN”的“4 -4 -4 4 -4 4”和“博客”的“5 -5 5 -5 5 5”进行累加，得到“4+5 -4+-5 -4+5 4+-5 -4+5 4+5”，得到“9 -9 1 -1 1”。 * 降维 * 对于n-bit签名的累加结果，如果大于0则置1，否则置0，从而得到该语句的simhash值，最后我们便可以根据不同语句simhash的海明距离来判断它们的相似度。例如把上面计算出来的“9 -9 1 -1 1 9”降维（某位大于0记为1，小于0记为0），得到的01串为：“1 0 1 0 1 1”，从而形成它们的simhash签名。 每篇文档得到SimHash签名值后，接着计算两个签名的海明距离即可。根据经验值，对64位的 SimHash值，海明距离在3以内的可认为相似度比较高。</description></item></channel></rss>

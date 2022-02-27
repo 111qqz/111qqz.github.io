@@ -1,1 +1,14 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>supervisor on 111qqz的小窝</title><link>https://111qqz.github.io/tags/supervisor/</link><description>Recent content in supervisor on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 04 Aug 2017 09:22:44 +0000</lastBuildDate><atom:link href="https://111qqz.github.io/tags/supervisor/index.xml" rel="self" type="application/rss+xml"/><item><title>tensorflow Supervisor 学习笔记</title><link>https://111qqz.github.io/2017/08/tensorflow-supervisor-notes/</link><pubDate>Fri, 04 Aug 2017 09:22:44 +0000</pubDate><guid>https://111qqz.github.io/2017/08/tensorflow-supervisor-notes/</guid><description>update:supervisor的缺点是遇到问题只会抛异常，所以现在有一个better的管理工具,MonitoredSession master,chief worker,Supervisor 这几</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>supervisor on 111qqz的小窝</title><link>http://example.org/tags/supervisor/</link><description>Recent content in supervisor on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 04 Aug 2017 09:22:44 +0000</lastBuildDate><atom:link href="http://example.org/tags/supervisor/index.xml" rel="self" type="application/rss+xml"/><item><title>tensorflow Supervisor 学习笔记</title><link>http://example.org/2017/08/tensorflow-supervisor-notes/</link><pubDate>Fri, 04 Aug 2017 09:22:44 +0000</pubDate><guid>http://example.org/2017/08/tensorflow-supervisor-notes/</guid><description>update:supervisor的缺点是遇到问题只会抛异常，所以现在有一个better的管理工具,MonitoredSession
+master,chief worker,Supervisor 这几个概念有点搞不清（我最菜.jpg 因此来学习一下。
+概述 原生的tensorflow 是各种东西都需要自己手动，如果是小规模的训练问题倒是不大，但是如果是训练的数据量比较大，可能需要训练几天或者几个月。。。
+那原生的tensorflow的健壮性可能就比较堪忧。。。
+万一断电了之类。。。
+这时候我们就可以使用supervisor
+其主要提供下面三个功能，以增强训练的健壮性：
+* Handles shutdowns and crashes cleanly. * Can be resumed after a shutdown or a crash. * Can be monitored through TensorBoard. supervisor可以看做一个工具，或者说是对原生tensorflow的一层封装，目的主要是通过定期save的方法增强训练健壮性，
+就算程序挂掉了也可以从上一次save的checkpoint恢复，而不是从头再来（虽然这些也可以手动实现（？）
+同时也可以简化代码量
+除了supervisor,还有tf.learn库，里面提供对原生tensorflow更高层的封装，也提供更丰富的功能。
+实例 来举个具体的例子好了：
+在不使用supervisor的时候，我们的训练代码如下：
+variables ... ops ... summary_op ... merge_all_summarie saver init_op with tf.Session() as sess: writer = tf.tf.train.SummaryWriter() sess.run(init) saver.restore() for ...: train merged_summary = sess.run(merge_all_summarie) writer.add_summary(merged_summary,i) saver.save 如果使用supervisor，代码如下：</description></item></channel></rss>
