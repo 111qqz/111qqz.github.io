@@ -1,18 +1,23 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>python on 111qqz的小窝</title><link>http://example.org/tags/python/</link><description>Recent content in python on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 19 Oct 2018 08:18:53 +0000</lastBuildDate><atom:link href="http://example.org/tags/python/index.xml" rel="self" type="application/rss+xml"/><item><title>爬虫学习笔记</title><link>http://example.org/2018/10/web-crawler-notes/</link><pubDate>Fri, 19 Oct 2018 08:18:53 +0000</pubDate><guid>http://example.org/2018/10/web-crawler-notes/</guid><description>再次迫于生计。。。
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>python on Clarity</title><link>https://111qqz.com/tags/python/</link><description>Recent content in python on Clarity</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>Copyright © 2008–2018, Steve Francia and the Hugo Authors; all rights reserved.</copyright><lastBuildDate>Fri, 19 Oct 2018 08:18:53 +0000</lastBuildDate><atom:link href="https://111qqz.com/tags/python/index.xml" rel="self" type="application/rss+xml"/><item><title>爬虫学习笔记</title><link>https://111qqz.com/2018/10/web-crawler-notes/</link><pubDate>Fri, 19 Oct 2018 08:18:53 +0000</pubDate><guid>https://111qqz.com/2018/10/web-crawler-notes/</guid><description>
+再次迫于生计。。。
 参考了面向新人的 Python 爬虫学习资料
 大致的学习路线为:
-二： 大型框架式爬虫（ Scrapy 框架为主）
-三：浏览器模拟爬虫 （ Mechanize 模拟 和 Selenium 模拟）有Python基础和一点html基础的话。。。貌似上手是0难度的
-年轻人的第一个爬虫(虽然代码是直接copy的&amp;hellip;
-''' 抓取百度贴吧---生活大爆炸吧的基本内容 爬虫线路： requests - bs4 Python版本： 3.6 OS： mac os 12.12.4 ''' import requests import time from bs4 import BeautifulSoup # 首先我们写好抓取网页的函数 def get_html(url): try: r = requests.get(url, timeout=30) r.raise_for_status() # 这里我们知道百度贴吧的编码是utf-8，所以手动设置的。爬去其他的页面时建议使用： # r.endcodding = r.apparent_endconding r.encoding = 'utf-8' return r.text except: return &amp;quot; ERROR &amp;quot; def get_content(url): ''' 分析贴吧的网页文件，整理信息，保存在列表变量中 ''' # 初始化一个列表来保存所有的帖子信息： comments = [] # 首先，我们把需要爬取信息的网页下载到本地 html = get_html(url) # 我们来做一锅汤 soup = BeautifulSoup(html, 'lxml') # 按照之前的分析，我们找到所有具有‘ j_thread_list clearfix’属性的li标签。返回一个列表类型。 liTags = soup.</description></item><item><title>使用python计算误差代码</title><link>http://example.org/2018/08/calculate-error-with-python/</link><pubDate>Mon, 06 Aug 2018 11:54:35 +0000</pubDate><guid>http://example.org/2018/08/calculate-error-with-python/</guid><description>import os import math ave_err=0.0 max_err=0.0 max_err_rate=0.0 length=0 with open(&amp;ldquo;cpu_result.txt&amp;rdquo;,&amp;ldquo;r&amp;rdquo;) as fp1, open(&amp;ldquo;cuda_ppl_result.txt&amp;rdquo;,&amp;ldquo;r&amp;rdquo;) as fp2: for l1 in fp1: l2 = fp2.readline() l1=l1[:-2] l2=l2[:-2] lst = l1.split(' &amp;lsquo;) lst2 = l2.split(&amp;rsquo; &amp;lsquo;) #print lst lst = [float(x) for x in lst ] length = length + len(lst) lst2 = [float(x) for x in lst2] #print (lst) #print (lst2)
-for index,x in enumerate(lst): y = lst2[index] ave_err = ave_err + abs(x-y) max_err = max(max_err,abs(x-y)) max_err_rate = max(max_err_rate,abs(x-y)/x) print(&amp;quot;len=&amp;quot;,length) print(&amp;quot;max_err=&amp;quot;,max_err) print(&amp;quot;max_err_rate=&amp;quot;,max_err_rate*100,&amp;quot;%&amp;quot;) print(&amp;quot;ave_err=&amp;quot;,ave_err/length) 需要提供两个文件，并且两个文件的数据格式相同。</description></item><item><title>pytorch 函数笔记</title><link>http://example.org/2018/02/pytorch-function-notes/</link><pubDate>Fri, 23 Feb 2018 02:55:25 +0000</pubDate><guid>http://example.org/2018/02/pytorch-function-notes/</guid><description>记录一些常用的&amp;hellip;总去查文档也是有点麻烦
-* tensor.view 的作用是reshape 比如 a = torch.range(1, 16) 得到一个tensor that has 16 elements from 1 to 16. 在a=a.view(4,4)就得到了一个44的tensor。 需要注意reshape之后元素的个数不能改变(16==44) 参数-1的作用是，我懒得算这一维度应该是多少,（由于元素个数不能改变）所以希望自动被计算。**需要注意的是，只有一个维度可以写-1。 **不过view和reshape有些区别：reshape always copies memory. view never copies memory * torch.squeeze 将输入张量形状中的1 去除并返回。 如果输入是形如(A×1×B×1×C×1×D)，那么输出形状就为： (A×B×C×D)当给定dim时，那么挤压操作只在给定维度上。例如，输入形状为: (A×1×B), squeeze(input, 0) 将会保持张量不变，只有用 squeeze(input, 1)，形状会变成 (A×B)。注意： 返回张量与输入张量共享内存，所以改变其中一个的内容会改变另一个。 * torch.unsqueeze 返回一个新的张量，对输入的制定位置插入维度 1 注意： 返回张量与输入张量共享内存，所以改变其中一个的内容会改变另一个。如果dim为负，则将会被转化dim+input.dim()+1 &amp;gt;&amp;gt;&amp;gt; x = torch.Tensor([1, 2, 3, 4]) &amp;gt;&amp;gt;&amp;gt; torch.unsqueeze(x, 0) 1 2 3 4 [torch.FloatTensor of size 1x4] &amp;gt;&amp;gt;&amp;gt; torch.</description></item><item><title>正则匹配中文及常用正则表达式 (转载)</title><link>http://example.org/2017/12/Common-regular-expression/</link><pubDate>Mon, 04 Dec 2017 11:34:06 +0000</pubDate><guid>http://example.org/2017/12/Common-regular-expression/</guid><description>先放一个同事安利给我的网站:regex101
+一： 简单的定向脚本爬虫（ request --- bs4 --- re ） 二： 大型框架式爬虫（ Scrapy 框架为主）
+三：浏览器模拟爬虫 （ Mechanize 模拟 和 Selenium 模拟）
+有Python基础和一点html基础的话。。。貌似上手是0难度的
+年轻人的第一个爬虫(虽然代码是直接copy的...
+''' 抓取百度贴吧---生活大爆炸吧的基本内容 爬虫线路： requests - bs4 Python版本： 3.6 OS： mac os 12.12.4 ''' import requests import time from bs4 import BeautifulSoup # 首先我们写好抓取网页的函数 def get_html(url): try: r = requests.get(url, timeout=30) r.raise_for_status() # 这里我们知道百度贴吧的编码是utf-8，所以手动设置的。爬去其他的页面时建议使用： # r.endcodding = r.apparent_endconding r.encoding = 'utf-8' return r.text except: return &amp;quot; ERROR &amp;quot; def get_content(url): ''' 分析贴吧的网页文件，整理信息，保存在列表变量中 ''' # 初始化一个列表来保存所有的帖子信息： comments = [] # 首先，我们把需要爬取信息的网页下载到本地 html = get_html(url) # 我们来做一锅汤 soup = BeautifulSoup(html, 'lxml') # 按照之前的分析，我们找到所有具有‘ j_thread_list clearfix’属性的li标签。返回一个列表类型。 liTags = soup.</description></item><item><title>使用python计算误差代码</title><link>https://111qqz.com/2018/08/calculate-error-with-python/</link><pubDate>Mon, 06 Aug 2018 11:54:35 +0000</pubDate><guid>https://111qqz.com/2018/08/calculate-error-with-python/</guid><description>
+import os import math ave_err=0.0 max_err=0.0 max_err_rate=0.0 length=0 with open(&amp;quot;cpu_result.txt&amp;quot;,&amp;quot;r&amp;quot;) as fp1, open(&amp;quot;cuda_ppl_result.txt&amp;quot;,&amp;quot;r&amp;quot;) as fp2: for l1 in fp1: l2 = fp2.readline() l1=l1[:-2] l2=l2[:-2] lst = l1.split(' ') lst2 = l2.split(' ') #print lst lst = [float(x) for x in lst ] length = length + len(lst) lst2 = [float(x) for x in lst2] #print (lst) #print (lst2)
+for index,x in enumerate(lst): y = lst2[index] ave_err = ave_err + abs(x-y) max_err = max(max_err,abs(x-y)) max_err_rate = max(max_err_rate,abs(x-y)/x) print(&amp;quot;len=&amp;quot;,length) print(&amp;quot;max_err=&amp;quot;,max_err) print(&amp;quot;max_err_rate=&amp;quot;,max_err_rate*100,&amp;quot;%&amp;quot;) print(&amp;quot;ave_err=&amp;quot;,ave_err/length) 需要提供两个文件，并且两个文件的数据格式相同。</description></item><item><title>pytorch 函数笔记</title><link>https://111qqz.com/2018/02/pytorch-function-notes/</link><pubDate>Fri, 23 Feb 2018 02:55:25 +0000</pubDate><guid>https://111qqz.com/2018/02/pytorch-function-notes/</guid><description>
+记录一些常用的...总去查文档也是有点麻烦
+* tensor.view 的作用是reshape 比如 a = torch.range(1, 16) 得到一个tensor that has 16 elements from 1 to 16. 在a=a.view(4,4)就得到了一个44的tensor。 需要注意reshape之后元素的个数不能改变(16==44) 参数-1的作用是，我懒得算这一维度应该是多少,（由于元素个数不能改变）所以希望自动被计算。**需要注意的是，只有一个维度可以写-1。 **不过view和reshape有些区别：reshape always copies memory. view never copies memory * torch.squeeze 将输入张量形状中的1 去除并返回。 如果输入是形如(A×1×B×1×C×1×D)，那么输出形状就为： (A×B×C×D)当给定dim时，那么挤压操作只在给定维度上。例如，输入形状为: (A×1×B), squeeze(input, 0) 将会保持张量不变，只有用 squeeze(input, 1)，形状会变成 (A×B)。注意： 返回张量与输入张量共享内存，所以改变其中一个的内容会改变另一个。 * torch.unsqueeze 返回一个新的张量，对输入的制定位置插入维度 1 注意： 返回张量与输入张量共享内存，所以改变其中一个的内容会改变另一个。如果dim为负，则将会被转化dim+input.dim()+1 &amp;gt;&amp;gt;&amp;gt; x = torch.Tensor([1, 2, 3, 4]) &amp;gt;&amp;gt;&amp;gt; torch.unsqueeze(x, 0) 1 2 3 4 [torch.FloatTensor of size 1x4] &amp;gt;&amp;gt;&amp;gt; torch.</description></item><item><title>正则匹配中文及常用正则表达式 (转载)</title><link>https://111qqz.com/2017/12/common-regular-expression/</link><pubDate>Mon, 04 Dec 2017 11:34:06 +0000</pubDate><guid>https://111qqz.com/2017/12/common-regular-expression/</guid><description>
+先放一个同事安利给我的网站:regex101
 查询匹配的中文字符unicode编码
 正则表达式用于字符串处理、表单验证、日志数据分析等场合，实用高效。现将自己走网上搜索并总结的常用方法收集了一下：
 匹配中文字符的正则表达式： [\u4e00-\u9fa5] 注：匹配中文还真是个头疼的事，有了这个表达式就好办了
 匹配双字节字符(包括汉字在内)：[^\x00-\xff] 注：可以用来计算字符串的长度（一个双字节字符长度计2，ASCII字符计1）
 匹配空白行的正则表达式：\n\s*\r 注：可以用来删除空白行
-匹配HTML标记的正则表达式：&amp;lt;(\S_?)[^&amp;gt;]&amp;gt;.?&amp;lt;/&amp;gt;|&amp;lt;._? /&amp;gt; 注：网上流传的版本太糟糕，上面这个也仅仅能匹配部分，对于复杂的嵌套标记依旧无能为力
+匹配HTML标记的正则表达式：&amp;lt;(\S_?)[^&amp;gt;]_&amp;gt;._?&amp;lt;/&amp;gt;|&amp;lt;._? /&amp;gt; 注：网上流传的版本太糟糕，上面这个也仅仅能匹配部分，对于复杂的嵌套标记依旧无能为力
 匹配首尾空白字符的正则表达式：^\s_|\s_$ 注：可以用来删除行首行尾的空白字符(包括空格、制表符、换页符等等)，非常有用的表达式
 匹配Email地址的正则表达式：\w+([-+.]\w+)@\w+([-.]\w+).\w+([-.]\w+)* 注：表单验证时很实用
 匹配网址URL的正则表达式：[a-zA-z]+://[^\s]* 注：网上流传的版本功能很有限，上面这个基本可以满足需求
@@ -23,18 +28,21 @@ for index,x in enumerate(lst): y = lst2[index] ave_err = ave_err + abs(x-y) max_
 匹配身份证：\d|\d 注：中国的身份证为15位或18位
 匹配ip地址：\d+.\d+.\d+.\d+ 注：提取ip地址时有用
 匹配特定数字： ^[1-9]\d_$　//匹配正整数 ^-[1-9]\d_$ //匹配负整数 ^-?[1-9]\d_$　//匹配整数 ^[1-9]\d_|0$　//匹配非负整数（正整数 + 0） ^-[1-9]\d_|0$　//匹配非正整数（负整数 + 0） ^[1-9]\d_.\d_|0.\d_[1-9]\d_$　//匹配正浮点数 ^-([1-9]\d_.\d_|0.\d_[1-9]\d_)$　//匹配负浮点数 ^-?([1-9]\d_.\d_|0.\d_[1-9]\d_|0?.0+|0)$　//匹配浮点数 ^[1-9]\d_.\d_|0.\d_[1-9]\d_|0?.0+|0$　//匹配非负浮点数（正浮点数 + 0） ^(-([1-9]\d_.\d_|0.\d_[1-9]\d*))|0?.0+|0$　//匹配非正浮点数（负浮点数 + 0） 注：处理大量数据时有用，具体应用时注意修正
-匹配特定字符串： ^[A-Za-z]+$　//匹配由26个英文字母组成的字符串 ^[A-Z]+$　//匹配由26个英文字母的大写组成的字符串 ^[a-z]+$　//匹配由26个英文字母的小写组成的字符串 ^[A-Za-z0-9]+$　//匹配由数字和26个英文字母组成的字符串 ^\w+$　//匹配由数字、26个英文字母或者下划线组成的字符串 注：最基本也是最常用的一些表达式</description></item><item><title>python只获取当前目录下的文件夹及文件名</title><link>http://example.org/2017/08/python-get-dir-name-in-current-path/</link><pubDate>Wed, 16 Aug 2017 08:21:41 +0000</pubDate><guid>http://example.org/2017/08/python-get-dir-name-in-current-path/</guid><description>list = os.listdir(rootdir)#列出目录下的所有文件和目录 for line in list: filepath = os.path.join(rootdir,line) if os.path.isdir(filepath):#如果filepath是目录 print &amp;ldquo;dir:&amp;rdquo; + filepath else: print &amp;ldquo;file:&amp;rdquo; + filepath
+匹配特定字符串： ^[A-Za-z]+$　//匹配由26个英文字母组成的字符串 ^[A-Z]+$　//匹配由26个英文字母的大写组成的字符串 ^[a-z]+$　//匹配由26个英文字母的小写组成的字符串 ^[A-Za-z0-9]+$　//匹配由数字和26个英文字母组成的字符串 ^\w+$　//匹配由数字、26个英文字母或者下划线组成的字符串 注：最基本也是最常用的一些表达式</description></item><item><title>python只获取当前目录下的文件夹及文件名</title><link>https://111qqz.com/2017/08/python-get-dir-name-in-current-path/</link><pubDate>Wed, 16 Aug 2017 08:21:41 +0000</pubDate><guid>https://111qqz.com/2017/08/python-get-dir-name-in-current-path/</guid><description>
+list = os.listdir(rootdir)#列出目录下的所有文件和目录 for line in list: filepath = os.path.join(rootdir,line) if os.path.isdir(filepath):#如果filepath是目录 print &amp;quot;dir:&amp;quot; + filepath else: print &amp;quot;file:&amp;quot; + filepath
 如果需要遍历文件夹下的所以文件，可以使用os.walk()方法。
 os.walk()返回一个三元素的tuple：当前路径、子文件夹名称、文件列表。 import os for root, dirs, files in os.walk(path): for filename in files: print filename for dirname in dirs: print dirname 举个列处当前目录所有文件夹的例子：
-from os import listdir from os.path import isfile, join import os dir =os.listdir() for line in dir: if os.path.isdir(line): print (line) 参考资料</description></item><item><title>python numpy 用法 简明手册</title><link>http://example.org/2017/07/python-numpy-notes/</link><pubDate>Mon, 24 Jul 2017 03:08:35 +0000</pubDate><guid>http://example.org/2017/07/python-numpy-notes/</guid><description>原文链接
+from os import listdir from os.path import isfile, join import os dir =os.listdir() for line in dir: if os.path.isdir(line): print (line) 参考资料</description></item><item><title>python numpy 用法 简明手册</title><link>https://111qqz.com/2017/07/python-numpy-notes/</link><pubDate>Mon, 24 Jul 2017 03:08:35 +0000</pubDate><guid>https://111qqz.com/2017/07/python-numpy-notes/</guid><description>
+原文链接
 感谢stanford,感谢原作者的翻译，我调整了一下代码格式，可以当做手册来用了，毕竟之前没怎么写过py 23333
-原文如下 这篇教程由Justin Johnson创作。
+**译者注**：本文[智能单元](https://zhuanlan.zhihu.com/intelligentunit)首发，翻译自斯坦福CS231n课程笔记[Python Numpy Tutorial](http://link.zhihu.com/?target=http//cs231n.github.io/python-numpy-tutorial/)，由课程教师[Andrej Karpathy](http://link.zhihu.com/?target=http//cs.stanford.edu/people/karpathy/)授权进行翻译。本篇教程由[杜客](https://www.zhihu.com/people/du-ke)翻译完成，[Flood Sung](https://www.zhihu.com/people/flood-sung)、[SunisDown](https://www.zhihu.com/people/sunisdown)、[巩子嘉](https://www.zhihu.com/people/gong-zi-jia-57)和一位不愿透露ID的知友对本翻译亦有贡献。 原文如下 这篇教程由Justin Johnson创作。
 我们将使用Python编程语言来完成本课程的所有作业。Python是一门伟大的通用编程语言，在一些常用库（numpy, scipy, matplotlib）的帮助下，它又会变成一个强大的科学计算环境。
 我们期望你们中大多数人对于Python语言和Numpy库比较熟悉，而对于没有Python经验的同学，这篇教程可以帮助你们快速了解Python编程环境和如何使用Python作为科学计算工具。
 一部分同学对于Matlab有一定经验。对于这部分同学，我们推荐阅读 numpy for Matlab users页面。
 你们还可以查看本教程的IPython notebook版。该教程是由Volodymyr Kuleshov和Isaac Caswell为课程CS 228创建的。
 内容列表：
-* Python * 基本数据类型 * 容器 * 列表 * 字典 * 集合 * 元组 * 函数 * 类 * Numpy * 数组 * 访问数组 * 数据类型 * 数组计算 * 广播 * SciPy * 图像操作 * MATLAB文件 * 点之间的距离 * Matplotlib * 绘制图形 * 绘制多个图形 * 图像 Python Python是一种高级的，动态类型的多范型编程语言。很多时候，大家会说Python看起来简直和伪代码一样，这是因为你能够通过很少行数的代码表达出很有力的思想。举个例子，下面是用Python实现的经典的quicksort算法例子：</description></item><item><title>libgfortran.so.4 missing under archlinux</title><link>http://example.org/2017/06/libgfortran-so-4-missing-under-archlinux/</link><pubDate>Fri, 09 Jun 2017 20:12:41 +0000</pubDate><guid>http://example.org/2017/06/libgfortran-so-4-missing-under-archlinux/</guid><description>。。。哭了哦。。终于解决了这个bug
+* Python * 基本数据类型 * 容器 * 列表 * 字典 * 集合 * 元组 * 函数 * 类 * Numpy * 数组 * 访问数组 * 数据类型 * 数组计算 * 广播 * SciPy * 图像操作 * MATLAB文件 * 点之间的距离 * Matplotlib * 绘制图形 * 绘制多个图形 * 图像 Python Python是一种高级的，动态类型的多范型编程语言。很多时候，大家会说Python看起来简直和伪代码一样，这是因为你能够通过很少行数的代码表达出很有力的思想。举个例子，下面是用Python实现的经典的quicksort算法例子：</description></item><item><title>libgfortran.so.4 missing under archlinux</title><link>https://111qqz.com/2017/06/libgfortran-so-4-missing-under-archlinux/</link><pubDate>Fri, 09 Jun 2017 20:12:41 +0000</pubDate><guid>https://111qqz.com/2017/06/libgfortran-so-4-missing-under-archlinux/</guid><description>
+。。。哭了哦。。终于解决了这个bug
 参考资料：
 libgfortran broken?
 libgfortran=3.0 should not be install with numpy &amp;lt;= 1.9
@@ -43,38 +51,31 @@ libgfortran=3.0 should not be install with numpy &amp;lt;= 1.9
 conflict with gcc-libs and gcc-libs-multilib on latest update
 一开始以为是anaconda相关。。。搞了半天。。。
 然后又按照第一个资料里。。。试图把libgfortran用libgcc替代。。
-发现删掉libgfortran会同时删掉scripy&amp;hellip;
+发现删掉libgfortran会同时删掉scripy...
 然后又觉得。。或许是scripy有什么问题？
 查了一会也没发现什么。。。
 后来又想也许是dlib的问题？
-看了下dlib的github,说是pip 的安装方式可能存在问题，我又用源码安装了一边，问题依旧&amp;hellip;.
+看了下dlib的github,说是pip 的安装方式可能存在问题，我又用源码安装了一边，问题依旧....
 然后本来打算睡觉了。。。
 突然梦到。。。也许是arch的问题呢。。。
 一搜果然是。。。MGJ。。。这bug出现的时间。。。貌似是2017年5月30号以后。。。（具体参照最后一个资料的日期。。。
-而且这。。。谁能想到是arch的锅啊。。。更别说是这么新鲜的bug&amp;hellip;
-所以说arch是不是不适合跑深度学习，做科学计算之类的啊orz&amp;hellip;.
+而且这。。。谁能想到是arch的锅啊。。。更别说是这么新鲜的bug...
+所以说arch是不是不适合跑深度学习，做科学计算之类的啊orz....
 最后说下解决办法：
-:: gcc-libs 与 gcc-libs-multilib 有冲突。删除 gcc-libs-multilib 吗？ [y/N] y 错误：无法准备事务处理 (无法满足依赖关系) :: gcc-multilib：移除 gcc-libs-multilib 将破坏依赖关系 'gcc-libs-multilib=6.3.1-2' (tensorflow) [coder@111qqz-pc github]$ sudo pacman -S gcc-libs --force 正在解决依赖关系.</description></item><item><title>conda升级anaconda　ValueError的解决办法</title><link>http://example.org/2017/06/how-to-fix-conda-upgrade-valueerror/</link><pubDate>Thu, 08 Jun 2017 13:03:51 +0000</pubDate><guid>http://example.org/2017/06/how-to-fix-conda-upgrade-valueerror/</guid><description>conda update anaconda　后提示
+:: gcc-libs 与 gcc-libs-multilib 有冲突。删除 gcc-libs-multilib 吗？ [y/N] y 错误：无法准备事务处理 (无法满足依赖关系) :: gcc-multilib：移除 gcc-libs-multilib 将破坏依赖关系 'gcc-libs-multilib=6.3.1-2' (tensorflow) [coder@111qqz-pc github]$ sudo pacman -S gcc-libs --force 正在解决依赖关系.</description></item><item><title>conda升级anaconda　ValueError的解决办法</title><link>https://111qqz.com/2017/06/how-to-fix-conda-upgrade-valueerror/</link><pubDate>Thu, 08 Jun 2017 13:03:51 +0000</pubDate><guid>https://111qqz.com/2017/06/how-to-fix-conda-upgrade-valueerror/</guid><description>
+conda update anaconda　后提示
 ValueError: unsupported format character ')' (0x29) at index 49 查到了这个：anaconda update issue
-我先把psutil卸载掉，重新update了一下，成功。
-conda remove psutil</description></item><item><title>数字图像处理大作业(初步）</title><link>http://example.org/2017/06/digital-image-processing-course-final-project/</link><pubDate>Wed, 07 Jun 2017 06:53:36 +0000</pubDate><guid>http://example.org/2017/06/digital-image-processing-course-final-project/</guid><description>&amp;hellip;先随便记录一下好了。。。
+I have narrowed this down to the following packages: package build psutil-1.2.1 py27_0 hard-link pycparser-2.10 py27_0 hard-link pykit-0.1.0 np18py27_2 hard-link pyparsing-2.0.1 py27_0 hard-link by calling "</description></item><item><title>数字图像处理大作业(初步）</title><link>https://111qqz.com/2017/06/digital-image-processing-course-final-project/</link><pubDate>Wed, 07 Jun 2017 06:53:36 +0000</pubDate><guid>https://111qqz.com/2017/06/digital-image-processing-course-final-project/</guid><description>
+...先随便记录一下好了。。。
 * 神经网络识别数字或者字母？ * 识别车牌号？ * not hot dog? 安装python pandas pandas
-发现之前装caffe的时候&amp;hellip;装了这个东西。。。
+发现之前装caffe的时候...装了这个东西。。。
 但是就是检测不到？于是卸载重装。。。。
 需要注意的是，如果是python2,要用pip2 install pandas,如果是python3,要用pip3 install pandas.
-安装tensorflow&amp;hellip;直接sudo pacman -Syu python-tensorflow 即可。。。然后装好之后检测不到orz&amp;hellip;感觉还是pip的安装方式比较靠谱。。。
+安装tensorflow...直接sudo pacman -Syu python-tensorflow 即可。。。
+然后装好之后检测不到orz...感觉还是pip的安装方式比较靠谱。。。
 pip2 install tensorflow
 tensorflow_pip安装
 我的环境是python2.7
 # Ubuntu/Linux 64-bit, CPU only, Python 2.7 $ export TF_BINARY_URL=https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.10.0-cp27-none-linux_x86_64.whl sudo pip install --upgrade $TF_BINARY_URL 安装成功。。然后发现。。numpy挂了（？？？？？
-SO上给出的建议 感觉之后还会各种遇到不同python版本导致的问题。。。。那就上anaconda好了。。。试了anaconda&amp;hellip;想法挺好。。但是貌似还不成熟.。。比如用anaconda安装numpy会报错orz..
-最后解决办法是。。。卸载了python-numpy以及所有依赖python-numpy的a包；卸载了python2-numpy以及所有a依赖python２-numpy的包
-然后重新安装了python2-numpy
-以及发现。。。还有些坑是shellaa相关的.。。y所以暂时不要用fish了。。。
-然后提示Missing required dependencies [&amp;lsquo;dateutil&amp;rsquo;]
-解决办法是安装python2-datautil
-以及各种pip安装。。都记得要pip2而不是pip
-中间缺少一堆库。。。大部分直接安装就好了。。。记得要安装python2对应的版本。。。
-然后对于ImportError: No module named tensorboard.plugins
-解决办法　是将tensorflow升级到1.0以上（安装之后的版本默认为0.1)
-sudo proxychains4 pip2 install tensorflow &amp;ndash;upgrade</description></item><item><title>vim下python 的配置</title><link>http://example.org/2017/06/vimrc-for-python/</link><pubDate>Wed, 07 Jun 2017 06:21:12 +0000</pubDate><guid>http://example.org/2017/06/vimrc-for-python/</guid><description>由于最近要做数字图像处理的大作业，以及之后一段时间，估计写python多一些，所以打算花些时间配置下vim. 1. 一键执行 其实之前一直有的。。不过没有效果，就没有管。发现问题是，python对应的filetype为&amp;quot;python&amp;quot;，而不是&amp;quot;py&amp;quot; func! CompileRunGcc() exec &amp;quot;w&amp;quot; if &amp;amp;filetype == 'c' exec &amp;quot;!g++ % -o %&amp;lt;&amp;quot; exec &amp;quot;! ./%&amp;lt;&amp;quot; elseif &amp;amp;filetype == 'cpp' exec &amp;quot;!g++ % -std=gnu++11 -Wall -o %&amp;lt;&amp;quot; exec &amp;quot;! ./%&amp;lt;&amp;quot; elseif &amp;amp;filetype == 'java' exec &amp;quot;!javac %&amp;quot; exec &amp;quot;!java %&amp;lt;&amp;quot; elseif &amp;amp;filetype == 'sh' :!./% elseif &amp;amp;filetype == 'python' &amp;quot; exec &amp;quot;!python %&amp;quot; &amp;quot; exec &amp;quot;!python %&amp;lt;&amp;quot; exec &amp;quot;!python2.7 %&amp;quot; endif endfunc 2.代码补全 不想折腾了。。既然ycm也支持python,就先用用看好了。。不行再换别的。 放一段ycm　for python的配置文件 &amp;quot;默认配置文件路径&amp;quot; let g:ycm_global_ycm_extra_conf = '~/.</description></item></channel></rss>
+Image not found a.warning-link { color: inherit !important; font-weight: inherit !important; text-decoration: underline !important; border-bottom: none !important; } Web path: https://111qqz.</description></item><item><title>vim下python 的配置</title><link>https://111qqz.com/2017/06/vimrc-for-python/</link><pubDate>Wed, 07 Jun 2017 06:21:12 +0000</pubDate><guid>https://111qqz.com/2017/06/vimrc-for-python/</guid><description>
+由于最近要做数字图像处理的大作业，以及之后一段时间，估计写python多一些，所以打算花些时间配置下vim. 1. 一键执行 其实之前一直有的。。不过没有效果，就没有管。发现问题是，python对应的filetype为&amp;quot;python&amp;quot;，而不是&amp;quot;py&amp;quot; func! CompileRunGcc() exec &amp;quot;w&amp;quot; if &amp;amp;filetype == 'c' exec &amp;quot;!g++ % -o %&amp;lt;&amp;quot; exec &amp;quot;! ./%&amp;lt;&amp;quot; elseif &amp;amp;filetype == 'cpp' exec &amp;quot;!g++ % -std=gnu++11 -Wall -o %&amp;lt;&amp;quot; exec &amp;quot;! ./%&amp;lt;&amp;quot; elseif &amp;amp;filetype == 'java' exec &amp;quot;!javac %&amp;quot; exec &amp;quot;!java %&amp;lt;&amp;quot; elseif &amp;amp;filetype == 'sh' :!./% elseif &amp;amp;filetype == 'python' &amp;quot; exec &amp;quot;!python %&amp;quot; &amp;quot; exec &amp;quot;!python %&amp;lt;&amp;quot; exec &amp;quot;!python2.7 %&amp;quot; endif endfunc 2.代码补全 不想折腾了。。既然ycm也支持python,就先用用看好了。。不行再换别的。 放一段ycm　for python的配置文件 &amp;quot;默认配置文件路径&amp;quot; let g:ycm_global_ycm_extra_conf = '~/.</description></item></channel></rss>
