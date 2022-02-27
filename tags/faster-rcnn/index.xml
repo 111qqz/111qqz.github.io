@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>faster-rcnn on 111qqz的小窝</title><link>http://example.org/tags/faster-rcnn/</link><description>Recent content in faster-rcnn on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 05 Apr 2020 20:38:28 +0800</lastBuildDate><atom:link href="http://example.org/tags/faster-rcnn/index.xml" rel="self" type="application/rss+xml"/><item><title>Faster Rcnn 目标检测算法</title><link>http://example.org/2020/04/faster-rcnn/</link><pubDate>Sun, 05 Apr 2020 20:38:28 +0800</pubDate><guid>http://example.org/2020/04/faster-rcnn/</guid><description>背景 2019年对了好几次faster rcnn，第一次是赛事之窗项目和北京的同事，对齐sdk和训练的实现。 第二次是被tensorRT4和tensorRT5之间默认参数不一致的问题坑了一下。 第三次是被caffe proto中roi align 的默认参数坑了。
 虽然debug了这么多次，踩了一堆坑，但是一段时间不用，细节就会慢慢不记得了。因此来记录一下。
 faster rcnn，是一种&amp;quot;two stage&amp;quot;的目标检测算法。
-所谓&amp;quot;two stage&amp;rdquo;，是说在实际进行目标检测之前，先会通过某种&amp;quot;region proposals&amp;rdquo; algorithm，来获得一定数量的RoI(Regions of Interest),我们下一阶段要检测的obejct有极大可能被包含在这些RoI. 这种&amp;quot;Region based&amp;quot;的方法是对基于&amp;quot;sliding windows&amp;quot;方法的极大改进，因为不需要遍历每一个可能的位置以及crop大小，只需要对这些RoI进行检测，有效地减小了计算量。
+所谓&amp;quot;two stage&amp;quot;，是说在实际进行目标检测之前，先会通过某种&amp;quot;region proposals&amp;quot; algorithm，来获得一定数量的RoI(Regions of Interest),我们下一阶段要检测的obejct有极大可能被包含在这些RoI. 这种&amp;quot;Region based&amp;quot;的方法是对基于&amp;quot;sliding windows&amp;quot;方法的极大改进，因为不需要遍历每一个可能的位置以及crop大小，只需要对这些RoI进行检测，有效地减小了计算量。
 下面简单说一下这一类&amp;quot;Region based&amp;quot;方法的历史脉络
 rcnn RCNN的做法是通过一种传统方法&amp;quot;selective search&amp;quot;来得到若干RoI,然后把每一个RoI，后面接CNN进行后续的检测。 显然，这个方法的问题在于计算量非常大。
 selective search的策略是，既然是不知道尺度是怎样的，那我们就尽可能遍历所有的尺度，但是不同于暴力穷举，我们可以先得到小尺度的区域，然后一次次合并得到大的尺寸.
 fast rcnn 明眼人可以看出，rcnn计算量过大的原因之一是做了非常多的重复计算。
 因此fast rcnn做的改进是，与其把每一个通过&amp;quot;selective search&amp;quot;得到的RoI在原图上crop出来送进CNN,不如先让整张图过一段CNN,然后把通过&amp;quot;selective search&amp;quot;在原图上得到的RoI先映射到这段CNN的某个conv feature map. 相当于这部分CNN只做了一次，与RoI数量无关，极大地减小了计算量。
 faster rcnn 终于轮到主角登场了。 fast rcnn极大提高了检测的速度。 然后发现，速度的瓶颈已经不在后续的检测部分了，而是在于“region proposals” algorithm.
-于是，faster-rcnn提出&amp;quot;Region proposal network&amp;quot;来替代&amp;quot;selective search&amp;rdquo;,进一步提高了检测速度。
+于是，faster-rcnn提出&amp;quot;Region proposal network&amp;quot;来替代&amp;quot;selective search&amp;quot;,进一步提高了检测速度。
 放一张结构图，非常清楚。 Region proposal network(RPN) anchor 介绍RPN网络首先就要介绍一下anchor.
 （被坑过一次，某个足球项目上，training和inference用的anchor竟然是不一致的。。）
 其实anchor这个概念很简单，用大白话说就是，根据要检测的物体的形状（高矮胖瘦等），预先 设置一些不同尺寸（高矮胖瘦）的粗略的框，然后对这些框做一个二分类，判断前景还是背景，同时做bbox regression 来微调坐标，最终得到proposals.
@@ -16,7 +16,7 @@ faster rcnn 终于轮到主角登场了。 fast rcnn极大提高了检测的速�
 要注意的是，anchors是在进入网络前预先生成的。 实际项目中，通常设置长宽比为[1:1,2:1,1:2]三种比例，然后通过 generate_anchors.py 来生成anchors.</description></item><item><title>记一次faster-rcnn debug记录</title><link>http://example.org/2019/12/debug-faster-rcnn-once-again/</link><pubDate>Fri, 13 Dec 2019 16:32:14 +0800</pubDate><guid>http://example.org/2019/12/debug-faster-rcnn-once-again/</guid><description>问题描述 一年debug 三次faster rcnn,每次都有新感觉（不
 接到一个bug report,现象为某人脸模型，转换成trt模型，当batch size为1时结果完全正确，但是batch size大于1时结果不正确。 具体的现象是，如果跑多张不同的图，只有第一张图有结果，后面的图都没有结果。 如果跑的图中有相同的，那么和第一张相同的图都会有结果，其余的图没有结果。
 layer { name: &amp;#34;POD_proposal&amp;#34; type: &amp;#34;RPRoIFused&amp;#34; bottom: &amp;#34;Reshape_105&amp;#34; bottom: &amp;#34;Conv_100&amp;#34; bottom: &amp;#34;Add_95&amp;#34; bottom: &amp;#34;im_info&amp;#34; top: &amp;#34;rois&amp;#34; top: &amp;#34;tmp_pooling&amp;#34; rpn_proposal_param{ feat_stride: 16 anchor_ratios: 1 anchor_scales: 1 anchor_scales: 2 anchor_scales: 4 anchor_scales: 8 anchor_scales: 16 anchor_scales: 32 test_desc_param { rpn_pre_nms_top_n: 2000 rpn_post_nms_top_n: 50 rpn_min_size: 16 rpn_nms_thresh: 0.7 } } roi_pooling_param{ pooled_h: 7 pooled_w: 7 spatial_scale: 0.0625 }}特别地，proposal layer中 rpn_post_nms_top_n的参数值如果使用默认的300,那么结果都是对的。把这个值改小（只要小于300)，结果就像上面所述。
-debug 经过 首先根据rpn_post_nms_top_n的值一修改，结果就是错的来看，怀疑是哪里参数写死了。 然而很快就排除了这个问题。因为faster rcnn的模型已经在另一个产品中经过长期验证了。 而且proposal layer是tensorrt自己实现的，有bug早就有人发现了。</description></item><item><title>faster rcnn 模型 tensorrt4与tensorrt5 结果不一致 踩坑记录</title><link>http://example.org/2019/11/debug-frcnn-model-when-upgrading-from-tensorrt4-to-tensorrt5/</link><pubDate>Thu, 07 Nov 2019 23:40:39 +0800</pubDate><guid>http://example.org/2019/11/debug-frcnn-model-when-upgrading-from-tensorrt4-to-tensorrt5/</guid><description>最近有同事report给我们,用同一个模型转换工具,转同一个faster rcnn 模型, 同样的sdk代码,在有些显卡上结果正常,但是再比较新的显卡上(比如Titan V)上 结果完全不正确.
+debug 经过 首先根据rpn_post_nms_top_n的值一修改，结果就是错的来看，怀疑是哪里参数写死了。 然而很快就排除了这个问题。因为faster rcnn的模型已经在另一个产品中经过长期验证了。 而且proposal layer是tensorrt自己实现的，有bug早就有人发现了。</description></item><item><title>faster rcnn 模型 tensorrt4与tensorrt5 结果不一致 踩坑记录</title><link>http://example.org/2019/11/debug-Frcnn-Model-When-Upgrading-From-Tensorrt4-to-Tensorrt5/</link><pubDate>Thu, 07 Nov 2019 23:40:39 +0800</pubDate><guid>http://example.org/2019/11/debug-Frcnn-Model-When-Upgrading-From-Tensorrt4-to-Tensorrt5/</guid><description>最近有同事report给我们,用同一个模型转换工具,转同一个faster rcnn 模型, 同样的sdk代码,在有些显卡上结果正常,但是再比较新的显卡上(比如Titan V)上 结果完全不正确.
 听说之后我的内心其实是 **喵喵喵喵喵?**的
 先在模型转换工具中infer了一下,发现&amp;hellip;结果竟然真的不一样!
 于是又开始了debug faster rcnn 的旅程(奇怪..我为什么要说又)
@@ -28,7 +28,7 @@ prototxt
 最终发现有问题的layer 是softmax!
 cls_score 的维度应该为 N*K*C*H*W
 softmax应该按照C这一维度来做,因此softmax_param中axis应该为2.
-查阅&amp;quot;tensorrt support matrix&amp;rdquo; ，发现 tensorrt5中，softmax会按照用户指定的维度进行。
+查阅&amp;quot;tensorrt support matrix&amp;quot; ，发现 tensorrt5中，softmax会按照用户指定的维度进行。
 而对于tensorrt4.0, softmax layer 与设定的softmax_param无关，只会在channel 的维度上来做softmax.
 所以，比较好的解决办法是，干脆不写softmax_param这个参数 对于trt4，会直接按照channel 维度来做 对于trt5，会在第N-3的axis上进行。对于SSD的 N*C*H*W或者 faster rcnn 的N*K*C*H*W, N-3都是channel所在的维度。
 问题解决！</description></item></channel></rss>

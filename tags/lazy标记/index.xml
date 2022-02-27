@@ -2,7 +2,7 @@
 题意： 给出两个字符串，问公共长度大于等于k的子串个数（只要两个串的位置不同就认为是不同）
 思路： 考虑SAM的性质。
 SAM上的一个节点所能接受的本质不同的子串个数是**st[v].len - st[st[v].link].len**
-而这些子串，都出现了right[v]次，因为不同子串的个数就是**(st[v].len-st[st[v].link].len)*right[v]**
+而这些子串，都出现了right[v]次，因为不同子串的个数就是**(st[v].len-st[st[v].link].len)right[v]*
 现在有了限制条件，要求长度大于等于k.
 没有限制的话，SAM上的一个节点所能接受的字符串的长度范围是在[st[st[v].link].len+1,st[v].len]
 那么现在范围其实就变成了**[MX,st[v].len],其中MX = max{st[st[v].link].len+1,k}**
@@ -18,7 +18,7 @@ len&amp;lt;MX时无贡献。
 Description Farmer John尝试通过和奶牛们玩益智玩具来保持他的奶牛们思维敏捷. 其中一个大型玩具是牛栏中的灯. N (2 &amp;lt;= N &amp;lt;= 100,000) 头奶牛中的每一头被连续的编号为1..N, 站在一个彩色的灯下面.刚到傍晚的时候, 所有的灯都是关闭的. 奶牛们通过N个按钮来控制灯的开关; 按第i个按钮可以改变第i个灯的状态.奶牛们执行M (1 &amp;lt;= M &amp;lt;= 100,000)条指令, 每个指令都是两个整数中的一个(0 &amp;lt;= 指令号 &amp;lt;= 1). 第1种指令(用0表示)包含两个数字S_i和E_i (1 &amp;lt;= S_i &amp;lt;= E_i &amp;lt;= N), 它们表示起始开关和终止开关. 奶牛们只需要把从S_i到E_i之间的按钮都按一次, 就可以完成这个指令. 第2种指令(用1表示)同样包含两个数字S_i和E_i (1 &amp;lt;= S_i &amp;lt;= E_i &amp;lt;= N), 不过这种指令是询问从S_i到E_i之间的灯有多少是亮着的. 帮助FJ确保他的奶牛们可以得到正确的答案.
 Input 第 1 行: 用空格隔开的两个整数N和M</description></item><item><title>codeforces #381 div2 E. Alyona and towers (线段树 区间合并)</title><link>http://example.org/2016/11/cf740e/</link><pubDate>Mon, 28 Nov 2016 07:16:52 +0000</pubDate><guid>http://example.org/2016/11/cf740e/</guid><description>e:题意：那个数，定义hill为一段连续的区间，满足该区间为严格单峰。现在有若干操作，每个操作是对某段区间的数同时增加一个数，问每次操作后，所有的hill中，宽度最大的（区间长度最大）的是多少。
 思路：同时增加一个数很线段树。。。但是要维护什么呢。。。？
-_但是合并的时候要怎么办呢。。。__考虑两个方向的合并。。。__所以还要维护一个区间中，包含右端点的向左单调减延伸的长度，以及左端点的值。__同理，要维护一个区间中，包含左端点的向右单调增延伸的长度，以及右端点的值。__那么每次pushup的时候，就是两个区间hill的最大值，以及两个方向合并的最大值中取最大。。。__。。。上面是我口胡的。。。_upd:
+但是合并的时候要怎么办呢。。。考虑两个方向的合并。。。所以还要维护一个区间中，包含右端点的向左单调减延伸的长度，以及左端点的值。同理，要维护一个区间中，包含左端点的向右单调增延伸的长度，以及右端点的值。那么每次pushup的时候，就是两个区间hill的最大值，以及两个方向合并的最大值中取最大。。。。。。上面是我口胡的。。。upd:
 口胡的还是有点靠谱的（并没有2333，还是漏了情况）
 具体题解见代码注释
 以及，为了过这道题先过了在岛老师空间题解中提到的两道题目：
@@ -40,7 +40,7 @@ sum域，表示该区间中mex(1,i)的和
 lazy域，表示延迟标记。
 可以预处理出nxt数组，表示位置i上的数下次出现最近是在nxt[i]
 #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;set&amp;gt; using namespace std; const int N=2E5+7; #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 typedef long long LL; int n; int a[N]; bool vis[N]; int Mex[N]; pair &amp;lt; int , int &amp;gt; b[N]; int nxt[N]; struct Tree { LL lazy; LL sum; LL mx; }tree[N&amp;lt;&amp;lt;2]; void PushUp( int rt) { tree[rt].</description></item><item><title>codeforces 145 E. Lucky Queries (线段树lazy标记)</title><link>http://example.org/2016/09/cf145e/</link><pubDate>Tue, 27 Sep 2016 11:15:53 +0000</pubDate><guid>http://example.org/2016/09/cf145e/</guid><description>题目链接
-题意：给出一串只由数字'4'和'7'组成的串。两种操作，一种是询问整个串中最长非下降子序列的长度，另一种给出区间[l,r]，将区间中的没个数反转，反转的定义为，4变成7,7变成4.
+题意：给出一串只由数字'4&amp;rsquo;和'7&amp;rsquo;组成的串。两种操作，一种是询问整个串中最长非下降子序列的长度，另一种给出区间[l,r]，将区间中的没个数反转，反转的定义为，4变成7,7变成4.
 思路：线段树lazy标记。
 线段树的域记录5个信息，c4,c7,c47,c74，flip,a分别表示4的个数,7的个数，非下降子序列的个数，非上升的子序列的个数，以及该区间是否被翻转。
 纠结了很久PushUp操作。。。。

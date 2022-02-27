@@ -4,13 +4,13 @@
 所以，k[i] = x[i] + y[i] + i-1，现在问经过时间t后，熊的位置在哪里。也就是x[t],y[t]的值。
 思路： 我们不妨先只考虑x方向的，因为y方向完全相同。
 观察x[t]的式子， x[t] = (x[t-1] + dx[t-1] -1) % n +1。。这个%n之后+1简直蛋疼得一逼。。。
-我们不妨构造_**g[t] = x[t]-1**_，这样原式子就变成了 _**g[t] = (g[t-1] + dx[t-1]) %n** _&amp;hellip;看起来爽了很多。。。
-观察式子_**g[t] = (g[t-1] + dx[t-1]) % n**_，我们发现这是一个前缀和的形式。
+我们不妨构造_g[t] = x[t]-1_，这样原式子就变成了 _g[t] = (g[t-1] + dx[t-1]) %n _&amp;hellip;看起来爽了很多。。。
+观察式子_g[t] = (g[t-1] + dx[t-1]) % n_，我们发现这是一个前缀和的形式。
 根据在hdu4686解题报告 中提到的经验，对于求和的式子，我们只需要考虑每一项的构造法。
 因此问题转化成构造矩阵dx[t]
 dx[t] = k[t-1] + dx[t-1]
-其中_**k[t] = x[t] + y[t] + t-1,**_我们写成gx[t]和gy[t]的形式
-有**_k[t] = gx[t] + gy[t] + t + 1_**</description></item><item><title>UVA - 10518 How Many Calls? (构造矩阵，快速幂)</title><link>http://example.org/2017/10/uva-10518/</link><pubDate>Sun, 01 Oct 2017 11:10:16 +0000</pubDate><guid>http://example.org/2017/10/uva-10518/</guid><description>题目链接
+其中_k[t] = x[t] + y[t] + t-1,_我们写成gx[t]和gy[t]的形式
+有**k[t] = gx[t] + gy[t] + t + 1**</description></item><item><title>UVA - 10518 How Many Calls? (构造矩阵，快速幂)</title><link>http://example.org/2017/10/uva-10518/</link><pubDate>Sun, 01 Oct 2017 11:10:16 +0000</pubDate><guid>http://example.org/2017/10/uva-10518/</guid><description>题目链接
 题意： 求f[n] = f[n-1] + f[n-2] + 1，在b(10000)进制下的最后一位数字的十进制表示。
 思路： 构造矩阵即可，M矩阵是一个3_3的矩阵，M1矩阵是一个3_1的矩阵。。很easy，就不说了。
 写题解的目的是，对于这种要求b进制下，最后一位或者最后两位的数字的十进制表示的问题，其实就是在说，取模的数是base或者base^2
@@ -22,7 +22,6 @@ where a 0 = A0 a i = a i-1_AX+AY b 0 = B0 b i = b i-1_BX+BY What is th
 难点还是构造矩阵。
 构造矩阵主要凭借经验，但是还是有一些规律可循：
 1. 对于求和的式子，如 s[n] = sum{F[1]..F[n]}类似的式子，我们只需要考虑如何构造F[n]即可。 2. 尽量将要构造的表达式展开成，第n项，与前面项(第n-1项等)有关的形式。 3. 观察2中展开的表达式的系数，每一个系数都亚奥出现在转移矩阵M中。 4. 观察2中展开的表达式的项，基本每一项都要整体或者以其他形式出现在初始矩阵M1中 5. 我们并不很关心初始项。 6. 难点其实在于构造M1矩阵，也就是说哪些项是重要的。一般而言，**可能有的项是，s[n],f[n],常数项，以及为了构造出f[n]的辅助项。** 对于这道题：
-[](https://111qqz.com/wordpress/wp-content/uploads/2017/10/DeepinScreenshot_select-area_20171001142722.png)[![](https://111qqz.com/wordpress/wp-content/uploads/2017/10/DeepinScreenshot_select-area_20171001142742.png) ](https://111qqz.com/wordpress/wp-content/uploads/2017/10/DeepinScreenshot_select-area_20171001142742.png)[![](https://111qqz.com/wordpress/wp-content/uploads/2017/10/DeepinScreenshot_select-area_20171001142722.png) ](https://111qqz.com/wordpress/wp-content/uploads/2017/10/DeepinScreenshot_select-area_20171001142722.png)
 然后矩阵快速幂即可。
 1A
 /* *********************************************** Author :111qqz Created Time :2017年10月01日 星期日 13时34分52秒 File Name :4686.</description></item><item><title>uva 10870 - Recurrences (矩阵加速线性递推式)</title><link>http://example.org/2017/10/uva-10870/</link><pubDate>Sat, 30 Sep 2017 20:35:55 +0000</pubDate><guid>http://example.org/2017/10/uva-10870/</guid><description>uva10870题目链接
@@ -44,7 +43,7 @@ where a 0 = A0 a i = a i-1_AX+AY b 0 = B0 b i = b i-1_BX+BY What is th
 快速幂即可。
 有个坑点在于..读入的结束是p=0&amp;amp;q=0,并且只有这两个输入。
 如果用p=0&amp;amp;&amp;amp;q=0作为终止条件，那么就会将三个输入，但p==0&amp;amp;&amp;amp;q==0的情况错误得终止&amp;hellip;
-正确的做法是 while (~scanf(&amp;quot;%lld%lld%lld&amp;rdquo;,&amp;amp;p,&amp;amp;q,&amp;amp;n)==3)
+正确的做法是 while (~scanf(&amp;quot;%lld%lld%lld&amp;quot;,&amp;amp;p,&amp;amp;q,&amp;amp;n)==3)
 /* *********************************************** Author :111qqz Created Time :2017年10月01日 星期日 03时01分38秒 File Name :10655.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define PB push_back #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; LL p,q,n; struct Mat { LL mat[105][105]; void clear() { ms(mat,0); } }M,M1; Mat operator * (Mat a,Mat b) { Mat c; c.</description></item><item><title>【dp专题001】bzoj 1009: [HNOI2008]GT考试 (字符串上dp+kmp+矩阵加速线性递推式)</title><link>http://example.org/2016/11/bzoj-1009/</link><pubDate>Sun, 13 Nov 2016 07:21:02 +0000</pubDate><guid>http://example.org/2016/11/bzoj-1009/</guid><description>1009: [HNOI2008]GT考试 Time Limit: 1 Sec Memory Limit: 162 MB Submit: 3127 Solved: 1926 [Submit][Status][Discuss]
 Description 　阿申准备报名参加GT考试，准考证号为N位数X1X2&amp;hellip;.Xn(0&amp;lt;=Xi&amp;lt;=9),他不希望准考证号上出现不吉利的数字。 他的不吉利数学A1A2&amp;hellip;Am(0&amp;lt;=Ai&amp;lt;=9)有M位，不出现是指X1X2&amp;hellip;Xn中没有恰好一段等于A1A2&amp;hellip;Am. A1和X1可以为 0
 Input 　第一行输入N,M,K.接下来一行输入M位的数。 N&amp;lt;=10^9,M&amp;lt;=20,K&amp;lt;=1000
@@ -53,7 +52,7 @@ Sample Input 4 3 100 111
 Sample Output 81
 思路： 这次总算想对了状态表示：dp[i][j] 表示当前处理到第i位，最后j位与不吉利串相同的方案数。 然后此时考虑转移，也就是观察第i+1位。 根据第i+1位字符的不同，转移到的 位置也不相同。 从dp[i][j] 可以转移到dp[i+1][k]，这种转移表现为dp[i+1][k] += dp[i][j] (k取决于第i+1位字符) *我们可以用f[i+1][k]+=f[i][j]trans[j][k]，trans[j][k]表示串s后j位与不吉利串前j位相同， 添加一个字符后后k位与不吉利串前k位相同的方案数。
 就是说中间的那一部式子可以化简成矩阵的形式。。因此整个递推式就成了矩阵乘法的形式。 tran数组可以用kmp预处理出来。 重点是注意体会在字符串上dp的思想。
-/* *********************************************** Author :111qqz Created Time :2016年11月13日 星期日 13时54分33秒 File Name :code/bzoj/1009.</description></item><item><title>acdream oj 1124 喵喵的遗憾 (斐波那契数列循环节)</title><link>http://example.org/2016/11/acdream-oj-1124-/</link><pubDate>Thu, 03 Nov 2016 00:39:54 +0000</pubDate><guid>http://example.org/2016/11/acdream-oj-1124-/</guid><description>题目链接
+/* *********************************************** Author :111qqz Created Time :2016年11月13日 星期日 13时54分33秒 File Name :code/bzoj/1009.</description></item><item><title>acdream oj 1124 喵喵的遗憾 (斐波那契数列循环节)</title><link>http://example.org/2016/11/acdream-oj-1124--/</link><pubDate>Thu, 03 Nov 2016 00:39:54 +0000</pubDate><guid>http://example.org/2016/11/acdream-oj-1124--/</guid><description>题目链接
 题意：
 F0 = 1 , F1 = 1 , F2 = 2 , Fn = Fn-1+Fn-2
 求：
@@ -86,7 +85,7 @@ Given A, B, and n, you are to calculate the value of f(n).
 还有这道题让我知道了
 括号里的话是错误的。只有当x&amp;lt;phi(c)的时候，这个公式才成立。
 这道题就是反例，不加判断会wa。
-/* *********************************************** Author :111qqz Created Time :Sun 30 Oct 2016 11:46:33 PM CST File Name :code/hdu/3221.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; LL a,b,p,n; LL mod; LL euler( LL x) { LL ret = 1; for ( LL i = 2 ; i*i &amp;lt;= x; i++) { if (x%i==0) { x/=i; ret*=(i-1); while (x%i==0) { x/=i; ret*=i; } } } if (x&amp;gt;1) ret*=(x-1); return ret; } struct Mat { LL mat[2][2]; void clear() { ms(mat,0); } }M,M1; Mat operator * (Mat a,Mat b) { Mat res; res.</description></item><item><title>BZOJ 4547: Hdu5171 小奇的集合 (矩阵快速幂)</title><link>http://example.org/2016/10/bzoj-4547-hdu5171-/</link><pubDate>Wed, 26 Oct 2016 01:09:38 +0000</pubDate><guid>http://example.org/2016/10/bzoj-4547-hdu5171-/</guid><description>4547: Hdu5171 小奇的集合 Time Limit: 2 Sec Memory Limit: 256 MB Submit: 263 Solved: 113 [Submit][Status][Discuss]
+/* *********************************************** Author :111qqz Created Time :Sun 30 Oct 2016 11:46:33 PM CST File Name :code/hdu/3221.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; LL a,b,p,n; LL mod; LL euler( LL x) { LL ret = 1; for ( LL i = 2 ; i*i &amp;lt;= x; i++) { if (x%i==0) { x/=i; ret*=(i-1); while (x%i==0) { x/=i; ret*=i; } } } if (x&amp;gt;1) ret*=(x-1); return ret; } struct Mat { LL mat[2][2]; void clear() { ms(mat,0); } }M,M1; Mat operator * (Mat a,Mat b) { Mat res; res.</description></item><item><title>BZOJ 4547: Hdu5171 小奇的集合 (矩阵快速幂)</title><link>http://example.org/2016/10/bzoj-4547-hdu5171--/</link><pubDate>Wed, 26 Oct 2016 01:09:38 +0000</pubDate><guid>http://example.org/2016/10/bzoj-4547-hdu5171--/</guid><description>4547: Hdu5171 小奇的集合 Time Limit: 2 Sec Memory Limit: 256 MB Submit: 263 Solved: 113 [Submit][Status][Discuss]
 Description  有一个大小为n的可重集S，小奇每次操作可以加入一个数a+b(a,b均属于S)，求k次操作后它可获得的S的和的最大
 值。（数据保证这个值为非负数）
 Input 第一行有两个整数n,k表示初始元素数量和操作数，第二行包含n个整数表示初始时可重集的元素。
@@ -126,7 +125,7 @@ M67_十个利用矩阵乘法解决的经典题目
 题意：
 Given a n × n matrix A and a positive integer k, find the sum S = A + _A_2 + _A_3 + … + Ak.
 思路： 对k进行二分。
-比如，当k=6时，有： A + A^2 + A^3 + A^4 + A^5 + A^6 =_(A + A^2 + A^3)_ + A^3*_(A + A^2 + A^3)_ 应用这个式子后，规模k减小了一半。我们二分求出A^3后再递归地计算A + A^2 + A^3，即可得到原问题的答案。
+比如，当k=6时，有： A + A^2 + A^3 + A^4 + A^5 + A^6 =(A + A^2 + A^3) + A^3*(A + A^2 + A^3) 应用这个式子后，规模k减小了一半。我们二分求出A^3后再递归地计算A + A^2 + A^3，即可得到原问题的答案。
 以及错误的递归方式：
 无形中增加了多少次。。。。。。怎么像小学生呢。。。
 正确的写法。。。
