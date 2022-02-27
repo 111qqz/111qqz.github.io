@@ -12,7 +12,7 @@
 观察者模式的目的是定义对象间的一种一对多的依赖关系，当一个对象的状态发生改变时，所有依赖于它的对象都得到通知并被自动更新。
 因此观察者模式又叫发布-订阅模式。
 下面放一个简化之后的例子:
-#include …">
+1 2 3 #include …">
 <meta name=twitter:card content="summary">
 <meta name=twitter:creator content>
 <meta name=twitter:title content="[设计模式] 观察者( Observer )模式学习笔记">
@@ -22,7 +22,7 @@
 观察者模式的目的是定义对象间的一种一对多的依赖关系，当一个对象的状态发生改变时，所有依赖于它的对象都得到通知并被自动更新。
 因此观察者模式又叫发布-订阅模式。
 下面放一个简化之后的例子:
-#include …">
+1 2 3 #include …">
 <meta property="og:image" content="https://111qqz.com/images/thumbnail.png">
 <link rel=apple-touch-icon sizes=180x180 href=https://111qqz.com/icons/apple-touch-icon.png>
 <link rel=icon type=image/png sizes=32x32 href=https://111qqz.com/icons/favicon-32x32.png>
@@ -108,8 +108,9 @@
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Sep 1, 2018</span>
-<span class=post_time> · 1 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F title=观察者模式 class="post_tag button button_translucent">观察者模式
+<span class=post_time> · 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F title=观察者模式 class="post_tag button button_translucent">观察者模式
 </a><a href=https://111qqz.com/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F title=设计模式 class="post_tag button button_translucent">设计模式
+</a><a href=https://111qqz.com/tags/cpp title=cpp class="post_tag button button_translucent">cpp
 </a>
 </span>
 <span class=page_only>&nbsp;·
@@ -130,88 +131,92 @@ Share on:
 <p>观察者模式的目的是定义对象间的一种一对多的依赖关系，当一个对象的状态发生改变时，所有依赖于它的对象都得到通知并被自动更新。</p>
 <p>因此观察者模式又叫发布-订阅模式。</p>
 <p>下面放一个简化之后的例子:</p>
-<pre><code>#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-using namespace std;
-class Secretary;
-// 看股票的同事类（观察对象，观察者）
-class StockObserver
-{
-public:
-	StockObserver(string strName, Secretary* strSub)
-	{
-		name = strName;
-		sub = strSub;
-	}
- 
-	void Update();
- 
-private:
-	string name;
-	Secretary* sub;我所理解的设计模式（C++实现）——观察者模式（Observer Pattern）
-};
- 
-// 秘书类（主题对象，通知者）
-class Secretary
-{
- 
-public:
-	string action;
-	void Add(StockObserver ob) { observers.push_back(ob); }
-	void Remove(int addIndex)
-	{
-		if(addIndex &gt;=0 &amp;&amp; addIndex &lt; observers.size())
-		observers.erase(observers.begin() + addIndex);
-	}
-	void Notify()
-	{
-		vector&lt;StockObserver&gt;::iterator it;
-		for (it=observers.begin(); it!=observers.end(); ++it)
-		{
-			(*it).Update();
-		}
-	}
- 
-private:
-	vector&lt;StockObserver&gt; observers;
-};
- 
- 
- 
- 
-void StockObserver::Update()
-{
-	cout &lt;&lt; name &lt;&lt; &quot; : &quot; &lt;&lt; sub-&gt;action &lt;&lt; &quot;, begin to work&quot; &lt;&lt; endl;
-}
- 
-int main()
-{
-	// 创建通知者
-	Secretary* p = new Secretary();
- 
-	// 观察者
-	StockObserver* s1 = new StockObserver(&quot;Lazy&quot;, p);
-	StockObserver* s2 = new StockObserver(&quot;SnowFire&quot;, p);
- 
-	// 加入通知队列
-	p-&gt;Add(*s1);
-	p-&gt;Add(*s2);
- 
-	// 事件
-	p-&gt;action = &quot;The boss is coming...&quot;;
- 
-	// 通知
-	p-&gt;Notify();
- 
-	// 动态删除
-	p-&gt;Remove(0);
-	
-	p-&gt;Notify();
- 
-	return 0;
-</code></pre>
-<p>update:怪不得觉得熟悉，原来Qt的信号槽机制<a href=https://en.wikipedia.org/wiki/Signals_and_slots>Signals_and_slots </a>就是使用了观察者模式。</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span>    
+<span class=ln> 3</span>    <span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span><span class=ln> 4</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;vector&gt;</span><span class=cp>
+</span><span class=ln> 5</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;string&gt;</span><span class=cp>
+</span><span class=ln> 6</span><span class=cp></span>    <span class=k>using</span> <span class=k>namespace</span> <span class=n>std</span><span class=p>;</span>
+<span class=ln> 7</span>    <span class=k>class</span> <span class=nc>Secretary</span><span class=p>;</span>
+<span class=ln> 8</span>    <span class=c1>// 看股票的同事类（观察对象，观察者）
+</span><span class=ln> 9</span><span class=c1></span>    <span class=k>class</span> <span class=nc>StockObserver</span>
+<span class=ln>10</span>    <span class=p>{</span>
+<span class=ln>11</span>    <span class=k>public</span><span class=o>:</span>
+<span class=ln>12</span>    	<span class=n>StockObserver</span><span class=p>(</span><span class=n>string</span> <span class=n>strName</span><span class=p>,</span> <span class=n>Secretary</span><span class=o>*</span> <span class=n>strSub</span><span class=p>)</span>
+<span class=ln>13</span>    	<span class=p>{</span>
+<span class=ln>14</span>    		<span class=n>name</span> <span class=o>=</span> <span class=n>strName</span><span class=p>;</span>
+<span class=ln>15</span>    		<span class=n>sub</span> <span class=o>=</span> <span class=n>strSub</span><span class=p>;</span>
+<span class=ln>16</span>    	<span class=p>}</span>
+<span class=ln>17</span>     
+<span class=ln>18</span>    	<span class=kt>void</span> <span class=nf>Update</span><span class=p>();</span>
+<span class=ln>19</span>     
+<span class=ln>20</span>    <span class=k>private</span><span class=o>:</span>
+<span class=ln>21</span>    	<span class=n>string</span> <span class=n>name</span><span class=p>;</span>
+<span class=ln>22</span>    	<span class=n>Secretary</span><span class=o>*</span> <span class=n>sub</span><span class=p>;</span><span class=err>我所理解的设计模式（</span><span class=n>C</span><span class=o>++</span><span class=err>实现）——观察者模式（</span><span class=n>Observer</span> <span class=n>Pattern</span><span class=err>）</span>
+<span class=ln>23</span>    <span class=p>};</span>
+<span class=ln>24</span>     
+<span class=ln>25</span>    <span class=c1>// 秘书类（主题对象，通知者）
+</span><span class=ln>26</span><span class=c1></span>    <span class=k>class</span> <span class=nc>Secretary</span>
+<span class=ln>27</span>    <span class=p>{</span>
+<span class=ln>28</span>     
+<span class=ln>29</span>    <span class=k>public</span><span class=o>:</span>
+<span class=ln>30</span>    	<span class=n>string</span> <span class=n>action</span><span class=p>;</span>
+<span class=ln>31</span>    	<span class=kt>void</span> <span class=nf>Add</span><span class=p>(</span><span class=n>StockObserver</span> <span class=n>ob</span><span class=p>)</span> <span class=p>{</span> <span class=n>observers</span><span class=p>.</span><span class=n>push_back</span><span class=p>(</span><span class=n>ob</span><span class=p>);</span> <span class=p>}</span>
+<span class=ln>32</span>    	<span class=kt>void</span> <span class=nf>Remove</span><span class=p>(</span><span class=kt>int</span> <span class=n>addIndex</span><span class=p>)</span>
+<span class=ln>33</span>    	<span class=p>{</span>
+<span class=ln>34</span>    		<span class=k>if</span><span class=p>(</span><span class=n>addIndex</span> <span class=o>&gt;=</span><span class=mi>0</span> <span class=o>&amp;&amp;</span> <span class=n>addIndex</span> <span class=o>&lt;</span> <span class=n>observers</span><span class=p>.</span><span class=n>size</span><span class=p>())</span>
+<span class=ln>35</span>    		<span class=n>observers</span><span class=p>.</span><span class=n>erase</span><span class=p>(</span><span class=n>observers</span><span class=p>.</span><span class=n>begin</span><span class=p>()</span> <span class=o>+</span> <span class=n>addIndex</span><span class=p>);</span>
+<span class=ln>36</span>    	<span class=p>}</span>
+<span class=ln>37</span>    	<span class=kt>void</span> <span class=nf>Notify</span><span class=p>()</span>
+<span class=ln>38</span>    	<span class=p>{</span>
+<span class=ln>39</span>    		<span class=n>vector</span><span class=o>&lt;</span><span class=n>StockObserver</span><span class=o>&gt;::</span><span class=n>iterator</span> <span class=n>it</span><span class=p>;</span>
+<span class=ln>40</span>    		<span class=k>for</span> <span class=p>(</span><span class=n>it</span><span class=o>=</span><span class=n>observers</span><span class=p>.</span><span class=n>begin</span><span class=p>();</span> <span class=n>it</span><span class=o>!=</span><span class=n>observers</span><span class=p>.</span><span class=n>end</span><span class=p>();</span> <span class=o>++</span><span class=n>it</span><span class=p>)</span>
+<span class=ln>41</span>    		<span class=p>{</span>
+<span class=ln>42</span>    			<span class=p>(</span><span class=o>*</span><span class=n>it</span><span class=p>).</span><span class=n>Update</span><span class=p>();</span>
+<span class=ln>43</span>    		<span class=p>}</span>
+<span class=ln>44</span>    	<span class=p>}</span>
+<span class=ln>45</span>     
+<span class=ln>46</span>    <span class=k>private</span><span class=o>:</span>
+<span class=ln>47</span>    	<span class=n>vector</span><span class=o>&lt;</span><span class=n>StockObserver</span><span class=o>&gt;</span> <span class=n>observers</span><span class=p>;</span>
+<span class=ln>48</span>    <span class=p>};</span>
+<span class=ln>49</span>     
+<span class=ln>50</span>     
+<span class=ln>51</span>     
+<span class=ln>52</span>     
+<span class=ln>53</span>    <span class=kt>void</span> <span class=n>StockObserver</span><span class=o>::</span><span class=n>Update</span><span class=p>()</span>
+<span class=ln>54</span>    <span class=p>{</span>
+<span class=ln>55</span>    	<span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>name</span> <span class=o>&lt;&lt;</span> <span class=s>&#34; : &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>sub</span><span class=o>-&gt;</span><span class=n>action</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;, begin to work&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+<span class=ln>56</span>    <span class=p>}</span>
+<span class=ln>57</span>     
+<span class=ln>58</span>    <span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+<span class=ln>59</span>    <span class=p>{</span>
+<span class=ln>60</span>    	<span class=c1>// 创建通知者
+</span><span class=ln>61</span><span class=c1></span>    	<span class=n>Secretary</span><span class=o>*</span> <span class=n>p</span> <span class=o>=</span> <span class=k>new</span> <span class=n>Secretary</span><span class=p>();</span>
+<span class=ln>62</span>     
+<span class=ln>63</span>    	<span class=c1>// 观察者
+</span><span class=ln>64</span><span class=c1></span>    	<span class=n>StockObserver</span><span class=o>*</span> <span class=n>s1</span> <span class=o>=</span> <span class=k>new</span> <span class=n>StockObserver</span><span class=p>(</span><span class=s>&#34;Lazy&#34;</span><span class=p>,</span> <span class=n>p</span><span class=p>);</span>
+<span class=ln>65</span>    	<span class=n>StockObserver</span><span class=o>*</span> <span class=n>s2</span> <span class=o>=</span> <span class=k>new</span> <span class=n>StockObserver</span><span class=p>(</span><span class=s>&#34;SnowFire&#34;</span><span class=p>,</span> <span class=n>p</span><span class=p>);</span>
+<span class=ln>66</span>     
+<span class=ln>67</span>    	<span class=c1>// 加入通知队列
+</span><span class=ln>68</span><span class=c1></span>    	<span class=n>p</span><span class=o>-&gt;</span><span class=n>Add</span><span class=p>(</span><span class=o>*</span><span class=n>s1</span><span class=p>);</span>
+<span class=ln>69</span>    	<span class=n>p</span><span class=o>-&gt;</span><span class=n>Add</span><span class=p>(</span><span class=o>*</span><span class=n>s2</span><span class=p>);</span>
+<span class=ln>70</span>     
+<span class=ln>71</span>    	<span class=c1>// 事件
+</span><span class=ln>72</span><span class=c1></span>    	<span class=n>p</span><span class=o>-&gt;</span><span class=n>action</span> <span class=o>=</span> <span class=s>&#34;The boss is coming...&#34;</span><span class=p>;</span>
+<span class=ln>73</span>     
+<span class=ln>74</span>    	<span class=c1>// 通知
+</span><span class=ln>75</span><span class=c1></span>    	<span class=n>p</span><span class=o>-&gt;</span><span class=n>Notify</span><span class=p>();</span>
+<span class=ln>76</span>     
+<span class=ln>77</span>    	<span class=c1>// 动态删除
+</span><span class=ln>78</span><span class=c1></span>    	<span class=n>p</span><span class=o>-&gt;</span><span class=n>Remove</span><span class=p>(</span><span class=mi>0</span><span class=p>);</span>
+<span class=ln>79</span>    	
+<span class=ln>80</span>    	<span class=n>p</span><span class=o>-&gt;</span><span class=n>Notify</span><span class=p>();</span>
+<span class=ln>81</span>     
+<span class=ln>82</span>    	<span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>83</span>     
+<span class=ln>84</span>    
+<span class=ln>85</span>
+</code></pre></div><p>update:怪不得觉得熟悉，原来Qt的信号槽机制<a href=https://en.wikipedia.org/wiki/Signals_and_slots>Signals_and_slots </a>就是使用了观察者模式。</p>
 <p>参考资料:</p>
 <p><a href=http://www.runoob.com/design-pattern/observer-pattern.html>观察者模式-菜鸟教程</a></p>
 <p><a href=https://blog.csdn.net/lcl_data/article/details/9208561>我所理解的设计模式（C++实现）——观察者模式（Observer Pattern）</a></p>
@@ -262,7 +267,7 @@ ACM
 </a>
 <a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>
 其他
-<span class=button_tally>128</span>
+<span class=button_tally>108</span>
 </a>
 <a href=https://111qqz.com/categories/deep-learning/ class="post_tag button button_translucent" title=deep-learning>
 DEEP-LEARNING
@@ -272,13 +277,13 @@ DEEP-LEARNING
 面试
 <span class=button_tally>63</span>
 </a>
+<a href=https://111qqz.com/categories/%E5%B7%A5%E7%A8%8B/ class="post_tag button button_translucent" title=工程>
+工程
+<span class=button_tally>46</span>
+</a>
 <a href=https://111qqz.com/categories/%E9%9A%8F%E7%AC%94%E6%9D%82%E8%B0%88/ class="post_tag button button_translucent" title=随笔杂谈>
 随笔杂谈
 <span class=button_tally>46</span>
-</a>
-<a href=https://111qqz.com/categories/%E5%B7%A5%E7%A8%8B/ class="post_tag button button_translucent" title=工程>
-工程
-<span class=button_tally>23</span>
 </a>
 <a href=https://111qqz.com/categories/mooc/ class="post_tag button button_translucent" title=mooc>
 MOOC
@@ -333,6 +338,10 @@ NUMBER-THEORY
 模拟
 <span class=button_tally>24</span>
 </a>
+<a href=https://111qqz.com/tags/cpp/ class="post_tag button button_translucent" title=cpp>
+CPP
+<span class=button_tally>23</span>
+</a>
 <a href=https://111qqz.com/tags/%E5%8D%9A%E5%BC%88%E8%AE%BA/ class="post_tag button button_translucent" title=博弈论>
 博弈论
 <span class=button_tally>22</span>
@@ -348,10 +357,6 @@ BINARY-SEARCH
 <a href=https://111qqz.com/tags/%E6%AF%8D%E5%87%BD%E6%95%B0/ class="post_tag button button_translucent" title=母函数>
 母函数
 <span class=button_tally>21</span>
-</a>
-<a href=https://111qqz.com/tags/bfs/ class="post_tag button button_translucent" title=bfs>
-BFS
-<span class=button_tally>20</span>
 </a>
 <br>
 <div class="post_tags_toggle button">All Tags</div>
@@ -399,9 +404,9 @@ BFS
 </a>
 <a href=https://111qqz.com/tags/bsgs/ class="post_tag button button_translucent" data-position=4 title=bsgs>BSGS<span class=button_tally>4</span>
 </a>
-<a href=https://111qqz.com/tags/c++/ class="post_tag button button_translucent" data-position=9 title=c++>C++<span class=button_tally>9</span>
+<a href=https://111qqz.com/tags/c++/ class="post_tag button button_translucent" data-position=7 title=c++>C++<span class=button_tally>7</span>
 </a>
-<a href=https://111qqz.com/tags/c++11/ class="post_tag button button_translucent" data-position=4 title=c++11>C++11<span class=button_tally>4</span>
+<a href=https://111qqz.com/tags/c++11/ class="post_tag button button_translucent" data-position=1 title=c++11>C++11<span class=button_tally>1</span>
 </a>
 <a href=https://111qqz.com/tags/cache/ class="post_tag button button_translucent" data-position=1 title=cache>CACHE<span class=button_tally>1</span>
 </a>
@@ -427,7 +432,7 @@ BFS
 </a>
 <a href=https://111qqz.com/tags/convolutional-neural-network/ class="post_tag button button_translucent" data-position=1 title=convolutional-neural-network>CONVOLUTIONAL-NEURAL-NETWORK<span class=button_tally>1</span>
 </a>
-<a href=https://111qqz.com/tags/cpp/ class="post_tag button button_translucent" data-position=16 title=cpp>CPP<span class=button_tally>16</span>
+<a href=https://111qqz.com/tags/cpp/ class="post_tag button button_translucent" data-position=23 title=cpp>CPP<span class=button_tally>23</span>
 </a>
 <a href=https://111qqz.com/tags/cs231n/ class="post_tag button button_translucent" data-position=1 title=cs231n>CS231N<span class=button_tally>1</span>
 </a>
@@ -453,7 +458,7 @@ BFS
 </a>
 <a href=https://111qqz.com/tags/dl-sys/ class="post_tag button button_translucent" data-position=1 title=dl-sys>DL-SYS<span class=button_tally>1</span>
 </a>
-<a href=https://111qqz.com/tags/docker/ class="post_tag button button_translucent" data-position=3 title=docker>DOCKER<span class=button_tally>3</span>
+<a href=https://111qqz.com/tags/docker/ class="post_tag button button_translucent" data-position=4 title=docker>DOCKER<span class=button_tally>4</span>
 </a>
 <a href=https://111qqz.com/tags/dp/ class="post_tag button button_translucent" data-position=71 title=dp>DP<span class=button_tally>71</span>
 </a>
@@ -599,7 +604,7 @@ BFS
 </a>
 <a href=https://111qqz.com/tags/model-distillation/ class="post_tag button button_translucent" data-position=1 title=model-distillation>MODEL-DISTILLATION<span class=button_tally>1</span>
 </a>
-<a href=https://111qqz.com/tags/modern-cpp/ class="post_tag button button_translucent" data-position=5 title=modern-cpp>MODERN-CPP<span class=button_tally>5</span>
+<a href=https://111qqz.com/tags/modern-cpp/ class="post_tag button button_translucent" data-position=8 title=modern-cpp>MODERN-CPP<span class=button_tally>8</span>
 </a>
 <a href=https://111qqz.com/tags/move/ class="post_tag button button_translucent" data-position=1 title=move>MOVE<span class=button_tally>1</span>
 </a>
@@ -809,7 +814,7 @@ BFS
 </a>
 <a href=https://111qqz.com/tags/%E5%88%86%E7%B1%BB%E8%AE%A8%E8%AE%BA/ class="post_tag button button_translucent" data-position=1 title=分类讨论>分类讨论<span class=button_tally>1</span>
 </a>
-<a href=https://111qqz.com/tags/%E5%89%8D%E7%AB%AF/ class="post_tag button button_translucent" data-position=5 title=前端>前端<span class=button_tally>5</span>
+<a href=https://111qqz.com/tags/%E5%89%8D%E7%AB%AF/ class="post_tag button button_translucent" data-position=6 title=前端>前端<span class=button_tally>6</span>
 </a>
 <a href=https://111qqz.com/tags/%E5%89%8D%E7%BC%80%E5%92%8C/ class="post_tag button button_translucent" data-position=17 title=前缀和>前缀和<span class=button_tally>17</span>
 </a>
@@ -908,6 +913,8 @@ BFS
 <a href=https://111qqz.com/tags/%E5%BA%B7%E6%89%98%E5%B1%95%E5%BC%80/ class="post_tag button button_translucent" data-position=1 title=康托展开>康托展开<span class=button_tally>1</span>
 </a>
 <a href=https://111qqz.com/tags/%E5%BA%B7%E6%89%98%E5%B1%95%E5%BC%80/%E9%80%86%E5%B1%95%E5%BC%80/ class="post_tag button button_translucent" data-position=2 title=康托展开/逆展开>康托展开/逆展开<span class=button_tally>2</span>
+</a>
+<a href=https://111qqz.com/tags/%E5%BE%AA%E7%8E%AF%E5%B1%95%E5%BC%80/ class="post_tag button button_translucent" data-position=1 title=循环展开>循环展开<span class=button_tally>1</span>
 </a>
 <a href=https://111qqz.com/tags/%E5%BE%AA%E7%8E%AF%E8%8A%82/ class="post_tag button button_translucent" data-position=8 title=循环节>循环节<span class=button_tally>8</span>
 </a>
@@ -1054,6 +1061,8 @@ BFS
 <a href=https://111qqz.com/tags/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/ class="post_tag button button_translucent" data-position=5 title=矩阵快速幂>矩阵快速幂<span class=button_tally>5</span>
 </a>
 <a href=https://111qqz.com/tags/%E7%A6%BB%E6%95%A3%E5%8C%96/ class="post_tag button button_translucent" data-position=11 title=离散化>离散化<span class=button_tally>11</span>
+</a>
+<a href=https://111qqz.com/tags/%E7%AC%A6%E5%8F%B7%E5%8F%AF%E8%A7%81%E6%80%A7/ class="post_tag button button_translucent" data-position=1 title=符号可见性>符号可见性<span class=button_tally>1</span>
 </a>
 <a href=https://111qqz.com/tags/%E7%AC%A6%E5%8F%B7%E8%A1%A8/ class="post_tag button button_translucent" data-position=1 title=符号表>符号表<span class=button_tally>1</span>
 </a>

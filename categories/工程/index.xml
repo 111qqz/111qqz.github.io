@@ -1,8 +1,84 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>工程 on 111qqz的小窝</title><link>https://111qqz.com/categories/%E5%B7%A5%E7%A8%8B/</link><description>Recent content in 工程 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sat, 26 Feb 2022 18:12:20 +0800</lastBuildDate><atom:link href="https://111qqz.com/categories/%E5%B7%A5%E7%A8%8B/index.xml" rel="self" type="application/rss+xml"/><item><title>2022 TO DO list</title><link>https://111qqz.com/2022/02/2022-to-do-list/</link><pubDate>Sat, 26 Feb 2022 18:12:20 +0800</pubDate><guid>https://111qqz.com/2022/02/2022-to-do-list/</guid><description>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>工程 on 111qqz的小窝</title><link>https://111qqz.com/categories/%E5%B7%A5%E7%A8%8B/</link><description>Recent content in 工程 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sat, 26 Feb 2022 19:10:30 +0800</lastBuildDate><atom:link href="https://111qqz.com/categories/%E5%B7%A5%E7%A8%8B/index.xml" rel="self" type="application/rss+xml"/><item><title>2022 TO DO list</title><link>https://111qqz.com/2022/02/2022-to-do-list/</link><pubDate>Sat, 26 Feb 2022 18:12:20 +0800</pubDate><guid>https://111qqz.com/2022/02/2022-to-do-list/</guid><description>
 竟然一下子就2022年了，时间过得真快。 还是简单列一下TODO list吧。
-源码 levelDB workflow 书籍 课程 目前买了一年的极客时间，可以学6门课... 还没想好学哪些...</description></item><item><title>x86 calling conventions</title><link>https://111qqz.com/2019/01/x86-calling-conventions/</link><pubDate>Thu, 31 Jan 2019 12:12:22 +0000</pubDate><guid>https://111qqz.com/2019/01/x86-calling-conventions/</guid><description>
+源码 levelDB workflow 书籍 课程 目前买了一年的极客时间，可以学6门课... 还没想好学哪些...</description></item><item><title>levelDB 代码阅读笔记 01</title><link>https://111qqz.com/2022/02/leveldb-notes-01/</link><pubDate>Sat, 26 Feb 2022 19:10:30 +0800</pubDate><guid>https://111qqz.com/2022/02/leveldb-notes-01/</guid><description>
+背景 最近在做一个智能算力相关的项目，类似美团外卖广告智能算力的探索与实践 其中实现控制系统需要与数据库交互。 虽然最后技术选型并没有使用到levelDB,但是想趁机把代码读了吧。
+很惊讶的发现我大三的时候声称自己度过部分levelDB代码，甚至还写了几篇相关的博客，比如
+murmurhash源码分析 Lock-free vs wait-free concurrency 内存屏障（Memory Barriers） levelDB 学习笔记 但是我却一点都没印象了.... 仔细看来很多概念在当时可能都是没有充分理解的，而且从数目上来看，应该并没有完整看完levelDB代码。
+所以重新开个坑，看看自己比起毕业前有没有长进【没有
+先从入口 include/leveldb/db.h 开始
+LEVELDB_EXPORT 看到LEVELDB_EXPORT这个macro
+1 2class LEVELDB_EXPORT Snapshot { 3 protected: 4 virtual ~Snapshot(); 5}; 6 是在 include/leveldb/export.h 中定义的
+1 2// 符号可见性问题，使用macro来控制在编译成动态库时暴露，在Link时不暴露符号是一种common 的做法 3// 4#if !defined(LEVELDB_EXPORT) 5 6#if defined(LEVELDB_SHARED_LIBRARY) 7#if defined(_WIN32) 8 9#if defined(LEVELDB_COMPILE_LIBRARY) 10#define LEVELDB_EXPORT __declspec(dllexport) 11#else 12#define LEVELDB_EXPORT __declspec(dllimport) 13#endif // defined(LEVELDB_COMPILE_LIBRARY) 14 15#else // defined(_WIN32) 16#if defined(LEVELDB_COMPILE_LIBRARY) 17#define LEVELDB_EXPORT __attribute__((visibility(&amp;#34;default&amp;#34;))) 18#else 19#define LEVELDB_EXPORT 20#endif 21#endif // defined(_WIN32) 22 23#else // defined(LEVELDB_SHARED_LIBRARY) 24#define LEVELDB_EXPORT 25#endif 26 27#endif // !</description></item><item><title>ska::flat_hash_map 源码分析</title><link>https://111qqz.com/2021/08/ska_flat_hash_map_notes/</link><pubDate>Sat, 21 Aug 2021 17:43:02 +0800</pubDate><guid>https://111qqz.com/2021/08/ska_flat_hash_map_notes/</guid><description>
+背景 最近在调研各种hashmap.. 发现ska::flat hash map性能优秀。。于是来看看代码。。 发现最大的特点是,ska::flat_hash_map使用了带probe count上限的robin hood hashing
+相关概念 Distance_from_desired 对于采用了open addressing的hash实现，当插入发生冲突时，会以一定方式(如线性探测、平方探测等)来探测下一个可以插入的slot. 因而实际插入的slot位置与理想的slot位置通常不相同，这段距离定义为distance_from_desired 在没有冲突的理想情况下，所有distance_from_desired的值应该都为0 distance_from_desired的一种更常见的说法叫做probe sequence lengths(PSL)
+robin hood hashing robin hood hashing的核心思想是&amp;quot;劫富济贫&amp;quot; distance_from_desired小的slot被认为更&amp;quot;富有&amp;quot;，distance_from_desired大的slot被认为更&amp;quot;贫穷&amp;quot; 具体来说，当去插入一个新的元素时，如果当前位置的元素的distance_from_desired要比待插入元素的distance_from_desired要小，那么就将待插入元素放入当前位置，将当前位置的元素取出，寻找一个新的位置。
+这样做使得所有元素的distance_from_desired的分布更为平均，variance更小。 这样的分布对cache更友好（几乎全部元素distance_from_desired都小于一个cache line的长度，因此在find的时候只需要fetch一次cache line），从而拥有更好的性能。
+一般的robin hashing 在find时，一般用一个全局的最大distance_from_desired作为没有找到该元素终止条件。 一种常见的改进是,不维护全局最大distance_from_desired,而是在看到当前位置元素的distance_from_desired比要插入的元素的distance_from_desired小时终止。
+1 2 iterator find(const FindKey&amp;amp; key) { 3 size_t index = 4 hash_policy.index_for_hash(hash_object(key), num_slots_minus_one); 5 EntryPointer it = entries + ptrdiff_t(index); 6 for (int8_t distance = 0; it-&amp;gt;distance_from_desired &amp;gt;= distance; 7 ++distance, ++it) { 8 if (compares_equal(key, it-&amp;gt;value)) return {it}; 9 } 10 return end(); 11 } 12 带上限的robin hashing 一般的robin hashing在insert时，会不断进行寻找(包括了可能的swap过程)，直到找到一个空的slot为止。该过程在hash table较满时可能接近线性的时间复杂度。 ska::flat_hash_map对这一点的改进是，限制了insert时尝试的上限次数，作者给出的经验值为log(N),其中N为slots的个数。 这样保证每个slot的最大distance_from_desired不会超过log(N)</description></item><item><title>一次avx2在gcc上core dump的排查经历</title><link>https://111qqz.com/2021/07/core-dump-on-gcc-4-with-avx2/</link><pubDate>Thu, 22 Jul 2021 20:01:50 +0800</pubDate><guid>https://111qqz.com/2021/07/core-dump-on-gcc-4-with-avx2/</guid><description>
+背景 起因是同事在实现int4的功能，结果流水线有一条死活过不了(gcc版本为4.8.5),一直core dump 经过初步排查，找出了如下最小可以复现的代码:
+1 2#include &amp;lt;immintrin.h&amp;gt;3 4class Test{ 5 public: 6 Test(){ 7 tmp = _mm256_set_epi32(0,0,0,0,0,0,0,0); 8 } 9 private: 10 __m256i tmp; 11}; 12int main(){ 13 auto *tmp = new Test(); 14 return 0; 15} gcc版本为4.8.5 其中编译选项为
+1g++ -std=c++11 -mavx2 a.cpp 2 现象为会core在 tmp = _mm256_set_epi32(0,0,0,0,0,0,0,0);
+但是同样的代码，同样的编译选项，在gcc7.3上就不会发生core的问题。
+初步排查 查看汇编代码,gcc4.8.5生成的如下:
+1 2main: 3 push rbp 4 mov rbp, rsp 5 mov edi, 32 6 call operator new(unsigned long) 7 vpxor xmm0, xmm0, xmm0 8 vmovdqa YMMWORD PTR [rax], ymm0 9 mov eax, 0 10 pop rbp 11 ret 12 链接在这里</description></item><item><title>k8s nodes is forbidden user cannot list resource nodes in api group at the cluster scope</title><link>https://111qqz.com/2020/05/install-k8s-get-nodes-forbidden-error/</link><pubDate>Thu, 07 May 2020 16:01:52 +0800</pubDate><guid>https://111qqz.com/2020/05/install-k8s-get-nodes-forbidden-error/</guid><description>
+继续将k8s用于模型转换和部署的自动化流程...然后发现之前安装k8s的文档不work了．． 时间是2020年5月7日，当前最新的k8s版本是　v1.18.2
+报错如下:
+1 2 3&amp;lt;2kzzqw6rsjid0 --discovery-token-ca-cert-hash sha256:c6c72bdc96c0ff4d59559ff915eee61ba7ac5e8b93c0b2f9e11e813412387ec2 --v=5 4W0507 15:45:12.608784 4768 join.go:346] [preflight] WARNING: JoinControlPane.controlPlane settings will be ignored when control-plane flag is not set. 5I0507 15:45:12.608822 4768 join.go:371] [preflight] found NodeName empty; using OS hostname as NodeName 6I0507 15:45:12.608853 4768 initconfiguration.go:103] detected and using CRI socket: /var/run/dockershim.sock 7[preflight] Running pre-flight checks 8I0507 15:45:12.608902 4768 preflight.go:90] [preflight] Running general checks 9I0507 15:45:12.608933 4768 checks.go:249] validating the existence and emptiness of directory /etc/kubernetes/manifests 10I0507 15:45:12.</description></item><item><title>x86 calling conventions</title><link>https://111qqz.com/2019/01/x86-calling-conventions/</link><pubDate>Thu, 31 Jan 2019 12:12:22 +0000</pubDate><guid>https://111qqz.com/2019/01/x86-calling-conventions/</guid><description>
 x86的调用约定主要说的是这几件事:
-* The order in which atomic (scalar) parameters, or individual parts of a complex parameter, are allocated * How parameters are passed (pushed on the stack, placed in registers, or a mix of both) * Which registers the called function must preserve for the caller (also known as: callee-saved registers or non-volatile registers) * How the task of preparing the stack for, and restoring after, a function call is divided between the caller and the callee 调用约定实际上并不唯一</description></item><item><title>[C++11]std::condition_variable notes</title><link>https://111qqz.com/2018/09/condition_variable-notes/</link><pubDate>Sun, 23 Sep 2018 08:42:33 +0000</pubDate><guid>https://111qqz.com/2018/09/condition_variable-notes/</guid><description>
+* The order in which atomic (scalar) parameters, or individual parts of a complex parameter, are allocated * How parameters are passed (pushed on the stack, placed in registers, or a mix of both) * Which registers the called function must preserve for the caller (also known as: callee-saved registers or non-volatile registers) * How the task of preparing the stack for, and restoring after, a function call is divided between the caller and the callee 调用约定实际上并不唯一</description></item><item><title>优化学习笔记(1):Loop unrolling</title><link>https://111qqz.com/2019/01/loop-unrolling/</link><pubDate>Wed, 23 Jan 2019 11:51:46 +0000</pubDate><guid>https://111qqz.com/2019/01/loop-unrolling/</guid><description>
+迫于生计，最近要学习halide
+先去学习/复习一下常见的编译优化技巧。
+loop unrolling，也就是循环展开，顾名思义，就是把循环展开来写。
+normal loop: int x; for (x = 0; x &amp;lt; 100; x++) { delete(x); } after loop unrolling: int x; for (x = 0; x &amp;lt; 100; x += 5 ) { delete(x); delete(x + 1); delete(x + 2); delete(x + 3); delete(x + 4); } 循环展开是一种优化，可以手动实现也可以编译器自动实现。
+为什么要将循环展开？ * 循环每次都需要判断终止条件，展开后可以消除这部分开销。 * 减少[分支预测](https://en.wikipedia.org/wiki/Branch_predictor)开销。循环里的分支是指“跳出循环”还是“进行下一次迭代” * [vectorization](https://en.wikipedia.org/wiki/Automatic_vectorization) for (int y = 0; y &amp;lt; 4; y++) { for (int x_outer = 0; x_outer &amp;lt; 2; x_outer++) { // The loop over x_inner has gone away, and has been // replaced by a vectorized version of the // expression.</description></item><item><title>docker network 与 本地 network 网段冲突</title><link>https://111qqz.com/2018/11/docker-network-conflict-with-local-subnetwork/</link><pubDate>Tue, 20 Nov 2018 08:33:20 +0000</pubDate><guid>https://111qqz.com/2018/11/docker-network-conflict-with-local-subnetwork/</guid><description>
+起因: 公司部署在hk的爬虫服务器突然挂掉了。后来发现只是在深圳办公区无法访问。排查后发现原因是docker的网络(包括docker network的subnet或者是某个容器的ip)与该host在内网的ip段相同，导致冲突。
+排查过程： 有两个方面需要排查。一个是docker服务启动时的默认网络。
+默认网络使用bridge桥接模式，是容器与宿主机进行通讯的默认办法。
+修改默认网段可以参考 http://blog.51cto.com/wsxxsl/2060761
+除此之外，还需要注意docker创建的network的网段。
+使用docker network ls 命令查看当前的网络
+然后可以使用docker inspect 查看每个network的详细信息。
+也可以直接使用ip addr 来查看各种奇怪的虚拟网卡的ip,是否有前两位的地址和host的ip地址相同的。
+解决办法: 本想在docker-compose up 时指定默认网络的subnet
+结果发现好像并不支持？version 1.10.0 error on gateway spec
+Was there any discussion on that? I do need to customize the network, because my company uses the 172.16.0.0/16 address range at some segments and Docker will simply clash with that by default, so every single Docker server in the whole company needs a forced network setting.</description></item><item><title>记一次在 docker compose 中使用volume的踩坑记录</title><link>https://111qqz.com/2018/11/docker-compose-default-volume-name-makes-me-confused/</link><pubDate>Wed, 14 Nov 2018 08:06:57 +0000</pubDate><guid>https://111qqz.com/2018/11/docker-compose-default-volume-name-makes-me-confused/</guid><description>
+现象: 使用docker compose 挂载 named volume 无效（且没有错误提示)
+排查过程: 一开始是没有使用docker-compose命令，直接使用docker run -v 命令，挂载两个绝对路径，没有问题。
+然后使用named volume，在这里使用了local-persist 插件，来指定数据卷(volume)在host上的位置。直接用docker run -v 命令，依然没有问题。
+接下里打算放到docker compose里面，发现并没有挂载成功。
+但是在docker compose里面，挂载两个绝对路径是ok的。
+于是怀疑是volume的问题
+此时使用docker inspect 查看 用docker compose 启动起来的，挂载named volume的容器
+发现mount里面，挂载的named volume并不是我在docker-compose.yml填写的名称，而是多了一个前缀，这个前缀恰好是docker-compose.yml 文件所在的目录名称。
+查了一下，发现果然不止我一个人被坑到orz Docker-compose prepends directory name to named volumes
+其实应该直接使用docker inspect来排查的...应该会更快找到问题
+解决办法： 有几种解决办法：
+* 不手动创建volume，而是在docker-compose.yml中，设置volume的mountpoint * 在docker-compose.yml中，添加external: true的选项到 volume中，参考[external](https://docs.docker.com/compose/compose-file/#external) 顺便附上我的docker-compose.yml文件
+version: '3' services: django: image: &amp;quot;registry.sensetime.com/spider/sensespider:v1.0&amp;quot; volumes: - spiderdata:/data privileged: true ports: - &amp;quot;8000:8000&amp;quot; working_dir: /home/renkuanze/workspace/sensespider entrypoint: bash run.</description></item><item><title>java-grpc 踩坑记录</title><link>https://111qqz.com/2018/10/java-grpc-notes/</link><pubDate>Wed, 17 Oct 2018 03:29:03 +0000</pubDate><guid>https://111qqz.com/2018/10/java-grpc-notes/</guid><description>
+最近的项目需要java和python之间的进程通信，想到了之前使用过的的grpc.
+参考官方quickstart
+* JDK: version 7 or higher 看起来只依赖jdk,美滋滋
+然后按照文档执行
+./gradlew installDist
+报错:
+Task :grpc-compiler:compileJava_pluginExecutableJava_pluginCpp FAILED FAILURE: Build failed with an exception. * What went wrong: Execution failed for task ':grpc-compiler:compileJava_pluginExecutableJava_pluginCpp'. &amp;gt; No tool chain is available to build for platform 'x86_64': - Tool chain 'visualCpp' (Visual Studio): Visual Studio is not available on this operating system. - Tool chain 'gcc' (GNU GCC): Could not determine GCC metadata: could not find vendor in output of /usr/local/gcc-4.</description></item><item><title>spring 学习笔记</title><link>https://111qqz.com/2018/10/spring-notes/</link><pubDate>Wed, 10 Oct 2018 09:56:46 +0000</pubDate><guid>https://111qqz.com/2018/10/spring-notes/</guid><description>
+迫于生计，又要从零开始学习spring.
+在这篇文章之前，对java的基础是2015年写过一个java大作业，对spring是一无所知。
+为了学习spring，我按顺序做了以下事情:
+* 学习了一下java语法，教程关键词是&amp;quot;java tutorial for cpp programmers&amp;quot;,比如[Learning a New Programming Language: Java for C++ Programmers ](http://pages.cs.wisc.edu/~hasti/cs368/JavaTutorial/) * 对spring有个大体的了解。视频教程要比官方文档或者博客迅速得多。推荐java brains的 [spring boot quick start](https://javabrains.io/courses/spring_bootquickstart/) ,一天时间就基本可以了解个大概。 * 简单看了下java brains的另一门课程 [spring_core](https://javabrains.io/courses/spring_core/)，主要是为了了解spring中一些常见概念，比如bean,依赖注入，以及常用注解。 * 然后了解了下spring与数据库的连接，这里有一个比官网更详细的教程[Spring Boot, MySQL, JPA, Hibernate Restful CRUD API Tutorial](https://www.callicoder.com/spring-boot-rest-api-tutorial-with-mysql-jpa-hibernate/) ，代码整理在[github](https://github.com/111qqz/Spring-Boot-mysql-sample) ,这个时候感受到了代码直接操作数据库（而不用写sql语句)的美妙。</description></item><item><title>spring 依赖注入</title><link>https://111qqz.com/2018/10/spring-dependency-injection/</link><pubDate>Tue, 09 Oct 2018 07:45:17 +0000</pubDate><guid>https://111qqz.com/2018/10/spring-dependency-injection/</guid><description>
+真是个不明觉厉的术语...其实是个特别简单的概念orz
+用白话讲，如果一个class A中用到了class B的实例，那么class B的实例就是class A的依赖，如果不是在class A中定义class B的实例，而是通过某个接口，将class B的实例传入classA,就叫依赖注入。
+public class Example { // private DatabaseThingie myDatabase; // public Example() { // myDatabase = new DatabaseThingie(); // } public Example(DatabaseThingie useThisDatabaseInstead) { myDatabase = useThisDatabaseInstead; } public void DoStuff() { ... myDatabase.GetData(); ... } } 依赖注入（DI）和控制反转（IOC）基本是一个意思，因为说起来谁都离不开谁。
+简单来说，a依赖b，但a不控制b的创建和销毁，仅使用b，那么b的控制权交给a之外处理，这叫控制反转（IOC），而a要依赖b，必然要使用b的instance，那么
+1. 通过a的接口，把b传入； 2. 通过a的构造，把b传入； 3. 通过设置a的属性，把b传入； 这个过程叫依赖注入（DI）。
+那么什么是IOC Container？
+随着DI的频繁使用，要实现IOC，会有很多重复代码，甚至随着技术的发展，有更多新的实现方法和方案，那么有人就把这些实现IOC的代码打包成组件或框架，来避免人们重复造轮子。
+所以实现IOC的组件或者框架，我们可以叫它IOC Container。</description></item><item><title>[c++11] std::async std::packaged_task std::promise and std::future notes</title><link>https://111qqz.com/2018/09/c11-async-packaged-ask-promise-future-notes/</link><pubDate>Sun, 30 Sep 2018 06:49:27 +0000</pubDate><guid>https://111qqz.com/2018/09/c11-async-packaged-ask-promise-future-notes/</guid><description>
+把std::async,std::packaged_task,std::promise三个放在一起来说,是因为他们都可以返回一个std::future对象.简单来说,当某个线程需要等待一个特定的一次性事件(one-off event),它可以用一个&amp;quot;future&amp;quot;来表示这个事件.
+std::async 有的时候可能你需要做一个花费事件比较长的计算,但是计算结果不是立刻需要.这个时候就可以用一个新的线程来做这个计算.这里比较关键的问题是如何将在新线程进行计算的结果传回到当前线程,因为std::thread并没有提供一个类似的机制.
+这个时候就需要std::async登场了.
+1 2 #include &amp;lt;future&amp;gt;3 #include &amp;lt;iostream&amp;gt;4 int find_the_answer_to_ltuae(); 5 void do_other_stuff(); 6 int main() 7 { 8 std::future&amp;lt;int&amp;gt; the_answer=std::async(find_the_answer_to_ltuae); 9 do_other_stuff(); 10 std::cout&amp;lt;&amp;lt;&amp;#34;The answer is &amp;#34;&amp;lt;&amp;lt;the_answer.get()&amp;lt;&amp;lt;std::endl; 11 } 当然也可以与向std::thread包装的thread function中传参数一样,向std::async中传参数,如下:
+1 2 #include &amp;lt;string&amp;gt;3 #include &amp;lt;future&amp;gt;4 struct X 5 { 6 void foo(int,std::string const&amp;amp;); 7 std::string bar(std::string const&amp;amp;); 8 }; 9 X x; 10 auto f1=std::async(&amp;amp;X::foo,&amp;amp;x,42,&amp;#34;hello&amp;#34;); // 调用p-&amp;gt;foo(42, &amp;#34;hello&amp;#34;)，p是指向x的指针 11 auto f2=std::async(&amp;amp;X::bar,x,&amp;#34;goodbye&amp;#34;); // 调用tmpx.bar(&amp;#34;goodbye&amp;#34;)， tmpx是x的拷贝副本 12 struct Y 13 { 14 double operator()(double); 15 }; 16 Y y; 17 auto f3=std::async(Y(),3.</description></item><item><title>[C++11]std::condition_variable notes</title><link>https://111qqz.com/2018/09/condition_variable-notes/</link><pubDate>Sun, 23 Sep 2018 08:42:33 +0000</pubDate><guid>https://111qqz.com/2018/09/condition_variable-notes/</guid><description>
 condition_variable 类是同步原语，能用于阻塞一个线程，或同时阻塞多个线程，直至另一线程修改共享变量（条件）并通知 condition_variable 。 用人话来说,condition_variable，也就是条件变量，是线程间通信的一种方式。
 线程之间在很多时候需要通信，比如经典的生产者消费者问题
 一个比较naive的方案是，用mutex来保护一个flag,然后另一线程不停得check这个flag的状态是否改变。以及在这个方案上的改进:让另一个线程check之后，可以先睡一段时间。
@@ -18,9 +94,96 @@ std::mutex mut; std::queue&amp;lt;data_chunk&amp;gt; data_queue; // 1 std::condi
 std::shared_ptr&amp;lt;some_resource&amp;gt; resource_ptr; std::mutex resource_mutex; void foo() { std::unique_lock&amp;lt;std::mutex&amp;gt; lk(resource_mutex); if(!resource_ptr) { resource_ptr.reset(new some_resource); } lk.unlock(); resource_ptr-&amp;gt;do_something(); } 这确实是一个办法。但是初始化时如果需要耗费比较多的时间，当有比较多的线程时，一个线程初始化时，其他线程会耗时间在不必要的等待上。
 在c++11以后，我们可以使用std::once_flag和std::call_once来解决资源初始化时加锁的问题。比起显示调用std::mutex的好处是，资源消耗更少。
 下面是两个例子:
-std::shared_ptr&amp;lt;some_resource&amp;gt; resource_ptr; std::once_flag resource_flag; b void init_resource() { resource_ptr.reset(new some_resource); } void foo() { std::call_once(resource_flag,init_resource); resource_ptr-&amp;gt;do_something(); } class X { private: connection_info connection_details; connection_handle connection; std::once_flag connection_init_flag; void open_connection() { connection=connection_manager.open(connection_details); } public:62 C HAPTER 3 Sharing data between threads X(connection_info const&amp;amp; connection_details_): connection_details(connection_details_) {} void send_data(data_packet const&amp;amp; data) { std::call_once(connection_init_flag,&amp;amp;X::open_connection,this); connection.</description></item><item><title>[C++11] promise &amp;&amp; future leanrning notes</title><link>https://111qqz.com/2018/08/promise-future-notes/</link><pubDate>Thu, 23 Aug 2018 02:45:53 +0000</pubDate><guid>https://111qqz.com/2018/08/promise-future-notes/</guid><description>
+std::shared_ptr&amp;lt;some_resource&amp;gt; resource_ptr; std::once_flag resource_flag; b void init_resource() { resource_ptr.reset(new some_resource); } void foo() { std::call_once(resource_flag,init_resource); resource_ptr-&amp;gt;do_something(); } class X { private: connection_info connection_details; connection_handle connection; std::once_flag connection_init_flag; void open_connection() { connection=connection_manager.open(connection_details); } public:62 C HAPTER 3 Sharing data between threads X(connection_info const&amp;amp; connection_details_): connection_details(connection_details_) {} void send_data(data_packet const&amp;amp; data) { std::call_once(connection_init_flag,&amp;amp;X::open_connection,this); connection.</description></item><item><title>react 中setState的更新策略</title><link>https://111qqz.com/2018/09/react-setstate-Update-strategy/</link><pubDate>Tue, 18 Sep 2018 13:31:06 +0000</pubDate><guid>https://111qqz.com/2018/09/react-setstate-Update-strategy/</guid><description>
+起因是想更新一个array类型的state,结果setState更新之后用console.log() debug 结果，发现结果特别玄学。。。
+查了下发现this.setState是个异步操作。。。
+参考资料:
+深入理解React 组件状态（State）
+React中setState同步更新策略
+https://react.docschina.org/docs/react-component.html</description></item><item><title>learn java in 21 minutes for C++ Programmers</title><link>https://111qqz.com/2018/09/learn-java-in-21-minutes-for-c-programmers/</link><pubDate>Mon, 10 Sep 2018 11:53:31 +0000</pubDate><guid>https://111qqz.com/2018/09/learn-java-in-21-minutes-for-c-programmers/</guid><description>
+先放资料:
+Learning a New Programming Language: Java for C++ Programmers
+java package 先说几条重要的人话:
+* 一个java文件第一行可以声明该文件所属于的package，package的名字必须与整个工作目录的路径名相同。 * 同一个package下的class默认有互相访问的权限。 * 访问属性设置为public的class，如果该class所在的file声明了package，那么可以被其他package下的class访问到。 * .java的文件名必须与文件中设置为public的class名保持一致（如果没有public的类，那么名称任意) * Every class is part of some _package_. * All classes in a file are part of the same package. * You can specify the package using a _package declaration_: * package
+name ; as the first (non-comment) line in the file. * Multiple files can specify the same package name.</description></item><item><title>[c++11 ]std::move 右值引用 转移语义 完美转发 notes</title><link>https://111qqz.com/2018/09/c11-stdmove-notes/</link><pubDate>Sun, 09 Sep 2018 13:01:45 +0000</pubDate><guid>https://111qqz.com/2018/09/c11-stdmove-notes/</guid><description>
+起因是在看&amp;lt;CplusplusConcurrencyInAction_PracticalMultithreading&amp;gt;，里面讲到转移一个std::thread的ownership提到了std::move.
+之前[C++11 ] std::ref&amp;amp;&amp;amp;std::reference_wrapper notes 提到的情况是在我们想要用引用的时候却进行了拷贝，得到不符合期望的结果。现在的情况是，有些object或许是不支持拷贝构造的。比如std::unique_str,std::ifstream，这个时候如果我们需要传参数进去，就可以使用std::move来实现。比如下面这个例子:
+1 2 void process_big_object(std::unique_ptr&amp;lt;big_object&amp;gt;); 3 std::unique_ptr&amp;lt;big_object&amp;gt; p(new big_object); 4 p-&amp;gt;prepare_data(42); 5 std::thread t(process_big_object,std::move(p)); 6 当然这只是使用std::move的一种情形，即传递不允许拷贝构造的object作为参数。
+另外，std::move可以更有效率地传递资源。内容之后补orz
+实际上std::move()的作用是传进去一个object,返回这个object的右值引用（rvalue reference）
+首先区分左值和右值，这其实是一个c语言中就有的概念（作为区分，右值引用是C++11中新引入的概念）
+一般来说，右值是不能被取地址的值。在C++11之前，右值是不能被引用的。
+语法上为了区分C++11之前的引用（也就是左值引用&amp;amp;）,右值引用的符号为&amp;amp;&amp;amp;
+1 void process_value(int&amp;amp; i) { 2 std::cout &amp;lt;&amp;lt; &amp;#34;LValue processed: &amp;#34; &amp;lt;&amp;lt; i &amp;lt;&amp;lt; std::endl; 3 } 4 5 void process_value(int&amp;amp;&amp;amp; i) { 6 std::cout &amp;lt;&amp;lt; &amp;#34;RValue processed: &amp;#34; &amp;lt;&amp;lt; i &amp;lt;&amp;lt; std::endl; 7 } 8 9 int main() { 10 int a = 0; 11 process_value(a); 12 process_value(1); 13 } 14 LValue processed: 0 15 RValue processed: 1 那么为什么要引入“右值引用”这个概念？ 主要有两个目的：完美转发(Perfect Forwarding)和转移语义(Move Sementics)</description></item><item><title>[C++11 ] std::ref&amp;&amp;std::reference_wrapper notes</title><link>https://111qqz.com/2018/09/reference_wrapper-notes/</link><pubDate>Sun, 09 Sep 2018 11:28:53 +0000</pubDate><guid>https://111qqz.com/2018/09/reference_wrapper-notes/</guid><description>
+起因是在看《CplusplusConcurrencyInAction_PracticalMultithreading》的时候，里面讲到初始化std::thread的时候，如果thread funtion的参数列表中有引用，需要传入std::ref才可以得到符合预期的结果。
+查阅发现std::ref是用来生成std::reference_wrapper。 按照 cppreference 上的话来说
+`std::reference_wrapper` 是包装引用于可复制、可赋值对象的类模板。它常用作将容器存储入无法正常保有引用的标准容器（类似 [std::vector](https://zh.cppreference.com/w/cpp/container/vector) ）的机制。 用人话来说，就是有的时候一些地方（比如STL容器中传值，又比如std::bind）会默认使用复制，这可能与我们想使用引用的期望不符。
+具体见下面的几个例子：
+1 2 #include &amp;lt;functional&amp;gt;3 #include &amp;lt;iostream&amp;gt;4 5 void f(int&amp;amp; n1, int&amp;amp; n2, const int&amp;amp; n3) 6 { 7 std::cout &amp;lt;&amp;lt; &amp;#34;In function: &amp;#34; &amp;lt;&amp;lt; n1 &amp;lt;&amp;lt; &amp;#39; &amp;#39; &amp;lt;&amp;lt; n2 &amp;lt;&amp;lt; &amp;#39; &amp;#39; &amp;lt;&amp;lt; n3 &amp;lt;&amp;lt; &amp;#39;\n&amp;#39;; 8 ++n1; // increments the copy of n1 stored in the function object 9 ++n2; // increments the main()&amp;#39;s n2 10 // ++n3; // compile error 11 } 12 13 int main() 14 { 15 int n1 = 1, n2 = 2, n3 = 3; 16 std::function&amp;lt;void()&amp;gt; bound_f = std::bind(f, n1, std::ref(n2), std::cref(n3)); 17 n1 = 10; 18 n2 = 11; 19 n3 = 12; 20 std::cout &amp;lt;&amp;lt; &amp;#34;Before function: &amp;#34; &amp;lt;&amp;lt; n1 &amp;lt;&amp;lt; &amp;#39; &amp;#39; &amp;lt;&amp;lt; n2 &amp;lt;&amp;lt; &amp;#39; &amp;#39; &amp;lt;&amp;lt; n3 &amp;lt;&amp;lt; &amp;#39;\n&amp;#39;; 21 bound_f(); 22 std::cout &amp;lt;&amp;lt; &amp;#34;After function: &amp;#34; &amp;lt;&amp;lt; n1 &amp;lt;&amp;lt; &amp;#39; &amp;#39; &amp;lt;&amp;lt; n2 &amp;lt;&amp;lt; &amp;#39; &amp;#39; &amp;lt;&amp;lt; n3 &amp;lt;&amp;lt; &amp;#39;\n&amp;#39;; 23 } Before function: 10 11 12 In function: 1 11 12 After function: 10 12 12 我们发现直接传进去的参数n1的值没有改变，而使用std::ref传进去的值的结果符合预期。</description></item><item><title>typescript学习笔记</title><link>https://111qqz.com/2018/09/typescript-notes/</link><pubDate>Wed, 05 Sep 2018 08:02:42 +0000</pubDate><guid>https://111qqz.com/2018/09/typescript-notes/</guid><description>
+先放参考资料:
+TypeScript 入门教程
+React &amp;amp; Webpack
+react-typescript-cheatsheet (强推一波，讲了很多react+ts的实践）
+typescript是javascript的语法扩展。。。好处是提供了类型。。可以在编译（结果为js文件)的时候提供静态的类型检查。。。
+typescript的问号语法:标记某个参数为可选。
+例子:
+export class Thread { id: string; lastMessage: Message; name: string; avatarSrc: string; constructor(id?: string, name?: string, avatarSrc?: string) { this.id = id || uuid(); this.name = name; this.avatarSrc = avatarSrc; } } 关于typescript的类型推断。。如果在定义时直接赋值则会进行推断，否则会推断类型为any.
+let myFavoriteNumber = 'seven'; myFavoriteNumber = 7; // index.ts(2,1): error TS2322: Type 'number' is not assignable to type 'string'. //上面的写法会编译错误，原因是定义时已经推断类型为string //但是下面的写法没有问题 let myFavoriteNumber; myFavoriteNumber = 'seven'; myFavoriteNumber = 7; let myFavoriteNumber: string | number; myFavoriteNumber = 'seven'; myFavoriteNumber = 7; 这里的 let myFavoriteNumber: string | number 的含义是， 允许 myFavoriteNumber 的类型是 string 或者 number，但是不能是其他类型。 当 TypeScript 不确定一个联合类型的变量到底是哪个类型的时候，我们只能访问此联合类型的所有类型里共有的属性或方法</description></item><item><title>[设计模式] 观察者( Observer )模式学习笔记</title><link>https://111qqz.com/2018/09/observer-pattern-notes/</link><pubDate>Sat, 01 Sep 2018 09:27:40 +0000</pubDate><guid>https://111qqz.com/2018/09/observer-pattern-notes/</guid><description>
+最近在学习node.js，里面讲到node.js的事件机制使用了观察者模式，因此来学习一下。
+观察者模式的目的是定义对象间的一种一对多的依赖关系，当一个对象的状态发生改变时，所有依赖于它的对象都得到通知并被自动更新。
+因此观察者模式又叫发布-订阅模式。
+下面放一个简化之后的例子:
+1 2 3 #include &amp;lt;iostream&amp;gt;4 #include &amp;lt;vector&amp;gt;5 #include &amp;lt;string&amp;gt;6 using namespace std; 7 class Secretary; 8 // 看股票的同事类（观察对象，观察者） 9 class StockObserver 10 { 11 public: 12 StockObserver(string strName, Secretary* strSub) 13 { 14 name = strName; 15 sub = strSub; 16 } 17 18 void Update(); 19 20 private: 21 string name; 22 Secretary* sub;我所理解的设计模式（C++实现）——观察者模式（Observer Pattern） 23 }; 24 25 // 秘书类（主题对象，通知者） 26 class Secretary 27 { 28 29 public: 30 string action; 31 void Add(StockObserver ob) { observers.</description></item><item><title>Redux 学习笔记</title><link>https://111qqz.com/2018/08/redux-notes/</link><pubDate>Thu, 30 Aug 2018 12:05:35 +0000</pubDate><guid>https://111qqz.com/2018/08/redux-notes/</guid><description>
+Redux是Flux架构的一种实现。
+至于Flux架构是什么，可以参考Flux 架构入门教程
+粗略得讲，和MVC架构是同一类东西，最大的区别是单向数据流，禁止了Model和VIEW层之间数据的流动。</description></item><item><title>JavaScript 学习笔记</title><link>https://111qqz.com/2018/08/javascript-notes/</link><pubDate>Thu, 30 Aug 2018 03:42:19 +0000</pubDate><guid>https://111qqz.com/2018/08/javascript-notes/</guid><description>
+暂时没空从头开始搞...用到哪里先记录一下好了orz
+我觉得不行，还是要先大致了解一下。
+参考资料:
+A re-introduction to JavaScript (JS tutorial)
+继承与原型链
+// 让我们假设我们有一个对象 o, 其有自己的属性 a 和 b： // {a: 1, b: 2} // o 的 [[Prototype]] 有属性 b 和 c： // {b: 3, c: 4} // 最后, o.[[Prototype]].[[Prototype]] 是 null. // 这就是原型链的末尾，即 null， // 根据定义，null 没有[[Prototype]]. // 综上，整个原型链如下: // {a:1, b:2} ---&amp;gt; {b:3, c:4} ---&amp;gt; null console.log(o.a); // 1 // a是o的自身属性吗？是的，该属性的值为1 console.log(o.b); // 2 // b是o的自身属性吗？是的，该属性的值为2 // 原型上也有一个'b'属性,但是它不会被访问到.这种情况称为&amp;quot;属性遮蔽 (property shadowing)&amp;quot; console.</description></item><item><title>react学习笔记</title><link>https://111qqz.com/2018/08/react-notes/</link><pubDate>Tue, 28 Aug 2018 10:16:16 +0000</pubDate><guid>https://111qqz.com/2018/08/react-notes/</guid><description>
+首先介绍一个fb家的快速开发react的工具 create-react-app
+这个东西依赖node6.0或者更高版本。
+关于在ubuntu 14.04上安装node ，可以参考这个链接
+发现执行nvm install 6.0会没有任何相应...但是实际上已经安装好了。
+接下来安装create-react-app
+命令是: npm install --global create-react-app
+然后创建一个react app
+命令为:create-react-app first_react_app
+挂着代理大概需要半小时左右。
+或者可以使用淘宝npm镜像:
+设置方法为：npm config set registry https://registry.npm.taobao.org，设置完成后，重新执行create-react-app first-app
+实现的第一个组件，功能是点击按钮增加计数...
+import React, { Component } from 'react'; class ClickCounter extends Component{ constructor(props){ super(props); this.onClickButton = this.onClickButton.bind(this); this.state = {count:0}; } onClickButton(){ this.setState({count: this.state.count+1}); } render(){ return( &amp;lt;div&amp;gt; &amp;lt;button onClick={this.onClickButton}&amp;gt;Who am I?&amp;lt;/button&amp;gt; &amp;lt;div&amp;gt; click Count: {this.state.count} &amp;lt;/div&amp;gt; &amp;lt;/div&amp;gt; ) } } export default ClickCounter; JSX是JS的语法扩展。JSX中使用的元素包含html中的元素和React中的组件。React 判断一个元素是 HTML 元素还是 React 组件的原则就是看第一个字母是否大 写。</description></item><item><title>[C++11] promise &amp;&amp; future leanrning notes</title><link>https://111qqz.com/2018/08/promise-future-notes/</link><pubDate>Thu, 23 Aug 2018 02:45:53 +0000</pubDate><guid>https://111qqz.com/2018/08/promise-future-notes/</guid><description>
 用人话就是，主线程传给附属线程一个promise Object,然后主线程想要获取附属线程set给promise Object的值（也就是该线程返回的某个结果），需要通过主线程中的promise object 得到对应的future object(每个promise 对应一个 future),然后调用future 的get方法。如果附属线程没有执行作为参数传入的promise的set方法去返回结果，那么程序就会block住。
-/* *********************************************** Author :111qqz mail: renkuanze@sensetime.com Created Time :2018年08月23日 星期四 10时37分07秒 File Name :future_sample.cpp ************************************************ */ #include &amp;lt;iostream&amp;gt; #include &amp;lt;thread&amp;gt; #include &amp;lt;future&amp;gt; void initiazer(std::promise&amp;lt;int&amp;gt; * promObj) { //std::cout&amp;lt;&amp;lt;&amp;quot;Inside Thread&amp;quot;&amp;lt;&amp;lt;std::endl; for ( int i = 1 ; i &amp;lt;= 2000000000 ; i++); //promObj-&amp;gt;set_value(35); } int main() { std::promise&amp;lt;int&amp;gt; promiseObj; std::future&amp;lt;int&amp;gt; futureObj = promiseObj.get_future(); std::thread th(initiazer, &amp;amp;promiseObj); std::cout&amp;lt;&amp;lt;futureObj.get()&amp;lt;&amp;lt;std::endl; th.join(); return 0; } 参考资料:</description></item><item><title>c++11 function 与bind 学习笔记</title><link>https://111qqz.com/2018/07/cpp11-function-bind-notes/</link><pubDate>Thu, 19 Jul 2018 10:46:26 +0000</pubDate><guid>https://111qqz.com/2018/07/cpp11-function-bind-notes/</guid><description>
+/* *********************************************** Author :111qqz mail: renkuanze@sensetime.com Created Time :2018年08月23日 星期四 10时37分07秒 File Name :future_sample.cpp ************************************************ */ #include &amp;lt;iostream&amp;gt; #include &amp;lt;thread&amp;gt; #include &amp;lt;future&amp;gt; void initiazer(std::promise&amp;lt;int&amp;gt; * promObj) { //std::cout&amp;lt;&amp;lt;&amp;quot;Inside Thread&amp;quot;&amp;lt;&amp;lt;std::endl; for ( int i = 1 ; i &amp;lt;= 2000000000 ; i++); //promObj-&amp;gt;set_value(35); } int main() { std::promise&amp;lt;int&amp;gt; promiseObj; std::future&amp;lt;int&amp;gt; futureObj = promiseObj.get_future(); std::thread th(initiazer, &amp;amp;promiseObj); std::cout&amp;lt;&amp;lt;futureObj.get()&amp;lt;&amp;lt;std::endl; th.join(); return 0; } 参考资料:</description></item><item><title>把二进制文件按字节读到vector中</title><link>https://111qqz.com/2018/08/how-to-read-binary-data-into-cpp-vector/</link><pubDate>Tue, 21 Aug 2018 06:08:56 +0000</pubDate><guid>https://111qqz.com/2018/08/how-to-read-binary-data-into-cpp-vector/</guid><description>
+1 std::vector&amp;lt;unsigned char&amp;gt; readFromFile1(const char* filePath) { 2 FILE* file = fopen(filePath, &amp;#34;rb&amp;#34;); 3 std::vector&amp;lt;unsigned char&amp;gt; result; 4 if (file == nullptr) { 5 return result; 6 } 7 8 // 获取文件大小，尽量一次读完 9 size_t fileSize = getFileSize(file); 10 if (fileSize != 0) { 11 result.resize(fileSize); 12 size_t n = fread(&amp;amp;result[0], 1, fileSize, file); 13 assert(n &amp;lt;= fileSize); 14 if (n != fileSize) { 15 result.resize(n); 16 } 17 } 18 19 // 在读取过程当中，有可能文件大小有变化，再尝试读取 20 const size_t read_len = 1024; 21 char buf[read_len]; 22 for (;;) { 23 size_t n = fread(buf, 1, read_len, file); 24 result.</description></item><item><title>boost:property_tree 学习笔记</title><link>https://111qqz.com/2018/08/boost_property_tree-notes/</link><pubDate>Mon, 20 Aug 2018 08:10:16 +0000</pubDate><guid>https://111qqz.com/2018/08/boost_property_tree-notes/</guid><description>
+先放资料:
+How to use boost::property_tree to load and write JSON
+How to iterate a boost property tree?
+不出现key的方法遍历一个json文件:
+/* *********************************************** Author :111qqz mail: renkuanze@sensetime.com Created Time :2018年08月17日 星期五 15时29分23秒 File Name :ptree.cpp ************************************************ */ #include &amp;lt;boost/property_tree/ptree.hpp&amp;gt; #include &amp;lt;boost/property_tree/json_parser.hpp&amp;gt; #include &amp;lt;bits/stdc++.h&amp;gt; #include &amp;lt;vector&amp;gt; using namespace std; using boost::property_tree::ptree; string indent(int level) { string s; for (int i=0; i&amp;lt;level; i++) s += &amp;quot; &amp;quot;; return s; } void printTree (ptree &amp;amp;pt, int level) { if (pt.</description></item><item><title>记录一次因动态库符号表可见性导致的未定义的引用(undefined reference)</title><link>https://111qqz.com/2018/08/symbol-table-visibility/</link><pubDate>Wed, 15 Aug 2018 13:12:17 +0000</pubDate><guid>https://111qqz.com/2018/08/symbol-table-visibility/</guid><description>
+编译某代码，发现报错某函数未定义的引用。该函数的是先前编译得到的动态库中。
+先去check了该函数的实现，还有接口与头文件中的声明是否统一。发现没有问题。
+然后怀疑.cpp文件没有被编译到，于是在该函数中添加
+#pragma message(&amp;quot;******************************8&amp;quot;)
+发现的确被编译到了。
+使用nm来查看动态库中的符号表，发现也可以找到这个函数的符号。
+于是怀疑编译代码的时候没有链接到该动态库。
+于是在make的时候打印详细信息。make VERBOSE=1
+发现也的确链接了动态库....
+见鬼了Orz
+然后用readelf -s 来查看动态库，惊讶得发现要找的那个符号的BIND怎么是LOCAL..也就是只有文件内可见。
+最后发现...是公司内部的工具和CMakeLists中的add_library冲突...
+虽然这个坑的解决方案没什么价值...不过因为这个坑了解了一些之前没有了解的部分，也算值得。
+关于动态库的符号可见性：
+控制的原因是，如果不控制，那么不同的cpp文件可能有相同的变量名字，如果把所有的符号都暴露，很可能在链接时产生冲突。 另外一个原因是，暴露没有必要的符号，会导致符号表的size变大，从而使得link时速度变慢。
+参考资料:
+Introduction to symbol visibility
+readelf elf文件格式分析
+Hiding what's exposed in a shared library
+Why is the new C++ visibility support so useful?</description></item><item><title>c++11 function 与bind 学习笔记</title><link>https://111qqz.com/2018/07/cpp11-function-bind-notes/</link><pubDate>Thu, 19 Jul 2018 10:46:26 +0000</pubDate><guid>https://111qqz.com/2018/07/cpp11-function-bind-notes/</guid><description>
 C++11 std::function 是一种通用、多态的函数封装,它的实例可以对任何可 以调用的目标实体进行存储、复制和调用操作
 见下面的例子
 /* *********************************************** Author :111qqz mail: renkuanze@sensetime.com Created Time :2018年07月19日 星期四 17时41分00秒 File Name :bind.cpp ************************************************ */ #include &amp;lt;functional&amp;gt; #include &amp;lt;iostream&amp;gt; using namespace std; float foo( int x,int y,int z){return x+y+z+1.;} int main() { function&amp;lt;int(int,int)&amp;gt;func = foo; int y = 10; function&amp;lt;int(int)&amp;gt;fun = [&amp;amp;]( int value)-&amp;gt;int { return 1+value+y; }; cout&amp;lt;&amp;lt;func(15,4,9)&amp;lt;&amp;lt;endl; cout&amp;lt;&amp;lt;fun(8)&amp;lt;&amp;lt;endl; return 0; } std::bind 则是用来绑定函数调用的参数的,它解决的需求是我们有时候可 能并不一定能够一次性获得调用某个函数的全部参数,通过这个函数,我们可以将 部分调用参数提前绑定到函数身上成为一个新的对象,然后在参数齐全后,完成调 用

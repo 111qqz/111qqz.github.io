@@ -100,8 +100,9 @@
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Sep 30, 2018</span>
-<span class=post_time> · 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/async title=async class="post_tag button button_translucent">async
-</a><a href=https://111qqz.com/tags/c++11 title=c++11 class="post_tag button button_translucent">c++11
+<span class=post_time> · 3 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/async title=async class="post_tag button button_translucent">async
+</a><a href=https://111qqz.com/tags/cpp title=cpp class="post_tag button button_translucent">cpp
+</a><a href=https://111qqz.com/tags/modern-cpp title="modern cpp" class="post_tag button button_translucent">modern cpp
 </a><a href=https://111qqz.com/tags/future title=future class="post_tag button button_translucent">future
 </a><a href=https://111qqz.com/tags/packaged_task title=packaged_task class="post_tag button button_translucent">packaged_task
 </a><a href=https://111qqz.com/tags/promise title=promise class="post_tag button button_translucent">promise
@@ -125,129 +126,130 @@ Share on:
 <h2 id=stdasync>std::async</h2>
 <p>有的时候可能你需要做一个花费事件比较长的计算,但是计算结果不是立刻需要.这个时候就可以用一个新的线程来做这个计算.这里比较关键的问题是如何将在新线程进行计算的结果传回到当前线程,因为std::thread并没有提供一个类似的机制.</p>
 <p>这个时候就需要std::async登场了.</p>
-<pre><code>#include &lt;future&gt;
-#include &lt;iostream&gt;
-int find_the_answer_to_ltuae();
-void do_other_stuff();
-int main()
-{
-std::future&lt;int&gt; the_answer=std::async(find_the_answer_to_ltuae);
-do_other_stuff();
-std::cout&lt;&lt;&quot;The answer is &quot;&lt;&lt;the_answer.get()&lt;&lt;std::endl;
-}
-</code></pre>
-<p>当然也可以与向std::thread包装的thread function中传参数一样,向std::async中传参数,如下:</p>
-<pre><code>#include &lt;string&gt;
-#include &lt;future&gt;
-struct X
-{
-  void foo(int,std::string const&amp;);
-  std::string bar(std::string const&amp;);
-};
-X x;
-auto f1=std::async(&amp;X::foo,&amp;x,42,&quot;hello&quot;);  // 调用p-&gt;foo(42, &quot;hello&quot;)，p是指向x的指针
-auto f2=std::async(&amp;X::bar,x,&quot;goodbye&quot;);  // 调用tmpx.bar(&quot;goodbye&quot;)， tmpx是x的拷贝副本
-struct Y
-{
-  double operator()(double);
-};
-Y y;
-auto f3=std::async(Y(),3.141);  // 调用tmpy(3.141)，tmpy通过Y的移动构造函数得到
-auto f4=std::async(std::ref(y),2.718);  // 调用y(2.718)
-X baz(X&amp;);
-std::async(baz,std::ref(x));  // 调用baz(x)
-class move_only
-{
-public:
-  move_only();
-  move_only(move_only&amp;&amp;)
-  move_only(move_only const&amp;) = delete;
-  move_only&amp; operator=(move_only&amp;&amp;);
-  move_only&amp; operator=(move_only const&amp;) = delete;
-  
-  void operator()();
-};
-auto f5=std::async(move_only());  // 调用tmp()，tmp是通过std::move(move_only())构造得到
-</code></pre>
-<p>此外,std:;async还有一个可选参数,值为std::launch::deferred或std::launch:async或std::launch::deferred|std::launch:async,第三种为默认参数.</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>    
+<span class=ln> 2</span>    <span class=cp>#include</span> <span class=cpf>&lt;future&gt;</span><span class=cp>
+</span><span class=ln> 3</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span><span class=ln> 4</span><span class=cp></span>    <span class=kt>int</span> <span class=nf>find_the_answer_to_ltuae</span><span class=p>();</span>
+<span class=ln> 5</span>    <span class=kt>void</span> <span class=nf>do_other_stuff</span><span class=p>();</span>
+<span class=ln> 6</span>    <span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+<span class=ln> 7</span>    <span class=p>{</span>
+<span class=ln> 8</span>    <span class=n>std</span><span class=o>::</span><span class=n>future</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span> <span class=n>the_answer</span><span class=o>=</span><span class=n>std</span><span class=o>::</span><span class=n>async</span><span class=p>(</span><span class=n>find_the_answer_to_ltuae</span><span class=p>);</span>
+<span class=ln> 9</span>    <span class=n>do_other_stuff</span><span class=p>();</span>
+<span class=ln>10</span>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span><span class=o>&lt;&lt;</span><span class=s>&#34;The answer is &#34;</span><span class=o>&lt;&lt;</span><span class=n>the_answer</span><span class=p>.</span><span class=n>get</span><span class=p>()</span><span class=o>&lt;&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+<span class=ln>11</span>    <span class=p>}</span>
+</code></pre></div><p>当然也可以与向std::thread包装的thread function中传参数一样,向std::async中传参数,如下:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>    
+<span class=ln> 2</span>    <span class=cp>#include</span> <span class=cpf>&lt;string&gt;</span><span class=cp>
+</span><span class=ln> 3</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;future&gt;</span><span class=cp>
+</span><span class=ln> 4</span><span class=cp></span>    <span class=k>struct</span> <span class=nc>X</span>
+<span class=ln> 5</span>    <span class=p>{</span>
+<span class=ln> 6</span>      <span class=kt>void</span> <span class=nf>foo</span><span class=p>(</span><span class=kt>int</span><span class=p>,</span><span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=k>const</span><span class=o>&amp;</span><span class=p>);</span>
+<span class=ln> 7</span>      <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>bar</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=k>const</span><span class=o>&amp;</span><span class=p>);</span>
+<span class=ln> 8</span>    <span class=p>};</span>
+<span class=ln> 9</span>    <span class=n>X</span> <span class=n>x</span><span class=p>;</span>
+<span class=ln>10</span>    <span class=k>auto</span> <span class=n>f1</span><span class=o>=</span><span class=n>std</span><span class=o>::</span><span class=n>async</span><span class=p>(</span><span class=o>&amp;</span><span class=n>X</span><span class=o>::</span><span class=n>foo</span><span class=p>,</span><span class=o>&amp;</span><span class=n>x</span><span class=p>,</span><span class=mi>42</span><span class=p>,</span><span class=s>&#34;hello&#34;</span><span class=p>);</span>  <span class=c1>// 调用p-&gt;foo(42, &#34;hello&#34;)，p是指向x的指针
+</span><span class=ln>11</span><span class=c1></span>    <span class=k>auto</span> <span class=n>f2</span><span class=o>=</span><span class=n>std</span><span class=o>::</span><span class=n>async</span><span class=p>(</span><span class=o>&amp;</span><span class=n>X</span><span class=o>::</span><span class=n>bar</span><span class=p>,</span><span class=n>x</span><span class=p>,</span><span class=s>&#34;goodbye&#34;</span><span class=p>);</span>  <span class=c1>// 调用tmpx.bar(&#34;goodbye&#34;)， tmpx是x的拷贝副本
+</span><span class=ln>12</span><span class=c1></span>    <span class=k>struct</span> <span class=nc>Y</span>
+<span class=ln>13</span>    <span class=p>{</span>
+<span class=ln>14</span>      <span class=kt>double</span> <span class=nf>operator</span><span class=p>()(</span><span class=kt>double</span><span class=p>);</span>
+<span class=ln>15</span>    <span class=p>};</span>
+<span class=ln>16</span>    <span class=n>Y</span> <span class=n>y</span><span class=p>;</span>
+<span class=ln>17</span>    <span class=k>auto</span> <span class=n>f3</span><span class=o>=</span><span class=n>std</span><span class=o>::</span><span class=n>async</span><span class=p>(</span><span class=n>Y</span><span class=p>(),</span><span class=mf>3.141</span><span class=p>);</span>  <span class=c1>// 调用tmpy(3.141)，tmpy通过Y的移动构造函数得到
+</span><span class=ln>18</span><span class=c1></span>    <span class=k>auto</span> <span class=n>f4</span><span class=o>=</span><span class=n>std</span><span class=o>::</span><span class=n>async</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>ref</span><span class=p>(</span><span class=n>y</span><span class=p>),</span><span class=mf>2.718</span><span class=p>);</span>  <span class=c1>// 调用y(2.718)
+</span><span class=ln>19</span><span class=c1></span>    <span class=n>X</span> <span class=nf>baz</span><span class=p>(</span><span class=n>X</span><span class=o>&amp;</span><span class=p>);</span>
+<span class=ln>20</span>    <span class=n>std</span><span class=o>::</span><span class=n>async</span><span class=p>(</span><span class=n>baz</span><span class=p>,</span><span class=n>std</span><span class=o>::</span><span class=n>ref</span><span class=p>(</span><span class=n>x</span><span class=p>));</span>  <span class=c1>// 调用baz(x)
+</span><span class=ln>21</span><span class=c1></span>    <span class=k>class</span> <span class=nc>move_only</span>
+<span class=ln>22</span>    <span class=p>{</span>
+<span class=ln>23</span>    <span class=k>public</span><span class=o>:</span>
+<span class=ln>24</span>      <span class=n>move_only</span><span class=p>();</span>
+<span class=ln>25</span>      <span class=n>move_only</span><span class=p>(</span><span class=n>move_only</span><span class=o>&amp;&amp;</span><span class=p>)</span>
+<span class=ln>26</span>      <span class=n>move_only</span><span class=p>(</span><span class=n>move_only</span> <span class=k>const</span><span class=o>&amp;</span><span class=p>)</span> <span class=o>=</span> <span class=k>delete</span><span class=p>;</span>
+<span class=ln>27</span>      <span class=n>move_only</span><span class=o>&amp;</span> <span class=k>operator</span><span class=o>=</span><span class=p>(</span><span class=n>move_only</span><span class=o>&amp;&amp;</span><span class=p>);</span>
+<span class=ln>28</span>      <span class=n>move_only</span><span class=o>&amp;</span> <span class=k>operator</span><span class=o>=</span><span class=p>(</span><span class=n>move_only</span> <span class=k>const</span><span class=o>&amp;</span><span class=p>)</span> <span class=o>=</span> <span class=k>delete</span><span class=p>;</span>
+<span class=ln>29</span>      
+<span class=ln>30</span>      <span class=kt>void</span> <span class=nf>operator</span><span class=p>()();</span>
+<span class=ln>31</span>    <span class=p>};</span>
+<span class=ln>32</span>    <span class=k>auto</span> <span class=n>f5</span><span class=o>=</span><span class=n>std</span><span class=o>::</span><span class=n>async</span><span class=p>(</span><span class=n>move_only</span><span class=p>());</span>  <span class=c1>// 调用tmp()，tmp是通过std::move(move_only())构造得到
+</span><span class=ln>33</span><span class=c1></span>
+</code></pre></div><p>此外,std:;async还有一个可选参数,值为std::launch::deferred或std::launch:async或std::launch::deferred|std::launch:async,第三种为默认参数.</p>
 <p>std::launch::async表示该task会<strong>立即</strong>在一个新的thread上执行.</p>
 <p>std::launch::deferred 表示该task不会被立刻执行,而是在调用get()或者wait()的时候才会执行.这里需要注意的是,调用get()或者wait()的线程,可以是和调用async()属于同一个线程,也可以属于不同线程.</p>
 <p>笼统来说,std::launch:deferred是一种更为灵活的方式.具体请参考<a href=https://en.cppreference.com/w/cpp/thread/async>cppreference_async</a></p>
 <h2 id=stdpackaged_task>std::packaged_task</h2>
 <p>std::packaged_task有点类似std::function,将要在其他线程执行的对象封装了起来。</p>
-<pre><code>#include &lt;iostream&gt;
-#include &lt;cmath&gt;
-#include &lt;thread&gt;
-#include &lt;future&gt;
-#include &lt;functional&gt;
- 
-// unique function to avoid disambiguating the std::pow overload set
-int f(int x, int y) { return std::pow(x,y); }
- 
-void task_lambda()
-{
-    std::packaged_task&lt;int(int,int)&gt; task([](int a, int b) {
-        return std::pow(a, b); 
-    });
-    std::future&lt;int&gt; result = task.get_future();
- 
-    task(2, 9);
- 
-    std::cout &lt;&lt; &quot;task_lambda:\t&quot; &lt;&lt; result.get() &lt;&lt; '\n';
-}
- 
-void task_bind()
-{
-    std::packaged_task&lt;int()&gt; task(std::bind(f, 2, 11));
-    std::future&lt;int&gt; result = task.get_future();
- 
-    task();
- 
-    std::cout &lt;&lt; &quot;task_bind:\t&quot; &lt;&lt; result.get() &lt;&lt; '\n';
-}
- 
-void task_thread()
-{
-    std::packaged_task&lt;int(int,int)&gt; task(f);
-    std::future&lt;int&gt; result = task.get_future();
- 
-    std::thread task_td(std::move(task), 2, 10);
-    task_td.join();
- 
-    std::cout &lt;&lt; &quot;task_thread:\t&quot; &lt;&lt; result.get() &lt;&lt; '\n';
-}
- 
-int main()
-{
-    task_lambda();
-    task_bind();
-    task_thread();
-}
-</code></pre>
-<p>与std::async相比，std::packaged_task不会直接执行任务，而是需要显示调用，因此可以做到将执行函数的时机和获取future的时机分离</p>
-<pre><code>std::packaged_task&lt;int()&gt; task(sleep);
-
-auto f = task.get_future();
-task(); // invoke the function
-
-// You have to wait until task returns. Since task calls sleep
-// you will have to wait at least 1 second.
-std::cout &lt;&lt; &quot;You can see this after 1 second\n&quot;;
-
-// However, f.get() will be available, since task has already finished.
-std::cout &lt;&lt; f.get() &lt;&lt; std::endl;
-
-
-
-
-auto f = std::async(std::launch::async, sleep);
-std::cout &lt;&lt; &quot;You can see this immediately!\n&quot;;
-
-// However, the value of the future will be available after sleep has finished
-// so f.get() can block up to 1 second.
-std::cout &lt;&lt; f.get() &lt;&lt; &quot;This will be shown after a second!\n&quot;;
-</code></pre>
-<h2 id=stdpromise>std::promise</h2>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>    <span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span><span class=ln> 2</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;cmath&gt;</span><span class=cp>
+</span><span class=ln> 3</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;thread&gt;</span><span class=cp>
+</span><span class=ln> 4</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;future&gt;</span><span class=cp>
+</span><span class=ln> 5</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;functional&gt;</span><span class=cp>
+</span><span class=ln> 6</span><span class=cp></span>     
+<span class=ln> 7</span>    <span class=c1>// unique function to avoid disambiguating the std::pow overload set
+</span><span class=ln> 8</span><span class=c1></span>    <span class=kt>int</span> <span class=nf>f</span><span class=p>(</span><span class=kt>int</span> <span class=n>x</span><span class=p>,</span> <span class=kt>int</span> <span class=n>y</span><span class=p>)</span> <span class=p>{</span> <span class=k>return</span> <span class=n>std</span><span class=o>::</span><span class=n>pow</span><span class=p>(</span><span class=n>x</span><span class=p>,</span><span class=n>y</span><span class=p>);</span> <span class=p>}</span>
+<span class=ln> 9</span>     
+<span class=ln>10</span>    <span class=kt>void</span> <span class=nf>task_lambda</span><span class=p>()</span>
+<span class=ln>11</span>    <span class=p>{</span>
+<span class=ln>12</span>        <span class=n>std</span><span class=o>::</span><span class=n>packaged_task</span><span class=o>&lt;</span><span class=kt>int</span><span class=p>(</span><span class=kt>int</span><span class=p>,</span><span class=kt>int</span><span class=p>)</span><span class=o>&gt;</span> <span class=n>task</span><span class=p>([](</span><span class=kt>int</span> <span class=n>a</span><span class=p>,</span> <span class=kt>int</span> <span class=n>b</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>13</span>            <span class=k>return</span> <span class=n>std</span><span class=o>::</span><span class=n>pow</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>);</span> 
+<span class=ln>14</span>        <span class=p>});</span>
+<span class=ln>15</span>        <span class=n>std</span><span class=o>::</span><span class=n>future</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span> <span class=n>result</span> <span class=o>=</span> <span class=n>task</span><span class=p>.</span><span class=n>get_future</span><span class=p>();</span>
+<span class=ln>16</span>     
+<span class=ln>17</span>        <span class=n>task</span><span class=p>(</span><span class=mi>2</span><span class=p>,</span> <span class=mi>9</span><span class=p>);</span>
+<span class=ln>18</span>     
+<span class=ln>19</span>        <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;task_lambda:</span><span class=se>\t</span><span class=s>&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>result</span><span class=p>.</span><span class=n>get</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=sc>&#39;\n&#39;</span><span class=p>;</span>
+<span class=ln>20</span>    <span class=p>}</span>
+<span class=ln>21</span>     
+<span class=ln>22</span>    <span class=kt>void</span> <span class=nf>task_bind</span><span class=p>()</span>
+<span class=ln>23</span>    <span class=p>{</span>
+<span class=ln>24</span>        <span class=n>std</span><span class=o>::</span><span class=n>packaged_task</span><span class=o>&lt;</span><span class=kt>int</span><span class=p>()</span><span class=o>&gt;</span> <span class=n>task</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>bind</span><span class=p>(</span><span class=n>f</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>11</span><span class=p>));</span>
+<span class=ln>25</span>        <span class=n>std</span><span class=o>::</span><span class=n>future</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span> <span class=n>result</span> <span class=o>=</span> <span class=n>task</span><span class=p>.</span><span class=n>get_future</span><span class=p>();</span>
+<span class=ln>26</span>     
+<span class=ln>27</span>        <span class=n>task</span><span class=p>();</span>
+<span class=ln>28</span>     
+<span class=ln>29</span>        <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;task_bind:</span><span class=se>\t</span><span class=s>&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>result</span><span class=p>.</span><span class=n>get</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=sc>&#39;\n&#39;</span><span class=p>;</span>
+<span class=ln>30</span>    <span class=p>}</span>
+<span class=ln>31</span>     
+<span class=ln>32</span>    <span class=kt>void</span> <span class=nf>task_thread</span><span class=p>()</span>
+<span class=ln>33</span>    <span class=p>{</span>
+<span class=ln>34</span>        <span class=n>std</span><span class=o>::</span><span class=n>packaged_task</span><span class=o>&lt;</span><span class=kt>int</span><span class=p>(</span><span class=kt>int</span><span class=p>,</span><span class=kt>int</span><span class=p>)</span><span class=o>&gt;</span> <span class=n>task</span><span class=p>(</span><span class=n>f</span><span class=p>);</span>
+<span class=ln>35</span>        <span class=n>std</span><span class=o>::</span><span class=n>future</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span> <span class=n>result</span> <span class=o>=</span> <span class=n>task</span><span class=p>.</span><span class=n>get_future</span><span class=p>();</span>
+<span class=ln>36</span>     
+<span class=ln>37</span>        <span class=n>std</span><span class=o>::</span><span class=kr>thread</span> <span class=n>task_td</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>move</span><span class=p>(</span><span class=n>task</span><span class=p>),</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>10</span><span class=p>);</span>
+<span class=ln>38</span>        <span class=n>task_td</span><span class=p>.</span><span class=n>join</span><span class=p>();</span>
+<span class=ln>39</span>     
+<span class=ln>40</span>        <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;task_thread:</span><span class=se>\t</span><span class=s>&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>result</span><span class=p>.</span><span class=n>get</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=sc>&#39;\n&#39;</span><span class=p>;</span>
+<span class=ln>41</span>    <span class=p>}</span>
+<span class=ln>42</span>     
+<span class=ln>43</span>    <span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+<span class=ln>44</span>    <span class=p>{</span>
+<span class=ln>45</span>        <span class=n>task_lambda</span><span class=p>();</span>
+<span class=ln>46</span>        <span class=n>task_bind</span><span class=p>();</span>
+<span class=ln>47</span>        <span class=n>task_thread</span><span class=p>();</span>
+<span class=ln>48</span>    <span class=p>}</span>
+</code></pre></div><p>与std::async相比，std::packaged_task不会直接执行任务，而是需要显示调用，因此可以做到将执行函数的时机和获取future的时机分离</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>    <span class=n>std</span><span class=o>::</span><span class=n>packaged_task</span><span class=o>&lt;</span><span class=kt>int</span><span class=p>()</span><span class=o>&gt;</span> <span class=n>task</span><span class=p>(</span><span class=n>sleep</span><span class=p>);</span>
+<span class=ln> 2</span>    
+<span class=ln> 3</span>    <span class=k>auto</span> <span class=n>f</span> <span class=o>=</span> <span class=n>task</span><span class=p>.</span><span class=n>get_future</span><span class=p>();</span>
+<span class=ln> 4</span>    <span class=n>task</span><span class=p>();</span> <span class=c1>// invoke the function
+</span><span class=ln> 5</span><span class=c1></span>    
+<span class=ln> 6</span>    <span class=c1>// You have to wait until task returns. Since task calls sleep
+</span><span class=ln> 7</span><span class=c1></span>    <span class=c1>// you will have to wait at least 1 second.
+</span><span class=ln> 8</span><span class=c1></span>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;You can see this after 1 second</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
+<span class=ln> 9</span>    
+<span class=ln>10</span>    <span class=c1>// However, f.get() will be available, since task has already finished.
+</span><span class=ln>11</span><span class=c1></span>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>f</span><span class=p>.</span><span class=n>get</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+<span class=ln>12</span>
+<span class=ln>13</span>
+<span class=ln>14</span>
+<span class=ln>15</span>    
+<span class=ln>16</span>    <span class=k>auto</span> <span class=n>f</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>async</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>launch</span><span class=o>::</span><span class=n>async</span><span class=p>,</span> <span class=n>sleep</span><span class=p>);</span>
+<span class=ln>17</span>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;You can see this immediately!</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
+<span class=ln>18</span>    
+<span class=ln>19</span>    <span class=c1>// However, the value of the future will be available after sleep has finished
+</span><span class=ln>20</span><span class=c1></span>    <span class=c1>// so f.get() can block up to 1 second.
+</span><span class=ln>21</span><span class=c1></span>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>f</span><span class=p>.</span><span class=n>get</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;This will be shown after a second!</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
+<span class=ln>22</span>
+<span class=ln>23</span>
+</code></pre></div><h2 id=stdpromise>std::promise</h2>
 <p>第一次用c++11写多线程就是用的promise<a href=https://111qqz.com/2018/08/c11-promise-future-leanrning-notes/>promise && future leanrning notes</a></p>
 <p>个人认为std::promise与std::async或者std:;packaged_task最明显的区别是，它的值不是一个函数的返回值，而是可以通过set_value来设置，因此更加灵活。</p>
 <p>需要注意的是，<strong>std::promise不支持拷贝构造</strong>，因此需要使用std::move或者传promise的指针。</p>
@@ -311,7 +313,7 @@ ACM
 </a>
 <a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>
 其他
-<span class=button_tally>128</span>
+<span class=button_tally>108</span>
 </a>
 <a href=https://111qqz.com/categories/deep-learning/ class="post_tag button button_translucent" title=deep-learning>
 DEEP-LEARNING
@@ -321,13 +323,13 @@ DEEP-LEARNING
 面试
 <span class=button_tally>63</span>
 </a>
+<a href=https://111qqz.com/categories/%E5%B7%A5%E7%A8%8B/ class="post_tag button button_translucent" title=工程>
+工程
+<span class=button_tally>46</span>
+</a>
 <a href=https://111qqz.com/categories/%E9%9A%8F%E7%AC%94%E6%9D%82%E8%B0%88/ class="post_tag button button_translucent" title=随笔杂谈>
 随笔杂谈
 <span class=button_tally>46</span>
-</a>
-<a href=https://111qqz.com/categories/%E5%B7%A5%E7%A8%8B/ class="post_tag button button_translucent" title=工程>
-工程
-<span class=button_tally>23</span>
 </a>
 <a href=https://111qqz.com/categories/mooc/ class="post_tag button button_translucent" title=mooc>
 MOOC
@@ -382,6 +384,10 @@ NUMBER-THEORY
 模拟
 <span class=button_tally>24</span>
 </a>
+<a href=https://111qqz.com/tags/cpp/ class="post_tag button button_translucent" title=cpp>
+CPP
+<span class=button_tally>23</span>
+</a>
 <a href=https://111qqz.com/tags/%E5%8D%9A%E5%BC%88%E8%AE%BA/ class="post_tag button button_translucent" title=博弈论>
 博弈论
 <span class=button_tally>22</span>
@@ -397,10 +403,6 @@ BINARY-SEARCH
 <a href=https://111qqz.com/tags/%E6%AF%8D%E5%87%BD%E6%95%B0/ class="post_tag button button_translucent" title=母函数>
 母函数
 <span class=button_tally>21</span>
-</a>
-<a href=https://111qqz.com/tags/bfs/ class="post_tag button button_translucent" title=bfs>
-BFS
-<span class=button_tally>20</span>
 </a>
 <br>
 <div class="post_tags_toggle button">All Tags</div>
@@ -448,9 +450,9 @@ BFS
 </a>
 <a href=https://111qqz.com/tags/bsgs/ class="post_tag button button_translucent" data-position=4 title=bsgs>BSGS<span class=button_tally>4</span>
 </a>
-<a href=https://111qqz.com/tags/c++/ class="post_tag button button_translucent" data-position=9 title=c++>C++<span class=button_tally>9</span>
+<a href=https://111qqz.com/tags/c++/ class="post_tag button button_translucent" data-position=7 title=c++>C++<span class=button_tally>7</span>
 </a>
-<a href=https://111qqz.com/tags/c++11/ class="post_tag button button_translucent" data-position=4 title=c++11>C++11<span class=button_tally>4</span>
+<a href=https://111qqz.com/tags/c++11/ class="post_tag button button_translucent" data-position=1 title=c++11>C++11<span class=button_tally>1</span>
 </a>
 <a href=https://111qqz.com/tags/cache/ class="post_tag button button_translucent" data-position=1 title=cache>CACHE<span class=button_tally>1</span>
 </a>
@@ -476,7 +478,7 @@ BFS
 </a>
 <a href=https://111qqz.com/tags/convolutional-neural-network/ class="post_tag button button_translucent" data-position=1 title=convolutional-neural-network>CONVOLUTIONAL-NEURAL-NETWORK<span class=button_tally>1</span>
 </a>
-<a href=https://111qqz.com/tags/cpp/ class="post_tag button button_translucent" data-position=16 title=cpp>CPP<span class=button_tally>16</span>
+<a href=https://111qqz.com/tags/cpp/ class="post_tag button button_translucent" data-position=23 title=cpp>CPP<span class=button_tally>23</span>
 </a>
 <a href=https://111qqz.com/tags/cs231n/ class="post_tag button button_translucent" data-position=1 title=cs231n>CS231N<span class=button_tally>1</span>
 </a>
@@ -502,7 +504,7 @@ BFS
 </a>
 <a href=https://111qqz.com/tags/dl-sys/ class="post_tag button button_translucent" data-position=1 title=dl-sys>DL-SYS<span class=button_tally>1</span>
 </a>
-<a href=https://111qqz.com/tags/docker/ class="post_tag button button_translucent" data-position=3 title=docker>DOCKER<span class=button_tally>3</span>
+<a href=https://111qqz.com/tags/docker/ class="post_tag button button_translucent" data-position=4 title=docker>DOCKER<span class=button_tally>4</span>
 </a>
 <a href=https://111qqz.com/tags/dp/ class="post_tag button button_translucent" data-position=71 title=dp>DP<span class=button_tally>71</span>
 </a>
@@ -648,7 +650,7 @@ BFS
 </a>
 <a href=https://111qqz.com/tags/model-distillation/ class="post_tag button button_translucent" data-position=1 title=model-distillation>MODEL-DISTILLATION<span class=button_tally>1</span>
 </a>
-<a href=https://111qqz.com/tags/modern-cpp/ class="post_tag button button_translucent" data-position=5 title=modern-cpp>MODERN-CPP<span class=button_tally>5</span>
+<a href=https://111qqz.com/tags/modern-cpp/ class="post_tag button button_translucent" data-position=8 title=modern-cpp>MODERN-CPP<span class=button_tally>8</span>
 </a>
 <a href=https://111qqz.com/tags/move/ class="post_tag button button_translucent" data-position=1 title=move>MOVE<span class=button_tally>1</span>
 </a>
@@ -858,7 +860,7 @@ BFS
 </a>
 <a href=https://111qqz.com/tags/%E5%88%86%E7%B1%BB%E8%AE%A8%E8%AE%BA/ class="post_tag button button_translucent" data-position=1 title=分类讨论>分类讨论<span class=button_tally>1</span>
 </a>
-<a href=https://111qqz.com/tags/%E5%89%8D%E7%AB%AF/ class="post_tag button button_translucent" data-position=5 title=前端>前端<span class=button_tally>5</span>
+<a href=https://111qqz.com/tags/%E5%89%8D%E7%AB%AF/ class="post_tag button button_translucent" data-position=6 title=前端>前端<span class=button_tally>6</span>
 </a>
 <a href=https://111qqz.com/tags/%E5%89%8D%E7%BC%80%E5%92%8C/ class="post_tag button button_translucent" data-position=17 title=前缀和>前缀和<span class=button_tally>17</span>
 </a>
@@ -957,6 +959,8 @@ BFS
 <a href=https://111qqz.com/tags/%E5%BA%B7%E6%89%98%E5%B1%95%E5%BC%80/ class="post_tag button button_translucent" data-position=1 title=康托展开>康托展开<span class=button_tally>1</span>
 </a>
 <a href=https://111qqz.com/tags/%E5%BA%B7%E6%89%98%E5%B1%95%E5%BC%80/%E9%80%86%E5%B1%95%E5%BC%80/ class="post_tag button button_translucent" data-position=2 title=康托展开/逆展开>康托展开/逆展开<span class=button_tally>2</span>
+</a>
+<a href=https://111qqz.com/tags/%E5%BE%AA%E7%8E%AF%E5%B1%95%E5%BC%80/ class="post_tag button button_translucent" data-position=1 title=循环展开>循环展开<span class=button_tally>1</span>
 </a>
 <a href=https://111qqz.com/tags/%E5%BE%AA%E7%8E%AF%E8%8A%82/ class="post_tag button button_translucent" data-position=8 title=循环节>循环节<span class=button_tally>8</span>
 </a>
@@ -1103,6 +1107,8 @@ BFS
 <a href=https://111qqz.com/tags/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/ class="post_tag button button_translucent" data-position=5 title=矩阵快速幂>矩阵快速幂<span class=button_tally>5</span>
 </a>
 <a href=https://111qqz.com/tags/%E7%A6%BB%E6%95%A3%E5%8C%96/ class="post_tag button button_translucent" data-position=11 title=离散化>离散化<span class=button_tally>11</span>
+</a>
+<a href=https://111qqz.com/tags/%E7%AC%A6%E5%8F%B7%E5%8F%AF%E8%A7%81%E6%80%A7/ class="post_tag button button_translucent" data-position=1 title=符号可见性>符号可见性<span class=button_tally>1</span>
 </a>
 <a href=https://111qqz.com/tags/%E7%AC%A6%E5%8F%B7%E8%A1%A8/ class="post_tag button button_translucent" data-position=1 title=符号表>符号表<span class=button_tally>1</span>
 </a>

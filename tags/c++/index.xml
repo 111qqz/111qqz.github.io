@@ -1,28 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>c++ on 111qqz的小窝</title><link>https://111qqz.com/tags/c++/</link><description>Recent content in c++ on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Tue, 28 Aug 2018 06:30:59 +0000</lastBuildDate><atom:link href="https://111qqz.com/tags/c++/index.xml" rel="self" type="application/rss+xml"/><item><title>[设计模式] 组合模式（composite） 学习笔记</title><link>https://111qqz.com/2018/08/Composite-Pattern-notes/</link><pubDate>Tue, 28 Aug 2018 06:30:59 +0000</pubDate><guid>https://111qqz.com/2018/08/Composite-Pattern-notes/</guid><description>
 目的是忽略单一对象和组合对象的不同。 有点像以前写过的用链表定义一个树结构，每个节点是一个val + 多个tree 。如果某个节点是叶子节点了，那么对应的tree都为NULL. 只不过这里用了更加面向对象的实现。
 具体看代码：
-/* *********************************************** Author :111qqz mail: renkuanze@sensetime.com Created Time :2018年08月28日 星期二 14时21分51秒 File Name :composite.cpp ************************************************ */ #include &amp;lt;iostream&amp;gt; #include &amp;lt;list&amp;gt; #include &amp;lt;string&amp;gt; using namespace std; class Component { // 为组合中的对象声明接口，在适当情况下，实现所有类共有接口的默认行为 protected: string name; public: Component(string n) { name = n; } virtual ~Component() {} virtual void Add(Component* c) = 0; virtual void Remove(Component* c) = 0; virtual void Display(int depth) = 0; }; class Leaf : public Component { // 在组合中表示叶节点对象，叶节点没有子节点 public: Leaf(string name) : Component(name) {} void Add(Component* c){} // 叶节点没有Add功能，但这样做能使接口具备一致性，这就是透明方式，如果不加入Add和Remove方法，那就是安全方式。 void Remove(Component* c){} // 同上 void Display(int depth) { cout &amp;lt;&amp;lt; name &amp;lt;&amp;lt; &amp;quot; &amp;quot; &amp;lt;&amp;lt; depth &amp;lt;&amp;lt; endl; } }; class Composite : public Component { // 定义有枝节点行为，用来存储子部件 private: list&amp;lt;Component* &amp;gt; children; public: Composite(string name) : Component(name) {} void Add(Component* c) { children.</description></item><item><title>把二进制文件按字节读到vector中</title><link>https://111qqz.com/2018/08/how-to-read-binary-data-into-cpp-vector/</link><pubDate>Tue, 21 Aug 2018 06:08:56 +0000</pubDate><guid>https://111qqz.com/2018/08/how-to-read-binary-data-into-cpp-vector/</guid><description>
-std::vector&amp;lt;unsigned char&amp;gt; readFromFile1(const char* filePath) { FILE* file = fopen(filePath, &amp;quot;rb&amp;quot;); std::vector&amp;lt;unsigned char&amp;gt; result; if (file == nullptr) { return result; } // 获取文件大小，尽量一次读完 size_t fileSize = getFileSize(file); if (fileSize != 0) { result.resize(fileSize); size_t n = fread(&amp;amp;result[0], 1, fileSize, file); assert(n &amp;lt;= fileSize); if (n != fileSize) { result.resize(n); } } // 在读取过程当中，有可能文件大小有变化，再尝试读取 const size_t read_len = 1024; char buf[read_len]; for (;;) { size_t n = fread(buf, 1, read_len, file); result.</description></item><item><title>记录一次因动态库符号表可见性导致的未定义的引用(undefined reference)</title><link>https://111qqz.com/2018/08/symbol-table-visibility/</link><pubDate>Wed, 15 Aug 2018 13:12:17 +0000</pubDate><guid>https://111qqz.com/2018/08/symbol-table-visibility/</guid><description>
-编译某代码，发现报错某函数未定义的引用。该函数的是先前编译得到的动态库中。
-先去check了该函数的实现，还有接口与头文件中的声明是否统一。发现没有问题。
-然后怀疑.cpp文件没有被编译到，于是在该函数中添加
-#pragma message(&amp;quot;******************************8&amp;quot;)
-发现的确被编译到了。
-使用nm来查看动态库中的符号表，发现也可以找到这个函数的符号。
-于是怀疑编译代码的时候没有链接到该动态库。
-于是在make的时候打印详细信息。make VERBOSE=1
-发现也的确链接了动态库....
-见鬼了Orz
-然后用readelf -s 来查看动态库，惊讶得发现要找的那个符号的BIND怎么是LOCAL..也就是只有文件内可见。
-最后发现...是公司内部的工具和CMakeLists中的add_library冲突...
-虽然这个坑的解决方案没什么价值...不过因为这个坑了解了一些之前没有了解的部分，也算值得。
-关于动态库的符号可见性：
-控制的原因是，如果不控制，那么不同的cpp文件可能有相同的变量名字，如果把所有的符号都暴露，很可能在链接时产生冲突。 另外一个原因是，暴露没有必要的符号，会导致符号表的size变大，从而使得link时速度变慢。
-参考资料:
-Introduction to symbol visibility
-readelf elf文件格式分析
-Hiding what's exposed in a shared library
-Why is the new C++ visibility support so useful?</description></item><item><title>Eigen: C++开源矩阵学习笔记</title><link>https://111qqz.com/2018/04/eigen-notes/</link><pubDate>Thu, 05 Apr 2018 07:14:54 +0000</pubDate><guid>https://111qqz.com/2018/04/eigen-notes/</guid><description>
+/* *********************************************** Author :111qqz mail: renkuanze@sensetime.com Created Time :2018年08月28日 星期二 14时21分51秒 File Name :composite.cpp ************************************************ */ #include &amp;lt;iostream&amp;gt; #include &amp;lt;list&amp;gt; #include &amp;lt;string&amp;gt; using namespace std; class Component { // 为组合中的对象声明接口，在适当情况下，实现所有类共有接口的默认行为 protected: string name; public: Component(string n) { name = n; } virtual ~Component() {} virtual void Add(Component* c) = 0; virtual void Remove(Component* c) = 0; virtual void Display(int depth) = 0; }; class Leaf : public Component { // 在组合中表示叶节点对象，叶节点没有子节点 public: Leaf(string name) : Component(name) {} void Add(Component* c){} // 叶节点没有Add功能，但这样做能使接口具备一致性，这就是透明方式，如果不加入Add和Remove方法，那就是安全方式。 void Remove(Component* c){} // 同上 void Display(int depth) { cout &amp;lt;&amp;lt; name &amp;lt;&amp;lt; &amp;quot; &amp;quot; &amp;lt;&amp;lt; depth &amp;lt;&amp;lt; endl; } }; class Composite : public Component { // 定义有枝节点行为，用来存储子部件 private: list&amp;lt;Component* &amp;gt; children; public: Composite(string name) : Component(name) {} void Add(Component* c) { children.</description></item><item><title>Eigen: C++开源矩阵学习笔记</title><link>https://111qqz.com/2018/04/eigen-notes/</link><pubDate>Thu, 05 Apr 2018 07:14:54 +0000</pubDate><guid>https://111qqz.com/2018/04/eigen-notes/</guid><description>
 接触Eigen的原因是最近在看caffe/caffe2源码,caffe2中使用了Eigen库. Eigen 是一个基于C++模板的线性代数库，直接将库下载后放在项目目录下，然后包含头文件就能使用，非常方便。对于Linux用户,只需要把头文件放到/usr/include 下即可此外，Eigen的接口清晰，稳定高效。
 之后会更新一些,Eigen中我使用过的函数.
 ubuntu14.04LTS 下使用方式: sudo apt-get install libeigen3-dev cd /usr/include/eigen3 sudo cp -R Eigen /usr/include 然后尝试运行如下代码,直接编译即可.如果可以正常运行,表明安装完毕.

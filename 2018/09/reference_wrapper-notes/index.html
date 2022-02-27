@@ -102,7 +102,8 @@
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Sep 9, 2018</span>
-<span class=post_time> · 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/c++11 title=c++11 class="post_tag button button_translucent">c++11
+<span class=post_time> · 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/cpp title=cpp class="post_tag button button_translucent">cpp
+</a><a href=https://111qqz.com/tags/modern-cpp title="modern cpp" class="post_tag button button_translucent">modern cpp
 </a>
 </span>
 <span class=page_only>&nbsp;·
@@ -124,75 +125,76 @@ Share on:
 <blockquote>`std::reference_wrapper` 是包装引用于可复制、可赋值对象的类模板。它常用作将容器存储入无法正常保有引用的标准容器（类似 [std::vector](https://zh.cppreference.com/w/cpp/container/vector) ）的机制。</blockquote>
 <p>用人话来说，就是有的时候一些地方（比如STL容器中传值，又比如std::bind）会默认使用复制，这可能与我们想使用引用的期望不符。</p>
 <p>具体见下面的几个例子：</p>
-<pre><code>#include &lt;functional&gt;
-#include &lt;iostream&gt;
- 
-void f(int&amp; n1, int&amp; n2, const int&amp; n3)
-{
-    std::cout &lt;&lt; &quot;In function: &quot; &lt;&lt; n1 &lt;&lt; ' ' &lt;&lt; n2 &lt;&lt; ' ' &lt;&lt; n3 &lt;&lt; '\n';
-    ++n1; // increments the copy of n1 stored in the function object
-    ++n2; // increments the main()'s n2
-    // ++n3; // compile error
-}
- 
-int main()
-{
-    int n1 = 1, n2 = 2, n3 = 3;
-    std::function&lt;void()&gt; bound_f = std::bind(f, n1, std::ref(n2), std::cref(n3));
-    n1 = 10;
-    n2 = 11;
-    n3 = 12;
-    std::cout &lt;&lt; &quot;Before function: &quot; &lt;&lt; n1 &lt;&lt; ' ' &lt;&lt; n2 &lt;&lt; ' ' &lt;&lt; n3 &lt;&lt; '\n';
-    bound_f();
-    std::cout &lt;&lt; &quot;After function: &quot; &lt;&lt; n1 &lt;&lt; ' ' &lt;&lt; n2 &lt;&lt; ' ' &lt;&lt; n3 &lt;&lt; '\n';
-}
-
-Before function: 10 11 12
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>    
+<span class=ln> 2</span>    <span class=cp>#include</span> <span class=cpf>&lt;functional&gt;</span><span class=cp>
+</span><span class=ln> 3</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span><span class=ln> 4</span><span class=cp></span>     
+<span class=ln> 5</span>    <span class=kt>void</span> <span class=nf>f</span><span class=p>(</span><span class=kt>int</span><span class=o>&amp;</span> <span class=n>n1</span><span class=p>,</span> <span class=kt>int</span><span class=o>&amp;</span> <span class=n>n2</span><span class=p>,</span> <span class=k>const</span> <span class=kt>int</span><span class=o>&amp;</span> <span class=n>n3</span><span class=p>)</span>
+<span class=ln> 6</span>    <span class=p>{</span>
+<span class=ln> 7</span>        <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;In function: &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>n1</span> <span class=o>&lt;&lt;</span> <span class=sc>&#39; &#39;</span> <span class=o>&lt;&lt;</span> <span class=n>n2</span> <span class=o>&lt;&lt;</span> <span class=sc>&#39; &#39;</span> <span class=o>&lt;&lt;</span> <span class=n>n3</span> <span class=o>&lt;&lt;</span> <span class=sc>&#39;\n&#39;</span><span class=p>;</span>
+<span class=ln> 8</span>        <span class=o>++</span><span class=n>n1</span><span class=p>;</span> <span class=c1>// increments the copy of n1 stored in the function object
+</span><span class=ln> 9</span><span class=c1></span>        <span class=o>++</span><span class=n>n2</span><span class=p>;</span> <span class=c1>// increments the main()&#39;s n2
+</span><span class=ln>10</span><span class=c1></span>        <span class=c1>// ++n3; // compile error
+</span><span class=ln>11</span><span class=c1></span>    <span class=p>}</span>
+<span class=ln>12</span>     
+<span class=ln>13</span>    <span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+<span class=ln>14</span>    <span class=p>{</span>
+<span class=ln>15</span>        <span class=kt>int</span> <span class=n>n1</span> <span class=o>=</span> <span class=mi>1</span><span class=p>,</span> <span class=n>n2</span> <span class=o>=</span> <span class=mi>2</span><span class=p>,</span> <span class=n>n3</span> <span class=o>=</span> <span class=mi>3</span><span class=p>;</span>
+<span class=ln>16</span>        <span class=n>std</span><span class=o>::</span><span class=n>function</span><span class=o>&lt;</span><span class=kt>void</span><span class=p>()</span><span class=o>&gt;</span> <span class=n>bound_f</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>bind</span><span class=p>(</span><span class=n>f</span><span class=p>,</span> <span class=n>n1</span><span class=p>,</span> <span class=n>std</span><span class=o>::</span><span class=n>ref</span><span class=p>(</span><span class=n>n2</span><span class=p>),</span> <span class=n>std</span><span class=o>::</span><span class=n>cref</span><span class=p>(</span><span class=n>n3</span><span class=p>));</span>
+<span class=ln>17</span>        <span class=n>n1</span> <span class=o>=</span> <span class=mi>10</span><span class=p>;</span>
+<span class=ln>18</span>        <span class=n>n2</span> <span class=o>=</span> <span class=mi>11</span><span class=p>;</span>
+<span class=ln>19</span>        <span class=n>n3</span> <span class=o>=</span> <span class=mi>12</span><span class=p>;</span>
+<span class=ln>20</span>        <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Before function: &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>n1</span> <span class=o>&lt;&lt;</span> <span class=sc>&#39; &#39;</span> <span class=o>&lt;&lt;</span> <span class=n>n2</span> <span class=o>&lt;&lt;</span> <span class=sc>&#39; &#39;</span> <span class=o>&lt;&lt;</span> <span class=n>n3</span> <span class=o>&lt;&lt;</span> <span class=sc>&#39;\n&#39;</span><span class=p>;</span>
+<span class=ln>21</span>        <span class=n>bound_f</span><span class=p>();</span>
+<span class=ln>22</span>        <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;After function: &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>n1</span> <span class=o>&lt;&lt;</span> <span class=sc>&#39; &#39;</span> <span class=o>&lt;&lt;</span> <span class=n>n2</span> <span class=o>&lt;&lt;</span> <span class=sc>&#39; &#39;</span> <span class=o>&lt;&lt;</span> <span class=n>n3</span> <span class=o>&lt;&lt;</span> <span class=sc>&#39;\n&#39;</span><span class=p>;</span>
+<span class=ln>23</span>    <span class=p>}</span>
+</code></pre></div><pre><code>Before function: 10 11 12
 In function: 1 11 12
 After function: 10 12 12
 </code></pre>
 <p>我们发现直接传进去的参数n1的值没有改变，而使用std::ref传进去的值的结果符合预期。</p>
 <p>n1的值不符合预期的原因是，在调用std::bind的时候，会先将参数复制一份，然后传入函数f时，传入的不是在main函数中定义的n1的引用，而是对n1复制了一份得到的临时变量的引用。在函数f中对n1的修改只会使得n1的复制值与其保持一致，而不会改变n1.</p>
 <p>下面是一个关于<code>std::reference_wrapper 的例子</code></p>
-<pre><code>#include &lt;algorithm&gt;
-#include &lt;list&gt;
-#include &lt;vector&gt;
-#include &lt;iostream&gt;
-#include &lt;numeric&gt;
-#include &lt;random&gt;
-#include &lt;functional&gt;
- 
-int main()
-{
-    std::list&lt;int&gt; l(10);
-    std::iota(l.begin(), l.end(), -4);
- 
-    std::vector&lt;std::reference_wrapper&lt;int&gt;&gt; v(l.begin(), l.end());
-    // 不能在 list 上用 shuffle （要求随机访问），但能在 vector 上使用它
-    std::shuffle(v.begin(), v.end(), std::mt19937{std::random_device{}()});
- 
-    std::cout &lt;&lt; &quot;Contents of the list: &quot;;
-    for (int n : l) std::cout &lt;&lt; n &lt;&lt; ' '; std::cout &lt;&lt; '\n';
- 
-    std::cout &lt;&lt; &quot;Contents of the list, as seen through a shuffled vector: &quot;;
-    for (int i : v) std::cout &lt;&lt; i &lt;&lt; ' '; std::cout &lt;&lt; '\n';
- 
-    std::cout &lt;&lt; &quot;Doubling the values in the initial list...\n&quot;;
-    for (int&amp; i : l) {
-        i *= 2;
-    }
- 
-    std::cout &lt;&lt; &quot;Contents of the list, as seen through a shuffled vector: &quot;;
-    for (int i : v) std::cout &lt;&lt; i &lt;&lt; ' '; std::cout &lt;&lt; '\n';
-}
-
-
-Contents of the list: -4 -3 -2 -1 0 1 2 3 4 5 
-Contents of the list, as seen through a shuffled vector: -1 2 -2 1 5 0 3 -3 -4 4 
-Doubling the values in the initial list...
-Contents of the list, as seen through a shuffled vector: -2 4 -4 2 10 0 6 -6 -8 8
-</code></pre>
-<p>最后我们回到开始，将参数在通过创建std::thread传给thread funtion的时候，参数默认情况下仍然是被拷贝了一份，与上面std::bind的情况类似，因此需要使用std::ref</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>    <span class=cp>#include</span> <span class=cpf>&lt;algorithm&gt;</span><span class=cp>
+</span><span class=ln> 2</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;list&gt;</span><span class=cp>
+</span><span class=ln> 3</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;vector&gt;</span><span class=cp>
+</span><span class=ln> 4</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span><span class=ln> 5</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;numeric&gt;</span><span class=cp>
+</span><span class=ln> 6</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;random&gt;</span><span class=cp>
+</span><span class=ln> 7</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;functional&gt;</span><span class=cp>
+</span><span class=ln> 8</span><span class=cp></span>     
+<span class=ln> 9</span>    <span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+<span class=ln>10</span>    <span class=p>{</span>
+<span class=ln>11</span>        <span class=n>std</span><span class=o>::</span><span class=n>list</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span> <span class=n>l</span><span class=p>(</span><span class=mi>10</span><span class=p>);</span>
+<span class=ln>12</span>        <span class=n>std</span><span class=o>::</span><span class=n>iota</span><span class=p>(</span><span class=n>l</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span> <span class=n>l</span><span class=p>.</span><span class=n>end</span><span class=p>(),</span> <span class=o>-</span><span class=mi>4</span><span class=p>);</span>
+<span class=ln>13</span>     
+<span class=ln>14</span>        <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>reference_wrapper</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;&gt;</span> <span class=n>v</span><span class=p>(</span><span class=n>l</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span> <span class=n>l</span><span class=p>.</span><span class=n>end</span><span class=p>());</span>
+<span class=ln>15</span>        <span class=c1>// 不能在 list 上用 shuffle （要求随机访问），但能在 vector 上使用它
+</span><span class=ln>16</span><span class=c1></span>        <span class=n>std</span><span class=o>::</span><span class=n>shuffle</span><span class=p>(</span><span class=n>v</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span> <span class=n>v</span><span class=p>.</span><span class=n>end</span><span class=p>(),</span> <span class=n>std</span><span class=o>::</span><span class=n>mt19937</span><span class=p>{</span><span class=n>std</span><span class=o>::</span><span class=n>random_device</span><span class=p>{}()});</span>
+<span class=ln>17</span>     
+<span class=ln>18</span>        <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Contents of the list: &#34;</span><span class=p>;</span>
+<span class=ln>19</span>        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=nl>n</span> <span class=p>:</span> <span class=n>l</span><span class=p>)</span> <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>n</span> <span class=o>&lt;&lt;</span> <span class=sc>&#39; &#39;</span><span class=p>;</span> <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=sc>&#39;\n&#39;</span><span class=p>;</span>
+<span class=ln>20</span>     
+<span class=ln>21</span>        <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Contents of the list, as seen through a shuffled vector: &#34;</span><span class=p>;</span>
+<span class=ln>22</span>        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=nl>i</span> <span class=p>:</span> <span class=n>v</span><span class=p>)</span> <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>i</span> <span class=o>&lt;&lt;</span> <span class=sc>&#39; &#39;</span><span class=p>;</span> <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=sc>&#39;\n&#39;</span><span class=p>;</span>
+<span class=ln>23</span>     
+<span class=ln>24</span>        <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Doubling the values in the initial list...</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
+<span class=ln>25</span>        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span><span class=o>&amp;</span> <span class=nl>i</span> <span class=p>:</span> <span class=n>l</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>26</span>            <span class=n>i</span> <span class=o>*=</span> <span class=mi>2</span><span class=p>;</span>
+<span class=ln>27</span>        <span class=p>}</span>
+<span class=ln>28</span>     
+<span class=ln>29</span>        <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Contents of the list, as seen through a shuffled vector: &#34;</span><span class=p>;</span>
+<span class=ln>30</span>        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=nl>i</span> <span class=p>:</span> <span class=n>v</span><span class=p>)</span> <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>i</span> <span class=o>&lt;&lt;</span> <span class=sc>&#39; &#39;</span><span class=p>;</span> <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=sc>&#39;\n&#39;</span><span class=p>;</span>
+<span class=ln>31</span>    <span class=p>}</span>
+<span class=ln>32</span>    
+<span class=ln>33</span>    
+<span class=ln>34</span>    <span class=n>Contents</span> <span class=n>of</span> <span class=n>the</span> <span class=nl>list</span><span class=p>:</span> <span class=o>-</span><span class=mi>4</span> <span class=o>-</span><span class=mi>3</span> <span class=o>-</span><span class=mi>2</span> <span class=o>-</span><span class=mi>1</span> <span class=mi>0</span> <span class=mi>1</span> <span class=mi>2</span> <span class=mi>3</span> <span class=mi>4</span> <span class=mi>5</span> 
+<span class=ln>35</span>    <span class=n>Contents</span> <span class=n>of</span> <span class=n>the</span> <span class=n>list</span><span class=p>,</span> <span class=n>as</span> <span class=n>seen</span> <span class=n>through</span> <span class=n>a</span> <span class=n>shuffled</span> <span class=nl>vector</span><span class=p>:</span> <span class=o>-</span><span class=mi>1</span> <span class=mi>2</span> <span class=o>-</span><span class=mi>2</span> <span class=mi>1</span> <span class=mi>5</span> <span class=mi>0</span> <span class=mi>3</span> <span class=o>-</span><span class=mi>3</span> <span class=o>-</span><span class=mi>4</span> <span class=mi>4</span> 
+<span class=ln>36</span>    <span class=n>Doubling</span> <span class=n>the</span> <span class=n>values</span> <span class=n>in</span> <span class=n>the</span> <span class=n>initial</span> <span class=n>list</span><span class=p>...</span>
+<span class=ln>37</span>    <span class=n>Contents</span> <span class=n>of</span> <span class=n>the</span> <span class=n>list</span><span class=p>,</span> <span class=n>as</span> <span class=n>seen</span> <span class=n>through</span> <span class=n>a</span> <span class=n>shuffled</span> <span class=nl>vector</span><span class=p>:</span> <span class=o>-</span><span class=mi>2</span> <span class=mi>4</span> <span class=o>-</span><span class=mi>4</span> <span class=mi>2</span> <span class=mi>10</span> <span class=mi>0</span> <span class=mi>6</span> <span class=o>-</span><span class=mi>6</span> <span class=o>-</span><span class=mi>8</span> <span class=mi>8</span>
+<span class=ln>38</span>
+<span class=ln>39</span>
+</code></pre></div><p>最后我们回到开始，将参数在通过创建std::thread传给thread funtion的时候，参数默认情况下仍然是被拷贝了一份，与上面std::bind的情况类似，因此需要使用std::ref</p>
 <p>参考资料:</p>
 <pre><code>  * 《CplusplusConcurrencyInAction_PracticalMultithreading》2.2节
   * [std::ref](https://zh.cppreference.com/w/cpp/utility/functional/ref)
@@ -247,7 +249,7 @@ ACM
 </a>
 <a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>
 其他
-<span class=button_tally>128</span>
+<span class=button_tally>108</span>
 </a>
 <a href=https://111qqz.com/categories/deep-learning/ class="post_tag button button_translucent" title=deep-learning>
 DEEP-LEARNING
@@ -257,13 +259,13 @@ DEEP-LEARNING
 面试
 <span class=button_tally>63</span>
 </a>
+<a href=https://111qqz.com/categories/%E5%B7%A5%E7%A8%8B/ class="post_tag button button_translucent" title=工程>
+工程
+<span class=button_tally>46</span>
+</a>
 <a href=https://111qqz.com/categories/%E9%9A%8F%E7%AC%94%E6%9D%82%E8%B0%88/ class="post_tag button button_translucent" title=随笔杂谈>
 随笔杂谈
 <span class=button_tally>46</span>
-</a>
-<a href=https://111qqz.com/categories/%E5%B7%A5%E7%A8%8B/ class="post_tag button button_translucent" title=工程>
-工程
-<span class=button_tally>23</span>
 </a>
 <a href=https://111qqz.com/categories/mooc/ class="post_tag button button_translucent" title=mooc>
 MOOC
@@ -318,6 +320,10 @@ NUMBER-THEORY
 模拟
 <span class=button_tally>24</span>
 </a>
+<a href=https://111qqz.com/tags/cpp/ class="post_tag button button_translucent" title=cpp>
+CPP
+<span class=button_tally>23</span>
+</a>
 <a href=https://111qqz.com/tags/%E5%8D%9A%E5%BC%88%E8%AE%BA/ class="post_tag button button_translucent" title=博弈论>
 博弈论
 <span class=button_tally>22</span>
@@ -333,10 +339,6 @@ BINARY-SEARCH
 <a href=https://111qqz.com/tags/%E6%AF%8D%E5%87%BD%E6%95%B0/ class="post_tag button button_translucent" title=母函数>
 母函数
 <span class=button_tally>21</span>
-</a>
-<a href=https://111qqz.com/tags/bfs/ class="post_tag button button_translucent" title=bfs>
-BFS
-<span class=button_tally>20</span>
 </a>
 <br>
 <div class="post_tags_toggle button">All Tags</div>
@@ -384,9 +386,9 @@ BFS
 </a>
 <a href=https://111qqz.com/tags/bsgs/ class="post_tag button button_translucent" data-position=4 title=bsgs>BSGS<span class=button_tally>4</span>
 </a>
-<a href=https://111qqz.com/tags/c++/ class="post_tag button button_translucent" data-position=9 title=c++>C++<span class=button_tally>9</span>
+<a href=https://111qqz.com/tags/c++/ class="post_tag button button_translucent" data-position=7 title=c++>C++<span class=button_tally>7</span>
 </a>
-<a href=https://111qqz.com/tags/c++11/ class="post_tag button button_translucent" data-position=4 title=c++11>C++11<span class=button_tally>4</span>
+<a href=https://111qqz.com/tags/c++11/ class="post_tag button button_translucent" data-position=1 title=c++11>C++11<span class=button_tally>1</span>
 </a>
 <a href=https://111qqz.com/tags/cache/ class="post_tag button button_translucent" data-position=1 title=cache>CACHE<span class=button_tally>1</span>
 </a>
@@ -412,7 +414,7 @@ BFS
 </a>
 <a href=https://111qqz.com/tags/convolutional-neural-network/ class="post_tag button button_translucent" data-position=1 title=convolutional-neural-network>CONVOLUTIONAL-NEURAL-NETWORK<span class=button_tally>1</span>
 </a>
-<a href=https://111qqz.com/tags/cpp/ class="post_tag button button_translucent" data-position=16 title=cpp>CPP<span class=button_tally>16</span>
+<a href=https://111qqz.com/tags/cpp/ class="post_tag button button_translucent" data-position=23 title=cpp>CPP<span class=button_tally>23</span>
 </a>
 <a href=https://111qqz.com/tags/cs231n/ class="post_tag button button_translucent" data-position=1 title=cs231n>CS231N<span class=button_tally>1</span>
 </a>
@@ -438,7 +440,7 @@ BFS
 </a>
 <a href=https://111qqz.com/tags/dl-sys/ class="post_tag button button_translucent" data-position=1 title=dl-sys>DL-SYS<span class=button_tally>1</span>
 </a>
-<a href=https://111qqz.com/tags/docker/ class="post_tag button button_translucent" data-position=3 title=docker>DOCKER<span class=button_tally>3</span>
+<a href=https://111qqz.com/tags/docker/ class="post_tag button button_translucent" data-position=4 title=docker>DOCKER<span class=button_tally>4</span>
 </a>
 <a href=https://111qqz.com/tags/dp/ class="post_tag button button_translucent" data-position=71 title=dp>DP<span class=button_tally>71</span>
 </a>
@@ -584,7 +586,7 @@ BFS
 </a>
 <a href=https://111qqz.com/tags/model-distillation/ class="post_tag button button_translucent" data-position=1 title=model-distillation>MODEL-DISTILLATION<span class=button_tally>1</span>
 </a>
-<a href=https://111qqz.com/tags/modern-cpp/ class="post_tag button button_translucent" data-position=5 title=modern-cpp>MODERN-CPP<span class=button_tally>5</span>
+<a href=https://111qqz.com/tags/modern-cpp/ class="post_tag button button_translucent" data-position=8 title=modern-cpp>MODERN-CPP<span class=button_tally>8</span>
 </a>
 <a href=https://111qqz.com/tags/move/ class="post_tag button button_translucent" data-position=1 title=move>MOVE<span class=button_tally>1</span>
 </a>
@@ -794,7 +796,7 @@ BFS
 </a>
 <a href=https://111qqz.com/tags/%E5%88%86%E7%B1%BB%E8%AE%A8%E8%AE%BA/ class="post_tag button button_translucent" data-position=1 title=分类讨论>分类讨论<span class=button_tally>1</span>
 </a>
-<a href=https://111qqz.com/tags/%E5%89%8D%E7%AB%AF/ class="post_tag button button_translucent" data-position=5 title=前端>前端<span class=button_tally>5</span>
+<a href=https://111qqz.com/tags/%E5%89%8D%E7%AB%AF/ class="post_tag button button_translucent" data-position=6 title=前端>前端<span class=button_tally>6</span>
 </a>
 <a href=https://111qqz.com/tags/%E5%89%8D%E7%BC%80%E5%92%8C/ class="post_tag button button_translucent" data-position=17 title=前缀和>前缀和<span class=button_tally>17</span>
 </a>
@@ -893,6 +895,8 @@ BFS
 <a href=https://111qqz.com/tags/%E5%BA%B7%E6%89%98%E5%B1%95%E5%BC%80/ class="post_tag button button_translucent" data-position=1 title=康托展开>康托展开<span class=button_tally>1</span>
 </a>
 <a href=https://111qqz.com/tags/%E5%BA%B7%E6%89%98%E5%B1%95%E5%BC%80/%E9%80%86%E5%B1%95%E5%BC%80/ class="post_tag button button_translucent" data-position=2 title=康托展开/逆展开>康托展开/逆展开<span class=button_tally>2</span>
+</a>
+<a href=https://111qqz.com/tags/%E5%BE%AA%E7%8E%AF%E5%B1%95%E5%BC%80/ class="post_tag button button_translucent" data-position=1 title=循环展开>循环展开<span class=button_tally>1</span>
 </a>
 <a href=https://111qqz.com/tags/%E5%BE%AA%E7%8E%AF%E8%8A%82/ class="post_tag button button_translucent" data-position=8 title=循环节>循环节<span class=button_tally>8</span>
 </a>
@@ -1039,6 +1043,8 @@ BFS
 <a href=https://111qqz.com/tags/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/ class="post_tag button button_translucent" data-position=5 title=矩阵快速幂>矩阵快速幂<span class=button_tally>5</span>
 </a>
 <a href=https://111qqz.com/tags/%E7%A6%BB%E6%95%A3%E5%8C%96/ class="post_tag button button_translucent" data-position=11 title=离散化>离散化<span class=button_tally>11</span>
+</a>
+<a href=https://111qqz.com/tags/%E7%AC%A6%E5%8F%B7%E5%8F%AF%E8%A7%81%E6%80%A7/ class="post_tag button button_translucent" data-position=1 title=符号可见性>符号可见性<span class=button_tally>1</span>
 </a>
 <a href=https://111qqz.com/tags/%E7%AC%A6%E5%8F%B7%E8%A1%A8/ class="post_tag button button_translucent" data-position=1 title=符号表>符号表<span class=button_tally>1</span>
 </a>
