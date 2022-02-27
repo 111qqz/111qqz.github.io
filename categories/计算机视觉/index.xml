@@ -130,7 +130,23 @@ ReID问题至今没有很好得解决，主要原因是，不同camera下，人�
 但是这种办法是手动完成而不是一个end-to-end（什么是end-to-end 神经网络） 的过程
 所以考虑pose的潜力还没有被完全发掘。
 这篇paper主要做了以下工作：
-* 提出了一种新的深层结构，将身体部分转化成相应的特征表示，以此来克服pose变化带来的问题 * 提出了一个用来自动学习各部分权值的sub-network 这两部分工作都是end-to-end的</description></item><item><title>Similarity learning 和Metric learning</title><link>https://111qqz.com/2018/02/similarity-learning-metric-learning/</link><pubDate>Sun, 18 Feb 2018 08:14:10 +0000</pubDate><guid>https://111qqz.com/2018/02/similarity-learning-metric-learning/</guid><description>
+* 提出了一种新的深层结构，将身体部分转化成相应的特征表示，以此来克服pose变化带来的问题 * 提出了一个用来自动学习各部分权值的sub-network 这两部分工作都是end-to-end的</description></item><item><title>Deep Mutual Learning（相互学习） 阅读笔记</title><link>https://111qqz.com/2018/02/deep-mutual-learning-notes/</link><pubDate>Sun, 18 Feb 2018 10:46:35 +0000</pubDate><guid>https://111qqz.com/2018/02/deep-mutual-learning-notes/</guid><description>
+原始论文
+DNN在很多问题上效果很不错，但是由于深度和宽度过大，导致需要的执行时间和内存过大。我们需要讨论一些能快速执行并且对内存的需要不大的模型。
+已经有很多方法来做这件事，比较重要的是Model distillation（模型蒸馏）
+基于蒸馏的模型压缩的有效性是基于一个发现：小的网络有和大的网络一样的表达能力，只不过是更难以训练找到合适的参数。
+也就是说，难点在于优化(以找到合适的参数）而不在于网络的尺寸。
+蒸馏的模型的做法是把一个有效的(deep or/and wide) network 作为teacher network,让一个size 较小的 student network 模仿teacher network.
+这样做的好处是，size小的多的student network训练如何模仿teacher network通常要比直接训练得到目标函数容易，而效果上与teacher network相当，甚至超过teacher network.
+在这篇paper中，作者提出了一个和蒸馏模型相关但是不同的模型: Deep Mutual Learning (相互学习，以下缩写为DML)
+蒸馏模型开始于一个强大的教师网络，并通过教师网络**单向(one way)**教授学生网络知识。
+相反，DML中,开始于一群没有经受过训练的学生网络。
+具体来说，每个学生训练有两种损失:
+* **常规的监督学习损失和对齐的模仿损失** * **每个学生的在班级中落后于其他学生的概率。** 结果表明，DML的方式：比每个学生网络单独学习要好，也比传统的传统的蒸馏模型要好。
+此外，我们发现，对几个tearcher network 使用 DML，要往往有更好的结果。
+另外一些发现：
+* 效果随着班级中学生网络的数量的增加而增加 * 它适用于各种网络体系结构和异构群组 关于DML为什么有效的直觉讨论：
+* 常规的监督学习损失保证每个学生单独学习时，整体上结果是越来越好的。 * 由于初始条件不同，对下一个最可能的class的预测概率不同，这是额外信息的来源。</description></item><item><title>Similarity learning 和Metric learning</title><link>https://111qqz.com/2018/02/similarity-learning-metric-learning/</link><pubDate>Sun, 18 Feb 2018 08:14:10 +0000</pubDate><guid>https://111qqz.com/2018/02/similarity-learning-metric-learning/</guid><description>
 Similarity_learning 相似性学习（Similarity learning ）有监督机器学习，它与回归和分类密切相关，但目标是从实例中学习一个相似函数，以衡量两个对象的相似程度或相关程度。
 Similarity learning通常有四种setups:
 * regression similarity learning 在这种方式中，给出的数据是 ![(x_{i}^{1},x_{i}^{2})](https://wikimedia.org/api/rest_v1/media/math/render/svg/cfa249357a1b4a7baf332041d67e480d6bb1f8fb)  和他们的相似度 . 目标是学习到一个函数 ，对于 给出yi的近似值。 * Classification similarity learning 给出数据 和他们是否相似 。目标是训练出一个分类器，能够完成对一组 是否相似的二分类判断。 * Ranking similarity learning 给出有序三元组 ，其中 is known to be more similar to than to 。目标是训练出一个函数，使得对于新的三元组 ，满足 。容易看出，这种方式采取了比回归更弱的监督形式，因为不需要提供精确的相似性度量，只需要提供相似性的相对顺序。因此，这种ranking-based的相似性学习更容易应用于实际的大规模应用 * Locality sensitive hashing (LSH) 局部敏感哈希和普通哈希的不同就是，相似的项有更大的概率被放到同一个桶中。
@@ -145,4 +161,49 @@ Key:
 (4). Post-process, re-ranking
 AlignedReID: Surpassing Human-Level Performance in Person Re-Identification
 Hydraplus-net: Attentive deep features for pedestrian analysis.
-Darkrank: Accelerating deep metric learning via cross sample similarities transfer.</description></item></channel></rss>
+Darkrank: Accelerating deep metric learning via cross sample similarities transfer.</description></item><item><title>多标签图像分类任务的评价方法-mean average precision(mAP) 以及top x的评价方法</title><link>https://111qqz.com/2018/02/mean-average-precision-for-multi-label-classification-task/</link><pubDate>Fri, 09 Feb 2018 03:53:09 +0000</pubDate><guid>https://111qqz.com/2018/02/mean-average-precision-for-multi-label-classification-task/</guid><description>
+参考资料:
+多标签图像分类任务的评价方法-mAP
+wiki_Sensitivity and specificity
+False Positives和False Negative等含义
+mean average precision（MAP）在计算机视觉中是如何计算和应用的？
+首先需要了解True(False) Positives (Negatives)的含义
+True Positive （真正, TP）被模型预测为正的正样本；可以称作判断为真的正确率
+True Negative（真负 , TN）被模型预测为负的负样本 ；可以称作判断为假的正确率
+False Positive （假正, FP）被模型预测为正的负样本；可以称作误报率
+False Negative（假负 , FN）被模型预测为负的正样本；可以称作漏报率
+在图像中，尤其是分类问题中应用AP，是一种评价ranking方式好不好的指标：
+举例来说，我有一个两类分类问题，分别5个样本，如果这个分类器性能达到完美的话，ranking结果应该是+1，+1，+1，+1，+1，-1，-1，-1，-1，-1.
+但是分类器预测的label，和实际的score肯定不会这么完美。按照从大到小来打分，我们可以计算两个指标：precision和recall。比如分类器认为打分由高到低选择了前四个，实际上这里面只有两个是正样本。此时的recall就是2（你能包住的正样本数）/5（总共的正样本数）=0.4，precision是2（你选对了的）/4（总共选的）=0.5.
+图像分类中，这个打分score可以由SVM得到：s=w^Tx+b就是每一个样本的分数。
+从上面的例子可以看出，其实precision，recall都是选多少个样本k的函数，很容易想到，如果我总共有1000个样本，那么我就可以像这样计算1000对P-R，并且把他们画出来，这就是PR曲线：
+这里有一个趋势，recall越高，precision越低。这是很合理的，因为假如说我把1000个全拿进来，那肯定正样本都包住了，recall=1，但是此时precision就很小了，因为我全部认为他们是正样本。recall=1时的precision的数值，等于正样本所占的比例。
+所以AP，average precision，就是这个曲线下的面积，这里average，等于是对recall取平均。而mean average precision的mean，是对所有类别取平均（每一个类当做一次二分类任务）。现在的图像分类论文基本都是用mAP作为标准。
+使用AP会比accuracy要合理。对于accuracy，如果有9个负样本和一个正样本，那么即使分类器什么都不做全部判定为负样本accuracy也有90%。但是对于AP，recall=1那个点precision会掉到0.1.曲线下面积就会反映出来。
+precision 和 recall 的计算： &amp;amp;lt;img src=&amp;quot;https://pic2.zhimg.com/50/v2-761706f5b1fe36873ba1bb20c7d1d447_hd.jpg&amp;quot; data-rawwidth=&amp;quot;301&amp;quot; data-rawheight=&amp;quot;541&amp;quot; class=&amp;quot;content_image&amp;quot; width=&amp;quot;301&amp;quot;&amp;amp;gt; 图中上部分，左边一整个矩形中（false negative和true positive）的数表示ground truth之中为1的（即为正确的）数据，右边一整个矩形中的数表示ground truth之中为0的数据。
+精度precision的计算是用 检测正确的数据个数/总的检测个数。
+召回率recall的计算是用 检测正确的数据个数/ground truth之中所有正数据个数。
+AP：average precision 假设我们有数据： &amp;amp;lt;img src=&amp;quot;https://pic1.</description></item><item><title>Non-local Neural Networks 阅读笔记</title><link>https://111qqz.com/2018/02/non-local-neural-networks-notes/</link><pubDate>Mon, 05 Feb 2018 02:24:34 +0000</pubDate><guid>https://111qqz.com/2018/02/non-local-neural-networks-notes/</guid><description>
+先粗略读了2遍orz.可能不够严谨，先写一些high-level的理解。
+对于序列或者图片数据，如果想获得一个long-range的依赖，通常的做法是循环神经网络（对于序列）或者深层的卷积神经网络（对于图片数据）
+但是循环操作（当前的处理依赖于前面有限的若干个）和卷积操作都是一种局部操作。
+但是这种局部操作是有一些局限的，比如不好优化，计算代价比较大等。
+这篇paper提出了non-local 这个操作。
+non-local操作是计算机视觉中广泛使用的一种降噪算法，即non-local mean的一般化。
+non-local operation被认为是一个可以被广泛使用的操作，几乎可以和当前神经网络的其他部件结合。
+含有non-local opetation的一个基本操作单元我们称之为一个 non-local block
+含有non-local block 的神经网络我们可以称之为Non-local Neural Networks
+non-local operation是非常有效的，及时神经网络只有很少的几层（比如5）
+non-local operation和《Attention is all you need》 中提出的self-attention是相似的
+全连接操作可以看做non-local operation的一个特例。
+Non-local Neural Networks 原始论文</description></item><item><title>non-local means algorithm 学习笔记</title><link>https://111qqz.com/2018/01/non-local-means-algorithm-notes/</link><pubDate>Thu, 25 Jan 2018 02:53:52 +0000</pubDate><guid>https://111qqz.com/2018/01/non-local-means-algorithm-notes/</guid><description>
+终于忙完学校的事情可以干正事了orz
+这里会记录一些第一遍看paper的过程中遇到的一些影响理解的概念，不过大多不会深究，只算做粗浅的理解。
+1、高斯金字塔：
+高斯金字塔是最基本的图像塔。首先将原图像作为最底层图像G0（高斯金字塔的第0层），利用高斯核（5*5）对其进行卷积，然后对卷积后的图像进行下采样（去除偶数行和列）得到上一层图像G1，将此图像作为输入，重复卷积和下采样操作得到更上一层图像，反复迭代多次，形成一个金字塔形的图像数据结构，即高斯金字塔。
+2、拉普拉斯金字塔
+在高斯金字塔的运算过程中，图像经过卷积和下采样操作会丢失部分高频细节信息。为描述这些高频信息，人们定义了拉普拉斯金字塔(Laplacian Pyramid， LP)。用高斯金字塔的每一层图像减去其高一层图像上采样并高斯卷积之后的预测图像，得到一系列的差值图像即为 LP 分解图像。
+将Gl内插方法得到放大图像_Gl，使_Gl的尺寸与*Gl-1的尺寸相同，即放大算子Expand。
+参考资料：
+Gaussian and Laplacian Pyramids
+拉普拉斯金字塔融合</description></item></channel></rss>
