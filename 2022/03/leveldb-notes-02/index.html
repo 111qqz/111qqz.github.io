@@ -1,6 +1,6 @@
 <!doctype html><html lang=en data-figures class=page>
 <head>
-<title>levelDB 代码阅读笔记 03 db.h | 111qqz的小窝</title>
+<title>levelDB 代码阅读笔记 02 comparator | 111qqz的小窝</title>
 <meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta http-equiv=x-ua-compatible content="IE=edge">
@@ -8,22 +8,22 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date),gtag('config','UA-219255388-1')</script>
 <meta property="og:locale" content="en">
 <meta property="og:type" content="article">
-<meta name=description content="背景 最近在做一个智能算力相关的项目，类似美团外卖广告智能算力的探索与实践 其中实现控制系统需要与数据库交互。 虽然最后技术选型并没有使用到levelDB,但是想趁机把代码读了吧。
-很惊讶的发现我大三的时候声称自己度过部分levelDB代码，甚至还写了几篇相关的博客，比如
- murmurhash …">
+<meta name=description content="levelDB是一个有序的KV存储，因此key的顺序是十分关键的 levelDB提供用户自己定义key顺序的能力
+先看下comparator的接口
+接口 include/leveldb/comparator.h 1 2// A Comparator object provides a total order …">
 <meta name=twitter:card content="summary">
 <meta name=twitter:creator content>
-<meta name=twitter:title content="levelDB 代码阅读笔记 03 db.h">
-<meta property="og:url" content="https://111qqz.com/2022/02/leveldb-notes-03/">
-<meta property="og:title" content="levelDB 代码阅读笔记 03 db.h">
-<meta property="og:description" content="背景 最近在做一个智能算力相关的项目，类似美团外卖广告智能算力的探索与实践 其中实现控制系统需要与数据库交互。 虽然最后技术选型并没有使用到levelDB,但是想趁机把代码读了吧。
-很惊讶的发现我大三的时候声称自己度过部分levelDB代码，甚至还写了几篇相关的博客，比如
- murmurhash …">
+<meta name=twitter:title content="levelDB 代码阅读笔记 02 comparator">
+<meta property="og:url" content="https://111qqz.com/2022/03/leveldb-notes-02/">
+<meta property="og:title" content="levelDB 代码阅读笔记 02 comparator">
+<meta property="og:description" content="levelDB是一个有序的KV存储，因此key的顺序是十分关键的 levelDB提供用户自己定义key顺序的能力
+先看下comparator的接口
+接口 include/leveldb/comparator.h 1 2// A Comparator object provides a total order …">
 <meta property="og:image" content="https://111qqz.com/images/thumbnail.png">
 <link rel=apple-touch-icon sizes=180x180 href=https://111qqz.com/icons/apple-touch-icon.png>
 <link rel=icon type=image/png sizes=32x32 href=https://111qqz.com/icons/favicon-32x32.png>
 <link rel=manifest href=https://111qqz.com/icons/site.webmanifest>
-<link rel=canonical href=https://111qqz.com/2022/02/leveldb-notes-03/>
+<link rel=canonical href=https://111qqz.com/2022/03/leveldb-notes-02/>
 <link rel=preload href=https://111qqz.com/css/styles.f143f2039d975cd60c5524f52c5fbb6dd2236d44d0d53d71b5cb6f6127d4fe8082960bbb71fe0345b5bab4119124e0b09c0b7d7f4238a9288afc02815d258f76.css integrity="sha512-8UPyA52XXNYMVST1LF+7bdIjbUTQ1T1xtctvYSfU/oCClgu7cf4DRbW6tBGRJOCwnAt9f0I4qSiK/AKBXSWPdg==" as=style crossorigin=anonymous>
 <link rel=preload href=https://111qqz.com/js/bundle.min.3742850abb67c28705371634ec61c30ef94e46abe2abff0aa69f2d0719bdb4593a80e5d4f8c3e1c6ef6f860b354b7dc6dcc282abc788a7fc2798b214527a5207.js as=script integrity="sha512-N0KFCrtnwocFNxY07GHDDvlORqviq/8Kpp8tBxm9tFk6gOXU+MPhxu9vhgs1S33G3MKCq8eIp/wnmLIUUnpSBw==" crossorigin=anonymous>
 <link rel=stylesheet type=text/css href=https://111qqz.com/css/styles.f143f2039d975cd60c5524f52c5fbb6dd2236d44d0d53d71b5cb6f6127d4fe8082960bbb71fe0345b5bab4119124e0b09c0b7d7f4238a9288afc02815d258f76.css integrity="sha512-8UPyA52XXNYMVST1LF+7bdIjbUTQ1T1xtctvYSfU/oCClgu7cf4DRbW6tBGRJOCwnAt9f0I4qSiK/AKBXSWPdg==" crossorigin=anonymous>
@@ -103,176 +103,214 @@
 <main>
 <div class="grid-inverse wrap content">
 <article class=post_content>
-<h1 class=post_title>levelDB 代码阅读笔记 03 db.h</h1>
+<h1 class=post_title>levelDB 代码阅读笔记 02 comparator</h1>
 <div class=post_meta>
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
-Feb 26, 2022</span>
-<span class=post_time> · 3 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
+Mar 1, 2022</span>
+<span class=post_time> · 4 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
 </a>
 </span>
 <span class=page_only>&nbsp;·
 <div class=post_share>
 Share on:
-<a href="https://twitter.com/intent/tweet?text=levelDB%20%e4%bb%a3%e7%a0%81%e9%98%85%e8%af%bb%e7%ac%94%e8%ae%b0%2003%20db.h&url=https%3a%2f%2f111qqz.com%2f2022%2f02%2fleveldb-notes-03%2f&tw_p=tweetbutton" class=twitter title="Share on Twitter" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#twitter"/></svg>
+<a href="https://twitter.com/intent/tweet?text=levelDB%20%e4%bb%a3%e7%a0%81%e9%98%85%e8%af%bb%e7%ac%94%e8%ae%b0%2002%20comparator&url=https%3a%2f%2f111qqz.com%2f2022%2f03%2fleveldb-notes-02%2f&tw_p=tweetbutton" class=twitter title="Share on Twitter" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#twitter"/></svg>
 </a>
-<a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2f111qqz.com%2f2022%2f02%2fleveldb-notes-03%2f&t=levelDB%20%e4%bb%a3%e7%a0%81%e9%98%85%e8%af%bb%e7%ac%94%e8%ae%b0%2003%20db.h" class=facebook title="Share on Facebook" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#facebook"/></svg>
+<a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2f111qqz.com%2f2022%2f03%2fleveldb-notes-02%2f&t=levelDB%20%e4%bb%a3%e7%a0%81%e9%98%85%e8%af%bb%e7%ac%94%e8%ae%b0%2002%20comparator" class=facebook title="Share on Facebook" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#facebook"/></svg>
 </a>
 <a href=#linkedinshare id=linkedinshare class=linkedin title="Share on LinkedIn" rel=nofollow><svg class="icon"><use xlink:href="#linkedin"/></svg>
 </a>
-<a href=https://111qqz.com/2022/02/leveldb-notes-03/ title="Copy Link" class="link link_yank"><svg class="icon"><use xlink:href="#copy"/></svg>
+<a href=https://111qqz.com/2022/03/leveldb-notes-02/ title="Copy Link" class="link link_yank"><svg class="icon"><use xlink:href="#copy"/></svg>
 </a>
 </div>
 </span>
 </div>
-<div class=post_body><h2 id=背景>背景</h2>
-<p>最近在做一个智能算力相关的项目，类似<a href=https://tech.meituan.com/2021/06/17/waimai-ai-advertisement.html>美团外卖广告智能算力的探索与实践</a>
-其中实现控制系统需要与数据库交互。 虽然最后技术选型并没有使用到levelDB,但是想趁机把代码读了吧。</p>
-<p>很惊讶的发现我大三的时候声称自己度过部分levelDB代码，甚至还写了几篇相关的博客，比如</p>
-<ul>
-<li><a href=https://111qqz.com/2017/03/murmurhash/>murmurhash源码分析</a></li>
-<li><a href=https://111qqz.com/2017/03/lock-free-vs-wait-free-concurrency/>Lock-free vs wait-free concurrency</a></li>
-<li><a href=https://111qqz.com/2017/03/memory-barriers/>内存屏障（Memory Barriers）</a></li>
-<li><a href=https://111qqz.com/2018/04/leveldb-notes/>levelDB 学习笔记</a></li>
-</ul>
-<p>但是我却一点都没印象了....
-仔细看来很多概念在当时可能都是没有充分理解的，而且从数目上来看，应该并没有完整看完levelDB代码。</p>
-<p>所以重新开个坑，看看自己比起毕业前有没有长进【没有</p>
-<p>先从入口 include/leveldb/db.h 开始</p>
-<h2 id=leveldb_export>LEVELDB_EXPORT</h2>
-<p>看到LEVELDB_EXPORT这个macro</p>
-<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>
-<span class=ln>2</span><span class=k>class</span> <span class=nc>LEVELDB_EXPORT</span> <span class=n>Snapshot</span> <span class=p>{</span>
-<span class=ln>3</span> <span class=k>protected</span><span class=o>:</span>
-<span class=ln>4</span>  <span class=k>virtual</span> <span class=o>~</span><span class=n>Snapshot</span><span class=p>();</span>
-<span class=ln>5</span><span class=p>};</span>
-<span class=ln>6</span>
-</code></pre></div><p>是在 include/leveldb/export.h 中定义的</p>
+<div class=post_body><p>levelDB是一个有序的KV存储，因此key的顺序是十分关键的
+levelDB提供用户自己定义key顺序的能力</p>
+<p>先看下comparator的接口</p>
+<h1 id=接口-includeleveldbcomparatorh>接口 include/leveldb/comparator.h</h1>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
-<span class=ln> 2</span><span class=c1>// 符号可见性问题，使用macro来控制在编译成动态库时暴露，在Link时不暴露符号是一种common 的做法
-</span><span class=ln> 3</span><span class=c1>// 
-</span><span class=ln> 4</span><span class=c1></span><span class=cp>#if !defined(LEVELDB_EXPORT)
-</span><span class=ln> 5</span><span class=cp></span>
-<span class=ln> 6</span><span class=cp>#if defined(LEVELDB_SHARED_LIBRARY)
-</span><span class=ln> 7</span><span class=cp>#if defined(_WIN32)
-</span><span class=ln> 8</span><span class=cp></span>
-<span class=ln> 9</span><span class=cp>#if defined(LEVELDB_COMPILE_LIBRARY)
-</span><span class=ln>10</span><span class=cp>#define LEVELDB_EXPORT __declspec(dllexport)
-</span><span class=ln>11</span><span class=cp>#else
-</span><span class=ln>12</span><span class=cp>#define LEVELDB_EXPORT __declspec(dllimport)
-</span><span class=ln>13</span><span class=cp>#endif  </span><span class=c1>// defined(LEVELDB_COMPILE_LIBRARY)
-</span><span class=ln>14</span><span class=c1></span>
-<span class=ln>15</span><span class=cp>#else  </span><span class=c1>// defined(_WIN32)
-</span><span class=ln>16</span><span class=c1></span><span class=cp>#if defined(LEVELDB_COMPILE_LIBRARY)
-</span><span class=ln>17</span><span class=cp>#define LEVELDB_EXPORT __attribute__((visibility(&#34;default&#34;)))
-</span><span class=ln>18</span><span class=cp>#else
-</span><span class=ln>19</span><span class=cp>#define LEVELDB_EXPORT
-</span><span class=ln>20</span><span class=cp>#endif
-</span><span class=ln>21</span><span class=cp>#endif  </span><span class=c1>// defined(_WIN32)
-</span><span class=ln>22</span><span class=c1></span>
-<span class=ln>23</span><span class=cp>#else  </span><span class=c1>// defined(LEVELDB_SHARED_LIBRARY)
-</span><span class=ln>24</span><span class=c1></span><span class=cp>#define LEVELDB_EXPORT
-</span><span class=ln>25</span><span class=cp>#endif
-</span><span class=ln>26</span><span class=cp></span>
-<span class=ln>27</span><span class=cp>#endif  </span><span class=c1>// !defined(LEVELDB_EXPORT)
-</span><span class=ln>28</span><span class=c1></span>
-<span class=ln>29</span><span class=cp>#endif  </span><span class=c1>// STORAGE_LEVELDB_INCLUDE_EXPORT_H_
+<span class=ln> 2</span><span class=c1>// A Comparator object provides a total order across slices that are
+</span><span class=ln> 3</span><span class=c1>// used as keys in an sstable or a database.  A Comparator implementation
+</span><span class=ln> 4</span><span class=c1>// must be thread-safe since leveldb may invoke its methods concurrently
+</span><span class=ln> 5</span><span class=c1>// from multiple threads.
+</span><span class=ln> 6</span><span class=c1></span><span class=k>class</span> <span class=nc>LEVELDB_EXPORT</span> <span class=n>Comparator</span> <span class=p>{</span>
+<span class=ln> 7</span> <span class=k>public</span><span class=o>:</span>
+<span class=ln> 8</span>  <span class=k>virtual</span> <span class=o>~</span><span class=n>Comparator</span><span class=p>();</span>
+<span class=ln> 9</span>
+<span class=ln>10</span>  <span class=c1>// Three-way comparison.  Returns value:
+</span><span class=ln>11</span><span class=c1></span>  <span class=c1>//   &lt; 0 iff &#34;a&#34; &lt; &#34;b&#34;,
+</span><span class=ln>12</span><span class=c1></span>  <span class=c1>//   == 0 iff &#34;a&#34; == &#34;b&#34;,
+</span><span class=ln>13</span><span class=c1></span>  <span class=c1>//   &gt; 0 iff &#34;a&#34; &gt; &#34;b&#34;
+</span><span class=ln>14</span><span class=c1></span>  <span class=k>virtual</span> <span class=kt>int</span> <span class=nf>Compare</span><span class=p>(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>a</span><span class=p>,</span> <span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>b</span><span class=p>)</span> <span class=k>const</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>15</span>
+<span class=ln>16</span>  <span class=c1>// The name of the comparator.  Used to check for comparator
+</span><span class=ln>17</span><span class=c1></span>  <span class=c1>// mismatches (i.e., a DB created with one comparator is
+</span><span class=ln>18</span><span class=c1></span>  <span class=c1>// accessed using a different comparator.
+</span><span class=ln>19</span><span class=c1></span>  <span class=c1>//
+</span><span class=ln>20</span><span class=c1></span>  <span class=c1>// The client of this package should switch to a new name whenever
+</span><span class=ln>21</span><span class=c1></span>  <span class=c1>// the comparator implementation changes in a way that will cause
+</span><span class=ln>22</span><span class=c1></span>  <span class=c1>// the relative ordering of any two keys to change.
+</span><span class=ln>23</span><span class=c1></span>  <span class=c1>//
+</span><span class=ln>24</span><span class=c1></span>  <span class=c1>// Names starting with &#34;leveldb.&#34; are reserved and should not be used
+</span><span class=ln>25</span><span class=c1></span>  <span class=c1>// by any clients of this package.
+</span><span class=ln>26</span><span class=c1></span>  <span class=k>virtual</span> <span class=k>const</span> <span class=kt>char</span><span class=o>*</span> <span class=nf>Name</span><span class=p>()</span> <span class=k>const</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>27</span>
+<span class=ln>28</span>  <span class=c1>// Advanced functions: these are used to reduce the space requirements
+</span><span class=ln>29</span><span class=c1></span>  <span class=c1>// for internal data structures like index blocks.
 </span><span class=ln>30</span><span class=c1></span>
-<span class=ln>31</span>
-</code></pre></div><p>通常在编译为动态链接库时，需要将某些符号设置为可见；
-在link 这些动态库时，将这些符号设置为hidden</p>
-<blockquote>
-<p>because the same header file is generally used both when compiling the DLL and in client code that consumes the DLL's interface, it is a common pattern to define a macro that automatically resolves to the appropriate attribute specifier at compile-time</p>
-</blockquote>
-<p>可以参考</p>
-<ul>
-<li><a href=https://stackoverflow.com/questions/8863193/what-does-declspecdllimport-really-mean>what does __declspec(dllimport) really mean?</a></li>
-<li><a href=https://gcc.gnu.org/wiki/Visibility>gcc-wiki-Why is the new C++ visibility support so useful?</a></li>
-<li><a href=https://111qqz.com/2018/08/symbol-table-visibility/>记录一次因动态库符号表可见性导致的未定义的引用(undefined reference)</a></li>
-</ul>
-<h2 id=slice>slice</h2>
-<p>代码位于include/leveldb/slice.h
-可以参考 <a href=https://github.com/google/leveldb/blob/main/doc/index.md#slice>这里的说明</a></p>
-<p>Slice 基本就是一个简单版本的std::string_view,提供一个只读的窗口</p>
-<p><strong>与std::string_view, Slice的生命周期依赖于外部数据的生命周期</strong></p>
-<p>值得一提的可能是Slice::compare 函数，用来做一个三路比较</p>
+<span class=ln>31</span>  <span class=c1>// If *start &lt; limit, changes *start to a short string in [start,limit).
+</span><span class=ln>32</span><span class=c1></span>  <span class=c1>// Simple comparator implementations may return with *start unchanged,
+</span><span class=ln>33</span><span class=c1></span>  <span class=c1>// i.e., an implementation of this method that does nothing is correct.
+</span><span class=ln>34</span><span class=c1></span>  <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>FindShortestSeparator</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=o>*</span> <span class=n>start</span><span class=p>,</span>
+<span class=ln>35</span>                                     <span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>limit</span><span class=p>)</span> <span class=k>const</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>36</span>
+<span class=ln>37</span>  <span class=c1>// Changes *key to a short string &gt;= *key.
+</span><span class=ln>38</span><span class=c1></span>  <span class=c1>// Simple comparator implementations may return with *key unchanged,
+</span><span class=ln>39</span><span class=c1></span>  <span class=c1>// i.e., an implementation of this method that does nothing is correct.
+</span><span class=ln>40</span><span class=c1></span>  <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>FindShortSuccessor</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=o>*</span> <span class=n>key</span><span class=p>)</span> <span class=k>const</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>41</span><span class=p>};</span>
+<span class=ln>42</span>
+</code></pre></div><p>比较让人迷惑的应该是 FindShortestSeparator和 FindShortSuccessor 函数。
+其实可以简单理解成为了节省存储，而对key做了一定修改。
+这个实现是不确定的，甚至完全什么都不做也是合法的。</p>
+<p>下面我们主要看一下levelDB中两个实现了这个接口的sub class</p>
+<h1 id=bytewisecomparatorimpl>BytewiseComparatorImpl</h1>
+<p>默认的comparator,按照byte的字典序比较大小</p>
+<h2 id=主体实现>主体实现</h2>
+<p>需要注意 FindShortestSeparator和 FindShortSuccessor 的实现并非唯一的</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
-<span class=ln> 2</span>
-<span class=ln> 3</span><span class=kr>inline</span> <span class=kt>int</span> <span class=n>Slice</span><span class=o>::</span><span class=n>compare</span><span class=p>(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>b</span><span class=p>)</span> <span class=k>const</span> <span class=p>{</span>
-<span class=ln> 4</span> <span class=k>const</span> <span class=n>size_t</span> <span class=n>min_len</span> <span class=o>=</span> <span class=p>(</span><span class=n>size_</span> <span class=o>&lt;</span> <span class=n>b</span><span class=p>.</span><span class=n>size_</span><span class=p>)</span> <span class=o>?</span> <span class=nl>size_</span> <span class=p>:</span> <span class=n>b</span><span class=p>.</span><span class=n>size_</span><span class=p>;</span>
-<span class=ln> 5</span> <span class=kt>int</span> <span class=n>r</span> <span class=o>=</span> <span class=n>memcmp</span><span class=p>(</span><span class=n>data_</span><span class=p>,</span> <span class=n>b</span><span class=p>.</span><span class=n>data_</span><span class=p>,</span> <span class=n>min_len</span><span class=p>);</span>
-<span class=ln> 6</span> <span class=k>if</span> <span class=p>(</span><span class=n>r</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
-<span class=ln> 7</span>   <span class=k>if</span> <span class=p>(</span><span class=n>size_</span> <span class=o>&lt;</span> <span class=n>b</span><span class=p>.</span><span class=n>size_</span><span class=p>)</span>
-<span class=ln> 8</span>     <span class=n>r</span> <span class=o>=</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
-<span class=ln> 9</span>   <span class=k>else</span> <span class=nf>if</span> <span class=p>(</span><span class=n>size_</span> <span class=o>&gt;</span> <span class=n>b</span><span class=p>.</span><span class=n>size_</span><span class=p>)</span>
-<span class=ln>10</span>     <span class=n>r</span> <span class=o>=</span> <span class=o>+</span><span class=mi>1</span><span class=p>;</span>
-<span class=ln>11</span> <span class=p>}</span>
-<span class=ln>12</span> <span class=k>return</span> <span class=n>r</span><span class=p>;</span>
-<span class=ln>13</span><span class=p>}</span>
-<span class=ln>14</span>
-</code></pre></div><p>实际上这部分可以借助c++20的<a href=https://en.cppreference.com/w/cpp/language/default_comparisons>default_comparisons</a> 做一个简化</p>
-<h2 id=status>Status</h2>
-<p>Status Class 是对levelDB operation的结果做了一层封装。</p>
-<p>比较巧妙的地方在于，实现中将"状态码，错误信息“全部压缩在了一个char*中.</p>
-<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>
-<span class=ln>2</span>  <span class=c1>// OK status has a null state_.  Otherwise, state_ is a new[] array
-</span><span class=ln>3</span><span class=c1></span>  <span class=c1>// of the following form:
-</span><span class=ln>4</span><span class=c1></span>  <span class=c1>//    state_[0..3] == length of message
-</span><span class=ln>5</span><span class=c1></span>  <span class=c1>//    state_[4]    == code
-</span><span class=ln>6</span><span class=c1></span>  <span class=c1>//    state_[5..]  == message
-</span><span class=ln>7</span><span class=c1></span>  <span class=k>const</span> <span class=kt>char</span><span class=o>*</span> <span class=n>state_</span><span class=p>;</span>
-<span class=ln>8</span>
-</code></pre></div><p>这个实现主要是性能会有优势，原因之一是传递参数的时候只需要传一个char*，就可以将code和message全部进行传递。</p>
-<p>这样的state_实现决定了copy函数的实现，需要先从前4个byte拿到size,然后再进行copy</p>
-<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>
-<span class=ln>2</span><span class=k>const</span> <span class=kt>char</span><span class=o>*</span> <span class=n>Status</span><span class=o>::</span><span class=n>CopyState</span><span class=p>(</span><span class=k>const</span> <span class=kt>char</span><span class=o>*</span> <span class=n>state</span><span class=p>)</span> <span class=p>{</span>
-<span class=ln>3</span>  <span class=kt>uint32_t</span> <span class=n>size</span><span class=p>;</span>
-<span class=ln>4</span>  <span class=n>std</span><span class=o>::</span><span class=n>memcpy</span><span class=p>(</span><span class=o>&amp;</span><span class=n>size</span><span class=p>,</span> <span class=n>state</span><span class=p>,</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>size</span><span class=p>));</span>
-<span class=ln>5</span>  <span class=c1>// 5是4byte size + 1byte code
-</span><span class=ln>6</span><span class=c1></span>  <span class=kt>char</span><span class=o>*</span> <span class=n>result</span> <span class=o>=</span> <span class=k>new</span> <span class=kt>char</span><span class=p>[</span><span class=n>size</span> <span class=o>+</span> <span class=mi>5</span><span class=p>];</span>
-<span class=ln>7</span>  <span class=n>std</span><span class=o>::</span><span class=n>memcpy</span><span class=p>(</span><span class=n>result</span><span class=p>,</span> <span class=n>state</span><span class=p>,</span> <span class=n>size</span> <span class=o>+</span> <span class=mi>5</span><span class=p>);</span>
-<span class=ln>8</span>  <span class=k>return</span> <span class=n>result</span><span class=p>;</span>
-<span class=ln>9</span><span class=p>}</span>
-</code></pre></div><p>此外，一些静态函数的声明最初有些让人困惑，为啥要有两个Slice? 一个Slice不就够了吗</p>
-<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>  <span class=k>static</span> <span class=n>Status</span> <span class=nf>NotFound</span><span class=p>(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>msg</span><span class=p>,</span> <span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>msg2</span> <span class=o>=</span> <span class=n>Slice</span><span class=p>())</span> <span class=p>{</span>
-<span class=ln>2</span>    <span class=k>return</span> <span class=n>Status</span><span class=p>(</span><span class=n>kNotFound</span><span class=p>,</span> <span class=n>msg</span><span class=p>,</span> <span class=n>msg2</span><span class=p>);</span>
-<span class=ln>3</span>  <span class=p>}</span>
-<span class=ln>4</span>
-</code></pre></div><p>看了调用时的使用，发现是在一些场景下，错误信息会有两部分组成。 前一部分是大的类别的错误信息，后面可能是错误码（其他第三方的错误码)</p>
-<p>这样实现感觉主要是减轻了调用方的负担，因为不需要在调用测自己做message的拼接了。</p>
-<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
-<span class=ln> 2</span>
-<span class=ln> 3</span><span class=n>Status</span><span class=o>::</span><span class=n>Status</span><span class=p>(</span><span class=n>Code</span> <span class=n>code</span><span class=p>,</span> <span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>msg</span><span class=p>,</span> <span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>msg2</span><span class=p>)</span> <span class=p>{</span>
-<span class=ln> 4</span>  <span class=n>assert</span><span class=p>(</span><span class=n>code</span> <span class=o>!=</span> <span class=n>kOk</span><span class=p>);</span>
-<span class=ln> 5</span>  <span class=c1>// 两种情况
-</span><span class=ln> 6</span><span class=c1></span>  <span class=c1>// 1： msg2为空，len2为0, 返回的结果由msg决定
-</span><span class=ln> 7</span><span class=c1></span>  <span class=c1>// 2： msg2不为空， size为 size(msg1) + len(&#34;: &#34;) + size(msg2). 中间的2是分隔符
-</span><span class=ln> 8</span><span class=c1></span>  <span class=k>const</span> <span class=kt>uint32_t</span> <span class=n>len1</span> <span class=o>=</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>uint32_t</span><span class=o>&gt;</span><span class=p>(</span><span class=n>msg</span><span class=p>.</span><span class=n>size</span><span class=p>());</span>
-<span class=ln> 9</span>  <span class=k>const</span> <span class=kt>uint32_t</span> <span class=n>len2</span> <span class=o>=</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>uint32_t</span><span class=o>&gt;</span><span class=p>(</span><span class=n>msg2</span><span class=p>.</span><span class=n>size</span><span class=p>());</span>
-<span class=ln>10</span>  <span class=k>const</span> <span class=kt>uint32_t</span> <span class=n>size</span> <span class=o>=</span> <span class=n>len1</span> <span class=o>+</span> <span class=p>(</span><span class=n>len2</span> <span class=o>?</span> <span class=p>(</span><span class=mi>2</span> <span class=o>+</span> <span class=n>len2</span><span class=p>)</span> <span class=o>:</span> <span class=mi>0</span><span class=p>);</span>
-<span class=ln>11</span>  <span class=kt>char</span><span class=o>*</span> <span class=n>result</span> <span class=o>=</span> <span class=k>new</span> <span class=kt>char</span><span class=p>[</span><span class=n>size</span> <span class=o>+</span> <span class=mi>5</span><span class=p>];</span>
-<span class=ln>12</span>  <span class=n>std</span><span class=o>::</span><span class=n>memcpy</span><span class=p>(</span><span class=n>result</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>size</span><span class=p>,</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>size</span><span class=p>));</span>
-<span class=ln>13</span>  <span class=n>result</span><span class=p>[</span><span class=mi>4</span><span class=p>]</span> <span class=o>=</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>char</span><span class=o>&gt;</span><span class=p>(</span><span class=n>code</span><span class=p>);</span>
-<span class=ln>14</span>  <span class=n>std</span><span class=o>::</span><span class=n>memcpy</span><span class=p>(</span><span class=n>result</span> <span class=o>+</span> <span class=mi>5</span><span class=p>,</span> <span class=n>msg</span><span class=p>.</span><span class=n>data</span><span class=p>(),</span> <span class=n>len1</span><span class=p>);</span>
-<span class=ln>15</span>  <span class=k>if</span> <span class=p>(</span><span class=n>len2</span><span class=p>)</span> <span class=p>{</span>
-<span class=ln>16</span>    <span class=n>result</span><span class=p>[</span><span class=mi>5</span> <span class=o>+</span> <span class=n>len1</span><span class=p>]</span> <span class=o>=</span> <span class=sc>&#39;:&#39;</span><span class=p>;</span>
-<span class=ln>17</span>    <span class=n>result</span><span class=p>[</span><span class=mi>6</span> <span class=o>+</span> <span class=n>len1</span><span class=p>]</span> <span class=o>=</span> <span class=sc>&#39; &#39;</span><span class=p>;</span>
-<span class=ln>18</span>    <span class=n>std</span><span class=o>::</span><span class=n>memcpy</span><span class=p>(</span><span class=n>result</span> <span class=o>+</span> <span class=mi>7</span> <span class=o>+</span> <span class=n>len1</span><span class=p>,</span> <span class=n>msg2</span><span class=p>.</span><span class=n>data</span><span class=p>(),</span> <span class=n>len2</span><span class=p>);</span>
-<span class=ln>19</span>  <span class=p>}</span>
-<span class=ln>20</span>  <span class=n>state_</span> <span class=o>=</span> <span class=n>result</span><span class=p>;</span>
-<span class=ln>21</span><span class=p>}</span>
+<span class=ln> 2</span><span class=k>class</span> <span class=nc>BytewiseComparatorImpl</span> <span class=o>:</span> <span class=k>public</span> <span class=n>Comparator</span> <span class=p>{</span>
+<span class=ln> 3</span> <span class=k>public</span><span class=o>:</span>
+<span class=ln> 4</span>  <span class=n>BytewiseComparatorImpl</span><span class=p>()</span> <span class=o>=</span> <span class=k>default</span><span class=p>;</span>
+<span class=ln> 5</span>
+<span class=ln> 6</span>  <span class=k>const</span> <span class=kt>char</span><span class=o>*</span> <span class=nf>Name</span><span class=p>()</span> <span class=k>const</span> <span class=k>override</span> <span class=p>{</span> <span class=k>return</span> <span class=s>&#34;leveldb.BytewiseComparator&#34;</span><span class=p>;</span> <span class=p>}</span>
+<span class=ln> 7</span>
+<span class=ln> 8</span>  <span class=kt>int</span> <span class=nf>Compare</span><span class=p>(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>a</span><span class=p>,</span> <span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>b</span><span class=p>)</span> <span class=k>const</span> <span class=k>override</span> <span class=p>{</span>
+<span class=ln> 9</span>    <span class=k>return</span> <span class=n>a</span><span class=p>.</span><span class=n>compare</span><span class=p>(</span><span class=n>b</span><span class=p>);</span>
+<span class=ln>10</span>  <span class=p>}</span>
+<span class=ln>11</span>
+<span class=ln>12</span>  <span class=kt>void</span> <span class=nf>FindShortestSeparator</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=o>*</span> <span class=n>start</span><span class=p>,</span>
+<span class=ln>13</span>                             <span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>limit</span><span class=p>)</span> <span class=k>const</span> <span class=k>override</span> <span class=p>{</span>
+<span class=ln>14</span>    <span class=c1>// Find length of common prefix
+</span><span class=ln>15</span><span class=c1></span>    <span class=n>size_t</span> <span class=n>min_length</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>min</span><span class=p>(</span><span class=n>start</span><span class=o>-&gt;</span><span class=n>size</span><span class=p>(),</span> <span class=n>limit</span><span class=p>.</span><span class=n>size</span><span class=p>());</span>
+<span class=ln>16</span>    <span class=n>size_t</span> <span class=n>diff_index</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>17</span>    <span class=c1>// diff_index是一个不同的index
+</span><span class=ln>18</span><span class=c1></span>    <span class=k>while</span> <span class=p>((</span><span class=n>diff_index</span> <span class=o>&lt;</span> <span class=n>min_length</span><span class=p>)</span> <span class=o>&amp;&amp;</span>
+<span class=ln>19</span>           <span class=p>((</span><span class=o>*</span><span class=n>start</span><span class=p>)[</span><span class=n>diff_index</span><span class=p>]</span> <span class=o>==</span> <span class=n>limit</span><span class=p>[</span><span class=n>diff_index</span><span class=p>]))</span> <span class=p>{</span>
+<span class=ln>20</span>      <span class=n>diff_index</span><span class=o>++</span><span class=p>;</span>
+<span class=ln>21</span>    <span class=p>}</span>
 <span class=ln>22</span>
-<span class=ln>23</span>
-</code></pre></div><h2 id=注释>注释</h2>
-<p>include/leveldb/db.h 文件算是整个项目的接口，注释写的全面而详细</p>
-<p>大概有以下几个方面:</p>
+<span class=ln>23</span>    <span class=k>if</span> <span class=p>(</span><span class=n>diff_index</span> <span class=o>&gt;=</span> <span class=n>min_length</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>24</span>      <span class=c1>// 没有不同的字符，说明一个串是另一个串的前缀，不需要做任何操作
+</span><span class=ln>25</span><span class=c1></span>      <span class=c1>// Do not shorten if one string is a prefix of the other
+</span><span class=ln>26</span><span class=c1></span>    <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+<span class=ln>27</span>      <span class=kt>uint8_t</span> <span class=n>diff_byte</span> <span class=o>=</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>uint8_t</span><span class=o>&gt;</span><span class=p>((</span><span class=o>*</span><span class=n>start</span><span class=p>)[</span><span class=n>diff_index</span><span class=p>]);</span>
+<span class=ln>28</span>      <span class=k>if</span> <span class=p>(</span><span class=n>diff_byte</span> <span class=o>&lt;</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>uint8_t</span><span class=o>&gt;</span><span class=p>(</span><span class=mh>0xff</span><span class=p>)</span> <span class=o>&amp;&amp;</span>
+<span class=ln>29</span>          <span class=n>diff_byte</span> <span class=o>+</span> <span class=mi>1</span> <span class=o>&lt;</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>uint8_t</span><span class=o>&gt;</span><span class=p>(</span><span class=n>limit</span><span class=p>[</span><span class=n>diff_index</span><span class=p>]))</span> <span class=p>{</span>
+<span class=ln>30</span>        <span class=p>(</span><span class=o>*</span><span class=n>start</span><span class=p>)[</span><span class=n>diff_index</span><span class=p>]</span><span class=o>++</span><span class=p>;</span>
+<span class=ln>31</span>        <span class=n>start</span><span class=o>-&gt;</span><span class=n>resize</span><span class=p>(</span><span class=n>diff_index</span> <span class=o>+</span> <span class=mi>1</span><span class=p>);</span>
+<span class=ln>32</span>        <span class=n>assert</span><span class=p>(</span><span class=n>Compare</span><span class=p>(</span><span class=o>*</span><span class=n>start</span><span class=p>,</span> <span class=n>limit</span><span class=p>)</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>);</span>
+<span class=ln>33</span>      <span class=p>}</span>
+<span class=ln>34</span>    <span class=p>}</span>
+<span class=ln>35</span>  <span class=p>}</span>
+<span class=ln>36</span>
+<span class=ln>37</span>  <span class=kt>void</span> <span class=nf>FindShortSuccessor</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=o>*</span> <span class=n>key</span><span class=p>)</span> <span class=k>const</span> <span class=k>override</span> <span class=p>{</span>
+<span class=ln>38</span>    <span class=c1>// Find first character that can be incremented
+</span><span class=ln>39</span><span class=c1></span>    <span class=n>size_t</span> <span class=n>n</span> <span class=o>=</span> <span class=n>key</span><span class=o>-&gt;</span><span class=n>size</span><span class=p>();</span>
+<span class=ln>40</span>    <span class=k>for</span> <span class=p>(</span><span class=n>size_t</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>n</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>41</span>      <span class=k>const</span> <span class=kt>uint8_t</span> <span class=n>byte</span> <span class=o>=</span> <span class=p>(</span><span class=o>*</span><span class=n>key</span><span class=p>)[</span><span class=n>i</span><span class=p>];</span>
+<span class=ln>42</span>      <span class=k>if</span> <span class=p>(</span><span class=n>byte</span> <span class=o>!=</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>uint8_t</span><span class=o>&gt;</span><span class=p>(</span><span class=mh>0xff</span><span class=p>))</span> <span class=p>{</span>
+<span class=ln>43</span>        <span class=p>(</span><span class=o>*</span><span class=n>key</span><span class=p>)[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>byte</span> <span class=o>+</span> <span class=mi>1</span><span class=p>;</span>
+<span class=ln>44</span>        <span class=n>key</span><span class=o>-&gt;</span><span class=n>resize</span><span class=p>(</span><span class=n>i</span> <span class=o>+</span> <span class=mi>1</span><span class=p>);</span>
+<span class=ln>45</span>        <span class=k>return</span><span class=p>;</span>
+<span class=ln>46</span>      <span class=p>}</span>
+<span class=ln>47</span>    <span class=p>}</span>
+<span class=ln>48</span>    <span class=c1>// *key is a run of 0xffs.  Leave it alone.
+</span><span class=ln>49</span><span class=c1></span>  <span class=p>}</span>
+<span class=ln>50</span><span class=p>};</span>
+<span class=ln>51</span>
+<span class=ln>52</span>
+</code></pre></div><h2 id=scott-meyerss-singleton>Scott Meyers's singleton</h2>
+<p>比较值得一提的可能是这个单例的实现</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>
+<span class=ln>2</span><span class=k>const</span> <span class=n>Comparator</span><span class=o>*</span> <span class=nf>BytewiseComparator</span><span class=p>()</span> <span class=p>{</span>
+<span class=ln>3</span>  <span class=k>static</span> <span class=n>NoDestructor</span><span class=o>&lt;</span><span class=n>BytewiseComparatorImpl</span><span class=o>&gt;</span> <span class=n>singleton</span><span class=p>;</span>
+<span class=ln>4</span>  <span class=k>return</span> <span class=n>singleton</span><span class=p>.</span><span class=n>get</span><span class=p>();</span>
+<span class=ln>5</span><span class=p>}</span>
+</code></pre></div><p><a href=https://laristra.github.io/flecsi/src/developer-guide/patterns/meyers_singleton.html>Scott Meyers's singleton</a> 的实现虽然已经人尽皆知了，不妨来罗嗦几句讲一下重点</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span><span class=k>struct</span> <span class=nc>singleton_t</span>
+<span class=ln> 3</span><span class=p>{</span>
+<span class=ln> 4</span>
+<span class=ln> 5</span>  <span class=k>static</span>
+<span class=ln> 6</span>  <span class=n>singleton_t</span> <span class=o>&amp;</span>
+<span class=ln> 7</span>  <span class=n>instance</span><span class=p>()</span>
+<span class=ln> 8</span>  <span class=p>{</span>
+<span class=ln> 9</span>    <span class=k>static</span> <span class=n>singleton_t</span> <span class=n>s</span><span class=p>;</span>
+<span class=ln>10</span>    <span class=k>return</span> <span class=n>s</span><span class=p>;</span>
+<span class=ln>11</span>  <span class=p>}</span> <span class=c1>// instance
+</span><span class=ln>12</span><span class=c1></span>
+<span class=ln>13</span>  <span class=n>singleton_t</span><span class=p>(</span><span class=k>const</span> <span class=n>singleton_t</span> <span class=o>&amp;</span><span class=p>)</span> <span class=o>=</span> <span class=k>delete</span><span class=p>;</span>
+<span class=ln>14</span>  <span class=n>singleton_t</span> <span class=o>&amp;</span> <span class=k>operator</span> <span class=o>=</span> <span class=p>(</span><span class=k>const</span> <span class=n>singleton_t</span> <span class=o>&amp;</span><span class=p>)</span> <span class=o>=</span> <span class=k>delete</span><span class=p>;</span>
+<span class=ln>15</span>
+<span class=ln>16</span><span class=k>private</span><span class=o>:</span>
+<span class=ln>17</span>
+<span class=ln>18</span>  <span class=n>singleton_t</span><span class=p>()</span> <span class=p>{}</span>
+<span class=ln>19</span>  <span class=o>~</span><span class=n>singleton_t</span><span class=p>()</span> <span class=p>{}</span>
+<span class=ln>20</span>
+<span class=ln>21</span>
+<span class=ln>22</span>
+</code></pre></div><p>要注意的有三点:</p>
 <ul>
-<li>函数是做什么的</li>
-<li>正常情况下的返回值;异常情况下的返回值</li>
-<li>参数的生命周期</li>
-<li>当操作的key不存在时，是否返回错误(如Delete不会返回错误，但似乎Get会返回错误)</li>
-<li>线程安全性。 哪些部分是可以直接多个thread调用的，哪些需要外部加锁</li>
+<li>static function在第一次被访问时创建</li>
+<li>static local variable在第一次被执行时创建，在整个程序结束时销毁。 不被访问就不会创建，实现了"lazy loading"</li>
+<li><strong>c++11之后，标准保证了local static variable的创建是thread-safe的</strong></li>
 </ul>
+<p>但是 NoDestructor 是个什么东西呢</p>
+<h2 id=nodestructor>NoDestructor</h2>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span><span class=c1>// Wraps an instance whose destructor is never called.
+</span><span class=ln> 3</span><span class=c1>//
+</span><span class=ln> 4</span><span class=c1>// This is intended for use with function-level static variables.
+</span><span class=ln> 5</span><span class=c1></span><span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>InstanceType</span><span class=o>&gt;</span>
+<span class=ln> 6</span><span class=k>class</span> <span class=nc>NoDestructor</span> <span class=p>{</span>
+<span class=ln> 7</span> <span class=k>public</span><span class=o>:</span>
+<span class=ln> 8</span>  <span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span><span class=p>...</span> <span class=n>ConstructorArgTypes</span><span class=o>&gt;</span>
+<span class=ln> 9</span>  <span class=k>explicit</span> <span class=n>NoDestructor</span><span class=p>(</span><span class=n>ConstructorArgTypes</span><span class=o>&amp;&amp;</span><span class=p>...</span> <span class=n>constructor_args</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>10</span>    <span class=k>static_assert</span><span class=p>(</span><span class=k>sizeof</span><span class=p>(</span><span class=n>instance_storage_</span><span class=p>)</span> <span class=o>&gt;=</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>InstanceType</span><span class=p>),</span>
+<span class=ln>11</span>                  <span class=s>&#34;instance_storage_ is not large enough to hold the instance&#34;</span><span class=p>);</span>
+<span class=ln>12</span>    <span class=k>static_assert</span><span class=p>(</span>
+<span class=ln>13</span>        <span class=k>alignof</span><span class=p>(</span><span class=k>decltype</span><span class=p>(</span><span class=n>instance_storage_</span><span class=p>))</span> <span class=o>&gt;=</span> <span class=k>alignof</span><span class=p>(</span><span class=n>InstanceType</span><span class=p>),</span>
+<span class=ln>14</span>        <span class=s>&#34;instance_storage_ does not meet the instance&#39;s alignment requirement&#34;</span><span class=p>);</span>
+<span class=ln>15</span>    <span class=k>new</span> <span class=p>(</span><span class=o>&amp;</span><span class=n>instance_storage_</span><span class=p>)</span>
+<span class=ln>16</span>        <span class=n>InstanceType</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>forward</span><span class=o>&lt;</span><span class=n>ConstructorArgTypes</span><span class=o>&gt;</span><span class=p>(</span><span class=n>constructor_args</span><span class=p>)...);</span>
+<span class=ln>17</span>  <span class=p>}</span>
+<span class=ln>18</span>
+<span class=ln>19</span>  <span class=o>~</span><span class=n>NoDestructor</span><span class=p>()</span> <span class=o>=</span> <span class=k>default</span><span class=p>;</span>
+<span class=ln>20</span>
+<span class=ln>21</span>  <span class=n>NoDestructor</span><span class=p>(</span><span class=k>const</span> <span class=n>NoDestructor</span><span class=o>&amp;</span><span class=p>)</span> <span class=o>=</span> <span class=k>delete</span><span class=p>;</span>
+<span class=ln>22</span>  <span class=n>NoDestructor</span><span class=o>&amp;</span> <span class=k>operator</span><span class=o>=</span><span class=p>(</span><span class=k>const</span> <span class=n>NoDestructor</span><span class=o>&amp;</span><span class=p>)</span> <span class=o>=</span> <span class=k>delete</span><span class=p>;</span>
+<span class=ln>23</span>
+<span class=ln>24</span>  <span class=n>InstanceType</span><span class=o>*</span> <span class=nf>get</span><span class=p>()</span> <span class=p>{</span>
+<span class=ln>25</span>    <span class=k>return</span> <span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>InstanceType</span><span class=o>*&gt;</span><span class=p>(</span><span class=o>&amp;</span><span class=n>instance_storage_</span><span class=p>);</span>
+<span class=ln>26</span>  <span class=p>}</span>
+<span class=ln>27</span>
+<span class=ln>28</span> <span class=k>private</span><span class=o>:</span>
+<span class=ln>29</span>
+<span class=ln>30</span> <span class=cm>/*
+</span><span class=ln>31</span><span class=cm>
+</span><span class=ln>32</span><span class=cm> 分配内存，但不初始化
+</span><span class=ln>33</span><span class=cm>The type defined by std::aligned_storage&lt;&gt;::type can be used to create uninitialized memory blocks suitable to hold the objects of given type, optionally aligned stricter than their natural alignment requirement, for example on a cache or page boundary.
+</span><span class=ln>34</span><span class=cm>
+</span><span class=ln>35</span><span class=cm> */</span>
+<span class=ln>36</span>  <span class=k>typename</span> <span class=n>std</span><span class=o>::</span><span class=n>aligned_storage</span><span class=o>&lt;</span><span class=k>sizeof</span><span class=p>(</span><span class=n>InstanceType</span><span class=p>),</span>
+<span class=ln>37</span>                                <span class=k>alignof</span><span class=p>(</span><span class=n>InstanceType</span><span class=p>)</span><span class=o>&gt;::</span><span class=n>type</span> <span class=n>instance_storage_</span><span class=p>;</span>
+<span class=ln>38</span><span class=p>};</span>
+<span class=ln>39</span>
+<span class=ln>40</span>
+<span class=ln>41</span>
+</code></pre></div>
 </div>
 <div class=post_comments>
 </div>
@@ -296,19 +334,19 @@ Share on:
 <a href=https://111qqz.com/2022/02/2022-to-do-list/ class=nav-link title="2022  TO DO list">2022 TO DO list</a>
 </li>
 <li>
-<a href=https://111qqz.com/2022/06/core-dump-on-gcc-4-with-avx2/ class=nav-link title=发挥僧了什么>发挥僧了什么</a>
-</li>
-<li>
 <a href=https://111qqz.com/2022/02/leveldb-notes-01/ class=nav-link title="levelDB 代码阅读笔记 01 db.h">levelDB 代码阅读笔记 01 db.h</a>
-</li>
-<li>
-<a href=https://111qqz.com/2022/07/core-dump-on-gcc-4-with-avx2/ class=nav-link title=发挥僧了什么>发挥僧了什么</a>
 </li>
 <li>
 <a href=https://111qqz.com/2022/02/better-blog/ class=nav-link title=博客除草>博客除草</a>
 </li>
 <li>
 <a href=https://111qqz.com/2022/01/goodbye-2021/ class=nav-link title="Goodbye 2021">Goodbye 2021</a>
+</li>
+<li>
+<a href=https://111qqz.com/2021/08/ska_flat_hash_map_notes/ class=nav-link title="ska::flat_hash_map 源码分析">ska::flat_hash_map 源码分析</a>
+</li>
+<li>
+<a href=https://111qqz.com/2021/07/core-dump-on-gcc-4-with-avx2/ class=nav-link title="一次avx2在gcc上core dump的排查经历">一次avx2在gcc上core dump的排查经历</a>
 </li>
 </ul>
 <div>
@@ -336,7 +374,7 @@ DEEP-LEARNING
 </a>
 <a href=https://111qqz.com/categories/%E5%B7%A5%E7%A8%8B/ class="post_tag button button_translucent" title=工程>
 工程
-<span class=button_tally>50</span>
+<span class=button_tally>48</span>
 </a>
 <a href=https://111qqz.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/ class="post_tag button button_translucent" title=计算机视觉>
 计算机视觉
@@ -348,7 +386,7 @@ MOOC
 </a>
 <a href=https://111qqz.com/categories/%E4%BC%98%E5%8C%96/ class="post_tag button button_translucent" title=优化>
 优化
-<span class=button_tally>12</span>
+<span class=button_tally>10</span>
 </a>
 <a href=https://111qqz.com/categories/c++/ class="post_tag button button_translucent" title=c++>
 C++
@@ -439,7 +477,7 @@ BINARY-SEARCH
 </a>
 <a href=https://111qqz.com/tags/atom/ class="post_tag button button_translucent" data-position=1 title=atom>ATOM<span class=button_tally>1</span>
 </a>
-<a href=https://111qqz.com/tags/avx/ class="post_tag button button_translucent" data-position=3 title=avx>AVX<span class=button_tally>3</span>
+<a href=https://111qqz.com/tags/avx/ class="post_tag button button_translucent" data-position=1 title=avx>AVX<span class=button_tally>1</span>
 </a>
 <a href=https://111qqz.com/tags/awk/ class="post_tag button button_translucent" data-position=1 title=awk>AWK<span class=button_tally>1</span>
 </a>
@@ -737,7 +775,7 @@ BINARY-SEARCH
 </a>
 <a href=https://111qqz.com/tags/shadowsocks/ class="post_tag button button_translucent" data-position=2 title=shadowsocks>SHADOWSOCKS<span class=button_tally>2</span>
 </a>
-<a href=https://111qqz.com/tags/simd/ class="post_tag button button_translucent" data-position=3 title=simd>SIMD<span class=button_tally>3</span>
+<a href=https://111qqz.com/tags/simd/ class="post_tag button button_translucent" data-position=1 title=simd>SIMD<span class=button_tally>1</span>
 </a>
 <a href=https://111qqz.com/tags/simhash/ class="post_tag button button_translucent" data-position=1 title=simhash>SIMHASH<span class=button_tally>1</span>
 </a>
