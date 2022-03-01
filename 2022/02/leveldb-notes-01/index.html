@@ -66,11 +66,11 @@
 <span class=nav_child></span>
 <a href=https://111qqz.com/tags/cpp class="nav_child nav_item" title=cpp>cpp</a>
 <a href=https://111qqz.com/tags/cuda class="nav_child nav_item" title=cuda>cuda</a>
+<a href=https://111qqz.com/tags/levelDB class="nav_child nav_item" title=levelDB源码阅读笔记>levelDB源码阅读笔记</a>
 <a href=https://111qqz.com/tags/linux class="nav_child nav_item" title=linux>linux</a>
 <a href=https://111qqz.com/tags/%E5%89%8D%E7%AB%AF class="nav_child nav_item" title=前端>前端</a>
 <a href=https://111qqz.com/tags/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86 class="nav_child nav_item" title=图像处理>图像处理</a>
 <a href=https://111qqz.com/tags/docker class="nav_child nav_item" title=容器>容器</a>
-<a href=https://111qqz.com/tags/%E4%BC%98%E5%8C%96 class="nav_child nav_item" title=性能优化>性能优化</a>
 </div>
 </div>
 <div class=nav_parent>
@@ -108,7 +108,7 @@
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Feb 26, 2022</span>
-<span class=post_time> · 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=levelDB class="post_tag button button_translucent">levelDB
+<span class=post_time> · 3 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=levelDB class="post_tag button button_translucent">levelDB
 </a>
 </span>
 <span class=page_only>&nbsp;·
@@ -209,6 +209,59 @@ Share on:
 <span class=ln>13</span><span class=p>}</span>
 <span class=ln>14</span>
 </code></pre></div><p>实际上这部分可以借助c++20的<a href=https://en.cppreference.com/w/cpp/language/default_comparisons>default_comparisons</a> 做一个简化</p>
+<h2 id=status>Status</h2>
+<p>Status Class 是对levelDB operation的结果做了一层封装。</p>
+<p>比较巧妙的地方在于，实现中将"状态码，错误信息“全部压缩在了一个char*中.</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>
+<span class=ln>2</span>  <span class=c1>// OK status has a null state_.  Otherwise, state_ is a new[] array
+</span><span class=ln>3</span><span class=c1></span>  <span class=c1>// of the following form:
+</span><span class=ln>4</span><span class=c1></span>  <span class=c1>//    state_[0..3] == length of message
+</span><span class=ln>5</span><span class=c1></span>  <span class=c1>//    state_[4]    == code
+</span><span class=ln>6</span><span class=c1></span>  <span class=c1>//    state_[5..]  == message
+</span><span class=ln>7</span><span class=c1></span>  <span class=k>const</span> <span class=kt>char</span><span class=o>*</span> <span class=n>state_</span><span class=p>;</span>
+<span class=ln>8</span>
+</code></pre></div><p>这个实现主要是性能会有优势，原因之一是传递参数的时候只需要传一个char*，就可以将code和message全部进行传递。</p>
+<p>这样的state_实现决定了copy函数的实现，需要先从前4个byte拿到size,然后再进行copy</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>
+<span class=ln>2</span><span class=k>const</span> <span class=kt>char</span><span class=o>*</span> <span class=n>Status</span><span class=o>::</span><span class=n>CopyState</span><span class=p>(</span><span class=k>const</span> <span class=kt>char</span><span class=o>*</span> <span class=n>state</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>3</span>  <span class=kt>uint32_t</span> <span class=n>size</span><span class=p>;</span>
+<span class=ln>4</span>  <span class=n>std</span><span class=o>::</span><span class=n>memcpy</span><span class=p>(</span><span class=o>&amp;</span><span class=n>size</span><span class=p>,</span> <span class=n>state</span><span class=p>,</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>size</span><span class=p>));</span>
+<span class=ln>5</span>  <span class=c1>// 5是4byte size + 1byte code
+</span><span class=ln>6</span><span class=c1></span>  <span class=kt>char</span><span class=o>*</span> <span class=n>result</span> <span class=o>=</span> <span class=k>new</span> <span class=kt>char</span><span class=p>[</span><span class=n>size</span> <span class=o>+</span> <span class=mi>5</span><span class=p>];</span>
+<span class=ln>7</span>  <span class=n>std</span><span class=o>::</span><span class=n>memcpy</span><span class=p>(</span><span class=n>result</span><span class=p>,</span> <span class=n>state</span><span class=p>,</span> <span class=n>size</span> <span class=o>+</span> <span class=mi>5</span><span class=p>);</span>
+<span class=ln>8</span>  <span class=k>return</span> <span class=n>result</span><span class=p>;</span>
+<span class=ln>9</span><span class=p>}</span>
+</code></pre></div><p>此外，一些静态函数的声明最初有些让人困惑，为啥要有两个Slice? 一个Slice不就够了吗</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>  <span class=k>static</span> <span class=n>Status</span> <span class=nf>NotFound</span><span class=p>(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>msg</span><span class=p>,</span> <span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>msg2</span> <span class=o>=</span> <span class=n>Slice</span><span class=p>())</span> <span class=p>{</span>
+<span class=ln>2</span>    <span class=k>return</span> <span class=n>Status</span><span class=p>(</span><span class=n>kNotFound</span><span class=p>,</span> <span class=n>msg</span><span class=p>,</span> <span class=n>msg2</span><span class=p>);</span>
+<span class=ln>3</span>  <span class=p>}</span>
+<span class=ln>4</span>
+</code></pre></div><p>看了调用时的使用，发现是在一些场景下，错误信息会有两部分组成。 前一部分是大的类别的错误信息，后面可能是错误码（其他第三方的错误码)</p>
+<p>这样实现感觉主要是减轻了调用方的负担，因为不需要在调用测自己做message的拼接了。</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span>
+<span class=ln> 3</span><span class=n>Status</span><span class=o>::</span><span class=n>Status</span><span class=p>(</span><span class=n>Code</span> <span class=n>code</span><span class=p>,</span> <span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>msg</span><span class=p>,</span> <span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>msg2</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln> 4</span>  <span class=n>assert</span><span class=p>(</span><span class=n>code</span> <span class=o>!=</span> <span class=n>kOk</span><span class=p>);</span>
+<span class=ln> 5</span>  <span class=c1>// 两种情况
+</span><span class=ln> 6</span><span class=c1></span>  <span class=c1>// 1： msg2为空，len2为0, 返回的结果由msg决定
+</span><span class=ln> 7</span><span class=c1></span>  <span class=c1>// 2： msg2不为空， size为 size(msg1) + len(&#34;: &#34;) + size(msg2). 中间的2是分隔符
+</span><span class=ln> 8</span><span class=c1></span>  <span class=k>const</span> <span class=kt>uint32_t</span> <span class=n>len1</span> <span class=o>=</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>uint32_t</span><span class=o>&gt;</span><span class=p>(</span><span class=n>msg</span><span class=p>.</span><span class=n>size</span><span class=p>());</span>
+<span class=ln> 9</span>  <span class=k>const</span> <span class=kt>uint32_t</span> <span class=n>len2</span> <span class=o>=</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>uint32_t</span><span class=o>&gt;</span><span class=p>(</span><span class=n>msg2</span><span class=p>.</span><span class=n>size</span><span class=p>());</span>
+<span class=ln>10</span>  <span class=k>const</span> <span class=kt>uint32_t</span> <span class=n>size</span> <span class=o>=</span> <span class=n>len1</span> <span class=o>+</span> <span class=p>(</span><span class=n>len2</span> <span class=o>?</span> <span class=p>(</span><span class=mi>2</span> <span class=o>+</span> <span class=n>len2</span><span class=p>)</span> <span class=o>:</span> <span class=mi>0</span><span class=p>);</span>
+<span class=ln>11</span>  <span class=kt>char</span><span class=o>*</span> <span class=n>result</span> <span class=o>=</span> <span class=k>new</span> <span class=kt>char</span><span class=p>[</span><span class=n>size</span> <span class=o>+</span> <span class=mi>5</span><span class=p>];</span>
+<span class=ln>12</span>  <span class=n>std</span><span class=o>::</span><span class=n>memcpy</span><span class=p>(</span><span class=n>result</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>size</span><span class=p>,</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>size</span><span class=p>));</span>
+<span class=ln>13</span>  <span class=n>result</span><span class=p>[</span><span class=mi>4</span><span class=p>]</span> <span class=o>=</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>char</span><span class=o>&gt;</span><span class=p>(</span><span class=n>code</span><span class=p>);</span>
+<span class=ln>14</span>  <span class=n>std</span><span class=o>::</span><span class=n>memcpy</span><span class=p>(</span><span class=n>result</span> <span class=o>+</span> <span class=mi>5</span><span class=p>,</span> <span class=n>msg</span><span class=p>.</span><span class=n>data</span><span class=p>(),</span> <span class=n>len1</span><span class=p>);</span>
+<span class=ln>15</span>  <span class=k>if</span> <span class=p>(</span><span class=n>len2</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>16</span>    <span class=n>result</span><span class=p>[</span><span class=mi>5</span> <span class=o>+</span> <span class=n>len1</span><span class=p>]</span> <span class=o>=</span> <span class=sc>&#39;:&#39;</span><span class=p>;</span>
+<span class=ln>17</span>    <span class=n>result</span><span class=p>[</span><span class=mi>6</span> <span class=o>+</span> <span class=n>len1</span><span class=p>]</span> <span class=o>=</span> <span class=sc>&#39; &#39;</span><span class=p>;</span>
+<span class=ln>18</span>    <span class=n>std</span><span class=o>::</span><span class=n>memcpy</span><span class=p>(</span><span class=n>result</span> <span class=o>+</span> <span class=mi>7</span> <span class=o>+</span> <span class=n>len1</span><span class=p>,</span> <span class=n>msg2</span><span class=p>.</span><span class=n>data</span><span class=p>(),</span> <span class=n>len2</span><span class=p>);</span>
+<span class=ln>19</span>  <span class=p>}</span>
+<span class=ln>20</span>  <span class=n>state_</span> <span class=o>=</span> <span class=n>result</span><span class=p>;</span>
+<span class=ln>21</span><span class=p>}</span>
+<span class=ln>22</span>
+<span class=ln>23</span>
+</code></pre></div><h2 id=注释>注释</h2>
 </div>
 <div class=post_comments>
 </div>
