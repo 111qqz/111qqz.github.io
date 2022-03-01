@@ -1,6 +1,6 @@
 <!doctype html><html lang=en data-figures class=page>
 <head>
-<title>levelDB 代码阅读笔记 01 | 111qqz的小窝</title>
+<title>levelDB 代码阅读笔记 01 db.h | 111qqz的小窝</title>
 <meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta http-equiv=x-ua-compatible content="IE=edge">
@@ -13,9 +13,9 @@
  murmurhash …">
 <meta name=twitter:card content="summary">
 <meta name=twitter:creator content>
-<meta name=twitter:title content="levelDB 代码阅读笔记 01  ">
+<meta name=twitter:title content="levelDB 代码阅读笔记 01 db.h">
 <meta property="og:url" content="https://111qqz.com/2022/02/leveldb-notes-01/">
-<meta property="og:title" content="levelDB 代码阅读笔记 01  ">
+<meta property="og:title" content="levelDB 代码阅读笔记 01 db.h">
 <meta property="og:description" content="背景 最近在做一个智能算力相关的项目，类似美团外卖广告智能算力的探索与实践 其中实现控制系统需要与数据库交互。 虽然最后技术选型并没有使用到levelDB,但是想趁机把代码读了吧。
 很惊讶的发现我大三的时候声称自己度过部分levelDB代码，甚至还写了几篇相关的博客，比如
  murmurhash …">
@@ -66,7 +66,7 @@
 <span class=nav_child></span>
 <a href=https://111qqz.com/tags/cpp class="nav_child nav_item" title=cpp>cpp</a>
 <a href=https://111qqz.com/tags/cuda class="nav_child nav_item" title=cuda>cuda</a>
-<a href=https://111qqz.com/tags/levelDB class="nav_child nav_item" title=levelDB源码阅读笔记>levelDB源码阅读笔记</a>
+<a href=https://111qqz.com/tags/leveldb class="nav_child nav_item" title=levelDB源码笔记>levelDB源码笔记</a>
 <a href=https://111qqz.com/tags/linux class="nav_child nav_item" title=linux>linux</a>
 <a href=https://111qqz.com/tags/%E5%89%8D%E7%AB%AF class="nav_child nav_item" title=前端>前端</a>
 <a href=https://111qqz.com/tags/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86 class="nav_child nav_item" title=图像处理>图像处理</a>
@@ -103,20 +103,20 @@
 <main>
 <div class="grid-inverse wrap content">
 <article class=post_content>
-<h1 class=post_title>levelDB 代码阅读笔记 01 </h1>
+<h1 class=post_title>levelDB 代码阅读笔记 01 db.h</h1>
 <div class=post_meta>
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Feb 26, 2022</span>
-<span class=post_time> · 3 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=levelDB class="post_tag button button_translucent">levelDB
+<span class=post_time> · 3 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
 </a>
 </span>
 <span class=page_only>&nbsp;·
 <div class=post_share>
 Share on:
-<a href="https://twitter.com/intent/tweet?text=levelDB%20%e4%bb%a3%e7%a0%81%e9%98%85%e8%af%bb%e7%ac%94%e8%ae%b0%2001%20%20&url=https%3a%2f%2f111qqz.com%2f2022%2f02%2fleveldb-notes-01%2f&tw_p=tweetbutton" class=twitter title="Share on Twitter" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#twitter"/></svg>
+<a href="https://twitter.com/intent/tweet?text=levelDB%20%e4%bb%a3%e7%a0%81%e9%98%85%e8%af%bb%e7%ac%94%e8%ae%b0%2001%20db.h&url=https%3a%2f%2f111qqz.com%2f2022%2f02%2fleveldb-notes-01%2f&tw_p=tweetbutton" class=twitter title="Share on Twitter" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#twitter"/></svg>
 </a>
-<a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2f111qqz.com%2f2022%2f02%2fleveldb-notes-01%2f&t=levelDB%20%e4%bb%a3%e7%a0%81%e9%98%85%e8%af%bb%e7%ac%94%e8%ae%b0%2001%20%20" class=facebook title="Share on Facebook" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#facebook"/></svg>
+<a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2f111qqz.com%2f2022%2f02%2fleveldb-notes-01%2f&t=levelDB%20%e4%bb%a3%e7%a0%81%e9%98%85%e8%af%bb%e7%ac%94%e8%ae%b0%2001%20db.h" class=facebook title="Share on Facebook" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#facebook"/></svg>
 </a>
 <a href=#linkedinshare id=linkedinshare class=linkedin title="Share on LinkedIn" rel=nofollow><svg class="icon"><use xlink:href="#linkedin"/></svg>
 </a>
@@ -262,6 +262,15 @@ Share on:
 <span class=ln>22</span>
 <span class=ln>23</span>
 </code></pre></div><h2 id=注释>注释</h2>
+<p>include/leveldb/db.h 文件算是整个项目的接口，注释写的全面而详细</p>
+<p>大概有以下几个方面:</p>
+<ul>
+<li>函数是做什么的</li>
+<li>正常情况下的返回值;异常情况下的返回值</li>
+<li>参数的生命周期</li>
+<li>当操作的key不存在时，是否返回错误(如Delete不会返回错误，但似乎Get会返回错误)</li>
+<li>线程安全性。 哪些部分是可以直接多个thread调用的，哪些需要外部加锁</li>
+</ul>
 </div>
 <div class=post_comments>
 </div>
