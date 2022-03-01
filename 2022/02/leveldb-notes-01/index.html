@@ -108,7 +108,7 @@
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Feb 26, 2022</span>
-<span class=post_time> · 1 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=levelDB class="post_tag button button_translucent">levelDB
+<span class=post_time> · 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=levelDB class="post_tag button button_translucent">levelDB
 </a>
 </span>
 <span class=page_only>&nbsp;·
@@ -190,6 +190,25 @@ Share on:
 <li><a href=https://gcc.gnu.org/wiki/Visibility>gcc-wiki-Why is the new C++ visibility support so useful?</a></li>
 <li><a href=https://111qqz.com/2018/08/symbol-table-visibility/>记录一次因动态库符号表可见性导致的未定义的引用(undefined reference)</a></li>
 </ul>
+<h2 id=slice>slice</h2>
+<p>代码位于include/leveldb/slice.h</p>
+<p>Slice 基本就是一个string_view,提供一个只读的窗口</p>
+<p>值得一提的可能是Slice::compare 函数，用来做一个三路比较</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span>
+<span class=ln> 3</span><span class=kr>inline</span> <span class=kt>int</span> <span class=n>Slice</span><span class=o>::</span><span class=n>compare</span><span class=p>(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>b</span><span class=p>)</span> <span class=k>const</span> <span class=p>{</span>
+<span class=ln> 4</span> <span class=k>const</span> <span class=n>size_t</span> <span class=n>min_len</span> <span class=o>=</span> <span class=p>(</span><span class=n>size_</span> <span class=o>&lt;</span> <span class=n>b</span><span class=p>.</span><span class=n>size_</span><span class=p>)</span> <span class=o>?</span> <span class=nl>size_</span> <span class=p>:</span> <span class=n>b</span><span class=p>.</span><span class=n>size_</span><span class=p>;</span>
+<span class=ln> 5</span> <span class=kt>int</span> <span class=n>r</span> <span class=o>=</span> <span class=n>memcmp</span><span class=p>(</span><span class=n>data_</span><span class=p>,</span> <span class=n>b</span><span class=p>.</span><span class=n>data_</span><span class=p>,</span> <span class=n>min_len</span><span class=p>);</span>
+<span class=ln> 6</span> <span class=k>if</span> <span class=p>(</span><span class=n>r</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln> 7</span>   <span class=k>if</span> <span class=p>(</span><span class=n>size_</span> <span class=o>&lt;</span> <span class=n>b</span><span class=p>.</span><span class=n>size_</span><span class=p>)</span>
+<span class=ln> 8</span>     <span class=n>r</span> <span class=o>=</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+<span class=ln> 9</span>   <span class=k>else</span> <span class=nf>if</span> <span class=p>(</span><span class=n>size_</span> <span class=o>&gt;</span> <span class=n>b</span><span class=p>.</span><span class=n>size_</span><span class=p>)</span>
+<span class=ln>10</span>     <span class=n>r</span> <span class=o>=</span> <span class=o>+</span><span class=mi>1</span><span class=p>;</span>
+<span class=ln>11</span> <span class=p>}</span>
+<span class=ln>12</span> <span class=k>return</span> <span class=n>r</span><span class=p>;</span>
+<span class=ln>13</span><span class=p>}</span>
+<span class=ln>14</span>
+</code></pre></div><p>实际上这部分可以借助c++20的<a href=https://en.cppreference.com/w/cpp/language/default_comparisons>default_comparisons</a> 做一个简化</p>
 </div>
 <div class=post_comments>
 </div>
