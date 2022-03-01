@@ -128,7 +128,7 @@ Share on:
 <div class=post_body><p>levelDB是一个有序的KV存储，因此key的顺序是十分关键的
 levelDB提供用户自己定义key顺序的能力</p>
 <p>先看下comparator的接口</p>
-<h1 id=接口-includeleveldbcomparatorh>接口 include/leveldb/comparator.h</h1>
+<h2 id=接口-includeleveldbcomparatorh>接口 include/leveldb/comparator.h</h2>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
 <span class=ln> 2</span><span class=c1>// A Comparator object provides a total order across slices that are
 </span><span class=ln> 3</span><span class=c1>// used as keys in an sstable or a database.  A Comparator implementation
@@ -175,9 +175,9 @@ levelDB提供用户自己定义key顺序的能力</p>
 其实可以简单理解成为了节省存储，而对key做了一定修改。
 这个实现是不确定的，甚至完全什么都不做也是合法的。</p>
 <p>下面我们主要看一下levelDB中两个实现了这个接口的sub class</p>
-<h1 id=bytewisecomparatorimpl>BytewiseComparatorImpl</h1>
+<h2 id=bytewisecomparatorimpl>BytewiseComparatorImpl</h2>
 <p>默认的comparator,按照byte的字典序比较大小</p>
-<h2 id=主体实现>主体实现</h2>
+<h3 id=主体实现>主体实现</h3>
 <p>需要注意 FindShortestSeparator和 FindShortSuccessor 的实现并非唯一的</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
 <span class=ln> 2</span><span class=k>class</span> <span class=nc>BytewiseComparatorImpl</span> <span class=o>:</span> <span class=k>public</span> <span class=n>Comparator</span> <span class=p>{</span>
@@ -231,7 +231,7 @@ levelDB提供用户自己定义key顺序的能力</p>
 <span class=ln>50</span><span class=p>};</span>
 <span class=ln>51</span>
 <span class=ln>52</span>
-</code></pre></div><h2 id=scott-meyerss-singleton>Scott Meyers's singleton</h2>
+</code></pre></div><h3 id=scott-meyerss-singleton>Scott Meyers's singleton</h3>
 <p>比较值得一提的可能是这个单例的实现</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>
 <span class=ln>2</span><span class=k>const</span> <span class=n>Comparator</span><span class=o>*</span> <span class=nf>BytewiseComparator</span><span class=p>()</span> <span class=p>{</span>
@@ -268,7 +268,7 @@ levelDB提供用户自己定义key顺序的能力</p>
 <li><strong>c++11之后，标准保证了local static variable的创建是thread-safe的</strong></li>
 </ul>
 <p>但是 NoDestructor 是个什么东西呢</p>
-<h2 id=nodestructor>NoDestructor</h2>
+<h3 id=nodestructor>NoDestructor</h3>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
 <span class=ln> 2</span><span class=c1>// Wraps an instance whose destructor is never called.
 </span><span class=ln> 3</span><span class=c1>//
