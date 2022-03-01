@@ -104,6 +104,46 @@
 <div class=excerpt>
 <div class=excerpt_header>
 <h3 class=post_link>
+<a href=https://111qqz.com/2020/05/caffe-source-code-analysis-part11/ title="caffe 源码学习笔记(11) argmax layer">caffe 源码学习笔记(11) argmax layer</a>
+</h3>
+<div class=post_meta>
+<span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
+<span class=post_date>
+May 6, 2020</span>
+<span class=post_time> · 3 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/caffe title=caffe class="post_tag button button_translucent">caffe
+</a>
+</span>
+<span class=page_only>&nbsp;·
+<div class=post_share>
+Share on:
+<a href="https://twitter.com/intent/tweet?text=caffe%20%e6%ba%90%e7%a0%81%e5%ad%a6%e4%b9%a0%e7%ac%94%e8%ae%b0%2811%29%20argmax%20layer&url=https%3a%2f%2f111qqz.com%2f2020%2f05%2fcaffe-source-code-analysis-part11%2f&tw_p=tweetbutton" class=twitter title="Share on Twitter" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#twitter"/></svg>
+</a>
+<a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2f111qqz.com%2f2020%2f05%2fcaffe-source-code-analysis-part11%2f&t=caffe%20%e6%ba%90%e7%a0%81%e5%ad%a6%e4%b9%a0%e7%ac%94%e8%ae%b0%2811%29%20argmax%20layer" class=facebook title="Share on Facebook" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#facebook"/></svg>
+</a>
+<a href=#linkedinshare id=linkedinshare class=linkedin title="Share on LinkedIn" rel=nofollow><svg class="icon"><use xlink:href="#linkedin"/></svg>
+</a>
+<a href=https://111qqz.com/2020/05/caffe-source-code-analysis-part11/ title="Copy Link" class="link link_yank"><svg class="icon"><use xlink:href="#copy"/></svg>
+</a>
+</div>
+</span>
+</div>
+</div>
+<div class=excerpt_footer>
+<div class=pale>
+<p>背景 似乎没什么背景,继续看caffe代码
+argmax的作用是返回一个blob某个维度或者batch_size之后的维度的top_k的index(或者pair(index,value))
+proto 还是先看proto
+12message ArgMaxParameter {3 // If true produce pairs (argmax, maxval) 4 optional bool out_max_val = 1 [default = false];5 optional uint32 top_k = 2 [default = 1];6 // The axis along which to maximise -- may …</p>
+<br>
+<a href=https://111qqz.com/2020/05/caffe-source-code-analysis-part11/ title="Read More" class="excerpt_more button">Read More</a>
+</div>
+</div>
+</div>
+</li>
+<li class=post_item>
+<div class=excerpt>
+<div class=excerpt_header>
+<h3 class=post_link>
 <a href=https://111qqz.com/2020/05/caffe-source-code-analysis-part10/ title="caffe 源码学习笔记(10) eltwise layer">caffe 源码学习笔记(10) eltwise layer</a>
 </h3>
 <div class=post_meta>
@@ -465,47 +505,6 @@ Share on:
 </div>
 </div>
 </li>
-<li class=post_item>
-<div class=excerpt>
-<div class=excerpt_header>
-<h3 class=post_link>
-<a href=https://111qqz.com/2020/04/caffe-source-code-analysis-part4/ title="caffe 源码学习笔记(4) 激活函数">caffe 源码学习笔记(4) 激活函数</a>
-</h3>
-<div class=post_meta>
-<span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
-<span class=post_date>
-Apr 7, 2020</span>
-<span class=post_time> · 6 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/caffe title=caffe class="post_tag button button_translucent">caffe
-</a>
-</span>
-<span class=page_only>&nbsp;·
-<div class=post_share>
-Share on:
-<a href="https://twitter.com/intent/tweet?text=caffe%20%e6%ba%90%e7%a0%81%e5%ad%a6%e4%b9%a0%e7%ac%94%e8%ae%b0%284%29%20%e6%bf%80%e6%b4%bb%e5%87%bd%e6%95%b0&url=https%3a%2f%2f111qqz.com%2f2020%2f04%2fcaffe-source-code-analysis-part4%2f&tw_p=tweetbutton" class=twitter title="Share on Twitter" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#twitter"/></svg>
-</a>
-<a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2f111qqz.com%2f2020%2f04%2fcaffe-source-code-analysis-part4%2f&t=caffe%20%e6%ba%90%e7%a0%81%e5%ad%a6%e4%b9%a0%e7%ac%94%e8%ae%b0%284%29%20%e6%bf%80%e6%b4%bb%e5%87%bd%e6%95%b0" class=facebook title="Share on Facebook" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#facebook"/></svg>
-</a>
-<a href=#linkedinshare id=linkedinshare class=linkedin title="Share on LinkedIn" rel=nofollow><svg class="icon"><use xlink:href="#linkedin"/></svg>
-</a>
-<a href=https://111qqz.com/2020/04/caffe-source-code-analysis-part4/ title="Copy Link" class="link link_yank"><svg class="icon"><use xlink:href="#copy"/></svg>
-</a>
-</div>
-</span>
-</div>
-</div>
-<div class=excerpt_footer>
-<div class=pale>
-<p>在看过caffe代码的三个核心部分,blob,layer,net之后，陷入了不知道以什么顺序继续看的困境。
-blob,layer,net只是三个最基本的概念，关键还是在于各个layer. 但是layer这么多，要怎么看呢？ 想了一下决定把相同作用的layer放在一起分析。 今天打算先分析一下激活函数。
-sigmoid 表达式为 f(t) = 1/(1+e^-t)
-caffe GPU实现，非常直接
-1 2template &lt;typename Dtype> 3__global__ void SigmoidForward(const int n, const Dtype* in, Dtype* out) { 4 …</p>
-<br>
-<a href=https://111qqz.com/2020/04/caffe-source-code-analysis-part4/ title="Read More" class="excerpt_more button">Read More</a>
-</div>
-</div>
-</div>
-</li>
 <li>
 <ul class="pagination pagination-default">
 <li class=page-item>
@@ -597,7 +596,7 @@ DEEP-LEARNING
 </a>
 <a href=https://111qqz.com/categories/%E5%B7%A5%E7%A8%8B/ class="post_tag button button_translucent" title=工程>
 工程
-<span class=button_tally>48</span>
+<span class=button_tally>49</span>
 </a>
 <a href=https://111qqz.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/ class="post_tag button button_translucent" title=计算机视觉>
 计算机视觉
@@ -609,7 +608,7 @@ MOOC
 </a>
 <a href=https://111qqz.com/categories/%E4%BC%98%E5%8C%96/ class="post_tag button button_translucent" title=优化>
 优化
-<span class=button_tally>10</span>
+<span class=button_tally>11</span>
 </a>
 <a href=https://111qqz.com/categories/c++/ class="post_tag button button_translucent" title=c++>
 C++
@@ -700,7 +699,7 @@ BINARY-SEARCH
 </a>
 <a href=https://111qqz.com/tags/atom/ class="post_tag button button_translucent" data-position=1 title=atom>ATOM<span class=button_tally>1</span>
 </a>
-<a href=https://111qqz.com/tags/avx/ class="post_tag button button_translucent" data-position=1 title=avx>AVX<span class=button_tally>1</span>
+<a href=https://111qqz.com/tags/avx/ class="post_tag button button_translucent" data-position=2 title=avx>AVX<span class=button_tally>2</span>
 </a>
 <a href=https://111qqz.com/tags/awk/ class="post_tag button button_translucent" data-position=1 title=awk>AWK<span class=button_tally>1</span>
 </a>
@@ -998,7 +997,7 @@ BINARY-SEARCH
 </a>
 <a href=https://111qqz.com/tags/shadowsocks/ class="post_tag button button_translucent" data-position=2 title=shadowsocks>SHADOWSOCKS<span class=button_tally>2</span>
 </a>
-<a href=https://111qqz.com/tags/simd/ class="post_tag button button_translucent" data-position=1 title=simd>SIMD<span class=button_tally>1</span>
+<a href=https://111qqz.com/tags/simd/ class="post_tag button button_translucent" data-position=2 title=simd>SIMD<span class=button_tally>2</span>
 </a>
 <a href=https://111qqz.com/tags/simhash/ class="post_tag button button_translucent" data-position=1 title=simhash>SIMHASH<span class=button_tally>1</span>
 </a>
