@@ -108,7 +108,7 @@
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Mar 1, 2022</span>
-<span class=post_time> · 5 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
+<span class=post_time> · 6 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
 </a>
 </span>
 <span class=page_only>&nbsp;·
@@ -356,6 +356,34 @@ levelDB提供用户自己定义key顺序的能力</p>
 As with any other uninitialized storage, the objects are created using placement new and destroyed with explicit destructor calls.</p>
 </blockquote>
 </div>
+<h4 id=why-use-nodestructor>why use NoDestructor</h4>
+<p>代码看懂了，但还有最重要的一点是，为什么要用这个？</p>
+<p>这个实现最初貌似出现在chromium的开发者讨论中 <a href="https://groups.google.com/a/chromium.org/g/cxx/c/rs_iizoAu6w?pli=1">Proposal: use base::NoDestructor for leaky non-POD globals (and get rid of base::Singleton?)</a></p>
+<p>chromium中的实现在<a href=https://chromium.googlesource.com/chromium/src/base/+/refs/heads/main/no_destructor.h>这里</a></p>
+<p>我看这个代码最大的疑问是，就算不用NoDestructor，一个static local variable也不会进行析构（在程序退出时才进行),那么为啥要用NoDestructor呢？</p>
+<div class="notices info">
+<div class=label>Info</div>
+<p>Variables declared at block scope with the specifier static or thread_local (since C++11) have static or thread (since C++11) storage duration but are initialized <strong>the first time control passes through their declaration</strong> (unless their initialization is zero- or constant-initialization, which can be performed before the block is first entered). On all further calls, the declaration is skipped.</p>
+<p>The destructor for a block-scope static variable is called <strong>at program exit</strong>, but only if the initialization took place successfully.</p>
+</div>
+<p>看了chromium中的注释才发现，是被名字误解了
+<div class="notices warning">
+<div class=label>Warning</div>
+<p>NoDestructor的目的并不是提供一种不用析构的能力，而是提供了其他优势，又<strong>恰好不需要析构</strong>。所以用了这个名字</p>
+</div>
+</p>
+<p>那NoDesctructor有什么优势呢？</p>
+<ul>
+<li>对比local static,NoDesctructor<t>是inline stored的，不存在malloc和指针解引用，效率更高</li>
+<li>对比chromium中的 base::LazyInstance，支持对构造函数中传入参数</li>
+</ul>
+<p>经常提到的一个词是"inline storage / stored inline"我理解在这个语境下说的是<a href=https://en.cppreference.com/w/cpp/language/storage_duration>storage_duration</a>中的 <strong>static storage duration</strong>
+(<strong>存疑</strong>)</p>
+<p>参考:</p>
+<ul>
+<li><a href=https://zhuanlan.zhihu.com/p/273437088>chrome为什么用NoDestructor替换掉LazyInstance</a></li>
+<li><a href=https://github.com/google/leveldb/commit/05709fb43eea34936c9f535edcb74d5e91a0b495>Remove InitOnce from the port API.</a></li>
+</ul>
 </div>
 <div class=post_comments>
 </div>
