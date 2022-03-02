@@ -108,7 +108,7 @@
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Mar 1, 2022</span>
-<span class=post_time> · 4 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
+<span class=post_time> · 5 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
 </a>
 </span>
 <span class=page_only>&nbsp;·
@@ -310,7 +310,58 @@ levelDB提供用户自己定义key顺序的能力</p>
 <span class=ln>39</span>
 <span class=ln>40</span>
 <span class=ln>41</span>
-</code></pre></div>
+</code></pre></div><h4 id=变长参数与stdforward>变长参数与std::forward</h4>
+<p>首先是看到构造函数的变长模板和变长参数列表的用法，可以支持传入任意数量个任意类型的参数，这个用法在std::make_unique之类的函数非常常见
+并且一般会用std::forward将参数的形式按照传入的形式往下层传，参考 <a href=https://en.cppreference.com/w/cpp/memory/unique_ptr/make_unique>cppreference:make_unique</a></p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>
+<span class=ln>2</span><span class=k>template</span><span class=o>&lt;</span><span class=k>class</span> <span class=nc>T</span><span class=p>,</span> <span class=k>class</span><span class=err>... </span><span class=nc>Args</span><span class=o>&gt;</span>
+<span class=ln>3</span><span class=n>std</span><span class=o>::</span><span class=n>enable_if_t</span><span class=o>&lt;!</span><span class=n>std</span><span class=o>::</span><span class=n>is_array</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;::</span><span class=n>value</span><span class=p>,</span> <span class=n>std</span><span class=o>::</span><span class=n>unique_ptr</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;&gt;</span>
+<span class=ln>4</span><span class=n>make_unique</span><span class=p>(</span><span class=n>Args</span><span class=o>&amp;&amp;</span><span class=p>...</span> <span class=n>args</span><span class=p>)</span>
+<span class=ln>5</span><span class=p>{</span>
+<span class=ln>6</span>    <span class=k>return</span> <span class=n>std</span><span class=o>::</span><span class=n>unique_ptr</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;</span><span class=p>(</span><span class=k>new</span> <span class=n>T</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>forward</span><span class=o>&lt;</span><span class=n>Args</span><span class=o>&gt;</span><span class=p>(</span><span class=n>args</span><span class=p>)...));</span>
+<span class=ln>7</span><span class=p>}</span>
+</code></pre></div><h4 id=placement-new>placement new</h4>
+<p>可以看到这里也很特别</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>
+<span class=ln>2</span>    <span class=k>new</span> <span class=p>(</span><span class=o>&amp;</span><span class=n>instance_storage_</span><span class=p>)</span>
+<span class=ln>3</span>        <span class=n>InstanceType</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>forward</span><span class=o>&lt;</span><span class=n>ConstructorArgTypes</span><span class=o>&gt;</span><span class=p>(</span><span class=n>constructor_args</span><span class=p>)...);</span>
+<span class=ln>4</span>
+</code></pre></div><p>看到new会自然想到这个内存是内配在heap上的，然而实际上却未必。
+这个语法叫做<a href=https://en.cppreference.com/w/cpp/language/new#Placement_new>placement new</a>
+可以支持在一个预先分配好的memory(不一定是在heap上，可以是在stack上)来在指定的内存中构造对象</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span><span class=c1>// within any block scope...
+</span><span class=ln> 3</span><span class=c1></span><span class=p>{</span>
+<span class=ln> 4</span>    <span class=k>alignas</span><span class=p>(</span><span class=n>T</span><span class=p>)</span> <span class=kt>unsigned</span> <span class=kt>char</span> <span class=n>buf</span><span class=p>[</span><span class=k>sizeof</span><span class=p>(</span><span class=n>T</span><span class=p>)];</span>
+<span class=ln> 5</span>    <span class=c1>// Statically allocate the storage with automatic storage duration
+</span><span class=ln> 6</span><span class=c1></span>    <span class=c1>// which is large enough for any object of type `T`.
+</span><span class=ln> 7</span><span class=c1></span>    <span class=n>T</span><span class=o>*</span> <span class=n>tptr</span> <span class=o>=</span> <span class=k>new</span><span class=p>(</span><span class=n>buf</span><span class=p>)</span> <span class=n>T</span><span class=p>;</span> <span class=c1>// Construct a `T` object, placing it directly into your 
+</span><span class=ln> 8</span><span class=c1></span>                          <span class=c1>// pre-allocated storage at memory address `buf`.
+</span><span class=ln> 9</span><span class=c1></span>    <span class=n>tptr</span><span class=o>-&gt;~</span><span class=n>T</span><span class=p>();</span>           <span class=c1>// You must **manually** call the object&#39;s destructor
+</span><span class=ln>10</span><span class=c1></span>                          <span class=c1>// if its side effects is depended by the program.
+</span><span class=ln>11</span><span class=c1></span><span class=p>}</span>                         <span class=c1>// Leaving this block scope automatically deallocates `buf`.
+</span><span class=ln>12</span><span class=c1></span>
+<span class=ln>13</span>
+</code></pre></div><p>需要注意的是，与普通的new和delete对应不同。 使用placement new构造出的对象，需要显式调用析构函数。 参考<a href=https://www.stroustrup.com/bs_faq2.html#placement-delete>is there a placemnet delete?</a>的说明</p>
+<p>那么问题来了，为啥要有placemnet new? 有啥好处？ 我理解主要有两点:</p>
+<div class="notices tip">
+<div class=label>Tip</div>
+<ul>
+<li>类似内存池，每次构造新对象的时候不需要发生malloc,速度更快</li>
+<li>分配内存可能发生异常。 将分配内存的代码与构造对象的部分分开，方便处理</li>
+</ul>
+</div>
+<h4 id=stdaligned_storage>std::aligned_storage</h4>
+<p>这个其实就是与placement new配合使用的，只分配内存，不构造对象。
+参考 <a href=https://en.cppreference.com/w/cpp/types/aligned_storage>aligned_storage</a></p>
+<p>两个模板参数分别是对象至少的size，以及最小的aligment要求。</p>
+<div class="notices tip">
+<div class=label>Tip</div>
+<blockquote>
+<p>The type defined by std::aligned_storage&lt;>::type can be used to create uninitialized memory blocks suitable to hold the objects of given type, optionally aligned stricter than their natural alignment requirement, for example on a cache or page boundary.
+As with any other uninitialized storage, the objects are created using placement new and destroyed with explicit destructor calls.</p>
+</blockquote>
+</div>
 </div>
 <div class=post_comments>
 </div>
