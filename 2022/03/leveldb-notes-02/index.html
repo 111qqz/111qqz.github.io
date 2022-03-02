@@ -298,18 +298,12 @@ levelDB提供用户自己定义key顺序的能力</p>
 <span class=ln>27</span>
 <span class=ln>28</span> <span class=k>private</span><span class=o>:</span>
 <span class=ln>29</span>
-<span class=ln>30</span> <span class=cm>/*
-</span><span class=ln>31</span><span class=cm>
-</span><span class=ln>32</span><span class=cm> 分配内存，但不初始化
-</span><span class=ln>33</span><span class=cm>The type defined by std::aligned_storage&lt;&gt;::type can be used to create uninitialized memory blocks suitable to hold the objects of given type, optionally aligned stricter than their natural alignment requirement, for example on a cache or page boundary.
-</span><span class=ln>34</span><span class=cm>
-</span><span class=ln>35</span><span class=cm> */</span>
-<span class=ln>36</span>  <span class=k>typename</span> <span class=n>std</span><span class=o>::</span><span class=n>aligned_storage</span><span class=o>&lt;</span><span class=k>sizeof</span><span class=p>(</span><span class=n>InstanceType</span><span class=p>),</span>
-<span class=ln>37</span>                                <span class=k>alignof</span><span class=p>(</span><span class=n>InstanceType</span><span class=p>)</span><span class=o>&gt;::</span><span class=n>type</span> <span class=n>instance_storage_</span><span class=p>;</span>
-<span class=ln>38</span><span class=p>};</span>
-<span class=ln>39</span>
-<span class=ln>40</span>
-<span class=ln>41</span>
+<span class=ln>30</span>  <span class=k>typename</span> <span class=n>std</span><span class=o>::</span><span class=n>aligned_storage</span><span class=o>&lt;</span><span class=k>sizeof</span><span class=p>(</span><span class=n>InstanceType</span><span class=p>),</span>
+<span class=ln>31</span>                                <span class=k>alignof</span><span class=p>(</span><span class=n>InstanceType</span><span class=p>)</span><span class=o>&gt;::</span><span class=n>type</span> <span class=n>instance_storage_</span><span class=p>;</span>
+<span class=ln>32</span><span class=p>};</span>
+<span class=ln>33</span>
+<span class=ln>34</span>
+<span class=ln>35</span>
 </code></pre></div><h4 id=变长参数与stdforward>变长参数与std::forward</h4>
 <p>首先是看到构造函数的变长模板和变长参数列表的用法，可以支持传入任意数量个任意类型的参数，这个用法在std::make_unique之类的函数非常常见
 并且一般会用std::forward将参数的形式按照传入的形式往下层传，参考 <a href=https://en.cppreference.com/w/cpp/memory/unique_ptr/make_unique>cppreference:make_unique</a></p>
@@ -355,8 +349,8 @@ levelDB提供用户自己定义key顺序的能力</p>
 <p>这个其实就是与placement new配合使用的，只分配内存，不构造对象。
 参考 <a href=https://en.cppreference.com/w/cpp/types/aligned_storage>aligned_storage</a></p>
 <p>两个模板参数分别是对象至少的size，以及最小的aligment要求。</p>
-<div class="notices tip">
-<div class=label>Tip</div>
+<div class="notices info">
+<div class=label>Info</div>
 <blockquote>
 <p>The type defined by std::aligned_storage&lt;>::type can be used to create uninitialized memory blocks suitable to hold the objects of given type, optionally aligned stricter than their natural alignment requirement, for example on a cache or page boundary.
 As with any other uninitialized storage, the objects are created using placement new and destroyed with explicit destructor calls.</p>
