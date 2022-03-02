@@ -108,7 +108,7 @@
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Mar 1, 2022</span>
-<span class=post_time> · 6 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
+<span class=post_time> · 7 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
 </a>
 </span>
 <span class=page_only>&nbsp;·
@@ -372,7 +372,91 @@ As with any other uninitialized storage, the objects are created using placement
 <p>NoDestructor的目的并不是提供一种不用析构的能力，而是提供了其他优势，又<strong>恰好不需要析构</strong>。所以用了这个名字</p>
 </div>
 </p>
-<p>那NoDesctructor有什么优势呢？</p>
+<p>同时，我之前理解是不对的。</p>
+<div class="notices warning">
+<div class=label>Warning</div>
+<p>static local variable是在程序退出时析构，而NoDestructor是程序退出时也不会析构。</p>
+</div>
+<p>这两个不是一回事，可以从如下这段测试中看出区别:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span><span class=c1>// Copyright (c) 2018 The LevelDB Authors. All rights reserved.
+</span><span class=ln> 3</span><span class=c1>// Use of this source code is governed by a BSD-style license that can be
+</span><span class=ln> 4</span><span class=c1>// found in the LICENSE file. See the AUTHORS file for names of contributors.
+</span><span class=ln> 5</span><span class=c1></span>
+<span class=ln> 6</span><span class=cp>#include</span> <span class=cpf>&#34;util/no_destructor.h&#34;</span><span class=cp>
+</span><span class=ln> 7</span><span class=cp></span>
+<span class=ln> 8</span><span class=cp>#include</span> <span class=cpf>&lt;cstdint&gt;</span><span class=cp>
+</span><span class=ln> 9</span><span class=cp>#include</span> <span class=cpf>&lt;cstdlib&gt;</span><span class=cp>
+</span><span class=ln>10</span><span class=cp>#include</span> <span class=cpf>&lt;utility&gt;</span><span class=cp>
+</span><span class=ln>11</span><span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span><span class=ln>12</span><span class=cp></span>
+<span class=ln>13</span><span class=cp>#include</span> <span class=cpf>&#34;gtest/gtest.h&#34;</span><span class=cp>
+</span><span class=ln>14</span><span class=cp></span>
+<span class=ln>15</span><span class=k>namespace</span> <span class=n>leveldb</span> <span class=p>{</span>
+<span class=ln>16</span>
+<span class=ln>17</span><span class=k>namespace</span> <span class=p>{</span>
+<span class=ln>18</span>
+<span class=ln>19</span><span class=k>struct</span> <span class=nc>DoNotDestruct</span> <span class=p>{</span>
+<span class=ln>20</span> <span class=k>public</span><span class=o>:</span>
+<span class=ln>21</span>  <span class=n>DoNotDestruct</span><span class=p>(</span><span class=kt>uint32_t</span> <span class=n>a</span><span class=p>,</span> <span class=kt>uint64_t</span> <span class=n>b</span><span class=p>)</span> <span class=o>:</span> <span class=n>a</span><span class=p>(</span><span class=n>a</span><span class=p>),</span> <span class=n>b</span><span class=p>(</span><span class=n>b</span><span class=p>)</span> <span class=p>{}</span>
+<span class=ln>22</span>  <span class=o>~</span><span class=n>DoNotDestruct</span><span class=p>()</span> <span class=p>{</span> 
+<span class=ln>23</span>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span><span class=o>&lt;&lt;</span><span class=s>&#34; dtor&#34;</span><span class=o>&lt;&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+<span class=ln>24</span>    <span class=n>std</span><span class=o>::</span><span class=n>abort</span><span class=p>();</span> <span class=p>}</span>
+<span class=ln>25</span>
+<span class=ln>26</span>  <span class=c1>// Used to check constructor argument forwarding.
+</span><span class=ln>27</span><span class=c1></span>  <span class=kt>uint32_t</span> <span class=n>a</span><span class=p>;</span>
+<span class=ln>28</span>  <span class=kt>uint64_t</span> <span class=n>b</span><span class=p>;</span>
+<span class=ln>29</span><span class=p>};</span>
+<span class=ln>30</span>
+<span class=ln>31</span><span class=k>constexpr</span> <span class=k>const</span> <span class=kt>uint32_t</span> <span class=n>kGoldenA</span> <span class=o>=</span> <span class=mh>0xdeadbeef</span><span class=p>;</span>
+<span class=ln>32</span><span class=k>constexpr</span> <span class=k>const</span> <span class=kt>uint64_t</span> <span class=n>kGoldenB</span> <span class=o>=</span> <span class=mh>0xaabbccddeeffaabb</span><span class=p>;</span>
+<span class=ln>33</span>
+<span class=ln>34</span><span class=p>}</span>  <span class=c1>// namespace
+</span><span class=ln>35</span><span class=c1></span>
+<span class=ln>36</span><span class=n>TEST</span><span class=p>(</span><span class=n>NoDestructorTest</span><span class=p>,</span> <span class=n>StackInstance</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>37</span>  <span class=n>NoDestructor</span><span class=o>&lt;</span><span class=n>DoNotDestruct</span><span class=o>&gt;</span> <span class=n>instance</span><span class=p>(</span><span class=n>kGoldenA</span><span class=p>,</span> <span class=n>kGoldenB</span><span class=p>);</span>
+<span class=ln>38</span>  <span class=n>ASSERT_EQ</span><span class=p>(</span><span class=n>kGoldenA</span><span class=p>,</span> <span class=n>instance</span><span class=p>.</span><span class=n>get</span><span class=p>()</span><span class=o>-&gt;</span><span class=n>a</span><span class=p>);</span>
+<span class=ln>39</span>  <span class=n>ASSERT_EQ</span><span class=p>(</span><span class=n>kGoldenB</span><span class=p>,</span> <span class=n>instance</span><span class=p>.</span><span class=n>get</span><span class=p>()</span><span class=o>-&gt;</span><span class=n>b</span><span class=p>);</span>
+<span class=ln>40</span><span class=p>}</span>
+<span class=ln>41</span>
+<span class=ln>42</span><span class=n>TEST</span><span class=p>(</span><span class=n>NoDestructorTest</span><span class=p>,</span> <span class=n>StaticInstance</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>43</span>  <span class=k>static</span> <span class=n>NoDestructor</span><span class=o>&lt;</span><span class=n>DoNotDestruct</span><span class=o>&gt;</span> <span class=n>instance</span><span class=p>(</span><span class=n>kGoldenA</span><span class=p>,</span> <span class=n>kGoldenB</span><span class=p>);</span>
+<span class=ln>44</span>  <span class=n>ASSERT_EQ</span><span class=p>(</span><span class=n>kGoldenA</span><span class=p>,</span> <span class=n>instance</span><span class=p>.</span><span class=n>get</span><span class=p>()</span><span class=o>-&gt;</span><span class=n>a</span><span class=p>);</span>
+<span class=ln>45</span>  <span class=n>ASSERT_EQ</span><span class=p>(</span><span class=n>kGoldenB</span><span class=p>,</span> <span class=n>instance</span><span class=p>.</span><span class=n>get</span><span class=p>()</span><span class=o>-&gt;</span><span class=n>b</span><span class=p>);</span>
+<span class=ln>46</span><span class=p>}</span>
+<span class=ln>47</span>
+<span class=ln>48</span><span class=n>TEST</span><span class=p>(</span><span class=n>NoDestructorTest</span><span class=p>,</span> <span class=n>StaticIns</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>49</span>  <span class=k>static</span> <span class=n>DoNotDestruct</span> <span class=nf>instance</span><span class=p>(</span><span class=n>kGoldenA</span><span class=p>,</span> <span class=n>kGoldenB</span><span class=p>);</span>
+<span class=ln>50</span>  <span class=n>ASSERT_EQ</span><span class=p>(</span><span class=n>kGoldenA</span><span class=p>,</span> <span class=n>instance</span><span class=p>.</span><span class=n>a</span><span class=p>);</span>
+<span class=ln>51</span>  <span class=n>ASSERT_EQ</span><span class=p>(</span><span class=n>kGoldenB</span><span class=p>,</span> <span class=n>instance</span><span class=p>.</span><span class=n>b</span><span class=p>);</span>
+<span class=ln>52</span><span class=p>}</span>
+<span class=ln>53</span>
+<span class=ln>54</span><span class=p>}</span>  <span class=c1>// namespace leveldb
+</span><span class=ln>55</span><span class=c1></span>
+<span class=ln>56</span>
+</code></pre></div><p>输出的结果:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=ln> 1</span>
+<span class=ln> 2</span>root@KUANZEREN-PC4:~/workspace/leveldb/build# ./leveldb_tests    --gtest_filter<span class=o>=</span>*NoDestructor* 
+<span class=ln> 3</span>Running main<span class=o>()</span> from /root/workspace/leveldb/third_party/googletest/googletest/src/gtest_main.cc
+<span class=ln> 4</span>Note: Google Test <span class=nv>filter</span> <span class=o>=</span> *NoDestructor*
+<span class=ln> 5</span><span class=o>[==========]</span> Running <span class=m>3</span> tests from <span class=m>1</span> <span class=nb>test</span> suite.
+<span class=ln> 6</span><span class=o>[</span>----------<span class=o>]</span> Global <span class=nb>test</span> environment set-up.
+<span class=ln> 7</span><span class=o>[</span>----------<span class=o>]</span> <span class=m>3</span> tests from NoDestructorTest
+<span class=ln> 8</span><span class=o>[</span> RUN      <span class=o>]</span> NoDestructorTest.StackInstance
+<span class=ln> 9</span><span class=o>[</span>       OK <span class=o>]</span> NoDestructorTest.StackInstance <span class=o>(</span><span class=m>0</span> ms<span class=o>)</span>
+<span class=ln>10</span><span class=o>[</span> RUN      <span class=o>]</span> NoDestructorTest.StaticInstance
+<span class=ln>11</span><span class=o>[</span>       OK <span class=o>]</span> NoDestructorTest.StaticInstance <span class=o>(</span><span class=m>0</span> ms<span class=o>)</span>
+<span class=ln>12</span><span class=o>[</span> RUN      <span class=o>]</span> NoDestructorTest.StaticIns
+<span class=ln>13</span><span class=o>[</span>       OK <span class=o>]</span> NoDestructorTest.StaticIns <span class=o>(</span><span class=m>0</span> ms<span class=o>)</span>
+<span class=ln>14</span><span class=o>[</span>----------<span class=o>]</span> <span class=m>3</span> tests from NoDestructorTest <span class=o>(</span><span class=m>0</span> ms total<span class=o>)</span>
+<span class=ln>15</span>
+<span class=ln>16</span><span class=o>[</span>----------<span class=o>]</span> Global <span class=nb>test</span> environment tear-down
+<span class=ln>17</span><span class=o>[==========]</span> <span class=m>3</span> tests from <span class=m>1</span> <span class=nb>test</span> suite ran. <span class=o>(</span><span class=m>0</span> ms total<span class=o>)</span>
+<span class=ln>18</span><span class=o>[</span>  PASSED  <span class=o>]</span> <span class=m>3</span> tests.
+<span class=ln>19</span> dtor
+<span class=ln>20</span>Aborted
+<span class=ln>21</span>
+</code></pre></div><p>那NoDesctructor有什么优势呢？</p>
 <ul>
 <li>对比local static,NoDesctructor<t>是inline stored的，不存在malloc和指针解引用，效率更高</li>
 <li>对比chromium中的 base::LazyInstance，支持对构造函数中传入参数</li>
