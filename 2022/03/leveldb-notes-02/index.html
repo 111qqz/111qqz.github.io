@@ -108,7 +108,7 @@
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Mar 1, 2022</span>
-<span class=post_time> · 7 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
+<span class=post_time> · 10 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
 </a>
 </span>
 <span class=page_only>&nbsp;·
@@ -468,6 +468,143 @@ As with any other uninitialized storage, the objects are created using placement
 <li><a href=https://zhuanlan.zhihu.com/p/273437088>chrome为什么用NoDestructor替换掉LazyInstance</a></li>
 <li><a href=https://github.com/google/leveldb/commit/05709fb43eea34936c9f535edcb74d5e91a0b495>Remove InitOnce from the port API.</a></li>
 </ul>
+<h2 id=其他-comparator>其他 Comparator</h2>
+<h3 id=reversekeycomparator>ReverseKeyComparator</h3>
+<p>测试用的Comparator,将key颠倒顺序后使用bytewiseComparator比较大小
+也就是 "abc"变为"cba"</p>
+<h3 id=countcomparator>CountComparator</h3>
+<p>测试用。 其他Comparator的一个包装器，加了个atomic的计数器，用来benchmark</p>
+<h3 id=internalkeycomparator>InternalKeyComparator</h3>
+<p>这个值得讲一下</p>
+<p>首先看到Compare函数</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span><span class=kt>int</span> <span class=n>InternalKeyComparator</span><span class=o>::</span><span class=n>Compare</span><span class=p>(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>akey</span><span class=p>,</span> <span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>bkey</span><span class=p>)</span> <span class=k>const</span> <span class=p>{</span>
+<span class=ln> 3</span>  <span class=c1>// Order by:
+</span><span class=ln> 4</span><span class=c1></span>  <span class=c1>//    increasing user key (according to user-supplied comparator)
+</span><span class=ln> 5</span><span class=c1></span>  <span class=c1>//    decreasing sequence number
+</span><span class=ln> 6</span><span class=c1></span>  <span class=c1>//    decreasing type (though sequence# should be enough to disambiguate)
+</span><span class=ln> 7</span><span class=c1></span>  <span class=kt>int</span> <span class=n>r</span> <span class=o>=</span> <span class=n>user_comparator_</span><span class=o>-&gt;</span><span class=n>Compare</span><span class=p>(</span><span class=n>ExtractUserKey</span><span class=p>(</span><span class=n>akey</span><span class=p>),</span> <span class=n>ExtractUserKey</span><span class=p>(</span><span class=n>bkey</span><span class=p>));</span>
+<span class=ln> 8</span>  <span class=k>if</span> <span class=p>(</span><span class=n>r</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln> 9</span>
+<span class=ln>10</span>    <span class=k>const</span> <span class=kt>uint64_t</span> <span class=n>anum</span> <span class=o>=</span> <span class=n>DecodeFixed64</span><span class=p>(</span><span class=n>akey</span><span class=p>.</span><span class=n>data</span><span class=p>()</span> <span class=o>+</span> <span class=n>akey</span><span class=p>.</span><span class=n>size</span><span class=p>()</span> <span class=o>-</span> <span class=mi>8</span><span class=p>);</span>
+<span class=ln>11</span>    <span class=k>const</span> <span class=kt>uint64_t</span> <span class=n>bnum</span> <span class=o>=</span> <span class=n>DecodeFixed64</span><span class=p>(</span><span class=n>bkey</span><span class=p>.</span><span class=n>data</span><span class=p>()</span> <span class=o>+</span> <span class=n>bkey</span><span class=p>.</span><span class=n>size</span><span class=p>()</span> <span class=o>-</span> <span class=mi>8</span><span class=p>);</span>
+<span class=ln>12</span>    <span class=k>if</span> <span class=p>(</span><span class=n>anum</span> <span class=o>&gt;</span> <span class=n>bnum</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>13</span>      <span class=n>r</span> <span class=o>=</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+<span class=ln>14</span>    <span class=p>}</span> <span class=k>else</span> <span class=nf>if</span> <span class=p>(</span><span class=n>anum</span> <span class=o>&lt;</span> <span class=n>bnum</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>15</span>      <span class=n>r</span> <span class=o>=</span> <span class=o>+</span><span class=mi>1</span><span class=p>;</span>
+<span class=ln>16</span>    <span class=p>}</span>
+<span class=ln>17</span>  <span class=p>}</span>
+<span class=ln>18</span>  <span class=k>return</span> <span class=n>r</span><span class=p>;</span>
+<span class=ln>19</span><span class=p>}</span>
+</code></pre></div><p>最初让人比较疑惑的是，看起来只有两个比较逻辑:</p>
+<ol>
+<li>按照user key升序排列(根据传入的comparator)</li>
+<li>根据DecodeFixex64得到的值(就是把Slice中的最后8byte转换为一个uint64_t的值) 降序排列</li>
+</ol>
+<p>为什么注释里写了三个比较逻辑？
+这里的代码是看不出来的，带着这个疑问，我们去看下DecodeFixex64的值的意义是什么呢</p>
+<p>我们首先看下InternalKey是什么</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span><span class=c1>// Modules in this directory should keep internal keys wrapped inside
+</span><span class=ln> 3</span><span class=c1>// the following class instead of plain strings so that we do not
+</span><span class=ln> 4</span><span class=c1>// incorrectly use string comparisons instead of an InternalKeyComparator.
+</span><span class=ln> 5</span><span class=c1></span><span class=k>class</span> <span class=nc>InternalKey</span> <span class=p>{</span>
+<span class=ln> 6</span> <span class=k>private</span><span class=o>:</span>
+<span class=ln> 7</span>  <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>rep_</span><span class=p>;</span>
+<span class=ln> 8</span>
+<span class=ln> 9</span> <span class=k>public</span><span class=o>:</span>
+<span class=ln>10</span>  <span class=n>InternalKey</span><span class=p>()</span> <span class=p>{}</span>  <span class=c1>// Leave rep_ as empty to indicate it is invalid
+</span><span class=ln>11</span><span class=c1></span>  <span class=n>InternalKey</span><span class=p>(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>user_key</span><span class=p>,</span> <span class=n>SequenceNumber</span> <span class=n>s</span><span class=p>,</span> <span class=n>ValueType</span> <span class=n>t</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>12</span>    <span class=n>AppendInternalKey</span><span class=p>(</span><span class=o>&amp;</span><span class=n>rep_</span><span class=p>,</span> <span class=n>ParsedInternalKey</span><span class=p>(</span><span class=n>user_key</span><span class=p>,</span> <span class=n>s</span><span class=p>,</span> <span class=n>t</span><span class=p>));</span>
+<span class=ln>13</span>  <span class=p>}</span>
+<span class=ln>14</span>
+<span class=ln>15</span>  <span class=kt>bool</span> <span class=nf>DecodeFrom</span><span class=p>(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>s</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>16</span>    <span class=n>rep_</span><span class=p>.</span><span class=n>assign</span><span class=p>(</span><span class=n>s</span><span class=p>.</span><span class=n>data</span><span class=p>(),</span> <span class=n>s</span><span class=p>.</span><span class=n>size</span><span class=p>());</span>
+<span class=ln>17</span>    <span class=k>return</span> <span class=o>!</span><span class=n>rep_</span><span class=p>.</span><span class=n>empty</span><span class=p>();</span>
+<span class=ln>18</span>  <span class=p>}</span>
+<span class=ln>19</span>
+<span class=ln>20</span>  <span class=n>Slice</span> <span class=nf>Encode</span><span class=p>()</span> <span class=k>const</span> <span class=p>{</span>
+<span class=ln>21</span>    <span class=n>assert</span><span class=p>(</span><span class=o>!</span><span class=n>rep_</span><span class=p>.</span><span class=n>empty</span><span class=p>());</span>
+<span class=ln>22</span>    <span class=k>return</span> <span class=n>rep_</span><span class=p>;</span>
+<span class=ln>23</span>  <span class=p>}</span>
+<span class=ln>24</span>
+<span class=ln>25</span>  <span class=n>Slice</span> <span class=nf>user_key</span><span class=p>()</span> <span class=k>const</span> <span class=p>{</span> <span class=k>return</span> <span class=n>ExtractUserKey</span><span class=p>(</span><span class=n>rep_</span><span class=p>);</span> <span class=p>}</span>
+<span class=ln>26</span>
+<span class=ln>27</span>  <span class=kt>void</span> <span class=nf>SetFrom</span><span class=p>(</span><span class=k>const</span> <span class=n>ParsedInternalKey</span><span class=o>&amp;</span> <span class=n>p</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>28</span>    <span class=n>rep_</span><span class=p>.</span><span class=n>clear</span><span class=p>();</span>
+<span class=ln>29</span>    <span class=n>AppendInternalKey</span><span class=p>(</span><span class=o>&amp;</span><span class=n>rep_</span><span class=p>,</span> <span class=n>p</span><span class=p>);</span>
+<span class=ln>30</span>  <span class=p>}</span>
+<span class=ln>31</span>
+<span class=ln>32</span>  <span class=kt>void</span> <span class=nf>Clear</span><span class=p>()</span> <span class=p>{</span> <span class=n>rep_</span><span class=p>.</span><span class=n>clear</span><span class=p>();</span> <span class=p>}</span>
+<span class=ln>33</span>
+<span class=ln>34</span>  <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>DebugString</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+<span class=ln>35</span><span class=p>};</span>
+<span class=ln>36</span>
+<span class=ln>37</span>
+<span class=ln>38</span>
+<span class=ln>39</span>
+</code></pre></div><p>其中最重要的是 AppendInternalKey的部分，里面涵盖了InternalKey的表示
+其实就是由如下三部分组成了一个string
+| userkey | sequence | type |</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span><span class=k>static</span> <span class=kt>uint64_t</span> <span class=nf>PackSequenceAndType</span><span class=p>(</span><span class=kt>uint64_t</span> <span class=n>seq</span><span class=p>,</span> <span class=n>ValueType</span> <span class=n>t</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln> 3</span>  <span class=n>assert</span><span class=p>(</span><span class=n>seq</span> <span class=o>&lt;=</span> <span class=n>kMaxSequenceNumber</span><span class=p>);</span>
+<span class=ln> 4</span>  <span class=n>assert</span><span class=p>(</span><span class=n>t</span> <span class=o>&lt;=</span> <span class=n>kValueTypeForSeek</span><span class=p>);</span>
+<span class=ln> 5</span>  <span class=c1>// 高位是sequence number,低位是type
+</span><span class=ln> 6</span><span class=c1></span>  <span class=k>return</span> <span class=p>(</span><span class=n>seq</span> <span class=o>&lt;&lt;</span> <span class=mi>8</span><span class=p>)</span> <span class=o>|</span> <span class=n>t</span><span class=p>;</span>
+<span class=ln> 7</span><span class=p>}</span>
+<span class=ln> 8</span>
+<span class=ln> 9</span><span class=kt>void</span> <span class=nf>AppendInternalKey</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=o>*</span> <span class=n>result</span><span class=p>,</span> <span class=k>const</span> <span class=n>ParsedInternalKey</span><span class=o>&amp;</span> <span class=n>key</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>10</span>  <span class=c1>// 把user key这个slice 往result后拼接
+</span><span class=ln>11</span><span class=c1></span>  <span class=n>result</span><span class=o>-&gt;</span><span class=n>append</span><span class=p>(</span><span class=n>key</span><span class=p>.</span><span class=n>user_key</span><span class=p>.</span><span class=n>data</span><span class=p>(),</span> <span class=n>key</span><span class=p>.</span><span class=n>user_key</span><span class=p>.</span><span class=n>size</span><span class=p>());</span>
+<span class=ln>12</span>  <span class=n>PutFixed64</span><span class=p>(</span><span class=n>result</span><span class=p>,</span> <span class=n>PackSequenceAndType</span><span class=p>(</span><span class=n>key</span><span class=p>.</span><span class=n>sequence</span><span class=p>,</span> <span class=n>key</span><span class=p>.</span><span class=n>type</span><span class=p>));</span>
+<span class=ln>13</span>  <span class=c1>// Result 中分了三部分
+</span><span class=ln>14</span><span class=c1></span>  <span class=c1>// user_key , sequence, type.  后两部分合成了一个uint64_t
+</span><span class=ln>15</span><span class=c1></span><span class=p>}</span>
+<span class=ln>16</span>
+</code></pre></div><p><strong>要注意的是sequence和type共同放在一个uint64_t中，高56bit为sequence为sequence,低8 bit为type</strong></p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span><span class=c1>// Value types encoded as the last component of internal keys.
+</span><span class=ln> 3</span><span class=c1>// DO NOT CHANGE THESE ENUM VALUES: they are embedded in the on-disk
+</span><span class=ln> 4</span><span class=c1>// data structures.
+</span><span class=ln> 5</span><span class=c1></span><span class=k>enum</span> <span class=nc>ValueType</span> <span class=p>{</span> <span class=n>kTypeDeletion</span> <span class=o>=</span> <span class=mh>0x0</span><span class=p>,</span> <span class=n>kTypeValue</span> <span class=o>=</span> <span class=mh>0x1</span> <span class=p>};</span>
+<span class=ln> 6</span><span class=c1>// kValueTypeForSeek defines the ValueType that should be passed when
+</span><span class=ln> 7</span><span class=c1>// constructing a ParsedInternalKey object for seeking to a particular
+</span><span class=ln> 8</span><span class=c1>// sequence number (since we sort sequence numbers in decreasing order
+</span><span class=ln> 9</span><span class=c1>// and the value type is embedded as the low 8 bits in the sequence
+</span><span class=ln>10</span><span class=c1>// number in internal keys, we need to use the highest-numbered
+</span><span class=ln>11</span><span class=c1>// ValueType, not the lowest).
+</span><span class=ln>12</span><span class=c1></span><span class=k>static</span> <span class=k>const</span> <span class=n>ValueType</span> <span class=n>kValueTypeForSeek</span> <span class=o>=</span> <span class=n>kTypeValue</span><span class=p>;</span>
+<span class=ln>13</span>
+<span class=ln>14</span><span class=k>typedef</span> <span class=kt>uint64_t</span> <span class=n>SequenceNumber</span><span class=p>;</span>
+<span class=ln>15</span>
+<span class=ln>16</span><span class=c1>// We leave eight bits empty at the bottom so a type and sequence#
+</span><span class=ln>17</span><span class=c1>// can be packed together into 64-bits.
+</span><span class=ln>18</span><span class=c1>// 在真正pack的时候会做一个移位
+</span><span class=ln>19</span><span class=c1></span><span class=k>static</span> <span class=k>const</span> <span class=n>SequenceNumber</span> <span class=n>kMaxSequenceNumber</span> <span class=o>=</span> <span class=p>((</span><span class=mh>0x1ull</span> <span class=o>&lt;&lt;</span> <span class=mi>56</span><span class=p>)</span> <span class=o>-</span> <span class=mi>1</span><span class=p>);</span>
+<span class=ln>20</span>
+<span class=ln>21</span><span class=k>struct</span> <span class=nc>ParsedInternalKey</span> <span class=p>{</span>
+<span class=ln>22</span>  <span class=n>Slice</span> <span class=n>user_key</span><span class=p>;</span>
+<span class=ln>23</span>  <span class=n>SequenceNumber</span> <span class=n>sequence</span><span class=p>;</span>
+<span class=ln>24</span>  <span class=n>ValueType</span> <span class=n>type</span><span class=p>;</span>
+<span class=ln>25</span>
+<span class=ln>26</span>  <span class=n>ParsedInternalKey</span><span class=p>()</span> <span class=p>{}</span>  <span class=c1>// Intentionally left uninitialized (for speed)
+</span><span class=ln>27</span><span class=c1></span>  <span class=n>ParsedInternalKey</span><span class=p>(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>u</span><span class=p>,</span> <span class=k>const</span> <span class=n>SequenceNumber</span><span class=o>&amp;</span> <span class=n>seq</span><span class=p>,</span> <span class=n>ValueType</span> <span class=n>t</span><span class=p>)</span>
+<span class=ln>28</span>      <span class=o>:</span> <span class=n>user_key</span><span class=p>(</span><span class=n>u</span><span class=p>),</span> <span class=n>sequence</span><span class=p>(</span><span class=n>seq</span><span class=p>),</span> <span class=n>type</span><span class=p>(</span><span class=n>t</span><span class=p>)</span> <span class=p>{}</span>
+<span class=ln>29</span>  <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>DebugString</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+<span class=ln>30</span><span class=p>};</span>
+<span class=ln>31</span>
+</code></pre></div><p>这也就解释了最初的疑问。 uint64_t实际上暗含了先比较sequence,再比较type的比较逻辑</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>
+<span class=ln>2</span>  <span class=k>const</span> <span class=kt>uint64_t</span> <span class=n>anum</span> <span class=o>=</span> <span class=n>DecodeFixed64</span><span class=p>(</span><span class=n>akey</span><span class=p>.</span><span class=n>data</span><span class=p>()</span> <span class=o>+</span> <span class=n>akey</span><span class=p>.</span><span class=n>size</span><span class=p>()</span> <span class=o>-</span> <span class=mi>8</span><span class=p>);</span>
+<span class=ln>3</span>    <span class=k>const</span> <span class=kt>uint64_t</span> <span class=n>bnum</span> <span class=o>=</span> <span class=n>DecodeFixed64</span><span class=p>(</span><span class=n>bkey</span><span class=p>.</span><span class=n>data</span><span class=p>()</span> <span class=o>+</span> <span class=n>bkey</span><span class=p>.</span><span class=n>size</span><span class=p>()</span> <span class=o>-</span> <span class=mi>8</span><span class=p>);</span>
+<span class=ln>4</span>    <span class=k>if</span> <span class=p>(</span><span class=n>anum</span> <span class=o>&gt;</span> <span class=n>bnum</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>5</span>      <span class=n>r</span> <span class=o>=</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+<span class=ln>6</span>    <span class=p>}</span> <span class=k>else</span> <span class=nf>if</span> <span class=p>(</span><span class=n>anum</span> <span class=o>&lt;</span> <span class=n>bnum</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>7</span>      <span class=n>r</span> <span class=o>=</span> <span class=o>+</span><span class=mi>1</span><span class=p>;</span>
+<span class=ln>8</span>    <span class=p>}</span>
+<span class=ln>9</span>
+</code></pre></div><p>感觉把几个信息合并到一起表示的技巧在levelDB的实现中比较常见， 有点类似状压DP里面的技巧</p>
 </div>
 <div class=post_comments>
 </div>
