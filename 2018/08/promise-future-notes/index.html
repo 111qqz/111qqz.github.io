@@ -128,35 +128,35 @@ Share on:
 <img class="image_figure image_external" loading=lazy src=https://thispointer.com//wp-content/uploads/2015/06/promise.png alt="std::promise and std::future">
 </p>
 <p>用人话就是，主线程传给附属线程一个promise Object,然后主线程想要获取附属线程set给promise Object的值（也就是该线程返回的某个结果），需要通过主线程中的promise object 得到对应的future object(每个promise 对应一个 future),然后调用future 的get方法。如果附属线程没有执行作为参数传入的promise的set方法去返回结果，那么程序就会block住。</p>
-<pre><code>/* ***********************************************
-Author :111qqz
-mail: renkuanze@sensetime.com
-Created Time :2018年08月23日 星期四 10时37分07秒
-File Name :future_sample.cpp
-************************************************ */
-
-#include &lt;iostream&gt;
-#include &lt;thread&gt;
-#include &lt;future&gt;
- 
-void initiazer(std::promise&lt;int&gt; * promObj)
-{
-    //std::cout&lt;&lt;&quot;Inside Thread&quot;&lt;&lt;std::endl;     
-    for ( int i = 1 ; i &lt;= 2000000000 ; i++);
-    //promObj-&gt;set_value(35);
-}
- 
-int main()
-{
-    std::promise&lt;int&gt; promiseObj;
-    std::future&lt;int&gt; futureObj = promiseObj.get_future();
-    std::thread th(initiazer, &amp;promiseObj);
-    std::cout&lt;&lt;futureObj.get()&lt;&lt;std::endl;
-    th.join();
-    return 0;
-}
-</code></pre>
-<p>参考资料:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>   <span class=cm>/* ***********************************************
+</span><span class=ln> 2</span><span class=cm>   Author :111qqz
+</span><span class=ln> 3</span><span class=cm>   mail: renkuanze@sensetime.com
+</span><span class=ln> 4</span><span class=cm>   Created Time :2018年08月23日 星期四 10时37分07秒
+</span><span class=ln> 5</span><span class=cm>   File Name :future_sample.cpp
+</span><span class=ln> 6</span><span class=cm>   ************************************************ */</span>
+<span class=ln> 7</span>   
+<span class=ln> 8</span>   <span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span><span class=ln> 9</span><span class=cp></span>   <span class=cp>#include</span> <span class=cpf>&lt;thread&gt;</span><span class=cp>
+</span><span class=ln>10</span><span class=cp></span>   <span class=cp>#include</span> <span class=cpf>&lt;future&gt;</span><span class=cp>
+</span><span class=ln>11</span><span class=cp></span>    
+<span class=ln>12</span>   <span class=kt>void</span> <span class=nf>initiazer</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>promise</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span> <span class=o>*</span> <span class=n>promObj</span><span class=p>)</span>
+<span class=ln>13</span>   <span class=p>{</span>
+<span class=ln>14</span>       <span class=c1>//std::cout&lt;&lt;&#34;Inside Thread&#34;&lt;&lt;std::endl;     
+</span><span class=ln>15</span><span class=c1></span>       <span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>1</span> <span class=p>;</span> <span class=n>i</span> <span class=o>&lt;=</span> <span class=mi>2000000000</span> <span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>);</span>
+<span class=ln>16</span>       <span class=c1>//promObj-&gt;set_value(35);
+</span><span class=ln>17</span><span class=c1></span>   <span class=p>}</span>
+<span class=ln>18</span>    
+<span class=ln>19</span>   <span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+<span class=ln>20</span>   <span class=p>{</span>
+<span class=ln>21</span>       <span class=n>std</span><span class=o>::</span><span class=n>promise</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span> <span class=n>promiseObj</span><span class=p>;</span>
+<span class=ln>22</span>       <span class=n>std</span><span class=o>::</span><span class=n>future</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span> <span class=n>futureObj</span> <span class=o>=</span> <span class=n>promiseObj</span><span class=p>.</span><span class=n>get_future</span><span class=p>();</span>
+<span class=ln>23</span>       <span class=n>std</span><span class=o>::</span><span class=kr>thread</span> <span class=n>th</span><span class=p>(</span><span class=n>initiazer</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>promiseObj</span><span class=p>);</span>
+<span class=ln>24</span>       <span class=n>std</span><span class=o>::</span><span class=n>cout</span><span class=o>&lt;&lt;</span><span class=n>futureObj</span><span class=p>.</span><span class=n>get</span><span class=p>()</span><span class=o>&lt;&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+<span class=ln>25</span>       <span class=n>th</span><span class=p>.</span><span class=n>join</span><span class=p>();</span>
+<span class=ln>26</span>       <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>27</span>   <span class=p>}</span>
+<span class=ln>28</span>   
+</code></pre></div><p>参考资料:</p>
 <p><a href=https://thispointer.com/c11-multithreading-part-8-stdfuture-stdpromise-and-returning-values-from-thread/>C++11 Multithreading – Part 7: Condition Variables Explained</a></p>
 </div>
 <div class=post_comments>

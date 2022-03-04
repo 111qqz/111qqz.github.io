@@ -106,7 +106,7 @@
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Sep 23, 2018</span>
-<span class=post_time> · 1 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/cpp title=cpp class="post_tag button button_translucent">cpp
+<span class=post_time> · 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/cpp title=cpp class="post_tag button button_translucent">cpp
 </a><a href=https://111qqz.com/tags/modern-cpp title="modern cpp" class="post_tag button button_translucent">modern cpp
 </a><a href=https://111qqz.com/tags/condition_variable title=condition_variable class="post_tag button button_translucent">condition_variable
 </a>
@@ -133,111 +133,109 @@ Share on:
 <p>这个时候我们可以考虑使用条件变量。</p>
 <p>条件变量是可以用在如下场景: 一个或者多个线程在等某个条件的成立，而这个条件由另外的线程所控制。当该条件成立时，控制该条件的线程会主动通知这些线程，将这些线程唤醒。</p>
 <p>如下是一个最简单的例子:</p>
-<pre><code>std::mutex mut;
-std::queue&lt;data_chunk&gt; data_queue;  // 1
-std::condition_variable data_cond;
-
-void data_preparation_thread()
-{
-  while(more_data_to_prepare())
-  {
-    data_chunk const data=prepare_data();
-    std::lock_guard&lt;std::mutex&gt; lk(mut);
-    data_queue.push(data);  // 2
-    data_cond.notify_one();  // 3
-  }
-}
-
-void data_processing_thread()
-{
-  while(true)
-  {
-    std::unique_lock&lt;std::mutex&gt; lk(mut);  // 4
-    data_cond.wait(
-         lk,[]{return !data_queue.empty();});  // 5
-    data_chunk data=data_queue.front();
-    data_queue.pop();
-    lk.unlock();  // 6
-    process(data);
-    if(is_last_chunk(data))
-      break;
-  }
-}
-</code></pre>
-<p>接下来是一个较为复杂的例子，一个线程安全的队列的实现,</p>
-<pre><code>#include &lt;queue&gt;
-#include &lt;memory&gt;
-#include &lt;mutex&gt;
-#include &lt;condition_variable&gt;
-
-template&lt;typename T&gt;
-class threadsafe_queue
-{
-private:
-  mutable std::mutex mut;  // 1 互斥量必须是可变的 
-  std::queue&lt;T&gt; data_queue;
-  std::condition_variable data_cond;
-public:
-  threadsafe_queue()
-  {}
-  threadsafe_queue(threadsafe_queue const&amp; other)
-  {
-    std::lock_guard&lt;std::mutex&gt; lk(other.mut);
-    data_queue=other.data_queue;
-  }
-
-  void push(T new_value)
-  {
-    std::lock_guard&lt;std::mutex&gt; lk(mut);
-    data_queue.push(new_value);
-    data_cond.notify_one();
-  }
-
-  void wait_and_pop(T&amp; value)
-  {
-    std::unique_lock&lt;std::mutex&gt; lk(mut);
-    data_cond.wait(lk,[this]{return !data_queue.empty();});
-    value=data_queue.front();
-    data_queue.pop();
-  }
-
-  std::shared_ptr&lt;T&gt; wait_and_pop()
-  {
-    std::unique_lock&lt;std::mutex&gt; lk(mut);
-    data_cond.wait(lk,[this]{return !data_queue.empty();});
-    std::shared_ptr&lt;T&gt; res(std::make_shared&lt;T&gt;(data_queue.front()));
-    data_queue.pop();
-    return res;
-  }
-
-  bool try_pop(T&amp; value)
-  {
-    std::lock_guard&lt;std::mutex&gt; lk(mut);
-    if(data_queue.empty())
-      return false;
-    value=data_queue.front();
-    data_queue.pop();
-    return true;
-  }
-
-  std::shared_ptr&lt;T&gt; try_pop()
-  {
-    std::lock_guard&lt;std::mutex&gt; lk(mut);
-    if(data_queue.empty())
-      return std::shared_ptr&lt;T&gt;();
-    std::shared_ptr&lt;T&gt; res(std::make_shared&lt;T&gt;(data_queue.front()));
-    data_queue.pop();
-    return res;
-  }
-
-  bool empty() const
-  {
-    std::lock_guard&lt;std::mutex&gt; lk(mut);
-    return data_queue.empty();
-  }
-};
-</code></pre>
-<p>以及，虽然现在，这样线程安全的数据结构应该早就有人封装好了，我们直接使用就行了，比如之前用过的intel tbb的<a href=https://software.intel.com/en-us/node/506200>concurrent_queue</a>，不过如果对内部实现一无所知，大概没办法感觉到这种精巧之处吧。。</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>   <span class=n>std</span><span class=o>::</span><span class=n>mutex</span> <span class=n>mut</span><span class=p>;</span>
+<span class=ln> 2</span>   <span class=n>std</span><span class=o>::</span><span class=n>queue</span><span class=o>&lt;</span><span class=n>data_chunk</span><span class=o>&gt;</span> <span class=n>data_queue</span><span class=p>;</span>  <span class=c1>// 1
+</span><span class=ln> 3</span><span class=c1></span>   <span class=n>std</span><span class=o>::</span><span class=n>condition_variable</span> <span class=n>data_cond</span><span class=p>;</span>
+<span class=ln> 4</span>   
+<span class=ln> 5</span>   <span class=kt>void</span> <span class=nf>data_preparation_thread</span><span class=p>()</span>
+<span class=ln> 6</span>   <span class=p>{</span>
+<span class=ln> 7</span>     <span class=k>while</span><span class=p>(</span><span class=n>more_data_to_prepare</span><span class=p>())</span>
+<span class=ln> 8</span>     <span class=p>{</span>
+<span class=ln> 9</span>       <span class=n>data_chunk</span> <span class=k>const</span> <span class=n>data</span><span class=o>=</span><span class=n>prepare_data</span><span class=p>();</span>
+<span class=ln>10</span>       <span class=n>std</span><span class=o>::</span><span class=n>lock_guard</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>mutex</span><span class=o>&gt;</span> <span class=n>lk</span><span class=p>(</span><span class=n>mut</span><span class=p>);</span>
+<span class=ln>11</span>       <span class=n>data_queue</span><span class=p>.</span><span class=n>push</span><span class=p>(</span><span class=n>data</span><span class=p>);</span>  <span class=c1>// 2
+</span><span class=ln>12</span><span class=c1></span>       <span class=n>data_cond</span><span class=p>.</span><span class=n>notify_one</span><span class=p>();</span>  <span class=c1>// 3
+</span><span class=ln>13</span><span class=c1></span>     <span class=p>}</span>
+<span class=ln>14</span>   <span class=p>}</span>
+<span class=ln>15</span>   
+<span class=ln>16</span>   <span class=kt>void</span> <span class=nf>data_processing_thread</span><span class=p>()</span>
+<span class=ln>17</span>   <span class=p>{</span>
+<span class=ln>18</span>     <span class=k>while</span><span class=p>(</span><span class=nb>true</span><span class=p>)</span>
+<span class=ln>19</span>     <span class=p>{</span>
+<span class=ln>20</span>       <span class=n>std</span><span class=o>::</span><span class=n>unique_lock</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>mutex</span><span class=o>&gt;</span> <span class=n>lk</span><span class=p>(</span><span class=n>mut</span><span class=p>);</span>  <span class=c1>// 4
+</span><span class=ln>21</span><span class=c1></span>       <span class=n>data_cond</span><span class=p>.</span><span class=n>wait</span><span class=p>(</span>
+<span class=ln>22</span>            <span class=n>lk</span><span class=p>,[]{</span><span class=k>return</span> <span class=o>!</span><span class=n>data_queue</span><span class=p>.</span><span class=n>empty</span><span class=p>();});</span>  <span class=c1>// 5
+</span><span class=ln>23</span><span class=c1></span>       <span class=n>data_chunk</span> <span class=n>data</span><span class=o>=</span><span class=n>data_queue</span><span class=p>.</span><span class=n>front</span><span class=p>();</span>
+<span class=ln>24</span>       <span class=n>data_queue</span><span class=p>.</span><span class=n>pop</span><span class=p>();</span>
+<span class=ln>25</span>       <span class=n>lk</span><span class=p>.</span><span class=n>unlock</span><span class=p>();</span>  <span class=c1>// 6
+</span><span class=ln>26</span><span class=c1></span>       <span class=n>process</span><span class=p>(</span><span class=n>data</span><span class=p>);</span>
+<span class=ln>27</span>       <span class=k>if</span><span class=p>(</span><span class=n>is_last_chunk</span><span class=p>(</span><span class=n>data</span><span class=p>))</span>
+<span class=ln>28</span>         <span class=k>break</span><span class=p>;</span>
+<span class=ln>29</span>     <span class=p>}</span>
+<span class=ln>30</span>   <span class=p>}</span>
+</code></pre></div><p>接下来是一个较为复杂的例子，一个线程安全的队列的实现,</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>   <span class=cp>#include</span> <span class=cpf>&lt;queue&gt;</span><span class=cp>
+</span><span class=ln> 2</span><span class=cp></span>   <span class=cp>#include</span> <span class=cpf>&lt;memory&gt;</span><span class=cp>
+</span><span class=ln> 3</span><span class=cp></span>   <span class=cp>#include</span> <span class=cpf>&lt;mutex&gt;</span><span class=cp>
+</span><span class=ln> 4</span><span class=cp></span>   <span class=cp>#include</span> <span class=cpf>&lt;condition_variable&gt;</span><span class=cp>
+</span><span class=ln> 5</span><span class=cp></span>   
+<span class=ln> 6</span>   <span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>T</span><span class=o>&gt;</span>
+<span class=ln> 7</span>   <span class=k>class</span> <span class=nc>threadsafe_queue</span>
+<span class=ln> 8</span>   <span class=p>{</span>
+<span class=ln> 9</span>   <span class=k>private</span><span class=o>:</span>
+<span class=ln>10</span>     <span class=k>mutable</span> <span class=n>std</span><span class=o>::</span><span class=n>mutex</span> <span class=n>mut</span><span class=p>;</span>  <span class=c1>// 1 互斥量必须是可变的 
+</span><span class=ln>11</span><span class=c1></span>     <span class=n>std</span><span class=o>::</span><span class=n>queue</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;</span> <span class=n>data_queue</span><span class=p>;</span>
+<span class=ln>12</span>     <span class=n>std</span><span class=o>::</span><span class=n>condition_variable</span> <span class=n>data_cond</span><span class=p>;</span>
+<span class=ln>13</span>   <span class=k>public</span><span class=o>:</span>
+<span class=ln>14</span>     <span class=n>threadsafe_queue</span><span class=p>()</span>
+<span class=ln>15</span>     <span class=p>{}</span>
+<span class=ln>16</span>     <span class=n>threadsafe_queue</span><span class=p>(</span><span class=n>threadsafe_queue</span> <span class=k>const</span><span class=o>&amp;</span> <span class=n>other</span><span class=p>)</span>
+<span class=ln>17</span>     <span class=p>{</span>
+<span class=ln>18</span>       <span class=n>std</span><span class=o>::</span><span class=n>lock_guard</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>mutex</span><span class=o>&gt;</span> <span class=n>lk</span><span class=p>(</span><span class=n>other</span><span class=p>.</span><span class=n>mut</span><span class=p>);</span>
+<span class=ln>19</span>       <span class=n>data_queue</span><span class=o>=</span><span class=n>other</span><span class=p>.</span><span class=n>data_queue</span><span class=p>;</span>
+<span class=ln>20</span>     <span class=p>}</span>
+<span class=ln>21</span>   
+<span class=ln>22</span>     <span class=kt>void</span> <span class=nf>push</span><span class=p>(</span><span class=n>T</span> <span class=n>new_value</span><span class=p>)</span>
+<span class=ln>23</span>     <span class=p>{</span>
+<span class=ln>24</span>       <span class=n>std</span><span class=o>::</span><span class=n>lock_guard</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>mutex</span><span class=o>&gt;</span> <span class=n>lk</span><span class=p>(</span><span class=n>mut</span><span class=p>);</span>
+<span class=ln>25</span>       <span class=n>data_queue</span><span class=p>.</span><span class=n>push</span><span class=p>(</span><span class=n>new_value</span><span class=p>);</span>
+<span class=ln>26</span>       <span class=n>data_cond</span><span class=p>.</span><span class=n>notify_one</span><span class=p>();</span>
+<span class=ln>27</span>     <span class=p>}</span>
+<span class=ln>28</span>   
+<span class=ln>29</span>     <span class=kt>void</span> <span class=nf>wait_and_pop</span><span class=p>(</span><span class=n>T</span><span class=o>&amp;</span> <span class=n>value</span><span class=p>)</span>
+<span class=ln>30</span>     <span class=p>{</span>
+<span class=ln>31</span>       <span class=n>std</span><span class=o>::</span><span class=n>unique_lock</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>mutex</span><span class=o>&gt;</span> <span class=n>lk</span><span class=p>(</span><span class=n>mut</span><span class=p>);</span>
+<span class=ln>32</span>       <span class=n>data_cond</span><span class=p>.</span><span class=n>wait</span><span class=p>(</span><span class=n>lk</span><span class=p>,[</span><span class=k>this</span><span class=p>]{</span><span class=k>return</span> <span class=o>!</span><span class=n>data_queue</span><span class=p>.</span><span class=n>empty</span><span class=p>();});</span>
+<span class=ln>33</span>       <span class=n>value</span><span class=o>=</span><span class=n>data_queue</span><span class=p>.</span><span class=n>front</span><span class=p>();</span>
+<span class=ln>34</span>       <span class=n>data_queue</span><span class=p>.</span><span class=n>pop</span><span class=p>();</span>
+<span class=ln>35</span>     <span class=p>}</span>
+<span class=ln>36</span>   
+<span class=ln>37</span>     <span class=n>std</span><span class=o>::</span><span class=n>shared_ptr</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;</span> <span class=n>wait_and_pop</span><span class=p>()</span>
+<span class=ln>38</span>     <span class=p>{</span>
+<span class=ln>39</span>       <span class=n>std</span><span class=o>::</span><span class=n>unique_lock</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>mutex</span><span class=o>&gt;</span> <span class=n>lk</span><span class=p>(</span><span class=n>mut</span><span class=p>);</span>
+<span class=ln>40</span>       <span class=n>data_cond</span><span class=p>.</span><span class=n>wait</span><span class=p>(</span><span class=n>lk</span><span class=p>,[</span><span class=k>this</span><span class=p>]{</span><span class=k>return</span> <span class=o>!</span><span class=n>data_queue</span><span class=p>.</span><span class=n>empty</span><span class=p>();});</span>
+<span class=ln>41</span>       <span class=n>std</span><span class=o>::</span><span class=n>shared_ptr</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;</span> <span class=n>res</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>make_shared</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;</span><span class=p>(</span><span class=n>data_queue</span><span class=p>.</span><span class=n>front</span><span class=p>()));</span>
+<span class=ln>42</span>       <span class=n>data_queue</span><span class=p>.</span><span class=n>pop</span><span class=p>();</span>
+<span class=ln>43</span>       <span class=k>return</span> <span class=n>res</span><span class=p>;</span>
+<span class=ln>44</span>     <span class=p>}</span>
+<span class=ln>45</span>   
+<span class=ln>46</span>     <span class=kt>bool</span> <span class=nf>try_pop</span><span class=p>(</span><span class=n>T</span><span class=o>&amp;</span> <span class=n>value</span><span class=p>)</span>
+<span class=ln>47</span>     <span class=p>{</span>
+<span class=ln>48</span>       <span class=n>std</span><span class=o>::</span><span class=n>lock_guard</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>mutex</span><span class=o>&gt;</span> <span class=n>lk</span><span class=p>(</span><span class=n>mut</span><span class=p>);</span>
+<span class=ln>49</span>       <span class=k>if</span><span class=p>(</span><span class=n>data_queue</span><span class=p>.</span><span class=n>empty</span><span class=p>())</span>
+<span class=ln>50</span>         <span class=k>return</span> <span class=nb>false</span><span class=p>;</span>
+<span class=ln>51</span>       <span class=n>value</span><span class=o>=</span><span class=n>data_queue</span><span class=p>.</span><span class=n>front</span><span class=p>();</span>
+<span class=ln>52</span>       <span class=n>data_queue</span><span class=p>.</span><span class=n>pop</span><span class=p>();</span>
+<span class=ln>53</span>       <span class=k>return</span> <span class=nb>true</span><span class=p>;</span>
+<span class=ln>54</span>     <span class=p>}</span>
+<span class=ln>55</span>   
+<span class=ln>56</span>     <span class=n>std</span><span class=o>::</span><span class=n>shared_ptr</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;</span> <span class=n>try_pop</span><span class=p>()</span>
+<span class=ln>57</span>     <span class=p>{</span>
+<span class=ln>58</span>       <span class=n>std</span><span class=o>::</span><span class=n>lock_guard</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>mutex</span><span class=o>&gt;</span> <span class=n>lk</span><span class=p>(</span><span class=n>mut</span><span class=p>);</span>
+<span class=ln>59</span>       <span class=k>if</span><span class=p>(</span><span class=n>data_queue</span><span class=p>.</span><span class=n>empty</span><span class=p>())</span>
+<span class=ln>60</span>         <span class=k>return</span> <span class=n>std</span><span class=o>::</span><span class=n>shared_ptr</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;</span><span class=p>();</span>
+<span class=ln>61</span>       <span class=n>std</span><span class=o>::</span><span class=n>shared_ptr</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;</span> <span class=n>res</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>make_shared</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;</span><span class=p>(</span><span class=n>data_queue</span><span class=p>.</span><span class=n>front</span><span class=p>()));</span>
+<span class=ln>62</span>       <span class=n>data_queue</span><span class=p>.</span><span class=n>pop</span><span class=p>();</span>
+<span class=ln>63</span>       <span class=k>return</span> <span class=n>res</span><span class=p>;</span>
+<span class=ln>64</span>     <span class=p>}</span>
+<span class=ln>65</span>   
+<span class=ln>66</span>     <span class=kt>bool</span> <span class=nf>empty</span><span class=p>()</span> <span class=k>const</span>
+<span class=ln>67</span>     <span class=p>{</span>
+<span class=ln>68</span>       <span class=n>std</span><span class=o>::</span><span class=n>lock_guard</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>mutex</span><span class=o>&gt;</span> <span class=n>lk</span><span class=p>(</span><span class=n>mut</span><span class=p>);</span>
+<span class=ln>69</span>       <span class=k>return</span> <span class=n>data_queue</span><span class=p>.</span><span class=n>empty</span><span class=p>();</span>
+<span class=ln>70</span>     <span class=p>}</span>
+<span class=ln>71</span>   <span class=p>};</span>
+</code></pre></div><p>以及，虽然现在，这样线程安全的数据结构应该早就有人封装好了，我们直接使用就行了，比如之前用过的intel tbb的<a href=https://software.intel.com/en-us/node/506200>concurrent_queue</a>，不过如果对内部实现一无所知，大概没办法感觉到这种精巧之处吧。。</p>
 <p>参考资料:</p>
 <p><a href=http://www.enseignement.polytechnique.fr/informatique/INF478/docs/Cpp/en/cpp/thread/condition_variable.html>std::condition_variable</a></p>
 <p><a href=https://zh.cppreference.com/w/cpp/thread/condition_variable>std::condition_variable</a></p>

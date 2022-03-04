@@ -140,90 +140,91 @@ programming language is notoriously difficult"
 <h3 id=stream的基本认识>Stream的基本认识</h3>
 <p>说说我的理解。stream(流)可以看做输入输出的抽象。我们通过流可以忽略掉device的细节，采取同样的输入输出方式。</p>
 <p>对于任何原生的cpp类型，都可以用stream来处理。用户自定义的类，也可以通过重载&lt;&lt;和>>而让stream可以处理。</p>
-<pre><code>#include &lt;iostream&gt;
-#include &lt;ctime&gt;
-#include &lt;sstream&gt;
-#include &lt;fstream&gt;
- 
-using namespace std;
- 
-// timestamp returns the current time as a string 
-std::string timestamp();    
- 
-class LogStatement;
-ostream&amp; operator&lt;&lt;(ostream&amp; ost, const LogStatement&amp; ls);
- 
-class LogStatement
-{
-public:
-        LogStatement(std::string s): data(s), time_string( timestamp() )
-        { };
- 
-        //This method handles all the outputs.    
-        friend ostream&amp; operator&lt;&lt;(ostream&amp;, const LogStatement&amp;);   
-private:
-        std::string data;
-        std::string time_string;
-    
-};
- 
-ostream&amp; operator&lt;&lt;(ostream&amp; ost, const LogStatement&amp; ls)
-{
-        ost&lt;&lt;&quot;~|&quot;&lt;&lt;ls.time_string&lt;&lt;'|'&lt;&lt;ls.data&lt;&lt;&quot;|~&quot;;
-        return ost;
-}
- 
-std::string timestamp() 
-{
-        //Notice the use of a stringstream, yet another useful stream medium!
-        ostringstream stream;    
-        time_t rawtime;
-        tm * timeinfo;
- 
-        time(&amp;rawtime);
-        timeinfo = localtime( &amp;rawtime );
- 
-        stream &lt;&lt; (timeinfo-&gt;tm_year)+1900&lt;&lt;&quot; &quot;&lt;&lt;timeinfo-&gt;tm_mon
-        &lt;&lt;&quot; &quot;&lt;&lt;timeinfo-&gt;tm_mday&lt;&lt;&quot; &quot;&lt;&lt;timeinfo-&gt;tm_hour
-        &lt;&lt;&quot; &quot;&lt;&lt;timeinfo-&gt;tm_min&lt;&lt;&quot; &quot;&lt;&lt;timeinfo-&gt;tm_sec;
-        // The str() function of output stringstreams return a std::string.
-        return stream.str();   
-}
- 
-int main(int argc, char** argv)
-{
-        if(argc&lt;2)
-        {
-              // A return of -1 denotes an error condition.
-              return -1;  
-        }
-        ostringstream log_data;
-        // This takes all the char arrays in the argv 
-        // (except the filename) and produces a stream.
-        for(int i=1;i&lt;argc;i++)    
-        {
-               log_data&lt;&lt;argv[i]&lt;&lt;' '; 
-        }
-  
-        LogStatement log_entry(log_data.str());
- 
-        clog&lt;&lt;log_entry&lt;&lt;endl;
- 
-        ofstream logfile(&quot;logfile&quot;,ios::app);
- 
-        // check for errors opening the file
-        if ( ! logfile )      
-        {
-                return -1;
-        }       
- 
-        logfile&lt;&lt;log_entry&lt;&lt;endl;
-        logfile.close();
- 
-        return 0;
-}
-</code></pre>
-<p>stream大致分为inputstream和outputstream两种，分别对应的类型为std::istream和std::ostream.</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span>    <span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span><span class=ln> 3</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;ctime&gt;</span><span class=cp>
+</span><span class=ln> 4</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;sstream&gt;</span><span class=cp>
+</span><span class=ln> 5</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;fstream&gt;</span><span class=cp>
+</span><span class=ln> 6</span><span class=cp></span>     
+<span class=ln> 7</span>    <span class=k>using</span> <span class=k>namespace</span> <span class=n>std</span><span class=p>;</span>
+<span class=ln> 8</span>     
+<span class=ln> 9</span>    <span class=c1>// timestamp returns the current time as a string 
+</span><span class=ln>10</span><span class=c1></span>    <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>timestamp</span><span class=p>();</span>    
+<span class=ln>11</span>     
+<span class=ln>12</span>    <span class=k>class</span> <span class=nc>LogStatement</span><span class=p>;</span>
+<span class=ln>13</span>    <span class=n>ostream</span><span class=o>&amp;</span> <span class=k>operator</span><span class=o>&lt;&lt;</span><span class=p>(</span><span class=n>ostream</span><span class=o>&amp;</span> <span class=n>ost</span><span class=p>,</span> <span class=k>const</span> <span class=n>LogStatement</span><span class=o>&amp;</span> <span class=n>ls</span><span class=p>);</span>
+<span class=ln>14</span>     
+<span class=ln>15</span>    <span class=k>class</span> <span class=nc>LogStatement</span>
+<span class=ln>16</span>    <span class=p>{</span>
+<span class=ln>17</span>    <span class=k>public</span><span class=o>:</span>
+<span class=ln>18</span>            <span class=n>LogStatement</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>s</span><span class=p>)</span><span class=o>:</span> <span class=n>data</span><span class=p>(</span><span class=n>s</span><span class=p>),</span> <span class=n>time_string</span><span class=p>(</span> <span class=n>timestamp</span><span class=p>()</span> <span class=p>)</span>
+<span class=ln>19</span>            <span class=p>{</span> <span class=p>};</span>
+<span class=ln>20</span>     
+<span class=ln>21</span>            <span class=c1>//This method handles all the outputs.    
+</span><span class=ln>22</span><span class=c1></span>            <span class=k>friend</span> <span class=n>ostream</span><span class=o>&amp;</span> <span class=k>operator</span><span class=o>&lt;&lt;</span><span class=p>(</span><span class=n>ostream</span><span class=o>&amp;</span><span class=p>,</span> <span class=k>const</span> <span class=n>LogStatement</span><span class=o>&amp;</span><span class=p>);</span>   
+<span class=ln>23</span>    <span class=k>private</span><span class=o>:</span>
+<span class=ln>24</span>            <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>data</span><span class=p>;</span>
+<span class=ln>25</span>            <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>time_string</span><span class=p>;</span>
+<span class=ln>26</span>        
+<span class=ln>27</span>    <span class=p>};</span>
+<span class=ln>28</span>     
+<span class=ln>29</span>    <span class=n>ostream</span><span class=o>&amp;</span> <span class=k>operator</span><span class=o>&lt;&lt;</span><span class=p>(</span><span class=n>ostream</span><span class=o>&amp;</span> <span class=n>ost</span><span class=p>,</span> <span class=k>const</span> <span class=n>LogStatement</span><span class=o>&amp;</span> <span class=n>ls</span><span class=p>)</span>
+<span class=ln>30</span>    <span class=p>{</span>
+<span class=ln>31</span>            <span class=n>ost</span><span class=o>&lt;&lt;</span><span class=s>&#34;~|&#34;</span><span class=o>&lt;&lt;</span><span class=n>ls</span><span class=p>.</span><span class=n>time_string</span><span class=o>&lt;&lt;</span><span class=sc>&#39;|&#39;</span><span class=o>&lt;&lt;</span><span class=n>ls</span><span class=p>.</span><span class=n>data</span><span class=o>&lt;&lt;</span><span class=s>&#34;|~&#34;</span><span class=p>;</span>
+<span class=ln>32</span>            <span class=k>return</span> <span class=n>ost</span><span class=p>;</span>
+<span class=ln>33</span>    <span class=p>}</span>
+<span class=ln>34</span>     
+<span class=ln>35</span>    <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>timestamp</span><span class=p>()</span> 
+<span class=ln>36</span>    <span class=p>{</span>
+<span class=ln>37</span>            <span class=c1>//Notice the use of a stringstream, yet another useful stream medium!
+</span><span class=ln>38</span><span class=c1></span>            <span class=n>ostringstream</span> <span class=n>stream</span><span class=p>;</span>    
+<span class=ln>39</span>            <span class=n>time_t</span> <span class=n>rawtime</span><span class=p>;</span>
+<span class=ln>40</span>            <span class=n>tm</span> <span class=o>*</span> <span class=n>timeinfo</span><span class=p>;</span>
+<span class=ln>41</span>     
+<span class=ln>42</span>            <span class=n>time</span><span class=p>(</span><span class=o>&amp;</span><span class=n>rawtime</span><span class=p>);</span>
+<span class=ln>43</span>            <span class=n>timeinfo</span> <span class=o>=</span> <span class=n>localtime</span><span class=p>(</span> <span class=o>&amp;</span><span class=n>rawtime</span> <span class=p>);</span>
+<span class=ln>44</span>     
+<span class=ln>45</span>            <span class=n>stream</span> <span class=o>&lt;&lt;</span> <span class=p>(</span><span class=n>timeinfo</span><span class=o>-&gt;</span><span class=n>tm_year</span><span class=p>)</span><span class=o>+</span><span class=mi>1900</span><span class=o>&lt;&lt;</span><span class=s>&#34; &#34;</span><span class=o>&lt;&lt;</span><span class=n>timeinfo</span><span class=o>-&gt;</span><span class=n>tm_mon</span>
+<span class=ln>46</span>            <span class=o>&lt;&lt;</span><span class=s>&#34; &#34;</span><span class=o>&lt;&lt;</span><span class=n>timeinfo</span><span class=o>-&gt;</span><span class=n>tm_mday</span><span class=o>&lt;&lt;</span><span class=s>&#34; &#34;</span><span class=o>&lt;&lt;</span><span class=n>timeinfo</span><span class=o>-&gt;</span><span class=n>tm_hour</span>
+<span class=ln>47</span>            <span class=o>&lt;&lt;</span><span class=s>&#34; &#34;</span><span class=o>&lt;&lt;</span><span class=n>timeinfo</span><span class=o>-&gt;</span><span class=n>tm_min</span><span class=o>&lt;&lt;</span><span class=s>&#34; &#34;</span><span class=o>&lt;&lt;</span><span class=n>timeinfo</span><span class=o>-&gt;</span><span class=n>tm_sec</span><span class=p>;</span>
+<span class=ln>48</span>            <span class=c1>// The str() function of output stringstreams return a std::string.
+</span><span class=ln>49</span><span class=c1></span>            <span class=k>return</span> <span class=n>stream</span><span class=p>.</span><span class=n>str</span><span class=p>();</span>   
+<span class=ln>50</span>    <span class=p>}</span>
+<span class=ln>51</span>     
+<span class=ln>52</span>    <span class=kt>int</span> <span class=nf>main</span><span class=p>(</span><span class=kt>int</span> <span class=n>argc</span><span class=p>,</span> <span class=kt>char</span><span class=o>**</span> <span class=n>argv</span><span class=p>)</span>
+<span class=ln>53</span>    <span class=p>{</span>
+<span class=ln>54</span>            <span class=k>if</span><span class=p>(</span><span class=n>argc</span><span class=o>&lt;</span><span class=mi>2</span><span class=p>)</span>
+<span class=ln>55</span>            <span class=p>{</span>
+<span class=ln>56</span>                  <span class=c1>// A return of -1 denotes an error condition.
+</span><span class=ln>57</span><span class=c1></span>                  <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>  
+<span class=ln>58</span>            <span class=p>}</span>
+<span class=ln>59</span>            <span class=n>ostringstream</span> <span class=n>log_data</span><span class=p>;</span>
+<span class=ln>60</span>            <span class=c1>// This takes all the char arrays in the argv 
+</span><span class=ln>61</span><span class=c1></span>            <span class=c1>// (except the filename) and produces a stream.
+</span><span class=ln>62</span><span class=c1></span>            <span class=k>for</span><span class=p>(</span><span class=kt>int</span> <span class=n>i</span><span class=o>=</span><span class=mi>1</span><span class=p>;</span><span class=n>i</span><span class=o>&lt;</span><span class=n>argc</span><span class=p>;</span><span class=n>i</span><span class=o>++</span><span class=p>)</span>    
+<span class=ln>63</span>            <span class=p>{</span>
+<span class=ln>64</span>                   <span class=n>log_data</span><span class=o>&lt;&lt;</span><span class=n>argv</span><span class=p>[</span><span class=n>i</span><span class=p>]</span><span class=o>&lt;&lt;</span><span class=sc>&#39; &#39;</span><span class=p>;</span> 
+<span class=ln>65</span>            <span class=p>}</span>
+<span class=ln>66</span>      
+<span class=ln>67</span>            <span class=n>LogStatement</span> <span class=n>log_entry</span><span class=p>(</span><span class=n>log_data</span><span class=p>.</span><span class=n>str</span><span class=p>());</span>
+<span class=ln>68</span>     
+<span class=ln>69</span>            <span class=n>clog</span><span class=o>&lt;&lt;</span><span class=n>log_entry</span><span class=o>&lt;&lt;</span><span class=n>endl</span><span class=p>;</span>
+<span class=ln>70</span>     
+<span class=ln>71</span>            <span class=n>ofstream</span> <span class=n>logfile</span><span class=p>(</span><span class=s>&#34;logfile&#34;</span><span class=p>,</span><span class=n>ios</span><span class=o>::</span><span class=n>app</span><span class=p>);</span>
+<span class=ln>72</span>     
+<span class=ln>73</span>            <span class=c1>// check for errors opening the file
+</span><span class=ln>74</span><span class=c1></span>            <span class=k>if</span> <span class=p>(</span> <span class=o>!</span> <span class=n>logfile</span> <span class=p>)</span>      
+<span class=ln>75</span>            <span class=p>{</span>
+<span class=ln>76</span>                    <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+<span class=ln>77</span>            <span class=p>}</span>       
+<span class=ln>78</span>     
+<span class=ln>79</span>            <span class=n>logfile</span><span class=o>&lt;&lt;</span><span class=n>log_entry</span><span class=o>&lt;&lt;</span><span class=n>endl</span><span class=p>;</span>
+<span class=ln>80</span>            <span class=n>logfile</span><span class=p>.</span><span class=n>close</span><span class=p>();</span>
+<span class=ln>81</span>     
+<span class=ln>82</span>            <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>83</span>    <span class=p>}</span>
+<span class=ln>84</span>
+</code></pre></div><p>stream大致分为inputstream和outputstream两种，分别对应的类型为std::istream和std::ostream.</p>
 <p>stream大概有如下操作:</p>
 <pre><code>  *     使用适当的值类型(如stringstream的STD : : string和fstream的文件名)和适当的模式(如用于输入的IOs : : in和用于输出的IOs : : out等，具体取决于流的类型)初始化流
   * 可以通过get和put指针指定I / O应该发生的位置。根据您打开流的方式，可能已经适当地设置了位置(例如，如果使用IOs : : app打开文件，则在流的末尾设置get指针，允许附加)。
@@ -239,13 +240,12 @@ seekp(1,ios::cur);      //proceeds to next char
 * 使用&lt;&lt;或者>>来读或者写。</p>
 <h3 id=stream的错误处理>stream的错误处理</h3>
 <p>将stream当成bool来处理是比较常见的，</p>
-<pre><code>ifstream file( &quot;test.txt&quot; );
-if ( ! file )
-{
-        cout &lt;&lt; &quot;An error occurred opening the file&quot; &lt;&lt; endl;
-}
-</code></pre>
-<p>但是实际上有四种status:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>    <span class=n>ifstream</span> <span class=nf>file</span><span class=p>(</span> <span class=s>&#34;test.txt&#34;</span> <span class=p>);</span>
+<span class=ln>2</span>    <span class=k>if</span> <span class=p>(</span> <span class=o>!</span> <span class=n>file</span> <span class=p>)</span>
+<span class=ln>3</span>    <span class=p>{</span>
+<span class=ln>4</span>            <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;An error occurred opening the file&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+<span class=ln>5</span>    <span class=p>}</span>
+</code></pre></div><p>但是实际上有四种status:</p>
 <pre><code>  * good() returns true when everything is okay.
   * bad() returns true when a fatal error has occurred.
   * fail() returns true after an unsuccessful stream operation like an unexpected type of input being encountered.
@@ -253,34 +253,34 @@ if ( ! file )
 </code></pre>
 <h3 id=string-streams>String Streams</h3>
 <p>emm,其实string和stream好像挺像的。 区别是,string是可以随机访问的，stream是顺序访问。</p>
-<pre><code>#include &lt;iostream&gt;
-#include &lt;sstream&gt;
- 
-using namespace std;
- 
-int main()
-{
-        stringstream my_stream(ios::in|ios::out);
-        std::string dat(&quot;Hey, I have a double : 74.79 .&quot;);
- 
-        my_stream.str(dat);
-        my_stream.seekg(-7,ios::end);
- 
-        double val;
-        my_stream&gt;&gt;val;
- 
-        val= val*val;
- 
-        my_stream.seekp(-7,ios::end);
-        my_stream&lt;&lt;val;
- 
-        std::string new_val = my_stream.str();
-        cout&lt;&lt;new_val;
- 
-        return 0;
-}
-</code></pre>
-<p>输出是:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>    <span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span><span class=ln> 2</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;sstream&gt;</span><span class=cp>
+</span><span class=ln> 3</span><span class=cp></span>     
+<span class=ln> 4</span>    <span class=k>using</span> <span class=k>namespace</span> <span class=n>std</span><span class=p>;</span>
+<span class=ln> 5</span>     
+<span class=ln> 6</span>    <span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+<span class=ln> 7</span>    <span class=p>{</span>
+<span class=ln> 8</span>            <span class=n>stringstream</span> <span class=n>my_stream</span><span class=p>(</span><span class=n>ios</span><span class=o>::</span><span class=n>in</span><span class=o>|</span><span class=n>ios</span><span class=o>::</span><span class=n>out</span><span class=p>);</span>
+<span class=ln> 9</span>            <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>dat</span><span class=p>(</span><span class=s>&#34;Hey, I have a double : 74.79 .&#34;</span><span class=p>);</span>
+<span class=ln>10</span>     
+<span class=ln>11</span>            <span class=n>my_stream</span><span class=p>.</span><span class=n>str</span><span class=p>(</span><span class=n>dat</span><span class=p>);</span>
+<span class=ln>12</span>            <span class=n>my_stream</span><span class=p>.</span><span class=n>seekg</span><span class=p>(</span><span class=o>-</span><span class=mi>7</span><span class=p>,</span><span class=n>ios</span><span class=o>::</span><span class=n>end</span><span class=p>);</span>
+<span class=ln>13</span>     
+<span class=ln>14</span>            <span class=kt>double</span> <span class=n>val</span><span class=p>;</span>
+<span class=ln>15</span>            <span class=n>my_stream</span><span class=o>&gt;&gt;</span><span class=n>val</span><span class=p>;</span>
+<span class=ln>16</span>     
+<span class=ln>17</span>            <span class=n>val</span><span class=o>=</span> <span class=n>val</span><span class=o>*</span><span class=n>val</span><span class=p>;</span>
+<span class=ln>18</span>     
+<span class=ln>19</span>            <span class=n>my_stream</span><span class=p>.</span><span class=n>seekp</span><span class=p>(</span><span class=o>-</span><span class=mi>7</span><span class=p>,</span><span class=n>ios</span><span class=o>::</span><span class=n>end</span><span class=p>);</span>
+<span class=ln>20</span>            <span class=n>my_stream</span><span class=o>&lt;&lt;</span><span class=n>val</span><span class=p>;</span>
+<span class=ln>21</span>     
+<span class=ln>22</span>            <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>new_val</span> <span class=o>=</span> <span class=n>my_stream</span><span class=p>.</span><span class=n>str</span><span class=p>();</span>
+<span class=ln>23</span>            <span class=n>cout</span><span class=o>&lt;&lt;</span><span class=n>new_val</span><span class=p>;</span>
+<span class=ln>24</span>     
+<span class=ln>25</span>            <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>26</span>    <span class=p>}</span>
+<span class=ln>27</span>
+</code></pre></div><p>输出是:</p>
 <pre><code>Hey, I have a double : 5593.54
 </code></pre>
 <p>我们观察到原本句子末尾的英文句号"."被覆盖掉了。</p>
@@ -288,74 +288,75 @@ int main()
 <p>I/O操作是相对来说比较花时间的操作，如果我们要多次写很多小文件，那会浪费大量的时间。于是我们的想法是，使用一个临时的Buffer将数据存起来，当这个buffer满了之后再去读或者写。</p>
 <p>注意不是所有的stream都采用了这种机制，比如cerr就没有采用。</p>
 <p>下面放一段代码来感受下buffer</p>
-<pre><code>#include &lt;iostream&gt;
-#include &lt;string&gt;
-
-using std::cout;    using std::endl;
-using std::cerr;    using std::ostream;
-using std::string;
-
-/*
- * A helpful function that halts the program until
- * the user presses enter.
- */
-void waitForEnter(const string&amp; msg) {
-    cout &lt;&lt; msg;
-    string l;
-    std::getline(std::cin, l);
-    cout &lt;&lt; endl;
-}
-
-
-/*
- * Tests the buffer without flushing anything.
- *
- * Tries outputting a string to the stream, then does some slow
- * operation and then ouputs another string to the stream. We
- * see nothing is printed for a while then everything is printed at
- * once, suggesting cout is buffered.
- */
-void testBuffer(ostream&amp; os) {
-    os &lt;&lt; &quot;Before loop - &quot;;
-    for(int i = 0; i &lt; 2000000000; ++i) {
-        // waste time
-    }
-    os &lt;&lt; &quot;After loop&quot; &lt;&lt; endl;
-}
-
-/*
- * Tests the buffer with flushing.
- *
- * Here we see that the first string is printed
- * to the console, and then there is a delay due to
- * the for loop before the second string is printed.
- */
-void testBufferFlush(ostream&amp; os) {
-    os &lt;&lt; &quot;Before loop - &quot; &lt;&lt; std::flush;
-    for(int i = 0; i &lt; 2000000000; ++i) {
-        // waste time
-    }
-    os &lt;&lt; &quot;After loop&quot; &lt;&lt; endl;
-}
-
-
-
-int main() {
-       waitForEnter(&quot;Enter to continue: &quot;);
-       cout &lt;&lt; &quot;Testing cout...&quot; &lt;&lt; endl;
-       testBuffer(cout);
-       cout &lt;&lt; endl;
-
-       /* Prints a line of 20 = characters. */
-       cout &lt;&lt; string(20, '=') &lt;&lt; endl;
-
-       waitForEnter(&quot;Enter to continue: &quot;);
-       cout &lt;&lt; &quot;Testing flushed cout...&quot; &lt;&lt; endl;
-       testBufferFlush(cout);
-       cout &lt;&lt; endl;
-}
-</code></pre>
-<p>此处flush的含义是将buffer中的内容立即输出</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>    <span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span><span class=ln> 2</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;string&gt;</span><span class=cp>
+</span><span class=ln> 3</span><span class=cp></span>    
+<span class=ln> 4</span>    <span class=k>using</span> <span class=n>std</span><span class=o>::</span><span class=n>cout</span><span class=p>;</span>    <span class=k>using</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+<span class=ln> 5</span>    <span class=k>using</span> <span class=n>std</span><span class=o>::</span><span class=n>cerr</span><span class=p>;</span>    <span class=k>using</span> <span class=n>std</span><span class=o>::</span><span class=n>ostream</span><span class=p>;</span>
+<span class=ln> 6</span>    <span class=k>using</span> <span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=p>;</span>
+<span class=ln> 7</span>    
+<span class=ln> 8</span>    <span class=cm>/*
+</span><span class=ln> 9</span><span class=cm>     * A helpful function that halts the program until
+</span><span class=ln>10</span><span class=cm>     * the user presses enter.
+</span><span class=ln>11</span><span class=cm>     */</span>
+<span class=ln>12</span>    <span class=kt>void</span> <span class=nf>waitForEnter</span><span class=p>(</span><span class=k>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>msg</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>13</span>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>msg</span><span class=p>;</span>
+<span class=ln>14</span>        <span class=n>string</span> <span class=n>l</span><span class=p>;</span>
+<span class=ln>15</span>        <span class=n>std</span><span class=o>::</span><span class=n>getline</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>cin</span><span class=p>,</span> <span class=n>l</span><span class=p>);</span>
+<span class=ln>16</span>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+<span class=ln>17</span>    <span class=p>}</span>
+<span class=ln>18</span>    
+<span class=ln>19</span>    
+<span class=ln>20</span>    <span class=cm>/*
+</span><span class=ln>21</span><span class=cm>     * Tests the buffer without flushing anything.
+</span><span class=ln>22</span><span class=cm>     *
+</span><span class=ln>23</span><span class=cm>     * Tries outputting a string to the stream, then does some slow
+</span><span class=ln>24</span><span class=cm>     * operation and then ouputs another string to the stream. We
+</span><span class=ln>25</span><span class=cm>     * see nothing is printed for a while then everything is printed at
+</span><span class=ln>26</span><span class=cm>     * once, suggesting cout is buffered.
+</span><span class=ln>27</span><span class=cm>     */</span>
+<span class=ln>28</span>    <span class=kt>void</span> <span class=nf>testBuffer</span><span class=p>(</span><span class=n>ostream</span><span class=o>&amp;</span> <span class=n>os</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>29</span>        <span class=n>os</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Before loop - &#34;</span><span class=p>;</span>
+<span class=ln>30</span>        <span class=k>for</span><span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=mi>2000000000</span><span class=p>;</span> <span class=o>++</span><span class=n>i</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>31</span>            <span class=c1>// waste time
+</span><span class=ln>32</span><span class=c1></span>        <span class=p>}</span>
+<span class=ln>33</span>        <span class=n>os</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;After loop&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+<span class=ln>34</span>    <span class=p>}</span>
+<span class=ln>35</span>    
+<span class=ln>36</span>    <span class=cm>/*
+</span><span class=ln>37</span><span class=cm>     * Tests the buffer with flushing.
+</span><span class=ln>38</span><span class=cm>     *
+</span><span class=ln>39</span><span class=cm>     * Here we see that the first string is printed
+</span><span class=ln>40</span><span class=cm>     * to the console, and then there is a delay due to
+</span><span class=ln>41</span><span class=cm>     * the for loop before the second string is printed.
+</span><span class=ln>42</span><span class=cm>     */</span>
+<span class=ln>43</span>    <span class=kt>void</span> <span class=nf>testBufferFlush</span><span class=p>(</span><span class=n>ostream</span><span class=o>&amp;</span> <span class=n>os</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>44</span>        <span class=n>os</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Before loop - &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>flush</span><span class=p>;</span>
+<span class=ln>45</span>        <span class=k>for</span><span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=mi>2000000000</span><span class=p>;</span> <span class=o>++</span><span class=n>i</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>46</span>            <span class=c1>// waste time
+</span><span class=ln>47</span><span class=c1></span>        <span class=p>}</span>
+<span class=ln>48</span>        <span class=n>os</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;After loop&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+<span class=ln>49</span>    <span class=p>}</span>
+<span class=ln>50</span>    
+<span class=ln>51</span>    
+<span class=ln>52</span>    
+<span class=ln>53</span>    <span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+<span class=ln>54</span>           <span class=n>waitForEnter</span><span class=p>(</span><span class=s>&#34;Enter to continue: &#34;</span><span class=p>);</span>
+<span class=ln>55</span>           <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Testing cout...&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+<span class=ln>56</span>           <span class=n>testBuffer</span><span class=p>(</span><span class=n>cout</span><span class=p>);</span>
+<span class=ln>57</span>           <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+<span class=ln>58</span>    
+<span class=ln>59</span>           <span class=cm>/* Prints a line of 20 = characters. */</span>
+<span class=ln>60</span>           <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>string</span><span class=p>(</span><span class=mi>20</span><span class=p>,</span> <span class=sc>&#39;=&#39;</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+<span class=ln>61</span>    
+<span class=ln>62</span>           <span class=n>waitForEnter</span><span class=p>(</span><span class=s>&#34;Enter to continue: &#34;</span><span class=p>);</span>
+<span class=ln>63</span>           <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Testing flushed cout...&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+<span class=ln>64</span>           <span class=n>testBufferFlush</span><span class=p>(</span><span class=n>cout</span><span class=p>);</span>
+<span class=ln>65</span>           <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+<span class=ln>66</span>    <span class=p>}</span>
+<span class=ln>67</span>    
+<span class=ln>68</span>
+</code></pre></div><p>此处flush的含义是将buffer中的内容立即输出</p>
 <p>我们观察发现，在testBUffer中，"before loop"是在循环之后才输出的。暗示cout使用了buffer.</p>
 </div>
 <div class=post_comments>

@@ -12,7 +12,7 @@
 How to use boost::property_tree to load and write JSON
 How to iterate a boost property tree?
 不出现key的方法遍历一个json文件:
-/* …">
+1 /* …">
 <meta name=twitter:card content="summary">
 <meta name=twitter:creator content>
 <meta name=twitter:title content="boost:property_tree 学习笔记">
@@ -22,7 +22,7 @@ How to iterate a boost property tree?
 How to use boost::property_tree to load and write JSON
 How to iterate a boost property tree?
 不出现key的方法遍历一个json文件:
-/* …">
+1 /* …">
 <meta property="og:image" content="https://111qqz.com/images/thumbnail.png">
 <link rel=apple-touch-icon sizes=180x180 href=https://111qqz.com/icons/apple-touch-icon.png>
 <link rel=icon type=image/png sizes=32x32 href=https://111qqz.com/icons/favicon-32x32.png>
@@ -136,62 +136,64 @@ Share on:
 <p><a href=http://zenol.fr/blog/boost-property-tree/en.html>How to use boost::property_tree to load and write JSON</a></p>
 <p><a href=https://stackoverflow.com/questions/4586768/how-to-iterate-a-boost-property-tree>How to iterate a boost property tree?</a></p>
 <p>不出现key的方法遍历一个json文件:</p>
-<pre><code>/* ***********************************************
-Author :111qqz
-mail: renkuanze@sensetime.com
-Created Time :2018年08月17日 星期五 15时29分23秒
-File Name :ptree.cpp
-************************************************ */
-#include &lt;boost/property_tree/ptree.hpp&gt;
-#include &lt;boost/property_tree/json_parser.hpp&gt;
-#include &lt;bits/stdc++.h&gt;
-#include &lt;vector&gt;
-using namespace std;
-using boost::property_tree::ptree;
-
-string indent(int level) {
-  string s; 
-  for (int i=0; i&lt;level; i++) s += &quot;  &quot;;
-  return s; 
-} 
-
-void printTree (ptree &amp;pt, int level) {
-  if (pt.empty()) {
-    cerr &lt;&lt; &quot;\&quot;&quot;&lt;&lt; pt.data()&lt;&lt; &quot;\&quot;&quot;;
-  }
-
-  else {
-    if (level) cerr &lt;&lt; endl; 
-
-    cerr &lt;&lt; indent(level) &lt;&lt; &quot;{&quot; &lt;&lt; endl;     
-
-    for (ptree::iterator pos = pt.begin(); pos != pt.end();) {
-      cerr &lt;&lt; indent(level+1) &lt;&lt; &quot;\&quot;&quot; &lt;&lt; pos-&gt;first &lt;&lt; &quot;\&quot;: &quot;; 
-
-      printTree(pos-&gt;second, level + 1); 
-      ++pos; 
-      if (pos != pt.end()) {
-        cerr &lt;&lt; &quot;,&quot;; 
-      }
-      cerr &lt;&lt; endl;
-    } 
-
-   cerr &lt;&lt; indent(level) &lt;&lt; &quot; }&quot;;     
-  }
-
-  return; 
-}
-int main()
-{
-	ptree root;
-	read_json(&quot;terr.json&quot;,root);
-	printTree(root,0);
-
-
-	return 0;
-
-}
-</code></pre>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>   <span class=cm>/* ***********************************************
+</span><span class=ln> 2</span><span class=cm>   Author :111qqz
+</span><span class=ln> 3</span><span class=cm>   mail: renkuanze@sensetime.com
+</span><span class=ln> 4</span><span class=cm>   Created Time :2018年08月17日 星期五 15时29分23秒
+</span><span class=ln> 5</span><span class=cm>   File Name :ptree.cpp
+</span><span class=ln> 6</span><span class=cm>   ************************************************ */</span>
+<span class=ln> 7</span>   <span class=cp>#include</span> <span class=cpf>&lt;boost/property_tree/ptree.hpp&gt;</span><span class=cp>
+</span><span class=ln> 8</span><span class=cp></span>   <span class=cp>#include</span> <span class=cpf>&lt;boost/property_tree/json_parser.hpp&gt;</span><span class=cp>
+</span><span class=ln> 9</span><span class=cp></span>   <span class=cp>#include</span> <span class=cpf>&lt;bits/stdc++.h&gt;</span><span class=cp>
+</span><span class=ln>10</span><span class=cp></span>   <span class=cp>#include</span> <span class=cpf>&lt;vector&gt;</span><span class=cp>
+</span><span class=ln>11</span><span class=cp></span>   <span class=k>using</span> <span class=k>namespace</span> <span class=n>std</span><span class=p>;</span>
+<span class=ln>12</span>   <span class=k>using</span> <span class=n>boost</span><span class=o>::</span><span class=n>property_tree</span><span class=o>::</span><span class=n>ptree</span><span class=p>;</span>
+<span class=ln>13</span>   
+<span class=ln>14</span>   <span class=n>string</span> <span class=nf>indent</span><span class=p>(</span><span class=kt>int</span> <span class=n>level</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>15</span>     <span class=n>string</span> <span class=n>s</span><span class=p>;</span> 
+<span class=ln>16</span>     <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span><span class=o>=</span><span class=mi>0</span><span class=p>;</span> <span class=n>i</span><span class=o>&lt;</span><span class=n>level</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span> <span class=n>s</span> <span class=o>+=</span> <span class=s>&#34;  &#34;</span><span class=p>;</span>
+<span class=ln>17</span>     <span class=k>return</span> <span class=n>s</span><span class=p>;</span> 
+<span class=ln>18</span>   <span class=p>}</span> 
+<span class=ln>19</span>   
+<span class=ln>20</span>   <span class=kt>void</span> <span class=nf>printTree</span> <span class=p>(</span><span class=n>ptree</span> <span class=o>&amp;</span><span class=n>pt</span><span class=p>,</span> <span class=kt>int</span> <span class=n>level</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>21</span>     <span class=k>if</span> <span class=p>(</span><span class=n>pt</span><span class=p>.</span><span class=n>empty</span><span class=p>())</span> <span class=p>{</span>
+<span class=ln>22</span>       <span class=n>cerr</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;</span><span class=se>\&#34;</span><span class=s>&#34;</span><span class=o>&lt;&lt;</span> <span class=n>pt</span><span class=p>.</span><span class=n>data</span><span class=p>()</span><span class=o>&lt;&lt;</span> <span class=s>&#34;</span><span class=se>\&#34;</span><span class=s>&#34;</span><span class=p>;</span>
+<span class=ln>23</span>     <span class=p>}</span>
+<span class=ln>24</span>   
+<span class=ln>25</span>     <span class=k>else</span> <span class=p>{</span>
+<span class=ln>26</span>       <span class=k>if</span> <span class=p>(</span><span class=n>level</span><span class=p>)</span> <span class=n>cerr</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span> 
+<span class=ln>27</span>   
+<span class=ln>28</span>       <span class=n>cerr</span> <span class=o>&lt;&lt;</span> <span class=n>indent</span><span class=p>(</span><span class=n>level</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;{&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>     
+<span class=ln>29</span>   
+<span class=ln>30</span>       <span class=k>for</span> <span class=p>(</span><span class=n>ptree</span><span class=o>::</span><span class=n>iterator</span> <span class=n>pos</span> <span class=o>=</span> <span class=n>pt</span><span class=p>.</span><span class=n>begin</span><span class=p>();</span> <span class=n>pos</span> <span class=o>!=</span> <span class=n>pt</span><span class=p>.</span><span class=n>end</span><span class=p>();)</span> <span class=p>{</span>
+<span class=ln>31</span>         <span class=n>cerr</span> <span class=o>&lt;&lt;</span> <span class=n>indent</span><span class=p>(</span><span class=n>level</span><span class=o>+</span><span class=mi>1</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;</span><span class=se>\&#34;</span><span class=s>&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>pos</span><span class=o>-&gt;</span><span class=n>first</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;</span><span class=se>\&#34;</span><span class=s>: &#34;</span><span class=p>;</span> 
+<span class=ln>32</span>   
+<span class=ln>33</span>         <span class=n>printTree</span><span class=p>(</span><span class=n>pos</span><span class=o>-&gt;</span><span class=n>second</span><span class=p>,</span> <span class=n>level</span> <span class=o>+</span> <span class=mi>1</span><span class=p>);</span> 
+<span class=ln>34</span>         <span class=o>++</span><span class=n>pos</span><span class=p>;</span> 
+<span class=ln>35</span>         <span class=k>if</span> <span class=p>(</span><span class=n>pos</span> <span class=o>!=</span> <span class=n>pt</span><span class=p>.</span><span class=n>end</span><span class=p>())</span> <span class=p>{</span>
+<span class=ln>36</span>           <span class=n>cerr</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;,&#34;</span><span class=p>;</span> 
+<span class=ln>37</span>         <span class=p>}</span>
+<span class=ln>38</span>         <span class=n>cerr</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+<span class=ln>39</span>       <span class=p>}</span> 
+<span class=ln>40</span>   
+<span class=ln>41</span>      <span class=n>cerr</span> <span class=o>&lt;&lt;</span> <span class=n>indent</span><span class=p>(</span><span class=n>level</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34; }&#34;</span><span class=p>;</span>     
+<span class=ln>42</span>     <span class=p>}</span>
+<span class=ln>43</span>   
+<span class=ln>44</span>     <span class=k>return</span><span class=p>;</span> 
+<span class=ln>45</span>   <span class=p>}</span>
+<span class=ln>46</span>   <span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+<span class=ln>47</span>   <span class=p>{</span>
+<span class=ln>48</span>   	<span class=n>ptree</span> <span class=n>root</span><span class=p>;</span>
+<span class=ln>49</span>   	<span class=n>read_json</span><span class=p>(</span><span class=s>&#34;terr.json&#34;</span><span class=p>,</span><span class=n>root</span><span class=p>);</span>
+<span class=ln>50</span>   	<span class=n>printTree</span><span class=p>(</span><span class=n>root</span><span class=p>,</span><span class=mi>0</span><span class=p>);</span>
+<span class=ln>51</span>   
+<span class=ln>52</span>   
+<span class=ln>53</span>   	<span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>54</span>   
+<span class=ln>55</span>   <span class=p>}</span>
+<span class=ln>56</span>   
+<span class=ln>57</span>
+</code></pre></div>
 </div>
 <div class=post_comments>
 </div>

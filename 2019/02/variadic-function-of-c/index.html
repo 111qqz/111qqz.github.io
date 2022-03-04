@@ -132,40 +132,39 @@ Share on:
   * [va_end](http://en.cppreference.com/w/cpp/utility/variadic/va_end) ,用来将va_list释放的宏。
 </code></pre>
 <p>下面看一个例子就明白怎么用了orz</p>
-<pre><code>#include &lt;stdio.h&gt;
-#include &lt;stdarg.h&gt;
-
-/* print all args one at a time until a negative argument is seen;
-   all args are assumed to be of int type */
-void printargs(int arg1, ...)
-{
-  va_list ap;
-  int i;
-
-  va_start(ap, arg1); 
-  for (i = arg1; i &gt;= 0; i = va_arg(ap, int))
-    printf(&quot;%d &quot;, i);
-  va_end(ap);
-  putchar('\n');
-}
-
-int main(void)
-{
-   printargs(5, 2, 14, 84, 97, 15, -1, 48, -1);
-   printargs(84, 51, -1);
-   printargs(-1);
-   printargs(1, -1);
-   return 0;
-}
-
-
-output:
-5 2 14 84 97 15
-84 51
-
-1
-</code></pre>
-<p>如果想研究c语言中变长参数的具体实现，可以参考 <a href=https://tonybai.com/2008/05/07/also-talk-about-c-variable-length-args/>也谈C语言变长参数</a></p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>    <span class=cp>#include</span> <span class=cpf>&lt;stdio.h&gt;</span><span class=cp>
+</span><span class=ln> 2</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;stdarg.h&gt;</span><span class=cp>
+</span><span class=ln> 3</span><span class=cp></span>    
+<span class=ln> 4</span>    <span class=cm>/* print all args one at a time until a negative argument is seen;
+</span><span class=ln> 5</span><span class=cm>       all args are assumed to be of int type */</span>
+<span class=ln> 6</span>    <span class=kt>void</span> <span class=nf>printargs</span><span class=p>(</span><span class=kt>int</span> <span class=n>arg1</span><span class=p>,</span> <span class=p>...)</span>
+<span class=ln> 7</span>    <span class=p>{</span>
+<span class=ln> 8</span>      <span class=n>va_list</span> <span class=n>ap</span><span class=p>;</span>
+<span class=ln> 9</span>      <span class=kt>int</span> <span class=n>i</span><span class=p>;</span>
+<span class=ln>10</span>    
+<span class=ln>11</span>      <span class=n>va_start</span><span class=p>(</span><span class=n>ap</span><span class=p>,</span> <span class=n>arg1</span><span class=p>);</span> 
+<span class=ln>12</span>      <span class=k>for</span> <span class=p>(</span><span class=n>i</span> <span class=o>=</span> <span class=n>arg1</span><span class=p>;</span> <span class=n>i</span> <span class=o>&gt;=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>=</span> <span class=n>va_arg</span><span class=p>(</span><span class=n>ap</span><span class=p>,</span> <span class=kt>int</span><span class=p>))</span>
+<span class=ln>13</span>        <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%d &#34;</span><span class=p>,</span> <span class=n>i</span><span class=p>);</span>
+<span class=ln>14</span>      <span class=n>va_end</span><span class=p>(</span><span class=n>ap</span><span class=p>);</span>
+<span class=ln>15</span>      <span class=n>putchar</span><span class=p>(</span><span class=sc>&#39;\n&#39;</span><span class=p>);</span>
+<span class=ln>16</span>    <span class=p>}</span>
+<span class=ln>17</span>    
+<span class=ln>18</span>    <span class=kt>int</span> <span class=nf>main</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+<span class=ln>19</span>    <span class=p>{</span>
+<span class=ln>20</span>       <span class=n>printargs</span><span class=p>(</span><span class=mi>5</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>14</span><span class=p>,</span> <span class=mi>84</span><span class=p>,</span> <span class=mi>97</span><span class=p>,</span> <span class=mi>15</span><span class=p>,</span> <span class=o>-</span><span class=mi>1</span><span class=p>,</span> <span class=mi>48</span><span class=p>,</span> <span class=o>-</span><span class=mi>1</span><span class=p>);</span>
+<span class=ln>21</span>       <span class=n>printargs</span><span class=p>(</span><span class=mi>84</span><span class=p>,</span> <span class=mi>51</span><span class=p>,</span> <span class=o>-</span><span class=mi>1</span><span class=p>);</span>
+<span class=ln>22</span>       <span class=n>printargs</span><span class=p>(</span><span class=o>-</span><span class=mi>1</span><span class=p>);</span>
+<span class=ln>23</span>       <span class=n>printargs</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=o>-</span><span class=mi>1</span><span class=p>);</span>
+<span class=ln>24</span>       <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>25</span>    <span class=p>}</span>
+<span class=ln>26</span>    
+<span class=ln>27</span>    
+<span class=ln>28</span>    <span class=nl>output</span><span class=p>:</span>
+<span class=ln>29</span>    <span class=mi>5</span> <span class=mi>2</span> <span class=mi>14</span> <span class=mi>84</span> <span class=mi>97</span> <span class=mi>15</span>
+<span class=ln>30</span>    <span class=mi>84</span> <span class=mi>51</span>
+<span class=ln>31</span>    
+<span class=ln>32</span>    <span class=mi>1</span>
+</code></pre></div><p>如果想研究c语言中变长参数的具体实现，可以参考 <a href=https://tonybai.com/2008/05/07/also-talk-about-c-variable-length-args/>也谈C语言变长参数</a></p>
 <p>参考资料:</p>
 <p><a href=https://publications.gbdirect.co.uk//c_book/chapter9/stdarg.html>Variable numbers of arguments</a></p>
 </div>
