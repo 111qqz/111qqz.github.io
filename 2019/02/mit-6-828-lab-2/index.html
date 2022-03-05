@@ -104,7 +104,7 @@
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Feb 14, 2019</span>
-<span class=post_time> · 22 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/6.828 title=6.828 class="post_tag button button_translucent">6.828
+<span class=post_time> · 23 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/6.828 title=6.828 class="post_tag button button_translucent">6.828
 </a>
 </span>
 <span class=page_only>&nbsp;·
@@ -120,6 +120,22 @@ Share on:
 </a>
 </div>
 </span>
+</div>
+<div class=post_toc>
+<h2>Overview</h2>
+<nav id=TableOfContents>
+<ul>
+<li>
+<ul>
+<li><a href=#2019年2月24完成了除了challenge以外的全部练习和问题-总共花费15个小时>2019年2月24:完成了除了"Challenge"以外的全部练习和问题. 总共花费15个小时.</a></li>
+<li><a href=#2019年2月26完成challenge-2应该是最简单的一个orz只花了不到一个小时>2019年2月26:完成"Challenge 2"(应该是最简单的一个orz，只花了不到一个小时)</a></li>
+</ul>
+</li>
+<li><a href=#part-1-physical-page-management>Part 1: Physical Page Management</a></li>
+<li><a href=#part-2-virtual-memory>Part 2: Virtual Memory</a></li>
+<li><a href=#part-3-kernel-address-space>Part 3: Kernel Address Space</a></li>
+</ul>
+</nav>
 </div>
 <div class=post_body><h3 id=2019年2月24完成了除了challenge以外的全部练习和问题-总共花费15个小时>2019年2月24:完成了除了"Challenge"以外的全部练习和问题. 总共花费15个小时.</h3>
 <h3 id=2019年2月26完成challenge-2应该是最简单的一个orz只花了不到一个小时>2019年2月26:完成"Challenge 2"(应该是最简单的一个orz，只花了不到一个小时)</h3>
@@ -396,223 +412,223 @@ in the entrypgdir, but that is sufficient to allocate the first kernel page tabl
 <img class="image_figure image_external" loading=lazy src=https://pdos.csail.mit.edu/6.828/2018/readings/i386/fig6-10.gif alt>
 </p>
 <p>然后第三点,返回的是一个pointer,必须是VA,需要做相应的转换.</p>
-<pre><code>// Given 'pgdir', a pointer to a page directory, pgdir_walk returns
-// a pointer to the page table entry (PTE) for linear address 'va'.
-// This requires walking the two-level page table structure.
-//
-// The relevant page table page might not exist yet.
-// If this is true, and create == false, then pgdir_walk returns NULL.
-// Otherwise, pgdir_walk allocates a new page table page with page_alloc.
-//    - If the allocation fails, pgdir_walk returns NULL.
-//    - Otherwise, the new page's reference count is incremented,
-//	the page is cleared,
-//	and pgdir_walk returns a pointer into the new page table page.
-//
-// Hint 1: you can turn a PageInfo * into the physical address of the
-// page it refers to with page2pa() from kern/pmap.h.
-//
-// Hint 2: the x86 MMU checks permission bits in both the page directory
-// and the page table, so it's safe to leave permissions in the page
-// directory more permissive than strictly necessary.
-//
-// Hint 3: look at inc/mmu.h for useful macros that manipulate page
-// table and page directory entries.
-//
-pte_t *
-pgdir_walk(pde_t *pgdir, const void *va, int create)
-{
-	// Fill this function in
-	//cprintf(&quot;*pgdir:x *va:x\n&quot;,*pgdir, va);
-	pte_t * pgdir_entry = &amp;pgdir[PDX(va)];
-	bool page_exist = (*pgdir_entry &amp; PTE_P);
-	//cprintf(&quot;page_exist %d\n&quot;,page_exist);
-	struct PageInfo * pginfo;
-	if (!page_exist)
-	{
-		if (!create) return NULL;
-		else
-		{
-			pginfo = page_alloc(1);
-			//cprintf(&quot;pginfo in pgdir_walk:x\n&quot;,pginfo);
-			if (!pginfo) return NULL;
-			pginfo-&gt;pp_ref++;
-			// 要添加的权限参考 https://pdos.csail.mit.edu/6.828/2018/readings/i386/s06_04.htm
-			*pgdir_entry = (pte_t)page2pa(pginfo) | PTE_U | PTE_W | PTE_P;
-			// return pgdir_entry;
-		}
-	}
-	// what if pre_t present bit is 0?
-	// 注意PTE_ADDR返回的是物理地址，而一个pointer应该指向一个虚拟地址。
-	//
-	pte_t * pgtable_entry = (pte_t *)KADDR(PTE_ADDR(*pgdir_entry))+PTX(va);
-	page_exist = (*pgtable_entry &amp;PTE_P);
-	
-	// 提示1有什么作用？ 怎么判断page table page是否存在？ 
-	// 用present bhttps://pdos.csail.mit.edu/6.828/2018/readings/i386/s06_04.htmit 判断？
-	return pgtable_entry;
-}
-</code></pre>
-<p>接下里是boot_map_region.  由于各种参数已经保证了对齐PGSIZE...所以也没什么cornor case.</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=ln> 1</span>    <span class=c1>// Given &#39;pgdir&#39;, a pointer to a page directory, pgdir_walk returns
+</span><span class=ln> 2</span><span class=c1></span>    <span class=c1>// a pointer to the page table entry (PTE) for linear address &#39;va&#39;.
+</span><span class=ln> 3</span><span class=c1></span>    <span class=c1>// This requires walking the two-level page table structure.
+</span><span class=ln> 4</span><span class=c1></span>    <span class=c1>//
+</span><span class=ln> 5</span><span class=c1></span>    <span class=c1>// The relevant page table page might not exist yet.
+</span><span class=ln> 6</span><span class=c1></span>    <span class=c1>// If this is true, and create == false, then pgdir_walk returns NULL.
+</span><span class=ln> 7</span><span class=c1></span>    <span class=c1>// Otherwise, pgdir_walk allocates a new page table page with page_alloc.
+</span><span class=ln> 8</span><span class=c1></span>    <span class=c1>//    - If the allocation fails, pgdir_walk returns NULL.
+</span><span class=ln> 9</span><span class=c1></span>    <span class=c1>//    - Otherwise, the new page&#39;s reference count is incremented,
+</span><span class=ln>10</span><span class=c1></span>    <span class=c1>//	the page is cleared,
+</span><span class=ln>11</span><span class=c1></span>    <span class=c1>//	and pgdir_walk returns a pointer into the new page table page.
+</span><span class=ln>12</span><span class=c1></span>    <span class=c1>//
+</span><span class=ln>13</span><span class=c1></span>    <span class=c1>// Hint 1: you can turn a PageInfo * into the physical address of the
+</span><span class=ln>14</span><span class=c1></span>    <span class=c1>// page it refers to with page2pa() from kern/pmap.h.
+</span><span class=ln>15</span><span class=c1></span>    <span class=c1>//
+</span><span class=ln>16</span><span class=c1></span>    <span class=c1>// Hint 2: the x86 MMU checks permission bits in both the page directory
+</span><span class=ln>17</span><span class=c1></span>    <span class=c1>// and the page table, so it&#39;s safe to leave permissions in the page
+</span><span class=ln>18</span><span class=c1></span>    <span class=c1>// directory more permissive than strictly necessary.
+</span><span class=ln>19</span><span class=c1></span>    <span class=c1>//
+</span><span class=ln>20</span><span class=c1></span>    <span class=c1>// Hint 3: look at inc/mmu.h for useful macros that manipulate page
+</span><span class=ln>21</span><span class=c1></span>    <span class=c1>// table and page directory entries.
+</span><span class=ln>22</span><span class=c1></span>    <span class=c1>//
+</span><span class=ln>23</span><span class=c1></span>    <span class=n>pte_t</span> <span class=o>*</span>
+<span class=ln>24</span>    <span class=nf>pgdir_walk</span><span class=p>(</span><span class=n>pde_t</span> <span class=o>*</span><span class=n>pgdir</span><span class=p>,</span> <span class=k>const</span> <span class=kt>void</span> <span class=o>*</span><span class=n>va</span><span class=p>,</span> <span class=kt>int</span> <span class=n>create</span><span class=p>)</span>
+<span class=ln>25</span>    <span class=p>{</span>
+<span class=ln>26</span>    	<span class=c1>// Fill this function in
+</span><span class=ln>27</span><span class=c1></span>    	<span class=c1>//cprintf(&#34;*pgdir:x *va:x\n&#34;,*pgdir, va);
+</span><span class=ln>28</span><span class=c1></span>    	<span class=n>pte_t</span> <span class=o>*</span> <span class=n>pgdir_entry</span> <span class=o>=</span> <span class=o>&amp;</span><span class=n>pgdir</span><span class=p>[</span><span class=n>PDX</span><span class=p>(</span><span class=n>va</span><span class=p>)];</span>
+<span class=ln>29</span>    	<span class=kt>bool</span> <span class=n>page_exist</span> <span class=o>=</span> <span class=p>(</span><span class=o>*</span><span class=n>pgdir_entry</span> <span class=o>&amp;</span> <span class=n>PTE_P</span><span class=p>);</span>
+<span class=ln>30</span>    	<span class=c1>//cprintf(&#34;page_exist %d\n&#34;,page_exist);
+</span><span class=ln>31</span><span class=c1></span>    	<span class=k>struct</span> <span class=n>PageInfo</span> <span class=o>*</span> <span class=n>pginfo</span><span class=p>;</span>
+<span class=ln>32</span>    	<span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>page_exist</span><span class=p>)</span>
+<span class=ln>33</span>    	<span class=p>{</span>
+<span class=ln>34</span>    		<span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>create</span><span class=p>)</span> <span class=k>return</span> <span class=nb>NULL</span><span class=p>;</span>
+<span class=ln>35</span>    		<span class=k>else</span>
+<span class=ln>36</span>    		<span class=p>{</span>
+<span class=ln>37</span>    			<span class=n>pginfo</span> <span class=o>=</span> <span class=n>page_alloc</span><span class=p>(</span><span class=mi>1</span><span class=p>);</span>
+<span class=ln>38</span>    			<span class=c1>//cprintf(&#34;pginfo in pgdir_walk:x\n&#34;,pginfo);
+</span><span class=ln>39</span><span class=c1></span>    			<span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>pginfo</span><span class=p>)</span> <span class=k>return</span> <span class=nb>NULL</span><span class=p>;</span>
+<span class=ln>40</span>    			<span class=n>pginfo</span><span class=o>-&gt;</span><span class=n>pp_ref</span><span class=o>++</span><span class=p>;</span>
+<span class=ln>41</span>    			<span class=c1>// 要添加的权限参考 https://pdos.csail.mit.edu/6.828/2018/readings/i386/s06_04.htm
+</span><span class=ln>42</span><span class=c1></span>    			<span class=o>*</span><span class=n>pgdir_entry</span> <span class=o>=</span> <span class=p>(</span><span class=n>pte_t</span><span class=p>)</span><span class=n>page2pa</span><span class=p>(</span><span class=n>pginfo</span><span class=p>)</span> <span class=o>|</span> <span class=n>PTE_U</span> <span class=o>|</span> <span class=n>PTE_W</span> <span class=o>|</span> <span class=n>PTE_P</span><span class=p>;</span>
+<span class=ln>43</span>    			<span class=c1>// return pgdir_entry;
+</span><span class=ln>44</span><span class=c1></span>    		<span class=p>}</span>
+<span class=ln>45</span>    	<span class=p>}</span>
+<span class=ln>46</span>    	<span class=c1>// what if pre_t present bit is 0?
+</span><span class=ln>47</span><span class=c1></span>    	<span class=c1>// 注意PTE_ADDR返回的是物理地址，而一个pointer应该指向一个虚拟地址。
+</span><span class=ln>48</span><span class=c1></span>    	<span class=c1>//
+</span><span class=ln>49</span><span class=c1></span>    	<span class=n>pte_t</span> <span class=o>*</span> <span class=n>pgtable_entry</span> <span class=o>=</span> <span class=p>(</span><span class=n>pte_t</span> <span class=o>*</span><span class=p>)</span><span class=n>KADDR</span><span class=p>(</span><span class=n>PTE_ADDR</span><span class=p>(</span><span class=o>*</span><span class=n>pgdir_entry</span><span class=p>))</span><span class=o>+</span><span class=n>PTX</span><span class=p>(</span><span class=n>va</span><span class=p>);</span>
+<span class=ln>50</span>    	<span class=n>page_exist</span> <span class=o>=</span> <span class=p>(</span><span class=o>*</span><span class=n>pgtable_entry</span> <span class=o>&amp;</span><span class=n>PTE_P</span><span class=p>);</span>
+<span class=ln>51</span>    	
+<span class=ln>52</span>    	<span class=c1>// 提示1有什么作用？ 怎么判断page table page是否存在？ 
+</span><span class=ln>53</span><span class=c1></span>    	<span class=c1>// 用present bhttps://pdos.csail.mit.edu/6.828/2018/readings/i386/s06_04.htmit 判断？
+</span><span class=ln>54</span><span class=c1></span>    	<span class=k>return</span> <span class=n>pgtable_entry</span><span class=p>;</span>
+<span class=ln>55</span>    <span class=p>}</span>
+<span class=ln>56</span>
+</code></pre></div><p>接下里是boot_map_region.  由于各种参数已经保证了对齐PGSIZE...所以也没什么cornor case.</p>
 <p><strong>唯一值得强调的是,map一个VA到PA的含义,其实就是将VA对应的page entry的page frame address设置为PA.</strong></p>
-<pre><code>//
-// map一个VA到PA的含义，其实就是将VA对应的page entry的地址设置为PA.
-// Map [va, va+size) of virtual address space to physical [pa, pa+size)
-// in the page table rooted at pgdir.  Size is a multiple of PGSIZE, and
-// va and pa are both page-aligned.
-// Use permission bits perm|PTE_P for the entries.
-//
-// This function is only intended to set up the ``static'' mappings
-// above UTOP. As such, it should *not* change the pp_ref field on the
-// mapped pages.
-//
-// Hint: the TA solution uses pgdir_walk
-static void
-boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm)
-{
-	// Fill this function in
-	size_t  num = size/PGSIZE;
-	for ( size_t i = 0 ; i &lt; num ; i++)
-	{
-		uintptr_t cur_va = va + i*PGSIZE;
-		pte_t * entry = pgdir_walk(pgdir,(const void*)cur_va,1);
-		if (!entry)
-		{
-			panic(&quot;pgdir_walk return NULL!&quot;);
-		}
-		physaddr_t cur_pa = pa + i*PGSIZE;
-		*entry = cur_pa | perm | PTE_P;
-	}
-}
-</code></pre>
-<p>接下来是page_lookup,作用是从va得到映射到该位置的page的信息.</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=ln> 1</span>   <span class=c1>//
+</span><span class=ln> 2</span><span class=c1></span>   <span class=c1>// map一个VA到PA的含义，其实就是将VA对应的page entry的地址设置为PA.
+</span><span class=ln> 3</span><span class=c1></span>   <span class=c1>// Map [va, va+size) of virtual address space to physical [pa, pa+size)
+</span><span class=ln> 4</span><span class=c1></span>   <span class=c1>// in the page table rooted at pgdir.  Size is a multiple of PGSIZE, and
+</span><span class=ln> 5</span><span class=c1></span>   <span class=c1>// va and pa are both page-aligned.
+</span><span class=ln> 6</span><span class=c1></span>   <span class=c1>// Use permission bits perm|PTE_P for the entries.
+</span><span class=ln> 7</span><span class=c1></span>   <span class=c1>//
+</span><span class=ln> 8</span><span class=c1></span>   <span class=c1>// This function is only intended to set up the ``static&#39;&#39; mappings
+</span><span class=ln> 9</span><span class=c1></span>   <span class=c1>// above UTOP. As such, it should *not* change the pp_ref field on the
+</span><span class=ln>10</span><span class=c1></span>   <span class=c1>// mapped pages.
+</span><span class=ln>11</span><span class=c1></span>   <span class=c1>//
+</span><span class=ln>12</span><span class=c1></span>   <span class=c1>// Hint: the TA solution uses pgdir_walk
+</span><span class=ln>13</span><span class=c1></span>   <span class=k>static</span> <span class=kt>void</span>
+<span class=ln>14</span>   <span class=nf>boot_map_region</span><span class=p>(</span><span class=n>pde_t</span> <span class=o>*</span><span class=n>pgdir</span><span class=p>,</span> <span class=n>uintptr_t</span> <span class=n>va</span><span class=p>,</span> <span class=n>size_t</span> <span class=n>size</span><span class=p>,</span> <span class=n>physaddr_t</span> <span class=n>pa</span><span class=p>,</span> <span class=kt>int</span> <span class=n>perm</span><span class=p>)</span>
+<span class=ln>15</span>   <span class=p>{</span>
+<span class=ln>16</span>   	<span class=c1>// Fill this function in
+</span><span class=ln>17</span><span class=c1></span>   	<span class=n>size_t</span>  <span class=n>num</span> <span class=o>=</span> <span class=n>size</span><span class=o>/</span><span class=n>PGSIZE</span><span class=p>;</span>
+<span class=ln>18</span>   	<span class=k>for</span> <span class=p>(</span> <span class=n>size_t</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span> <span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>num</span> <span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
+<span class=ln>19</span>   	<span class=p>{</span>
+<span class=ln>20</span>   		<span class=n>uintptr_t</span> <span class=n>cur_va</span> <span class=o>=</span> <span class=n>va</span> <span class=o>+</span> <span class=n>i</span><span class=o>*</span><span class=n>PGSIZE</span><span class=p>;</span>
+<span class=ln>21</span>   		<span class=n>pte_t</span> <span class=o>*</span> <span class=n>entry</span> <span class=o>=</span> <span class=n>pgdir_walk</span><span class=p>(</span><span class=n>pgdir</span><span class=p>,(</span><span class=k>const</span> <span class=kt>void</span><span class=o>*</span><span class=p>)</span><span class=n>cur_va</span><span class=p>,</span><span class=mi>1</span><span class=p>);</span>
+<span class=ln>22</span>   		<span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>entry</span><span class=p>)</span>
+<span class=ln>23</span>   		<span class=p>{</span>
+<span class=ln>24</span>   			<span class=n>panic</span><span class=p>(</span><span class=s>&#34;pgdir_walk return NULL!&#34;</span><span class=p>);</span>
+<span class=ln>25</span>   		<span class=p>}</span>
+<span class=ln>26</span>   		<span class=n>physaddr_t</span> <span class=n>cur_pa</span> <span class=o>=</span> <span class=n>pa</span> <span class=o>+</span> <span class=n>i</span><span class=o>*</span><span class=n>PGSIZE</span><span class=p>;</span>
+<span class=ln>27</span>   		<span class=o>*</span><span class=n>entry</span> <span class=o>=</span> <span class=n>cur_pa</span> <span class=o>|</span> <span class=n>perm</span> <span class=o>|</span> <span class=n>PTE_P</span><span class=p>;</span>
+<span class=ln>28</span>   	<span class=p>}</span>
+<span class=ln>29</span>   <span class=p>}</span>
+<span class=ln>30</span>
+<span class=ln>31</span>
+</code></pre></div><p>接下来是page_lookup,作用是从va得到映射到该位置的page的信息.</p>
 <p>一开始少判断了一种情况,就是忘记检查返回的*entry,导致一个assert(!page_alloc(0)); 一直过不去...调了蛮久orz</p>
-<pre><code>// Return the page mapped at virtual address 'va'.
-// If pte_store is not zero, then we store in it the address
-// of the pte for this page.  This is used by page_remove and
-// can be used to verify page permissions for syscall arguments,
-// but should not be used by most callers.
-//
-// Return NULL if there is no page mapped at va.
-//
-// Hint: the TA solution uses pgdir_walk and pa2page.
-//
-struct PageInfo *
-page_lookup(pde_t *pgdir, void *va, pte_t **pte_store)
-{
-	// Fill this function in
-	pte_t * entry = pgdir_walk( pgdir, va, 0);
-	if (!entry) return NULL;
-	if (pte_store)
-	{
-		*pte_store =  entry;
-	}
-	bool exist = *entry &amp; PTE_P;
-	if (!exist) return NULL;
-
-	physaddr_t pa = PTE_ADDR(*entry);
-	cprintf(&quot;pa in lookup: x\n&quot;,pa);
-	struct PageInfo* ret = pa2page(pa);
-	return ret;
-}
-</code></pre>
-<p>下来是page_remove.</p>
-<pre><code>// Unmaps the physical page at virtual address 'va'.
-// If there is no physical page at that address, silently does nothing.
-//
-// Details:
-//   - The ref count on the physical page should decrement.
-//   - The physical page should be freed if the refcount reaches 0.
-//   - The pg table entry corresponding to 'va' should be set to 0.
-//     (if such a PTE exists)
-//   - The TLB must be invalidated if you remove an entry from
-//     the page table.
-//
-// Hint: The TA solution is implemented using page_lookup,
-// 	tlb_invalidate, and page_decref.
-//
-void
-page_remove(pde_t *pgdir, void *va)
-{
-	// Fill this function in
-	pte_t *entry;
-	struct PageInfo * pginfo = page_lookup(pgdir,va,&amp;entry);
-	//cprintf(&quot;VA in page_remove:x\n&quot;,va);
-	//cprintf(&quot;pginfo in page_remove:x\n&quot;,pginfo);
-	if (!pginfo) return;
-	page_decref(pginfo);
-	//pte_t * entry = pgdir_walk(pgdir,va,0);
-	//if (!entry) return;
-	*entry = 0;
-	tlb_invalidate(pgdir,va);
-	//check
-	//entry = pgdir_walk(pgdir,va,0);
-	//cprintf(&quot; va: x entry after page_remove: x\n&quot;,va, *entry);
-}
-</code></pre>
-<p>接下来是page_insert.</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=ln> 1</span>    <span class=c1>// Return the page mapped at virtual address &#39;va&#39;.
+</span><span class=ln> 2</span><span class=c1></span>    <span class=c1>// If pte_store is not zero, then we store in it the address
+</span><span class=ln> 3</span><span class=c1></span>    <span class=c1>// of the pte for this page.  This is used by page_remove and
+</span><span class=ln> 4</span><span class=c1></span>    <span class=c1>// can be used to verify page permissions for syscall arguments,
+</span><span class=ln> 5</span><span class=c1></span>    <span class=c1>// but should not be used by most callers.
+</span><span class=ln> 6</span><span class=c1></span>    <span class=c1>//
+</span><span class=ln> 7</span><span class=c1></span>    <span class=c1>// Return NULL if there is no page mapped at va.
+</span><span class=ln> 8</span><span class=c1></span>    <span class=c1>//
+</span><span class=ln> 9</span><span class=c1></span>    <span class=c1>// Hint: the TA solution uses pgdir_walk and pa2page.
+</span><span class=ln>10</span><span class=c1></span>    <span class=c1>//
+</span><span class=ln>11</span><span class=c1></span>    <span class=k>struct</span> <span class=n>PageInfo</span> <span class=o>*</span>
+<span class=ln>12</span>    <span class=nf>page_lookup</span><span class=p>(</span><span class=n>pde_t</span> <span class=o>*</span><span class=n>pgdir</span><span class=p>,</span> <span class=kt>void</span> <span class=o>*</span><span class=n>va</span><span class=p>,</span> <span class=n>pte_t</span> <span class=o>**</span><span class=n>pte_store</span><span class=p>)</span>
+<span class=ln>13</span>    <span class=p>{</span>
+<span class=ln>14</span>    	<span class=c1>// Fill this function in
+</span><span class=ln>15</span><span class=c1></span>    	<span class=n>pte_t</span> <span class=o>*</span> <span class=n>entry</span> <span class=o>=</span> <span class=n>pgdir_walk</span><span class=p>(</span> <span class=n>pgdir</span><span class=p>,</span> <span class=n>va</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+<span class=ln>16</span>    	<span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>entry</span><span class=p>)</span> <span class=k>return</span> <span class=nb>NULL</span><span class=p>;</span>
+<span class=ln>17</span>    	<span class=k>if</span> <span class=p>(</span><span class=n>pte_store</span><span class=p>)</span>
+<span class=ln>18</span>    	<span class=p>{</span>
+<span class=ln>19</span>    		<span class=o>*</span><span class=n>pte_store</span> <span class=o>=</span>  <span class=n>entry</span><span class=p>;</span>
+<span class=ln>20</span>    	<span class=p>}</span>
+<span class=ln>21</span>    	<span class=kt>bool</span> <span class=n>exist</span> <span class=o>=</span> <span class=o>*</span><span class=n>entry</span> <span class=o>&amp;</span> <span class=n>PTE_P</span><span class=p>;</span>
+<span class=ln>22</span>    	<span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>exist</span><span class=p>)</span> <span class=k>return</span> <span class=nb>NULL</span><span class=p>;</span>
+<span class=ln>23</span>    
+<span class=ln>24</span>    	<span class=n>physaddr_t</span> <span class=n>pa</span> <span class=o>=</span> <span class=n>PTE_ADDR</span><span class=p>(</span><span class=o>*</span><span class=n>entry</span><span class=p>);</span>
+<span class=ln>25</span>    	<span class=n>cprintf</span><span class=p>(</span><span class=s>&#34;pa in lookup: x</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span><span class=n>pa</span><span class=p>);</span>
+<span class=ln>26</span>    	<span class=k>struct</span> <span class=n>PageInfo</span><span class=o>*</span> <span class=n>ret</span> <span class=o>=</span> <span class=n>pa2page</span><span class=p>(</span><span class=n>pa</span><span class=p>);</span>
+<span class=ln>27</span>    	<span class=k>return</span> <span class=n>ret</span><span class=p>;</span>
+<span class=ln>28</span>    <span class=p>}</span>
+<span class=ln>29</span>
+</code></pre></div><p>下来是page_remove.</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=ln> 1</span>    <span class=c1>// Unmaps the physical page at virtual address &#39;va&#39;.
+</span><span class=ln> 2</span><span class=c1></span>    <span class=c1>// If there is no physical page at that address, silently does nothing.
+</span><span class=ln> 3</span><span class=c1></span>    <span class=c1>//
+</span><span class=ln> 4</span><span class=c1></span>    <span class=c1>// Details:
+</span><span class=ln> 5</span><span class=c1></span>    <span class=c1>//   - The ref count on the physical page should decrement.
+</span><span class=ln> 6</span><span class=c1></span>    <span class=c1>//   - The physical page should be freed if the refcount reaches 0.
+</span><span class=ln> 7</span><span class=c1></span>    <span class=c1>//   - The pg table entry corresponding to &#39;va&#39; should be set to 0.
+</span><span class=ln> 8</span><span class=c1></span>    <span class=c1>//     (if such a PTE exists)
+</span><span class=ln> 9</span><span class=c1></span>    <span class=c1>//   - The TLB must be invalidated if you remove an entry from
+</span><span class=ln>10</span><span class=c1></span>    <span class=c1>//     the page table.
+</span><span class=ln>11</span><span class=c1></span>    <span class=c1>//
+</span><span class=ln>12</span><span class=c1></span>    <span class=c1>// Hint: The TA solution is implemented using page_lookup,
+</span><span class=ln>13</span><span class=c1></span>    <span class=c1>// 	tlb_invalidate, and page_decref.
+</span><span class=ln>14</span><span class=c1></span>    <span class=c1>//
+</span><span class=ln>15</span><span class=c1></span>    <span class=kt>void</span>
+<span class=ln>16</span>    <span class=nf>page_remove</span><span class=p>(</span><span class=n>pde_t</span> <span class=o>*</span><span class=n>pgdir</span><span class=p>,</span> <span class=kt>void</span> <span class=o>*</span><span class=n>va</span><span class=p>)</span>
+<span class=ln>17</span>    <span class=p>{</span>
+<span class=ln>18</span>    	<span class=c1>// Fill this function in
+</span><span class=ln>19</span><span class=c1></span>    	<span class=n>pte_t</span> <span class=o>*</span><span class=n>entry</span><span class=p>;</span>
+<span class=ln>20</span>    	<span class=k>struct</span> <span class=n>PageInfo</span> <span class=o>*</span> <span class=n>pginfo</span> <span class=o>=</span> <span class=n>page_lookup</span><span class=p>(</span><span class=n>pgdir</span><span class=p>,</span><span class=n>va</span><span class=p>,</span><span class=o>&amp;</span><span class=n>entry</span><span class=p>);</span>
+<span class=ln>21</span>    	<span class=c1>//cprintf(&#34;VA in page_remove:x\n&#34;,va);
+</span><span class=ln>22</span><span class=c1></span>    	<span class=c1>//cprintf(&#34;pginfo in page_remove:x\n&#34;,pginfo);
+</span><span class=ln>23</span><span class=c1></span>    	<span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>pginfo</span><span class=p>)</span> <span class=k>return</span><span class=p>;</span>
+<span class=ln>24</span>    	<span class=n>page_decref</span><span class=p>(</span><span class=n>pginfo</span><span class=p>);</span>
+<span class=ln>25</span>    	<span class=c1>//pte_t * entry = pgdir_walk(pgdir,va,0);
+</span><span class=ln>26</span><span class=c1></span>    	<span class=c1>//if (!entry) return;
+</span><span class=ln>27</span><span class=c1></span>    	<span class=o>*</span><span class=n>entry</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>28</span>    	<span class=n>tlb_invalidate</span><span class=p>(</span><span class=n>pgdir</span><span class=p>,</span><span class=n>va</span><span class=p>);</span>
+<span class=ln>29</span>    	<span class=c1>//check
+</span><span class=ln>30</span><span class=c1></span>    	<span class=c1>//entry = pgdir_walk(pgdir,va,0);
+</span><span class=ln>31</span><span class=c1></span>    	<span class=c1>//cprintf(&#34; va: x entry after page_remove: x\n&#34;,va, *entry);
+</span><span class=ln>32</span><span class=c1></span>    <span class=p>}</span>
+</code></pre></div><p>接下来是page_insert.</p>
 <p>被坑的一个点是...错误码是带负号的...滑稽</p>
 <p>然后我的实现中用了page_lookup...其实不用也完全可以...但是觉得使用page_lookup检查某一个va是否有page存在的逻辑更加合理...</p>
-<pre><code>// Map the physical page 'pp' at virtual address 'va'.
-// The permissions (the low 12 bits) of the page table entry
-// should be set to 'perm|PTE_P'.
-// 
-// Requirements
-//   - If there is already a page mapped at 'va', it should be page_remove()d.
-//   - If necessary, on demand, a page table should be allocated and inserted
-//     into 'pgdir'.
-//   - pp-&gt;pp_ref should be incremented if the insertion succeeds.
-//   - The TLB must be invalidated if a page was formerly present at 'va'.
-//
-// Corner-case hint: Make sure to consider what happens when the same
-// pp is re-inserted at the same virtual address in the same pgdir.
-// However, try not to distinguish this case in your code, as this
-// frequently leads to subtle bugs; there's an elegant way to handle
-// everything in one code path.
-//
-//
-// RETURNS:
-//   0 on success
-//   -E_NO_MEM, if page table couldn't be allocated
-//
-// Hint: The TA solution is implemented using pgdir_walk, page_remove,
-// and page2pa.
-//
- 
-int
-page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
-{
-	// Fill this function in
-	physaddr_t pa = page2pa(pp);
-	//pte_t *entry = pgdir_walk(pgdir,va,1);
-	pte_t *entry;
-	struct PageInfo * pginfo = page_lookup(pgdir,va,&amp;entry);	
-	bool exist = *entry &amp; PTE_P;
-	cprintf(&quot;*entry x exist %d pginfo x\n&quot;,*entry,exist,pginfo);
-	if (pginfo!=NULL)
-	{
-		if (PTE_ADDR(*entry)== pa)
-		{
-			*entry = pa | perm | PTE_P;
-			return 0;
-		}
-		else
-		{
-			page_remove(pgdir,va);
-		}
-	}
-	entry = pgdir_walk(pgdir,va,1);
-	if (!entry)
-	{
-		return -E_NO_MEM;
-		// 我服了。。错误码还带符号的。。。
-	}
-	*entry = pa | perm | PTE_P;
-	pp-&gt;pp_ref++;
-	//cprintf(&quot;check_va2pa:x\n&quot;,check_va2pa(pgdir,PGSIZE));
-	return 0;
-}
-</code></pre>
-<h2 id=part-3-kernel-address-space>Part 3: Kernel Address Space</h2>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=ln> 1</span>    <span class=c1>// Map the physical page &#39;pp&#39; at virtual address &#39;va&#39;.
+</span><span class=ln> 2</span><span class=c1></span>    <span class=c1>// The permissions (the low 12 bits) of the page table entry
+</span><span class=ln> 3</span><span class=c1></span>    <span class=c1>// should be set to &#39;perm|PTE_P&#39;.
+</span><span class=ln> 4</span><span class=c1></span>    <span class=c1>// 
+</span><span class=ln> 5</span><span class=c1></span>    <span class=c1>// Requirements
+</span><span class=ln> 6</span><span class=c1></span>    <span class=c1>//   - If there is already a page mapped at &#39;va&#39;, it should be page_remove()d.
+</span><span class=ln> 7</span><span class=c1></span>    <span class=c1>//   - If necessary, on demand, a page table should be allocated and inserted
+</span><span class=ln> 8</span><span class=c1></span>    <span class=c1>//     into &#39;pgdir&#39;.
+</span><span class=ln> 9</span><span class=c1></span>    <span class=c1>//   - pp-&gt;pp_ref should be incremented if the insertion succeeds.
+</span><span class=ln>10</span><span class=c1></span>    <span class=c1>//   - The TLB must be invalidated if a page was formerly present at &#39;va&#39;.
+</span><span class=ln>11</span><span class=c1></span>    <span class=c1>//
+</span><span class=ln>12</span><span class=c1></span>    <span class=c1>// Corner-case hint: Make sure to consider what happens when the same
+</span><span class=ln>13</span><span class=c1></span>    <span class=c1>// pp is re-inserted at the same virtual address in the same pgdir.
+</span><span class=ln>14</span><span class=c1></span>    <span class=c1>// However, try not to distinguish this case in your code, as this
+</span><span class=ln>15</span><span class=c1></span>    <span class=c1>// frequently leads to subtle bugs; there&#39;s an elegant way to handle
+</span><span class=ln>16</span><span class=c1></span>    <span class=c1>// everything in one code path.
+</span><span class=ln>17</span><span class=c1></span>    <span class=c1>//
+</span><span class=ln>18</span><span class=c1></span>    <span class=c1>//
+</span><span class=ln>19</span><span class=c1></span>    <span class=c1>// RETURNS:
+</span><span class=ln>20</span><span class=c1></span>    <span class=c1>//   0 on success
+</span><span class=ln>21</span><span class=c1></span>    <span class=c1>//   -E_NO_MEM, if page table couldn&#39;t be allocated
+</span><span class=ln>22</span><span class=c1></span>    <span class=c1>//
+</span><span class=ln>23</span><span class=c1></span>    <span class=c1>// Hint: The TA solution is implemented using pgdir_walk, page_remove,
+</span><span class=ln>24</span><span class=c1></span>    <span class=c1>// and page2pa.
+</span><span class=ln>25</span><span class=c1></span>    <span class=c1>//
+</span><span class=ln>26</span><span class=c1></span>     
+<span class=ln>27</span>    <span class=kt>int</span>
+<span class=ln>28</span>    <span class=nf>page_insert</span><span class=p>(</span><span class=n>pde_t</span> <span class=o>*</span><span class=n>pgdir</span><span class=p>,</span> <span class=k>struct</span> <span class=n>PageInfo</span> <span class=o>*</span><span class=n>pp</span><span class=p>,</span> <span class=kt>void</span> <span class=o>*</span><span class=n>va</span><span class=p>,</span> <span class=kt>int</span> <span class=n>perm</span><span class=p>)</span>
+<span class=ln>29</span>    <span class=p>{</span>
+<span class=ln>30</span>    	<span class=c1>// Fill this function in
+</span><span class=ln>31</span><span class=c1></span>    	<span class=n>physaddr_t</span> <span class=n>pa</span> <span class=o>=</span> <span class=n>page2pa</span><span class=p>(</span><span class=n>pp</span><span class=p>);</span>
+<span class=ln>32</span>    	<span class=c1>//pte_t *entry = pgdir_walk(pgdir,va,1);
+</span><span class=ln>33</span><span class=c1></span>    	<span class=n>pte_t</span> <span class=o>*</span><span class=n>entry</span><span class=p>;</span>
+<span class=ln>34</span>    	<span class=k>struct</span> <span class=n>PageInfo</span> <span class=o>*</span> <span class=n>pginfo</span> <span class=o>=</span> <span class=n>page_lookup</span><span class=p>(</span><span class=n>pgdir</span><span class=p>,</span><span class=n>va</span><span class=p>,</span><span class=o>&amp;</span><span class=n>entry</span><span class=p>);</span>	
+<span class=ln>35</span>    	<span class=kt>bool</span> <span class=n>exist</span> <span class=o>=</span> <span class=o>*</span><span class=n>entry</span> <span class=o>&amp;</span> <span class=n>PTE_P</span><span class=p>;</span>
+<span class=ln>36</span>    	<span class=n>cprintf</span><span class=p>(</span><span class=s>&#34;*entry x exist %d pginfo x</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span><span class=o>*</span><span class=n>entry</span><span class=p>,</span><span class=n>exist</span><span class=p>,</span><span class=n>pginfo</span><span class=p>);</span>
+<span class=ln>37</span>    	<span class=k>if</span> <span class=p>(</span><span class=n>pginfo</span><span class=o>!=</span><span class=nb>NULL</span><span class=p>)</span>
+<span class=ln>38</span>    	<span class=p>{</span>
+<span class=ln>39</span>    		<span class=k>if</span> <span class=p>(</span><span class=n>PTE_ADDR</span><span class=p>(</span><span class=o>*</span><span class=n>entry</span><span class=p>)</span><span class=o>==</span> <span class=n>pa</span><span class=p>)</span>
+<span class=ln>40</span>    		<span class=p>{</span>
+<span class=ln>41</span>    			<span class=o>*</span><span class=n>entry</span> <span class=o>=</span> <span class=n>pa</span> <span class=o>|</span> <span class=n>perm</span> <span class=o>|</span> <span class=n>PTE_P</span><span class=p>;</span>
+<span class=ln>42</span>    			<span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>43</span>    		<span class=p>}</span>
+<span class=ln>44</span>    		<span class=k>else</span>
+<span class=ln>45</span>    		<span class=p>{</span>
+<span class=ln>46</span>    			<span class=n>page_remove</span><span class=p>(</span><span class=n>pgdir</span><span class=p>,</span><span class=n>va</span><span class=p>);</span>
+<span class=ln>47</span>    		<span class=p>}</span>
+<span class=ln>48</span>    	<span class=p>}</span>
+<span class=ln>49</span>    	<span class=n>entry</span> <span class=o>=</span> <span class=n>pgdir_walk</span><span class=p>(</span><span class=n>pgdir</span><span class=p>,</span><span class=n>va</span><span class=p>,</span><span class=mi>1</span><span class=p>);</span>
+<span class=ln>50</span>    	<span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>entry</span><span class=p>)</span>
+<span class=ln>51</span>    	<span class=p>{</span>
+<span class=ln>52</span>    		<span class=k>return</span> <span class=o>-</span><span class=n>E_NO_MEM</span><span class=p>;</span>
+<span class=ln>53</span>    		<span class=c1>// 我服了。。错误码还带符号的。。。
+</span><span class=ln>54</span><span class=c1></span>    	<span class=p>}</span>
+<span class=ln>55</span>    	<span class=o>*</span><span class=n>entry</span> <span class=o>=</span> <span class=n>pa</span> <span class=o>|</span> <span class=n>perm</span> <span class=o>|</span> <span class=n>PTE_P</span><span class=p>;</span>
+<span class=ln>56</span>    	<span class=n>pp</span><span class=o>-&gt;</span><span class=n>pp_ref</span><span class=o>++</span><span class=p>;</span>
+<span class=ln>57</span>    	<span class=c1>//cprintf(&#34;check_va2pa:x\n&#34;,check_va2pa(pgdir,PGSIZE));
+</span><span class=ln>58</span><span class=c1></span>    	<span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>59</span>    <span class=p>}</span>
+<span class=ln>60</span>
+</code></pre></div><h2 id=part-3-kernel-address-space>Part 3: Kernel Address Space</h2>
 <p>JOS把地址空间整体分为两部分,用户环境和kernel. 这条分界线在ULIM. 具体可以参考memlayout.h中的图.</p>
 <p><strong>JOS会把物理地址[0x00000000 ,0x0fffffff] 的256MB空间映射到虚拟空间[0xf0000000 ,0xffffffff ]</strong></p>
 <p><strong>做这个地址映射原因之一是"One reason JOS remaps all of physical memory starting from physical address 0 at virtual address 0xf0000000 is to help the kernel read and write memory for which it knows just the physical address"</strong></p>
