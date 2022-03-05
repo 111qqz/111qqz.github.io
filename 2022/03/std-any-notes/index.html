@@ -140,7 +140,7 @@ Share on:
 <span class=ln> 8</span>  <span class=kt>void</span><span class=o>*</span> <span class=n>user_data</span><span class=p>;</span> 
 <span class=ln> 9</span><span class=p>};</span>
 <span class=ln>10</span>
-</code></pre></div><p>了解cpp11的开发者可能会使用std::shared_ptr<void> 来实现</p>
+</code></pre></div><p>了解cpp11的开发者可能会使用std::shared_ptr&lt;void> 来实现</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=ln> 1</span><span class=k>struct</span> <span class=nc>day</span> <span class=p>{</span>
 <span class=ln> 2</span>  <span class=c1>// ...things...
 </span><span class=ln> 3</span><span class=c1></span>  <span class=n>std</span><span class=o>::</span><span class=n>shared_ptr</span><span class=o>&lt;</span><span class=kt>void</span><span class=o>&gt;</span> <span class=n>user_data</span><span class=p>;</span>
@@ -230,23 +230,28 @@ Share on:
 <li>void*由于缺少类型信息，copy数据时容易出现错误</li>
 <li>void*缺少对执行object的所有权，不管理其生命周期</li>
 </ul>
-<h2 id=why-not-stdshared_ptrvoid>why not std::shared_ptr<void>?</h2>
-<p>std::shared_ptr<void> 由于shared_ptr的type enuse，是知道如何删除对应对象的 (但是只是在std::shared_ptr的controll block中包含了deleter信息，并不知道具体的类型)</p>
-<p>debug::
-This leads to a question of how std::shared_ptr<void> can destroy a managed object of a specific type despite holding a void*? It works because the object deletion procedure in std::shared_ptr is type-erased,</p>
-<p>std::shared_ptr的constrol block中有对应的deleter. 这个deleter不需要类型也可以work是因为这个deleter做到到了"type-erasure"
-也就是 <strong>确保程序在运行时执行不依赖类型信息</strong>。 参考 <a href=https://zh.wikipedia.org/wiki/%E7%B1%BB%E5%9E%8B%E6%93%A6%E9%99%A4>wiki-类型擦除</a></p>
+<h2 id=why-not-stdshared_ptrvoid>why not std::shared_ptr&lt;void>?</h2>
+<p>std::shared_ptr &lt;void> 是知道如何删除对应对象的 (但是只是在std::shared_ptr的controll block中包含了deleter信息，并不知道具体的类型)</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>
 <span class=ln>2</span><span class=n>some_day</span><span class=p>.</span><span class=n>user_data</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>make_shared</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=o>&gt;</span><span class=p>(</span><span class=s>&#34;Hello, world!&#34;</span><span class=p>);</span>
 <span class=ln>3</span><span class=c1>// ...much later...
 </span><span class=ln>4</span><span class=c1></span><span class=n>some_day</span> <span class=o>=</span> <span class=n>some_other_day</span><span class=p>;</span> <span class=c1>// the object at which some_day.user_data _was_
 </span><span class=ln>5</span><span class=c1></span>                           <span class=c1>// pointing is freed automatically
 </span><span class=ln>6</span><span class=c1></span>
-</code></pre></div><h2 id=使用场景>使用场景</h2>
+</code></pre></div><p>然而，shared_ptr&lt;void>仍然不包含类型信息
+此外，使用shared_ptr&lt;void>会有更大的性能开销，开销来自于需要额外分配内存，参考<a href=https://111qqz.com/2022/03/std-shared-ptr-notes/>std::shared_ptr 笔记</a></p>
+<h2 id=使用场景>使用场景</h2>
+<ul>
+<li><strong>尽量避免使用</strong></li>
+<li>如果类型未知时无法避免，不得不用void*，此时可以用std::any代替</li>
+<li>如果是类型是某种之一，用std::variant，而不是std::any</li>
+<li>如果类型为某种(或者为空)，用std::optional,而不是std::any</li>
+</ul>
 <h2 id=参考资料>参考资料</h2>
 <ul>
 <li><a href=https://en.cppreference.com/w/cpp/utility/any>cppreference std::any</a></li>
 <li><a href=https://devblogs.microsoft.com/cppblog/stdany-how-when-and-why/>std::any: How, when, and why</a></li>
+<li><a href=https://www.nextptr.com/tutorial/ta1227747841/the-stdshared_ptrvoid-as-arbitrary-userdata-pointer>The std::shared_ptr as arbitrary user-data pointer</a></li>
 </ul>
 </div>
 <div class=post_comments>
@@ -271,7 +276,7 @@ This leads to a question of how std::shared_ptr<void> can destroy a managed obje
 <a href=https://111qqz.com/2022/02/2022-to-do-list/ class=nav-link title="2022  TO DO list">2022 TO DO list</a>
 </li>
 <li>
-<a href=https://111qqz.com/2022/03/std-shared-ptr-notes/ class=nav-link title="2022 03 05 Std Shared Ptr">2022 03 05 Std Shared Ptr</a>
+<a href=https://111qqz.com/2022/03/std-shared-ptr-notes/ class=nav-link title="std::shared_ptr 学习笔记">std::shared_ptr 学习笔记</a>
 </li>
 <li>
 <a href=https://111qqz.com/2022/03/leveldb-notes-02/ class=nav-link title="levelDB 代码阅读笔记 02 comparator">levelDB 代码阅读笔记 02 comparator</a>
