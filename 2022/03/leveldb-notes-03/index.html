@@ -1,6 +1,6 @@
 <!doctype html><html lang=en data-figures class=page>
 <head>
-<title>2022 03 06 Reading Leveldb Code 03 | 111qqz的小窝</title>
+<title>levelDB 代码阅读笔记 03 cache | 111qqz的小窝</title>
 <meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta http-equiv=x-ua-compatible content="IE=edge">
@@ -12,9 +12,9 @@
 1 2 3namespace leveldb { 4 5class LEVELDB_EXPORT Cache; 6 7// Create a new cache …">
 <meta name=twitter:card content="summary">
 <meta name=twitter:creator content>
-<meta name=twitter:title content="2022 03 06 Reading Leveldb Code 03">
+<meta name=twitter:title content="levelDB 代码阅读笔记 03 cache">
 <meta property="og:url" content="https://111qqz.com/2022/03/leveldb-notes-03/">
-<meta property="og:title" content="2022 03 06 Reading Leveldb Code 03">
+<meta property="og:title" content="levelDB 代码阅读笔记 03 cache">
 <meta property="og:description" content="Cache接口 没有太多好说的，可以注意这里用了void*来表示任意类型数据。 在c++17之后可以考虑用std::any代替，参考 std::any 笔记
 1 2 3namespace leveldb { 4 5class LEVELDB_EXPORT Cache; 6 7// Create a new cache …">
 <meta property="og:image" content="https://111qqz.com/images/thumbnail.png">
@@ -101,7 +101,7 @@
 <main>
 <div class="grid-inverse wrap content">
 <article class=post_content>
-<h1 class=post_title>2022 03 06 Reading Leveldb Code 03</h1>
+<h1 class=post_title>levelDB 代码阅读笔记 03 cache</h1>
 <div class=post_meta>
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
@@ -112,9 +112,9 @@ Mar 6, 2022</span>
 <span class=page_only>&nbsp;·
 <div class=post_share>
 Share on:
-<a href="https://twitter.com/intent/tweet?text=2022%2003%2006%20Reading%20Leveldb%20Code%2003&url=https%3a%2f%2f111qqz.com%2f2022%2f03%2fleveldb-notes-03%2f&tw_p=tweetbutton" class=twitter title="Share on Twitter" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#twitter"/></svg>
+<a href="https://twitter.com/intent/tweet?text=levelDB%20%e4%bb%a3%e7%a0%81%e9%98%85%e8%af%bb%e7%ac%94%e8%ae%b0%2003%20cache&url=https%3a%2f%2f111qqz.com%2f2022%2f03%2fleveldb-notes-03%2f&tw_p=tweetbutton" class=twitter title="Share on Twitter" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#twitter"/></svg>
 </a>
-<a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2f111qqz.com%2f2022%2f03%2fleveldb-notes-03%2f&t=2022%2003%2006%20Reading%20Leveldb%20Code%2003" class=facebook title="Share on Facebook" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#facebook"/></svg>
+<a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2f111qqz.com%2f2022%2f03%2fleveldb-notes-03%2f&t=levelDB%20%e4%bb%a3%e7%a0%81%e9%98%85%e8%af%bb%e7%ac%94%e8%ae%b0%2003%20cache" class=facebook title="Share on Facebook" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#facebook"/></svg>
 </a>
 <a href=#linkedinshare id=linkedinshare class=linkedin title="Share on LinkedIn" rel=nofollow><svg class="icon"><use xlink:href="#linkedin"/></svg>
 </a>
@@ -258,7 +258,7 @@ Share on:
 <p>该函数返回指向对应key的slot，或者返回一个指向对应链表最后的slot的后面
 从用位运算替代取模的代码来看，bucket个数一定是2的倍数</p>
 <p>这里要注意的细节是，while判断其实包含了四种可能的case.</p>
-<ol>
+<ul>
 <li>
 <p>hash值相等，key值相等。 那么这个slot的元素就是我们要找的</p>
 </li>
@@ -271,7 +271,7 @@ Share on:
 <li>
 <p>hash值不等，key值相等。 不可能发生这种情况。 对于相同的key值，只要是hash function不变，得到的hash值一定是相同的。</p>
 </li>
-</ol>
+</ul>
 <p>这里的判断条件实际上包含了1-3三种情况。</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span><span class=p>(</span><span class=o>*</span><span class=n>ptr</span><span class=p>)</span><span class=o>-&gt;</span><span class=n>hash</span> <span class=o>!=</span> <span class=n>hash</span> <span class=o>||</span> <span class=n>key</span> <span class=o>!=</span> <span class=p>(</span><span class=o>*</span><span class=n>ptr</span><span class=p>)</span><span class=o>-&gt;</span><span class=n>key</span><span class=p>())</span>
 <span class=ln>2</span>
@@ -390,7 +390,7 @@ Share on:
 </div>
 <h2 class=post_related>Posts in this Series</h2>
 <ul>
-<li><a href=https://111qqz.com/2022/03/leveldb-notes-03/ class=nav-link title="2022 03 06 Reading Leveldb Code 03">2022 03 06 Reading Leveldb Code 03</a></li>
+<li><a href=https://111qqz.com/2022/03/leveldb-notes-03/ class=nav-link title="levelDB 代码阅读笔记 03 cache">levelDB 代码阅读笔记 03 cache</a></li>
 <li><a href=https://111qqz.com/2022/03/leveldb-notes-02/ class=nav-link title="levelDB 代码阅读笔记 02 comparator">levelDB 代码阅读笔记 02 comparator</a></li>
 <li><a href=https://111qqz.com/2022/02/leveldb-notes-01/ class=nav-link title="levelDB 代码阅读笔记 01 db.h">levelDB 代码阅读笔记 01 db.h</a></li>
 </ul>
@@ -407,7 +407,7 @@ Share on:
 <h2 class=mt-4>Posts in this series</h2>
 <ul>
 <li>
-<a href=https://111qqz.com/2022/03/leveldb-notes-03/ class=nav-link title="2022 03 06 Reading Leveldb Code 03">2022 03 06 Reading Leveldb Code 03</a>
+<a href=https://111qqz.com/2022/03/leveldb-notes-03/ class=nav-link title="levelDB 代码阅读笔记 03 cache">levelDB 代码阅读笔记 03 cache</a>
 </li>
 <li>
 <a href=https://111qqz.com/2022/03/leveldb-notes-02/ class=nav-link title="levelDB 代码阅读笔记 02 comparator">levelDB 代码阅读笔记 02 comparator</a>
