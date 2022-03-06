@@ -10,7 +10,7 @@
 <meta property="og:type" content="article">
 <meta name=description content="20180214 update:
 第一个版本已经比较久了，于是更新一下，顺便写了个脚本orz
-pacman-mirrors -c China echo &#34; [archlinuxcn] &#34; >> /etc/pacman.conf echo &#34; SigLevel = …">
+1 2 pacman-mirrors -c China 3 echo &#34; [archlinuxcn] &#34; >> /etc/pacman.conf 4 echo &#34; SigLevel = …">
 <meta name=twitter:card content="summary">
 <meta name=twitter:creator content>
 <meta name=twitter:title content="manjaro installation guide">
@@ -18,7 +18,7 @@ pacman-mirrors -c China echo &#34; [archlinuxcn] &#34; >> /etc/pacman.conf echo 
 <meta property="og:title" content="manjaro installation guide">
 <meta property="og:description" content="20180214 update:
 第一个版本已经比较久了，于是更新一下，顺便写了个脚本orz
-pacman-mirrors -c China echo &#34; [archlinuxcn] &#34; >> /etc/pacman.conf echo &#34; SigLevel = …">
+1 2 pacman-mirrors -c China 3 echo &#34; [archlinuxcn] &#34; >> /etc/pacman.conf 4 echo &#34; SigLevel = …">
 <meta property="og:image" content="https://111qqz.com/images/thumbnail.png">
 <link rel=apple-touch-icon sizes=180x180 href=https://111qqz.com/icons/apple-touch-icon.png>
 <link rel=icon type=image/png sizes=32x32 href=https://111qqz.com/icons/favicon-32x32.png>
@@ -108,7 +108,7 @@ pacman-mirrors -c China echo &#34; [archlinuxcn] &#34; >> /etc/pacman.conf echo 
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Jun 8, 2017</span>
-<span class=post_time> · 21 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/manjaro title=manjaro class="post_tag button button_translucent">manjaro
+<span class=post_time> · 11 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/manjaro title=manjaro class="post_tag button button_translucent">manjaro
 </a>
 </span>
 <span class=page_only>&nbsp;·
@@ -127,525 +127,52 @@ Share on:
 </div>
 <div class=post_body><p>20180214 update:</p>
 <p>第一个版本已经比较久了，于是更新一下，顺便写了个脚本orz</p>
-<pre><code>pacman-mirrors -c China
-echo &quot; [archlinuxcn] &quot; &gt;&gt; /etc/pacman.conf
-echo &quot; SigLevel = Optional TrustedOnly &quot;  &gt;&gt; /etc/pacman.conf
-echo &quot; Server = https://mirrors.ustc.edu.cn/archlinuxcn/\$arch&quot; &gt;&gt; /etc/pacman.conf
-
-
-echo &quot;[arch4edu]&quot; &gt;&gt; /etc/pacman.conf
-echo &quot;SigLevel = Never&quot; &gt;&gt; /etc/pacman.conf
-echo &quot;Server = http://mirrors.tuna.tsinghua.edu.cn/arch4edu/\$arch &quot; &gt;&gt; /etc/pacman.conf
-pacman -Syyu
-pacman -S archlinuxcn-keyring
-
- pacman -S yakuake fish gvim 
- pacman -S google-chrome chromium
- pacman -S  wget aria2  remarkable netease-cloud-music
- pacman -S fcitx fcitx-configtool fcitx-sogoupinyin fcitx-im kcm-fcitx
- pacman -S shadowsocks-qt5
- pacman -S wqy-microhei wqy-microhei-lite wqy-bitmapfont wqy-zenhei ttf-arphic-ukai ttf-arphic-uming adobe-source-han-sans-cn-fonts
-
-cat &gt;&gt; ~/.xprofile  &lt;&lt;EOF
-export GTK_IM_MODULE=fcitx
-export QT_IM_MODULE=fcitx
-export XMODIFIERS=&quot;@im=fcitx&quot;
-EOF
-
- pacman -S proxychains-ng
-cat &gt;&gt; /etc/proxychains.conf &lt;&lt;EOF
-quiet_mode
-dynamic_chain
-chain_len = 1 #round_robin_chain和random_chain使用
-proxy_dns
-remote_dns_subnet 224
-tcp_read_time_out 15000
-tcp_connect_time_out 8000
-localnet 127.0.0.0/255.0.0.0
-localnet 10.0.0.0/255.0.0.0
-localnet 172.16.0.0/255.240.0.0
-localnet 192.168.0.0/255.255.0.0
- 
-[ProxyList]
-socks5  127.0.0.1 1080
-http    127.0.0.1 1087
-EOF
- 
-pacman -S vundle-git
-cat &gt;&gt; ~/.vimrc  &lt;&lt;EOF
-set guifont=Neep\ 18
-
-map &lt;F9&gt; :call SaveInputData()&lt;CR&gt;
-func! SaveInputData()
-    exec &quot;tabnew&quot;
-    exec 'normal &quot;+gP'
-    exec &quot;w! code/in.txt&quot;
-endfunc
-
-
-
-&quot;colorscheme torte
-&quot; colorscheme murphy
-colorscheme elflord
-&quot; colorscheme molokai
-&quot;colorscheme elisex
-&quot;colorscheme colorer
-&quot;colorscheme blacklight
-&quot;colorscheme blue
-&quot;colorscheme darkblue
-&quot;colorscheme evening
-&quot;colorscheme shine
-
-&quot;colorscheme molokai
-&quot;colorscheme solarized
-&quot;colorscheme sift
-&quot;colorscheme advantage
-&quot;colorscheme 256_jungle
-
-
-&quot;set fencs=utf-8,ucs-bom,shift-jis,gb18030,gbk,gb2312,cp936
-&quot;set termencoding=utf-8
-&quot;set encoding=utf-8
-&quot;set fileencodings=ucs-bom,utf-8,cp936
-&quot;set fileencoding=utf-8
-
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-&quot; 显示相关
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-&quot;set shortmess=atI   &quot; 启动的时候不显示那个援助乌干达儿童的提示
-&quot;winpos 5 5          &quot; 设定窗口位置
-&quot;set lines=40 columns=155    &quot; 设定窗口大小
-set go=             &quot; 不要图形按钮
-&quot;color asmanian2     &quot; 设置背景主题
-&quot;set guifont=Courier_New:h10:cANSI   &quot; 设置字体
-syntax on           &quot; 语法高亮
-autocmd InsertLeave * se nocul  &quot; 用浅色高亮当前行
-autocmd InsertEnter * se cul    &quot; 用浅色高亮当前行
-&quot;set ruler           &quot; 显示标尺
-set showcmd         &quot; 输入的命令显示出来，看的清楚些
-&quot;set cmdheight=1     &quot; 命令行（在状态行下）的高度，设置为1
-&quot;set whichwrap+=&lt;,&gt;,h,l   &quot; 允许backspace和光标键跨越行边界(不建议)
-&quot;set scrolloff=3     &quot; 光标移动到buffer的顶部和底部时保持3行距离
-set novisualbell    &quot; 不要闪烁(不明白)
-set statusline=%F%m%r%h%w\ [FORMAT=%{&amp;ff}]\ [TYPE=%Y]\ [POS=%l,%v][%p%%]\ %{strftime(\&quot;%d/%m/%y\ -\ %H:%M\&quot;)}   &quot;状态行显示的内容
-set laststatus=1    &quot; 启动显示状态行(1),总是显示状态行(2)
-&quot;set foldenable      &quot; 允许折叠
-set foldmethod=manual   &quot; 手动折叠
-&quot;set background=dark &quot;背景使用黑色
-set nocompatible  &quot;去掉讨厌的有关vi一致性模式，避免以前版本的一些bug和局限
-&quot; 显示中文帮助
-if version &gt;= 603
-    set helplang=cn
-    set encoding=utf-8
-endif
-&quot; 设置配色方案
-&quot;colorscheme murphy
-&quot;字体
-&quot;if (has(&quot;gui_running&quot;))
-&quot;   set guifont=Bitstream\ Vera\ Sans\ Mono\ 10
-&quot;endif
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-&quot;&quot;&quot;&quot;&quot;新文件标题
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-&quot;新建.c,.h,.sh,.java文件，自动插入文件头
-autocmd BufNewFile *.cpp,*.[ch],*.sh,*.java exec &quot;:call SetTitle()&quot;
-&quot;&quot;定义函数SetTitle，自动插入文件头
-&quot;map &lt;F4&gt; :call SetTitle()&lt;CR&gt;
-func SetTitle()
-    &quot;如果文件类型为.sh文件
-    if &amp;filetype == 'sh'
-        call setline(1,&quot;\#########################################################################&quot;)
-        call append(line(&quot;.&quot;), &quot;\# File Name: &quot;.expand(&quot;%&quot;))
-        call append(line(&quot;.&quot;)+1, &quot;\# Author: 111qqz&quot;)
-        call append(line(&quot;.&quot;)+2, &quot;\# mail: renkuanze@sensetime.com&quot;)
-        call append(line(&quot;.&quot;)+3, &quot;\# Created Time: &quot;.strftime(&quot;%c&quot;))
-        call append(line(&quot;.&quot;)+4, &quot;\#########################################################################&quot;)
-        call append(line(&quot;.&quot;)+5, &quot;\#!/bin/bash&quot;)
-        call append(line(&quot;.&quot;)+6, &quot;&quot;)
-    else
-        let l = 0
-        let l = l + 1 | call setline(l,'/* ***********************************************')
-        let l = l + 1 | call setline(l,'Author :111qqz')
-                let l = l + 1 | call setline(l,'mail: renkuanze@sensetime.com'
-        let l = l + 1 | call setline(l,'Created Time :'.strftime('%c'))
-        let l = l + 1 | call setline(l,'File Name :'.expand('%'))
-        let l = l + 1 | call setline(l,'************************************************ */')
-        let l = l + 1 | call setline(l,'')
-    endif
-    if &amp;filetype == 'cpp'
-        let l = l + 1 | call setline(l,'#include &lt;bits/stdc++.h&gt;')
-        let l = l + 1 | call setline(l,'')
-        let l = l + 1 | call setline(l,'using namespace std;')
-        let l = l + 1 | call setline(l,'int main()')
-        let l = l + 1 | call setline(l,'{')
-        let l = l + 1 | call setline(l,'    return 0;')
-        let l = l + 1 | call setline(l,'}')
-
-
-    endif
-    if &amp;filetype == 'c'
-        call append(line(&quot;.&quot;)+6, &quot;#include&lt;stdio.h&gt;&quot;)
-        call append(line(&quot;.&quot;)+7, &quot;&quot;)
-    endif
-    if &amp;filetype == 'java'
-        call append(line(&quot;.&quot;)+6,&quot;public class &quot;.expand(&quot;%&quot;))
-        call append(line(&quot;.&quot;)+7,&quot;&quot;)
-    endif
-    &quot;新建文件后，自动定位到文件末尾
-    autocmd BufNewFile * normal G23
-endfunc
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-&quot;键盘命令
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;v&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-
-nmap &lt;leader&gt;w :w!&lt;cr&gt;
-nmap &lt;leader&gt;f :find&lt;cr&gt;
-
-nmap &lt;F8&gt; :TagbarToggle&lt;CR&gt;
-
-
-&quot; 映射全选+复制 ctrl+a
-map &lt;C-A&gt; ggvG&quot;+Y
-map! &lt;C-A&gt; &lt;Esc&gt;ggVGY
-map &lt;F12&gt; gg=G
-&quot; 选中状态下 Ctrl+c 复制
-vmap &lt;C-c&gt; &quot;+y
-&quot;去空行
-nnoremap &lt;F2&gt; :g/^\s*$/d&lt;CR&gt;
-&quot;比较文件
-nnoremap &lt;C-F2&gt; :vert diffsplit
-&quot;新建标签
-map &lt;M-F2&gt; :tabnew&lt;CR&gt;
-&quot;列出当前目录文件
-map &lt;F3&gt; :tabnew .&lt;CR&gt;
-&quot;打开树状文件目录
-map &lt;C-F3&gt; \be
-&quot;C，C++ 按F5编译运行
-map &lt;F5&gt; :call CompileRunGcc()&lt;CR&gt;
-
-au BufRead *.py map &lt;buffer&gt; &lt;F6&gt; :w&lt;CR&gt;:!/usr/bin/env python % &lt;CR&gt;
-
-let g:tagbar_usearrows = 1
-nnoremap &lt;leader&gt;l :TagbarToggle&lt;CR&gt;
-func! CompileRunGcc()
-    exec &quot;w&quot;
-    if &amp;filetype == 'c'
-        exec &quot;!g++ % -o %&lt;&quot;
-        exec &quot;! ./%&lt;&quot;
-    elseif &amp;filetype == 'cpp'
-        exec &quot;!g++ % -std=gnu++11  -Wall   -o %&lt;&quot;
-        exec &quot;! ./%&lt;&quot;
-    elseif &amp;filetype == 'java'
-        exec &quot;!javac %&quot;
-        exec &quot;!java %&lt;&quot;
-    elseif &amp;filetype == 'sh'
-        :!./%
-    elseif &amp;filetype == 'python'
-    &quot;   exec &quot;!python %&quot;
-    &quot;   exec &quot;!python %&lt;&quot;
-        exec &quot;!python2.7 %&quot;
-    endif
-endfunc
-&quot;C,C++的调试
-map &lt;F8&gt; :call Rungdb()&lt;CR&gt;
-func! Rungdb()
-    exec &quot;w&quot;
-    exec &quot;!g++ % -std=c++11 -g  -o %&lt;&quot;
-    exec &quot;!gdb ./%&lt;&quot;
-endfunc
-
-
-
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-&quot;&quot;实用设置
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-&quot; 设置当文件被改动时自动载入
-set autoread
-&quot; quickfix模式
-autocmd FileType c,cpp map &lt;buffer&gt; &lt;leader&gt;&lt;space&gt; :w&lt;cr&gt;:make&lt;cr&gt;
-&quot;代码补全
-set completeopt=preview,menu
-&quot;允许插件
-filetype plugin on
-&quot;共享剪贴板
-set clipboard+=unnamed
-&quot;从不备份
-set nobackup
-&quot;make 运行
-:set makeprg=g++\ -Wall\ \ %
-&quot;自动保存
-set autowrite
-set ruler                   &quot; 打开状态栏标尺
-set cursorline              &quot; 突出显示当前行
-set magic                   &quot; 设置魔术
-set guioptions-=T           &quot; 隐藏工具栏
-set guioptions-=m           &quot; 隐藏菜单栏
-&quot;set statusline=\ %&lt;%F[%1*%M%*%n%R%H]%=\ %y\ %0(%{&amp;fileformat}\ %{&amp;encoding}\ %c:%l/%L%)\
-&quot; 设置在状态行显示的信息
-set foldcolumn=0
-set foldmethod=indent
-set foldlevel=3
-set foldenable              &quot; 开始折叠
-&quot; 不要使用vi的键盘模式，而是vim自己的
-set nocompatible
-&quot; 语法高亮
-set syntax=on
-&quot; 去掉输入错误的提示声音
-set noeb
-&quot; 在处理未保存或只读文件的时候，弹出确认
-set confirm
-&quot; 自动缩进
-set autoindent
-set clipboard+=unnamed
-set cindent
-&quot; Tab键的宽度
-set tabstop=8
-&quot; 统一缩进为8
-set softtabstop=4
-set shiftwidth=4
-&quot; 不要用空格代替制表符
-set noexpandtab
-&quot; 在行和段开始处使用制表符
-set smarttab
-&quot; 显示行号
-set number
-&quot; 历史记录数
-set history=1000
-&quot;禁止生成临时文件
-set nobackup
-set noswapfile
-&quot;搜索忽略大小写
-set ignorecase
-&quot;搜索逐字符高亮
-set hlsearch
-set incsearch
-&quot;行内替换
-set gdefault
-&quot;编码设置
-set enc=utf-8
-set fencs=utf-8,ucs-bom,shift-jis,gb18030,gbk,gb2312,cp936
-&quot;语言设置
-set langmenu=zh_CN.UTF-8
-set helplang=cn
-&quot; 我的状态行显示的内容（包括文件类型和解码）
-&quot;set statusline=%F%m%r%h%w\ [FORMAT=%{&amp;ff}]\ [TYPE=%Y]\ [POS=%l,%v][%p%%]\ %{strftime(\&quot;%d/%m/%y\ -\ %H:%M\&quot;)}
-&quot;set statusline=[%F]%y%r%m%*%=[Line:%l/%L,Column:%c][%p%%]
-&quot; 总是显示状态行
-set laststatus=2
-&quot; 命令行（在状态行下）的高度，默认为1，这里是2
-set cmdheight=2
-&quot; 侦测文件类型
-filetype on
-&quot; 载入文件类型插件
-filetype plugin on
-&quot; 为特定文件类型载入相关缩进文件
-filetype indent on
-&quot; 保存全局变量
-set viminfo+=!
-&quot; 带有如下符号的单词不要被换行分割
-set iskeyword+=_,$,@,%,#,-
-&quot; 字符间插入的像素行数目
-set linespace=0
-&quot; 增强模式中的命令行自动完成操作
-set wildmenu
-&quot; 使回格键（backspace）正常处理indent, eol, start等
-set backspace=2
-&quot; 允许backspace和光标键跨越行边界
-set whichwrap+=&lt;,&gt;,h,l
-&quot; 可以在buffer的任何地方使用鼠标（类似office中在工作区双击鼠标定位）
-set mouse=a
-set selection=exclusive
-set selectmode=mouse,key
-&quot; 通过使用: commands命令，告诉我们文件的哪一行被改变过
-set report=0
-&quot; 在被分割的窗口间显示空白，便于阅读
-set fillchars=vert:\ ,stl:\ ,stlnc:\
-&quot; 高亮显示匹配的括号
-set showmatch
-&quot; 匹配括号高亮的时间（单位是十分之一秒）
-set matchtime=1
-&quot; 光标移动到buffer的顶部和底部时保持3行距离
-set scrolloff=3
-&quot; 为C程序提供自动缩进
-set smartindent
-&quot; 高亮显示普通txt文件（需要txt.vim脚本）
-set cursorline
-hi CursorLine  cterm=bold   ctermbg=blue ctermfg=yellow
-au BufRead,BufNewFile *  setfiletype txt
-&quot;自动补全
-&quot;:inoremap ( ()&lt;ESC&gt;i
-&quot;:inoremap ) &lt;c-r&gt;=ClosePair(')')&lt;CR&gt;
-&quot;:inoremap { {&lt;CR&gt;}&lt;ESC&gt;O
-&quot;:inoremap } &lt;c-r&gt;=ClosePair('}')&lt;CR&gt;
-&quot;:inoremap [ []&lt;ESC&gt;i
-&quot;:inoremap ] &lt;c-r&gt;=ClosePair(']')&lt;CR&gt;
-&quot;:inoremap &quot; &quot;&quot;&lt;ESC&gt;i
-&quot;:inoremap ' ''&lt;ESC&gt;i
-function! ClosePair(char)
-    if getline('.')[col('.') - 1] == a:char
-        return &quot;\&lt;Right&gt;&quot;
-    else
-        return a:char
-    endif
-endfunction
-filetype plugin indent on
-&quot;打开文件类型检测, 加了这句才可以用智能补全
-set completeopt=longest,menu
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-
-
-
-
-
-
-
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;vundle设置&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-set nocompatible              &quot; be iMproved, required
-&quot;filetype off                  &quot; required
-set shell=/bin/bash
-
-
-&quot; Interface
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'
-&quot; vim-scripts repos
-&quot;
-&quot;
-
-  Plugin 'MarcWeber/vim-addon-mw-utils'
-  Plugin 'tomtom/tlib_vim'
-  Plugin 'garbas/vim-snipmate'
-
-  &quot; Optional:
- Plugin 'honza/vim-snippets'
- Plugin 'davidhalter/jedi-vim'
- Plugin 'vim-airline/vim-airline'
- Plugin 'vim-airline/vim-airline-themes'
- Plugin 'bash-support.vim'
- Plugin 'perl-support.vim'
- Plugin 'majutsushi/tagbar'
- Plugin 'ZoomWin'
- Plugin 'morhetz/gruvbox'
- Plugin 'scrooloose/syntastic'
-Plugin 'Valloric/YouCompleteMe'
-call vundle#end()            &quot; required
-filetype plugin indent on    &quot; required
-
-
-
-
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;youcompleteme设置&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-
-
-&quot;let g:ycm_autoclose_preview_window_after_completion=1
-&quot;nnoremap &lt;leader&gt;g :YcmCompleter GoToDefinitionElseDeclaration&lt;CR&gt;
-
-&quot; YouCompleteMe 功能
-&quot; 补全功能在注释中同样有效
-&quot;let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/cpp/ycm/.ycm_extra_conf.py'
-&quot;let g:ycm_complete_in_comments=1
- &quot;允许 vim 加载 .ycm_extra_conf.py 文件，不再提示
-&quot;let g:ycm_confirm_extra_conf=0
-
-&quot;let g:ycm_error_symbol = '&lt;&lt;'
-&quot;let g:ycm_warning_symbol = '&lt;'
-&quot;nnoremap &lt;leader&gt;gl :YcmCompleter GoToDeclaration&lt;CR&gt;
-&quot;nnoremap &lt;leader&gt;gf :YcmCompleter GoToDefinition&lt;CR&gt;
-&quot;nnoremap &lt;leader&gt;gg :YcmCompleter GoToDefinitionElseDeclaration&lt;CR&gt;
-&quot;nmap &lt;F4&gt; :YcmDiags&lt;CR&gt;
-
-
-
-
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;youcompleteme设置 by wyz&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-let g:cpp_class_scope_highlight=1
-let g:cpp_experimental_template_highlight=1
-let g:ycm_show_diagnostics_ui=0
-let g:ycm_enable_diagnostic_signs=0
-let g:ycm_enable_diagnostic_highlighting = 0
-let g:ycm_echo_current_diagnostic = 0
-let g:ycm_collect_identifiers_from_tags_files = 1
-let g:ycm_key_invoke_completion = '&lt;C-Q&gt;'
-let g:ycm_seed_identifiers_with_syntax = 1
-let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
-let g:ycm_collect_identifiers_from_tags_files = 1
-let g:ycm_confirm_extra_conf = 0
-let g:ycm_autoclose_preview_window_after_completion = 1
-let g:ycm_autoclose_preview_window_after_insertion = 1
-
-
-
-&quot; for python
-&quot;
-&quot;
-
-&quot;默认配置文件路径&quot;
-let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
-&quot;打开vim时不再询问是否加载ycm_extra_conf.py配置&quot;
-let g:ycm_confirm_extra_conf=0
-set completeopt=longest,menu
-&quot;python解释器路径&quot;
-let g:ycm_path_to_python_interpreter='/usr/bin/python'
-&quot;是否开启语义补全&quot;
-let g:ycm_seed_identifiers_with_syntax=1
-&quot;是否在注释中也开启补全&quot;
-let g:ycm_complete_in_comments=1
-let g:ycm_collect_identifiers_from_comments_and_strings = 0
-&quot;开始补全的字符数&quot;
-let g:ycm_min_num_of_chars_for_completion=2
-&quot;补全后自动关机预览窗口&quot;
-let g:ycm_autoclose_preview_window_after_completion=1
-&quot; 禁止缓存匹配项,每次都重新生成匹配项&quot;
-let g:ycm_cache_omnifunc=0
-&quot;字符串中也开启补全&quot;
-let g:ycm_complete_in_strings = 1
-
-
-
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;'for airline&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-
-let g:airline_powerline_fonts = 1
-let g:airline#extensions#tabline#enabled = 1
- let g:airline#extensions#tabline#buffer_nr_show = 1
-let g:airline#extensions#tabline#left_sep = ' '
-let g:airline#extensions#tabline#left_alt_sep = '|'
-
- nnoremap &lt;F2&gt; :bnext&lt;CR&gt;
- nnoremap &lt;F4&gt; :bprevious&lt;CR&gt;
-
- if !exists('g:airline_symbols')
-    let g:airline_symbols = {}
-    endif
-
- let g:airline_left_sep = '⮀'
-  let g:airline_left_alt_sep = '⮁'
-  let g:airline_right_sep = '⮂'
-  let g:airline_right_alt_sep = '⮃'
-  let g:airline_symbols.branch = '⭠'
-  let g:airline_symbols.readonly = '⭤'
-
-EOF
-
-echo &quot; please install vim plug-in&quot;
-</code></pre>
-<p>出于目前对manjaro的依赖，以及没有找到很简单易行的备份系统的方案的原因，决定详细记录一下系统安装的过程，以防哪天系统挂掉了，可以快速恢复。</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=ln> 1</span>    
+<span class=ln> 2</span>    pacman-mirrors -c China
+<span class=ln> 3</span>    <span class=nb>echo</span> <span class=s2>&#34; [archlinuxcn] &#34;</span> &gt;&gt; /etc/pacman.conf
+<span class=ln> 4</span>    <span class=nb>echo</span> <span class=s2>&#34; SigLevel = Optional TrustedOnly &#34;</span>  &gt;&gt; /etc/pacman.conf
+<span class=ln> 5</span>    <span class=nb>echo</span> <span class=s2>&#34; Server = https://mirrors.ustc.edu.cn/archlinuxcn/\$arch&#34;</span> &gt;&gt; /etc/pacman.conf
+<span class=ln> 6</span>    
+<span class=ln> 7</span>    
+<span class=ln> 8</span>    <span class=nb>echo</span> <span class=s2>&#34;[arch4edu]&#34;</span> &gt;&gt; /etc/pacman.conf
+<span class=ln> 9</span>    <span class=nb>echo</span> <span class=s2>&#34;SigLevel = Never&#34;</span> &gt;&gt; /etc/pacman.conf
+<span class=ln>10</span>    <span class=nb>echo</span> <span class=s2>&#34;Server = http://mirrors.tuna.tsinghua.edu.cn/arch4edu/\$arch &#34;</span> &gt;&gt; /etc/pacman.conf
+<span class=ln>11</span>    pacman -Syyu
+<span class=ln>12</span>    pacman -S archlinuxcn-keyring
+<span class=ln>13</span>    
+<span class=ln>14</span>     pacman -S yakuake fish gvim 
+<span class=ln>15</span>     pacman -S google-chrome chromium
+<span class=ln>16</span>     pacman -S  wget aria2  remarkable netease-cloud-music
+<span class=ln>17</span>     pacman -S fcitx fcitx-configtool fcitx-sogoupinyin fcitx-im kcm-fcitx
+<span class=ln>18</span>     pacman -S shadowsocks-qt5
+<span class=ln>19</span>     pacman -S wqy-microhei wqy-microhei-lite wqy-bitmapfont wqy-zenhei ttf-arphic-ukai ttf-arphic-uming adobe-source-han-sans-cn-fonts
+<span class=ln>20</span>    
+<span class=ln>21</span>    cat &gt;&gt; ~/.xprofile  <span class=s>&lt;&lt;EOF
+</span><span class=ln>22</span><span class=s>    export GTK_IM_MODULE=fcitx
+</span><span class=ln>23</span><span class=s>    export QT_IM_MODULE=fcitx
+</span><span class=ln>24</span><span class=s>    export XMODIFIERS=&#34;@im=fcitx&#34;
+</span><span class=ln>25</span><span class=s>    EOF</span>
+<span class=ln>26</span>    
+</code></pre></div><p>出于目前对manjaro的依赖，以及没有找到很简单易行的备份系统的方案的原因，决定详细记录一下系统安装的过程，以防哪天系统挂掉了，可以快速恢复。</p>
 <h3 id=1关于更换源><strong>1.关于更换源</strong></h3>
 <p>坑点主要在系统默认的源是国外源，如何切换成中国源，网上有很多教程，但这些教程都是针对Arch的，弄来弄去也很不容易搞好，而且胡乱修改会把Manjaro的源破坏掉（不要问我怎么知道的）。
 其实网上有个blog的方法很方便，附上连接</p>
 <p>就两行命令搞定：</p>
-<pre><code>sudo pacman-mirrors -c China  //选择中国源并更新
-sudo pacman -Syyu  //更新系统
-</code></pre>
-<p>2.安装搜狗输入法</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=ln>1</span>    
+<span class=ln>2</span>    sudo pacman-mirrors -c China  //选择中国源并更新
+<span class=ln>3</span>    sudo pacman -Syyu  //更新系统
+<span class=ln>4</span>
+</code></pre></div><p>2.安装搜狗输入法</p>
 <p>具体为，安装fcitx,安装fcitx-sogoupinyin,安装kcm-fcitx</p>
 <p>然后</p>
 <p>~/.xprofile 文件中添加如下内容</p>
-<pre><code>export GTK_IM_MODULE=fcitx
-export QT_IM_MODULE=fcitx
-export XMODIFIERS=&quot;@im=fcitx&quot;
-</code></pre>
-<p>由于初始安装系统时选择的是英文，在安装搜狗输入法之前先安装了chrome，导致在chrome中无法输入中文（而在firefox中可以），解决办法时，删除掉.config中google-chrome文件夹即可</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=ln>1</span>
+<span class=ln>2</span>
+<span class=ln>3</span>    
+<span class=ln>4</span>    <span class=nb>export</span> <span class=nv>GTK_IM_MODULE</span><span class=o>=</span>fcitx
+<span class=ln>5</span>    <span class=nb>export</span> <span class=nv>QT_IM_MODULE</span><span class=o>=</span>fcitx
+<span class=ln>6</span>    <span class=nb>export</span> <span class=nv>XMODIFIERS</span><span class=o>=</span><span class=s2>&#34;@im=fcitx&#34;</span>
+</code></pre></div><p>由于初始安装系统时选择的是英文，在安装搜狗输入法之前先安装了chrome，导致在chrome中无法输入中文（而在firefox中可以），解决办法时，删除掉.config中google-chrome文件夹即可</p>
 <p>3 添加archlinuxcn源</p>
 <p>在 <code>/etc/pacman.conf</code> 文件末尾添加以下两行：</p>
 <pre><code>[archlinuxcn]
@@ -670,982 +197,541 @@ Server = http://mirrors.tuna.tsinghua.edu.cn/arch4edu/$arch
   * remarkable (markdown编辑器，轻量级)
 </code></pre>
 <p>6.proxychains-ng</p>
-<pre><code>dynamic_chain
-chain_len = 1 
-proxy_dns 
-remote_dns_subnet 224
-tcp_read_time_out 15000
-tcp_connect_time_out 8000
-[ProxyList]
-socks5     127.0.0.1 1080
-</code></pre>
-<p>就很气，配置文件经常失效，再记录一份好了</p>
-<pre><code>quiet_mode
-dynamic_chain
-chain_len = 1 #round_robin_chain和random_chain使用
-proxy_dns
-remote_dns_subnet 224
-tcp_read_time_out 15000
-tcp_connect_time_out 8000
-localnet 127.0.0.0/255.0.0.0
-localnet 10.0.0.0/255.0.0.0
-localnet 172.16.0.0/255.240.0.0
-localnet 192.168.0.0/255.255.0.0
-
-[ProxyList]
-socks5  127.0.0.1 1080
-http    127.0.0.1 1087
-</code></pre>
-<p>7 vim 配置</p>
-<pre><code>set guifont=Neep\ 18
- 
-map &lt;F9&gt; :call SaveInputData()&lt;CR&gt;
-func! SaveInputData()
-    exec &quot;tabnew&quot;
-    exec 'normal &quot;+gP'
-    exec &quot;w! code/in.txt&quot;
-endfunc
- 
- 
- 
-&quot;colorscheme torte
-&quot; colorscheme murphy
-colorscheme elflord
-&quot; colorscheme molokai
-&quot;colorscheme elisex
-&quot;colorscheme colorer
-&quot;colorscheme blacklight
-&quot;colorscheme blue
-&quot;colorscheme darkblue
-&quot;colorscheme evening
-&quot;colorscheme shine
- 
-&quot;colorscheme molokai
-&quot;colorscheme solarized
-&quot;colorscheme sift
-&quot;colorscheme advantage
-&quot;colorscheme 256_jungle
- 
- 
-&quot;set fencs=utf-8,ucs-bom,shift-jis,gb18030,gbk,gb2312,cp936
-&quot;set termencoding=utf-8
-&quot;set encoding=utf-8
-&quot;set fileencodings=ucs-bom,utf-8,cp936
-&quot;set fileencoding=utf-8
- 
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-&quot; 显示相关  
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-&quot;set shortmess=atI   &quot; 启动的时候不显示那个援助乌干达儿童的提示  
-&quot;winpos 5 5          &quot; 设定窗口位置  
-&quot;set lines=40 columns=155    &quot; 设定窗口大小  
-set go=             &quot; 不要图形按钮  
-&quot;color asmanian2     &quot; 设置背景主题  
-&quot;set guifont=Courier_New:h10:cANSI   &quot; 设置字体  
-syntax on           &quot; 语法高亮  
-autocmd InsertLeave * se nocul  &quot; 用浅色高亮当前行  
-autocmd InsertEnter * se cul    &quot; 用浅色高亮当前行  
-&quot;set ruler           &quot; 显示标尺  
-set showcmd         &quot; 输入的命令显示出来，看的清楚些  
-&quot;set cmdheight=1     &quot; 命令行（在状态行下）的高度，设置为1  
-&quot;set whichwrap+=&lt;,&gt;,h,l   &quot; 允许backspace和光标键跨越行边界(不建议)  
-&quot;set scrolloff=3     &quot; 光标移动到buffer的顶部和底部时保持3行距离  
-set novisualbell    &quot; 不要闪烁(不明白)  
-set statusline=%F%m%r%h%w\ [FORMAT=%{&amp;ff}]\ [TYPE=%Y]\ [POS=%l,%v][%p%%]\ %{strftime(\&quot;%d/%m/%y\ -\ %H:%M\&quot;)}   &quot;状态行显示的内容  
-set laststatus=1    &quot; 启动显示状态行(1),总是显示状态行(2)  
-&quot;set foldenable      &quot; 允许折叠  
-set foldmethod=manual   &quot; 手动折叠  
-&quot;set background=dark &quot;背景使用黑色 
-set nocompatible  &quot;去掉讨厌的有关vi一致性模式，避免以前版本的一些bug和局限  
-&quot; 显示中文帮助
-if version &gt;= 603
-    set helplang=cn
-    set encoding=utf-8
-endif
-&quot; 设置配色方案
-&quot;colorscheme murphy
-&quot;字体 
-&quot;if (has(&quot;gui_running&quot;)) 
-&quot;   set guifont=Bitstream\ Vera\ Sans\ Mono\ 10 
-&quot;endif 
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-&quot;&quot;&quot;&quot;&quot;新文件标题
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-&quot;新建.c,.h,.sh,.java文件，自动插入文件头 
-autocmd BufNewFile *.cpp,*.[ch],*.sh,*.java exec &quot;:call SetTitle()&quot; 
-&quot;&quot;定义函数SetTitle，自动插入文件头
-&quot;map &lt;F4&gt; :call SetTitle()&lt;CR&gt;
-func SetTitle() 
-    &quot;如果文件类型为.sh文件 
-    if &amp;filetype == 'sh' 
-        call setline(1,&quot;\#########################################################################&quot;) 
-        call append(line(&quot;.&quot;), &quot;\# File Name: &quot;.expand(&quot;%&quot;)) 
-        call append(line(&quot;.&quot;)+1, &quot;\# Author: 111qqz&quot;) 
-        call append(line(&quot;.&quot;)+2, &quot;\# mail: renkuanze@sensetime.com&quot;) 
-        call append(line(&quot;.&quot;)+3, &quot;\# Created Time: &quot;.strftime(&quot;%c&quot;)) 
-        call append(line(&quot;.&quot;)+4, &quot;\#########################################################################&quot;) 
-        call append(line(&quot;.&quot;)+5, &quot;\#!/bin/bash&quot;) 
-        call append(line(&quot;.&quot;)+6, &quot;&quot;) 
-    else 
-        let l = 0
-        let l = l + 1 | call setline(l,'/* ***********************************************')
-        let l = l + 1 | call setline(l,'Author :111qqz')
-    let l = l + 1 | call setline(l,'mail: renkuanze@sensetime.com')
-        let l = l + 1 | call setline(l,'Created Time :'.strftime('%c'))
-        let l = l + 1 | call setline(l,'File Name :'.expand('%'))
-        let l = l + 1 | call setline(l,'************************************************ */')
-        let l = l + 1 | call setline(l,'')
-    endif
-    if &amp;filetype == 'cpp' 
-        let l = l + 1 | call setline(l,'#include &lt;bits/stdc++.h&gt;')
-        let l = l + 1 | call setline(l,'')
-        let l = l + 1 | call setline(l,'using namespace std;')
-        let l = l + 1 | call setline(l,'int main()')
-        let l = l + 1 | call setline(l,'{')
-        let l = l + 1 | call setline(l,'    return 0;')
-        let l = l + 1 | call setline(l,'}')
- 
- 
-    endif
-    if &amp;filetype == 'c'
-        call append(line(&quot;.&quot;)+6, &quot;#include&lt;stdio.h&gt;&quot;)
-        call append(line(&quot;.&quot;)+7, &quot;&quot;)
-    endif
-    if &amp;filetype == 'java'
-        call append(line(&quot;.&quot;)+6,&quot;public class &quot;.expand(&quot;%&quot;))
-        call append(line(&quot;.&quot;)+7,&quot;&quot;)
-    endif
-    &quot;新建文件后，自动定位到文件末尾
-    autocmd BufNewFile * normal G23
-endfunc
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-&quot;键盘命令
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;v&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
- 
-nmap &lt;leader&gt;w :w!&lt;cr&gt;
-nmap &lt;leader&gt;f :find&lt;cr&gt;
- 
-nmap &lt;F8&gt; :TagbarToggle&lt;CR&gt;
- 
- 
-&quot; 映射全选+复制 ctrl+a
-map &lt;C-A&gt; ggvG&quot;+Y
-map! &lt;C-A&gt; &lt;Esc&gt;ggVGY
-map &lt;F12&gt; gg=G
-&quot; 选中状态下 Ctrl+c 复制
-vmap &lt;C-c&gt; &quot;+y
-&quot;去空行  
-nnoremap &lt;F2&gt; :g/^\s*$/d&lt;CR&gt; 
-&quot;比较文件  
-nnoremap &lt;C-F2&gt; :vert diffsplit 
-&quot;新建标签  
-map &lt;M-F2&gt; :tabnew&lt;CR&gt;  
-&quot;列出当前目录文件  
-map &lt;F3&gt; :tabnew .&lt;CR&gt;  
-&quot;打开树状文件目录  
-map &lt;C-F3&gt; \be  
-&quot;C，C++ 按F5编译运行
-map &lt;F5&gt; :call CompileRunGcc()&lt;CR&gt;
- 
-au BufRead *.py map &lt;buffer&gt; &lt;F6&gt; :w&lt;CR&gt;:!/usr/bin/env python % &lt;CR&gt;
- 
-let g:tagbar_usearrows = 1
-nnoremap &lt;leader&gt;l :TagbarToggle&lt;CR&gt;
-func! CompileRunGcc()
-    exec &quot;w&quot;
-    if &amp;filetype == 'c'
-        exec &quot;!g++ % -o %&lt;&quot;
-        exec &quot;! ./%&lt;&quot;
-    elseif &amp;filetype == 'cpp'
-        exec &quot;!g++ % -std=gnu++11  -Wall   -o %&lt;&quot;
-        exec &quot;! ./%&lt;&quot;
-    elseif &amp;filetype == 'java' 
-        exec &quot;!javac %&quot; 
-        exec &quot;!java %&lt;&quot;
-    elseif &amp;filetype == 'sh'
-        :!./%
-    elseif &amp;filetype == 'python'
-    &quot;   exec &quot;!python %&quot;
-    &quot;   exec &quot;!python %&lt;&quot;
-        exec &quot;!python2.7 %&quot;
-    endif
-endfunc
-&quot;C,C++的调试
-map &lt;F8&gt; :call Rungdb()&lt;CR&gt;
-func! Rungdb()
-    exec &quot;w&quot;
-    exec &quot;!g++ % -std=c++11 -g  -o %&lt;&quot;
-    exec &quot;!gdb ./%&lt;&quot;
-endfunc
- 
- 
- 
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-&quot;&quot;实用设置
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-&quot; 设置当文件被改动时自动载入
-set autoread
-&quot; quickfix模式
-autocmd FileType c,cpp map &lt;buffer&gt; &lt;leader&gt;&lt;space&gt; :w&lt;cr&gt;:make&lt;cr&gt;
-&quot;代码补全 
-set completeopt=preview,menu 
-&quot;允许插件  
-filetype plugin on
-&quot;共享剪贴板  
-set clipboard+=unnamed 
-&quot;从不备份  
-set nobackup
-&quot;make 运行
-:set makeprg=g++\ -Wall\ \ %
-&quot;自动保存
-set autowrite
-set ruler                   &quot; 打开状态栏标尺
-set cursorline              &quot; 突出显示当前行
-set magic                   &quot; 设置魔术
-set guioptions-=T           &quot; 隐藏工具栏
-set guioptions-=m           &quot; 隐藏菜单栏
-&quot;set statusline=\ %&lt;%F[%1*%M%*%n%R%H]%=\ %y\ %0(%{&amp;fileformat}\ %{&amp;encoding}\ %c:%l/%L%)\
-&quot; 设置在状态行显示的信息
-set foldcolumn=0
-set foldmethod=indent 
-set foldlevel=3 
-set foldenable              &quot; 开始折叠
-&quot; 不要使用vi的键盘模式，而是vim自己的
-set nocompatible
-&quot; 语法高亮
-set syntax=on
-&quot; 去掉输入错误的提示声音
-set noeb
-&quot; 在处理未保存或只读文件的时候，弹出确认
-set confirm
-&quot; 自动缩进
-set autoindent
-set clipboard+=unnamed
-set cindent
-&quot; Tab键的宽度
-set tabstop=8
-&quot; 统一缩进为8
-set softtabstop=4
-set shiftwidth=4
-&quot; 不要用空格代替制表符
-set noexpandtab
-&quot; 在行和段开始处使用制表符
-set smarttab
-&quot; 显示行号
-set number
-&quot; 历史记录数
-set history=1000
-&quot;禁止生成临时文件
-set nobackup
-set noswapfile
-&quot;搜索忽略大小写
-set ignorecase
-&quot;搜索逐字符高亮
-set hlsearch
-set incsearch
-&quot;行内替换
-set gdefault
-&quot;编码设置
-set enc=utf-8
-set fencs=utf-8,ucs-bom,shift-jis,gb18030,gbk,gb2312,cp936
-&quot;语言设置
-set langmenu=zh_CN.UTF-8
-set helplang=cn
-&quot; 我的状态行显示的内容（包括文件类型和解码）
-&quot;set statusline=%F%m%r%h%w\ [FORMAT=%{&amp;ff}]\ [TYPE=%Y]\ [POS=%l,%v][%p%%]\ %{strftime(\&quot;%d/%m/%y\ -\ %H:%M\&quot;)}
-&quot;set statusline=[%F]%y%r%m%*%=[Line:%l/%L,Column:%c][%p%%]
-&quot; 总是显示状态行
-set laststatus=2
-&quot; 命令行（在状态行下）的高度，默认为1，这里是2
-set cmdheight=2
-&quot; 侦测文件类型
-filetype on
-&quot; 载入文件类型插件
-filetype plugin on
-&quot; 为特定文件类型载入相关缩进文件
-filetype indent on
-&quot; 保存全局变量
-set viminfo+=!
-&quot; 带有如下符号的单词不要被换行分割
-set iskeyword+=_,$,@,%,#,-
-&quot; 字符间插入的像素行数目
-set linespace=0
-&quot; 增强模式中的命令行自动完成操作
-set wildmenu
-&quot; 使回格键（backspace）正常处理indent, eol, start等
-set backspace=2
-&quot; 允许backspace和光标键跨越行边界
-set whichwrap+=&lt;,&gt;,h,l
-&quot; 可以在buffer的任何地方使用鼠标（类似office中在工作区双击鼠标定位）
-set mouse=a
-set selection=exclusive
-set selectmode=mouse,key
-&quot; 通过使用: commands命令，告诉我们文件的哪一行被改变过
-set report=0
-&quot; 在被分割的窗口间显示空白，便于阅读
-set fillchars=vert:\ ,stl:\ ,stlnc:\
-&quot; 高亮显示匹配的括号
-set showmatch
-&quot; 匹配括号高亮的时间（单位是十分之一秒）
-set matchtime=1
-&quot; 光标移动到buffer的顶部和底部时保持3行距离
-set scrolloff=3
-&quot; 为C程序提供自动缩进
-set smartindent
-&quot; 高亮显示普通txt文件（需要txt.vim脚本）
-set cursorline
-hi CursorLine  cterm=bold   ctermbg=blue ctermfg=yellow
-au BufRead,BufNewFile *  setfiletype txt
-&quot;自动补全
-&quot;:inoremap ( ()&lt;ESC&gt;i
-&quot;:inoremap ) &lt;c-r&gt;=ClosePair(')')&lt;CR&gt;
-&quot;:inoremap { {&lt;CR&gt;}&lt;ESC&gt;O
-&quot;:inoremap } &lt;c-r&gt;=ClosePair('}')&lt;CR&gt;
-&quot;:inoremap [ []&lt;ESC&gt;i
-&quot;:inoremap ] &lt;c-r&gt;=ClosePair(']')&lt;CR&gt;
-&quot;:inoremap &quot; &quot;&quot;&lt;ESC&gt;i
-&quot;:inoremap ' ''&lt;ESC&gt;i
-function! ClosePair(char)
-    if getline('.')[col('.') - 1] == a:char
-        return &quot;\&lt;Right&gt;&quot;
-    else
-        return a:char
-    endif
-endfunction
-filetype plugin indent on 
-&quot;打开文件类型检测, 加了这句才可以用智能补全
-set completeopt=longest,menu
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
- 
- 
- 
- 
- 
- 
- 
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;vundle设置&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-set nocompatible              &quot; be iMproved, required
-&quot;filetype off                  &quot; required
-set shell=/bin/bash 
- 
- 
-&quot; Interface
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'
-&quot; vim-scripts repos
-&quot;
-&quot;
- 
-  Plugin 'MarcWeber/vim-addon-mw-utils'
-  Plugin 'tomtom/tlib_vim'
-  Plugin 'garbas/vim-snipmate'
- 
-  &quot; Optional:
- Plugin 'honza/vim-snippets'
- Plugin 'davidhalter/jedi-vim'
- Plugin 'vim-airline/vim-airline'
- Plugin 'vim-airline/vim-airline-themes'
- Plugin 'bash-support.vim'
- Plugin 'perl-support.vim'
- Plugin 'majutsushi/tagbar'
- Plugin 'ZoomWin'
- Plugin 'morhetz/gruvbox' 
- Plugin 'scrooloose/syntastic'
-Plugin 'Valloric/YouCompleteMe'
-call vundle#end()            &quot; required
-filetype plugin indent on    &quot; required
- 
- 
- 
- 
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;youcompleteme设置&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
- 
- 
-&quot;let g:ycm_autoclose_preview_window_after_completion=1
-&quot;nnoremap &lt;leader&gt;g :YcmCompleter GoToDefinitionElseDeclaration&lt;CR&gt;
- 
-&quot; YouCompleteMe 功能
-&quot; 补全功能在注释中同样有效
-&quot;let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/cpp/ycm/.ycm_extra_conf.py'
-&quot;let g:ycm_complete_in_comments=1
- &quot;允许 vim 加载 .ycm_extra_conf.py 文件，不再提示
-&quot;let g:ycm_confirm_extra_conf=0
- 
-&quot;let g:ycm_error_symbol = '&lt;&lt;'
-&quot;let g:ycm_warning_symbol = '&lt;'
-&quot;nnoremap &lt;leader&gt;gl :YcmCompleter GoToDeclaration&lt;CR&gt;
-&quot;nnoremap &lt;leader&gt;gf :YcmCompleter GoToDefinition&lt;CR&gt;
-&quot;nnoremap &lt;leader&gt;gg :YcmCompleter GoToDefinitionElseDeclaration&lt;CR&gt;
-&quot;nmap &lt;F4&gt; :YcmDiags&lt;CR&gt;
- 
- 
- 
- 
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;youcompleteme设置 by wyz&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
-let g:cpp_class_scope_highlight=1
-let g:cpp_experimental_template_highlight=1
-let g:ycm_show_diagnostics_ui=0
-let g:ycm_enable_diagnostic_signs=0
-let g:ycm_enable_diagnostic_highlighting = 0
-let g:ycm_echo_current_diagnostic = 0
-let g:ycm_collect_identifiers_from_tags_files = 1
-let g:ycm_key_invoke_completion = '&lt;C-Q&gt;'
-let g:ycm_seed_identifiers_with_syntax = 1
-let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
-let g:ycm_collect_identifiers_from_tags_files = 1
-let g:ycm_confirm_extra_conf = 0
-let g:ycm_autoclose_preview_window_after_completion = 1
-let g:ycm_autoclose_preview_window_after_insertion = 1
- 
- 
- 
-&quot; for python
-&quot;
-&quot;
- 
-&quot;默认配置文件路径&quot;
-let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
-&quot;打开vim时不再询问是否加载ycm_extra_conf.py配置&quot;
-let g:ycm_confirm_extra_conf=0
-set completeopt=longest,menu
-&quot;python解释器路径&quot;
-let g:ycm_path_to_python_interpreter='/usr/bin/python'
-&quot;是否开启语义补全&quot;
-let g:ycm_seed_identifiers_with_syntax=1
-&quot;是否在注释中也开启补全&quot;
-let g:ycm_complete_in_comments=1
-let g:ycm_collect_identifiers_from_comments_and_strings = 0
-&quot;开始补全的字符数&quot;
-let g:ycm_min_num_of_chars_for_completion=2
-&quot;补全后自动关机预览窗口&quot;
-let g:ycm_autoclose_preview_window_after_completion=1
-&quot; 禁止缓存匹配项,每次都重新生成匹配项&quot;
-let g:ycm_cache_omnifunc=0
-&quot;字符串中也开启补全&quot;
-let g:ycm_complete_in_strings = 1
- 
- 
- 
-&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;'for airline&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
- 
-let g:airline_powerline_fonts = 1   
-let g:airline#extensions#tabline#enabled = 1
- let g:airline#extensions#tabline#buffer_nr_show = 1
-let g:airline#extensions#tabline#left_sep = ' '
-let g:airline#extensions#tabline#left_alt_sep = '|'
- 
- nnoremap &lt;F2&gt; :bnext&lt;CR&gt;
- nnoremap &lt;F4&gt; :bprevious&lt;CR&gt;
- 
- if !exists('g:airline_symbols')
-    let g:airline_symbols = {}
-    endif
- 
- let g:airline_left_sep = '⮀'
-  let g:airline_left_alt_sep = '⮁'
-  let g:airline_right_sep = '⮂'
-  let g:airline_right_alt_sep = '⮃'
-  let g:airline_symbols.branch = '⭠'
-  let g:airline_symbols.readonly = '⭤'
-</code></pre>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=ln> 1</span>    
+<span class=ln> 2</span>    dynamic_chain
+<span class=ln> 3</span>    chain_len = 1 
+<span class=ln> 4</span>    proxy_dns 
+<span class=ln> 5</span>    remote_dns_subnet 224
+<span class=ln> 6</span>    tcp_read_time_out 15000
+<span class=ln> 7</span>    tcp_connect_time_out 8000
+<span class=ln> 8</span>    [ProxyList]
+<span class=ln> 9</span>    socks5     127.0.0.1 1080
+<span class=ln>10</span>    
+<span class=ln>11</span>    
+</code></pre></div><p>就很气，配置文件经常失效，再记录一份好了</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=ln> 1</span>    quiet_mode
+<span class=ln> 2</span>    dynamic_chain
+<span class=ln> 3</span>    chain_len = 1 #round_robin_chain和random_chain使用
+<span class=ln> 4</span>    proxy_dns
+<span class=ln> 5</span>    remote_dns_subnet 224
+<span class=ln> 6</span>    tcp_read_time_out 15000
+<span class=ln> 7</span>    tcp_connect_time_out 8000
+<span class=ln> 8</span>    localnet 127.0.0.0/255.0.0.0
+<span class=ln> 9</span>    localnet 10.0.0.0/255.0.0.0
+<span class=ln>10</span>    localnet 172.16.0.0/255.240.0.0
+<span class=ln>11</span>    localnet 192.168.0.0/255.255.0.0
+<span class=ln>12</span>    
+<span class=ln>13</span>    [ProxyList]
+<span class=ln>14</span>    socks5  127.0.0.1 1080
+<span class=ln>15</span>    http    127.0.0.1 1087
+<span class=ln>16</span>
+</code></pre></div><p>7 vim 配置</p>
+<p><a href=https://github.com/111qqz/vim>参考这里</a></p>
 <p>8修改键盘映射</p>
-<pre><code>keysym XF86Back = Page_Up
-keysym XF86Forward = Page_Down
-</code></pre>
-<p>9安装中文字体：</p>
-<pre><code>sudo pacman -S wqy-microhei wqy-microhei-lite wqy-bitmapfont wqy-zenhei ttf-arphic-ukai ttf-arphic-uming adobe-source-han-sans-cn-fonts
-</code></pre>
-<ol>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=ln>1</span>    keysym <span class=nv>XF86Back</span> <span class=o>=</span> Page_Up
+<span class=ln>2</span>    keysym <span class=nv>XF86Forward</span> <span class=o>=</span> Page_Down
+<span class=ln>3</span>
+</code></pre></div><p>9安装中文字体：</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=ln>1</span>    
+<span class=ln>2</span>    sudo pacman -S wqy-microhei wqy-microhei-lite wqy-bitmapfont wqy-zenhei ttf-arphic-ukai ttf-arphic-uming adobe-source-han-sans-cn-fonts
+<span class=ln>3</span>
+</code></pre></div><ol>
 <li>anaconda with fish</li>
 </ol>
 <p>anaconda 默认的环境变量是bash,对于fish,需要修改~/.config/fish/config.fish 如下</p>
-<pre><code>#export LD_LIBRARY_PATH=/usr/local/cuda/lib64/
-set -x LD_LIBRARY_PATH /usr/local/cuda/lib64/
-
-# added by Anaconda2 4.4.0 installer
-#export PATH=&quot;/home/sensetime/anaconda2/bin:$PATH&quot;
-set -x PATH /home/sensetime/anaconda2/bin $PATH
-</code></pre>
-<p>11 youcompleteme</p>
-<pre><code># This file is NOT licensed under the GPLv3, which is the license for the rest
-# of YouCompleteMe.
-#
-# Here's the license text for this file:
-#
-# This is free and unencumbered software released into the public domain.
-#
-# Anyone is free to copy, modify, publish, use, compile, sell, or
-# distribute this software, either in source code form or as a compiled
-# binary, for any purpose, commercial or non-commercial, and by any
-# means.
-#
-# In jurisdictions that recognize copyright laws, the author or authors
-# of this software dedicate any and all copyright interest in the
-# software to the public domain. We make this dedication for the benefit
-# of the public at large and to the detriment of our heirs and
-# successors. We intend this dedication to be an overt act of
-# relinquishment in perpetuity of all present and future rights to this
-# software under copyright law.
-#
-# THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-# IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-# OTHER DEALINGS IN THE SOFTWARE.
-#
-# For more information, please refer to &lt;http://unlicense.org/&gt;
-
-import os
-import ycm_core
-
-# These are the compilation flags that will be used in case there's no
-# compilation database set (by default, one is not set).
-# CHANGE THIS LIST OF FLAGS. YES, THIS IS THE DROID YOU HAVE BEEN LOOKING FOR.
-flags = [
-'-Wall',
-'-Wextra',
-'-Werror',
-'-Wnoc++98-compat',
-'-Wno-long-long',
-'-Wno-variadic-macros',
-'-fexceptions',
-'-DNDEBUG',
-#'-stdlib=libc++',
-# You 100% do NOT need -DUSE_CLANG_COMPLETER in your flags; only the YCM
-# source code needs it.
-'-DUSE_CLANG_COMPLETER',
-# THIS IS IMPORTANT! Without a &quot;-std=&lt;something&gt;&quot; flag, clang won't know which
-# language to use when compiling headers. So it will guess. Badly. So C++
-# headers will be compiled as C headers. You don't want that so ALWAYS specify
-# a &quot;-std=&lt;something&gt;&quot;.
-# For a C project, you would set this to something like 'c99' instead of
-# 'c++11'.
-'-std=c++11',
-# ...and the same thing goes for the magic -x option which specifies the
-# language that the files to be compiled are written in. This is mostly
-# relevant for c++ headers.
-# For a C project, you would set this to 'c' instead of 'c++'.
-'-x',
-'c++',
-'-isystem',
-'../BoostParts',
-'-isystem',
-# This path will only work on OS X, but extra paths that don't exist are not
-# harmful
-'/System/Library/Frameworks/Python.framework/Headers',
-'-isystem',
-'../llvm/include',
-'-isystem',
-'../llvm/tools/clang/include',
-'-I',
-'.',
-'-I',
-'./ClangCompleter',
-'-isystem',
-'./tests/gmock/gtest',
-'-isystem',
-'./tests/gmock/gtest/include',
-'-isystem',
-'./tests/gmock',
-'-isystem',
-'./tests/gmock/include',
-#'-isystem',
-#'/usr/local/include/c++/5.1.0',
-#'-isystem',
-#'/usr/local/include',
-#'-isystem',
-#'/usr/include',
-]
-
-
-# Set this to the absolute path to the folder (NOT the file!) containing the
-# compile_commands.json file to use that instead of 'flags'. See here for
-# more details: http://clang.llvm.org/docs/JSONCompilationDatabase.html
-#
-# You can get CMake to generate this file for you by adding:
-#   set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )
-# to your CMakeLists.txt file.
-#
-# Most projects will NOT need to set this to anything; you can just change the
-# 'flags' list of compilation flags. Notice that YCM itself uses that approach.
-compilation_database_folder = ''
-
-if os.path.exists( compilation_database_folder ):
-  database = ycm_core.CompilationDatabase( compilation_database_folder )
-else:
-  database = None
-
-SOURCE_EXTENSIONS = [ '.cpp', '.cxx', '.cc', '.c', '.m', '.mm' ]
-
-def DirectoryOfThisScript():
-  return os.path.dirname( os.path.abspath( __file__ ) )
-
-
-def MakeRelativePathsInFlagsAbsolute( flags, working_directory ):
-  if not working_directory:
-    return list( flags )
-  new_flags = []
-  make_next_absolute = False
-  path_flags = [ '-isystem', '-I', '-iquote', '--sysroot=' ]
-  for flag in flags:
-    new_flag = flag
-
-    if make_next_absolute:
-      make_next_absolute = False
-      if not flag.startswith( '/' ):
-        new_flag = os.path.join( working_directory, flag )
-
-    for path_flag in path_flags:
-      if flag == path_flag:
-        make_next_absolute = True
-        break
-
-      if flag.startswith( path_flag ):
-        path = flag[ len( path_flag ): ]
-        new_flag = path_flag + os.path.join( working_directory, path )
-        break
-
-    if new_flag:
-      new_flags.append( new_flag )
-  return new_flags
-
-
-def IsHeaderFile( filename ):
-  extension = os.path.splitext( filename )[ 1 ]
-  return extension in [ '.h', '.hxx', '.hpp', '.hh' ]
-
-
-def GetCompilationInfoForFile( filename ):
-  # The compilation_commands.json file generated by CMake does not have entries
-  # for header files. So we do our best by asking the db for flags for a
-  # corresponding source file, if any. If one exists, the flags for that file
-  # should be good enough.
-  if IsHeaderFile( filename ):
-    basename = os.path.splitext( filename )[ 0 ]
-    for extension in SOURCE_EXTENSIONS:
-      replacement_file = basename + extension
-      if os.path.exists( replacement_file ):
-        compilation_info = database.GetCompilationInfoForFile(
-          replacement_file )
-        if compilation_info.compiler_flags_:
-          return compilation_info
-    return None
-  return database.GetCompilationInfoForFile( filename )
-
-
-def FlagsForFile( filename, **kwargs ):
-  if database:
-    # Bear in mind that compilation_info.compiler_flags_ does NOT return a
-    # python list, but a &quot;list-like&quot; StringVec object
-    compilation_info = GetCompilationInfoForFile( filename )
-    if not compilation_info:
-      return None
-
-    final_flags = MakeRelativePathsInFlagsAbsolute(
-      compilation_info.compiler_flags_,
-      compilation_info.compiler_working_dir_ )
-
-    # NOTE: This is just for YouCompleteMe; it's highly likely that your project
-    # does NOT need to remove the stdlib flag. DO NOT USE THIS IN YOUR
-    # ycm_extra_conf IF YOU'RE NOT 100% SURE YOU NEED IT.
-    try:
-      final_flags.remove( '-stdlib=libc++' )
-      pass
-    except ValueError:
-      pass
-  else:
-    relative_to = DirectoryOfThisScript()
-    final_flags = MakeRelativePathsInFlagsAbsolute( flags, relative_to )
-
-  return {
-    'flags': final_flags,
-    'do_cache': True
-  }
-</code></pre>
-<p>12.关于vim 剪贴板的问题</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=ln>1</span>    
+<span class=ln>2</span>    <span class=c1>#export LD_LIBRARY_PATH=/usr/local/cuda/lib64/</span>
+<span class=ln>3</span>    <span class=nb>set</span> -x LD_LIBRARY_PATH /usr/local/cuda/lib64/
+<span class=ln>4</span>    
+<span class=ln>5</span>    <span class=c1># added by Anaconda2 4.4.0 installer</span>
+<span class=ln>6</span>    <span class=c1>#export PATH=&#34;/home/sensetime/anaconda2/bin:$PATH&#34;</span>
+<span class=ln>7</span>    <span class=nb>set</span> -x PATH /home/sensetime/anaconda2/bin <span class=nv>$PATH</span>
+<span class=ln>8</span>
+</code></pre></div><p>11 youcompleteme</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=ln>  1</span>    
+<span class=ln>  2</span>    <span class=c1># This file is NOT licensed under the GPLv3, which is the license for the rest</span>
+<span class=ln>  3</span>    <span class=c1># of YouCompleteMe.</span>
+<span class=ln>  4</span>    <span class=c1>#</span>
+<span class=ln>  5</span>    <span class=c1># Here&#39;s the license text for this file:</span>
+<span class=ln>  6</span>    <span class=c1>#</span>
+<span class=ln>  7</span>    <span class=c1># This is free and unencumbered software released into the public domain.</span>
+<span class=ln>  8</span>    <span class=c1>#</span>
+<span class=ln>  9</span>    <span class=c1># Anyone is free to copy, modify, publish, use, compile, sell, or</span>
+<span class=ln> 10</span>    <span class=c1># distribute this software, either in source code form or as a compiled</span>
+<span class=ln> 11</span>    <span class=c1># binary, for any purpose, commercial or non-commercial, and by any</span>
+<span class=ln> 12</span>    <span class=c1># means.</span>
+<span class=ln> 13</span>    <span class=c1>#</span>
+<span class=ln> 14</span>    <span class=c1># In jurisdictions that recognize copyright laws, the author or authors</span>
+<span class=ln> 15</span>    <span class=c1># of this software dedicate any and all copyright interest in the</span>
+<span class=ln> 16</span>    <span class=c1># software to the public domain. We make this dedication for the benefit</span>
+<span class=ln> 17</span>    <span class=c1># of the public at large and to the detriment of our heirs and</span>
+<span class=ln> 18</span>    <span class=c1># successors. We intend this dedication to be an overt act of</span>
+<span class=ln> 19</span>    <span class=c1># relinquishment in perpetuity of all present and future rights to this</span>
+<span class=ln> 20</span>    <span class=c1># software under copyright law.</span>
+<span class=ln> 21</span>    <span class=c1>#</span>
+<span class=ln> 22</span>    <span class=c1># THE SOFTWARE IS PROVIDED &#34;AS IS&#34;, WITHOUT WARRANTY OF ANY KIND,</span>
+<span class=ln> 23</span>    <span class=c1># EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF</span>
+<span class=ln> 24</span>    <span class=c1># MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.</span>
+<span class=ln> 25</span>    <span class=c1># IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR</span>
+<span class=ln> 26</span>    <span class=c1># OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,</span>
+<span class=ln> 27</span>    <span class=c1># ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR</span>
+<span class=ln> 28</span>    <span class=c1># OTHER DEALINGS IN THE SOFTWARE.</span>
+<span class=ln> 29</span>    <span class=c1>#</span>
+<span class=ln> 30</span>    <span class=c1># For more information, please refer to &lt;http://unlicense.org/&gt;</span>
+<span class=ln> 31</span>    
+<span class=ln> 32</span>    <span class=kn>import</span> <span class=nn>os</span>
+<span class=ln> 33</span>    <span class=kn>import</span> <span class=nn>ycm_core</span>
+<span class=ln> 34</span>    
+<span class=ln> 35</span>    <span class=c1># These are the compilation flags that will be used in case there&#39;s no</span>
+<span class=ln> 36</span>    <span class=c1># compilation database set (by default, one is not set).</span>
+<span class=ln> 37</span>    <span class=c1># CHANGE THIS LIST OF FLAGS. YES, THIS IS THE DROID YOU HAVE BEEN LOOKING FOR.</span>
+<span class=ln> 38</span>    <span class=n>flags</span> <span class=o>=</span> <span class=p>[</span>
+<span class=ln> 39</span>    <span class=s1>&#39;-Wall&#39;</span><span class=p>,</span>
+<span class=ln> 40</span>    <span class=s1>&#39;-Wextra&#39;</span><span class=p>,</span>
+<span class=ln> 41</span>    <span class=s1>&#39;-Werror&#39;</span><span class=p>,</span>
+<span class=ln> 42</span>    <span class=s1>&#39;-Wnoc++98-compat&#39;</span><span class=p>,</span>
+<span class=ln> 43</span>    <span class=s1>&#39;-Wno-long-long&#39;</span><span class=p>,</span>
+<span class=ln> 44</span>    <span class=s1>&#39;-Wno-variadic-macros&#39;</span><span class=p>,</span>
+<span class=ln> 45</span>    <span class=s1>&#39;-fexceptions&#39;</span><span class=p>,</span>
+<span class=ln> 46</span>    <span class=s1>&#39;-DNDEBUG&#39;</span><span class=p>,</span>
+<span class=ln> 47</span>    <span class=c1>#&#39;-stdlib=libc++&#39;,</span>
+<span class=ln> 48</span>    <span class=c1># You 100% do NOT need -DUSE_CLANG_COMPLETER in your flags; only the YCM</span>
+<span class=ln> 49</span>    <span class=c1># source code needs it.</span>
+<span class=ln> 50</span>    <span class=s1>&#39;-DUSE_CLANG_COMPLETER&#39;</span><span class=p>,</span>
+<span class=ln> 51</span>    <span class=c1># THIS IS IMPORTANT! Without a &#34;-std=&lt;something&gt;&#34; flag, clang won&#39;t know which</span>
+<span class=ln> 52</span>    <span class=c1># language to use when compiling headers. So it will guess. Badly. So C++</span>
+<span class=ln> 53</span>    <span class=c1># headers will be compiled as C headers. You don&#39;t want that so ALWAYS specify</span>
+<span class=ln> 54</span>    <span class=c1># a &#34;-std=&lt;something&gt;&#34;.</span>
+<span class=ln> 55</span>    <span class=c1># For a C project, you would set this to something like &#39;c99&#39; instead of</span>
+<span class=ln> 56</span>    <span class=c1># &#39;c++11&#39;.</span>
+<span class=ln> 57</span>    <span class=s1>&#39;-std=c++11&#39;</span><span class=p>,</span>
+<span class=ln> 58</span>    <span class=c1># ...and the same thing goes for the magic -x option which specifies the</span>
+<span class=ln> 59</span>    <span class=c1># language that the files to be compiled are written in. This is mostly</span>
+<span class=ln> 60</span>    <span class=c1># relevant for c++ headers.</span>
+<span class=ln> 61</span>    <span class=c1># For a C project, you would set this to &#39;c&#39; instead of &#39;c++&#39;.</span>
+<span class=ln> 62</span>    <span class=s1>&#39;-x&#39;</span><span class=p>,</span>
+<span class=ln> 63</span>    <span class=s1>&#39;c++&#39;</span><span class=p>,</span>
+<span class=ln> 64</span>    <span class=s1>&#39;-isystem&#39;</span><span class=p>,</span>
+<span class=ln> 65</span>    <span class=s1>&#39;../BoostParts&#39;</span><span class=p>,</span>
+<span class=ln> 66</span>    <span class=s1>&#39;-isystem&#39;</span><span class=p>,</span>
+<span class=ln> 67</span>    <span class=c1># This path will only work on OS X, but extra paths that don&#39;t exist are not</span>
+<span class=ln> 68</span>    <span class=c1># harmful</span>
+<span class=ln> 69</span>    <span class=s1>&#39;/System/Library/Frameworks/Python.framework/Headers&#39;</span><span class=p>,</span>
+<span class=ln> 70</span>    <span class=s1>&#39;-isystem&#39;</span><span class=p>,</span>
+<span class=ln> 71</span>    <span class=s1>&#39;../llvm/include&#39;</span><span class=p>,</span>
+<span class=ln> 72</span>    <span class=s1>&#39;-isystem&#39;</span><span class=p>,</span>
+<span class=ln> 73</span>    <span class=s1>&#39;../llvm/tools/clang/include&#39;</span><span class=p>,</span>
+<span class=ln> 74</span>    <span class=s1>&#39;-I&#39;</span><span class=p>,</span>
+<span class=ln> 75</span>    <span class=s1>&#39;.&#39;</span><span class=p>,</span>
+<span class=ln> 76</span>    <span class=s1>&#39;-I&#39;</span><span class=p>,</span>
+<span class=ln> 77</span>    <span class=s1>&#39;./ClangCompleter&#39;</span><span class=p>,</span>
+<span class=ln> 78</span>    <span class=s1>&#39;-isystem&#39;</span><span class=p>,</span>
+<span class=ln> 79</span>    <span class=s1>&#39;./tests/gmock/gtest&#39;</span><span class=p>,</span>
+<span class=ln> 80</span>    <span class=s1>&#39;-isystem&#39;</span><span class=p>,</span>
+<span class=ln> 81</span>    <span class=s1>&#39;./tests/gmock/gtest/include&#39;</span><span class=p>,</span>
+<span class=ln> 82</span>    <span class=s1>&#39;-isystem&#39;</span><span class=p>,</span>
+<span class=ln> 83</span>    <span class=s1>&#39;./tests/gmock&#39;</span><span class=p>,</span>
+<span class=ln> 84</span>    <span class=s1>&#39;-isystem&#39;</span><span class=p>,</span>
+<span class=ln> 85</span>    <span class=s1>&#39;./tests/gmock/include&#39;</span><span class=p>,</span>
+<span class=ln> 86</span>    <span class=c1>#&#39;-isystem&#39;,</span>
+<span class=ln> 87</span>    <span class=c1>#&#39;/usr/local/include/c++/5.1.0&#39;,</span>
+<span class=ln> 88</span>    <span class=c1>#&#39;-isystem&#39;,</span>
+<span class=ln> 89</span>    <span class=c1>#&#39;/usr/local/include&#39;,</span>
+<span class=ln> 90</span>    <span class=c1>#&#39;-isystem&#39;,</span>
+<span class=ln> 91</span>    <span class=c1>#&#39;/usr/include&#39;,</span>
+<span class=ln> 92</span>    <span class=p>]</span>
+<span class=ln> 93</span>    
+<span class=ln> 94</span>    
+<span class=ln> 95</span>    <span class=c1># Set this to the absolute path to the folder (NOT the file!) containing the</span>
+<span class=ln> 96</span>    <span class=c1># compile_commands.json file to use that instead of &#39;flags&#39;. See here for</span>
+<span class=ln> 97</span>    <span class=c1># more details: http://clang.llvm.org/docs/JSONCompilationDatabase.html</span>
+<span class=ln> 98</span>    <span class=c1>#</span>
+<span class=ln> 99</span>    <span class=c1># You can get CMake to generate this file for you by adding:</span>
+<span class=ln>100</span>    <span class=c1>#   set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )</span>
+<span class=ln>101</span>    <span class=c1># to your CMakeLists.txt file.</span>
+<span class=ln>102</span>    <span class=c1>#</span>
+<span class=ln>103</span>    <span class=c1># Most projects will NOT need to set this to anything; you can just change the</span>
+<span class=ln>104</span>    <span class=c1># &#39;flags&#39; list of compilation flags. Notice that YCM itself uses that approach.</span>
+<span class=ln>105</span>    <span class=n>compilation_database_folder</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span>
+<span class=ln>106</span>    
+<span class=ln>107</span>    <span class=k>if</span> <span class=n>os</span><span class=o>.</span><span class=n>path</span><span class=o>.</span><span class=n>exists</span><span class=p>(</span> <span class=n>compilation_database_folder</span> <span class=p>):</span>
+<span class=ln>108</span>      <span class=n>database</span> <span class=o>=</span> <span class=n>ycm_core</span><span class=o>.</span><span class=n>CompilationDatabase</span><span class=p>(</span> <span class=n>compilation_database_folder</span> <span class=p>)</span>
+<span class=ln>109</span>    <span class=k>else</span><span class=p>:</span>
+<span class=ln>110</span>      <span class=n>database</span> <span class=o>=</span> <span class=kc>None</span>
+<span class=ln>111</span>    
+<span class=ln>112</span>    <span class=n>SOURCE_EXTENSIONS</span> <span class=o>=</span> <span class=p>[</span> <span class=s1>&#39;.cpp&#39;</span><span class=p>,</span> <span class=s1>&#39;.cxx&#39;</span><span class=p>,</span> <span class=s1>&#39;.cc&#39;</span><span class=p>,</span> <span class=s1>&#39;.c&#39;</span><span class=p>,</span> <span class=s1>&#39;.m&#39;</span><span class=p>,</span> <span class=s1>&#39;.mm&#39;</span> <span class=p>]</span>
+<span class=ln>113</span>    
+<span class=ln>114</span>    <span class=k>def</span> <span class=nf>DirectoryOfThisScript</span><span class=p>():</span>
+<span class=ln>115</span>      <span class=k>return</span> <span class=n>os</span><span class=o>.</span><span class=n>path</span><span class=o>.</span><span class=n>dirname</span><span class=p>(</span> <span class=n>os</span><span class=o>.</span><span class=n>path</span><span class=o>.</span><span class=n>abspath</span><span class=p>(</span> <span class=vm>__file__</span> <span class=p>)</span> <span class=p>)</span>
+<span class=ln>116</span>    
+<span class=ln>117</span>    
+<span class=ln>118</span>    <span class=k>def</span> <span class=nf>MakeRelativePathsInFlagsAbsolute</span><span class=p>(</span> <span class=n>flags</span><span class=p>,</span> <span class=n>working_directory</span> <span class=p>):</span>
+<span class=ln>119</span>      <span class=k>if</span> <span class=ow>not</span> <span class=n>working_directory</span><span class=p>:</span>
+<span class=ln>120</span>        <span class=k>return</span> <span class=nb>list</span><span class=p>(</span> <span class=n>flags</span> <span class=p>)</span>
+<span class=ln>121</span>      <span class=n>new_flags</span> <span class=o>=</span> <span class=p>[]</span>
+<span class=ln>122</span>      <span class=n>make_next_absolute</span> <span class=o>=</span> <span class=kc>False</span>
+<span class=ln>123</span>      <span class=n>path_flags</span> <span class=o>=</span> <span class=p>[</span> <span class=s1>&#39;-isystem&#39;</span><span class=p>,</span> <span class=s1>&#39;-I&#39;</span><span class=p>,</span> <span class=s1>&#39;-iquote&#39;</span><span class=p>,</span> <span class=s1>&#39;--sysroot=&#39;</span> <span class=p>]</span>
+<span class=ln>124</span>      <span class=k>for</span> <span class=n>flag</span> <span class=ow>in</span> <span class=n>flags</span><span class=p>:</span>
+<span class=ln>125</span>        <span class=n>new_flag</span> <span class=o>=</span> <span class=n>flag</span>
+<span class=ln>126</span>    
+<span class=ln>127</span>        <span class=k>if</span> <span class=n>make_next_absolute</span><span class=p>:</span>
+<span class=ln>128</span>          <span class=n>make_next_absolute</span> <span class=o>=</span> <span class=kc>False</span>
+<span class=ln>129</span>          <span class=k>if</span> <span class=ow>not</span> <span class=n>flag</span><span class=o>.</span><span class=n>startswith</span><span class=p>(</span> <span class=s1>&#39;/&#39;</span> <span class=p>):</span>
+<span class=ln>130</span>            <span class=n>new_flag</span> <span class=o>=</span> <span class=n>os</span><span class=o>.</span><span class=n>path</span><span class=o>.</span><span class=n>join</span><span class=p>(</span> <span class=n>working_directory</span><span class=p>,</span> <span class=n>flag</span> <span class=p>)</span>
+<span class=ln>131</span>    
+<span class=ln>132</span>        <span class=k>for</span> <span class=n>path_flag</span> <span class=ow>in</span> <span class=n>path_flags</span><span class=p>:</span>
+<span class=ln>133</span>          <span class=k>if</span> <span class=n>flag</span> <span class=o>==</span> <span class=n>path_flag</span><span class=p>:</span>
+<span class=ln>134</span>            <span class=n>make_next_absolute</span> <span class=o>=</span> <span class=kc>True</span>
+<span class=ln>135</span>            <span class=k>break</span>
+<span class=ln>136</span>    
+<span class=ln>137</span>          <span class=k>if</span> <span class=n>flag</span><span class=o>.</span><span class=n>startswith</span><span class=p>(</span> <span class=n>path_flag</span> <span class=p>):</span>
+<span class=ln>138</span>            <span class=n>path</span> <span class=o>=</span> <span class=n>flag</span><span class=p>[</span> <span class=nb>len</span><span class=p>(</span> <span class=n>path_flag</span> <span class=p>):</span> <span class=p>]</span>
+<span class=ln>139</span>            <span class=n>new_flag</span> <span class=o>=</span> <span class=n>path_flag</span> <span class=o>+</span> <span class=n>os</span><span class=o>.</span><span class=n>path</span><span class=o>.</span><span class=n>join</span><span class=p>(</span> <span class=n>working_directory</span><span class=p>,</span> <span class=n>path</span> <span class=p>)</span>
+<span class=ln>140</span>            <span class=k>break</span>
+<span class=ln>141</span>    
+<span class=ln>142</span>        <span class=k>if</span> <span class=n>new_flag</span><span class=p>:</span>
+<span class=ln>143</span>          <span class=n>new_flags</span><span class=o>.</span><span class=n>append</span><span class=p>(</span> <span class=n>new_flag</span> <span class=p>)</span>
+<span class=ln>144</span>      <span class=k>return</span> <span class=n>new_flags</span>
+<span class=ln>145</span>    
+<span class=ln>146</span>    
+<span class=ln>147</span>    <span class=k>def</span> <span class=nf>IsHeaderFile</span><span class=p>(</span> <span class=n>filename</span> <span class=p>):</span>
+<span class=ln>148</span>      <span class=n>extension</span> <span class=o>=</span> <span class=n>os</span><span class=o>.</span><span class=n>path</span><span class=o>.</span><span class=n>splitext</span><span class=p>(</span> <span class=n>filename</span> <span class=p>)[</span> <span class=mi>1</span> <span class=p>]</span>
+<span class=ln>149</span>      <span class=k>return</span> <span class=n>extension</span> <span class=ow>in</span> <span class=p>[</span> <span class=s1>&#39;.h&#39;</span><span class=p>,</span> <span class=s1>&#39;.hxx&#39;</span><span class=p>,</span> <span class=s1>&#39;.hpp&#39;</span><span class=p>,</span> <span class=s1>&#39;.hh&#39;</span> <span class=p>]</span>
+<span class=ln>150</span>    
+<span class=ln>151</span>    
+<span class=ln>152</span>    <span class=k>def</span> <span class=nf>GetCompilationInfoForFile</span><span class=p>(</span> <span class=n>filename</span> <span class=p>):</span>
+<span class=ln>153</span>      <span class=c1># The compilation_commands.json file generated by CMake does not have entries</span>
+<span class=ln>154</span>      <span class=c1># for header files. So we do our best by asking the db for flags for a</span>
+<span class=ln>155</span>      <span class=c1># corresponding source file, if any. If one exists, the flags for that file</span>
+<span class=ln>156</span>      <span class=c1># should be good enough.</span>
+<span class=ln>157</span>      <span class=k>if</span> <span class=n>IsHeaderFile</span><span class=p>(</span> <span class=n>filename</span> <span class=p>):</span>
+<span class=ln>158</span>        <span class=n>basename</span> <span class=o>=</span> <span class=n>os</span><span class=o>.</span><span class=n>path</span><span class=o>.</span><span class=n>splitext</span><span class=p>(</span> <span class=n>filename</span> <span class=p>)[</span> <span class=mi>0</span> <span class=p>]</span>
+<span class=ln>159</span>        <span class=k>for</span> <span class=n>extension</span> <span class=ow>in</span> <span class=n>SOURCE_EXTENSIONS</span><span class=p>:</span>
+<span class=ln>160</span>          <span class=n>replacement_file</span> <span class=o>=</span> <span class=n>basename</span> <span class=o>+</span> <span class=n>extension</span>
+<span class=ln>161</span>          <span class=k>if</span> <span class=n>os</span><span class=o>.</span><span class=n>path</span><span class=o>.</span><span class=n>exists</span><span class=p>(</span> <span class=n>replacement_file</span> <span class=p>):</span>
+<span class=ln>162</span>            <span class=n>compilation_info</span> <span class=o>=</span> <span class=n>database</span><span class=o>.</span><span class=n>GetCompilationInfoForFile</span><span class=p>(</span>
+<span class=ln>163</span>              <span class=n>replacement_file</span> <span class=p>)</span>
+<span class=ln>164</span>            <span class=k>if</span> <span class=n>compilation_info</span><span class=o>.</span><span class=n>compiler_flags_</span><span class=p>:</span>
+<span class=ln>165</span>              <span class=k>return</span> <span class=n>compilation_info</span>
+<span class=ln>166</span>        <span class=k>return</span> <span class=kc>None</span>
+<span class=ln>167</span>      <span class=k>return</span> <span class=n>database</span><span class=o>.</span><span class=n>GetCompilationInfoForFile</span><span class=p>(</span> <span class=n>filename</span> <span class=p>)</span>
+<span class=ln>168</span>    
+<span class=ln>169</span>    
+<span class=ln>170</span>    <span class=k>def</span> <span class=nf>FlagsForFile</span><span class=p>(</span> <span class=n>filename</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span> <span class=p>):</span>
+<span class=ln>171</span>      <span class=k>if</span> <span class=n>database</span><span class=p>:</span>
+<span class=ln>172</span>        <span class=c1># Bear in mind that compilation_info.compiler_flags_ does NOT return a</span>
+<span class=ln>173</span>        <span class=c1># python list, but a &#34;list-like&#34; StringVec object</span>
+<span class=ln>174</span>        <span class=n>compilation_info</span> <span class=o>=</span> <span class=n>GetCompilationInfoForFile</span><span class=p>(</span> <span class=n>filename</span> <span class=p>)</span>
+<span class=ln>175</span>        <span class=k>if</span> <span class=ow>not</span> <span class=n>compilation_info</span><span class=p>:</span>
+<span class=ln>176</span>          <span class=k>return</span> <span class=kc>None</span>
+<span class=ln>177</span>    
+<span class=ln>178</span>        <span class=n>final_flags</span> <span class=o>=</span> <span class=n>MakeRelativePathsInFlagsAbsolute</span><span class=p>(</span>
+<span class=ln>179</span>          <span class=n>compilation_info</span><span class=o>.</span><span class=n>compiler_flags_</span><span class=p>,</span>
+<span class=ln>180</span>          <span class=n>compilation_info</span><span class=o>.</span><span class=n>compiler_working_dir_</span> <span class=p>)</span>
+<span class=ln>181</span>    
+<span class=ln>182</span>        <span class=c1># NOTE: This is just for YouCompleteMe; it&#39;s highly likely that your project</span>
+<span class=ln>183</span>        <span class=c1># does NOT need to remove the stdlib flag. DO NOT USE THIS IN YOUR</span>
+<span class=ln>184</span>        <span class=c1># ycm_extra_conf IF YOU&#39;RE NOT 100% SURE YOU NEED IT.</span>
+<span class=ln>185</span>        <span class=k>try</span><span class=p>:</span>
+<span class=ln>186</span>          <span class=n>final_flags</span><span class=o>.</span><span class=n>remove</span><span class=p>(</span> <span class=s1>&#39;-stdlib=libc++&#39;</span> <span class=p>)</span>
+<span class=ln>187</span>          <span class=k>pass</span>
+<span class=ln>188</span>        <span class=k>except</span> <span class=ne>ValueError</span><span class=p>:</span>
+<span class=ln>189</span>          <span class=k>pass</span>
+<span class=ln>190</span>      <span class=k>else</span><span class=p>:</span>
+<span class=ln>191</span>        <span class=n>relative_to</span> <span class=o>=</span> <span class=n>DirectoryOfThisScript</span><span class=p>()</span>
+<span class=ln>192</span>        <span class=n>final_flags</span> <span class=o>=</span> <span class=n>MakeRelativePathsInFlagsAbsolute</span><span class=p>(</span> <span class=n>flags</span><span class=p>,</span> <span class=n>relative_to</span> <span class=p>)</span>
+<span class=ln>193</span>    
+<span class=ln>194</span>      <span class=k>return</span> <span class=p>{</span>
+<span class=ln>195</span>        <span class=s1>&#39;flags&#39;</span><span class=p>:</span> <span class=n>final_flags</span><span class=p>,</span>
+<span class=ln>196</span>        <span class=s1>&#39;do_cache&#39;</span><span class=p>:</span> <span class=kc>True</span>
+<span class=ln>197</span>      <span class=p>}</span>
+<span class=ln>198</span>
+<span class=ln>199</span>
+</code></pre></div><p>12.关于vim 剪贴板的问题</p>
 <p><a href=https://vi.stackexchange.com/questions/3076/how-do-i-use-the-system-clipboard-with-vim-in-arch-linux>How do I use the system clipboard with Vim in Arch Linux?</a></p>
 <p>uninstall vim,install gvim,and use vim instead of gvim</p>
 <p>13 vim 配色文件molokai.vim(透明背景修改</p>
-<pre><code>&quot; Vim color file
-&quot;
-&quot; Author: Tomas Restrepo &lt;tomas@winterdom.com&gt;
-&quot; https://github.com/tomasr/molokai
-&quot;
-&quot; Note: Based on the Monokai theme for TextMate
-&quot; by Wimer Hazenberg and its darker variant
-&quot; by Hamish Stuart Macpherson
-&quot;
-
-hi clear
-
-if version &gt; 580
-    &quot; no guarantees for version 5.8 and below, but this makes it stop
-    &quot; complaining
-    hi clear
-    if exists(&quot;syntax_on&quot;)
-        syntax reset
-    endif
-endif
-let g:colors_name=&quot;molokai&quot;
-
-if exists(&quot;g:molokai_original&quot;)
-    let s:molokai_original = g:molokai_original
-else
-    let s:molokai_original = 0
-endif
-
-
-hi Boolean         guifg=#AE81FF
-hi Character       guifg=#E6DB74
-hi Number          guifg=#AE81FF
-hi String          guifg=#E6DB74
-hi Conditional     guifg=#F92672               gui=bold
-hi Constant        guifg=#AE81FF               gui=bold
-hi Cursor          guifg=#000000 guibg=#F8F8F0
-hi iCursor         guifg=#000000 guibg=#F8F8F0
-hi Debug           guifg=#BCA3A3               gui=bold
-hi Define          guifg=#66D9EF
-hi Delimiter       guifg=#8F8F8F
-hi DiffAdd                       guibg=#13354A
-hi DiffChange      guifg=#89807D guibg=#4C4745
-hi DiffDelete      guifg=#960050 guibg=#1E0010
-hi DiffText                      guibg=#4C4745 gui=italic,bold
-
-hi Directory       guifg=#A6E22E               gui=bold
-hi Error           guifg=#E6DB74 guibg=#1E0010
-hi ErrorMsg        guifg=#F92672 guibg=#232526 gui=bold
-hi Exception       guifg=#A6E22E               gui=bold
-hi Float           guifg=#AE81FF
-hi FoldColumn      guifg=#465457 guibg=#000000
-hi Folded          guifg=#465457 guibg=#000000
-hi Function        guifg=#A6E22E
-hi Identifier      guifg=#FD971F
-hi Ignore          guifg=#808080 guibg=bg
-hi IncSearch       guifg=#C4BE89 guibg=#000000
-
-hi Keyword         guifg=#F92672               gui=bold
-hi Label           guifg=#E6DB74               gui=none
-hi Macro           guifg=#C4BE89               gui=italic
-hi SpecialKey      guifg=#66D9EF               gui=italic
-
-hi MatchParen      guifg=#000000 guibg=#FD971F gui=bold
-hi ModeMsg         guifg=#E6DB74
-hi MoreMsg         guifg=#E6DB74
-hi Operator        guifg=#F92672
-
-&quot; complete menu
-hi Pmenu           guifg=#66D9EF guibg=#000000
-hi PmenuSel                      guibg=#808080
-hi PmenuSbar                     guibg=#080808
-hi PmenuThumb      guifg=#66D9EF
-
-hi PreCondit       guifg=#A6E22E               gui=bold
-hi PreProc         guifg=#A6E22E
-hi Question        guifg=#66D9EF
-hi Repeat          guifg=#F92672               gui=bold
-hi Search          guifg=#000000 guibg=#FFE792
-&quot; marks
-hi SignColumn      guifg=#A6E22E guibg=#232526
-hi SpecialChar     guifg=#F92672               gui=bold
-hi SpecialComment  guifg=#7E8E91               gui=bold
-hi Special         guifg=#66D9EF guibg=bg      gui=italic
-if has(&quot;spell&quot;)
-    hi SpellBad    guisp=#FF0000 gui=undercurl
-    hi SpellCap    guisp=#7070F0 gui=undercurl
-    hi SpellLocal  guisp=#70F0F0 gui=undercurl
-    hi SpellRare   guisp=#FFFFFF gui=undercurl
-endif
-hi Statement       guifg=#F92672               gui=bold
-hi StatusLine      guifg=#455354 guibg=fg
-hi StatusLineNC    guifg=#808080 guibg=#080808
-hi StorageClass    guifg=#FD971F               gui=italic
-hi Structure       guifg=#66D9EF
-hi Tag             guifg=#F92672               gui=italic
-hi Title           guifg=#ef5939
-hi Todo            guifg=#FFFFFF guibg=bg      gui=bold
-
-hi Typedef         guifg=#66D9EF
-hi Type            guifg=#66D9EF               gui=none
-hi Underlined      guifg=#808080               gui=underline
-
-hi VertSplit       guifg=#808080 guibg=#080808 gui=bold
-hi VisualNOS                     guibg=#403D3D
-hi Visual                        guibg=#403D3D
-hi WarningMsg      guifg=#FFFFFF guibg=#333333 gui=bold
-hi WildMenu        guifg=#66D9EF guibg=#000000
-
-hi TabLineFill     guifg=#1B1D1E guibg=#1B1D1E
-hi TabLine         guibg=#1B1D1E guifg=#808080 gui=none
-
-if s:molokai_original == 1
-   hi Normal          guifg=#F8F8F2 guibg=NONE
-   hi Comment         guifg=#75715E
-   hi CursorLine                    guibg=#3E3D32
-   hi CursorLineNr    guifg=#FD971F               gui=none
-   hi CursorColumn                  guibg=#3E3D32
-   hi ColorColumn                   guibg=#3B3A32
-   hi LineNr          guifg=#BCBCBC guibg=#3B3A32
-   hi NonText         guifg=#75715E
-   hi SpecialKey      guifg=#75715E
-else
-   hi Normal          guifg=#F8F8F2 guibg=NONE 
-   hi Comment         guifg=#7E8E91
-   hi CursorLine                    guibg=#293739
-   hi CursorLineNr    guifg=#FD971F               gui=none
-   hi CursorColumn                  guibg=#293739
-   hi ColorColumn                   guibg=#232526
-   hi LineNr          guifg=#465457 guibg=#232526
-   hi NonText         guifg=#465457
-   hi SpecialKey      guifg=#465457
-end
-
-&quot;
-&quot; Support for 256-color terminal
-&quot;
-if &amp;t_Co &gt; 255
-   if s:molokai_original == 1
-      hi Normal                   ctermbg=NONE 
-      hi CursorLine               ctermbg=235   cterm=none
-      hi CursorLineNr ctermfg=208               cterm=none
-   else
-      hi Normal       ctermfg=252 ctermbg=NONE
-      hi CursorLine               ctermbg=234   cterm=none
-      hi CursorLineNr ctermfg=208               cterm=none
-   endif
-   hi Boolean         ctermfg=135
-   hi Character       ctermfg=144
-   hi Number          ctermfg=135
-   hi String          ctermfg=144
-   hi Conditional     ctermfg=161               cterm=bold
-   hi Constant        ctermfg=135               cterm=bold
-   hi Cursor          ctermfg=16  ctermbg=253
-   hi Debug           ctermfg=225               cterm=bold
-   hi Define          ctermfg=81
-   hi Delimiter       ctermfg=241
-
-   hi DiffAdd                     ctermbg=24
-   hi DiffChange      ctermfg=181 ctermbg=239
-   hi DiffDelete      ctermfg=162 ctermbg=53
-   hi DiffText                    ctermbg=102 cterm=bold
-
-   hi Directory       ctermfg=118               cterm=bold
-   hi Error           ctermfg=219 ctermbg=89
-   hi ErrorMsg        ctermfg=199 ctermbg=16    cterm=bold
-   hi Exception       ctermfg=118               cterm=bold
-   hi Float           ctermfg=135
-   hi FoldColumn      ctermfg=67  ctermbg=16
-   hi Folded          ctermfg=67  ctermbg=16
-   hi Function        ctermfg=118
-   hi Identifier      ctermfg=208               cterm=none
-   hi Ignore          ctermfg=244 ctermbg=232
-   hi IncSearch       ctermfg=193 ctermbg=16
-
-   hi keyword         ctermfg=161               cterm=bold
-   hi Label           ctermfg=229               cterm=none
-   hi Macro           ctermfg=193
-   hi SpecialKey      ctermfg=81
-
-   hi MatchParen      ctermfg=233  ctermbg=208 cterm=bold
-   hi ModeMsg         ctermfg=229
-   hi MoreMsg         ctermfg=229
-   hi Operator        ctermfg=161
-
-   &quot; complete menu
-   hi Pmenu           ctermfg=81  ctermbg=16
-   hi PmenuSel        ctermfg=255 ctermbg=242
-   hi PmenuSbar                   ctermbg=232
-   hi PmenuThumb      ctermfg=81
-
-   hi PreCondit       ctermfg=118               cterm=bold
-   hi PreProc         ctermfg=118
-   hi Question        ctermfg=81
-   hi Repeat          ctermfg=161               cterm=bold
-   hi Search          ctermfg=0   ctermbg=222   cterm=NONE
-
-   &quot; marks column
-   hi SignColumn      ctermfg=118 ctermbg=235
-   hi SpecialChar     ctermfg=161               cterm=bold
-   hi SpecialComment  ctermfg=245               cterm=bold
-   hi Special         ctermfg=81
-   if has(&quot;spell&quot;)
-       hi SpellBad                ctermbg=52
-       hi SpellCap                ctermbg=17
-       hi SpellLocal              ctermbg=17
-       hi SpellRare  ctermfg=none ctermbg=none  cterm=reverse
-   endif
-   hi Statement       ctermfg=161               cterm=bold
-   hi StatusLine      ctermfg=238 ctermbg=253
-   hi StatusLineNC    ctermfg=244 ctermbg=232
-   hi StorageClass    ctermfg=208
-   hi Structure       ctermfg=81
-   hi Tag             ctermfg=161
-   hi Title           ctermfg=166
-   hi Todo            ctermfg=231 ctermbg=232   cterm=bold
-
-   hi Typedef         ctermfg=81
-   hi Type            ctermfg=81                cterm=none
-   hi Underlined      ctermfg=244               cterm=underline
-
-   hi VertSplit       ctermfg=244 ctermbg=232   cterm=bold
-   hi VisualNOS                   ctermbg=238
-   hi Visual                      ctermbg=235
-   hi WarningMsg      ctermfg=231 ctermbg=238   cterm=bold
-   hi WildMenu        ctermfg=81  ctermbg=16
-
-   hi Comment         ctermfg=59
-   hi CursorColumn                ctermbg=236
-   hi ColorColumn                 ctermbg=236
-   hi LineNr          ctermfg=250 ctermbg=236
-   hi NonText         ctermfg=59
-
-   hi SpecialKey      ctermfg=59
-
-   if exists(&quot;g:rehash256&quot;) &amp;&amp; g:rehash256 == 1
-       hi Normal       ctermfg=252 ctermbg=NONE 
-       hi CursorLine               ctermbg=236   cterm=none
-       hi CursorLineNr ctermfg=208               cterm=none
-
-       hi Boolean         ctermfg=141
-       hi Character       ctermfg=222
-       hi Number          ctermfg=141
-       hi String          ctermfg=222
-       hi Conditional     ctermfg=197               cterm=bold
-       hi Constant        ctermfg=141               cterm=bold
-
-       hi DiffDelete      ctermfg=125 ctermbg=233
-
-       hi Directory       ctermfg=154               cterm=bold
-       hi Error           ctermfg=222 ctermbg=233
-       hi Exception       ctermfg=154               cterm=bold
-       hi Float           ctermfg=141
-       hi Function        ctermfg=154
-       hi Identifier      ctermfg=208
-
-       hi Keyword         ctermfg=197               cterm=bold
-       hi Operator        ctermfg=197
-       hi PreCondit       ctermfg=154               cterm=bold
-       hi PreProc         ctermfg=154
-       hi Repeat          ctermfg=197               cterm=bold
-
-       hi Statement       ctermfg=197               cterm=bold
-       hi Tag             ctermfg=197
-       hi Title           ctermfg=203
-       hi Visual                      ctermbg=238
-
-       hi Comment         ctermfg=244
-       hi LineNr          ctermfg=239 ctermbg=235
-       hi NonText         ctermfg=239
-       hi SpecialKey      ctermfg=239
-   endif
-end
-
-&quot; Must be at the end, because of ctermbg=234 bug.
-&quot; https://groups.google.com/forum/#!msg/vim_dev/afPqwAFNdrU/nqh6tOM87QUJ
-set background=dark
-</code></pre>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-vim data-lang=vim><span class=ln>  1</span><span class=c>    
+</span><span class=ln>  2</span><span class=c>    &#34; Vim color file</span><span class=err>
+</span><span class=ln>  3</span><span class=err></span><span class=c>    &#34;</span><span class=err>
+</span><span class=ln>  4</span><span class=err></span><span class=c>    &#34; Author: Tomas Restrepo &lt;tomas@winterdom.com&gt;</span><span class=err>
+</span><span class=ln>  5</span><span class=err></span><span class=c>    &#34; https://github.com/tomasr/molokai</span><span class=err>
+</span><span class=ln>  6</span><span class=err></span><span class=c>    &#34;</span><span class=err>
+</span><span class=ln>  7</span><span class=err></span><span class=c>    &#34; Note: Based on the Monokai theme for TextMate</span><span class=err>
+</span><span class=ln>  8</span><span class=err></span><span class=c>    &#34; by Wimer Hazenberg and its darker variant</span><span class=err>
+</span><span class=ln>  9</span><span class=err></span><span class=c>    &#34; by Hamish Stuart Macpherson</span><span class=err>
+</span><span class=ln> 10</span><span class=err></span><span class=c>    &#34;</span><span class=err>
+</span><span class=ln> 11</span><span class=err></span>    <span class=err>
+</span><span class=ln> 12</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>clear</span><span class=err>
+</span><span class=ln> 13</span><span class=err></span>    <span class=err>
+</span><span class=ln> 14</span><span class=err></span>    <span class=k>if</span> <span class=nx>version</span> <span class=p>&gt;</span> <span class=m>580</span><span class=err>
+</span><span class=ln> 15</span><span class=err></span><span class=c>        &#34; no guarantees for version 5.8 and below, but this makes it stop</span><span class=err>
+</span><span class=ln> 16</span><span class=err></span><span class=c>        &#34; complaining</span><span class=err>
+</span><span class=ln> 17</span><span class=err></span>        <span class=nx>hi</span> <span class=nx>clear</span><span class=err>
+</span><span class=ln> 18</span><span class=err></span>        <span class=k>if</span> <span class=nx>exists</span><span class=p>(</span><span class=s2>&#34;syntax_on&#34;</span><span class=p>)</span><span class=err>
+</span><span class=ln> 19</span><span class=err></span>            <span class=nx>syntax</span> <span class=nx>reset</span><span class=err>
+</span><span class=ln> 20</span><span class=err></span>        <span class=k>endif</span><span class=err>
+</span><span class=ln> 21</span><span class=err></span>    <span class=k>endif</span><span class=err>
+</span><span class=ln> 22</span><span class=err></span>    <span class=k>let</span> <span class=nx>g</span>:<span class=nx>colors_name</span><span class=p>=</span><span class=s2>&#34;molokai&#34;</span><span class=err>
+</span><span class=ln> 23</span><span class=err></span>    <span class=err>
+</span><span class=ln> 24</span><span class=err></span>    <span class=k>if</span> <span class=nx>exists</span><span class=p>(</span><span class=s2>&#34;g:molokai_original&#34;</span><span class=p>)</span><span class=err>
+</span><span class=ln> 25</span><span class=err></span>        <span class=k>let</span> <span class=nx>s</span>:<span class=nx>molokai_original</span> <span class=p>=</span> <span class=nx>g</span>:<span class=nx>molokai_original</span><span class=err>
+</span><span class=ln> 26</span><span class=err></span>    <span class=k>else</span><span class=err>
+</span><span class=ln> 27</span><span class=err></span>        <span class=k>let</span> <span class=nx>s</span>:<span class=nx>molokai_original</span> <span class=p>=</span> <span class=m>0</span><span class=err>
+</span><span class=ln> 28</span><span class=err></span>    <span class=k>endif</span><span class=err>
+</span><span class=ln> 29</span><span class=err></span>    <span class=err>
+</span><span class=ln> 30</span><span class=err></span>    <span class=err>
+</span><span class=ln> 31</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Boolean</span>         <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>AE81FF</span><span class=err>
+</span><span class=ln> 32</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Character</span>       <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>E6DB74</span><span class=err>
+</span><span class=ln> 33</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Number</span>          <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>AE81FF</span><span class=err>
+</span><span class=ln> 34</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>String</span>          <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>E6DB74</span><span class=err>
+</span><span class=ln> 35</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Conditional</span>     <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>F92672</span>               <span class=nx>gui</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln> 36</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Constant</span>        <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>AE81FF</span>               <span class=nx>gui</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln> 37</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Cursor</span>          <span class=nx>guifg</span><span class=p>=</span><span class=mh>#000000</span> <span class=nx>guibg</span><span class=p>=</span>#<span class=nx>F8F8F0</span><span class=err>
+</span><span class=ln> 38</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>iCursor</span>         <span class=nx>guifg</span><span class=p>=</span><span class=mh>#000000</span> <span class=nx>guibg</span><span class=p>=</span>#<span class=nx>F8F8F0</span><span class=err>
+</span><span class=ln> 39</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Debug</span>           <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>BCA3A3</span>               <span class=nx>gui</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln> 40</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Define</span>          <span class=nx>guifg</span><span class=p>=</span>#<span class=m>66</span>D<span class=m>9</span>EF<span class=err>
+</span><span class=ln> 41</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Delimiter</span>       <span class=nx>guifg</span><span class=p>=</span>#<span class=m>8</span>F<span class=m>8</span>F<span class=m>8</span>F<span class=err>
+</span><span class=ln> 42</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>DiffAdd</span>                       <span class=nx>guibg</span><span class=p>=</span>#<span class=m>13354</span>A<span class=err>
+</span><span class=ln> 43</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>DiffChange</span>      <span class=nx>guifg</span><span class=p>=</span>#<span class=m>89807</span>D <span class=nx>guibg</span><span class=p>=</span>#<span class=m>4</span>C<span class=m>4745</span><span class=err>
+</span><span class=ln> 44</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>DiffDelete</span>      <span class=nx>guifg</span><span class=p>=</span><span class=mh>#960050</span> <span class=nx>guibg</span><span class=p>=</span>#<span class=m>1</span>E<span class=m>0010</span><span class=err>
+</span><span class=ln> 45</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>DiffText</span>                      <span class=nx>guibg</span><span class=p>=</span>#<span class=m>4</span>C<span class=m>4745</span> <span class=nx>gui</span><span class=p>=</span><span class=nb>italic</span><span class=p>,</span><span class=nb>bold</span><span class=err>
+</span><span class=ln> 46</span><span class=err></span>    <span class=err>
+</span><span class=ln> 47</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Directory</span>       <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>A6E22E</span>               <span class=nx>gui</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln> 48</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Error</span>           <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>E6DB74</span> <span class=nx>guibg</span><span class=p>=</span>#<span class=m>1</span>E<span class=m>0010</span><span class=err>
+</span><span class=ln> 49</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>ErrorMsg</span>        <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>F92672</span> <span class=nx>guibg</span><span class=p>=</span><span class=mh>#232526</span> <span class=nx>gui</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln> 50</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Exception</span>       <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>A6E22E</span>               <span class=nx>gui</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln> 51</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Float</span>           <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>AE81FF</span><span class=err>
+</span><span class=ln> 52</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>FoldColumn</span>      <span class=nx>guifg</span><span class=p>=</span><span class=mh>#465457</span> <span class=nx>guibg</span><span class=p>=</span><span class=mh>#000000</span><span class=err>
+</span><span class=ln> 53</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Folded</span>          <span class=nx>guifg</span><span class=p>=</span><span class=mh>#465457</span> <span class=nx>guibg</span><span class=p>=</span><span class=mh>#000000</span><span class=err>
+</span><span class=ln> 54</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Function</span>        <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>A6E22E</span><span class=err>
+</span><span class=ln> 55</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Identifier</span>      <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>FD971F</span><span class=err>
+</span><span class=ln> 56</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Ignore</span>          <span class=nx>guifg</span><span class=p>=</span><span class=mh>#808080</span> <span class=nx>guibg</span><span class=p>=</span><span class=nx>bg</span><span class=err>
+</span><span class=ln> 57</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>IncSearch</span>       <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>C4BE89</span> <span class=nx>guibg</span><span class=p>=</span><span class=mh>#000000</span><span class=err>
+</span><span class=ln> 58</span><span class=err></span>    <span class=err>
+</span><span class=ln> 59</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Keyword</span>         <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>F92672</span>               <span class=nx>gui</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln> 60</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Label</span>           <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>E6DB74</span>               <span class=nx>gui</span><span class=p>=</span><span class=nx>none</span><span class=err>
+</span><span class=ln> 61</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Macro</span>           <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>C4BE89</span>               <span class=nx>gui</span><span class=p>=</span><span class=nb>italic</span><span class=err>
+</span><span class=ln> 62</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>SpecialKey</span>      <span class=nx>guifg</span><span class=p>=</span>#<span class=m>66</span>D<span class=m>9</span>EF               <span class=nx>gui</span><span class=p>=</span><span class=nb>italic</span><span class=err>
+</span><span class=ln> 63</span><span class=err></span>    <span class=err>
+</span><span class=ln> 64</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>MatchParen</span>      <span class=nx>guifg</span><span class=p>=</span><span class=mh>#000000</span> <span class=nx>guibg</span><span class=p>=</span>#<span class=nx>FD971F</span> <span class=nx>gui</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln> 65</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>ModeMsg</span>         <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>E6DB74</span><span class=err>
+</span><span class=ln> 66</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>MoreMsg</span>         <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>E6DB74</span><span class=err>
+</span><span class=ln> 67</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Operator</span>        <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>F92672</span><span class=err>
+</span><span class=ln> 68</span><span class=err></span><span class=c>    
+</span><span class=ln> 69</span><span class=c>    &#34; complete menu</span><span class=err>
+</span><span class=ln> 70</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Pmenu</span>           <span class=nx>guifg</span><span class=p>=</span>#<span class=m>66</span>D<span class=m>9</span>EF <span class=nx>guibg</span><span class=p>=</span><span class=mh>#000000</span><span class=err>
+</span><span class=ln> 71</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>PmenuSel</span>                      <span class=nx>guibg</span><span class=p>=</span><span class=mh>#808080</span><span class=err>
+</span><span class=ln> 72</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>PmenuSbar</span>                     <span class=nx>guibg</span><span class=p>=</span><span class=mh>#080808</span><span class=err>
+</span><span class=ln> 73</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>PmenuThumb</span>      <span class=nx>guifg</span><span class=p>=</span>#<span class=m>66</span>D<span class=m>9</span>EF<span class=err>
+</span><span class=ln> 74</span><span class=err></span>    <span class=err>
+</span><span class=ln> 75</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>PreCondit</span>       <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>A6E22E</span>               <span class=nx>gui</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln> 76</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>PreProc</span>         <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>A6E22E</span><span class=err>
+</span><span class=ln> 77</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Question</span>        <span class=nx>guifg</span><span class=p>=</span>#<span class=m>66</span>D<span class=m>9</span>EF<span class=err>
+</span><span class=ln> 78</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Repeat</span>          <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>F92672</span>               <span class=nx>gui</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln> 79</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Search</span>          <span class=nx>guifg</span><span class=p>=</span><span class=mh>#000000</span> <span class=nx>guibg</span><span class=p>=</span>#<span class=nx>FFE792</span><span class=err>
+</span><span class=ln> 80</span><span class=err></span><span class=c>    &#34; marks</span><span class=err>
+</span><span class=ln> 81</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>SignColumn</span>      <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>A6E22E</span> <span class=nx>guibg</span><span class=p>=</span><span class=mh>#232526</span><span class=err>
+</span><span class=ln> 82</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>SpecialChar</span>     <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>F92672</span>               <span class=nx>gui</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln> 83</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>SpecialComment</span>  <span class=nx>guifg</span><span class=p>=</span>#<span class=m>7</span>E<span class=m>8</span>E<span class=m>91</span>               <span class=nx>gui</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln> 84</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Special</span>         <span class=nx>guifg</span><span class=p>=</span>#<span class=m>66</span>D<span class=m>9</span>EF <span class=nx>guibg</span><span class=p>=</span><span class=nx>bg</span>      <span class=nx>gui</span><span class=p>=</span><span class=nb>italic</span><span class=err>
+</span><span class=ln> 85</span><span class=err></span>    <span class=k>if</span> <span class=nx>has</span><span class=p>(</span><span class=s2>&#34;spell&#34;</span><span class=p>)</span><span class=err>
+</span><span class=ln> 86</span><span class=err></span>        <span class=nx>hi</span> <span class=nx>SpellBad</span>    <span class=nx>guisp</span><span class=p>=</span>#<span class=nx>FF0000</span> <span class=nx>gui</span><span class=p>=</span><span class=nx>undercurl</span><span class=err>
+</span><span class=ln> 87</span><span class=err></span>        <span class=nx>hi</span> <span class=nx>SpellCap</span>    <span class=nx>guisp</span><span class=p>=</span>#<span class=m>7070</span>F<span class=m>0</span> <span class=nx>gui</span><span class=p>=</span><span class=nx>undercurl</span><span class=err>
+</span><span class=ln> 88</span><span class=err></span>        <span class=nx>hi</span> <span class=nx>SpellLocal</span>  <span class=nx>guisp</span><span class=p>=</span>#<span class=m>70</span>F<span class=m>0</span>F<span class=m>0</span> <span class=nx>gui</span><span class=p>=</span><span class=nx>undercurl</span><span class=err>
+</span><span class=ln> 89</span><span class=err></span>        <span class=nx>hi</span> <span class=nx>SpellRare</span>   <span class=nx>guisp</span><span class=p>=</span>#<span class=nx>FFFFFF</span> <span class=nx>gui</span><span class=p>=</span><span class=nx>undercurl</span><span class=err>
+</span><span class=ln> 90</span><span class=err></span>    <span class=k>endif</span><span class=err>
+</span><span class=ln> 91</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Statement</span>       <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>F92672</span>               <span class=nx>gui</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln> 92</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>StatusLine</span>      <span class=nx>guifg</span><span class=p>=</span><span class=mh>#455354</span> <span class=nx>guibg</span><span class=p>=</span><span class=nx>fg</span><span class=err>
+</span><span class=ln> 93</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>StatusLineNC</span>    <span class=nx>guifg</span><span class=p>=</span><span class=mh>#808080</span> <span class=nx>guibg</span><span class=p>=</span><span class=mh>#080808</span><span class=err>
+</span><span class=ln> 94</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>StorageClass</span>    <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>FD971F</span>               <span class=nx>gui</span><span class=p>=</span><span class=nb>italic</span><span class=err>
+</span><span class=ln> 95</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Structure</span>       <span class=nx>guifg</span><span class=p>=</span>#<span class=m>66</span>D<span class=m>9</span>EF<span class=err>
+</span><span class=ln> 96</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Tag</span>             <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>F92672</span>               <span class=nx>gui</span><span class=p>=</span><span class=nb>italic</span><span class=err>
+</span><span class=ln> 97</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Title</span>           <span class=nx>guifg</span><span class=p>=</span><span class=mh>#ef5939</span><span class=err>
+</span><span class=ln> 98</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Todo</span>            <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>FFFFFF</span> <span class=nx>guibg</span><span class=p>=</span><span class=nx>bg</span>      <span class=nx>gui</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln> 99</span><span class=err></span>    <span class=err>
+</span><span class=ln>100</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Typedef</span>         <span class=nx>guifg</span><span class=p>=</span>#<span class=m>66</span>D<span class=m>9</span>EF<span class=err>
+</span><span class=ln>101</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Type</span>            <span class=nx>guifg</span><span class=p>=</span>#<span class=m>66</span>D<span class=m>9</span>EF               <span class=nx>gui</span><span class=p>=</span><span class=nx>none</span><span class=err>
+</span><span class=ln>102</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Underlined</span>      <span class=nx>guifg</span><span class=p>=</span><span class=mh>#808080</span>               <span class=nx>gui</span><span class=p>=</span><span class=nb>underline</span><span class=err>
+</span><span class=ln>103</span><span class=err></span>    <span class=err>
+</span><span class=ln>104</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>VertSplit</span>       <span class=nx>guifg</span><span class=p>=</span><span class=mh>#808080</span> <span class=nx>guibg</span><span class=p>=</span><span class=mh>#080808</span> <span class=nx>gui</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>105</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>VisualNOS</span>                     <span class=nx>guibg</span><span class=p>=</span>#<span class=m>403</span>D<span class=m>3</span>D<span class=err>
+</span><span class=ln>106</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>Visual</span>                        <span class=nx>guibg</span><span class=p>=</span>#<span class=m>403</span>D<span class=m>3</span>D<span class=err>
+</span><span class=ln>107</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>WarningMsg</span>      <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>FFFFFF</span> <span class=nx>guibg</span><span class=p>=</span><span class=mh>#333333</span> <span class=nx>gui</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>108</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>WildMenu</span>        <span class=nx>guifg</span><span class=p>=</span>#<span class=m>66</span>D<span class=m>9</span>EF <span class=nx>guibg</span><span class=p>=</span><span class=mh>#000000</span><span class=err>
+</span><span class=ln>109</span><span class=err></span>    <span class=err>
+</span><span class=ln>110</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>TabLineFill</span>     <span class=nx>guifg</span><span class=p>=</span>#<span class=m>1</span>B<span class=m>1</span>D<span class=m>1</span>E <span class=nx>guibg</span><span class=p>=</span>#<span class=m>1</span>B<span class=m>1</span>D<span class=m>1</span>E<span class=err>
+</span><span class=ln>111</span><span class=err></span>    <span class=nx>hi</span> <span class=nx>TabLine</span>         <span class=nx>guibg</span><span class=p>=</span>#<span class=m>1</span>B<span class=m>1</span>D<span class=m>1</span>E <span class=nx>guifg</span><span class=p>=</span><span class=mh>#808080</span> <span class=nx>gui</span><span class=p>=</span><span class=nx>none</span><span class=err>
+</span><span class=ln>112</span><span class=err></span>    <span class=err>
+</span><span class=ln>113</span><span class=err></span>    <span class=k>if</span> <span class=nx>s</span>:<span class=nx>molokai_original</span> <span class=p>==</span> <span class=m>1</span><span class=err>
+</span><span class=ln>114</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Normal</span>          <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>F8F8F2</span> <span class=nx>guibg</span><span class=p>=</span><span class=nb>NONE</span><span class=err>
+</span><span class=ln>115</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Comment</span>         <span class=nx>guifg</span><span class=p>=</span>#<span class=m>75715</span>E<span class=err>
+</span><span class=ln>116</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>CursorLine</span>                    <span class=nx>guibg</span><span class=p>=</span>#<span class=m>3</span>E<span class=m>3</span>D<span class=m>32</span><span class=err>
+</span><span class=ln>117</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>CursorLineNr</span>    <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>FD971F</span>               <span class=nx>gui</span><span class=p>=</span><span class=nx>none</span><span class=err>
+</span><span class=ln>118</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>CursorColumn</span>                  <span class=nx>guibg</span><span class=p>=</span>#<span class=m>3</span>E<span class=m>3</span>D<span class=m>32</span><span class=err>
+</span><span class=ln>119</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>ColorColumn</span>                   <span class=nx>guibg</span><span class=p>=</span>#<span class=m>3</span>B<span class=m>3</span>A<span class=m>32</span><span class=err>
+</span><span class=ln>120</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>LineNr</span>          <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>BCBCBC</span> <span class=nx>guibg</span><span class=p>=</span>#<span class=m>3</span>B<span class=m>3</span>A<span class=m>32</span><span class=err>
+</span><span class=ln>121</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>NonText</span>         <span class=nx>guifg</span><span class=p>=</span>#<span class=m>75715</span>E<span class=err>
+</span><span class=ln>122</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>SpecialKey</span>      <span class=nx>guifg</span><span class=p>=</span>#<span class=m>75715</span>E<span class=err>
+</span><span class=ln>123</span><span class=err></span>    <span class=k>else</span><span class=err>
+</span><span class=ln>124</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Normal</span>          <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>F8F8F2</span> <span class=nx>guibg</span><span class=p>=</span><span class=nb>NONE</span> <span class=err>
+</span><span class=ln>125</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Comment</span>         <span class=nx>guifg</span><span class=p>=</span>#<span class=m>7</span>E<span class=m>8</span>E<span class=m>91</span><span class=err>
+</span><span class=ln>126</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>CursorLine</span>                    <span class=nx>guibg</span><span class=p>=</span><span class=mh>#293739</span><span class=err>
+</span><span class=ln>127</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>CursorLineNr</span>    <span class=nx>guifg</span><span class=p>=</span>#<span class=nx>FD971F</span>               <span class=nx>gui</span><span class=p>=</span><span class=nx>none</span><span class=err>
+</span><span class=ln>128</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>CursorColumn</span>                  <span class=nx>guibg</span><span class=p>=</span><span class=mh>#293739</span><span class=err>
+</span><span class=ln>129</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>ColorColumn</span>                   <span class=nx>guibg</span><span class=p>=</span><span class=mh>#232526</span><span class=err>
+</span><span class=ln>130</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>LineNr</span>          <span class=nx>guifg</span><span class=p>=</span><span class=mh>#465457</span> <span class=nx>guibg</span><span class=p>=</span><span class=mh>#232526</span><span class=err>
+</span><span class=ln>131</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>NonText</span>         <span class=nx>guifg</span><span class=p>=</span><span class=mh>#465457</span><span class=err>
+</span><span class=ln>132</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>SpecialKey</span>      <span class=nx>guifg</span><span class=p>=</span><span class=mh>#465457</span><span class=err>
+</span><span class=ln>133</span><span class=err></span>    <span class=nx>end</span><span class=err>
+</span><span class=ln>134</span><span class=err></span><span class=c>    
+</span><span class=ln>135</span><span class=c>    &#34;</span><span class=err>
+</span><span class=ln>136</span><span class=err></span><span class=c>    &#34; Support for 256-color terminal</span><span class=err>
+</span><span class=ln>137</span><span class=err></span><span class=c>    &#34;</span><span class=err>
+</span><span class=ln>138</span><span class=err></span>    <span class=k>if</span> &amp;<span class=nx>t_Co</span> <span class=p>&gt;</span> <span class=m>255</span><span class=err>
+</span><span class=ln>139</span><span class=err></span>       <span class=k>if</span> <span class=nx>s</span>:<span class=nx>molokai_original</span> <span class=p>==</span> <span class=m>1</span><span class=err>
+</span><span class=ln>140</span><span class=err></span>          <span class=nx>hi</span> <span class=nx>Normal</span>                   <span class=nx>ctermbg</span><span class=p>=</span><span class=nb>NONE</span> <span class=err>
+</span><span class=ln>141</span><span class=err></span>          <span class=nx>hi</span> <span class=nx>CursorLine</span>               <span class=nx>ctermbg</span><span class=p>=</span><span class=m>235</span>   <span class=nx>cterm</span><span class=p>=</span><span class=nx>none</span><span class=err>
+</span><span class=ln>142</span><span class=err></span>          <span class=nx>hi</span> <span class=nx>CursorLineNr</span> <span class=nx>ctermfg</span><span class=p>=</span><span class=m>208</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nx>none</span><span class=err>
+</span><span class=ln>143</span><span class=err></span>       <span class=k>else</span><span class=err>
+</span><span class=ln>144</span><span class=err></span>          <span class=nx>hi</span> <span class=nx>Normal</span>       <span class=nx>ctermfg</span><span class=p>=</span><span class=m>252</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=nb>NONE</span><span class=err>
+</span><span class=ln>145</span><span class=err></span>          <span class=nx>hi</span> <span class=nx>CursorLine</span>               <span class=nx>ctermbg</span><span class=p>=</span><span class=m>234</span>   <span class=nx>cterm</span><span class=p>=</span><span class=nx>none</span><span class=err>
+</span><span class=ln>146</span><span class=err></span>          <span class=nx>hi</span> <span class=nx>CursorLineNr</span> <span class=nx>ctermfg</span><span class=p>=</span><span class=m>208</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nx>none</span><span class=err>
+</span><span class=ln>147</span><span class=err></span>       <span class=k>endif</span><span class=err>
+</span><span class=ln>148</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Boolean</span>         <span class=nx>ctermfg</span><span class=p>=</span><span class=m>135</span><span class=err>
+</span><span class=ln>149</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Character</span>       <span class=nx>ctermfg</span><span class=p>=</span><span class=m>144</span><span class=err>
+</span><span class=ln>150</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Number</span>          <span class=nx>ctermfg</span><span class=p>=</span><span class=m>135</span><span class=err>
+</span><span class=ln>151</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>String</span>          <span class=nx>ctermfg</span><span class=p>=</span><span class=m>144</span><span class=err>
+</span><span class=ln>152</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Conditional</span>     <span class=nx>ctermfg</span><span class=p>=</span><span class=m>161</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>153</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Constant</span>        <span class=nx>ctermfg</span><span class=p>=</span><span class=m>135</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>154</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Cursor</span>          <span class=nx>ctermfg</span><span class=p>=</span><span class=m>16</span>  <span class=nx>ctermbg</span><span class=p>=</span><span class=m>253</span><span class=err>
+</span><span class=ln>155</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Debug</span>           <span class=nx>ctermfg</span><span class=p>=</span><span class=m>225</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>156</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Define</span>          <span class=nx>ctermfg</span><span class=p>=</span><span class=m>81</span><span class=err>
+</span><span class=ln>157</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Delimiter</span>       <span class=nx>ctermfg</span><span class=p>=</span><span class=m>241</span><span class=err>
+</span><span class=ln>158</span><span class=err></span>    <span class=err>
+</span><span class=ln>159</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>DiffAdd</span>                     <span class=nx>ctermbg</span><span class=p>=</span><span class=m>24</span><span class=err>
+</span><span class=ln>160</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>DiffChange</span>      <span class=nx>ctermfg</span><span class=p>=</span><span class=m>181</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=m>239</span><span class=err>
+</span><span class=ln>161</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>DiffDelete</span>      <span class=nx>ctermfg</span><span class=p>=</span><span class=m>162</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=m>53</span><span class=err>
+</span><span class=ln>162</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>DiffText</span>                    <span class=nx>ctermbg</span><span class=p>=</span><span class=m>102</span> <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>163</span><span class=err></span>    <span class=err>
+</span><span class=ln>164</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Directory</span>       <span class=nx>ctermfg</span><span class=p>=</span><span class=m>118</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>165</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Error</span>           <span class=nx>ctermfg</span><span class=p>=</span><span class=m>219</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=m>89</span><span class=err>
+</span><span class=ln>166</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>ErrorMsg</span>        <span class=nx>ctermfg</span><span class=p>=</span><span class=m>199</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=m>16</span>    <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>167</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Exception</span>       <span class=nx>ctermfg</span><span class=p>=</span><span class=m>118</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>168</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Float</span>           <span class=nx>ctermfg</span><span class=p>=</span><span class=m>135</span><span class=err>
+</span><span class=ln>169</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>FoldColumn</span>      <span class=nx>ctermfg</span><span class=p>=</span><span class=m>67</span>  <span class=nx>ctermbg</span><span class=p>=</span><span class=m>16</span><span class=err>
+</span><span class=ln>170</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Folded</span>          <span class=nx>ctermfg</span><span class=p>=</span><span class=m>67</span>  <span class=nx>ctermbg</span><span class=p>=</span><span class=m>16</span><span class=err>
+</span><span class=ln>171</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Function</span>        <span class=nx>ctermfg</span><span class=p>=</span><span class=m>118</span><span class=err>
+</span><span class=ln>172</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Identifier</span>      <span class=nx>ctermfg</span><span class=p>=</span><span class=m>208</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nx>none</span><span class=err>
+</span><span class=ln>173</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Ignore</span>          <span class=nx>ctermfg</span><span class=p>=</span><span class=m>244</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=m>232</span><span class=err>
+</span><span class=ln>174</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>IncSearch</span>       <span class=nx>ctermfg</span><span class=p>=</span><span class=m>193</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=m>16</span><span class=err>
+</span><span class=ln>175</span><span class=err></span>    <span class=err>
+</span><span class=ln>176</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>keyword</span>         <span class=nx>ctermfg</span><span class=p>=</span><span class=m>161</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>177</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Label</span>           <span class=nx>ctermfg</span><span class=p>=</span><span class=m>229</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nx>none</span><span class=err>
+</span><span class=ln>178</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Macro</span>           <span class=nx>ctermfg</span><span class=p>=</span><span class=m>193</span><span class=err>
+</span><span class=ln>179</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>SpecialKey</span>      <span class=nx>ctermfg</span><span class=p>=</span><span class=m>81</span><span class=err>
+</span><span class=ln>180</span><span class=err></span>    <span class=err>
+</span><span class=ln>181</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>MatchParen</span>      <span class=nx>ctermfg</span><span class=p>=</span><span class=m>233</span>  <span class=nx>ctermbg</span><span class=p>=</span><span class=m>208</span> <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>182</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>ModeMsg</span>         <span class=nx>ctermfg</span><span class=p>=</span><span class=m>229</span><span class=err>
+</span><span class=ln>183</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>MoreMsg</span>         <span class=nx>ctermfg</span><span class=p>=</span><span class=m>229</span><span class=err>
+</span><span class=ln>184</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Operator</span>        <span class=nx>ctermfg</span><span class=p>=</span><span class=m>161</span><span class=err>
+</span><span class=ln>185</span><span class=err></span><span class=c>    
+</span><span class=ln>186</span><span class=c>       &#34; complete menu</span><span class=err>
+</span><span class=ln>187</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Pmenu</span>           <span class=nx>ctermfg</span><span class=p>=</span><span class=m>81</span>  <span class=nx>ctermbg</span><span class=p>=</span><span class=m>16</span><span class=err>
+</span><span class=ln>188</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>PmenuSel</span>        <span class=nx>ctermfg</span><span class=p>=</span><span class=m>255</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=m>242</span><span class=err>
+</span><span class=ln>189</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>PmenuSbar</span>                   <span class=nx>ctermbg</span><span class=p>=</span><span class=m>232</span><span class=err>
+</span><span class=ln>190</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>PmenuThumb</span>      <span class=nx>ctermfg</span><span class=p>=</span><span class=m>81</span><span class=err>
+</span><span class=ln>191</span><span class=err></span>    <span class=err>
+</span><span class=ln>192</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>PreCondit</span>       <span class=nx>ctermfg</span><span class=p>=</span><span class=m>118</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>193</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>PreProc</span>         <span class=nx>ctermfg</span><span class=p>=</span><span class=m>118</span><span class=err>
+</span><span class=ln>194</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Question</span>        <span class=nx>ctermfg</span><span class=p>=</span><span class=m>81</span><span class=err>
+</span><span class=ln>195</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Repeat</span>          <span class=nx>ctermfg</span><span class=p>=</span><span class=m>161</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>196</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Search</span>          <span class=nx>ctermfg</span><span class=p>=</span><span class=m>0</span>   <span class=nx>ctermbg</span><span class=p>=</span><span class=m>222</span>   <span class=nx>cterm</span><span class=p>=</span><span class=nb>NONE</span><span class=err>
+</span><span class=ln>197</span><span class=err></span><span class=c>    
+</span><span class=ln>198</span><span class=c>       &#34; marks column</span><span class=err>
+</span><span class=ln>199</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>SignColumn</span>      <span class=nx>ctermfg</span><span class=p>=</span><span class=m>118</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=m>235</span><span class=err>
+</span><span class=ln>200</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>SpecialChar</span>     <span class=nx>ctermfg</span><span class=p>=</span><span class=m>161</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>201</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>SpecialComment</span>  <span class=nx>ctermfg</span><span class=p>=</span><span class=m>245</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>202</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Special</span>         <span class=nx>ctermfg</span><span class=p>=</span><span class=m>81</span><span class=err>
+</span><span class=ln>203</span><span class=err></span>       <span class=k>if</span> <span class=nx>has</span><span class=p>(</span><span class=s2>&#34;spell&#34;</span><span class=p>)</span><span class=err>
+</span><span class=ln>204</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>SpellBad</span>                <span class=nx>ctermbg</span><span class=p>=</span><span class=m>52</span><span class=err>
+</span><span class=ln>205</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>SpellCap</span>                <span class=nx>ctermbg</span><span class=p>=</span><span class=m>17</span><span class=err>
+</span><span class=ln>206</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>SpellLocal</span>              <span class=nx>ctermbg</span><span class=p>=</span><span class=m>17</span><span class=err>
+</span><span class=ln>207</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>SpellRare</span>  <span class=nx>ctermfg</span><span class=p>=</span><span class=nx>none</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=nx>none</span>  <span class=nx>cterm</span><span class=p>=</span><span class=nx>reverse</span><span class=err>
+</span><span class=ln>208</span><span class=err></span>       <span class=k>endif</span><span class=err>
+</span><span class=ln>209</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Statement</span>       <span class=nx>ctermfg</span><span class=p>=</span><span class=m>161</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>210</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>StatusLine</span>      <span class=nx>ctermfg</span><span class=p>=</span><span class=m>238</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=m>253</span><span class=err>
+</span><span class=ln>211</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>StatusLineNC</span>    <span class=nx>ctermfg</span><span class=p>=</span><span class=m>244</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=m>232</span><span class=err>
+</span><span class=ln>212</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>StorageClass</span>    <span class=nx>ctermfg</span><span class=p>=</span><span class=m>208</span><span class=err>
+</span><span class=ln>213</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Structure</span>       <span class=nx>ctermfg</span><span class=p>=</span><span class=m>81</span><span class=err>
+</span><span class=ln>214</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Tag</span>             <span class=nx>ctermfg</span><span class=p>=</span><span class=m>161</span><span class=err>
+</span><span class=ln>215</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Title</span>           <span class=nx>ctermfg</span><span class=p>=</span><span class=m>166</span><span class=err>
+</span><span class=ln>216</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Todo</span>            <span class=nx>ctermfg</span><span class=p>=</span><span class=m>231</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=m>232</span>   <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>217</span><span class=err></span>    <span class=err>
+</span><span class=ln>218</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Typedef</span>         <span class=nx>ctermfg</span><span class=p>=</span><span class=m>81</span><span class=err>
+</span><span class=ln>219</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Type</span>            <span class=nx>ctermfg</span><span class=p>=</span><span class=m>81</span>                <span class=nx>cterm</span><span class=p>=</span><span class=nx>none</span><span class=err>
+</span><span class=ln>220</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Underlined</span>      <span class=nx>ctermfg</span><span class=p>=</span><span class=m>244</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>underline</span><span class=err>
+</span><span class=ln>221</span><span class=err></span>    <span class=err>
+</span><span class=ln>222</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>VertSplit</span>       <span class=nx>ctermfg</span><span class=p>=</span><span class=m>244</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=m>232</span>   <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>223</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>VisualNOS</span>                   <span class=nx>ctermbg</span><span class=p>=</span><span class=m>238</span><span class=err>
+</span><span class=ln>224</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Visual</span>                      <span class=nx>ctermbg</span><span class=p>=</span><span class=m>235</span><span class=err>
+</span><span class=ln>225</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>WarningMsg</span>      <span class=nx>ctermfg</span><span class=p>=</span><span class=m>231</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=m>238</span>   <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>226</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>WildMenu</span>        <span class=nx>ctermfg</span><span class=p>=</span><span class=m>81</span>  <span class=nx>ctermbg</span><span class=p>=</span><span class=m>16</span><span class=err>
+</span><span class=ln>227</span><span class=err></span>    <span class=err>
+</span><span class=ln>228</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>Comment</span>         <span class=nx>ctermfg</span><span class=p>=</span><span class=m>59</span><span class=err>
+</span><span class=ln>229</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>CursorColumn</span>                <span class=nx>ctermbg</span><span class=p>=</span><span class=m>236</span><span class=err>
+</span><span class=ln>230</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>ColorColumn</span>                 <span class=nx>ctermbg</span><span class=p>=</span><span class=m>236</span><span class=err>
+</span><span class=ln>231</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>LineNr</span>          <span class=nx>ctermfg</span><span class=p>=</span><span class=m>250</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=m>236</span><span class=err>
+</span><span class=ln>232</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>NonText</span>         <span class=nx>ctermfg</span><span class=p>=</span><span class=m>59</span><span class=err>
+</span><span class=ln>233</span><span class=err></span>    <span class=err>
+</span><span class=ln>234</span><span class=err></span>       <span class=nx>hi</span> <span class=nx>SpecialKey</span>      <span class=nx>ctermfg</span><span class=p>=</span><span class=m>59</span><span class=err>
+</span><span class=ln>235</span><span class=err></span>    <span class=err>
+</span><span class=ln>236</span><span class=err></span>       <span class=k>if</span> <span class=nx>exists</span><span class=p>(</span><span class=s2>&#34;g:rehash256&#34;</span><span class=p>)</span> &amp;&amp; <span class=nx>g</span>:<span class=nx>rehash256</span> <span class=p>==</span> <span class=m>1</span><span class=err>
+</span><span class=ln>237</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Normal</span>       <span class=nx>ctermfg</span><span class=p>=</span><span class=m>252</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=nb>NONE</span> <span class=err>
+</span><span class=ln>238</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>CursorLine</span>               <span class=nx>ctermbg</span><span class=p>=</span><span class=m>236</span>   <span class=nx>cterm</span><span class=p>=</span><span class=nx>none</span><span class=err>
+</span><span class=ln>239</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>CursorLineNr</span> <span class=nx>ctermfg</span><span class=p>=</span><span class=m>208</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nx>none</span><span class=err>
+</span><span class=ln>240</span><span class=err></span>    <span class=err>
+</span><span class=ln>241</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Boolean</span>         <span class=nx>ctermfg</span><span class=p>=</span><span class=m>141</span><span class=err>
+</span><span class=ln>242</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Character</span>       <span class=nx>ctermfg</span><span class=p>=</span><span class=m>222</span><span class=err>
+</span><span class=ln>243</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Number</span>          <span class=nx>ctermfg</span><span class=p>=</span><span class=m>141</span><span class=err>
+</span><span class=ln>244</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>String</span>          <span class=nx>ctermfg</span><span class=p>=</span><span class=m>222</span><span class=err>
+</span><span class=ln>245</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Conditional</span>     <span class=nx>ctermfg</span><span class=p>=</span><span class=m>197</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>246</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Constant</span>        <span class=nx>ctermfg</span><span class=p>=</span><span class=m>141</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>247</span><span class=err></span>    <span class=err>
+</span><span class=ln>248</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>DiffDelete</span>      <span class=nx>ctermfg</span><span class=p>=</span><span class=m>125</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=m>233</span><span class=err>
+</span><span class=ln>249</span><span class=err></span>    <span class=err>
+</span><span class=ln>250</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Directory</span>       <span class=nx>ctermfg</span><span class=p>=</span><span class=m>154</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>251</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Error</span>           <span class=nx>ctermfg</span><span class=p>=</span><span class=m>222</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=m>233</span><span class=err>
+</span><span class=ln>252</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Exception</span>       <span class=nx>ctermfg</span><span class=p>=</span><span class=m>154</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>253</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Float</span>           <span class=nx>ctermfg</span><span class=p>=</span><span class=m>141</span><span class=err>
+</span><span class=ln>254</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Function</span>        <span class=nx>ctermfg</span><span class=p>=</span><span class=m>154</span><span class=err>
+</span><span class=ln>255</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Identifier</span>      <span class=nx>ctermfg</span><span class=p>=</span><span class=m>208</span><span class=err>
+</span><span class=ln>256</span><span class=err></span>    <span class=err>
+</span><span class=ln>257</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Keyword</span>         <span class=nx>ctermfg</span><span class=p>=</span><span class=m>197</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>258</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Operator</span>        <span class=nx>ctermfg</span><span class=p>=</span><span class=m>197</span><span class=err>
+</span><span class=ln>259</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>PreCondit</span>       <span class=nx>ctermfg</span><span class=p>=</span><span class=m>154</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>260</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>PreProc</span>         <span class=nx>ctermfg</span><span class=p>=</span><span class=m>154</span><span class=err>
+</span><span class=ln>261</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Repeat</span>          <span class=nx>ctermfg</span><span class=p>=</span><span class=m>197</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>262</span><span class=err></span>    <span class=err>
+</span><span class=ln>263</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Statement</span>       <span class=nx>ctermfg</span><span class=p>=</span><span class=m>197</span>               <span class=nx>cterm</span><span class=p>=</span><span class=nb>bold</span><span class=err>
+</span><span class=ln>264</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Tag</span>             <span class=nx>ctermfg</span><span class=p>=</span><span class=m>197</span><span class=err>
+</span><span class=ln>265</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Title</span>           <span class=nx>ctermfg</span><span class=p>=</span><span class=m>203</span><span class=err>
+</span><span class=ln>266</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Visual</span>                      <span class=nx>ctermbg</span><span class=p>=</span><span class=m>238</span><span class=err>
+</span><span class=ln>267</span><span class=err></span>    <span class=err>
+</span><span class=ln>268</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>Comment</span>         <span class=nx>ctermfg</span><span class=p>=</span><span class=m>244</span><span class=err>
+</span><span class=ln>269</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>LineNr</span>          <span class=nx>ctermfg</span><span class=p>=</span><span class=m>239</span> <span class=nx>ctermbg</span><span class=p>=</span><span class=m>235</span><span class=err>
+</span><span class=ln>270</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>NonText</span>         <span class=nx>ctermfg</span><span class=p>=</span><span class=m>239</span><span class=err>
+</span><span class=ln>271</span><span class=err></span>           <span class=nx>hi</span> <span class=nx>SpecialKey</span>      <span class=nx>ctermfg</span><span class=p>=</span><span class=m>239</span><span class=err>
+</span><span class=ln>272</span><span class=err></span>       <span class=k>endif</span><span class=err>
+</span><span class=ln>273</span><span class=err></span>    <span class=nx>end</span><span class=err>
+</span><span class=ln>274</span><span class=err></span><span class=c>    
+</span><span class=ln>275</span><span class=c>    &#34; Must be at the end, because of ctermbg=234 bug.</span><span class=err>
+</span><span class=ln>276</span><span class=err></span><span class=c>    &#34; https://groups.google.com/forum/#!msg/vim_dev/afPqwAFNdrU/nqh6tOM87QUJ</span><span class=err>
+</span><span class=ln>277</span><span class=err></span>    <span class=nx>set</span> <span class=nx>background</span><span class=p>=</span><span class=nb>dark</span><span class=err>
+</span><span class=ln>278</span><span class=err></span>    <span class=err>
+</span><span class=ln>279</span><span class=err>
+</span><span class=ln>280</span><span class=err>
+</span></code></pre></div>
 </div>
 <div class=post_comments>
 </div>
@@ -1806,7 +892,7 @@ BINARY-SEARCH
 </a>
 <a href=https://111qqz.com/tags/anti-sg/ class="post_tag button button_translucent" data-position=2 title=anti-sg>ANTI-SG<span class=button_tally>2</span>
 </a>
-<a href=https://111qqz.com/tags/archlinux/ class="post_tag button button_translucent" data-position=3 title=archlinux>ARCHLINUX<span class=button_tally>3</span>
+<a href=https://111qqz.com/tags/archlinux/ class="post_tag button button_translucent" data-position=2 title=archlinux>ARCHLINUX<span class=button_tally>2</span>
 </a>
 <a href=https://111qqz.com/tags/async/ class="post_tag button button_translucent" data-position=1 title=async>ASYNC<span class=button_tally>1</span>
 </a>
@@ -2016,7 +1102,7 @@ BINARY-SEARCH
 </a>
 <a href=https://111qqz.com/tags/manacher/ class="post_tag button button_translucent" data-position=4 title=manacher>MANACHER<span class=button_tally>4</span>
 </a>
-<a href=https://111qqz.com/tags/manjaro/ class="post_tag button button_translucent" data-position=1 title=manjaro>MANJARO<span class=button_tally>1</span>
+<a href=https://111qqz.com/tags/manjaro/ class="post_tag button button_translucent" data-position=3 title=manjaro>MANJARO<span class=button_tally>3</span>
 </a>
 <a href=https://111qqz.com/tags/map/ class="post_tag button button_translucent" data-position=6 title=map>MAP<span class=button_tally>6</span>
 </a>
