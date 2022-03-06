@@ -106,7 +106,7 @@
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Mar 6, 2022</span>
-<span class=post_time> · 7 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
+<span class=post_time> · 8 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
 </a>
 </span>
 <span class=page_only>&nbsp;·
@@ -369,24 +369,60 @@ Share on:
 <span class=ln>23</span>        <span class=kt>uint32_t</span> <span class=n>hash</span> <span class=o>=</span> <span class=n>h</span><span class=o>-&gt;</span><span class=n>hash</span><span class=p>;</span>
 <span class=ln>24</span>	<span class=c1>// ptr is fixed value for same hash &amp; new_length
 </span><span class=ln>25</span><span class=c1></span>        <span class=n>LRUHandle</span><span class=o>**</span> <span class=n>ptr</span> <span class=o>=</span> <span class=o>&amp;</span><span class=n>new_list</span><span class=p>[</span><span class=n>hash</span> <span class=o>&amp;</span> <span class=p>(</span><span class=n>new_length</span> <span class=o>-</span> <span class=mi>1</span><span class=p>)];</span>
-<span class=ln>26</span>	<span class=c1>//TODO(???): what happen here?
-</span><span class=ln>27</span><span class=c1></span>        <span class=n>h</span><span class=o>-&gt;</span><span class=n>next_hash</span> <span class=o>=</span> <span class=o>*</span><span class=n>ptr</span><span class=p>;</span>
-<span class=ln>28</span>	<span class=c1>// kk: assigment element h to slot pointed by ptr.
-</span><span class=ln>29</span><span class=c1></span>        <span class=o>*</span><span class=n>ptr</span> <span class=o>=</span> <span class=n>h</span><span class=p>;</span>
-<span class=ln>30</span>	<span class=c1>// kk : continue processing next node
-</span><span class=ln>31</span><span class=c1></span>        <span class=n>h</span> <span class=o>=</span> <span class=n>next</span><span class=p>;</span>
-<span class=ln>32</span>        <span class=n>count</span><span class=o>++</span><span class=p>;</span>
-<span class=ln>33</span>      <span class=p>}</span>
-<span class=ln>34</span>    <span class=p>}</span>
-<span class=ln>35</span>    <span class=n>assert</span><span class=p>(</span><span class=n>elems_</span> <span class=o>==</span> <span class=n>count</span><span class=p>);</span>
-<span class=ln>36</span>    <span class=k>delete</span><span class=p>[]</span> <span class=n>list_</span><span class=p>;</span>
-<span class=ln>37</span>    <span class=n>list_</span> <span class=o>=</span> <span class=n>new_list</span><span class=p>;</span>
-<span class=ln>38</span>    <span class=n>length_</span> <span class=o>=</span> <span class=n>new_length</span><span class=p>;</span>
-<span class=ln>39</span>  <span class=p>}</span>
-<span class=ln>40</span><span class=p>};</span>
-<span class=ln>41</span>
+<span class=ln>26</span>	<span class=c1>//TODO(???): 一个头插法实现，每次新节点插入在头部
+</span><span class=ln>27</span><span class=c1></span>  <span class=c1>// 每次把新节点h插入到ptr前面，再把ptr指向h
+</span><span class=ln>28</span><span class=c1></span>        <span class=n>h</span><span class=o>-&gt;</span><span class=n>next_hash</span> <span class=o>=</span> <span class=o>*</span><span class=n>ptr</span><span class=p>;</span>
+<span class=ln>29</span>	<span class=c1>// kk: assigment element h to slot pointed by ptr.
+</span><span class=ln>30</span><span class=c1></span>        <span class=o>*</span><span class=n>ptr</span> <span class=o>=</span> <span class=n>h</span><span class=p>;</span>
+<span class=ln>31</span>	<span class=c1>// kk : continue processing next node
+</span><span class=ln>32</span><span class=c1></span>        <span class=n>h</span> <span class=o>=</span> <span class=n>next</span><span class=p>;</span>
+<span class=ln>33</span>        <span class=n>count</span><span class=o>++</span><span class=p>;</span>
+<span class=ln>34</span>      <span class=p>}</span>
+<span class=ln>35</span>    <span class=p>}</span>
+<span class=ln>36</span>    <span class=n>assert</span><span class=p>(</span><span class=n>elems_</span> <span class=o>==</span> <span class=n>count</span><span class=p>);</span>
+<span class=ln>37</span>    <span class=k>delete</span><span class=p>[]</span> <span class=n>list_</span><span class=p>;</span>
+<span class=ln>38</span>    <span class=n>list_</span> <span class=o>=</span> <span class=n>new_list</span><span class=p>;</span>
+<span class=ln>39</span>    <span class=n>length_</span> <span class=o>=</span> <span class=n>new_length</span><span class=p>;</span>
+<span class=ln>40</span>  <span class=p>}</span>
+<span class=ln>41</span><span class=p>};</span>
 <span class=ln>42</span>
-</code></pre></div>
+<span class=ln>43</span>
+</code></pre></div><p>这里有两部分需要注意.</p>
+<ol>
+<li>链表复制的部分看了半天竟然没看懂... 最后发现其实是个经典的<strong>头插法</strong>实现
+参考 <a href=https://segmentfault.com/a/1190000021501440>单链表的头插法和尾插法</a> 和 <a href=https://www.geeksforgeeks.org/linked-list-set-2-inserting-a-node/>Linked List | Set 2 (Inserting a node)</a></li>
+</ol>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span>
+<span class=ln> 3</span><span class=cm>/* Given a reference (pointer to pointer)
+</span><span class=ln> 4</span><span class=cm>to the head of a list and an int,
+</span><span class=ln> 5</span><span class=cm>inserts a new node on the front of the list. */</span>
+<span class=ln> 6</span><span class=kt>void</span> <span class=nf>push</span><span class=p>(</span><span class=n>Node</span><span class=o>**</span> <span class=n>head_ref</span><span class=p>,</span> <span class=kt>int</span> <span class=n>new_data</span><span class=p>)</span>
+<span class=ln> 7</span><span class=p>{</span>
+<span class=ln> 8</span>    <span class=cm>/* 1. allocate node */</span>
+<span class=ln> 9</span>    <span class=n>Node</span><span class=o>*</span> <span class=n>new_node</span> <span class=o>=</span> <span class=k>new</span> <span class=n>Node</span><span class=p>();</span>
+<span class=ln>10</span> 
+<span class=ln>11</span>    <span class=cm>/* 2. put in the data */</span>
+<span class=ln>12</span>    <span class=n>new_node</span><span class=o>-&gt;</span><span class=n>data</span> <span class=o>=</span> <span class=n>new_data</span><span class=p>;</span>
+<span class=ln>13</span> 
+<span class=ln>14</span>    <span class=cm>/* 3. Make next of new node as head */</span>
+<span class=ln>15</span>    <span class=n>new_node</span><span class=o>-&gt;</span><span class=n>next</span> <span class=o>=</span> <span class=p>(</span><span class=o>*</span><span class=n>head_ref</span><span class=p>);</span>
+<span class=ln>16</span> 
+<span class=ln>17</span>    <span class=cm>/* 4. move the head to point to the new node */</span>
+<span class=ln>18</span>    <span class=p>(</span><span class=o>*</span><span class=n>head_ref</span><span class=p>)</span> <span class=o>=</span> <span class=n>new_node</span><span class=p>;</span>
+<span class=ln>19</span><span class=p>}</span>
+<span class=ln>20</span>
+</code></pre></div><p>就很震惊我为什么会看不懂。。想了一下，是因为我一直以为h是旧的节点，分配出的new_list才是新节点(毕竟名字中都带了一个new字)</p>
+<p>但是实际上，<strong>new_list是本身就存在的链表，h才是要新加入的节点</strong></p>
+<p>每次将h插入到ptr的前面，并且将ptr更新为链表新的头部. 这样一想就变得好懂多了。。</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>
+<span class=ln>2</span>        <span class=n>h</span><span class=o>-&gt;</span><span class=n>next_hash</span> <span class=o>=</span> <span class=o>*</span><span class=n>ptr</span><span class=p>;</span>
+<span class=ln>3</span>	<span class=c1>// kk: assigment element h to slot pointed by ptr.
+</span><span class=ln>4</span><span class=c1></span>        <span class=o>*</span><span class=n>ptr</span> <span class=o>=</span> <span class=n>h</span><span class=p>;</span>
+<span class=ln>5</span>
+</code></pre></div><ol start=2>
+<li>由于bucket num改变，原本在同一个bucket中的两个元素现在可能被分配到不同的bucket中</li>
+</ol>
 </div>
 <h2 class=post_related>Posts in this Series</h2>
 <ul>
