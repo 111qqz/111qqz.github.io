@@ -106,7 +106,7 @@
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Mar 6, 2022</span>
-<span class=post_time> · 8 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
+<span class=post_time> · 12 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
 </a>
 </span>
 <span class=page_only>&nbsp;·
@@ -135,6 +135,15 @@ Share on:
 <li><a href=#insert>Insert</a></li>
 <li><a href=#remove>Remove</a></li>
 <li><a href=#resize>Resize</a></li>
+</ul>
+</li>
+<li><a href=#lrucache>LRUCache</a>
+<ul>
+<li><a href=#低配版的lrucache>低配版的LRUCache</a></li>
+<li><a href=#声明>声明</a></li>
+<li><a href=#链表结构>链表结构</a></li>
+<li><a href=#entry-引用计数>entry 引用计数</a></li>
+<li><a href=#insert-1>Insert</a></li>
 </ul>
 </li>
 </ul>
@@ -224,16 +233,15 @@ Share on:
 <span class=ln>80</span><span class=cp>#endif  </span><span class=c1>// STORAGE_LEVELDB_INCLUDE_CACHE_H_
 </span><span class=ln>81</span><span class=c1></span>
 </code></pre></div><h2 id=lruhandle>LRUHandle</h2>
-<p>这部分虽然在前面，但是具体的含义其实要看完完整的实现才清楚。
-后面补充</p>
+<p>这部分虽然在前面，但是具体的含义其实要看完完整的实现才清楚。</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
 <span class=ln> 2</span><span class=k>struct</span> <span class=nc>LRUHandle</span> <span class=p>{</span>
-<span class=ln> 3</span>  <span class=kt>void</span><span class=o>*</span> <span class=n>value</span><span class=p>;</span>
-<span class=ln> 4</span>  <span class=kt>void</span> <span class=p>(</span><span class=o>*</span><span class=n>deleter</span><span class=p>)(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span><span class=p>,</span> <span class=kt>void</span><span class=o>*</span> <span class=n>value</span><span class=p>);</span>
-<span class=ln> 5</span>  <span class=n>LRUHandle</span><span class=o>*</span> <span class=n>next_hash</span><span class=p>;</span>  <span class=c1>// 指向链表中的下一个位置
-</span><span class=ln> 6</span><span class=c1></span>  <span class=n>LRUHandle</span><span class=o>*</span> <span class=n>next</span><span class=p>;</span>
-<span class=ln> 7</span>  <span class=n>LRUHandle</span><span class=o>*</span> <span class=n>prev</span><span class=p>;</span>
-<span class=ln> 8</span>  <span class=n>size_t</span> <span class=n>charge</span><span class=p>;</span>  <span class=c1>// TODO(opt): Only allow uint32_t?
+<span class=ln> 3</span>  <span class=kt>void</span><span class=o>*</span> <span class=n>value</span><span class=p>;</span>  <span class=c1>// 缓存的value
+</span><span class=ln> 4</span><span class=c1></span>  <span class=kt>void</span> <span class=p>(</span><span class=o>*</span><span class=n>deleter</span><span class=p>)(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span><span class=p>,</span> <span class=kt>void</span><span class=o>*</span> <span class=n>value</span><span class=p>);</span>
+<span class=ln> 5</span>  <span class=n>LRUHandle</span><span class=o>*</span> <span class=n>next_hash</span><span class=p>;</span>  <span class=c1>// 用于HashTable中，指向这个bucket的下一个slot
+</span><span class=ln> 6</span><span class=c1></span>  <span class=n>LRUHandle</span><span class=o>*</span> <span class=n>next</span><span class=p>;</span>   <span class=c1>// 双向链表的实现
+</span><span class=ln> 7</span><span class=c1></span>  <span class=n>LRUHandle</span><span class=o>*</span> <span class=n>prev</span><span class=p>;</span>   <span class=c1>// 双向链表的实现
+</span><span class=ln> 8</span><span class=c1></span>  <span class=n>size_t</span> <span class=n>charge</span><span class=p>;</span>  <span class=c1>// TODO(opt): Only allow uint32_t?
 </span><span class=ln> 9</span><span class=c1></span>  <span class=n>size_t</span> <span class=n>key_length</span><span class=p>;</span>
 <span class=ln>10</span>  <span class=kt>bool</span> <span class=n>in_cache</span><span class=p>;</span>     <span class=c1>// Whether entry is in the cache.
 </span><span class=ln>11</span><span class=c1></span>  <span class=kt>uint32_t</span> <span class=n>refs</span><span class=p>;</span>     <span class=c1>// References, including cache reference, if present.
@@ -304,43 +312,53 @@ Share on:
 <span class=ln>27</span>
 </code></pre></div><h3 id=insert>Insert</h3>
 <p>插入一个元素
-需要注意的是当元素存在时，old返回非nullptr，此时会将本身存在的元素替换掉，并且更新新插入元素的next_hash</p>
+需要注意的是当元素存在时，old返回非nullptr，此时会将本身存在的元素替换掉，并且更新新插入元素的next_hash
+如果插入的元素之前不存在，就返回nullptr
+否则返回存在的元素的位置</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
-<span class=ln> 2</span>  <span class=n>LRUHandle</span><span class=o>*</span> <span class=nf>Insert</span><span class=p>(</span><span class=n>LRUHandle</span><span class=o>*</span> <span class=n>h</span><span class=p>)</span> <span class=p>{</span>
-<span class=ln> 3</span>    <span class=n>LRUHandle</span><span class=o>**</span> <span class=n>ptr</span> <span class=o>=</span> <span class=n>FindPointer</span><span class=p>(</span><span class=n>h</span><span class=o>-&gt;</span><span class=n>key</span><span class=p>(),</span> <span class=n>h</span><span class=o>-&gt;</span><span class=n>hash</span><span class=p>);</span>
-<span class=ln> 4</span>    <span class=n>LRUHandle</span><span class=o>*</span> <span class=n>old</span> <span class=o>=</span> <span class=o>*</span><span class=n>ptr</span><span class=p>;</span>
-<span class=ln> 5</span>    <span class=c1>// kk: two case here:
-</span><span class=ln> 6</span><span class=c1></span>    <span class=c1>// 1. old is nullptr. we not find the exact element. 
-</span><span class=ln> 7</span><span class=c1></span>    <span class=c1>// 2. old is not nullptr, we find the exact key. just update next_hash value of h.
-</span><span class=ln> 8</span><span class=c1></span>    <span class=n>h</span><span class=o>-&gt;</span><span class=n>next_hash</span> <span class=o>=</span> <span class=p>(</span><span class=n>old</span> <span class=o>==</span> <span class=k>nullptr</span> <span class=o>?</span> <span class=k>nullptr</span> <span class=o>:</span> <span class=n>old</span><span class=o>-&gt;</span><span class=n>next_hash</span><span class=p>);</span>
-<span class=ln> 9</span>    <span class=c1>// kk: assiment new elemnt h to the slot. might override old value
-</span><span class=ln>10</span><span class=c1></span>    <span class=o>*</span><span class=n>ptr</span> <span class=o>=</span> <span class=n>h</span><span class=p>;</span>
-<span class=ln>11</span>    <span class=k>if</span> <span class=p>(</span><span class=n>old</span> <span class=o>==</span> <span class=k>nullptr</span><span class=p>)</span> <span class=p>{</span>
-<span class=ln>12</span>      <span class=o>++</span><span class=n>elems_</span><span class=p>;</span>
-<span class=ln>13</span>      <span class=k>if</span> <span class=p>(</span><span class=n>elems_</span> <span class=o>&gt;</span> <span class=n>length_</span><span class=p>)</span> <span class=p>{</span>
-<span class=ln>14</span>        <span class=c1>// Since each cache entry is fairly large, we aim for a small
-</span><span class=ln>15</span><span class=c1></span>        <span class=c1>// average linked list length (&lt;= 1).
-</span><span class=ln>16</span><span class=c1></span>        <span class=n>Resize</span><span class=p>();</span>
-<span class=ln>17</span>      <span class=p>}</span>
-<span class=ln>18</span>    <span class=p>}</span>
-<span class=ln>19</span>    <span class=k>return</span> <span class=n>old</span><span class=p>;</span>
-<span class=ln>20</span>  <span class=p>}</span>
-<span class=ln>21</span>
+<span class=ln> 2</span>
+<span class=ln> 3</span>  <span class=c1>// return nullptr if h is not found in table
+</span><span class=ln> 4</span><span class=c1></span>  <span class=c1>// return non-nullptr if h is already in table
+</span><span class=ln> 5</span><span class=c1></span>
+<span class=ln> 6</span>  <span class=n>LRUHandle</span><span class=o>*</span> <span class=nf>Insert</span><span class=p>(</span><span class=n>LRUHandle</span><span class=o>*</span> <span class=n>h</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln> 7</span>    <span class=n>LRUHandle</span><span class=o>**</span> <span class=n>ptr</span> <span class=o>=</span> <span class=n>FindPointer</span><span class=p>(</span><span class=n>h</span><span class=o>-&gt;</span><span class=n>key</span><span class=p>(),</span> <span class=n>h</span><span class=o>-&gt;</span><span class=n>hash</span><span class=p>);</span>
+<span class=ln> 8</span>    <span class=n>LRUHandle</span><span class=o>*</span> <span class=n>old</span> <span class=o>=</span> <span class=o>*</span><span class=n>ptr</span><span class=p>;</span>
+<span class=ln> 9</span>    <span class=c1>// kk: two case here:
+</span><span class=ln>10</span><span class=c1></span>    <span class=c1>// 1. old is nullptr. we not find the exact element. 
+</span><span class=ln>11</span><span class=c1></span>    <span class=c1>// 2. old is not nullptr, we find the exact key. just update next_hash value of h.
+</span><span class=ln>12</span><span class=c1></span>    <span class=n>h</span><span class=o>-&gt;</span><span class=n>next_hash</span> <span class=o>=</span> <span class=p>(</span><span class=n>old</span> <span class=o>==</span> <span class=k>nullptr</span> <span class=o>?</span> <span class=k>nullptr</span> <span class=o>:</span> <span class=n>old</span><span class=o>-&gt;</span><span class=n>next_hash</span><span class=p>);</span>
+<span class=ln>13</span>    <span class=c1>// kk: assiment new elemnt h to the slot. might override old value
+</span><span class=ln>14</span><span class=c1></span>    <span class=o>*</span><span class=n>ptr</span> <span class=o>=</span> <span class=n>h</span><span class=p>;</span>
+<span class=ln>15</span>    <span class=k>if</span> <span class=p>(</span><span class=n>old</span> <span class=o>==</span> <span class=k>nullptr</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>16</span>      <span class=o>++</span><span class=n>elems_</span><span class=p>;</span>
+<span class=ln>17</span>      <span class=k>if</span> <span class=p>(</span><span class=n>elems_</span> <span class=o>&gt;</span> <span class=n>length_</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>18</span>        <span class=c1>// Since each cache entry is fairly large, we aim for a small
+</span><span class=ln>19</span><span class=c1></span>        <span class=c1>// average linked list length (&lt;= 1).
+</span><span class=ln>20</span><span class=c1></span>        <span class=n>Resize</span><span class=p>();</span>
+<span class=ln>21</span>      <span class=p>}</span>
+<span class=ln>22</span>    <span class=p>}</span>
+<span class=ln>23</span>    <span class=k>return</span> <span class=n>old</span><span class=p>;</span>
+<span class=ln>24</span>  <span class=p>}</span>
+<span class=ln>25</span>
 </code></pre></div><h3 id=remove>Remove</h3>
 <p>找到要删除的slot所在位置，然后把后面的节点往前连即可</p>
-<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
-<span class=ln> 2</span>  <span class=n>LRUHandle</span><span class=o>*</span> <span class=nf>Remove</span><span class=p>(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>key</span><span class=p>,</span> <span class=kt>uint32_t</span> <span class=n>hash</span><span class=p>)</span> <span class=p>{</span>
-<span class=ln> 3</span>    <span class=n>LRUHandle</span><span class=o>**</span> <span class=n>ptr</span> <span class=o>=</span> <span class=n>FindPointer</span><span class=p>(</span><span class=n>key</span><span class=p>,</span> <span class=n>hash</span><span class=p>);</span>
-<span class=ln> 4</span>    <span class=n>LRUHandle</span><span class=o>*</span> <span class=n>result</span> <span class=o>=</span> <span class=o>*</span><span class=n>ptr</span><span class=p>;</span>
-<span class=ln> 5</span>    <span class=c1>// kk : if result is nullptr, it meants no such key in table. Just do nothing.
-</span><span class=ln> 6</span><span class=c1></span>    <span class=k>if</span> <span class=p>(</span><span class=n>result</span> <span class=o>!=</span> <span class=k>nullptr</span><span class=p>)</span> <span class=p>{</span>
-<span class=ln> 7</span>	<span class=c1>// kk: link next node, so the linked list will not break
-</span><span class=ln> 8</span><span class=c1></span>      <span class=o>*</span><span class=n>ptr</span> <span class=o>=</span> <span class=n>result</span><span class=o>-&gt;</span><span class=n>next_hash</span><span class=p>;</span>
-<span class=ln> 9</span>      <span class=o>--</span><span class=n>elems_</span><span class=p>;</span>
-<span class=ln>10</span>    <span class=p>}</span>
-<span class=ln>11</span>    <span class=k>return</span> <span class=n>result</span><span class=p>;</span>
-<span class=ln>12</span>  <span class=p>}</span>
-<span class=ln>13</span>
+<p>如果要删除的元素不存在就返回nullptr
+否则返回被删除的元素</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>   <span class=c1>// return nullptr if no such key
+</span><span class=ln> 2</span><span class=c1></span>  <span class=c1>// otherwise just return the element just removed
+</span><span class=ln> 3</span><span class=c1></span>
+<span class=ln> 4</span>  <span class=n>LRUHandle</span><span class=o>*</span> <span class=nf>Remove</span><span class=p>(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>key</span><span class=p>,</span> <span class=kt>uint32_t</span> <span class=n>hash</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln> 5</span>    <span class=n>LRUHandle</span><span class=o>**</span> <span class=n>ptr</span> <span class=o>=</span> <span class=n>FindPointer</span><span class=p>(</span><span class=n>key</span><span class=p>,</span> <span class=n>hash</span><span class=p>);</span>
+<span class=ln> 6</span>    <span class=n>LRUHandle</span><span class=o>*</span> <span class=n>result</span> <span class=o>=</span> <span class=o>*</span><span class=n>ptr</span><span class=p>;</span>
+<span class=ln> 7</span>    <span class=c1>// kk : if result is nullptr, it meants no such key in table. Just do nothing.
+</span><span class=ln> 8</span><span class=c1></span>    <span class=k>if</span> <span class=p>(</span><span class=n>result</span> <span class=o>!=</span> <span class=k>nullptr</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln> 9</span>	<span class=c1>// kk: link next node, so the linked list will not break
+</span><span class=ln>10</span><span class=c1></span>      <span class=o>*</span><span class=n>ptr</span> <span class=o>=</span> <span class=n>result</span><span class=o>-&gt;</span><span class=n>next_hash</span><span class=p>;</span>
+<span class=ln>11</span>      <span class=o>--</span><span class=n>elems_</span><span class=p>;</span>
+<span class=ln>12</span>    <span class=p>}</span>
+<span class=ln>13</span>    <span class=k>return</span> <span class=n>result</span><span class=p>;</span>
+<span class=ln>14</span>  <span class=p>}</span>
+<span class=ln>15</span>
 </code></pre></div><h3 id=resize>Resize</h3>
 <p>一般称为Rehash操作。 如我们前面预料，length的确一直是2的倍数。
 当HashTable较慢(或者初始时)，进行该操作,将原有的元素复制到新的位置</p>
@@ -423,6 +441,243 @@ Share on:
 </code></pre></div><ol start=2>
 <li>由于bucket num改变，原本在同一个bucket中的两个元素现在可能被分配到不同的bucket中</li>
 </ol>
+<h2 id=lrucache>LRUCache</h2>
+<h3 id=低配版的lrucache>低配版的LRUCache</h3>
+<p>LRUCache算是面试题的常客了，通常的实现是用hashmap+双端链表
+其中hashmap的key是要缓存的key, value是链表上的一个node
+当get或者put某个key时，将对应的node放到链表的一端(表示最近被访问过)
+当cache超出给定的capacity后，则从链表的另一端(表示最早被访问)删除节点</p>
+<p>由于需要从链表的两端分别操作，因此一般的实现都是使用双向链表</p>
+<p>一个经典的cpp实现如下,代码来自leetcode</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span>
+<span class=ln> 3</span>
+<span class=ln> 4</span><span class=cm>/*
+</span><span class=ln> 5</span><span class=cm>    hash + 双向链表，put和get都是O(1)时间复杂度的经典实现。。。(list.size()可能不能O(1)?)
+</span><span class=ln> 6</span><span class=cm>  把cache的iter位置移动到cache.begin()位置
+</span><span class=ln> 7</span><span class=cm>  list.splice 方法 Transfers elements from one list to another.
+</span><span class=ln> 8</span><span class=cm>  cache.splice(cache.begin(),cache,iter);//移动到链表头
+</span><span class=ln> 9</span><span class=cm>*/</span>
+<span class=ln>10</span><span class=k>class</span> <span class=nc>LRUCache</span> <span class=p>{</span>
+<span class=ln>11</span><span class=k>public</span><span class=o>:</span>
+<span class=ln>12</span>    <span class=n>unordered_map</span><span class=o>&lt;</span><span class=kt>int</span><span class=p>,</span><span class=n>list</span><span class=o>&lt;</span><span class=n>pair</span><span class=o>&lt;</span><span class=kt>int</span><span class=p>,</span><span class=kt>int</span><span class=o>&gt;&gt;::</span><span class=n>iterator</span><span class=o>&gt;</span><span class=n>hash</span><span class=p>;</span>
+<span class=ln>13</span>    <span class=c1>// 用list维护size为capacity的元素集合，新加入的在前面，这样超过了容量后，直接删除最后的。
+</span><span class=ln>14</span><span class=c1></span>    <span class=n>list</span><span class=o>&lt;</span><span class=n>pair</span><span class=o>&lt;</span><span class=kt>int</span><span class=p>,</span><span class=kt>int</span><span class=o>&gt;&gt;</span> <span class=n>cache</span><span class=p>;</span><span class=c1>//key,value
+</span><span class=ln>15</span><span class=c1></span>    <span class=kt>int</span> <span class=n>limit</span><span class=p>;</span>
+<span class=ln>16</span>    <span class=n>LRUCache</span><span class=p>(</span><span class=kt>int</span> <span class=n>capacity</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>17</span>        <span class=n>limit</span> <span class=o>=</span> <span class=n>capacity</span><span class=p>;</span>
+<span class=ln>18</span>        <span class=n>hash</span><span class=p>.</span><span class=n>reserve</span><span class=p>(</span><span class=n>capacity</span><span class=p>);</span>
+<span class=ln>19</span>    <span class=p>}</span>
+<span class=ln>20</span>    <span class=kt>int</span> <span class=nf>get</span><span class=p>(</span><span class=kt>int</span> <span class=n>key</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>21</span>        <span class=k>if</span> <span class=p>(</span><span class=n>hash</span><span class=p>.</span><span class=n>find</span><span class=p>(</span><span class=n>key</span><span class=p>)</span><span class=o>==</span><span class=n>hash</span><span class=p>.</span><span class=n>end</span><span class=p>()){</span>
+<span class=ln>22</span>            <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+<span class=ln>23</span>        <span class=p>}</span><span class=k>else</span><span class=p>{</span>
+<span class=ln>24</span>            <span class=k>auto</span> <span class=n>iter</span> <span class=o>=</span> <span class=n>hash</span><span class=p>[</span><span class=n>key</span><span class=p>];</span>
+<span class=ln>25</span>            <span class=n>cache</span><span class=p>.</span><span class=n>splice</span><span class=p>(</span><span class=n>cache</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span><span class=n>cache</span><span class=p>,</span><span class=n>iter</span><span class=p>);</span>
+<span class=ln>26</span>            <span class=k>return</span> <span class=n>cache</span><span class=p>.</span><span class=n>begin</span><span class=p>()</span><span class=o>-&gt;</span><span class=n>second</span><span class=p>;</span>
+<span class=ln>27</span>        <span class=p>}</span>
+<span class=ln>28</span>    <span class=p>}</span>
+<span class=ln>29</span>    
+<span class=ln>30</span>    <span class=kt>void</span> <span class=nf>put</span><span class=p>(</span><span class=kt>int</span> <span class=n>key</span><span class=p>,</span> <span class=kt>int</span> <span class=n>value</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>31</span>        <span class=c1>//如果容量到了，删除尾部元素,再加上新结点
+</span><span class=ln>32</span><span class=c1></span>        <span class=k>if</span> <span class=p>(</span><span class=n>hash</span><span class=p>.</span><span class=n>find</span><span class=p>(</span><span class=n>key</span><span class=p>)</span><span class=o>==</span><span class=n>hash</span><span class=p>.</span><span class=n>end</span><span class=p>()){</span>
+<span class=ln>33</span>            <span class=k>if</span><span class=p>(</span><span class=n>cache</span><span class=p>.</span><span class=n>size</span><span class=p>()</span><span class=o>==</span><span class=n>limit</span><span class=p>)</span>   <span class=p>{</span>
+<span class=ln>34</span>                <span class=n>hash</span><span class=p>.</span><span class=n>erase</span><span class=p>(</span><span class=n>cache</span><span class=p>.</span><span class=n>back</span><span class=p>().</span><span class=n>first</span><span class=p>);</span>
+<span class=ln>35</span>                <span class=n>cache</span><span class=p>.</span><span class=n>pop_back</span><span class=p>();</span>
+<span class=ln>36</span>            <span class=p>}</span><span class=c1>//直接添加
+</span><span class=ln>37</span><span class=c1></span>            <span class=n>cache</span><span class=p>.</span><span class=n>emplace_front</span><span class=p>(</span><span class=n>key</span><span class=p>,</span><span class=n>value</span><span class=p>);</span>
+<span class=ln>38</span>            <span class=n>hash</span><span class=p>[</span><span class=n>key</span><span class=p>]</span><span class=o>=</span><span class=n>cache</span><span class=p>.</span><span class=n>begin</span><span class=p>();</span> 
+<span class=ln>39</span>        <span class=p>}</span>
+<span class=ln>40</span>        <span class=k>else</span> <span class=p>{</span><span class=c1>//如果插入相同key的元素，除了要移动，value也需要更新
+</span><span class=ln>41</span><span class=c1></span>            <span class=k>auto</span> <span class=n>iter</span> <span class=o>=</span> <span class=n>hash</span><span class=p>[</span><span class=n>key</span><span class=p>];</span>
+<span class=ln>42</span>            <span class=n>iter</span><span class=o>-&gt;</span><span class=n>second</span><span class=o>=</span><span class=n>value</span><span class=p>;</span><span class=c1>//更新地址value
+</span><span class=ln>43</span><span class=c1></span>            <span class=n>cache</span><span class=p>.</span><span class=n>splice</span><span class=p>(</span><span class=n>cache</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span><span class=n>cache</span><span class=p>,</span><span class=n>iter</span><span class=p>);</span><span class=c1>//移动到链表头
+</span><span class=ln>44</span><span class=c1></span>            <span class=n>hash</span><span class=p>[</span><span class=n>key</span><span class=p>]</span><span class=o>=</span><span class=n>cache</span><span class=p>.</span><span class=n>begin</span><span class=p>();</span>   <span class=c1>//更新hashtable的value
+</span><span class=ln>45</span><span class=c1></span>        <span class=p>}</span>
+<span class=ln>46</span>    <span class=p>}</span>
+<span class=ln>47</span><span class=p>};</span>
+<span class=ln>48</span>
+</code></pre></div><p>那么一个真实世界的LRUCache是怎么样的呢?</p>
+<h3 id=声明>声明</h3>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span><span class=c1>// A single shard of sharded cache.
+</span><span class=ln> 3</span><span class=c1></span><span class=k>class</span> <span class=nc>LRUCache</span> <span class=p>{</span>
+<span class=ln> 4</span> <span class=k>public</span><span class=o>:</span>
+<span class=ln> 5</span>  <span class=n>LRUCache</span><span class=p>();</span>
+<span class=ln> 6</span>  <span class=o>~</span><span class=n>LRUCache</span><span class=p>();</span>
+<span class=ln> 7</span>
+<span class=ln> 8</span>  <span class=c1>// Separate from constructor so caller can easily make an array of LRUCache
+</span><span class=ln> 9</span><span class=c1></span>  <span class=kt>void</span> <span class=nf>SetCapacity</span><span class=p>(</span><span class=n>size_t</span> <span class=n>capacity</span><span class=p>)</span> <span class=p>{</span> <span class=n>capacity_</span> <span class=o>=</span> <span class=n>capacity</span><span class=p>;</span> <span class=p>}</span>
+<span class=ln>10</span>
+<span class=ln>11</span>  <span class=c1>// Like Cache methods, but with an extra &#34;hash&#34; parameter.
+</span><span class=ln>12</span><span class=c1></span>  <span class=n>Cache</span><span class=o>::</span><span class=n>Handle</span><span class=o>*</span> <span class=n>Insert</span><span class=p>(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>key</span><span class=p>,</span> <span class=kt>uint32_t</span> <span class=n>hash</span><span class=p>,</span> <span class=kt>void</span><span class=o>*</span> <span class=n>value</span><span class=p>,</span>
+<span class=ln>13</span>                        <span class=n>size_t</span> <span class=n>charge</span><span class=p>,</span>
+<span class=ln>14</span>                        <span class=kt>void</span> <span class=p>(</span><span class=o>*</span><span class=n>deleter</span><span class=p>)(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>key</span><span class=p>,</span> <span class=kt>void</span><span class=o>*</span> <span class=n>value</span><span class=p>));</span>
+<span class=ln>15</span>  <span class=n>Cache</span><span class=o>::</span><span class=n>Handle</span><span class=o>*</span> <span class=n>Lookup</span><span class=p>(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>key</span><span class=p>,</span> <span class=kt>uint32_t</span> <span class=n>hash</span><span class=p>);</span>
+<span class=ln>16</span>  <span class=kt>void</span> <span class=nf>Release</span><span class=p>(</span><span class=n>Cache</span><span class=o>::</span><span class=n>Handle</span><span class=o>*</span> <span class=n>handle</span><span class=p>);</span>
+<span class=ln>17</span>  <span class=kt>void</span> <span class=nf>Erase</span><span class=p>(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>key</span><span class=p>,</span> <span class=kt>uint32_t</span> <span class=n>hash</span><span class=p>);</span>
+<span class=ln>18</span>  <span class=kt>void</span> <span class=nf>Prune</span><span class=p>();</span>
+<span class=ln>19</span>  <span class=n>size_t</span> <span class=nf>TotalCharge</span><span class=p>()</span> <span class=k>const</span> <span class=p>{</span>
+<span class=ln>20</span>    <span class=n>MutexLock</span> <span class=n>l</span><span class=p>(</span><span class=o>&amp;</span><span class=n>mutex_</span><span class=p>);</span>
+<span class=ln>21</span>    <span class=k>return</span> <span class=n>usage_</span><span class=p>;</span>
+<span class=ln>22</span>  <span class=p>}</span>
+<span class=ln>23</span>
+<span class=ln>24</span> <span class=k>private</span><span class=o>:</span>
+<span class=ln>25</span>  <span class=kt>void</span> <span class=n>LRU_Remove</span><span class=p>(</span><span class=n>LRUHandle</span><span class=o>*</span> <span class=n>e</span><span class=p>);</span>
+<span class=ln>26</span>  <span class=kt>void</span> <span class=nf>LRU_Append</span><span class=p>(</span><span class=n>LRUHandle</span><span class=o>*</span> <span class=n>list</span><span class=p>,</span> <span class=n>LRUHandle</span><span class=o>*</span> <span class=n>e</span><span class=p>);</span>
+<span class=ln>27</span>  <span class=kt>void</span> <span class=nf>Ref</span><span class=p>(</span><span class=n>LRUHandle</span><span class=o>*</span> <span class=n>e</span><span class=p>);</span>
+<span class=ln>28</span>  <span class=kt>void</span> <span class=nf>Unref</span><span class=p>(</span><span class=n>LRUHandle</span><span class=o>*</span> <span class=n>e</span><span class=p>);</span>
+<span class=ln>29</span>  <span class=kt>bool</span> <span class=nf>FinishErase</span><span class=p>(</span><span class=n>LRUHandle</span><span class=o>*</span> <span class=n>e</span><span class=p>)</span> <span class=n>EXCLUSIVE_LOCKS_REQUIRED</span><span class=p>(</span><span class=n>mutex_</span><span class=p>);</span>
+<span class=ln>30</span>
+<span class=ln>31</span>  <span class=c1>// Initialized before use.
+</span><span class=ln>32</span><span class=c1></span>  <span class=n>size_t</span> <span class=n>capacity_</span><span class=p>;</span>
+<span class=ln>33</span>
+<span class=ln>34</span>  <span class=c1>// mutex_ protects the following state.
+</span><span class=ln>35</span><span class=c1></span>  <span class=k>mutable</span> <span class=n>port</span><span class=o>::</span><span class=n>Mutex</span> <span class=n>mutex_</span><span class=p>;</span>
+<span class=ln>36</span>  <span class=n>size_t</span> <span class=n>usage_</span> <span class=nf>GUARDED_BY</span><span class=p>(</span><span class=n>mutex_</span><span class=p>);</span>
+<span class=ln>37</span>
+<span class=ln>38</span>  <span class=c1>// Dummy head of LRU list.
+</span><span class=ln>39</span><span class=c1></span>  <span class=c1>// lru.prev is newest entry, lru.next is oldest entry.
+</span><span class=ln>40</span><span class=c1></span>  <span class=c1>// Entries have refs==1 and in_cache==true.
+</span><span class=ln>41</span><span class=c1></span>  <span class=n>LRUHandle</span> <span class=n>lru_</span> <span class=nf>GUARDED_BY</span><span class=p>(</span><span class=n>mutex_</span><span class=p>);</span>
+<span class=ln>42</span>
+<span class=ln>43</span>  <span class=c1>// Dummy head of in-use list.
+</span><span class=ln>44</span><span class=c1></span>  <span class=c1>// Entries are in use by clients, and have refs &gt;= 2 and in_cache==true.
+</span><span class=ln>45</span><span class=c1></span>  <span class=n>LRUHandle</span> <span class=n>in_use_</span> <span class=nf>GUARDED_BY</span><span class=p>(</span><span class=n>mutex_</span><span class=p>);</span>
+<span class=ln>46</span>
+<span class=ln>47</span>  <span class=n>HandleTable</span> <span class=n>table_</span> <span class=nf>GUARDED_BY</span><span class=p>(</span><span class=n>mutex_</span><span class=p>);</span>
+<span class=ln>48</span><span class=p>};</span>
+<span class=ln>49</span>
+</code></pre></div><h3 id=链表结构>链表结构</h3>
+<p>实现中有两个链表,in_use_和lru_</p>
+<p>值得关注的是，这是两个环形的双向链表</p>
+<p>其中lru_的结构如下:</p>
+<p>dummy node -> node1(oldest) -> node2 -> ... -> nodeN(newest) -> dummy node</p>
+<p>in_use_的结构类似，但是node之间不存在特定顺序</p>
+<p><strong>开头的dummy node和结尾的实际上是同一个</strong></p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span><span class=n>LRUCache</span><span class=o>::</span><span class=n>LRUCache</span><span class=p>()</span> <span class=o>:</span> <span class=n>capacity_</span><span class=p>(</span><span class=mi>0</span><span class=p>),</span> <span class=n>usage_</span><span class=p>(</span><span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln> 2</span>  <span class=c1>// Make empty circular linked lists.
+</span><span class=ln> 3</span><span class=c1></span>  <span class=n>lru_</span><span class=p>.</span><span class=n>next</span> <span class=o>=</span> <span class=o>&amp;</span><span class=n>lru_</span><span class=p>;</span>
+<span class=ln> 4</span>  <span class=n>lru_</span><span class=p>.</span><span class=n>prev</span> <span class=o>=</span> <span class=o>&amp;</span><span class=n>lru_</span><span class=p>;</span>
+<span class=ln> 5</span>  <span class=n>in_use_</span><span class=p>.</span><span class=n>next</span> <span class=o>=</span> <span class=o>&amp;</span><span class=n>in_use_</span><span class=p>;</span>
+<span class=ln> 6</span>  <span class=n>in_use_</span><span class=p>.</span><span class=n>prev</span> <span class=o>=</span> <span class=o>&amp;</span><span class=n>in_use_</span><span class=p>;</span>
+<span class=ln> 7</span><span class=p>}</span>
+<span class=ln> 8</span>
+<span class=ln> 9</span>
+<span class=ln>10</span><span class=kt>void</span> <span class=n>LRUCache</span><span class=o>::</span><span class=n>LRU_Remove</span><span class=p>(</span><span class=n>LRUHandle</span><span class=o>*</span> <span class=n>e</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>11</span>  <span class=n>e</span><span class=o>-&gt;</span><span class=n>next</span><span class=o>-&gt;</span><span class=n>prev</span> <span class=o>=</span> <span class=n>e</span><span class=o>-&gt;</span><span class=n>prev</span><span class=p>;</span>
+<span class=ln>12</span>  <span class=n>e</span><span class=o>-&gt;</span><span class=n>prev</span><span class=o>-&gt;</span><span class=n>next</span> <span class=o>=</span> <span class=n>e</span><span class=o>-&gt;</span><span class=n>next</span><span class=p>;</span>
+<span class=ln>13</span><span class=p>}</span>
+<span class=ln>14</span>
+<span class=ln>15</span><span class=c1>// note: the linked list is a circle list
+</span><span class=ln>16</span><span class=c1>// dummy node -&gt; node1(oldest) -&gt; node2 -&gt; ... -&gt; nodeN(newest) -&gt; dummy node
+</span><span class=ln>17</span><span class=c1></span><span class=kt>void</span> <span class=n>LRUCache</span><span class=o>::</span><span class=n>LRU_Append</span><span class=p>(</span><span class=n>LRUHandle</span><span class=o>*</span> <span class=n>list</span><span class=p>,</span> <span class=n>LRUHandle</span><span class=o>*</span> <span class=n>e</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>18</span>  <span class=c1>// Make &#34;e&#34; newest entry by inserting just before *list
+</span><span class=ln>19</span><span class=c1></span>  <span class=n>e</span><span class=o>-&gt;</span><span class=n>next</span> <span class=o>=</span> <span class=n>list</span><span class=p>;</span>
+<span class=ln>20</span>  <span class=n>e</span><span class=o>-&gt;</span><span class=n>prev</span> <span class=o>=</span> <span class=n>list</span><span class=o>-&gt;</span><span class=n>prev</span><span class=p>;</span>
+<span class=ln>21</span>  <span class=n>e</span><span class=o>-&gt;</span><span class=n>prev</span><span class=o>-&gt;</span><span class=n>next</span> <span class=o>=</span> <span class=n>e</span><span class=p>;</span>
+<span class=ln>22</span>  <span class=n>e</span><span class=o>-&gt;</span><span class=n>next</span><span class=o>-&gt;</span><span class=n>prev</span> <span class=o>=</span> <span class=n>e</span><span class=p>;</span>
+<span class=ln>23</span><span class=p>}</span>
+<span class=ln>24</span>
+</code></pre></div><h3 id=entry-引用计数>entry 引用计数</h3>
+<p>每个entry只会在lru_或者in_use_之一（也可能都不在)
+lru_是LRUCache本身的链表，in_use_是表示哪些entry被client所使用</p>
+<p><strong>lru_ have refs==1 and in_cache==true.</strong></p>
+<p><strong>in_use_ have ref>=2 and in_cache==true.</strong></p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span><span class=kt>void</span> <span class=n>LRUCache</span><span class=o>::</span><span class=n>Ref</span><span class=p>(</span><span class=n>LRUHandle</span><span class=o>*</span> <span class=n>e</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln> 3</span>  <span class=k>if</span> <span class=p>(</span><span class=n>e</span><span class=o>-&gt;</span><span class=n>refs</span> <span class=o>==</span> <span class=mi>1</span> <span class=o>&amp;&amp;</span> <span class=n>e</span><span class=o>-&gt;</span><span class=n>in_cache</span><span class=p>)</span> <span class=p>{</span>  <span class=c1>// If on lru_ list, move to in_use_ list.
+</span><span class=ln> 4</span><span class=c1></span>    <span class=n>LRU_Remove</span><span class=p>(</span><span class=n>e</span><span class=p>);</span>
+<span class=ln> 5</span>    <span class=n>LRU_Append</span><span class=p>(</span><span class=o>&amp;</span><span class=n>in_use_</span><span class=p>,</span> <span class=n>e</span><span class=p>);</span>
+<span class=ln> 6</span>  <span class=p>}</span>
+<span class=ln> 7</span>  <span class=n>e</span><span class=o>-&gt;</span><span class=n>refs</span><span class=o>++</span><span class=p>;</span>
+<span class=ln> 8</span><span class=p>}</span>
+<span class=ln> 9</span>
+<span class=ln>10</span><span class=kt>void</span> <span class=n>LRUCache</span><span class=o>::</span><span class=n>Unref</span><span class=p>(</span><span class=n>LRUHandle</span><span class=o>*</span> <span class=n>e</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>11</span>  <span class=n>assert</span><span class=p>(</span><span class=n>e</span><span class=o>-&gt;</span><span class=n>refs</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>);</span>
+<span class=ln>12</span>  <span class=n>e</span><span class=o>-&gt;</span><span class=n>refs</span><span class=o>--</span><span class=p>;</span>
+<span class=ln>13</span>  <span class=k>if</span> <span class=p>(</span><span class=n>e</span><span class=o>-&gt;</span><span class=n>refs</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>  <span class=c1>// Deallocate.
+</span><span class=ln>14</span><span class=c1></span>    <span class=n>assert</span><span class=p>(</span><span class=o>!</span><span class=n>e</span><span class=o>-&gt;</span><span class=n>in_cache</span><span class=p>);</span>
+<span class=ln>15</span>    <span class=p>(</span><span class=o>*</span><span class=n>e</span><span class=o>-&gt;</span><span class=n>deleter</span><span class=p>)(</span><span class=n>e</span><span class=o>-&gt;</span><span class=n>key</span><span class=p>(),</span> <span class=n>e</span><span class=o>-&gt;</span><span class=n>value</span><span class=p>);</span>
+<span class=ln>16</span>    <span class=n>free</span><span class=p>(</span><span class=n>e</span><span class=p>);</span>
+<span class=ln>17</span>  <span class=p>}</span> <span class=k>else</span> <span class=nf>if</span> <span class=p>(</span><span class=n>e</span><span class=o>-&gt;</span><span class=n>in_cache</span> <span class=o>&amp;&amp;</span> <span class=n>e</span><span class=o>-&gt;</span><span class=n>refs</span> <span class=o>==</span> <span class=mi>1</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>18</span>    <span class=c1>// No longer in use; move to lru_ list.
+</span><span class=ln>19</span><span class=c1></span>    <span class=n>LRU_Remove</span><span class=p>(</span><span class=n>e</span><span class=p>);</span>
+<span class=ln>20</span>    <span class=n>LRU_Append</span><span class=p>(</span><span class=o>&amp;</span><span class=n>lru_</span><span class=p>,</span> <span class=n>e</span><span class=p>);</span>
+<span class=ln>21</span>  <span class=p>}</span>
+<span class=ln>22</span><span class=p>}</span>
+<span class=ln>23</span>
+</code></pre></div><h3 id=insert-1>Insert</h3>
+<p>这部分比较值得说,细节见注释。
+只说两点:</p>
+<ul>
+<li>插入的时候是对e进行处理，设置refs和in_cache以及添加到链表上，然后当发现该元素已经存在在cache中时，<strong>undo之前的操作</strong></li>
+<li>当usage_超过了cache的承载能力的时候，while循环里看起来只执行了一次。 <strong>实际上是FinishErase中的LRU_Remove操作每次会修改lru_</strong></li>
+</ul>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span><span class=n>Cache</span><span class=o>::</span><span class=n>Handle</span><span class=o>*</span> <span class=n>LRUCache</span><span class=o>::</span><span class=n>Insert</span><span class=p>(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>key</span><span class=p>,</span> <span class=kt>uint32_t</span> <span class=n>hash</span><span class=p>,</span> <span class=kt>void</span><span class=o>*</span> <span class=n>value</span><span class=p>,</span>
+<span class=ln> 3</span>                                <span class=n>size_t</span> <span class=n>charge</span><span class=p>,</span>
+<span class=ln> 4</span>                                <span class=kt>void</span> <span class=p>(</span><span class=o>*</span><span class=n>deleter</span><span class=p>)(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>key</span><span class=p>,</span>
+<span class=ln> 5</span>                                                <span class=kt>void</span><span class=o>*</span> <span class=n>value</span><span class=p>))</span> <span class=p>{</span>
+<span class=ln> 6</span>  <span class=n>MutexLock</span> <span class=nf>l</span><span class=p>(</span><span class=o>&amp;</span><span class=n>mutex_</span><span class=p>);</span>
+<span class=ln> 7</span>
+<span class=ln> 8</span>  <span class=c1>// kk : 1 means key_data,beginning of char,used as a placeholder
+</span><span class=ln> 9</span><span class=c1></span>  <span class=n>LRUHandle</span><span class=o>*</span> <span class=n>e</span> <span class=o>=</span>
+<span class=ln>10</span>      <span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>LRUHandle</span><span class=o>*&gt;</span><span class=p>(</span><span class=n>malloc</span><span class=p>(</span><span class=k>sizeof</span><span class=p>(</span><span class=n>LRUHandle</span><span class=p>)</span> <span class=o>-</span> <span class=mi>1</span> <span class=o>+</span> <span class=n>key</span><span class=p>.</span><span class=n>size</span><span class=p>()));</span>
+<span class=ln>11</span>  <span class=n>e</span><span class=o>-&gt;</span><span class=n>value</span> <span class=o>=</span> <span class=n>value</span><span class=p>;</span>
+<span class=ln>12</span>  <span class=n>e</span><span class=o>-&gt;</span><span class=n>deleter</span> <span class=o>=</span> <span class=n>deleter</span><span class=p>;</span>
+<span class=ln>13</span>  <span class=n>e</span><span class=o>-&gt;</span><span class=n>charge</span> <span class=o>=</span> <span class=n>charge</span><span class=p>;</span>
+<span class=ln>14</span>  <span class=n>e</span><span class=o>-&gt;</span><span class=n>key_length</span> <span class=o>=</span> <span class=n>key</span><span class=p>.</span><span class=n>size</span><span class=p>();</span>
+<span class=ln>15</span>  <span class=n>e</span><span class=o>-&gt;</span><span class=n>hash</span> <span class=o>=</span> <span class=n>hash</span><span class=p>;</span>
+<span class=ln>16</span>  <span class=n>e</span><span class=o>-&gt;</span><span class=n>in_cache</span> <span class=o>=</span> <span class=nb>false</span><span class=p>;</span>
+<span class=ln>17</span>  <span class=n>e</span><span class=o>-&gt;</span><span class=n>refs</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>  <span class=c1>// for the returned handle.
+</span><span class=ln>18</span><span class=c1></span>  <span class=n>std</span><span class=o>::</span><span class=n>memcpy</span><span class=p>(</span><span class=n>e</span><span class=o>-&gt;</span><span class=n>key_data</span><span class=p>,</span> <span class=n>key</span><span class=p>.</span><span class=n>data</span><span class=p>(),</span> <span class=n>key</span><span class=p>.</span><span class=n>size</span><span class=p>());</span>
+<span class=ln>19</span>
+<span class=ln>20</span>  <span class=k>if</span> <span class=p>(</span><span class=n>capacity_</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>21</span>    <span class=n>e</span><span class=o>-&gt;</span><span class=n>refs</span><span class=o>++</span><span class=p>;</span>  <span class=c1>// for the cache&#39;s reference.
+</span><span class=ln>22</span><span class=c1></span>    <span class=n>e</span><span class=o>-&gt;</span><span class=n>in_cache</span> <span class=o>=</span> <span class=nb>true</span><span class=p>;</span>
+<span class=ln>23</span>    <span class=n>LRU_Append</span><span class=p>(</span><span class=o>&amp;</span><span class=n>in_use_</span><span class=p>,</span> <span class=n>e</span><span class=p>);</span>
+<span class=ln>24</span>    <span class=n>usage_</span> <span class=o>+=</span> <span class=n>charge</span><span class=p>;</span>
+<span class=ln>25</span>    <span class=c1>// table_.Insert will return nullptr if no e in table_ before
+</span><span class=ln>26</span><span class=c1></span>    <span class=c1>// otherwise return a non-nullptr value.
+</span><span class=ln>27</span><span class=c1></span>    <span class=c1>// if nullptr, FinishErase just do nothing
+</span><span class=ln>28</span><span class=c1></span>    <span class=c1>// if not nullptr, undo above 4 lines
+</span><span class=ln>29</span><span class=c1></span>    <span class=n>FinishErase</span><span class=p>(</span><span class=n>table_</span><span class=p>.</span><span class=n>Insert</span><span class=p>(</span><span class=n>e</span><span class=p>));</span>
+<span class=ln>30</span>  <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>  <span class=c1>// don&#39;t cache. (capacity_==0 is supported and turns off caching.)
+</span><span class=ln>31</span><span class=c1></span>    <span class=c1>// next is read by key() in an assert, so it must be initialized
+</span><span class=ln>32</span><span class=c1></span>    <span class=n>e</span><span class=o>-&gt;</span><span class=n>next</span> <span class=o>=</span> <span class=k>nullptr</span><span class=p>;</span>
+<span class=ln>33</span>  <span class=p>}</span>
+<span class=ln>34</span>  <span class=c1>// lru_.next == &amp;lru_ means lru_ is the dummy node after last node in linked list
+</span><span class=ln>35</span><span class=c1></span>  <span class=k>while</span> <span class=p>(</span><span class=n>usage_</span> <span class=o>&gt;</span> <span class=n>capacity_</span> <span class=o>&amp;&amp;</span> <span class=n>lru_</span><span class=p>.</span><span class=n>next</span> <span class=o>!=</span> <span class=o>&amp;</span><span class=n>lru_</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>36</span>	<span class=c1>// kk: why while instead of if? 
+</span><span class=ln>37</span><span class=c1></span>	<span class=c1>// LRU_Remove() in FinishErase function change lru_ value
+</span><span class=ln>38</span><span class=c1></span>	<span class=c1>// FIXME: is this oldest node? yes,lur_.next is oldest. 
+</span><span class=ln>39</span><span class=c1></span>    <span class=n>LRUHandle</span><span class=o>*</span> <span class=n>old</span> <span class=o>=</span> <span class=n>lru_</span><span class=p>.</span><span class=n>next</span><span class=p>;</span>
+<span class=ln>40</span>    <span class=n>assert</span><span class=p>(</span><span class=n>old</span><span class=o>-&gt;</span><span class=n>refs</span> <span class=o>==</span> <span class=mi>1</span><span class=p>);</span>
+<span class=ln>41</span>    <span class=kt>bool</span> <span class=n>erased</span> <span class=o>=</span> <span class=n>FinishErase</span><span class=p>(</span><span class=n>table_</span><span class=p>.</span><span class=n>Remove</span><span class=p>(</span><span class=n>old</span><span class=o>-&gt;</span><span class=n>key</span><span class=p>(),</span> <span class=n>old</span><span class=o>-&gt;</span><span class=n>hash</span><span class=p>));</span>
+<span class=ln>42</span>    <span class=c1>// kk: old should always be in table_, so erased should be true.
+</span><span class=ln>43</span><span class=c1></span>    <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>erased</span><span class=p>)</span> <span class=p>{</span>  <span class=c1>// to avoid unused variable when compiled NDEBUG
+</span><span class=ln>44</span><span class=c1></span>      <span class=n>assert</span><span class=p>(</span><span class=n>erased</span><span class=p>);</span>
+<span class=ln>45</span>    <span class=p>}</span>
+<span class=ln>46</span>  <span class=p>}</span>
+<span class=ln>47</span>
+<span class=ln>48</span>  <span class=k>return</span> <span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>Cache</span><span class=o>::</span><span class=n>Handle</span><span class=o>*&gt;</span><span class=p>(</span><span class=n>e</span><span class=p>);</span>
+<span class=ln>49</span><span class=p>}</span>
+<span class=ln>50</span>
+<span class=ln>51</span><span class=c1>// If e != nullptr, finish removing *e from the cache; it has already been
+</span><span class=ln>52</span><span class=c1>// removed from the hash table.  Return whether e != nullptr.
+</span><span class=ln>53</span><span class=c1></span><span class=kt>bool</span> <span class=n>LRUCache</span><span class=o>::</span><span class=n>FinishErase</span><span class=p>(</span><span class=n>LRUHandle</span><span class=o>*</span> <span class=n>e</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>54</span>  <span class=k>if</span> <span class=p>(</span><span class=n>e</span> <span class=o>!=</span> <span class=k>nullptr</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>55</span>    <span class=n>assert</span><span class=p>(</span><span class=n>e</span><span class=o>-&gt;</span><span class=n>in_cache</span><span class=p>);</span>
+<span class=ln>56</span>    <span class=n>LRU_Remove</span><span class=p>(</span><span class=n>e</span><span class=p>);</span>
+<span class=ln>57</span>    <span class=n>e</span><span class=o>-&gt;</span><span class=n>in_cache</span> <span class=o>=</span> <span class=nb>false</span><span class=p>;</span>
+<span class=ln>58</span>    <span class=n>usage_</span> <span class=o>-=</span> <span class=n>e</span><span class=o>-&gt;</span><span class=n>charge</span><span class=p>;</span>
+<span class=ln>59</span>    <span class=n>Unref</span><span class=p>(</span><span class=n>e</span><span class=p>);</span>
+<span class=ln>60</span>  <span class=p>}</span>
+<span class=ln>61</span>  <span class=k>return</span> <span class=n>e</span> <span class=o>!=</span> <span class=k>nullptr</span><span class=p>;</span>
+<span class=ln>62</span><span class=p>}</span>
+<span class=ln>63</span>
+</code></pre></div>
 </div>
 <h2 class=post_related>Posts in this Series</h2>
 <ul>
