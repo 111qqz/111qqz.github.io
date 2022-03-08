@@ -106,7 +106,7 @@
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Mar 22, 2017</span>
-<span class=post_time> · 4 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/hash title=hash class="post_tag button button_translucent">hash
+<span class=post_time> · 5 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/hash title=hash class="post_tag button button_translucent">hash
 </a><a href=https://111qqz.com/tags/murmurhash title=murmurhash class="post_tag button button_translucent">murmurhash
 </a><a href=https://111qqz.com/tags/leveldb title=levelDB class="post_tag button button_translucent">levelDB
 </a>
@@ -135,240 +135,250 @@ Share on:
 <p>大概感受下有现实意义的工程代码的布局之类orz</p>
 <p>hash函数本身没有分析...这个没什么好分析的吧...应该是类似一种构造，看懂每一步很容易，但是你还是想不出来啊？而且一堆"magic number"</p>
 <p>代码很短，也就200行,分析见注释。</p>
-<pre><code>/**
- * `main.c' - murmurhash
- *
- * copyright (c) 2014 joseph werle &lt;joseph.werle@gmail.com&gt;
- */
-
-#include &lt;stdio.h&gt;
-#include &lt;stdlib.h&gt;
-#include &lt;string.h&gt;
-#include &lt;unistd.h&gt;
-#include &lt;inttypes.h&gt;
-#include &quot;murmurhash.h&quot;
-
-static void
-usage () {
-  fprintf(stderr, &quot;usage: murmur [-hV] [options]\n&quot;);
-}
-
-static void   //函数类型和函数名不一行写是什么风格orz...
-help () {
-  fprintf(stderr, &quot;\noptions:\n&quot;);
-  fprintf(stderr, &quot;\n  --seed=[seed]  hash seed (optional)&quot;);
-  fprintf(stderr, &quot;\n&quot;);
-}
-
-static char *
-read_stdin () {
-  size_t bsize = 1024;
-  size_t size = 1;
-  char buf[bsize];
-  char *res = (char *) malloc(sizeof(char) * bsize);
-  char *tmp = NULL;
-
-  // memory issue
-  if (NULL == res) { return NULL; } //申请内存失败了...
-
-  // cap
-  res[0] = '\0';
-
-  // read
-  if (NULL != fgets(buf, bsize, stdin)) {
-    // store
-    tmp = res; //异常安全？ 
-    // resize
-    size += (size_t) strlen(buf);
-    // realloc
-    res = (char *) realloc(res, size);
-
-    // memory issues
-    if (NULL == res) {
-      free(tmp);
-      return NULL;
-    }
-
-    // yield
-    strcat(res, buf); //将buf连接到res后面...
-  //  printf(&quot;buf:%s res:%s\n&quot;,buf,res);
-    return res;
-  }
-
-  free(res);
-
-
-  return NULL;
-}
-
-#define isopt(opt, str) (0 == strncmp(opt, str, strlen(str))) 
-//比较opt和str前strlen(str)个字符。
-
-#define setopt(opt, key, var) {                       \
-    char tmp = 0;                                     \
-    size_t len = strlen(key) + 1;                     \
-    for (int i = 0; i &lt; len; ++i) { tmp = *opt++; }   \
-    var = opt;                                        \
-}
-// key是&quot;seed&quot;,让len = strlen(key)+1，是为了把seed和‘=’跳过去。。。
-// 因此seed，‘=’，后面的数字之间不支持有空格。
-// 得到的var是*char型的seed.
-
-
-int
-main (int argc, char **argv) { //argc是命令行的参数个数，**argv是字符串数组
-  char *buf = NULL;
-  char *key = NULL;
-  char *seed = NULL;
-  uint32_t h = 0;
-
-  // parse opts
-  {
-    char *opt = NULL;
-    char tmp = 0;
-
- //   for ( int i = 0 ;  i &lt; argc ; i++)  printf(&quot;Argument %d is %s.\n&quot;, i, argv[i]);
-    opt = *argv++; // unused，因为第0个参数就是“murmur”，跳过。
-    
-
-    while ((opt = *argv++)) { //argv参数最后会变成null,退出循环...
-//	printf(&quot;opt: %s argv:%s\n&quot;,opt,*argv);
-
-      // flags
-      if ('-' == *opt++) {
-        switch (*opt++) {
-          case 'h':
-            return usage(), help(), 0; //直接用了return和逗号表达式...避免了break，代码简洁了（？
-
-          case 'V':
-            fprintf(stderr, &quot;%s\n&quot;, MURMURHASH_VERSION);
-            return 0;
-
-          case '-': //参数不要带空格。。。
-            if (isopt(opt, &quot;seed&quot;)) {
-              setopt(opt, &quot;seed&quot;, seed);
-            }
-            break; //是break而不是return，说明在--seed参数后面还可以跟其他参数。。
-		    //如果跟了多了--seed参数，前面的参数会被最有一个覆盖掉，hash结果与最后一个seed对应。
-          default:
-            tmp = *opt--;//这个tmp好像没什么用啊？
-            // error
-            fprintf(stderr, &quot;unknown option: `%s'\n&quot;, opt);
-            usage();
-            return 1;
-        }
-      }
-    }
-  }
-
-  if (NULL == seed) { //赞！ 避免了手残把等号写成赋值号的可能，下面也都用了这种写法。
-    seed = &quot;0&quot;;
-  }
-
-#define hash(key) murmurhash(key, (uint32_t) strlen(key), (uint32_t) atoi(seed));
-						//atoi，把字符串转成了int型，然后被强转了。。。
-  if (1 == isatty(0)) { return 1; } //isatty 判断文件描述词是否位终端机（？，是为1，不是为0
-  else if (ferror(stdin)) { return 1; }
-  else {
-    buf = read_stdin();
-    if (NULL == buf) { return 1; }
-    else if (0 == strlen(buf)) { buf = &quot;&quot;; }
-    h = hash(buf);
-    printf(&quot;%&quot; PRIu32 &quot;\n&quot;, h);
-    //PRIu32是头文件inttypes.h包含的宏，用于平台独立的printf编码。。
-    //会自动根据平台去对应相应的类型说明符。。。
-    do {
-      key = read_stdin();
-      if (NULL == key) { break; }
-      else if (0 == strlen(buf)) { buf = &quot;&quot;; }
-      h = hash(buf);
-      printf(&quot;%d&quot; PRIu32 &quot;\n&quot;, h);
-    } while (NULL != key);
-  }
-
-#undef hash
-
-  return 0;
-}
-
-
-
-
-/**
- * `murmurhash.h' - murmurhash
- *
- * copyright (c) 2014 joseph werle &lt;joseph.werle@gmail.com&gt;
- */
-
-#include &lt;stdlib.h&gt;
-#include &lt;stdio.h&gt;
-#include &lt;stdint.h&gt;
-#include &quot;murmurhash.h&quot;
-
-uint32_t
-murmurhash (const char *key, uint32_t len, uint32_t seed) {
-  uint32_t c1 = 0xcc9e2d51;
-  uint32_t c2 = 0x1b873593;
-  uint32_t r1 = 15;
-  uint32_t r2 = 13;
-  uint32_t m = 5;
-  uint32_t n = 0xe6546b64;
-  uint32_t h = 0;
-  uint32_t k = 0;
-  uint8_t *d = (uint8_t *) key; // 32 bit extract from `key'
-  const uint32_t *chunks = NULL;
-  const uint8_t *tail = NULL; // tail - last 8 bytes
-  int i = 0;
-  int l = len / 4; // chunk length
-
-  h = seed;
-
-  chunks = (const uint32_t *) (d + l * 4); // body
-  tail = (const uint8_t *) (d + l * 4); // last 8 byte chunk of `key'
-
-  // for each 4 byte chunk of `key'
-  for (i = -l; i != 0; ++i) {
-    // next 4 byte chunk of `key'
-    k = chunks[i];
-
-    // encode next 4 byte chunk of `key'
-    k *= c1;
-    k = (k &lt;&lt; r1) | (k &gt;&gt; (32 - r1));
-    k *= c2;
-
-    // append to hash
-    h ^= k;
-    h = (h &lt;&lt; r2) | (h &gt;&gt; (32 - r2));
-    h = h * m + n;
-  }
-
-  k = 0;
-
-  // remainder
-  switch (len &amp; 3) { // `len % 4'
-    case 3: k ^= (tail[2] &lt;&lt; 16);
-    case 2: k ^= (tail[1] &lt;&lt; 8);
-
-    case 1:
-      k ^= tail[0];
-      k *= c1;
-      k = (k &lt;&lt; r1) | (k &gt;&gt; (32 - r1));
-      k *= c2;
-      h ^= k;
-  }
-
-  h ^= len;
-
-  h ^= (h &gt;&gt; 16);
-  h *= 0x85ebca6b;
-  h ^= (h &gt;&gt; 13);
-  h *= 0xc2b2ae35;
-  h ^= (h &gt;&gt; 16);
-
-  return h;
-}
-</code></pre>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=ln>  1</span>    <span class=cm>/**
+</span><span class=ln>  2</span><span class=cm>     * `main.c&#39; - murmurhash
+</span><span class=ln>  3</span><span class=cm>     *
+</span><span class=ln>  4</span><span class=cm>     * copyright (c) 2014 joseph werle &lt;joseph.werle@gmail.com&gt;
+</span><span class=ln>  5</span><span class=cm>     */</span>
+<span class=ln>  6</span>    
+<span class=ln>  7</span>    <span class=cp>#include</span> <span class=cpf>&lt;stdio.h&gt;</span><span class=cp>
+</span><span class=ln>  8</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;stdlib.h&gt;</span><span class=cp>
+</span><span class=ln>  9</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;string.h&gt;</span><span class=cp>
+</span><span class=ln> 10</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;unistd.h&gt;</span><span class=cp>
+</span><span class=ln> 11</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;inttypes.h&gt;</span><span class=cp>
+</span><span class=ln> 12</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&#34;murmurhash.h&#34;</span><span class=cp>
+</span><span class=ln> 13</span><span class=cp></span>    
+<span class=ln> 14</span>    <span class=k>static</span> <span class=kt>void</span>
+<span class=ln> 15</span>    <span class=nf>usage</span> <span class=p>()</span> <span class=p>{</span>
+<span class=ln> 16</span>      <span class=n>fprintf</span><span class=p>(</span><span class=n>stderr</span><span class=p>,</span> <span class=s>&#34;usage: murmur [-hV] [options]</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span>
+<span class=ln> 17</span>    <span class=p>}</span>
+<span class=ln> 18</span>    
+<span class=ln> 19</span>    <span class=k>static</span> <span class=kt>void</span>   <span class=c1>//函数类型和函数名不一行写是什么风格orz...
+</span><span class=ln> 20</span><span class=c1></span>    <span class=n>help</span> <span class=p>()</span> <span class=p>{</span>
+<span class=ln> 21</span>      <span class=n>fprintf</span><span class=p>(</span><span class=n>stderr</span><span class=p>,</span> <span class=s>&#34;</span><span class=se>\n</span><span class=s>options:</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span>
+<span class=ln> 22</span>      <span class=n>fprintf</span><span class=p>(</span><span class=n>stderr</span><span class=p>,</span> <span class=s>&#34;</span><span class=se>\n</span><span class=s>  --seed=[seed]  hash seed (optional)&#34;</span><span class=p>);</span>
+<span class=ln> 23</span>      <span class=n>fprintf</span><span class=p>(</span><span class=n>stderr</span><span class=p>,</span> <span class=s>&#34;</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span>
+<span class=ln> 24</span>    <span class=p>}</span>
+<span class=ln> 25</span>    
+<span class=ln> 26</span>    <span class=k>static</span> <span class=kt>char</span> <span class=o>*</span>
+<span class=ln> 27</span>    <span class=n>read_stdin</span> <span class=p>()</span> <span class=p>{</span>
+<span class=ln> 28</span>      <span class=n>size_t</span> <span class=n>bsize</span> <span class=o>=</span> <span class=mi>1024</span><span class=p>;</span>
+<span class=ln> 29</span>      <span class=n>size_t</span> <span class=n>size</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+<span class=ln> 30</span>      <span class=kt>char</span> <span class=n>buf</span><span class=p>[</span><span class=n>bsize</span><span class=p>];</span>
+<span class=ln> 31</span>      <span class=kt>char</span> <span class=o>*</span><span class=n>res</span> <span class=o>=</span> <span class=p>(</span><span class=kt>char</span> <span class=o>*</span><span class=p>)</span> <span class=n>malloc</span><span class=p>(</span><span class=k>sizeof</span><span class=p>(</span><span class=kt>char</span><span class=p>)</span> <span class=o>*</span> <span class=n>bsize</span><span class=p>);</span>
+<span class=ln> 32</span>      <span class=kt>char</span> <span class=o>*</span><span class=n>tmp</span> <span class=o>=</span> <span class=nb>NULL</span><span class=p>;</span>
+<span class=ln> 33</span>    
+<span class=ln> 34</span>      <span class=c1>// memory issue
+</span><span class=ln> 35</span><span class=c1></span>      <span class=k>if</span> <span class=p>(</span><span class=nb>NULL</span> <span class=o>==</span> <span class=n>res</span><span class=p>)</span> <span class=p>{</span> <span class=k>return</span> <span class=nb>NULL</span><span class=p>;</span> <span class=p>}</span> <span class=c1>//申请内存失败了...
+</span><span class=ln> 36</span><span class=c1></span>    
+<span class=ln> 37</span>      <span class=c1>// cap
+</span><span class=ln> 38</span><span class=c1></span>      <span class=n>res</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>=</span> <span class=sc>&#39;\0&#39;</span><span class=p>;</span>
+<span class=ln> 39</span>    
+<span class=ln> 40</span>      <span class=c1>// read
+</span><span class=ln> 41</span><span class=c1></span>      <span class=k>if</span> <span class=p>(</span><span class=nb>NULL</span> <span class=o>!=</span> <span class=n>fgets</span><span class=p>(</span><span class=n>buf</span><span class=p>,</span> <span class=n>bsize</span><span class=p>,</span> <span class=n>stdin</span><span class=p>))</span> <span class=p>{</span>
+<span class=ln> 42</span>        <span class=c1>// store
+</span><span class=ln> 43</span><span class=c1></span>        <span class=n>tmp</span> <span class=o>=</span> <span class=n>res</span><span class=p>;</span> <span class=c1>//异常安全？ 
+</span><span class=ln> 44</span><span class=c1></span>        <span class=c1>// resize
+</span><span class=ln> 45</span><span class=c1></span>        <span class=n>size</span> <span class=o>+=</span> <span class=p>(</span><span class=n>size_t</span><span class=p>)</span> <span class=n>strlen</span><span class=p>(</span><span class=n>buf</span><span class=p>);</span>
+<span class=ln> 46</span>        <span class=c1>// realloc
+</span><span class=ln> 47</span><span class=c1></span>        <span class=n>res</span> <span class=o>=</span> <span class=p>(</span><span class=kt>char</span> <span class=o>*</span><span class=p>)</span> <span class=n>realloc</span><span class=p>(</span><span class=n>res</span><span class=p>,</span> <span class=n>size</span><span class=p>);</span>
+<span class=ln> 48</span>    
+<span class=ln> 49</span>        <span class=c1>// memory issues
+</span><span class=ln> 50</span><span class=c1></span>        <span class=k>if</span> <span class=p>(</span><span class=nb>NULL</span> <span class=o>==</span> <span class=n>res</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln> 51</span>          <span class=n>free</span><span class=p>(</span><span class=n>tmp</span><span class=p>);</span>
+<span class=ln> 52</span>          <span class=k>return</span> <span class=nb>NULL</span><span class=p>;</span>
+<span class=ln> 53</span>        <span class=p>}</span>
+<span class=ln> 54</span>    
+<span class=ln> 55</span>        <span class=c1>// yield
+</span><span class=ln> 56</span><span class=c1></span>        <span class=n>strcat</span><span class=p>(</span><span class=n>res</span><span class=p>,</span> <span class=n>buf</span><span class=p>);</span> <span class=c1>//将buf连接到res后面...
+</span><span class=ln> 57</span><span class=c1></span>      <span class=c1>//  printf(&#34;buf:%s res:%s\n&#34;,buf,res);
+</span><span class=ln> 58</span><span class=c1></span>        <span class=k>return</span> <span class=n>res</span><span class=p>;</span>
+<span class=ln> 59</span>      <span class=p>}</span>
+<span class=ln> 60</span>    
+<span class=ln> 61</span>      <span class=n>free</span><span class=p>(</span><span class=n>res</span><span class=p>);</span>
+<span class=ln> 62</span>    
+<span class=ln> 63</span>    
+<span class=ln> 64</span>      <span class=k>return</span> <span class=nb>NULL</span><span class=p>;</span>
+<span class=ln> 65</span>    <span class=p>}</span>
+<span class=ln> 66</span>    
+<span class=ln> 67</span>    <span class=cp>#define isopt(opt, str) (0 == strncmp(opt, str, strlen(str))) 
+</span><span class=ln> 68</span><span class=cp></span>    <span class=c1>//比较opt和str前strlen(str)个字符。
+</span><span class=ln> 69</span><span class=c1></span>    
+<span class=ln> 70</span>    <span class=cp>#define setopt(opt, key, var) {                       \
+</span><span class=ln> 71</span><span class=cp>        char tmp = 0;                                     \
+</span><span class=ln> 72</span><span class=cp>        size_t len = strlen(key) + 1;                     \
+</span><span class=ln> 73</span><span class=cp>        for (int i = 0; i &lt; len; ++i) { tmp = *opt++; }   \
+</span><span class=ln> 74</span><span class=cp>        var = opt;                                        \
+</span><span class=ln> 75</span><span class=cp>    }
+</span><span class=ln> 76</span><span class=cp></span>    <span class=c1>// key是&#34;seed&#34;,让len = strlen(key)+1，是为了把seed和‘=’跳过去。。。
+</span><span class=ln> 77</span><span class=c1></span>    <span class=c1>// 因此seed，‘=’，后面的数字之间不支持有空格。
+</span><span class=ln> 78</span><span class=c1></span>    <span class=c1>// 得到的var是*char型的seed.
+</span><span class=ln> 79</span><span class=c1></span>    
+<span class=ln> 80</span>    
+<span class=ln> 81</span>    <span class=kt>int</span>
+<span class=ln> 82</span>    <span class=n>main</span> <span class=p>(</span><span class=kt>int</span> <span class=n>argc</span><span class=p>,</span> <span class=kt>char</span> <span class=o>**</span><span class=n>argv</span><span class=p>)</span> <span class=p>{</span> <span class=c1>//argc是命令行的参数个数，**argv是字符串数组
+</span><span class=ln> 83</span><span class=c1></span>      <span class=kt>char</span> <span class=o>*</span><span class=n>buf</span> <span class=o>=</span> <span class=nb>NULL</span><span class=p>;</span>
+<span class=ln> 84</span>      <span class=kt>char</span> <span class=o>*</span><span class=n>key</span> <span class=o>=</span> <span class=nb>NULL</span><span class=p>;</span>
+<span class=ln> 85</span>      <span class=kt>char</span> <span class=o>*</span><span class=n>seed</span> <span class=o>=</span> <span class=nb>NULL</span><span class=p>;</span>
+<span class=ln> 86</span>      <span class=kt>uint32_t</span> <span class=n>h</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln> 87</span>    
+<span class=ln> 88</span>      <span class=c1>// parse opts
+</span><span class=ln> 89</span><span class=c1></span>      <span class=p>{</span>
+<span class=ln> 90</span>        <span class=kt>char</span> <span class=o>*</span><span class=n>opt</span> <span class=o>=</span> <span class=nb>NULL</span><span class=p>;</span>
+<span class=ln> 91</span>        <span class=kt>char</span> <span class=n>tmp</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln> 92</span>    
+<span class=ln> 93</span>     <span class=c1>//   for ( int i = 0 ;  i &lt; argc ; i++)  printf(&#34;Argument %d is %s.\n&#34;, i, argv[i]);
+</span><span class=ln> 94</span><span class=c1></span>        <span class=n>opt</span> <span class=o>=</span> <span class=o>*</span><span class=n>argv</span><span class=o>++</span><span class=p>;</span> <span class=c1>// unused，因为第0个参数就是“murmur”，跳过。
+</span><span class=ln> 95</span><span class=c1></span>        
+<span class=ln> 96</span>    
+<span class=ln> 97</span>        <span class=k>while</span> <span class=p>((</span><span class=n>opt</span> <span class=o>=</span> <span class=o>*</span><span class=n>argv</span><span class=o>++</span><span class=p>))</span> <span class=p>{</span> <span class=c1>//argv参数最后会变成null,退出循环...
+</span><span class=ln> 98</span><span class=c1></span>    <span class=c1>//	printf(&#34;opt: %s argv:%s\n&#34;,opt,*argv);
+</span><span class=ln> 99</span><span class=c1></span>    
+<span class=ln>100</span>          <span class=c1>// flags
+</span><span class=ln>101</span><span class=c1></span>          <span class=k>if</span> <span class=p>(</span><span class=sc>&#39;-&#39;</span> <span class=o>==</span> <span class=o>*</span><span class=n>opt</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>102</span>            <span class=k>switch</span> <span class=p>(</span><span class=o>*</span><span class=n>opt</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>103</span>              <span class=k>case</span> <span class=sc>&#39;h&#39;</span><span class=o>:</span>
+<span class=ln>104</span>                <span class=k>return</span> <span class=n>usage</span><span class=p>(),</span> <span class=n>help</span><span class=p>(),</span> <span class=mi>0</span><span class=p>;</span> <span class=c1>//直接用了return和逗号表达式...避免了break，代码简洁了（？
+</span><span class=ln>105</span><span class=c1></span>    
+<span class=ln>106</span>              <span class=k>case</span> <span class=sc>&#39;V&#39;</span><span class=o>:</span>
+<span class=ln>107</span>                <span class=n>fprintf</span><span class=p>(</span><span class=n>stderr</span><span class=p>,</span> <span class=s>&#34;%s</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>MURMURHASH_VERSION</span><span class=p>);</span>
+<span class=ln>108</span>                <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>109</span>    
+<span class=ln>110</span>              <span class=k>case</span> <span class=sc>&#39;-&#39;</span><span class=o>:</span> <span class=c1>//参数不要带空格。。。
+</span><span class=ln>111</span><span class=c1></span>                <span class=k>if</span> <span class=p>(</span><span class=n>isopt</span><span class=p>(</span><span class=n>opt</span><span class=p>,</span> <span class=s>&#34;seed&#34;</span><span class=p>))</span> <span class=p>{</span>
+<span class=ln>112</span>                  <span class=n>setopt</span><span class=p>(</span><span class=n>opt</span><span class=p>,</span> <span class=s>&#34;seed&#34;</span><span class=p>,</span> <span class=n>seed</span><span class=p>);</span>
+<span class=ln>113</span>                <span class=p>}</span>
+<span class=ln>114</span>                <span class=k>break</span><span class=p>;</span> <span class=c1>//是break而不是return，说明在--seed参数后面还可以跟其他参数。。
+</span><span class=ln>115</span><span class=c1></span>    		    <span class=c1>//如果跟了多了--seed参数，前面的参数会被最有一个覆盖掉，hash结果与最后一个seed对应。
+</span><span class=ln>116</span><span class=c1></span>              <span class=k>default</span><span class=o>:</span>
+<span class=ln>117</span>                <span class=n>tmp</span> <span class=o>=</span> <span class=o>*</span><span class=n>opt</span><span class=o>--</span><span class=p>;</span><span class=c1>//这个tmp好像没什么用啊？
+</span><span class=ln>118</span><span class=c1></span>                <span class=c1>// error
+</span><span class=ln>119</span><span class=c1></span>                <span class=n>fprintf</span><span class=p>(</span><span class=n>stderr</span><span class=p>,</span> <span class=s>&#34;unknown option: `%s&#39;</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>opt</span><span class=p>);</span>
+<span class=ln>120</span>                <span class=n>usage</span><span class=p>();</span>
+<span class=ln>121</span>                <span class=k>return</span> <span class=mi>1</span><span class=p>;</span>
+<span class=ln>122</span>            <span class=p>}</span>
+<span class=ln>123</span>          <span class=p>}</span>
+<span class=ln>124</span>        <span class=p>}</span>
+<span class=ln>125</span>      <span class=p>}</span>
+<span class=ln>126</span>    
+<span class=ln>127</span>      <span class=k>if</span> <span class=p>(</span><span class=nb>NULL</span> <span class=o>==</span> <span class=n>seed</span><span class=p>)</span> <span class=p>{</span> <span class=c1>//赞！ 避免了手残把等号写成赋值号的可能，下面也都用了这种写法。
+</span><span class=ln>128</span><span class=c1></span>        <span class=n>seed</span> <span class=o>=</span> <span class=s>&#34;0&#34;</span><span class=p>;</span>
+<span class=ln>129</span>      <span class=p>}</span>
+<span class=ln>130</span>    
+<span class=ln>131</span>    <span class=cp>#define hash(key) murmurhash(key, (uint32_t) strlen(key), (uint32_t) atoi(seed));
+</span><span class=ln>132</span><span class=cp></span>    						<span class=c1>//atoi，把字符串转成了int型，然后被强转了。。。
+</span><span class=ln>133</span><span class=c1></span>      <span class=k>if</span> <span class=p>(</span><span class=mi>1</span> <span class=o>==</span> <span class=n>isatty</span><span class=p>(</span><span class=mi>0</span><span class=p>))</span> <span class=p>{</span> <span class=k>return</span> <span class=mi>1</span><span class=p>;</span> <span class=p>}</span> <span class=c1>//isatty 判断文件描述词是否位终端机（？，是为1，不是为0
+</span><span class=ln>134</span><span class=c1></span>      <span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=n>ferror</span><span class=p>(</span><span class=n>stdin</span><span class=p>))</span> <span class=p>{</span> <span class=k>return</span> <span class=mi>1</span><span class=p>;</span> <span class=p>}</span>
+<span class=ln>135</span>      <span class=k>else</span> <span class=p>{</span>
+<span class=ln>136</span>        <span class=n>buf</span> <span class=o>=</span> <span class=n>read_stdin</span><span class=p>();</span>
+<span class=ln>137</span>        <span class=k>if</span> <span class=p>(</span><span class=nb>NULL</span> <span class=o>==</span> <span class=n>buf</span><span class=p>)</span> <span class=p>{</span> <span class=k>return</span> <span class=mi>1</span><span class=p>;</span> <span class=p>}</span>
+<span class=ln>138</span>        <span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=mi>0</span> <span class=o>==</span> <span class=n>strlen</span><span class=p>(</span><span class=n>buf</span><span class=p>))</span> <span class=p>{</span> <span class=n>buf</span> <span class=o>=</span> <span class=s>&#34;&#34;</span><span class=p>;</span> <span class=p>}</span>
+<span class=ln>139</span>        <span class=n>h</span> <span class=o>=</span> <span class=n>hash</span><span class=p>(</span><span class=n>buf</span><span class=p>);</span>
+<span class=ln>140</span>        <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%&#34;</span> <span class=n>PRIu32</span> <span class=s>&#34;</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>h</span><span class=p>);</span>
+<span class=ln>141</span>        <span class=c1>//PRIu32是头文件inttypes.h包含的宏，用于平台独立的printf编码。。
+</span><span class=ln>142</span><span class=c1></span>        <span class=c1>//会自动根据平台去对应相应的类型说明符。。。
+</span><span class=ln>143</span><span class=c1></span>        <span class=k>do</span> <span class=p>{</span>
+<span class=ln>144</span>          <span class=n>key</span> <span class=o>=</span> <span class=n>read_stdin</span><span class=p>();</span>
+<span class=ln>145</span>          <span class=k>if</span> <span class=p>(</span><span class=nb>NULL</span> <span class=o>==</span> <span class=n>key</span><span class=p>)</span> <span class=p>{</span> <span class=k>break</span><span class=p>;</span> <span class=p>}</span>
+<span class=ln>146</span>          <span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=mi>0</span> <span class=o>==</span> <span class=n>strlen</span><span class=p>(</span><span class=n>buf</span><span class=p>))</span> <span class=p>{</span> <span class=n>buf</span> <span class=o>=</span> <span class=s>&#34;&#34;</span><span class=p>;</span> <span class=p>}</span>
+<span class=ln>147</span>          <span class=n>h</span> <span class=o>=</span> <span class=n>hash</span><span class=p>(</span><span class=n>buf</span><span class=p>);</span>
+<span class=ln>148</span>          <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%d&#34;</span> <span class=n>PRIu32</span> <span class=s>&#34;</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>h</span><span class=p>);</span>
+<span class=ln>149</span>        <span class=p>}</span> <span class=k>while</span> <span class=p>(</span><span class=nb>NULL</span> <span class=o>!=</span> <span class=n>key</span><span class=p>);</span>
+<span class=ln>150</span>      <span class=p>}</span>
+<span class=ln>151</span>    
+<span class=ln>152</span>    <span class=cp>#undef hash
+</span><span class=ln>153</span><span class=cp></span>    
+<span class=ln>154</span>      <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>155</span>    <span class=p>}</span>
+<span class=ln>156</span>
+<span class=ln>157</span>
+<span class=ln>158</span>
+<span class=ln>159</span>    
+<span class=ln>160</span>    <span class=cm>/**
+</span><span class=ln>161</span><span class=cm>     * `murmurhash.h&#39; - murmurhash
+</span><span class=ln>162</span><span class=cm>     *
+</span><span class=ln>163</span><span class=cm>     * copyright (c) 2014 joseph werle &lt;joseph.werle@gmail.com&gt;
+</span><span class=ln>164</span><span class=cm>     */</span>
+<span class=ln>165</span>    
+<span class=ln>166</span>    <span class=cp>#include</span> <span class=cpf>&lt;stdlib.h&gt;</span><span class=cp>
+</span><span class=ln>167</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;stdio.h&gt;</span><span class=cp>
+</span><span class=ln>168</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;stdint.h&gt;</span><span class=cp>
+</span><span class=ln>169</span><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&#34;murmurhash.h&#34;</span><span class=cp>
+</span><span class=ln>170</span><span class=cp></span>    
+<span class=ln>171</span>    <span class=kt>uint32_t</span>
+<span class=ln>172</span>    <span class=n>murmurhash</span> <span class=p>(</span><span class=k>const</span> <span class=kt>char</span> <span class=o>*</span><span class=n>key</span><span class=p>,</span> <span class=kt>uint32_t</span> <span class=n>len</span><span class=p>,</span> <span class=kt>uint32_t</span> <span class=n>seed</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>173</span>      <span class=kt>uint32_t</span> <span class=n>c1</span> <span class=o>=</span> <span class=mh>0xcc9e2d51</span><span class=p>;</span>
+<span class=ln>174</span>      <span class=kt>uint32_t</span> <span class=n>c2</span> <span class=o>=</span> <span class=mh>0x1b873593</span><span class=p>;</span>
+<span class=ln>175</span>      <span class=kt>uint32_t</span> <span class=n>r1</span> <span class=o>=</span> <span class=mi>15</span><span class=p>;</span>
+<span class=ln>176</span>      <span class=kt>uint32_t</span> <span class=n>r2</span> <span class=o>=</span> <span class=mi>13</span><span class=p>;</span>
+<span class=ln>177</span>      <span class=kt>uint32_t</span> <span class=n>m</span> <span class=o>=</span> <span class=mi>5</span><span class=p>;</span>
+<span class=ln>178</span>      <span class=kt>uint32_t</span> <span class=n>n</span> <span class=o>=</span> <span class=mh>0xe6546b64</span><span class=p>;</span>
+<span class=ln>179</span>      <span class=kt>uint32_t</span> <span class=n>h</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>180</span>      <span class=kt>uint32_t</span> <span class=n>k</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>181</span>      <span class=kt>uint8_t</span> <span class=o>*</span><span class=n>d</span> <span class=o>=</span> <span class=p>(</span><span class=kt>uint8_t</span> <span class=o>*</span><span class=p>)</span> <span class=n>key</span><span class=p>;</span> <span class=c1>// 32 bit extract from `key&#39;
+</span><span class=ln>182</span><span class=c1></span>      <span class=k>const</span> <span class=kt>uint32_t</span> <span class=o>*</span><span class=n>chunks</span> <span class=o>=</span> <span class=nb>NULL</span><span class=p>;</span>
+<span class=ln>183</span>      <span class=k>const</span> <span class=kt>uint8_t</span> <span class=o>*</span><span class=n>tail</span> <span class=o>=</span> <span class=nb>NULL</span><span class=p>;</span> <span class=c1>// tail - last 8 bytes
+</span><span class=ln>184</span><span class=c1></span>      <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>185</span>      <span class=kt>int</span> <span class=n>l</span> <span class=o>=</span> <span class=n>len</span> <span class=o>/</span> <span class=mi>4</span><span class=p>;</span> <span class=c1>// chunk length
+</span><span class=ln>186</span><span class=c1></span>    
+<span class=ln>187</span>      <span class=n>h</span> <span class=o>=</span> <span class=n>seed</span><span class=p>;</span>
+<span class=ln>188</span>    
+<span class=ln>189</span>      <span class=n>chunks</span> <span class=o>=</span> <span class=p>(</span><span class=k>const</span> <span class=kt>uint32_t</span> <span class=o>*</span><span class=p>)</span> <span class=p>(</span><span class=n>d</span> <span class=o>+</span> <span class=n>l</span> <span class=o>*</span> <span class=mi>4</span><span class=p>);</span> <span class=c1>// body
+</span><span class=ln>190</span><span class=c1></span>      <span class=n>tail</span> <span class=o>=</span> <span class=p>(</span><span class=k>const</span> <span class=kt>uint8_t</span> <span class=o>*</span><span class=p>)</span> <span class=p>(</span><span class=n>d</span> <span class=o>+</span> <span class=n>l</span> <span class=o>*</span> <span class=mi>4</span><span class=p>);</span> <span class=c1>// last 8 byte chunk of `key&#39;
+</span><span class=ln>191</span><span class=c1></span>    
+<span class=ln>192</span>      <span class=c1>// for each 4 byte chunk of `key&#39;
+</span><span class=ln>193</span><span class=c1></span>      <span class=k>for</span> <span class=p>(</span><span class=n>i</span> <span class=o>=</span> <span class=o>-</span><span class=n>l</span><span class=p>;</span> <span class=n>i</span> <span class=o>!=</span> <span class=mi>0</span><span class=p>;</span> <span class=o>++</span><span class=n>i</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>194</span>        <span class=c1>// next 4 byte chunk of `key&#39;
+</span><span class=ln>195</span><span class=c1></span>        <span class=n>k</span> <span class=o>=</span> <span class=n>chunks</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+<span class=ln>196</span>    
+<span class=ln>197</span>        <span class=c1>// encode next 4 byte chunk of `key&#39;
+</span><span class=ln>198</span><span class=c1></span>        <span class=n>k</span> <span class=o>*=</span> <span class=n>c1</span><span class=p>;</span>
+<span class=ln>199</span>        <span class=n>k</span> <span class=o>=</span> <span class=p>(</span><span class=n>k</span> <span class=o>&lt;&lt;</span> <span class=n>r1</span><span class=p>)</span> <span class=o>|</span> <span class=p>(</span><span class=n>k</span> <span class=o>&gt;&gt;</span> <span class=p>(</span><span class=mi>32</span> <span class=o>-</span> <span class=n>r1</span><span class=p>));</span>
+<span class=ln>200</span>        <span class=n>k</span> <span class=o>*=</span> <span class=n>c2</span><span class=p>;</span>
+<span class=ln>201</span>    
+<span class=ln>202</span>        <span class=c1>// append to hash
+</span><span class=ln>203</span><span class=c1></span>        <span class=n>h</span> <span class=o>^=</span> <span class=n>k</span><span class=p>;</span>
+<span class=ln>204</span>        <span class=n>h</span> <span class=o>=</span> <span class=p>(</span><span class=n>h</span> <span class=o>&lt;&lt;</span> <span class=n>r2</span><span class=p>)</span> <span class=o>|</span> <span class=p>(</span><span class=n>h</span> <span class=o>&gt;&gt;</span> <span class=p>(</span><span class=mi>32</span> <span class=o>-</span> <span class=n>r2</span><span class=p>));</span>
+<span class=ln>205</span>        <span class=n>h</span> <span class=o>=</span> <span class=n>h</span> <span class=o>*</span> <span class=n>m</span> <span class=o>+</span> <span class=n>n</span><span class=p>;</span>
+<span class=ln>206</span>      <span class=p>}</span>
+<span class=ln>207</span>    
+<span class=ln>208</span>      <span class=n>k</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>209</span>    
+<span class=ln>210</span>      <span class=c1>// remainder
+</span><span class=ln>211</span><span class=c1></span>      <span class=k>switch</span> <span class=p>(</span><span class=n>len</span> <span class=o>&amp;</span> <span class=mi>3</span><span class=p>)</span> <span class=p>{</span> <span class=c1>// `len % 4&#39;
+</span><span class=ln>212</span><span class=c1></span>        <span class=k>case</span> <span class=mi>3</span><span class=o>:</span> <span class=n>k</span> <span class=o>^=</span> <span class=p>(</span><span class=n>tail</span><span class=p>[</span><span class=mi>2</span><span class=p>]</span> <span class=o>&lt;&lt;</span> <span class=mi>16</span><span class=p>);</span>
+<span class=ln>213</span>        <span class=k>case</span> <span class=mi>2</span><span class=o>:</span> <span class=n>k</span> <span class=o>^=</span> <span class=p>(</span><span class=n>tail</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span> <span class=o>&lt;&lt;</span> <span class=mi>8</span><span class=p>);</span>
+<span class=ln>214</span>    
+<span class=ln>215</span>        <span class=k>case</span> <span class=mi>1</span><span class=o>:</span>
+<span class=ln>216</span>          <span class=n>k</span> <span class=o>^=</span> <span class=n>tail</span><span class=p>[</span><span class=mi>0</span><span class=p>];</span>
+<span class=ln>217</span>          <span class=n>k</span> <span class=o>*=</span> <span class=n>c1</span><span class=p>;</span>
+<span class=ln>218</span>          <span class=n>k</span> <span class=o>=</span> <span class=p>(</span><span class=n>k</span> <span class=o>&lt;&lt;</span> <span class=n>r1</span><span class=p>)</span> <span class=o>|</span> <span class=p>(</span><span class=n>k</span> <span class=o>&gt;&gt;</span> <span class=p>(</span><span class=mi>32</span> <span class=o>-</span> <span class=n>r1</span><span class=p>));</span>
+<span class=ln>219</span>          <span class=n>k</span> <span class=o>*=</span> <span class=n>c2</span><span class=p>;</span>
+<span class=ln>220</span>          <span class=n>h</span> <span class=o>^=</span> <span class=n>k</span><span class=p>;</span>
+<span class=ln>221</span>      <span class=p>}</span>
+<span class=ln>222</span>    
+<span class=ln>223</span>      <span class=n>h</span> <span class=o>^=</span> <span class=n>len</span><span class=p>;</span>
+<span class=ln>224</span>    
+<span class=ln>225</span>      <span class=n>h</span> <span class=o>^=</span> <span class=p>(</span><span class=n>h</span> <span class=o>&gt;&gt;</span> <span class=mi>16</span><span class=p>);</span>
+<span class=ln>226</span>      <span class=n>h</span> <span class=o>*=</span> <span class=mh>0x85ebca6b</span><span class=p>;</span>
+<span class=ln>227</span>      <span class=n>h</span> <span class=o>^=</span> <span class=p>(</span><span class=n>h</span> <span class=o>&gt;&gt;</span> <span class=mi>13</span><span class=p>);</span>
+<span class=ln>228</span>      <span class=n>h</span> <span class=o>*=</span> <span class=mh>0xc2b2ae35</span><span class=p>;</span>
+<span class=ln>229</span>      <span class=n>h</span> <span class=o>^=</span> <span class=p>(</span><span class=n>h</span> <span class=o>&gt;&gt;</span> <span class=mi>16</span><span class=p>);</span>
+<span class=ln>230</span>    
+<span class=ln>231</span>      <span class=k>return</span> <span class=n>h</span><span class=p>;</span>
+<span class=ln>232</span>    <span class=p>}</span>
+<span class=ln>233</span>
+<span class=ln>234</span>
+</code></pre></div>
 </div>
+<h2 class=post_related>Posts in this Series</h2>
+<ul>
+<li><a href=https://111qqz.com/2022/03/leveldb-notes-03/ class=nav-link title="levelDB 代码阅读笔记 03 cache">levelDB 代码阅读笔记 03 cache</a></li>
+<li><a href=https://111qqz.com/2022/03/leveldb-notes-02/ class=nav-link title="levelDB 代码阅读笔记 02 comparator">levelDB 代码阅读笔记 02 comparator</a></li>
+<li><a href=https://111qqz.com/2022/02/leveldb-notes-01/ class=nav-link title="levelDB 代码阅读笔记 01 db.h">levelDB 代码阅读笔记 01 db.h</a></li>
+<li><a href=https://111qqz.com/2017/03/reading-murmurhash-code/ class=nav-link title=murmurhash源码分析>murmurhash源码分析</a></li>
+<li><a href=https://111qqz.com/2017/03/memory-barriers/ class=nav-link title="内存屏障（Memory Barriers）">内存屏障（Memory Barriers）</a></li>
+</ul>
 <div class=post_comments>
 </div>
 </article>
@@ -379,6 +389,24 @@ murmurhash (const char *key, uint32_t len, uint32_t seed) {
 深度学习框架工程师@Tencent, ex-ICPCer@HUST
 </div>
 <a href=https://111qqz.com/top/about/ class="button mt-1" role=button title="Read More">Read More</a>
+<h2 class=mt-4>Posts in this series</h2>
+<ul>
+<li>
+<a href=https://111qqz.com/2022/03/leveldb-notes-03/ class=nav-link title="levelDB 代码阅读笔记 03 cache">levelDB 代码阅读笔记 03 cache</a>
+</li>
+<li>
+<a href=https://111qqz.com/2022/03/leveldb-notes-02/ class=nav-link title="levelDB 代码阅读笔记 02 comparator">levelDB 代码阅读笔记 02 comparator</a>
+</li>
+<li>
+<a href=https://111qqz.com/2022/02/leveldb-notes-01/ class=nav-link title="levelDB 代码阅读笔记 01 db.h">levelDB 代码阅读笔记 01 db.h</a>
+</li>
+<li>
+<a href=https://111qqz.com/2017/03/reading-murmurhash-code/ class=nav-link title=murmurhash源码分析>murmurhash源码分析</a>
+</li>
+<li>
+<a href=https://111qqz.com/2017/03/memory-barriers/ class=nav-link title="内存屏障（Memory Barriers）">内存屏障（Memory Barriers）</a>
+</li>
+</ul>
 <h2 class=mt-4>Recent Posts</h2>
 <ul class=flex-column>
 <li>
@@ -415,7 +443,7 @@ ACM
 </a>
 <a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>
 其他
-<span class=button_tally>93</span>
+<span class=button_tally>91</span>
 </a>
 <a href=https://111qqz.com/categories/deep-learning/ class="post_tag button button_translucent" title=deep-learning>
 DEEP-LEARNING
@@ -431,7 +459,7 @@ DEEP-LEARNING
 </a>
 <a href=https://111qqz.com/categories/%E5%B7%A5%E7%A8%8B/ class="post_tag button button_translucent" title=工程>
 工程
-<span class=button_tally>51</span>
+<span class=button_tally>53</span>
 </a>
 <a href=https://111qqz.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/ class="post_tag button button_translucent" title=计算机视觉>
 计算机视觉
@@ -454,9 +482,17 @@ C++
 <div>
 <h2 class="mt-4 taxonomy" id=series-section>Series</h2>
 <nav class=tags_nav>
-<a href=https://111qqz.com/series/leveldb/ class="post_tag button button_translucent" title=leveldb>
-LEVELDB
-<span class=button_tally>3</span>
+<a href=https://111qqz.com/series/caffe%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/ class="post_tag button button_translucent" title=caffe源码阅读笔记>
+CAFFE源码阅读笔记
+<span class=button_tally>12</span>
+</a>
+<a href=https://111qqz.com/series/csapp/ class="post_tag button button_translucent" title=csapp>
+CSAPP
+<span class=button_tally>7</span>
+</a>
+<a href=https://111qqz.com/series/leveldb%E4%BB%A3%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/ class="post_tag button button_translucent" title=leveldb代码阅读笔记>
+LEVELDB代码阅读笔记
+<span class=button_tally>5</span>
 </a>
 </nav>
 </div>
