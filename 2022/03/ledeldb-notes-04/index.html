@@ -104,7 +104,7 @@
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Mar 13, 2022</span>
-<span class=post_time> · 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
+<span class=post_time> · 4 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
 </a>
 </span>
 <span class=page_only>&nbsp;·
@@ -128,9 +128,12 @@ Share on:
 <li><a href=#filterpolicy接口>FilterPolicy接口</a></li>
 <li><a href=#bloomfilter>bloomfilter</a>
 <ul>
+<li><a href=#基本原理>基本原理</a></li>
+<li><a href=#false-positive的来源>false positive的来源</a></li>
 <li><a href=#bloomfilter在leveldb中的实现>bloomfilter在levelDB中的实现</a></li>
 </ul>
 </li>
+<li><a href=#参考链接>参考链接</a></li>
 </ul>
 </nav>
 </div>
@@ -168,14 +171,21 @@ Share on:
 <p>一个十分经典的filter
 <strong>一般用于判断某个元素是否在一个集合中</strong>
 如果返回false,则一定不存在。 如果返回true，则大概率存在。返回true的情况存在一定的false positive.</p>
+<h3 id=基本原理>基本原理</h3>
 <div class="notices info">
 <div class=label>Info</div>
 <p>其核心原理有两部分:</p>
 <ol>
-<li>通过k个hash function对元素进行映射。
+<li>
+<p>通过k个hash function对元素进行映射。
 类似于从高维空间映射到低维空间。 不同的hash function映射到了不同的低维空间。
 如果在每个低维空间，两个元素经过k个hash function的值都相同，那么这两个元素大概率相同。
-如果任意一个hash function的值不同，那么这两个element一定不同。</li>
+如果任意一个hash function的值不同，那么这两个element一定不同。</p>
+</li>
+<li>
+<p>每个元素存k个hash 值还是很占空间，怎么办？ 将所有的hash值放到同一个长度为m的bitmap上。
+<strong>并认为如果一个元素不在集合中，那么大概率至少有一个bit不会被任何全集中的其他元素置为1.</strong></p>
+</li>
 </ol>
 </div>
 <p><strong>注意，这里说的"经过hash function的值"实际上说的是 "hash(element) % m 的值"，其中m为bitmap的长度</strong></p>
@@ -186,9 +196,127 @@ Share on:
 </picture>
 </figure>
 </p>
+<div class="notices info">
+<div class=label>Info</div>
+<p>有木有觉得和局部敏感HASH LSH很像？ 参考 <a href=https://111qqz.com/2017/03/simhash/>simdhash笔记</a> (<strong>simhash是用来处理文本相似的LSH算法，后面可以补一个LSH的笔记</strong>)</p>
+<p>尤其是核心原理中的第一点，几乎是完全一样的。都是利用hash function来做映射从而减少信息。
+<strong>最大的区别是LSH可以通过hash值的相似度来判断key的相似度，但是bloom filter中用的hash function是非LSH，只能判断相等或者不等。</strong></p>
+</div>
+<h3 id=false-positive的来源>false positive的来源</h3>
+<p>对于不在集合中的元素，有一定概率被误判为在集合中。</p>
+<p>这一误判实际上有两方面原因</p>
+<div class="notices tip">
+<div class=label>Tip</div>
+<ol>
+<li>
+<p>hash function带来的误判。 可能两个不同的元素的k组 hash(element) % m 得到的值是完全相同的。</p>
+</li>
+<li>
+<p>将映射之后得到的值放到同一个bitmap上带来的误判。 可能不存在于集合中的元素B算出的k个值恰好被若干个其他元素的结果置为了1. 从而带来误判</p>
+</li>
+</ol>
+</div>
 <h3 id=bloomfilter在leveldb中的实现>bloomfilter在levelDB中的实现</h3>
-<p><a href=https://leveldb-handbook.readthedocs.io/zh/latest/bloomfilter.html>https://leveldb-handbook.readthedocs.io/zh/latest/bloomfilter.html</a></p>
-<p><a href=https://en.wikipedia.org/wiki/Double_hashing>https://en.wikipedia.org/wiki/Double_hashing</a></p>
+<h4 id=最佳k值>最佳k值</h4>
+<p>有几个值得说明
+其一是构造函数中，hash function的个数为 bits_per_key * ln(2)</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>
+<span class=ln>2</span>  <span class=k>explicit</span> <span class=nf>BloomFilterPolicy</span><span class=p>(</span><span class=kt>int</span> <span class=n>bits_per_key</span><span class=p>)</span> <span class=o>:</span> <span class=n>bits_per_key_</span><span class=p>(</span><span class=n>bits_per_key</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>3</span>    <span class=c1>// We intentionally round down to reduce probing cost a little bit
+</span><span class=ln>4</span><span class=c1></span>    <span class=n>k_</span> <span class=o>=</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=n>size_t</span><span class=o>&gt;</span><span class=p>(</span><span class=n>bits_per_key</span> <span class=o>*</span> <span class=mf>0.69</span><span class=p>);</span>  <span class=c1>// 0.69 =~ ln(2)
+</span><span class=ln>5</span><span class=c1></span>    <span class=k>if</span> <span class=p>(</span><span class=n>k_</span> <span class=o>&lt;</span> <span class=mi>1</span><span class=p>)</span> <span class=n>k_</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+<span class=ln>6</span>    <span class=k>if</span> <span class=p>(</span><span class=n>k_</span> <span class=o>&gt;</span> <span class=mi>30</span><span class=p>)</span> <span class=n>k_</span> <span class=o>=</span> <span class=mi>30</span><span class=p>;</span>
+<span class=ln>7</span>  <span class=p>}</span>
+<span class=ln>8</span>
+</code></pre></div>
+<div class="notices warning">
+<div class=label>Warning</div>
+<p>首先要知道，hash function的个数k并不是越多越好。</p>
+<ul>
+<li>当k太小时，上一节所述的false positive的来源1会更容易发生</li>
+<li>当k太大时，上一节所述的false positive的来源2会更容易发生(因为每个元素占用了k个bit位，如果k比较大，很容易就把整个bitmap占满了)</li>
+</ul>
+</div>
+<p>那么k的值多少是比较合理的呢？
+可以推倒出k最好为 m/n * ln2. 其中m为bitmap的长度，n为key的个数。 m/n就是代码中的bits_per_key</p>
+<p>![最佳k值](images/leveldb/good choice of k in bloom filter.png)</p>
+<h4 id=如何得到k个hash-function>如何得到k个hash function</h4>
+<p>k是一个变量，那么问题来了
+上哪里找那么多不同的hash function去？</p>
+<p>levelDB中采用了double hash的做法来生成k个不同的hash值</p>
+<div class="notices tip">
+<div class=label>Tip</div>
+<p><a href=https://en.wikipedia.org/wiki/Double_hashing>double hashing</a> 本来是一种用于处理open addressing hash冲突的办法。
+和一般的linear probing 或者 quadratic probing的方法不同,double hash每次probing的长度是由key经过另一个hash function计算出来的(因此称之为double hashing). 由于每次probing的step是由key决定的，从而避免了频繁重复的hash冲突。</p>
+</div>
+<p>而levelDB这里用double hashing生成k个不同的hash value. <strong>计算成本非常低</strong></p>
+<p>具体来说,如下代码中的h是hash value1, delta是hash value2(没有用另一个hash function,而是简单的交换前后两部分的bit来生成一个不同的hash value).</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span>        <span class=kt>uint32_t</span> <span class=n>h</span> <span class=o>=</span> <span class=n>BloomHash</span><span class=p>(</span><span class=n>keys</span><span class=p>[</span><span class=n>i</span><span class=p>]);</span>
+<span class=ln> 3</span>      <span class=c1>// kk: 这里每次+delta就相当于生成不同的hash值了
+</span><span class=ln> 4</span><span class=c1></span>      <span class=c1>// delta是另一个hash value,通过翻转左右两边得到
+</span><span class=ln> 5</span><span class=c1></span>      <span class=k>const</span> <span class=kt>uint32_t</span> <span class=n>delta</span> <span class=o>=</span> <span class=p>(</span><span class=n>h</span> <span class=o>&gt;&gt;</span> <span class=mi>17</span><span class=p>)</span> <span class=o>|</span> <span class=p>(</span><span class=n>h</span> <span class=o>&lt;&lt;</span> <span class=mi>15</span><span class=p>);</span>  <span class=c1>// Rotate right 17 bits
+</span><span class=ln> 6</span><span class=c1></span>						     <span class=c1>// k 是hash函数的个数
+</span><span class=ln> 7</span><span class=c1></span>      <span class=k>for</span> <span class=p>(</span><span class=n>size_t</span> <span class=n>j</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>j</span> <span class=o>&lt;</span> <span class=n>k_</span><span class=p>;</span> <span class=n>j</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln> 8</span>	      <span class=c1>// kk: 这里就是把char* 当成bitset 使用
+</span><span class=ln> 9</span><span class=c1></span>        <span class=k>const</span> <span class=kt>uint32_t</span> <span class=n>bitpos</span> <span class=o>=</span> <span class=n>h</span> <span class=o>%</span> <span class=n>bits</span><span class=p>;</span>
+<span class=ln>10</span>        <span class=n>array</span><span class=p>[</span><span class=n>bitpos</span> <span class=o>/</span> <span class=mi>8</span><span class=p>]</span> <span class=o>|=</span> <span class=p>(</span><span class=mi>1</span> <span class=o>&lt;&lt;</span> <span class=p>(</span><span class=n>bitpos</span> <span class=o>%</span> <span class=mi>8</span><span class=p>));</span>
+<span class=ln>11</span>        <span class=n>h</span> <span class=o>+=</span> <span class=n>delta</span><span class=p>;</span>
+<span class=ln>12</span>      <span class=p>}</span>
+<span class=ln>13</span>    <span class=p>}</span>
+</code></pre></div><h4 id=bitmap实现>bitmap实现</h4>
+<p>levledb中没有用std::bitset,而是用一个char数组。每个位置表示8个bit.</p>
+<p>另外，最后生成的dst的结构为:
+将hash function的个数k encode进了dst中</p>
+<p>|bitmap....|k</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span>    <span class=k>const</span> <span class=n>size_t</span> <span class=n>init_size</span> <span class=o>=</span> <span class=n>dst</span><span class=o>-&gt;</span><span class=n>size</span><span class=p>();</span>
+<span class=ln> 3</span>    <span class=n>dst</span><span class=o>-&gt;</span><span class=n>resize</span><span class=p>(</span><span class=n>init_size</span> <span class=o>+</span> <span class=n>bytes</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+<span class=ln> 4</span>    <span class=n>dst</span><span class=o>-&gt;</span><span class=n>push_back</span><span class=p>(</span><span class=k>static_cast</span><span class=o>&lt;</span><span class=kt>char</span><span class=o>&gt;</span><span class=p>(</span><span class=n>k_</span><span class=p>));</span>  <span class=c1>// Remember # of probes in filter
+</span><span class=ln> 5</span><span class=c1></span>    <span class=c1>// kk: use char array as bitmap
+</span><span class=ln> 6</span><span class=c1></span>    <span class=c1>// each char has 8 position
+</span><span class=ln> 7</span><span class=c1></span>    <span class=kt>char</span><span class=o>*</span> <span class=n>array</span> <span class=o>=</span> <span class=o>&amp;</span><span class=p>(</span><span class=o>*</span><span class=n>dst</span><span class=p>)[</span><span class=n>init_size</span><span class=p>];</span>
+<span class=ln> 8</span>    <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>n</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln> 9</span>      <span class=c1>// Use double-hashing to generate a sequence of hash values.
+</span><span class=ln>10</span><span class=c1></span>      <span class=c1>// See analysis in [Kirsch,Mitzenmacher 2006].
+</span><span class=ln>11</span><span class=c1></span>      <span class=kt>uint32_t</span> <span class=n>h</span> <span class=o>=</span> <span class=n>BloomHash</span><span class=p>(</span><span class=n>keys</span><span class=p>[</span><span class=n>i</span><span class=p>]);</span>
+<span class=ln>12</span>      <span class=c1>// kk: 这里每次+delta就相当于生成不同的hash值了
+</span><span class=ln>13</span><span class=c1></span>      <span class=c1>// delta是另一个hash value,通过翻转左右两边得到
+</span><span class=ln>14</span><span class=c1></span>      <span class=k>const</span> <span class=kt>uint32_t</span> <span class=n>delta</span> <span class=o>=</span> <span class=p>(</span><span class=n>h</span> <span class=o>&gt;&gt;</span> <span class=mi>17</span><span class=p>)</span> <span class=o>|</span> <span class=p>(</span><span class=n>h</span> <span class=o>&lt;&lt;</span> <span class=mi>15</span><span class=p>);</span>  <span class=c1>// Rotate right 17 bits
+</span><span class=ln>15</span><span class=c1></span>						     <span class=c1>// k 是hash函数的个数
+</span><span class=ln>16</span><span class=c1></span>      <span class=k>for</span> <span class=p>(</span><span class=n>size_t</span> <span class=n>j</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>j</span> <span class=o>&lt;</span> <span class=n>k_</span><span class=p>;</span> <span class=n>j</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>17</span>	      <span class=c1>// kk: 这里就是把char* 当成bitset 使用
+</span><span class=ln>18</span><span class=c1></span>        <span class=k>const</span> <span class=kt>uint32_t</span> <span class=n>bitpos</span> <span class=o>=</span> <span class=n>h</span> <span class=o>%</span> <span class=n>bits</span><span class=p>;</span>
+<span class=ln>19</span>        <span class=n>array</span><span class=p>[</span><span class=n>bitpos</span> <span class=o>/</span> <span class=mi>8</span><span class=p>]</span> <span class=o>|=</span> <span class=p>(</span><span class=mi>1</span> <span class=o>&lt;&lt;</span> <span class=p>(</span><span class=n>bitpos</span> <span class=o>%</span> <span class=mi>8</span><span class=p>));</span>
+<span class=ln>20</span>        <span class=n>h</span> <span class=o>+=</span> <span class=n>delta</span><span class=p>;</span>
+<span class=ln>21</span>      <span class=p>}</span>
+<span class=ln>22</span>    <span class=p>}</span>
+</code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span>  <span class=c1>// Use the encoded k so that we can read filters generated by
+</span><span class=ln> 3</span><span class=c1></span>    <span class=c1>// bloom filters created using different parameters.
+</span><span class=ln> 4</span><span class=c1></span>    <span class=k>const</span> <span class=n>size_t</span> <span class=n>k</span> <span class=o>=</span> <span class=n>array</span><span class=p>[</span><span class=n>len</span> <span class=o>-</span> <span class=mi>1</span><span class=p>];</span>
+<span class=ln> 5</span>    <span class=k>if</span> <span class=p>(</span><span class=n>k</span> <span class=o>&gt;</span> <span class=mi>30</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln> 6</span>      <span class=c1>// Reserved for potentially new encodings for short bloom filters.
+</span><span class=ln> 7</span><span class=c1></span>      <span class=c1>// Consider it a match.
+</span><span class=ln> 8</span><span class=c1></span>      <span class=k>return</span> <span class=nb>true</span><span class=p>;</span>
+<span class=ln> 9</span>    <span class=p>}</span>
+<span class=ln>10</span>
+<span class=ln>11</span>    <span class=kt>uint32_t</span> <span class=n>h</span> <span class=o>=</span> <span class=n>BloomHash</span><span class=p>(</span><span class=n>key</span><span class=p>);</span>
+<span class=ln>12</span>    <span class=k>const</span> <span class=kt>uint32_t</span> <span class=n>delta</span> <span class=o>=</span> <span class=p>(</span><span class=n>h</span> <span class=o>&gt;&gt;</span> <span class=mi>17</span><span class=p>)</span> <span class=o>|</span> <span class=p>(</span><span class=n>h</span> <span class=o>&lt;&lt;</span> <span class=mi>15</span><span class=p>);</span>  <span class=c1>// Rotate right 17 bits
+</span><span class=ln>13</span><span class=c1></span>    <span class=k>for</span> <span class=p>(</span><span class=n>size_t</span> <span class=n>j</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>j</span> <span class=o>&lt;</span> <span class=n>k</span><span class=p>;</span> <span class=n>j</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>14</span>      <span class=k>const</span> <span class=kt>uint32_t</span> <span class=n>bitpos</span> <span class=o>=</span> <span class=n>h</span> <span class=o>%</span> <span class=n>bits</span><span class=p>;</span>
+<span class=ln>15</span>      <span class=c1>// 如果其中一个位置为0就返回false
+</span><span class=ln>16</span><span class=c1></span>      <span class=k>if</span> <span class=p>((</span><span class=n>array</span><span class=p>[</span><span class=n>bitpos</span> <span class=o>/</span> <span class=mi>8</span><span class=p>]</span> <span class=o>&amp;</span> <span class=p>(</span><span class=mi>1</span> <span class=o>&lt;&lt;</span> <span class=p>(</span><span class=n>bitpos</span> <span class=o>%</span> <span class=mi>8</span><span class=p>)))</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span> <span class=k>return</span> <span class=nb>false</span><span class=p>;</span>
+<span class=ln>17</span>      <span class=n>h</span> <span class=o>+=</span> <span class=n>delta</span><span class=p>;</span>
+<span class=ln>18</span>    <span class=p>}</span>
+<span class=ln>19</span>    <span class=k>return</span> <span class=nb>true</span><span class=p>;</span>
+<span class=ln>20</span>
+<span class=ln>21</span>
+</code></pre></div><h2 id=参考链接>参考链接</h2>
+<ul>
+<li><a href=https://leveldb-handbook.readthedocs.io/zh/latest/bloomfilter.html>leveldb bloomfilter</a></li>
+<li><a href=https://www.di.fc.ul.pt/~vcogo/notes/2017_06_ufsm_bf_lsh.pdf>Introducing (Probabilistic) Data Structures for Big Data: Bloom Filter and LSH</a></li>
+</ul>
 </div>
 <h2 class=post_related>Posts in this Series</h2>
 <ul>
