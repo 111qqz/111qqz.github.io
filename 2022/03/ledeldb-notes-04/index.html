@@ -1,6 +1,6 @@
 <!doctype html><html lang=en data-figures class=page>
 <head>
-<title>[施工中] levelDB 代码阅读笔记 04 filter | 111qqz的小窝</title>
+<title>levelDB 代码阅读笔记 04 filter | 111qqz的小窝</title>
 <meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta http-equiv=x-ua-compatible content="IE=edge">
@@ -11,9 +11,9 @@
 <meta name=description content="FilterPolicy接口 1 2class LEVELDB_EXPORT FilterPolicy { 3 public: 4 virtual ~FilterPolicy(); 5 6 // Return the name of this policy. Note that if the filter …">
 <meta name=twitter:card content="summary">
 <meta name=twitter:creator content>
-<meta name=twitter:title content="[施工中] levelDB 代码阅读笔记 04 filter">
+<meta name=twitter:title content="levelDB 代码阅读笔记 04 filter">
 <meta property="og:url" content="https://111qqz.com/2022/03/ledeldb-notes-04/">
-<meta property="og:title" content="[施工中] levelDB 代码阅读笔记 04 filter">
+<meta property="og:title" content="levelDB 代码阅读笔记 04 filter">
 <meta property="og:description" content="FilterPolicy接口 1 2class LEVELDB_EXPORT FilterPolicy { 3 public: 4 virtual ~FilterPolicy(); 5 6 // Return the name of this policy. Note that if the filter …">
 <meta property="og:image" content="https://111qqz.com/images/thumbnail.png">
 <link rel=apple-touch-icon sizes=180x180 href=https://111qqz.com/icons/apple-touch-icon.png>
@@ -99,7 +99,7 @@
 <main>
 <div class="grid-inverse wrap content">
 <article class=post_content>
-<h1 class=post_title>[施工中] levelDB 代码阅读笔记 04 filter</h1>
+<h1 class=post_title>levelDB 代码阅读笔记 04 filter</h1>
 <div class=post_meta>
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
@@ -110,9 +110,9 @@ Mar 13, 2022</span>
 <span class=page_only>&nbsp;·
 <div class=post_share>
 Share on:
-<a href="https://twitter.com/intent/tweet?text=%5b%e6%96%bd%e5%b7%a5%e4%b8%ad%5d%20levelDB%20%e4%bb%a3%e7%a0%81%e9%98%85%e8%af%bb%e7%ac%94%e8%ae%b0%2004%20filter&url=https%3a%2f%2f111qqz.com%2f2022%2f03%2fledeldb-notes-04%2f&tw_p=tweetbutton" class=twitter title="Share on Twitter" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#twitter"/></svg>
+<a href="https://twitter.com/intent/tweet?text=levelDB%20%e4%bb%a3%e7%a0%81%e9%98%85%e8%af%bb%e7%ac%94%e8%ae%b0%2004%20filter&url=https%3a%2f%2f111qqz.com%2f2022%2f03%2fledeldb-notes-04%2f&tw_p=tweetbutton" class=twitter title="Share on Twitter" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#twitter"/></svg>
 </a>
-<a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2f111qqz.com%2f2022%2f03%2fledeldb-notes-04%2f&t=%5b%e6%96%bd%e5%b7%a5%e4%b8%ad%5d%20levelDB%20%e4%bb%a3%e7%a0%81%e9%98%85%e8%af%bb%e7%ac%94%e8%ae%b0%2004%20filter" class=facebook title="Share on Facebook" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#facebook"/></svg>
+<a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2f111qqz.com%2f2022%2f03%2fledeldb-notes-04%2f&t=levelDB%20%e4%bb%a3%e7%a0%81%e9%98%85%e8%af%bb%e7%ac%94%e8%ae%b0%2004%20filter" class=facebook title="Share on Facebook" target=_blank rel=nofollow><svg class="icon"><use xlink:href="#facebook"/></svg>
 </a>
 <a href=#linkedinshare id=linkedinshare class=linkedin title="Share on LinkedIn" rel=nofollow><svg class="icon"><use xlink:href="#linkedin"/></svg>
 </a>
@@ -130,7 +130,13 @@ Share on:
 <ul>
 <li><a href=#基本原理>基本原理</a></li>
 <li><a href=#false-positive的来源>false positive的来源</a></li>
-<li><a href=#bloomfilter在leveldb中的实现>bloomfilter在levelDB中的实现</a></li>
+</ul>
+</li>
+<li><a href=#bloomfilter在leveldb中的实现>bloomfilter在levelDB中的实现</a>
+<ul>
+<li><a href=#最佳k值>最佳k值</a></li>
+<li><a href=#如何得到k个hash-function>如何得到k个hash function</a></li>
+<li><a href=#bitmap实现>bitmap实现</a></li>
 </ul>
 </li>
 <li><a href=#参考链接>参考链接</a></li>
@@ -216,8 +222,8 @@ Share on:
 </li>
 </ol>
 </div>
-<h3 id=bloomfilter在leveldb中的实现>bloomfilter在levelDB中的实现</h3>
-<h4 id=最佳k值>最佳k值</h4>
+<h2 id=bloomfilter在leveldb中的实现>bloomfilter在levelDB中的实现</h2>
+<h3 id=最佳k值>最佳k值</h3>
 <p>有几个值得说明
 其一是构造函数中，hash function的个数为 bits_per_key * ln(2)</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>
@@ -240,7 +246,7 @@ Share on:
 <p>那么k的值多少是比较合理的呢？
 可以推倒出k最好为 m/n * ln2. 其中m为bitmap的长度，n为key的个数。 m/n就是代码中的bits_per_key</p>
 <p>![最佳k值](images/leveldb/good choice of k in bloom filter.png)</p>
-<h4 id=如何得到k个hash-function>如何得到k个hash function</h4>
+<h3 id=如何得到k个hash-function>如何得到k个hash function</h3>
 <p>k是一个变量，那么问题来了
 上哪里找那么多不同的hash function去？</p>
 <p>levelDB中采用了double hash的做法来生成k个不同的hash值</p>
@@ -264,7 +270,7 @@ Share on:
 <span class=ln>11</span>        <span class=n>h</span> <span class=o>+=</span> <span class=n>delta</span><span class=p>;</span>
 <span class=ln>12</span>      <span class=p>}</span>
 <span class=ln>13</span>    <span class=p>}</span>
-</code></pre></div><h4 id=bitmap实现>bitmap实现</h4>
+</code></pre></div><h3 id=bitmap实现>bitmap实现</h3>
 <p>levledb中没有用std::bitset,而是用一个char数组。每个位置表示8个bit.</p>
 <p>另外，最后生成的dst的结构为:
 将hash function的个数k encode进了dst中</p>
@@ -320,7 +326,7 @@ Share on:
 </div>
 <h2 class=post_related>Posts in this Series</h2>
 <ul>
-<li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="[施工中] levelDB 代码阅读笔记 04 filter">[施工中] levelDB 代码阅读笔记 04 filter</a></li>
+<li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li>
 <li><a href=https://111qqz.com/2022/03/leveldb-notes-03/ class=nav-link title="levelDB 代码阅读笔记 03 cache">levelDB 代码阅读笔记 03 cache</a></li>
 <li><a href=https://111qqz.com/2022/03/leveldb-notes-02/ class=nav-link title="levelDB 代码阅读笔记 02 comparator">levelDB 代码阅读笔记 02 comparator</a></li>
 <li><a href=https://111qqz.com/2022/02/leveldb-notes-01/ class=nav-link title="levelDB 代码阅读笔记 01 db.h">levelDB 代码阅读笔记 01 db.h</a></li>
@@ -341,7 +347,7 @@ Share on:
 <h2 class=mt-4>Posts in this series</h2>
 <ul>
 <li>
-<a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="[施工中] levelDB 代码阅读笔记 04 filter">[施工中] levelDB 代码阅读笔记 04 filter</a>
+<a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a>
 </li>
 <li>
 <a href=https://111qqz.com/2022/03/leveldb-notes-03/ class=nav-link title="levelDB 代码阅读笔记 03 cache">levelDB 代码阅读笔记 03 cache</a>
