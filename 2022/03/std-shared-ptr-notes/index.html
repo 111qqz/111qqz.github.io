@@ -8,19 +8,17 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date),gtag('config','UA-219255388-1')</script>
 <meta property="og:locale" content="en">
 <meta property="og:type" content="article">
-<meta name=description content="概述 std::shared_ptr是智能指针的一种，在modern c++中被广泛使用
-虽然天天使用，但是有些细节还不是100%清楚，因此来整理一下
-线程安全 简单说，shared_ptr<T>的引用计数的实现是线程安全的，但是对于T的操作不是线程安全的
-control block type This …">
+<meta name=description content="概述 std::shared_ptr是智能指针的一种，在modern c++中被广泛使用（甚至滥用)
+虽然天天使用，但是有些细节还不是100%清楚，因此来整理一下 为了方便表述，下文只写shared_ptr,不在写std的namespace.
+组成 shared_ptr的实现中，成员通常由两部分组成。一个是所涵盖对象的 …">
 <meta name=twitter:card content="summary">
 <meta name=twitter:creator content>
 <meta name=twitter:title content="[施工中] std::shared_ptr 学习笔记">
 <meta property="og:url" content="https://111qqz.com/2022/03/std-shared-ptr-notes/">
 <meta property="og:title" content="[施工中] std::shared_ptr 学习笔记">
-<meta property="og:description" content="概述 std::shared_ptr是智能指针的一种，在modern c++中被广泛使用
-虽然天天使用，但是有些细节还不是100%清楚，因此来整理一下
-线程安全 简单说，shared_ptr<T>的引用计数的实现是线程安全的，但是对于T的操作不是线程安全的
-control block type This …">
+<meta property="og:description" content="概述 std::shared_ptr是智能指针的一种，在modern c++中被广泛使用（甚至滥用)
+虽然天天使用，但是有些细节还不是100%清楚，因此来整理一下 为了方便表述，下文只写shared_ptr,不在写std的namespace.
+组成 shared_ptr的实现中，成员通常由两部分组成。一个是所涵盖对象的 …">
 <meta property="og:image" content="https://111qqz.com/images/thumbnail.png">
 <link rel=apple-touch-icon sizes=180x180 href=https://111qqz.com/icons/apple-touch-icon.png>
 <link rel=icon type=image/png sizes=32x32 href=https://111qqz.com/icons/favicon-32x32.png>
@@ -110,7 +108,7 @@ control block type This …">
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Mar 5, 2022</span>
-<span class=post_time> · 1 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/cpp title=cpp class="post_tag button button_translucent">cpp
+<span class=post_time> · 3 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/cpp title=cpp class="post_tag button button_translucent">cpp
 </a><a href=https://111qqz.com/tags/modern-cpp title="modern cpp" class="post_tag button button_translucent">modern cpp
 </a><a href=https://111qqz.com/tags/stdshared_ptr title=std::shared_ptr class="post_tag button button_translucent">std::shared_ptr
 </a>
@@ -121,27 +119,186 @@ Mar 5, 2022</span>
 <nav id=TableOfContents>
 <ul>
 <li><a href=#概述>概述</a></li>
+<li><a href=#组成>组成</a></li>
+<li><a href=#control-block>control block</a></li>
 <li><a href=#线程安全>线程安全</a>
 <ul>
-<li><a href=#control-block>control block</a></li>
+<li><a href=#control-block-1>control block</a></li>
 </ul>
 </li>
 <li><a href=#type>type</a></li>
-<li><a href=#一种可能的实现>一种可能的实现</a></li>
+<li><a href=#一种简单的实现>一种简单的实现</a></li>
+<li><a href=#why-prefer-stdmake_shared-to-stdshared_ptrt-new-t>why prefer std::make_shared to std::shared_ptr<t> (new T)</a></li>
+<li><a href=#参考链接>参考链接</a></li>
 </ul>
 </nav>
 </div>
 <div class=post_body><h2 id=概述>概述</h2>
-<p>std::shared_ptr是智能指针的一种，在modern c++中被广泛使用</p>
-<p>虽然天天使用，但是有些细节还不是100%清楚，因此来整理一下</p>
+<p>std::shared_ptr是智能指针的一种，在modern c++中被广泛使用（<del>甚至滥用</del>)</p>
+<p>虽然天天使用，但是有些细节还不是100%清楚，因此来整理一下
+为了方便表述，下文只写shared_ptr,不在写std的namespace.</p>
+<h2 id=组成>组成</h2>
+<p>shared_ptr的实现中，成员通常由两部分组成。一个是所涵盖对象的指针，一个是control block 的指针</p>
+<h2 id=control-block>control block</h2>
+<div class="notices tip">
+<div class=label>Tip</div>
+<p>最重要的是，control block是 dynamically-allocated 的</p>
+</div>
+<p>(校招的时候某次面试，让我手写shared_ptr的实现，当时被多个object如何共享引用计数卡住了。。主要就是没意识到control block是单独allocate的，shared_ptr的实现中只是保留一个指针)</p>
+<p>control block中通常包含五部分</p>
+<ul>
+<li>either a pointer to the managed object or the managed object itself;</li>
+<li>the deleter (type-erased);</li>
+<li>the allocator (type-erased);</li>
+<li>the number of shared_ptrs that own the managed object;</li>
+<li>the number of weak_ptrs that refer to the managed object.</li>
+</ul>
+<p>这里面有几点值得强调：</p>
+<ol>
+<li>两个引用计数都是atomic的。</li>
+<li>weak_ptr是为了解决循环引用</li>
+<li>type-erased是什么？ 后面会介绍</li>
+</ol>
 <h2 id=线程安全>线程安全</h2>
-<p><strong>简单说，shared_ptr&lt;T>的引用计数的实现是线程安全的，但是对于T的操作不是线程安全的</strong></p>
-<h3 id=control-block>control block</h3>
+<p>shared_ptr的线程安全性快成c++面试的top10经典八股文了</p>
+<div class="notices tip">
+<div class=label>Tip</div>
+<p><em>简单说，shared_ptr&lt;T>的引用计数的实现是线程安全的(通常是两个atomic变量)，但是对于T的操作不是线程安全的</em>*</p>
+</div>
+<h3 id=control-block-1>control block</h3>
 <h2 id=type>type</h2>
 <p>This leads to a question of how std::shared_ptr<void> can destroy a managed object of a specific type despite holding a void*? It works because the object deletion procedure in std::shared_ptr is type-erased,</p>
 <p>std::shared_ptr的constrol block中有对应的deleter. 这个deleter不需要类型也可以work是因为这个deleter做到到了"type-erasure"
 也就是 <strong>确保程序在运行时执行不依赖类型信息</strong>。 参考 <a href=https://zh.wikipedia.org/wiki/%E7%B1%BB%E5%9E%8B%E6%93%A6%E9%99%A4>wiki-类型擦除</a></p>
-<h2 id=一种可能的实现>一种可能的实现</h2>
+<h2 id=一种简单的实现>一种简单的实现</h2>
+<p>这个实现中没有control block,只有一个简单的引用计数
+而且引用计数没有保证线程安全</p>
+<p>最重要的一点仍然是</p>
+<div class="notices tip">
+<div class=label>Tip</div>
+<blockquote>
+<p>Notice that the refCount variable is declared as a pointer. We cannot make it an integer variable because it won’t be possible to maintain its same value between different my_shared_ptr objects</p>
+</blockquote>
+</div>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>  1</span>
+<span class=ln>  2</span><span class=cp>#include</span> <span class=cpf>&lt;atomic&gt;</span><span class=cp>
+</span><span class=ln>  3</span><span class=cp>#include</span> <span class=cpf>&lt;cstdio&gt;</span><span class=cp>
+</span><span class=ln>  4</span><span class=cp>#include</span> <span class=cpf>&lt;ios&gt;</span><span class=cp>
+</span><span class=ln>  5</span><span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span><span class=ln>  6</span><span class=cp></span>
+<span class=ln>  7</span><span class=k>template</span> <span class=o>&lt;</span><span class=k>class</span> <span class=nc>T</span><span class=o>&gt;</span> <span class=k>class</span> <span class=nc>MySharedPtr</span> <span class=p>{</span>
+<span class=ln>  8</span><span class=k>private</span><span class=o>:</span>
+<span class=ln>  9</span>  <span class=n>T</span> <span class=o>*</span><span class=n>ptr</span> <span class=o>=</span> <span class=k>nullptr</span><span class=p>;</span>
+<span class=ln> 10</span>  <span class=kt>int</span> <span class=o>*</span><span class=n>refCount</span> <span class=o>=</span> <span class=k>nullptr</span><span class=p>;</span>
+<span class=ln> 11</span>
+<span class=ln> 12</span><span class=k>public</span><span class=o>:</span>
+<span class=ln> 13</span>  <span class=n>MySharedPtr</span><span class=p>()</span>
+<span class=ln> 14</span>      <span class=o>:</span> <span class=n>ptr</span><span class=p>(</span><span class=k>nullptr</span><span class=p>),</span> <span class=n>refCount</span><span class=p>(</span><span class=k>new</span> <span class=kt>int</span><span class=p>(</span><span class=mi>0</span><span class=p>))</span> <span class=c1>// default constructor
+</span><span class=ln> 15</span><span class=c1></span>  <span class=p>{}</span>
+<span class=ln> 16</span>
+<span class=ln> 17</span>  <span class=n>MySharedPtr</span><span class=p>(</span><span class=n>T</span> <span class=o>*</span><span class=n>ptr</span><span class=p>)</span>
+<span class=ln> 18</span>      <span class=o>:</span> <span class=n>ptr</span><span class=p>(</span><span class=n>ptr</span><span class=p>),</span> <span class=n>refCount</span><span class=p>(</span><span class=k>new</span> <span class=kt>int</span><span class=p>(</span><span class=mi>1</span><span class=p>))</span> <span class=c1>// constructor
+</span><span class=ln> 19</span><span class=c1></span>  <span class=p>{}</span>
+<span class=ln> 20</span>
+<span class=ln> 21</span>  <span class=cm>/*** Copy Semantics ***/</span>
+<span class=ln> 22</span>  <span class=n>MySharedPtr</span><span class=p>(</span><span class=k>const</span> <span class=n>MySharedPtr</span> <span class=o>&amp;</span><span class=n>obj</span><span class=p>)</span> <span class=c1>// copy constructor
+</span><span class=ln> 23</span><span class=c1></span>  <span class=p>{</span>
+<span class=ln> 24</span>    <span class=k>this</span><span class=o>-&gt;</span><span class=n>ptr</span> <span class=o>=</span> <span class=n>obj</span><span class=p>.</span><span class=n>ptr</span><span class=p>;</span> <span class=c1>// share the underlying pointer
+</span><span class=ln> 25</span><span class=c1></span>    <span class=k>this</span><span class=o>-&gt;</span><span class=n>refCount</span> <span class=o>=</span> <span class=n>obj</span><span class=p>.</span><span class=n>refCount</span><span class=p>;</span>
+<span class=ln> 26</span>    <span class=k>if</span> <span class=p>(</span><span class=k>nullptr</span> <span class=o>!=</span> <span class=n>obj</span><span class=p>.</span><span class=n>ptr</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln> 27</span>      <span class=p>(</span><span class=o>*</span><span class=k>this</span><span class=o>-&gt;</span><span class=n>refCount</span><span class=p>)</span><span class=o>++</span><span class=p>;</span> <span class=c1>// if the pointer is not null, increment the refCount
+</span><span class=ln> 28</span><span class=c1></span>    <span class=p>}</span>
+<span class=ln> 29</span>  <span class=p>}</span>
+<span class=ln> 30</span>
+<span class=ln> 31</span>  <span class=n>MySharedPtr</span> <span class=o>&amp;</span><span class=k>operator</span><span class=o>=</span><span class=p>(</span><span class=k>const</span> <span class=n>MySharedPtr</span> <span class=o>&amp;</span><span class=n>obj</span><span class=p>)</span> <span class=c1>// copy assignment
+</span><span class=ln> 32</span><span class=c1></span>  <span class=p>{</span>
+<span class=ln> 33</span>    <span class=n>__cleanup__</span><span class=p>();</span> <span class=c1>// cleanup any existing data
+</span><span class=ln> 34</span><span class=c1></span>
+<span class=ln> 35</span>    <span class=c1>// Assign incoming object&#39;s data to this object
+</span><span class=ln> 36</span><span class=c1></span>    <span class=k>this</span><span class=o>-&gt;</span><span class=n>ptr</span> <span class=o>=</span> <span class=n>obj</span><span class=p>.</span><span class=n>ptr</span><span class=p>;</span> <span class=c1>// share the underlying pointer
+</span><span class=ln> 37</span><span class=c1></span>    <span class=k>this</span><span class=o>-&gt;</span><span class=n>refCount</span> <span class=o>=</span> <span class=n>obj</span><span class=p>.</span><span class=n>refCount</span><span class=p>;</span>
+<span class=ln> 38</span>    <span class=k>if</span> <span class=p>(</span><span class=k>nullptr</span> <span class=o>!=</span> <span class=n>obj</span><span class=p>.</span><span class=n>ptr</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln> 39</span>      <span class=p>(</span><span class=o>*</span><span class=k>this</span><span class=o>-&gt;</span><span class=n>refCount</span><span class=p>)</span><span class=o>++</span><span class=p>;</span> <span class=c1>// if the pointer is not null, increment the refCount
+</span><span class=ln> 40</span><span class=c1></span>    <span class=p>}</span>
+<span class=ln> 41</span>    <span class=k>return</span> <span class=o>*</span><span class=k>this</span><span class=p>;</span>
+<span class=ln> 42</span>  <span class=p>}</span>
+<span class=ln> 43</span>
+<span class=ln> 44</span>  <span class=cm>/*** Move Semantics ***/</span>
+<span class=ln> 45</span>  <span class=n>MySharedPtr</span><span class=p>(</span><span class=n>MySharedPtr</span> <span class=o>&amp;&amp;</span><span class=n>dyingObj</span><span class=p>)</span> <span class=c1>// move constructor
+</span><span class=ln> 46</span><span class=c1></span>  <span class=p>{</span>
+<span class=ln> 47</span>    <span class=k>this</span><span class=o>-&gt;</span><span class=n>ptr</span> <span class=o>=</span> <span class=n>dyingObj</span><span class=p>.</span><span class=n>ptr</span><span class=p>;</span> <span class=c1>// share the underlying pointer
+</span><span class=ln> 48</span><span class=c1></span>    <span class=k>this</span><span class=o>-&gt;</span><span class=n>refCount</span> <span class=o>=</span> <span class=n>dyingObj</span><span class=p>.</span><span class=n>refCount</span><span class=p>;</span>
+<span class=ln> 49</span>
+<span class=ln> 50</span>    <span class=n>dyingObj</span><span class=p>.</span><span class=n>ptr</span> <span class=o>=</span> <span class=n>dyingObj</span><span class=p>.</span><span class=n>refCount</span> <span class=o>=</span> <span class=k>nullptr</span><span class=p>;</span> <span class=c1>// clean the dying object
+</span><span class=ln> 51</span><span class=c1></span>  <span class=p>}</span>
+<span class=ln> 52</span>
+<span class=ln> 53</span>  <span class=n>MySharedPtr</span> <span class=o>&amp;</span><span class=k>operator</span><span class=o>=</span><span class=p>(</span><span class=n>MySharedPtr</span> <span class=o>&amp;&amp;</span><span class=n>dyingObj</span><span class=p>)</span> <span class=c1>// move assignment
+</span><span class=ln> 54</span><span class=c1></span>  <span class=p>{</span>
+<span class=ln> 55</span>    <span class=n>__cleanup__</span><span class=p>();</span>            <span class=c1>// cleanup any existing data
+</span><span class=ln> 56</span><span class=c1></span>    <span class=k>this</span><span class=o>-&gt;</span><span class=n>ptr</span> <span class=o>=</span> <span class=n>dyingObj</span><span class=p>.</span><span class=n>ptr</span><span class=p>;</span> <span class=c1>// share the underlying pointer
+</span><span class=ln> 57</span><span class=c1></span>    <span class=k>this</span><span class=o>-&gt;</span><span class=n>refCount</span> <span class=o>=</span> <span class=n>dyingObj</span><span class=p>.</span><span class=n>refCount</span><span class=p>;</span>
+<span class=ln> 58</span>
+<span class=ln> 59</span>    <span class=n>dyingObj</span><span class=p>.</span><span class=n>ptr</span> <span class=o>=</span> <span class=n>dyingObj</span><span class=p>.</span><span class=n>refCount</span> <span class=o>=</span> <span class=k>nullptr</span><span class=p>;</span> <span class=c1>// clean the dying object
+</span><span class=ln> 60</span><span class=c1></span>    <span class=k>return</span> <span class=o>*</span><span class=k>this</span><span class=p>;</span>
+<span class=ln> 61</span>  <span class=p>}</span>
+<span class=ln> 62</span>
+<span class=ln> 63</span>  <span class=kt>int</span> <span class=nf>get_count</span><span class=p>()</span> <span class=k>const</span> <span class=p>{</span>
+<span class=ln> 64</span>    <span class=k>return</span> <span class=o>*</span><span class=n>refCount</span><span class=p>;</span> <span class=c1>// *this-&gt;refCount
+</span><span class=ln> 65</span><span class=c1></span>  <span class=p>}</span>
+<span class=ln> 66</span>
+<span class=ln> 67</span>  <span class=n>T</span> <span class=o>*</span><span class=nf>get</span><span class=p>()</span> <span class=k>const</span> <span class=p>{</span> <span class=k>return</span> <span class=k>this</span><span class=o>-&gt;</span><span class=n>ptr</span><span class=p>;</span> <span class=p>}</span>
+<span class=ln> 68</span>
+<span class=ln> 69</span>  <span class=n>T</span> <span class=o>*</span><span class=k>operator</span><span class=o>-&gt;</span><span class=p>()</span> <span class=k>const</span> <span class=p>{</span> <span class=k>return</span> <span class=k>this</span><span class=o>-&gt;</span><span class=n>ptr</span><span class=p>;</span> <span class=p>}</span>
+<span class=ln> 70</span>
+<span class=ln> 71</span>  <span class=n>T</span> <span class=o>&amp;</span><span class=k>operator</span><span class=o>*</span><span class=p>()</span> <span class=k>const</span> <span class=p>{</span> <span class=k>return</span> <span class=k>this</span><span class=o>-&gt;</span><span class=n>ptr</span><span class=p>;</span> <span class=p>}</span>
+<span class=ln> 72</span>
+<span class=ln> 73</span>  <span class=o>~</span><span class=n>MySharedPtr</span><span class=p>()</span> <span class=c1>// destructor
+</span><span class=ln> 74</span><span class=c1></span>  <span class=p>{</span>
+<span class=ln> 75</span>    <span class=n>__cleanup__</span><span class=p>();</span>
+<span class=ln> 76</span>  <span class=p>}</span>
+<span class=ln> 77</span>
+<span class=ln> 78</span><span class=k>private</span><span class=o>:</span>
+<span class=ln> 79</span>  <span class=kt>void</span> <span class=n>__cleanup__</span><span class=p>()</span> <span class=p>{</span>
+<span class=ln> 80</span>    <span class=k>if</span> <span class=p>(</span><span class=n>refCount</span> <span class=o>==</span> <span class=k>nullptr</span><span class=p>)</span>
+<span class=ln> 81</span>      <span class=k>return</span><span class=p>;</span>
+<span class=ln> 82</span>    <span class=p>(</span><span class=o>*</span><span class=n>refCount</span><span class=p>)</span><span class=o>--</span><span class=p>;</span>
+<span class=ln> 83</span>    <span class=k>if</span> <span class=p>(</span><span class=o>*</span><span class=n>refCount</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln> 84</span>      <span class=k>if</span> <span class=p>(</span><span class=k>nullptr</span> <span class=o>!=</span> <span class=n>ptr</span><span class=p>)</span>
+<span class=ln> 85</span>        <span class=k>delete</span> <span class=n>ptr</span><span class=p>;</span>
+<span class=ln> 86</span>      <span class=k>delete</span> <span class=n>refCount</span><span class=p>;</span>
+<span class=ln> 87</span>    <span class=p>}</span>
+<span class=ln> 88</span>  <span class=p>}</span>
+<span class=ln> 89</span><span class=p>};</span>
+<span class=ln> 90</span>
+<span class=ln> 91</span><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+<span class=ln> 92</span>  <span class=n>MySharedPtr</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span> <span class=n>val1</span><span class=p>(</span><span class=k>new</span> <span class=kt>int</span><span class=p>(</span><span class=mi>3</span><span class=p>));</span>
+<span class=ln> 93</span>  <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>val1</span><span class=p>.</span><span class=n>get_count</span><span class=p>());</span> <span class=c1>// 1
+</span><span class=ln> 94</span><span class=c1></span>  <span class=n>MySharedPtr</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span> <span class=n>val2</span><span class=p>(</span><span class=n>val1</span><span class=p>);</span>      <span class=c1>// copy ctor
+</span><span class=ln> 95</span><span class=c1></span>  <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>val1</span><span class=p>.</span><span class=n>get_count</span><span class=p>());</span> <span class=c1>// 2
+</span><span class=ln> 96</span><span class=c1></span>  <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>val2</span><span class=p>.</span><span class=n>get_count</span><span class=p>());</span> <span class=c1>// 2
+</span><span class=ln> 97</span><span class=c1></span>  <span class=k>auto</span> <span class=n>val3</span> <span class=o>=</span> <span class=n>val1</span><span class=p>;</span>                 <span class=c1>//  copy assigment operator
+</span><span class=ln> 98</span><span class=c1></span>  <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>val1</span><span class=p>.</span><span class=n>get_count</span><span class=p>());</span> <span class=c1>// 3
+</span><span class=ln> 99</span><span class=c1></span>  <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>val3</span><span class=p>.</span><span class=n>get_count</span><span class=p>());</span> <span class=c1>// 3
+</span><span class=ln>100</span><span class=c1></span>  <span class=k>auto</span> <span class=n>val4</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>move</span><span class=p>(</span><span class=n>val1</span><span class=p>);</span>      <span class=c1>// move ctor operator
+</span><span class=ln>101</span><span class=c1></span>  <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>val4</span><span class=p>.</span><span class=n>get_count</span><span class=p>());</span> <span class=c1>// 3
+</span><span class=ln>102</span><span class=c1></span>  <span class=n>val4</span> <span class=o>=</span> <span class=n>MySharedPtr</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span><span class=p>(</span><span class=k>new</span> <span class=kt>int</span><span class=p>(</span><span class=mi>10</span><span class=p>));</span>
+<span class=ln>103</span>  <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>val4</span><span class=p>.</span><span class=n>get_count</span><span class=p>());</span>  <span class=c1>// 1 , new object
+</span><span class=ln>104</span><span class=c1></span>  <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>val2</span><span class=p>.</span><span class=n>get_count</span><span class=p>());</span>  <span class=c1>// 2, val4 removed
+</span><span class=ln>105</span><span class=c1>//   printf(&#34;%d\n&#34;, val2.get_count());
+</span><span class=ln>106</span><span class=c1></span>
+<span class=ln>107</span>  <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln>108</span><span class=p>}</span>
+<span class=ln>109</span>
+</code></pre></div><h2 id=why-prefer-stdmake_shared-to-stdshared_ptrt-new-t>why prefer std::make_shared to std::shared_ptr<t> (new T)</h2>
+<ol>
+<li>异常安全</li>
+<li>对称性</li>
+<li>std::make_shared是一次分配T+controll block的内存，使用shared_ptr的话要分配两次。 一次是new T,一次是为control block分配内存</li>
+</ol>
+<h2 id=参考链接>参考链接</h2>
+<ul>
+<li><a href=https://medium.com/analytics-vidhya/c-shared-ptr-and-how-to-write-your-own-d0d385c118ad>C++: shared_ptr and how to write your own</a></li>
+</ul>
 </div>
 <div class=post_comments>
 </div>
