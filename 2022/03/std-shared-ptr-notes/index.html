@@ -108,7 +108,7 @@
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Mar 5, 2022</span>
-<span class=post_time> · 3 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/cpp title=cpp class="post_tag button button_translucent">cpp
+<span class=post_time> · 4 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/cpp title=cpp class="post_tag button button_translucent">cpp
 </a><a href=https://111qqz.com/tags/modern-cpp title="modern cpp" class="post_tag button button_translucent">modern cpp
 </a><a href=https://111qqz.com/tags/stdshared_ptr title=std::shared_ptr class="post_tag button button_translucent">std::shared_ptr
 </a>
@@ -121,12 +121,8 @@ Mar 5, 2022</span>
 <li><a href=#概述>概述</a></li>
 <li><a href=#组成>组成</a></li>
 <li><a href=#control-block>control block</a></li>
-<li><a href=#线程安全>线程安全</a>
-<ul>
-<li><a href=#control-block-1>control block</a></li>
-</ul>
-</li>
-<li><a href=#type>type</a></li>
+<li><a href=#线程安全>线程安全</a></li>
+<li><a href=#type-erasureerase的名词形式>type erasure(erase的名词形式)</a></li>
 <li><a href=#一种简单的实现>一种简单的实现</a></li>
 <li><a href=#why-prefer-stdmake_shared-to-stdshared_ptrt-new-t>why prefer std::make_shared to std::shared_ptr<t> (new T)</a></li>
 <li><a href=#参考链接>参考链接</a></li>
@@ -160,19 +156,40 @@ Mar 5, 2022</span>
 <li>type-erased是什么？ 后面会介绍</li>
 </ol>
 <h2 id=线程安全>线程安全</h2>
-<p>shared_ptr的线程安全性快成c++面试的top10经典八股文了</p>
+<p>shared_ptr的线程安全性快成c++面试的top10经典八股文了
 <div class="notices tip">
 <div class=label>Tip</div>
 <p><em>简单说，shared_ptr&lt;T>的引用计数的实现是线程安全的(通常是两个atomic变量)，但是对于T的操作不是线程安全的</em>*</p>
 </div>
-<h3 id=control-block-1>control block</h3>
-<h2 id=type>type</h2>
-<p>This leads to a question of how std::shared_ptr<void> can destroy a managed object of a specific type despite holding a void*? It works because the object deletion procedure in std::shared_ptr is type-erased,</p>
-<p>std::shared_ptr的constrol block中有对应的deleter. 这个deleter不需要类型也可以work是因为这个deleter做到到了"type-erasure"
-也就是 <strong>确保程序在运行时执行不依赖类型信息</strong>。 参考 <a href=https://zh.wikipedia.org/wiki/%E7%B1%BB%E5%9E%8B%E6%93%A6%E9%99%A4>wiki-类型擦除</a></p>
+</p>
+<h2 id=type-erasureerase的名词形式>type erasure(erase的名词形式)</h2>
+<p>是指在程序运行的时候，不需要知道具体的类型。与之相反的是 type-passing semantics
+<div class="notices tip">
+<div class=label>Tip</div>
+<p>实现 type-erasure semantics的主要目的是，使得程序运行时不依赖具体的类型信息。</p>
+</div>
+</p>
+<p>举个例子，
+std::shared_ptr的constrol block中有对应的deleter. 这个deleter不需要类型也可以work是因为这个deleter做到到了"type-erasure"
+也就是 <strong>确保程序在运行时执行不依赖类型信息</strong>。</p>
+<p>从代码来看,如下代码时可以正常编译的</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span><span class=cp>#include</span> <span class=cpf>&lt;memory&gt;</span><span class=cp>
+</span><span class=ln>2</span><span class=cp></span><span class=k>class</span> <span class=nc>Toy</span><span class=p>;</span> <span class=c1>// only forward declaration
+</span><span class=ln>3</span><span class=c1></span> 
+<span class=ln>4</span><span class=n>std</span><span class=o>::</span><span class=n>shared_ptr</span><span class=o>&lt;</span><span class=n>Toy</span><span class=o>&gt;</span> <span class=n>fwd</span> <span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>shared_ptr</span><span class=o>&lt;</span><span class=n>Toy</span><span class=o>&gt;</span> <span class=n>p</span><span class=p>)</span>
+<span class=ln>5</span><span class=p>{</span>
+<span class=ln>6</span>  <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>p</span><span class=p>)</span> <span class=k>throw</span> <span class=kt>int</span><span class=p>{};</span>
+<span class=ln>7</span>  <span class=k>return</span> <span class=n>p</span><span class=p>;</span>
+<span class=ln>8</span><span class=p>}</span>
+<span class=ln>9</span>
+</code></pre></div><p><strong>why? Toy是一个in-complete type, shared_ptr为什么能成功析构？</strong></p>
+<p>这个是因为。。deleter的类型在创建后就被erased了。 后续析构并不需要知道deleter的具体类型</p>
+<blockquote>
+<p>So how come shared_ptr works? It may also need to delete its pointee. Well, you probably know the answer already: shared_ptr’s deleter is type-erased. Its type is something like std::function&lt;void(Toy*)>. shared_ptr just needs to call it, and it does not care what the deleter does. Of course, upon creation of the shared_ptr, you have to tell it exactly how the deleter should delete the object, but once the construction is done, the type of the deleter is erased</p>
+</blockquote>
+<p>这也是为什么std::shared_ptr&lt;void> 合法并且可以正确析构的原因</p>
 <h2 id=一种简单的实现>一种简单的实现</h2>
-<p>这个实现中没有control block,只有一个简单的引用计数
-而且引用计数没有保证线程安全</p>
+<p>这个实现中没有control block,只有一个简单的引用计数</p>
 <p>最重要的一点仍然是</p>
 <div class="notices tip">
 <div class=label>Tip</div>
@@ -297,13 +314,18 @@ Mar 5, 2022</span>
 <span class=ln>117</span>
 </code></pre></div><h2 id=why-prefer-stdmake_shared-to-stdshared_ptrt-new-t>why prefer std::make_shared to std::shared_ptr<t> (new T)</h2>
 <ol>
-<li>异常安全</li>
-<li>对称性</li>
+<li>异常安全(new之后如果出现OOM会导致分配的内存没有释放)</li>
+<li>对称性（new和delete最好成对出现)</li>
 <li>std::make_shared是一次分配T+controll block的内存，使用shared_ptr的话要分配两次。 一次是new T,一次是为control block分配内存</li>
 </ol>
 <h2 id=参考链接>参考链接</h2>
 <ul>
-<li><a href=https://medium.com/analytics-vidhya/c-shared-ptr-and-how-to-write-your-own-d0d385c118ad>C++: shared_ptr and how to write your own</a></li>
+<li>
+<p><a href=https://medium.com/analytics-vidhya/c-shared-ptr-and-how-to-write-your-own-d0d385c118ad>C++: shared_ptr and how to write your own</a></p>
+</li>
+<li>
+<p><a href=https://akrzemi1.wordpress.com/2013/12/11/type-erasure-part-iii/>Andrzej's C++ blog Type erasure — Part III</a></p>
+</li>
 </ul>
 </div>
 <div class=post_comments>
