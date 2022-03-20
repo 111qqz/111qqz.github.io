@@ -108,7 +108,7 @@
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Mar 5, 2022</span>
-<span class=post_time> · 4 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/cpp title=cpp class="post_tag button button_translucent">cpp
+<span class=post_time> · 5 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/cpp title=cpp class="post_tag button button_translucent">cpp
 </a><a href=https://111qqz.com/tags/modern-cpp title="modern cpp" class="post_tag button button_translucent">modern cpp
 </a><a href=https://111qqz.com/tags/stdshared_ptr title=std::shared_ptr class="post_tag button button_translucent">std::shared_ptr
 </a>
@@ -163,6 +163,7 @@ Mar 5, 2022</span>
 </div>
 </p>
 <h2 id=type-erasureerase的名词形式>type erasure(erase的名词形式)</h2>
+<p>也称为type-earsed</p>
 <p>是指在程序运行的时候，不需要知道具体的类型。与之相反的是 type-passing semantics
 <div class="notices tip">
 <div class=label>Tip</div>
@@ -188,7 +189,74 @@ std::shared_ptr的constrol block中有对应的deleter. 这个deleter不需要�
 <p>So how come shared_ptr works? It may also need to delete its pointee. Well, you probably know the answer already: shared_ptr’s deleter is type-erased. Its type is something like std::function&lt;void(Toy*)>. shared_ptr just needs to call it, and it does not care what the deleter does. Of course, upon creation of the shared_ptr, you have to tell it exactly how the deleter should delete the object, but once the construction is done, the type of the deleter is erased</p>
 </blockquote>
 <p>这也是为什么std::shared_ptr&lt;void> 合法并且可以正确析构的原因</p>
-<h2 id=一种简单的实现>一种简单的实现</h2>
+<p>一个实例的实现是</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span><span class=k>namespace</span> <span class=n>detail</span> <span class=p>{</span>
+<span class=ln> 3</span>   <span class=k>struct</span> <span class=nc>deleter_base</span> <span class=p>{</span>
+<span class=ln> 4</span>      <span class=k>virtual</span> <span class=o>~</span><span class=n>deleter_base</span><span class=p>()</span> <span class=p>{}</span>
+<span class=ln> 5</span>      <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>operator</span><span class=p>()(</span> <span class=kt>void</span><span class=o>*</span> <span class=p>)</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+<span class=ln> 6</span>   <span class=p>};</span>
+<span class=ln> 7</span>   <span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>T</span><span class=o>&gt;</span>
+<span class=ln> 8</span>   <span class=k>struct</span> <span class=nc>deleter</span> <span class=o>:</span> <span class=n>deleter_base</span> <span class=p>{</span>
+<span class=ln> 9</span>      <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>operator</span><span class=p>()(</span> <span class=kt>void</span><span class=o>*</span> <span class=n>p</span> <span class=p>)</span> <span class=p>{</span>
+<span class=ln>10</span>         <span class=k>delete</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=n>T</span><span class=o>*&gt;</span><span class=p>(</span><span class=n>p</span><span class=p>);</span>
+<span class=ln>11</span>      <span class=p>}</span>
+<span class=ln>12</span>   <span class=p>};</span>
+<span class=ln>13</span><span class=p>}</span>
+<span class=ln>14</span><span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>T</span><span class=o>&gt;</span>
+<span class=ln>15</span><span class=k>class</span> <span class=nc>simple_ptr</span> <span class=p>{</span>
+<span class=ln>16</span>   <span class=n>T</span><span class=o>*</span> <span class=n>ptr</span><span class=p>;</span>
+<span class=ln>17</span>   <span class=n>detail</span><span class=o>::</span><span class=n>deleter_base</span><span class=o>*</span> <span class=n>deleter</span><span class=p>;</span>
+<span class=ln>18</span><span class=k>public</span><span class=o>:</span>
+<span class=ln>19</span>   <span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>U</span><span class=o>&gt;</span>
+<span class=ln>20</span>   <span class=n>simple_ptr</span><span class=p>(</span> <span class=n>U</span><span class=o>*</span> <span class=n>p</span> <span class=p>)</span> <span class=p>{</span>
+<span class=ln>21</span>      <span class=n>ptr</span> <span class=o>=</span> <span class=n>p</span><span class=p>;</span>
+<span class=ln>22</span>      <span class=n>deleter</span> <span class=o>=</span> <span class=k>new</span> <span class=n>detail</span><span class=o>::</span><span class=n>deleter</span><span class=o>&lt;</span><span class=n>U</span><span class=o>&gt;</span><span class=p>();</span>
+<span class=ln>23</span>   <span class=p>}</span>
+<span class=ln>24</span>   <span class=o>~</span><span class=n>simple_ptr</span><span class=p>()</span> <span class=p>{</span>
+<span class=ln>25</span>      <span class=p>(</span><span class=o>*</span><span class=n>deleter</span><span class=p>)(</span> <span class=n>ptr</span> <span class=p>);</span>
+<span class=ln>26</span>      <span class=k>delete</span> <span class=n>deleter</span><span class=p>;</span>
+<span class=ln>27</span>   <span class=p>}</span>
+<span class=ln>28</span><span class=p>};</span>
+<span class=ln>29</span>
+<span class=ln>30</span>
+</code></pre></div><p>这里值得注意的有两点.</p>
+<ul>
+<li>shared_ptr</li>
+</ul>
+<div class="notices tip">
+<div class=label>Tip</div>
+<ol>
+<li>
+<p>shared_ptr的class template parameter只有一个T，但是构造函数有另外个member tempalte parameter U. 也就是说shared_ptr的deleter不属于其shared_ptr类型的一部分。 这样做增加了灵活性（同样的T可以使用不同的deleter),但是也增加了额外的开销（需要存储deleter，并且如果没有使用std::make_shard的话需要额外的空间分配). 但是shared_ptr由于存在额外的引用计数，本来就要有额外的开销</p>
+</li>
+<li>
+<p>与之不同的是，std::unique_ptr 的class template parameter 有两个，Object类型T和deleter U. 这使得deleter是unique_ptr类型的一部分，但是带来的好处就是不需要存储deleter到unique_ptr中。</p>
+</li>
+</ol>
+</div>
+<p>一个unique_ptr的实例:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>
+<span class=ln>2</span><span class=k>template</span> <span class=o>&lt;</span><span class=k>class</span> <span class=nc>T</span><span class=p>,</span> <span class=k>class</span> <span class=nc>D</span> <span class=o>=</span> <span class=n>default_delete</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;&gt;</span> 
+<span class=ln>3</span><span class=k>class</span> <span class=nc>unique_ptr</span>
+<span class=ln>4</span><span class=p>{</span>
+<span class=ln>5</span>    <span class=n>unique_ptr</span><span class=p>(</span><span class=n>T</span><span class=o>*</span><span class=p>,</span> <span class=n>D</span><span class=o>&amp;</span><span class=p>);</span> <span class=c1>//simplified
+</span><span class=ln>6</span><span class=c1></span>    <span class=p>...</span>
+<span class=ln>7</span><span class=p>};</span>
+<span class=ln>8</span>
+</code></pre></div><p>如下的代码无法编译成功，会报错"default deleter cannot delete an incomplete type",</p>
+<p>原因就是deleter是unique_ptr type的一部分</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span><span class=cp>#include</span> <span class=cpf>&lt;memory&gt;</span><span class=cp>
+</span><span class=ln> 2</span><span class=cp></span><span class=k>class</span> <span class=nc>Toy</span><span class=p>;</span> <span class=c1>// only forward declaration
+</span><span class=ln> 3</span><span class=c1></span> 
+<span class=ln> 4</span><span class=n>std</span><span class=o>::</span><span class=n>unique_ptr</span><span class=o>&lt;</span><span class=n>Toy</span><span class=o>&gt;</span> <span class=n>fwd</span> <span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>unique_ptr</span><span class=o>&lt;</span><span class=n>Toy</span><span class=o>&gt;</span> <span class=n>p</span><span class=p>)</span>
+<span class=ln> 5</span><span class=p>{</span>
+<span class=ln> 6</span>  <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>p</span><span class=p>)</span> <span class=k>throw</span> <span class=kt>int</span><span class=p>{};</span>
+<span class=ln> 7</span>  <span class=k>return</span> <span class=n>p</span><span class=p>;</span>
+<span class=ln> 8</span><span class=p>}</span>
+<span class=ln> 9</span>
+<span class=ln>10</span>
+</code></pre></div><h2 id=一种简单的实现>一种简单的实现</h2>
 <p>这个实现中没有control block,只有一个简单的引用计数</p>
 <p>最重要的一点仍然是</p>
 <div class="notices tip">
@@ -325,6 +393,12 @@ std::shared_ptr的constrol block中有对应的deleter. 这个deleter不需要�
 </li>
 <li>
 <p><a href=https://akrzemi1.wordpress.com/2013/12/11/type-erasure-part-iii/>Andrzej's C++ blog Type erasure — Part III</a></p>
+</li>
+<li>
+<p><a href=https://stackoverflow.com/questions/6324694/type-erasure-in-c-how-boostshared-ptr-and-boostfunction-work>Type erasure in C++: how boost::shared_ptr and boost::function work?</a></p>
+</li>
+<li>
+<p><a href=https://stackoverflow.com/questions/21355037/why-does-unique-ptr-take-two-template-parameters-when-shared-ptr-only-takes-one>Why does unique_ptr take two template parameters when shared_ptr only takes one?</a></p>
 </li>
 </ul>
 </div>
