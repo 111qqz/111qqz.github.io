@@ -108,7 +108,7 @@ clean up function 代码比较好懂，唯一让我感到疑惑的是 clean up f
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Mar 26, 2022</span>
-<span class=post_time> · 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
+<span class=post_time> · 3 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb
 </a>
 </span>
 </div>
@@ -119,6 +119,7 @@ Mar 26, 2022</span>
 <li><a href=#接口>接口</a>
 <ul>
 <li><a href=#clean-up-function>clean up function</a></li>
+<li><a href=#iteratorwrapper>iteratorWrapper</a></li>
 </ul>
 </li>
 </ul>
@@ -192,6 +193,90 @@ Mar 26, 2022</span>
 </ol>
 </div>
 <p>带着这些疑问，继续往下读</p>
+<h3 id=iteratorwrapper>iteratorWrapper</h3>
+<p>这里包了一层，目的是把key()和valid()的结果cache住，节省了依次取地址的开销</p>
+<p>带来的代价就是，对于会影响key()和valid()结果的operation,需要额外的update操作，变得更重了。</p>
+<p>猜测是有某些频繁读key()和valid()的场景，因此做了这样一个trade-off</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span>
+<span class=ln> 3</span><span class=c1>// A internal wrapper class with an interface similar to Iterator that
+</span><span class=ln> 4</span><span class=c1>// caches the valid() and key() results for an underlying iterator.
+</span><span class=ln> 5</span><span class=c1>// This can help avoid virtual function calls and also gives better
+</span><span class=ln> 6</span><span class=c1>// cache locality.
+</span><span class=ln> 7</span><span class=c1></span><span class=k>class</span> <span class=nc>IteratorWrapper</span> <span class=p>{</span>
+<span class=ln> 8</span> <span class=k>public</span><span class=o>:</span>
+<span class=ln> 9</span>  <span class=n>IteratorWrapper</span><span class=p>()</span> <span class=o>:</span> <span class=n>iter_</span><span class=p>(</span><span class=k>nullptr</span><span class=p>),</span> <span class=n>valid_</span><span class=p>(</span><span class=nb>false</span><span class=p>)</span> <span class=p>{}</span>
+<span class=ln>10</span>  <span class=k>explicit</span> <span class=nf>IteratorWrapper</span><span class=p>(</span><span class=n>Iterator</span><span class=o>*</span> <span class=n>iter</span><span class=p>)</span> <span class=o>:</span> <span class=n>iter_</span><span class=p>(</span><span class=k>nullptr</span><span class=p>)</span> <span class=p>{</span> <span class=n>Set</span><span class=p>(</span><span class=n>iter</span><span class=p>);</span> <span class=p>}</span>
+<span class=ln>11</span>  <span class=o>~</span><span class=n>IteratorWrapper</span><span class=p>()</span> <span class=p>{</span> <span class=k>delete</span> <span class=n>iter_</span><span class=p>;</span> <span class=p>}</span>
+<span class=ln>12</span>  <span class=n>Iterator</span><span class=o>*</span> <span class=nf>iter</span><span class=p>()</span> <span class=k>const</span> <span class=p>{</span> <span class=k>return</span> <span class=n>iter_</span><span class=p>;</span> <span class=p>}</span>
+<span class=ln>13</span>
+<span class=ln>14</span>  <span class=c1>// Takes ownership of &#34;iter&#34; and will delete it when destroyed, or
+</span><span class=ln>15</span><span class=c1></span>  <span class=c1>// when Set() is invoked again.
+</span><span class=ln>16</span><span class=c1></span>  <span class=kt>void</span> <span class=nf>Set</span><span class=p>(</span><span class=n>Iterator</span><span class=o>*</span> <span class=n>iter</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>17</span>    <span class=k>delete</span> <span class=n>iter_</span><span class=p>;</span>
+<span class=ln>18</span>    <span class=n>iter_</span> <span class=o>=</span> <span class=n>iter</span><span class=p>;</span>
+<span class=ln>19</span>    <span class=k>if</span> <span class=p>(</span><span class=n>iter_</span> <span class=o>==</span> <span class=k>nullptr</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>20</span>      <span class=n>valid_</span> <span class=o>=</span> <span class=nb>false</span><span class=p>;</span>
+<span class=ln>21</span>    <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+<span class=ln>22</span>      <span class=n>Update</span><span class=p>();</span>
+<span class=ln>23</span>    <span class=p>}</span>
+<span class=ln>24</span>  <span class=p>}</span>
+<span class=ln>25</span>
+<span class=ln>26</span>  <span class=c1>// Iterator interface methods
+</span><span class=ln>27</span><span class=c1></span>  <span class=kt>bool</span> <span class=nf>Valid</span><span class=p>()</span> <span class=k>const</span> <span class=p>{</span> <span class=k>return</span> <span class=n>valid_</span><span class=p>;</span> <span class=p>}</span>
+<span class=ln>28</span>  <span class=n>Slice</span> <span class=nf>key</span><span class=p>()</span> <span class=k>const</span> <span class=p>{</span>
+<span class=ln>29</span>    <span class=n>assert</span><span class=p>(</span><span class=n>Valid</span><span class=p>());</span>
+<span class=ln>30</span>    <span class=k>return</span> <span class=n>key_</span><span class=p>;</span>
+<span class=ln>31</span>  <span class=p>}</span>
+<span class=ln>32</span>  <span class=n>Slice</span> <span class=nf>value</span><span class=p>()</span> <span class=k>const</span> <span class=p>{</span>
+<span class=ln>33</span>    <span class=n>assert</span><span class=p>(</span><span class=n>Valid</span><span class=p>());</span>
+<span class=ln>34</span>    <span class=k>return</span> <span class=n>iter_</span><span class=o>-&gt;</span><span class=n>value</span><span class=p>();</span>
+<span class=ln>35</span>  <span class=p>}</span>
+<span class=ln>36</span>  <span class=c1>// Methods below require iter() != nullptr
+</span><span class=ln>37</span><span class=c1></span>  <span class=n>Status</span> <span class=nf>status</span><span class=p>()</span> <span class=k>const</span> <span class=p>{</span>
+<span class=ln>38</span>    <span class=n>assert</span><span class=p>(</span><span class=n>iter_</span><span class=p>);</span>
+<span class=ln>39</span>    <span class=k>return</span> <span class=n>iter_</span><span class=o>-&gt;</span><span class=n>status</span><span class=p>();</span>
+<span class=ln>40</span>  <span class=p>}</span>
+<span class=ln>41</span>  <span class=kt>void</span> <span class=nf>Next</span><span class=p>()</span> <span class=p>{</span>
+<span class=ln>42</span>    <span class=n>assert</span><span class=p>(</span><span class=n>iter_</span><span class=p>);</span>
+<span class=ln>43</span>    <span class=n>iter_</span><span class=o>-&gt;</span><span class=n>Next</span><span class=p>();</span>
+<span class=ln>44</span>    <span class=n>Update</span><span class=p>();</span>
+<span class=ln>45</span>  <span class=p>}</span>
+<span class=ln>46</span>  <span class=kt>void</span> <span class=nf>Prev</span><span class=p>()</span> <span class=p>{</span>
+<span class=ln>47</span>    <span class=n>assert</span><span class=p>(</span><span class=n>iter_</span><span class=p>);</span>
+<span class=ln>48</span>    <span class=n>iter_</span><span class=o>-&gt;</span><span class=n>Prev</span><span class=p>();</span>
+<span class=ln>49</span>    <span class=n>Update</span><span class=p>();</span>
+<span class=ln>50</span>  <span class=p>}</span>
+<span class=ln>51</span>  <span class=kt>void</span> <span class=nf>Seek</span><span class=p>(</span><span class=k>const</span> <span class=n>Slice</span><span class=o>&amp;</span> <span class=n>k</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>52</span>    <span class=n>assert</span><span class=p>(</span><span class=n>iter_</span><span class=p>);</span>
+<span class=ln>53</span>    <span class=n>iter_</span><span class=o>-&gt;</span><span class=n>Seek</span><span class=p>(</span><span class=n>k</span><span class=p>);</span>
+<span class=ln>54</span>    <span class=n>Update</span><span class=p>();</span>
+<span class=ln>55</span>  <span class=p>}</span>
+<span class=ln>56</span>  <span class=kt>void</span> <span class=nf>SeekToFirst</span><span class=p>()</span> <span class=p>{</span>
+<span class=ln>57</span>    <span class=n>assert</span><span class=p>(</span><span class=n>iter_</span><span class=p>);</span>
+<span class=ln>58</span>    <span class=n>iter_</span><span class=o>-&gt;</span><span class=n>SeekToFirst</span><span class=p>();</span>
+<span class=ln>59</span>    <span class=n>Update</span><span class=p>();</span>
+<span class=ln>60</span>  <span class=p>}</span>
+<span class=ln>61</span>  <span class=kt>void</span> <span class=nf>SeekToLast</span><span class=p>()</span> <span class=p>{</span>
+<span class=ln>62</span>    <span class=n>assert</span><span class=p>(</span><span class=n>iter_</span><span class=p>);</span>
+<span class=ln>63</span>    <span class=n>iter_</span><span class=o>-&gt;</span><span class=n>SeekToLast</span><span class=p>();</span>
+<span class=ln>64</span>    <span class=n>Update</span><span class=p>();</span>
+<span class=ln>65</span>  <span class=p>}</span>
+<span class=ln>66</span>
+<span class=ln>67</span> <span class=k>private</span><span class=o>:</span>
+<span class=ln>68</span>  <span class=kt>void</span> <span class=n>Update</span><span class=p>()</span> <span class=p>{</span>
+<span class=ln>69</span>    <span class=n>valid_</span> <span class=o>=</span> <span class=n>iter_</span><span class=o>-&gt;</span><span class=n>Valid</span><span class=p>();</span>
+<span class=ln>70</span>    <span class=k>if</span> <span class=p>(</span><span class=n>valid_</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>71</span>      <span class=n>key_</span> <span class=o>=</span> <span class=n>iter_</span><span class=o>-&gt;</span><span class=n>key</span><span class=p>();</span>
+<span class=ln>72</span>    <span class=p>}</span>
+<span class=ln>73</span>  <span class=p>}</span>
+<span class=ln>74</span>
+<span class=ln>75</span>  <span class=n>Iterator</span><span class=o>*</span> <span class=n>iter_</span><span class=p>;</span>
+<span class=ln>76</span>  <span class=kt>bool</span> <span class=n>valid_</span><span class=p>;</span>
+<span class=ln>77</span>  <span class=n>Slice</span> <span class=n>key_</span><span class=p>;</span>
+<span class=ln>78</span><span class=p>};</span>
+<span class=ln>79</span>
+</code></pre></div>
 </div>
 <h2 class=post_related>Posts in this Series</h2>
 <ul>
