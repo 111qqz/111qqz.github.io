@@ -1,6 +1,6 @@
 <!doctype html><html lang=en data-figures class=page>
 <head>
-<title>levelDB 代码阅读笔记 06 iterator | 111qqz的小窝</title>
+<title>[施工中] levelDB 代码阅读笔记 06 iterator | 111qqz的小窝</title>
 <meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta http-equiv=x-ua-compatible content="IE=edge">
@@ -13,9 +13,9 @@ clean up function 代码比较好懂，唯一让我感到疑惑的是 clean up f
 1 2 // FIXME: 不太理解为什么需要很多个clean up function 3 // Cleanup functions are stored …">
 <meta name=twitter:card content="summary">
 <meta name=twitter:creator content>
-<meta name=twitter:title content="levelDB 代码阅读笔记 06 iterator">
+<meta name=twitter:title content="[施工中] levelDB 代码阅读笔记 06 iterator">
 <meta property="og:url" content="https://111qqz.com/2022/03/ledeldb-notes-06/">
-<meta property="og:title" content="levelDB 代码阅读笔记 06 iterator">
+<meta property="og:title" content="[施工中] levelDB 代码阅读笔记 06 iterator">
 <meta property="og:description" content="接口 一个ABC，后面会继承这个类做各种实现
 clean up function 代码比较好懂，唯一让我感到疑惑的是 clean up function 这部分
 1 2 // FIXME: 不太理解为什么需要很多个clean up function 3 // Cleanup functions are stored …">
@@ -103,7 +103,7 @@ clean up function 代码比较好懂，唯一让我感到疑惑的是 clean up f
 <main>
 <div class="grid-inverse wrap content">
 <article class=post_content>
-<h1 class=post_title>levelDB 代码阅读笔记 06 iterator</h1>
+<h1 class=post_title>[施工中] levelDB 代码阅读笔记 06 iterator</h1>
 <div class=post_meta>
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
@@ -122,6 +122,7 @@ Mar 26, 2022</span>
 <li><a href=#iteratorwrapper>iteratorWrapper</a></li>
 </ul>
 </li>
+<li><a href=#two-level-iterator>two level iterator</a></li>
 </ul>
 </nav>
 </div>
@@ -189,7 +190,7 @@ Mar 26, 2022</span>
 <div class=label>Info</div>
 <ol>
 <li>为什么需要多个clean up function?</li>
-<li>clean up funtion的参数是在注册时就唯一确定了，而不是在调用时。 clean up function究竟是在情理什么？</li>
+<li>clean up funtion的参数是在注册时就唯一确定了，而不是在调用时。 clean up function究竟是在清理什么？</li>
 </ol>
 </div>
 <p>带着这些疑问，继续往下读</p>
@@ -276,11 +277,35 @@ Mar 26, 2022</span>
 <span class=ln>77</span>  <span class=n>Slice</span> <span class=n>key_</span><span class=p>;</span>
 <span class=ln>78</span><span class=p>};</span>
 <span class=ln>79</span>
+</code></pre></div><h2 id=two-level-iterator>two level iterator</h2>
+<p>一个二级迭代器
+第一层为index iterator, index iterator对应的value是一个data block, 对应date iterator</p>
+<p>比较重要的是这个函数,每到一个新的index位置，会用来生成下一级的第一个data iterator</p>
+<p>data_block_handle_ 可以理解成对data block的一个标识，避免重复初始化这个data block的data iterator</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>
+<span class=ln> 2</span><span class=c1>// note: 每次InitDataBlock是可能改变成员变量data_iter_的值的
+</span><span class=ln> 3</span><span class=c1></span><span class=kt>void</span> <span class=n>TwoLevelIterator</span><span class=o>::</span><span class=n>InitDataBlock</span><span class=p>()</span> <span class=p>{</span>
+<span class=ln> 4</span>  <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>index_iter_</span><span class=p>.</span><span class=n>Valid</span><span class=p>())</span> <span class=p>{</span>
+<span class=ln> 5</span>    <span class=n>SetDataIterator</span><span class=p>(</span><span class=k>nullptr</span><span class=p>);</span>
+<span class=ln> 6</span>  <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+<span class=ln> 7</span>    <span class=n>Slice</span> <span class=n>handle</span> <span class=o>=</span> <span class=n>index_iter_</span><span class=p>.</span><span class=n>value</span><span class=p>();</span>
+<span class=ln> 8</span>    <span class=k>if</span> <span class=p>(</span><span class=n>data_iter_</span><span class=p>.</span><span class=n>iter</span><span class=p>()</span> <span class=o>!=</span> <span class=k>nullptr</span> <span class=o>&amp;&amp;</span>
+<span class=ln> 9</span>        <span class=n>handle</span><span class=p>.</span><span class=n>compare</span><span class=p>(</span><span class=n>data_block_handle_</span><span class=p>)</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+<span class=ln>10</span>      <span class=c1>// data_iter_ is already constructed with this iterator, so
+</span><span class=ln>11</span><span class=c1></span>      <span class=c1>// no need to change anything
+</span><span class=ln>12</span><span class=c1></span>    <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+<span class=ln>13</span>      <span class=n>Iterator</span><span class=o>*</span> <span class=n>iter</span> <span class=o>=</span> <span class=p>(</span><span class=o>*</span><span class=n>block_function_</span><span class=p>)(</span><span class=n>arg_</span><span class=p>,</span> <span class=n>options_</span><span class=p>,</span> <span class=n>handle</span><span class=p>);</span>
+<span class=ln>14</span>      <span class=n>data_block_handle_</span><span class=p>.</span><span class=n>assign</span><span class=p>(</span><span class=n>handle</span><span class=p>.</span><span class=n>data</span><span class=p>(),</span> <span class=n>handle</span><span class=p>.</span><span class=n>size</span><span class=p>());</span>
+<span class=ln>15</span>      <span class=c1>// note: data iterator是由block function创建出来的
+</span><span class=ln>16</span><span class=c1></span>      <span class=n>SetDataIterator</span><span class=p>(</span><span class=n>iter</span><span class=p>);</span>
+<span class=ln>17</span>    <span class=p>}</span>
+<span class=ln>18</span>  <span class=p>}</span>
+<span class=ln>19</span><span class=p>}</span>
 </code></pre></div>
 </div>
 <h2 class=post_related>Posts in this Series</h2>
 <ul>
-<li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="levelDB 代码阅读笔记 06 iterator">levelDB 代码阅读笔记 06 iterator</a></li>
+<li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li>
 <li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li>
 <li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li>
 <li><a href=https://111qqz.com/2022/03/leveldb-notes-03/ class=nav-link title="levelDB 代码阅读笔记 03 cache">levelDB 代码阅读笔记 03 cache</a></li>
@@ -303,7 +328,7 @@ Mar 26, 2022</span>
 <h2 class=mt-4>Posts in this series</h2>
 <ul>
 <li>
-<a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="levelDB 代码阅读笔记 06 iterator">levelDB 代码阅读笔记 06 iterator</a>
+<a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a>
 </li>
 <li>
 <a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a>
