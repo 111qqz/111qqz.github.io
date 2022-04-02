@@ -7,7 +7,7 @@ control block Tip 最重要的是，control block是 dynamically-allocated 的
 control block中通常包含五部分
 either a pointer to the managed object or the managed object itself; the deleter (type-erased); the allocator (type-erased); the number of shared_ptrs that own the managed object; the number of weak_ptrs that refer to the managed object. 这里面有几点值得强调：
 两个引用计数都是atomic的。 weak_ptr是为了解决循环引用 type-erased是什么？ 后面会介绍 线程安全 shared_ptr的线程安全性快成c++面试的top10经典八股文了 Tip 简单说，shared_ptr&amp;lt;T&amp;gt;的引用计数的实现是线程安全的(通常是两个atomic变量)，但是对于T的操作不是线程安全的*</description></item><item><title>[c++17] std::any 笔记</title><link>https://111qqz.com/2022/03/std-any-notes/</link><pubDate>Sat, 05 Mar 2022 16:02:36 +0800</pubDate><guid>https://111qqz.com/2022/03/std-any-notes/</guid><description>
-背景 一种很常见的背景是，需要表示未知类型的数据。 比如可能是用户提供的数据，比如是一个Cache的实现，value想支持任意类型的数据
+背景 一种很常见的背景是，需要表示未知类型的数据。 比如可能是用户提供的数据，比如是一个Cache的实现， value想支持任意类型的数据
 对于这种场景，c语言的出身的开发者通常会使用void*来实现
 1struct day { 2 // ...things... 3 void* user_data; 4}; 5 6struct month { 7 std::vector&amp;lt;day&amp;gt; days; 8 void* user_data; 9}; 10 了解cpp11的开发者可能会使用std::shared_ptr&amp;lt;void&amp;gt; 来实现
 1struct day { 2 // ...things... 3 std::shared_ptr&amp;lt;void&amp;gt; user_data; 4}; 5 6struct month { 7 std::vector&amp;lt;day&amp;gt; days; 8 std::shared_ptr&amp;lt;void&amp;gt; user_data; 9}; 10 那么有没有更好的实现办法呢？是有的，c++17中提供了std::any
