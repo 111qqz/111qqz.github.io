@@ -104,6 +104,33 @@
 <div class=excerpt>
 <div class=excerpt_header>
 <h3 class=post_link>
+<a href=https://111qqz.com/2021/07/core-dump-on-gcc-4-with-avx2/ title="一次avx2在gcc上core dump的排查经历">一次avx2在gcc上core dump的排查经历</a>
+</h3>
+<div class=post_meta>
+<span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
+<span class=post_date>
+Jul 22, 2021</span>
+<span class=post_time> · 3 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/simd title=simd class="post_tag button button_translucent">simd
+</a><a href=https://111qqz.com/tags/avx title=avx class="post_tag button button_translucent">avx
+</a>
+</span>
+</div>
+</div>
+<div class=excerpt_footer>
+<div class=pale>
+<p>背景 起因是同事在实现int4的功能，结果流水线有一条死活过不了(gcc版本为4.8.5),一直core dump 经过初步排查，找出了如下最小可以复现的代码:
+1 2#include &lt;immintrin.h>3 4class Test{ 5 public: 6 Test(){ 7 tmp = _mm256_set_epi32(0,0,0,0,0,0,0,0); 8 } 9 private: 10 __m256i tmp; 11}; 12int main(){ 13 auto *tmp = new Test(); 14 return 0; 15} gcc版本为4.8.5 其中编译选项为
+1g++ -std=c++11 …</p>
+<br>
+<a href=https://111qqz.com/2021/07/core-dump-on-gcc-4-with-avx2/ title="Read More" class="excerpt_more button">Read More</a>
+</div>
+</div>
+</div>
+</li>
+<li class=post_item>
+<div class=excerpt>
+<div class=excerpt_header>
+<h3 class=post_link>
 <a href=https://111qqz.com/2020/05/install-k8s-get-nodes-forbidden-error/ title="k8s nodes is forbidden user cannot list resource nodes in api group at the cluster scope">k8s nodes is forbidden user cannot list resource nodes in api group at the cluster scope</a>
 </h3>
 <div class=post_meta>
@@ -356,38 +383,6 @@ public class Example { // private DatabaseThingie myDatabase; // public Example(
 </div>
 </div>
 </li>
-<li class=post_item>
-<div class=excerpt>
-<div class=excerpt_header>
-<h3 class=post_link>
-<a href=https://111qqz.com/2018/09/c11-async-packaged-ask-promise-future-notes/ title="[c++11] std::async std::packaged_task std::promise and std::future notes">[c++11] std::async std::packaged_task std::promise and std::future notes</a>
-</h3>
-<div class=post_meta>
-<span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
-<span class=post_date>
-Sep 30, 2018</span>
-<span class=post_time> · 3 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/async title=async class="post_tag button button_translucent">async
-</a><a href=https://111qqz.com/tags/cpp title=cpp class="post_tag button button_translucent">cpp
-</a><a href=https://111qqz.com/tags/modern-cpp title="modern cpp" class="post_tag button button_translucent">modern cpp
-</a><a href=https://111qqz.com/tags/future title=future class="post_tag button button_translucent">future
-</a><a href=https://111qqz.com/tags/packaged_task title=packaged_task class="post_tag button button_translucent">packaged_task
-</a><a href=https://111qqz.com/tags/promise title=promise class="post_tag button button_translucent">promise
-</a>
-</span>
-</div>
-</div>
-<div class=excerpt_footer>
-<div class=pale>
-<p>把std::async,std::packaged_task,std::promise三个放在一起来说,是因为他们都可以返回一个std::future对象.简单来说,当某个线程需要等待一个特定的一次性事件(one-off event),它可以用一个"future"来表示这个事件.
-std::async 有的时候可能你需要做一个花费事件比较长的计算,但是计算结果不是立刻需要.这个时候就可以用一个新的线程来做这个计算.这里比较关键的问题是如何将在新线程进行计算的结果传回到当前线程,因为std::thread并没有提供一个类似的机制.
-这个时候就需要std::async登场了.
-1 2 #include …</p>
-<br>
-<a href=https://111qqz.com/2018/09/c11-async-packaged-ask-promise-future-notes/ title="Read More" class="excerpt_more button">Read More</a>
-</div>
-</div>
-</div>
-</li>
 <li>
 <ul class="pagination pagination-default">
 <li class=page-item>
@@ -436,6 +431,9 @@ std::async 有的时候可能你需要做一个花费事件比较长的计算,�
 <a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a>
 </li>
 <li>
+<a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title="2022 04 08 Redis Notes">2022 04 08 Redis Notes</a>
+</li>
+<li>
 <a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a>
 </li>
 <li>
@@ -449,9 +447,6 @@ std::async 有的时候可能你需要做一个花费事件比较长的计算,�
 </li>
 <li>
 <a href=https://111qqz.com/2022/03/std-shared-ptr-notes/ class=nav-link title="std::shared_ptr 学习笔记">std::shared_ptr 学习笔记</a>
-</li>
-<li>
-<a href=https://111qqz.com/2022/03/std-any-notes/ class=nav-link title="[c++17] std::any 笔记">[c++17] std::any 笔记</a>
 </li>
 </ul>
 <div>
@@ -479,7 +474,7 @@ DEEP-LEARNING
 </a>
 <a href=https://111qqz.com/categories/%E5%B7%A5%E7%A8%8B/ class="post_tag button button_translucent" title=工程>
 工程
-<span class=button_tally>56</span>
+<span class=button_tally>57</span>
 </a>
 <a href=https://111qqz.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/ class="post_tag button button_translucent" title=计算机视觉>
 计算机视觉
@@ -878,6 +873,8 @@ BINARY-SEARCH
 <a href=https://111qqz.com/tags/qt/ class="post_tag button button_translucent" data-position=5 title=qt>QT<span class=button_tally>5</span>
 </a>
 <a href=https://111qqz.com/tags/react/ class="post_tag button button_translucent" data-position=3 title=react>REACT<span class=button_tally>3</span>
+</a>
+<a href=https://111qqz.com/tags/redis/ class="post_tag button button_translucent" data-position=1 title=redis>REDIS<span class=button_tally>1</span>
 </a>
 <a href=https://111qqz.com/tags/redux/ class="post_tag button button_translucent" data-position=1 title=redux>REDUX<span class=button_tally>1</span>
 </a>
