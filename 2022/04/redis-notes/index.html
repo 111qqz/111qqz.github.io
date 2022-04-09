@@ -1,6 +1,6 @@
 <!doctype html><html lang=en data-figures class=page>
 <head>
-<title>2022 04 08 Redis Notes | 111qqz的小窝</title>
+<title>[施工中] redis学习笔记 | 111qqz的小窝</title>
 <meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta http-equiv=x-ua-compatible content="IE=edge">
@@ -8,13 +8,15 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date),gtag('config','UA-219255388-1')</script>
 <meta property="og:locale" content="en">
 <meta property="og:type" content="article">
-<meta name=description content>
+<meta name=description content="最近在做一个智能算力的项目，其中需要用到redis维护某个全局的时间窗口
+资料  https://redis.io/docs/about/ 极客时间Redis核心技术与实战  复杂数据结构的表示方式 学习过程中唯一让我迷惑的是一个嵌套的数据结构要如何表示 比如我想表示一个key为string, value为List …">
 <meta name=twitter:card content="summary">
 <meta name=twitter:creator content>
-<meta name=twitter:title content="2022 04 08 Redis Notes">
+<meta name=twitter:title content="[施工中] redis学习笔记">
 <meta property="og:url" content="https://111qqz.com/2022/04/redis-notes/">
-<meta property="og:title" content="2022 04 08 Redis Notes">
-<meta property="og:description" content>
+<meta property="og:title" content="[施工中] redis学习笔记">
+<meta property="og:description" content="最近在做一个智能算力的项目，其中需要用到redis维护某个全局的时间窗口
+资料  https://redis.io/docs/about/ 极客时间Redis核心技术与实战  复杂数据结构的表示方式 学习过程中唯一让我迷惑的是一个嵌套的数据结构要如何表示 比如我想表示一个key为string, value为List …">
 <meta property="og:image" content="https://111qqz.com/images/thumbnail.png">
 <link rel=apple-touch-icon sizes=180x180 href=https://111qqz.com/icons/apple-touch-icon.png>
 <link rel=icon type=image/png sizes=32x32 href=https://111qqz.com/icons/favicon-32x32.png>
@@ -99,20 +101,94 @@
 <main>
 <div class="grid-inverse wrap content">
 <article class=post_content>
-<h1 class=post_title>2022 04 08 Redis Notes</h1>
+<h1 class=post_title>[施工中] redis学习笔记</h1>
 <div class=post_meta>
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
 Apr 8, 2022</span>
-<span class=post_time> · 0 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/redis title=redis class="post_tag button button_translucent">redis
+<span class=post_time> · 1 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/redis title=redis class="post_tag button button_translucent">redis
 </a>
 </span>
 </div>
 <div class=post_toc>
 <h2>Overview</h2>
-<nav id=TableOfContents></nav>
+<nav id=TableOfContents>
+<ul>
+<li><a href=#资料>资料</a></li>
+<li><a href=#复杂数据结构的表示方式>复杂数据结构的表示方式</a></li>
+<li><a href=#原子性>原子性</a></li>
+<li><a href=#性能优化>性能优化</a>
+<ul>
+<li><a href=#on复杂度的操作>O(n)复杂度的操作</a></li>
+</ul>
+</li>
+</ul>
+</nav>
 </div>
-<div class=post_body>
+<div class=post_body><p>最近在做一个智能算力的项目，其中需要用到redis维护某个全局的时间窗口</p>
+<h2 id=资料>资料</h2>
+<ul>
+<li><a href=https://redis.io/docs/about/>https://redis.io/docs/about/</a></li>
+<li><a href=https://time.geekbang.org/column/intro/100056701>极客时间Redis核心技术与实战</a></li>
+</ul>
+<h2 id=复杂数据结构的表示方式>复杂数据结构的表示方式</h2>
+<p>学习过程中唯一让我迷惑的是一个嵌套的数据结构要如何表示
+比如我想表示一个key为string, value为List的Hash
+按照c++的语法，也就是一个</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span><span class=n>std</span><span class=o>::</span><span class=n>unordered_map</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=p>,</span><span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;&gt;</span>
+</code></pre></div><p>但是我发现，在redis中我无法设置value的数据类型</p>
+<p>后来发现，redis这种kv存储其实所有的key是在同一个空间的，不存在嵌套关系</p>
+<p>嵌套关系是根据相同的string名称来间接进行的
+也就是说；
+hash的value是一个string, 这个string是list的key名称</p>
+<p>hash: hash_key_name-> value_key_name
+list: value_key_name ->list</p>
+<h2 id=原子性>原子性</h2>
+<p>redis单个命令是原子操作，但是有的时候需要执行多个命令完成一个操作
+比如典型的 Read-Modify-Write 操作，这种操作为了保证原子性通常有两种办法
+其一是使用<strong>incr/hincrby</strong> 等命令，把多个命令合成一个
+其二是使用lua script,用以实现更复杂的逻辑</p>
+<h2 id=性能优化>性能优化</h2>
+<p>以我遇到的具体问题举例说明吧</p>
+<blockquote>
+<p>有一个队列，队列中的元素是不断变化的，想知道这个队列中所有元素的和。 队列元素的增加: 当一个请求到来时，就往队列中添加元素。 可能同时到来上百个请求 队列元素的删除: 按照时间删除，当请求到来超过一定时间后，自动删除。 说白了就是想维护一个时间窗口，并查询窗口中元素之和。</p>
+</blockquote>
+<p>最初考虑过使用redis expire命令来实现自动过期的策略，但是由于expire的key没办法直接把sum也对应删除掉，因此没有选择这个方案。</p>
+<p>于是转而考虑使用一个list来维护请求队列，从右边加入元素，左边删除元素。 维护窗口的时候按照时间戳进行删除</p>
+<p>当请求量增大时，发现耗时逐渐变慢，于是开始分析可能的性能瓶颈</p>
+<h3 id=on复杂度的操作>O(n)复杂度的操作</h3>
+<p>目前的实现中有三个O(n)复杂度的操作，分别是取队列中元素、删除其中过期的元素的key、在队列中清除这些元素</p>
+<p>代码如下</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=ln> 1</span>
+<span class=ln> 2</span>         <span class=kd>local</span> <span class=n>queue_name</span> <span class=o>=</span> <span class=n>redis.call</span><span class=p>(</span><span class=s2>&#34;hget&#34;</span><span class=p>,</span><span class=n>KEYS</span><span class=p>[</span><span class=mi>1</span><span class=p>],</span><span class=s2>&#34;queue&#34;</span><span class=p>)</span>
+<span class=ln> 3</span>         <span class=kd>local</span> <span class=n>sum_value</span> <span class=o>=</span> <span class=n>redis.call</span><span class=p>(</span><span class=s2>&#34;hget&#34;</span><span class=p>,</span><span class=n>KEYS</span><span class=p>[</span><span class=mi>1</span><span class=p>],</span><span class=s2>&#34;sum_value&#34;</span><span class=p>)</span>  
+<span class=ln> 4</span>         <span class=kd>local</span> <span class=n>sum_quota</span> <span class=o>=</span> <span class=n>redis.call</span><span class=p>(</span><span class=s2>&#34;hget&#34;</span><span class=p>,</span><span class=n>KEYS</span><span class=p>[</span><span class=mi>1</span><span class=p>],</span><span class=s2>&#34;sum_quota&#34;</span><span class=p>)</span> 
+<span class=ln> 5</span>         <span class=kd>local</span> <span class=n>queue</span> <span class=o>=</span> <span class=n>redis.call</span><span class=p>(</span><span class=s2>&#34;lrange&#34;</span><span class=p>,</span><span class=n>queue_name</span><span class=p>,</span><span class=mi>0</span><span class=p>,</span><span class=o>-</span><span class=mi>1</span><span class=p>)</span> 
+<span class=ln> 6</span>         <span class=kd>local</span> <span class=n>cnt</span> <span class=o>=</span> <span class=mi>0</span> 
+<span class=ln> 7</span>         <span class=kd>local</span> <span class=n>need_deleted</span> <span class=o>=</span> <span class=p>{}</span>  
+<span class=ln> 8</span>         <span class=kr>for</span> <span class=n>i</span><span class=o>=</span><span class=mi>1</span><span class=p>,</span><span class=o>#</span><span class=n>queue</span> <span class=kr>do</span> 
+<span class=ln> 9</span>           <span class=kd>local</span> <span class=n>time_stamp</span> <span class=o>=</span> <span class=n>redis.call</span><span class=p>(</span><span class=s2>&#34;hget&#34;</span><span class=p>,</span><span class=n>queue</span><span class=p>[</span><span class=n>i</span><span class=p>],</span><span class=s2>&#34;timestamp&#34;</span><span class=p>)</span> 
+<span class=ln>10</span>           <span class=kr>if</span> <span class=p>(</span><span class=n>ARGV</span><span class=p>[</span><span class=mi>2</span><span class=p>]</span><span class=o>-</span><span class=n>time_stamp</span><span class=o>&lt;=</span><span class=n>tonumber</span><span class=p>(</span><span class=n>ARGV</span><span class=p>[</span><span class=mi>1</span><span class=p>]))</span> <span class=kr>then</span> <span class=kr>break</span> <span class=kr>end</span>  
+<span class=ln>11</span>           <span class=n>cnt</span> <span class=o>=</span> <span class=n>i</span> 
+<span class=ln>12</span>           <span class=kd>local</span> <span class=n>quota</span> <span class=o>=</span> <span class=n>redis.call</span><span class=p>(</span><span class=s2>&#34;hget&#34;</span><span class=p>,</span> <span class=n>queue</span><span class=p>[</span><span class=n>i</span><span class=p>],</span><span class=s2>&#34;quota&#34;</span><span class=p>)</span>  
+<span class=ln>13</span>           <span class=kd>local</span> <span class=n>value</span> <span class=o>=</span> <span class=n>redis.call</span><span class=p>(</span><span class=s2>&#34;hget&#34;</span><span class=p>,</span><span class=n>queue</span><span class=p>[</span><span class=n>i</span><span class=p>],</span><span class=s2>&#34;value&#34;</span><span class=p>)</span> 
+<span class=ln>14</span>           <span class=n>sum_value</span> <span class=o>=</span> <span class=n>sum_value</span><span class=o>-</span><span class=n>value</span>  
+<span class=ln>15</span>           <span class=kd>local</span> <span class=n>quota</span> <span class=o>=</span> <span class=n>redis.call</span><span class=p>(</span><span class=s2>&#34;hget&#34;</span><span class=p>,</span><span class=n>queue</span><span class=p>[</span><span class=n>i</span><span class=p>],</span><span class=s2>&#34;quota&#34;</span><span class=p>)</span> 
+<span class=ln>16</span>           <span class=n>need_deleted</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>queue</span><span class=p>[</span><span class=n>i</span><span class=p>]</span>
+<span class=ln>17</span>           <span class=n>sum_quota</span> <span class=o>=</span> <span class=n>sum_quota</span> <span class=o>-</span> <span class=n>quota</span>  
+<span class=ln>18</span>          <span class=kr>end</span>  
+<span class=ln>19</span>          <span class=n>redis.call</span><span class=p>(</span><span class=s2>&#34;del&#34;</span><span class=p>,</span><span class=n>unpack</span><span class=p>(</span><span class=n>need_deleted</span><span class=p>))</span>
+<span class=ln>20</span>          <span class=n>redis.call</span><span class=p>(</span><span class=s2>&#34;hmset&#34;</span><span class=p>,</span><span class=n>KEYS</span><span class=p>[</span><span class=mi>1</span><span class=p>],</span><span class=s2>&#34;sum_quota&#34;</span><span class=p>,</span><span class=n>sum_quota</span><span class=p>,</span><span class=s2>&#34;sum_value&#34;</span><span class=p>,</span><span class=n>sum_value</span><span class=p>)</span> 
+<span class=ln>21</span>          <span class=n>redis.call</span><span class=p>(</span><span class=s2>&#34;ltrim&#34;</span><span class=p>,</span><span class=n>queue_name</span><span class=p>,</span><span class=n>cnt</span><span class=p>,</span><span class=o>-</span><span class=mi>1</span><span class=p>)</span> 
+<span class=ln>22</span>          <span class=kr>return</span> <span class=n>cnt</span>
+</code></pre></div><p>其中删除操作考虑过使用unlink替代del,发现反而更慢了
+参考 <a href=https://stackoverflow.com/questions/45818371/is-the-unlink-command-always-better-than-del-command>Is the UNLINK command always better than DEL command?</a>
+原因需要进一步确认</p>
+<p>但是另外的lrange和ltrim命令基本没有改进的空间，只有想办法减少操作的元素个数</p>
+<div class="notices info">
+<div class=label>Info</div>
+<p>每次把队列中所有元素取出来作为候选集是完全没必要的</p>
+</div>
 </div>
 <div class=post_comments>
 </div>
