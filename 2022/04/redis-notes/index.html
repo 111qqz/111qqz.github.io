@@ -1,6 +1,6 @@
 <!doctype html><html lang=en data-figures class=page>
 <head>
-<title>[施工中] redis学习笔记 | 111qqz的小窝</title>
+<title>redis学习笔记 | 111qqz的小窝</title>
 <meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta http-equiv=x-ua-compatible content="IE=edge">
@@ -12,9 +12,9 @@
 资料  https://redis.io/docs/about/ 极客时间Redis核心技术与实战  复杂数据结构的表示方式 学习过程中唯一让我迷惑的是一个嵌套的数据结构要如何表示 比如我想表示一个key为string, value为List …">
 <meta name=twitter:card content="summary">
 <meta name=twitter:creator content>
-<meta name=twitter:title content="[施工中] redis学习笔记">
+<meta name=twitter:title content="redis学习笔记">
 <meta property="og:url" content="https://111qqz.com/2022/04/redis-notes/">
-<meta property="og:title" content="[施工中] redis学习笔记">
+<meta property="og:title" content="redis学习笔记">
 <meta property="og:description" content="最近在做一个智能算力的项目，其中需要用到redis维护某个全局的时间窗口
 资料  https://redis.io/docs/about/ 极客时间Redis核心技术与实战  复杂数据结构的表示方式 学习过程中唯一让我迷惑的是一个嵌套的数据结构要如何表示 比如我想表示一个key为string, value为List …">
 <meta property="og:image" content="https://111qqz.com/images/thumbnail.png">
@@ -101,7 +101,7 @@
 <main>
 <div class="grid-inverse wrap content">
 <article class=post_content>
-<h1 class=post_title>[施工中] redis学习笔记</h1>
+<h1 class=post_title>redis学习笔记</h1>
 <div class=post_meta>
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
@@ -119,7 +119,10 @@ Apr 8, 2022</span>
 <li><a href=#原子性>原子性</a></li>
 <li><a href=#性能优化>性能优化</a>
 <ul>
+<li><a href=#使用evalsha替代eval>使用evalsha替代eval</a></li>
 <li><a href=#on复杂度的操作>O(n)复杂度的操作</a></li>
+<li><a href=#异步操作>异步操作</a></li>
+<li><a href=#big-key>big key</a></li>
 </ul>
 </li>
 </ul>
@@ -154,8 +157,12 @@ list: value_key_name ->list</p>
 <p>有一个队列，队列中的元素是不断变化的，想知道这个队列中所有元素的和。 队列元素的增加: 当一个请求到来时，就往队列中添加元素。 可能同时到来上百个请求 队列元素的删除: 按照时间删除，当请求到来超过一定时间后，自动删除。 说白了就是想维护一个时间窗口，并查询窗口中元素之和。</p>
 </blockquote>
 <p>最初考虑过使用redis expire命令来实现自动过期的策略，但是由于expire的key没办法直接把sum也对应删除掉，因此没有选择这个方案。</p>
-<p>于是转而考虑使用一个list来维护请求队列，从右边加入元素，左边删除元素。 维护窗口的时候按照时间戳进行删除</p>
+<p>于是转而考虑使用一个list来维护请求队列，从右边加入元 素，左边删除元素。 维护窗口的时候按照时间戳进行删除</p>
 <p>当请求量增大时，发现耗时逐渐变慢，于是开始分析可能的性能瓶颈</p>
+<h3 id=使用evalsha替代eval>使用evalsha替代eval</h3>
+<p>Lua script 每次会把脚本发送到server执行
+script没有变化，因此每次传送的开销也是没必要的</p>
+<p>使用evalsha替代eval</p>
 <h3 id=on复杂度的操作>O(n)复杂度的操作</h3>
 <p>目前的实现中有三个O(n)复杂度的操作，分别是取队列中元素、删除其中过期的元素的key、在队列中清除这些元素</p>
 <p>代码如下</p>
@@ -189,6 +196,15 @@ list: value_key_name ->list</p>
 <div class=label>Info</div>
 <p>每次把队列中所有元素取出来作为候选集是完全没必要的</p>
 </div>
+<p>队列中的元素是按照到来的时间单调排列的，只有一个小范围内的元素是可能过期的。
+比如如果更新间隔是100ms，那我每次只选取120ms（比100ms稍大的值)的请求数作为候选集来删除
+可以大大减少每次要操作的元素个数</p>
+<h3 id=异步操作>异步操作</h3>
+<p>不管是向队列中加入元素，还是删除过期元素，都没有必要使用同步操作等待redis server返回结果</p>
+<h3 id=big-key>big key</h3>
+<p>这个场景中的big key就是这个队列了
+那么实际上也完全没必要使用一个大的queue
+可以根据时间戳拆成多个小的queue来操作</p>
 </div>
 <div class=post_comments>
 </div>
