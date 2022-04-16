@@ -1,6 +1,6 @@
 <!doctype html><html lang=en data-figures class=page>
 <head>
-<title>[施工中] 浅谈 Cpp Value Categories | 111qqz的小窝</title>
+<title>浅谈 Cpp Value Categories | 111qqz的小窝</title>
 <meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta http-equiv=x-ua-compatible content="IE=edge">
@@ -13,9 +13,9 @@ Value Categories in the c language cpp是由c语言发展而来，因此这里�
 c语言只有简单的lvalue …">
 <meta name=twitter:card content="summary">
 <meta name=twitter:creator content>
-<meta name=twitter:title content="[施工中] 浅谈 Cpp Value Categories">
+<meta name=twitter:title content="浅谈 Cpp Value Categories">
 <meta property="og:url" content="https://111qqz.com/2022/04/cpp-value-categories/">
-<meta property="og:title" content="[施工中] 浅谈 Cpp Value Categories">
+<meta property="og:title" content="浅谈 Cpp Value Categories">
 <meta property="og:description" content="背景 每一个cpp expression都有一个type 和 value category 属性 前者大家都比较了解，但是后者却常常被忽视
 Value Categories in the c language cpp是由c语言发展而来，因此这里先介绍c 语言中的value category
 c语言只有简单的lvalue …">
@@ -103,7 +103,7 @@ c语言只有简单的lvalue …">
 <main>
 <div class="grid-inverse wrap content">
 <article class=post_content>
-<h1 class=post_title>[施工中] 浅谈 Cpp Value Categories</h1>
+<h1 class=post_title>浅谈 Cpp Value Categories</h1>
 <div class=post_meta>
 <span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>
@@ -125,9 +125,15 @@ Apr 12, 2022</span>
 <li><a href=#rvalue>rvalue</a></li>
 <li><a href=#为啥要区分lvalue-和rvalue>为啥要区分lvalue 和rvalue?</a></li>
 <li><a href=#lvalue-to-rvalue-conversion>lvalue-to-rvalue-conversion</a></li>
+<li><a href=#rvalues-of-class-type>rvalues of class type</a></li>
 </ul>
 </li>
-<li><a href=#class>class</a></li>
+<li><a href=#c11时代>c++11时代</a>
+<ul>
+<li><a href=#xvalue>xvalue</a></li>
+</ul>
+</li>
+<li><a href=#参考资料>参考资料</a></li>
 </ul>
 </nav>
 </div>
@@ -147,7 +153,7 @@ Apr 12, 2022</span>
 </div>
 <p>所以通俗的说，lvalue就是可以取地址(存在storage region)的值
 实际上编译器可能会对lvalue做优化，导致实际没有占用storage
-但是cpp保证可以在编程时认为lvalue 一定时有占用storage的</p>
+但是cpp保证可以在编程时认为lvalue 一定是有占用storage的</p>
 <h3 id=rvalue>rvalue</h3>
 <p>一切不是lvalue的值都是rvalue</p>
 <ul>
@@ -159,7 +165,8 @@ Apr 12, 2022</span>
 <p>然而，cpp 要求不要依赖这个行为来编程
 <div class="notices warning">
 <div class=label>Warning</div>
-<p>也就是认为rvalue(non-class)是不会占用storage的</p>
+<p>也就是可以一直认为rvalue(non-class)是不会占用storage的
+因此也不能取地址</p>
 </div>
 </p>
 <h3 id=为啥要区分lvalue-和rvalue>为啥要区分lvalue 和rvalue?</h3>
@@ -174,11 +181,38 @@ Apr 12, 2022</span>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span><span class=kt>int</span> <span class=n>m</span><span class=p>,</span><span class=n>n</span><span class=p>;</span>
 <span class=ln>2</span><span class=n>m</span> <span class=o>=</span> <span class=n>n</span><span class=p>;</span>
 <span class=ln>3</span>
-</code></pre></div><h2 id=class>class</h2>
+</code></pre></div><h3 id=rvalues-of-class-type>rvalues of class type</h3>
+<p>当涉及到class type时，情况有了些不同
+这里class type包含 class/struct/union
+原因是访问成员变量时需要 base address + offset 的形式</p>
+<p>因此rvalues of class type是实际会占用地址空间的</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>
+<span class=ln>2</span><span class=k>struct</span> <span class=nc>S</span><span class=p>{</span>
+<span class=ln>3</span>  <span class=kt>int</span> <span class=n>x</span><span class=p>;</span>
+<span class=ln>4</span>  <span class=kt>int</span> <span class=n>y</span><span class=p>;</span>
+<span class=ln>5</span><span class=p>};</span>
+<span class=ln>6</span>
+<span class=ln>7</span><span class=n>S</span> <span class=nf>foo</span><span class=p>();</span> <span class=c1>// delcear a function that returns rvalue value of type S
+</span><span class=ln>8</span><span class=c1></span><span class=kt>int</span> <span class=n>j</span> <span class=o>=</span> <span class=n>foor</span><span class=p>().</span><span class=n>j</span><span class=p>;</span>  <span class=c1>// access y member of a rvalue
+</span><span class=ln>9</span><span class=c1></span>
+</code></pre></div><h2 id=c11时代>c++11时代</h2>
+<p>c++11 引入了rvalue reference. 为了避免非必要的copy</p>
+<h3 id=xvalue>xvalue</h3>
+<ul>
+<li>含义是"expiring value"</li>
+<li>函数的返回值如果是一个rvalue reference,那么结果就是一个xvalue 比如std::move(x)</li>
+</ul>
+<p>因此整体的分类如下
+<img class="image_figure image_external" loading=lazy src=https://i.stack.imgur.com/WRaXL.png alt=分类>
+</p>
+<h2 id=参考资料>参考资料</h2>
+<ul>
+<li><a href=https://en.cppreference.com/w/cpp/language/value_category>Value categories</a></li>
+</ul>
 </div>
 <h2 class=post_related>Posts in this Series</h2>
 <ul>
-<li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="[施工中] 浅谈 Cpp Value Categories">[施工中] 浅谈 Cpp Value Categories</a></li>
+<li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li>
 </ul>
 <div class=post_comments>
 </div>
@@ -193,7 +227,7 @@ Apr 12, 2022</span>
 <h2 class=mt-4>Posts in this series</h2>
 <ul>
 <li>
-<a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="[施工中] 浅谈 Cpp Value Categories">[施工中] 浅谈 Cpp Value Categories</a>
+<a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a>
 </li>
 </ul>
 <h2 class=mt-4>Recent Posts</h2>
