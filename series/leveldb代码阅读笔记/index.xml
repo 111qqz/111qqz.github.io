@@ -12,7 +12,7 @@ levelDB是一个有序的KV存储，因此key的顺序是十分关键的 levelDB
 先看下comparator的接口
 接口 include/leveldb/comparator.h 1 2// A Comparator object provides a total order across slices that are 3// used as keys in an sstable or a database. A Comparator implementation 4// must be thread-safe since leveldb may invoke its methods concurrently 5// from multiple threads. 6class LEVELDB_EXPORT Comparator { 7 public: 8 virtual ~Comparator(); 9 10 // Three-way comparison. Returns value: 11 // &amp;lt; 0 iff &amp;#34;a&amp;#34; &amp;lt; &amp;#34;b&amp;#34;, 12 // == 0 iff &amp;#34;a&amp;#34; == &amp;#34;b&amp;#34;, 13 // &amp;gt; 0 iff &amp;#34;a&amp;#34; &amp;gt; &amp;#34;b&amp;#34; 14 virtual int Compare(const Slice&amp;amp; a, const Slice&amp;amp; b) const = 0; 15 16 // The name of the comparator.</description></item><item><title>levelDB 代码阅读笔记 01 db.h</title><link>https://111qqz.com/2022/02/leveldb-notes-01/</link><pubDate>Sat, 26 Feb 2022 19:10:30 +0800</pubDate><guid>https://111qqz.com/2022/02/leveldb-notes-01/</guid><description>
 背景 最近在做一个智能算力相关的项目，类似美团外卖广告智能算力的探索与实践 其中实现控制系统需要与数据库交互。 虽然最后技术选型并没有使用到levelDB,但是想趁机把代码读了吧。
-很惊讶的发现我大三的时候声称自己度过部分levelDB代码，甚至还写了几篇相关的博客，比如
+很惊讶的发现我大三的时候声称自己读过部分levelDB代码，甚至还写了几篇相关的博客，比如
 murmurhash源码分析 Lock-free vs wait-free concurrency 内存屏障（Memory Barriers） levelDB 学习笔记 但是我却一点都没印象了.... 仔细看来很多概念在当时可能都是没有充分理解的，而且从数目上来看，应该并没有完整看完levelDB代码。
 所以重新开个坑，看看自己比起毕业前有没有长进【没有
 先从入口 include/leveldb/db.h 开始
