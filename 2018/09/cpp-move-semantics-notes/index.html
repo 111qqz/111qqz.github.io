@@ -158,37 +158,38 @@ Sep 9, 2018</span>
 </blockquote>
 <p>此外，由于moved from object在出了所在的scope后就会调用析构函数，因此称之为一个"expiring value(Xvalue)"，也就是临近生命周期终点的"将亡值". 详细可以参考 <a href=https://111qqz.com/2022/04/cpp-value-categories/#xvalue>浅谈 Cpp Value Categories</a></p>
 <h3 id=when-not-to-use-stdmove>when not to use std::move</h3>
-<p>起因是在看&lt;CplusplusConcurrencyInAction_PracticalMultithreading>，里面讲到转移一个std::thread的ownership提到了std::move.</p>
-<p>之前<a href=https://111qqz.com/2018/09/c11_ref_notes/>[C++11 ] std::ref&&std::reference_wrapper notes</a> 提到的情况是在我们想要用引用的时候却进行了拷贝，得到不符合期望的结果。现在的情况是，有些object或许是不支持拷贝构造的。比如std::unique_str,std::ifstream，这个时候如果我们需要传参数进去，就可以使用std::move来实现。比如下面这个例子:</p>
+<p>最常见的一种情景是，在函数return 时错误地使用了std::move,从而阻止了编译器可能的copy elision</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>
-<span class=ln>2</span>    <span class=kt>void</span> <span class=nf>process_big_object</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>unique_ptr</span><span class=o>&lt;</span><span class=n>big_object</span><span class=o>&gt;</span><span class=p>);</span>
-<span class=ln>3</span>    <span class=n>std</span><span class=o>::</span><span class=n>unique_ptr</span><span class=o>&lt;</span><span class=n>big_object</span><span class=o>&gt;</span> <span class=n>p</span><span class=p>(</span><span class=k>new</span> <span class=n>big_object</span><span class=p>);</span>
-<span class=ln>4</span>    <span class=n>p</span><span class=o>-&gt;</span><span class=n>prepare_data</span><span class=p>(</span><span class=mi>42</span><span class=p>);</span>
-<span class=ln>5</span>    <span class=n>std</span><span class=o>::</span><span class=kr>thread</span> <span class=n>t</span><span class=p>(</span><span class=n>process_big_object</span><span class=p>,</span><span class=n>std</span><span class=o>::</span><span class=n>move</span><span class=p>(</span><span class=n>p</span><span class=p>));</span>
-<span class=ln>6</span>
-</code></pre></div><p>当然这只是使用std::move的一种情形，即传递不允许拷贝构造的object作为参数。</p>
-<p><del>另外，std::move可以更有效率地传递资源。内容之后补orz</del></p>
-<p>实际上std::move()的作用是传进去一个object,返回这个object的右值引用（<em>rvalue reference）</em></p>
-<p>首先区分左值和右值，这其实是一个c语言中就有的概念（作为区分，<strong>右值引用</strong>是C++11中新引入的概念）</p>
-<p>一般来说，右值是不能被取地址的值。在C++11之前，右值是不能被引用的。</p>
-<p>语法上为了区分C++11之前的引用（也就是左值引用&）,右值引用的符号为&&</p>
-<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln> 1</span>   <span class=kt>void</span> <span class=nf>process_value</span><span class=p>(</span><span class=kt>int</span><span class=o>&amp;</span> <span class=n>i</span><span class=p>)</span> <span class=p>{</span> 
-<span class=ln> 2</span>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;LValue processed: &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>i</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span> 
-<span class=ln> 3</span>   <span class=p>}</span> 
-<span class=ln> 4</span>    
-<span class=ln> 5</span>   <span class=kt>void</span> <span class=nf>process_value</span><span class=p>(</span><span class=kt>int</span><span class=o>&amp;&amp;</span> <span class=n>i</span><span class=p>)</span> <span class=p>{</span> 
-<span class=ln> 6</span>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;RValue processed: &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>i</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span> 
-<span class=ln> 7</span>   <span class=p>}</span> 
-<span class=ln> 8</span>    
-<span class=ln> 9</span>   <span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span> 
-<span class=ln>10</span>    <span class=kt>int</span> <span class=n>a</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> 
-<span class=ln>11</span>    <span class=n>process_value</span><span class=p>(</span><span class=n>a</span><span class=p>);</span> 
-<span class=ln>12</span>    <span class=n>process_value</span><span class=p>(</span><span class=mi>1</span><span class=p>);</span> 
-<span class=ln>13</span>   <span class=p>}</span>
-<span class=ln>14</span>   <span class=n>LValue</span> <span class=nl>processed</span><span class=p>:</span> <span class=mi>0</span> 
-<span class=ln>15</span>   <span class=n>RValue</span> <span class=nl>processed</span><span class=p>:</span> <span class=mi>1</span>
-</code></pre></div><p>那么为什么要引入“右值引用”这个概念？ 主要有两个目的：<strong>完美转发(Perfect Forwarding)<strong>和</strong>转移语义(Move Sementics)</strong></p>
-<blockquote>转移语义可以将资源 ( 堆，系统对象等 ) 从一个对象转移到另一个对象，这样能够减少不必要的临时对象的创建、拷贝以及销毁。转移语义是和拷贝语义相对的，可以类比文件的剪切与拷贝，当我们将文件从一个目录拷贝到另一个目录时，速度比剪切慢很多。</blockquote>
+<span class=ln>2</span><span class=n>T</span> <span class=nf>fn</span><span class=p>()</span>
+<span class=ln>3</span><span class=p>{</span>
+<span class=ln>4</span>  <span class=n>T</span> <span class=n>t</span><span class=p>;</span>
+<span class=ln>5</span>  <span class=k>return</span> <span class=n>std</span><span class=o>::</span><span class=n>move</span> <span class=p>(</span><span class=n>t</span><span class=p>);</span>
+<span class=ln>6</span><span class=p>}</span>
+</code></pre></div><p>实际上，编译器会先去尝试做copy elision，如果无法做到，那么会去implicit std::move</p>
+<div class="notices warning">
+<div class=label>Warning</div>
+<p>因此，无论如何都不要把std::move 用在函数返回值上</p>
+</div>
+<h2 id=forwarding-reference>forwarding reference</h2>
+<p>其实就是universal refernce. forward reference是官方名称</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=ln>1</span>
+<span class=ln>2</span><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>T</span><span class=o>&gt;</span>
+<span class=ln>3</span><span class=kt>void</span> <span class=n>f</span><span class=p>(</span><span class=n>T</span><span class=o>&amp;&amp;</span> <span class=n>x</span><span class=p>);</span>   <span class=c1>// forwarding reference
+</span><span class=ln>4</span><span class=c1></span>
+<span class=ln>5</span><span class=k>auto</span> <span class=o>&amp;&amp;</span> <span class=n>var2</span> <span class=o>=</span> <span class=n>var1</span><span class=p>;</span>  <span class=c1>// forwarding reference
+</span><span class=ln>6</span><span class=c1></span>
+<span class=ln>7</span>
+</code></pre></div><p>forwarding refernece</p>
+<ul>
+<li>被lvalue初始化就是lvalue reference</li>
+<li>被rvalue初始化就是rvalue reference</li>
+</ul>
+<p>forwarding reference 从语法上看起来和rvalue reference 还是比较相像的，那如何区分呢？
+如下情况时，实际上是forwarding reference而不是rvalue reference</p>
+<ul>
+<li>发生了type deduction</li>
+<li>从形式上看，出现了T&&或者auto&&</li>
+</ul>
 <h2 id=perfect-forwarding>perfect forwarding</h2>
 <p>完美转发，也叫精确传递，指的是“需要将一组参数原封不动的传递给另一个函数”。</p>
 <p>原封不动的含义是说:数值不变，左值/右值属性不变，const/non-const属性不变。</p>
