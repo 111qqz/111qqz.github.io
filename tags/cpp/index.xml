@@ -43,16 +43,18 @@ condition_variable 类是同步原语，能用于阻塞一个线程，或同时
 1 std::shared_ptr&amp;lt;some_resource&amp;gt; resource_ptr; 2 std::mutex resource_mutex; 3 void foo() 4 { 5 std::unique_lock&amp;lt;std::mutex&amp;gt; lk(resource_mutex); 6 if(!resource_ptr) 7 { 8 resource_ptr.reset(new some_resource); 9 } 10 lk.unlock(); 11 resource_ptr-&amp;gt;do_something(); 12 } 13 这确实是一个办法。但是初始化时如果需要耗费比较多的时间，当有比较多的线程时，一个线程初始化时，其他线程会耗时间在不必要的等待上。
 在c++11以后，我们可以使用std::once_flag和std::call_once来解决资源初始化时加锁的问题。比起显示调用std::mutex的好处是，资源消耗更少。
 下面是两个例子:
-1 std::shared_ptr&amp;lt;some_resource&amp;gt; resource_ptr; 2 std::once_flag resource_flag; 3 b 4 void init_resource() 5 { 6 resource_ptr.reset(new some_resource); 7 } 8 void foo() 9 { 10 std::call_once(resource_flag,init_resource); 11 resource_ptr-&amp;gt;do_something(); 12 } 13 14 15 16 17 class X 18 { 19 private: 20 connection_info connection_details; 21 connection_handle connection; 22 std::once_flag connection_init_flag; 23 void open_connection() 24 { 25 connection=connection_manager.</description></item><item><title>[c++11 ]std::move 右值引用 转移语义 完美转发 notes</title><link>https://111qqz.com/2018/09/c11-stdmove-notes/</link><pubDate>Sun, 09 Sep 2018 13:01:45 +0000</pubDate><guid>https://111qqz.com/2018/09/c11-stdmove-notes/</guid><description>
-起因是在看&amp;lt;CplusplusConcurrencyInAction_PracticalMultithreading&amp;gt;，里面讲到转移一个std::thread的ownership提到了std::move.
-之前[C++11 ] std::ref&amp;amp;&amp;amp;std::reference_wrapper notes 提到的情况是在我们想要用引用的时候却进行了拷贝，得到不符合期望的结果。现在的情况是，有些object或许是不支持拷贝构造的。比如std::unique_str,std::ifstream，这个时候如果我们需要传参数进去，就可以使用std::move来实现。比如下面这个例子:
-1 2 void process_big_object(std::unique_ptr&amp;lt;big_object&amp;gt;); 3 std::unique_ptr&amp;lt;big_object&amp;gt; p(new big_object); 4 p-&amp;gt;prepare_data(42); 5 std::thread t(process_big_object,std::move(p)); 6 当然这只是使用std::move的一种情形，即传递不允许拷贝构造的object作为参数。
-另外，std::move可以更有效率地传递资源。内容之后补orz
-实际上std::move()的作用是传进去一个object,返回这个object的右值引用（rvalue reference）
-首先区分左值和右值，这其实是一个c语言中就有的概念（作为区分，右值引用是C++11中新引入的概念）
-一般来说，右值是不能被取地址的值。在C++11之前，右值是不能被引用的。
-语法上为了区分C++11之前的引用（也就是左值引用&amp;amp;）,右值引用的符号为&amp;amp;&amp;amp;
-1 void process_value(int&amp;amp; i) { 2 std::cout &amp;lt;&amp;lt; &amp;#34;LValue processed: &amp;#34; &amp;lt;&amp;lt; i &amp;lt;&amp;lt; std::endl; 3 } 4 5 void process_value(int&amp;amp;&amp;amp; i) { 6 std::cout &amp;lt;&amp;lt; &amp;#34;RValue processed: &amp;#34; &amp;lt;&amp;lt; i &amp;lt;&amp;lt; std::endl; 7 } 8 9 int main() { 10 int a = 0; 11 process_value(a); 12 process_value(1); 13 } 14 LValue processed: 0 15 RValue processed: 1 那么为什么要引入“右值引用”这个概念？ 主要有两个目的：完美转发(Perfect Forwarding)和转移语义(Move Sementics)</description></item><item><title>[C++11 ] std::ref&amp;&amp;std::reference_wrapper notes</title><link>https://111qqz.com/2018/09/reference_wrapper-notes/</link><pubDate>Sun, 09 Sep 2018 11:28:53 +0000</pubDate><guid>https://111qqz.com/2018/09/reference_wrapper-notes/</guid><description>
+1 std::shared_ptr&amp;lt;some_resource&amp;gt; resource_ptr; 2 std::once_flag resource_flag; 3 b 4 void init_resource() 5 { 6 resource_ptr.reset(new some_resource); 7 } 8 void foo() 9 { 10 std::call_once(resource_flag,init_resource); 11 resource_ptr-&amp;gt;do_something(); 12 } 13 14 15 16 17 class X 18 { 19 private: 20 connection_info connection_details; 21 connection_handle connection; 22 std::once_flag connection_init_flag; 23 void open_connection() 24 { 25 connection=connection_manager.</description></item><item><title>[c++11] move semantics &amp;&amp; perfect forwarding 学习笔记</title><link>https://111qqz.com/2018/09/cpp-move-semantics-notes/</link><pubDate>Sun, 09 Sep 2018 13:01:45 +0000</pubDate><guid>https://111qqz.com/2018/09/cpp-move-semantics-notes/</guid><description>
+背景 move semantics是modern cpp中非常重要的特性，有必要详细了解一下。
+updateime: 2022年7月2日
+move semantic 基本的内容大家都很熟悉，就不说了
+std::move 做了什么 std::move没有move任何内容，只是简单把传进来转换为对应的rvalue reference
+实现为:
+1 2template&amp;lt;typename T&amp;gt; 3constexpr std::remove_reference_t&amp;lt;T&amp;gt;&amp;amp;&amp;amp; move(T&amp;amp;&amp;amp; t) noexcept 4{ 5 return static_cast&amp;lt;std::remove_reference_t&amp;lt;T&amp;gt;&amp;amp;&amp;amp;&amp;gt;(t); 6} Tip 需要强调的是，无论传入的是const or non-const, lvalue or rvalue, ref or non-ref, std::move都会无条件(无差别)地转换为 rvalue refernece
+被std::move的值处于一个什么状态 Tip moved from object is in a valid but unspecified state
+说人话就是，对于moved from object，仍然可以对其进行一些操作，但是其state是未知的
+我们拆开来看
+这里提到的一些操作，其实只有三种:
+析构函数 move assigment operator copy assigment operator 其余操作都是非法的。</description></item><item><title>[C++11 ] std::ref&amp;&amp;std::reference_wrapper notes</title><link>https://111qqz.com/2018/09/reference_wrapper-notes/</link><pubDate>Sun, 09 Sep 2018 11:28:53 +0000</pubDate><guid>https://111qqz.com/2018/09/reference_wrapper-notes/</guid><description>
 起因是在看《CplusplusConcurrencyInAction_PracticalMultithreading》的时候，里面讲到初始化std::thread的时候，如果thread funtion的参数列表中有引用，需要传入std::ref才可以得到符合预期的结果。
 查阅发现std::ref是用来生成std::reference_wrapper。 按照 cppreference 上的话来说
 `std::reference_wrapper` 是包装引用于可复制、可赋值对象的类模板。它常用作将容器存储入无法正常保有引用的标准容器（类似 [std::vector](https://zh.cppreference.com/w/cpp/container/vector) ）的机制。 用人话来说，就是有的时候一些地方（比如STL容器中传值，又比如std::bind）会默认使用复制，这可能与我们想使用引用的期望不符。
