@@ -10,11 +10,11 @@ slice
 loss function
 reduce
 eltwise
-argmax</description></item><item><title>2023 01 16 Build Onnxruntime With Bazel</title><link>https://111qqz.com/2023/01/build-onnxruntime-with-bazel/</link><pubDate>Mon, 16 Jan 2023 16:28:22 +0800</pubDate><guid>https://111qqz.com/2023/01/build-onnxruntime-with-bazel/</guid><description>
+argmax</description></item><item><title>Build Onnxruntime With Bazel</title><link>https://111qqz.com/2023/01/build-onnxruntime-with-bazel/</link><pubDate>Mon, 16 Jan 2023 16:28:22 +0800</pubDate><guid>https://111qqz.com/2023/01/build-onnxruntime-with-bazel/</guid><description>
 背景 需要使用bazel build onnxruntime
 但是onnxruntime本身没有提供bazel相关的配置
 作为单独的repo 将onnxruntime的包下载下来解压
-主要的坑点在于动态库必须写全版本号 完整的BUILD.bazel文件为
+主要的坑点在于动态库必须写全版本号，不然无法成功导入 完整的BUILD.bazel文件为
 1 2 3 4cc_import( 5 name = &amp;#34;ort_lib&amp;#34;, 6 hdrs = glob([&amp;#34;onnxruntime-linux-x64-1.13.1/include/**/*.h&amp;#34;]), 7 # FIXME: 这里的动态库必须写全版本号，不然会出现error: undefined reference to &amp;#39;OrtGetApiBase&amp;#39; 8 shared_library = &amp;#34;onnxruntime-linux-x64-1.13.1/lib/libonnxruntime.so.1.13.1&amp;#34;, 9) 10 11cc_library( 12 name = &amp;#34;ort&amp;#34;, 13 hdrs = glob([&amp;#34;onnxruntime-linux-x64-1.13.1/include/**/*.h&amp;#34;]), 14 visibility = [&amp;#34;//visibility:public&amp;#34;], 15 # copts = [&amp;#34;-Ionnxruntime-linux-x64-1.13.1/include&amp;#34;], 16 strip_include_prefix = &amp;#34;onnxruntime-linux-x64-1.13.1/include&amp;#34;, 17 deps = [&amp;#34;:ort_lib&amp;#34;] 18) 19 20 21 22cc_binary( 23 name = &amp;#34;demo&amp;#34;, 24 srcs = [&amp;#34;demo.</description></item><item><title>[施工中]caffe 源码学习笔记(11) softmax</title><link>https://111qqz.com/2022/08/caffe-source-code-analysis-part12/</link><pubDate>Sat, 06 Aug 2022 12:26:03 +0800</pubDate><guid>https://111qqz.com/2022/08/caffe-source-code-analysis-part12/</guid><description>
 背景 2022年惊讶的发现，当时竟然没有写关于softmax的笔记，因此来补充一下。
 proto 还是先看proto
