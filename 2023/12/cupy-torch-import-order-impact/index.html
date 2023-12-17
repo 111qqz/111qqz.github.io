@@ -116,11 +116,17 @@ Dec 17, 2023</span>
 <h2>Overview</h2>
 <nav id=TableOfContents>
 <ul>
+<li><a href=#背景>背景</a></li>
+<li><a href=#最小复现代码>最小复现代码</a>
+<ul>
 <li><a href=#结果举例>结果举例</a></li>
+</ul>
+</li>
+<li><a href=#一些猜测>一些猜测</a></li>
 </ul>
 </nav>
 </div>
-<div class=post_body><h1 id=背景>背景</h1>
+<div class=post_body><h2 id=背景>背景</h2>
 <p>公司内部的基于torch的toolbox发现某个版本之后,结果发生了偏移. 通过一系列排查,发现当导入cupy和torch的顺序不同时，计算结果会有所差异。
 也就是说,如下两段代码会导致模型训练等环节的计算得到不同的结果.</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=ln>1</span><span class=kn>import</span> <span class=nn>cupy</span> <span class=k>as</span> <span class=nn>cp</span>
@@ -128,7 +134,7 @@ Dec 17, 2023</span>
 </code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=ln>1</span><span class=kn>import</span> <span class=nn>torch</span>
 <span class=ln>2</span><span class=kn>import</span> <span class=nn>cupy</span> <span class=k>as</span> <span class=nn>cp</span>
 <span class=ln>3</span>
-</code></pre></div><h1 id=最小复现代码>最小复现代码</h1>
+</code></pre></div><h2 id=最小复现代码>最小复现代码</h2>
 <p>经过一番努力,把问题从内部框架中剥离了出来.
 如下是得到的最小复现代码.
 通过调整import cupy与import torch的相对顺序,会得到不同的结果.</p>
@@ -178,7 +184,7 @@ Dec 17, 2023</span>
 <span class=ln>44</span><span class=n>output_tensor</span> <span class=o>=</span> <span class=n>model</span><span class=p>(</span><span class=n>input_tensor</span><span class=p>)</span><span class=o>.</span><span class=n>detach</span><span class=p>()</span><span class=o>.</span><span class=n>cpu</span><span class=p>()</span><span class=o>.</span><span class=n>numpy</span><span class=p>()</span>
 <span class=ln>45</span>
 <span class=ln>46</span><span class=nb>print</span><span class=p>(</span><span class=s2>&#34;输出张量:&#34;</span><span class=p>,</span> <span class=n>output_tensor</span><span class=p>)</span>
-</code></pre></div><h2 id=结果举例>结果举例</h2>
+</code></pre></div><h3 id=结果举例>结果举例</h3>
 <p>测试GPU为: A100-PCIE-40GB<br>
 先<code>import cupy</code>,后<code>import torch</code>,得到的结果为:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=ln> 1</span>输出张量: <span class=o>[[</span>0.23729032<span class=o>]</span>
@@ -204,7 +210,7 @@ Dec 17, 2023</span>
 <span class=ln> 9</span> <span class=o>[</span>0.32745278<span class=o>]</span>
 <span class=ln>10</span> <span class=o>[</span>0.31726775<span class=o>]]</span>
 <span class=ln>11</span>
-</code></pre></div><h1 id=一些猜测>一些猜测</h1>
+</code></pre></div><h2 id=一些猜测>一些猜测</h2>
 <p>模型和代码在cpu上没有任何问题,因此问题一定出在gpu上
 怀疑是cupy初始化时某个cuda有关的设置和torch初始化时这个设置冲突</p>
 <p>但是具体是是什么设置..还需要继续探究.</p>
