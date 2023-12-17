@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on 111qqz的小窝</title><link>https://111qqz.com/post/</link><description>Recent content in Posts on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sun, 28 May 2023 17:24:28 +0800</lastBuildDate><atom:link href="https://111qqz.com/post/index.xml" rel="self" type="application/rss+xml"/><item><title>2022 TO DO list</title><link>https://111qqz.com/2022/02/2022-to-do-list/</link><pubDate>Sat, 26 Feb 2022 18:12:20 +0800</pubDate><guid>https://111qqz.com/2022/02/2022-to-do-list/</guid><description>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on 111qqz的小窝</title><link>https://111qqz.com/post/</link><description>Recent content in Posts on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sun, 17 Dec 2023 18:22:24 +0800</lastBuildDate><atom:link href="https://111qqz.com/post/index.xml" rel="self" type="application/rss+xml"/><item><title>2022 TO DO list</title><link>https://111qqz.com/2022/02/2022-to-do-list/</link><pubDate>Sat, 26 Feb 2022 18:12:20 +0800</pubDate><guid>https://111qqz.com/2022/02/2022-to-do-list/</guid><description>
 竟然一下子就2022年了，时间过得真快。 还是简单列一下TODO list吧。
 源码 levelDB workflow 书籍 APUE Advanced Programming in the UNIX Environment, 3rd Edition
 粗略读完了，内容非常多，更像是一个手册。需要的时候再细读即可
@@ -18,7 +18,10 @@ slice
 loss function
 reduce
 eltwise
-argmax</description></item><item><title>写在毕业五年之后</title><link>https://111qqz.com/2023/05/five-years-after-graduation/</link><pubDate>Sun, 28 May 2023 17:24:28 +0800</pubDate><guid>https://111qqz.com/2023/05/five-years-after-graduation/</guid><description>
+argmax</description></item><item><title>[施工中] cupy与torch的导入顺序不同对计算结果的影响</title><link>https://111qqz.com/2022/</link><pubDate>Sun, 17 Dec 2023 18:22:24 +0800</pubDate><guid>https://111qqz.com/2022/</guid><description>
+背景 公司内部的基于torch的toolbox发现某个版本之后,结果发生了偏移. 通过一系列排查,发现当导入cupy和torch的顺序不同时，计算结果会有所差异。 也就是说,如下两段代码会导致模型训练等环节的计算得到不同的结果.
+1import cupy as cp 2import torch 1import torch 2import cupy as cp 3 最小复现代码 经过一番努力,把问题从内部框架中剥离了出来. 如下是得到的最小复现代码. 通过调整import cupy与import torch的相对顺序,会得到不同的结果.
+1# import cupy as cp 2import torch 3import torch.nn as nn 4import cupy as cp 5import random 6import numpy as np 7 8# 设置随机种子 9def set_random_seed(seed: int): 10 random.seed(seed) 11 np.random.seed(seed) 12 torch.manual_seed(seed) 13 torch.cuda.manual_seed(seed) 14 torch.cuda.manual_seed_all(seed) 15 cp.random.seed(seed) 16 17# 定义一个简单的MLP模型 18class MLP(nn.Module): 19 def __init__(self): 20 super(MLP, self).</description></item><item><title>写在毕业五年之后</title><link>https://111qqz.com/2023/05/five-years-after-graduation/</link><pubDate>Sun, 28 May 2023 17:24:28 +0800</pubDate><guid>https://111qqz.com/2023/05/five-years-after-graduation/</guid><description>
 五年的工作时光转眼即逝，我想写点什么来回顾这段经历。
 工作主线 第一个offer hypereal 从毕业到现在已经五年了，但是我的求职之路要从2017年的找实习开始算起。我记得很清楚，人生第一次投出简历是给了一家做VR的初创公司hypereal（现在已经没有什么消息了，其官方Twitter的最后一条消息停留在了2017年5月）。当时我正坐在从哈尔滨到武汉的高铁上（G1276，全程14个小时），可能在ACMer求职群看到有人发了职位信息，就赶紧写了份简历投了过去。
 面试中都是一些八股文，唯一记得的是有一道求费波纳契数的题目，我写了个矩阵快速幂。面试后第二天，我就收到了实习offer，当时真的高兴了好久。
