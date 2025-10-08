@@ -1,28 +1,12 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>cdq分治 on 111qqz的小窝</title><link>https://111qqz.com/tags/cdq%E5%88%86%E6%B2%BB/</link><description>Recent content in cdq分治 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Tue, 10 Oct 2017 12:53:20 +0000</lastBuildDate><atom:link href="https://111qqz.com/tags/cdq%E5%88%86%E6%B2%BB/index.xml" rel="self" type="application/rss+xml"/><item><title>hdu 5618 Jam's problem again （cdq分治+BIT，三维偏序）</title><link>https://111qqz.com/2017/10/hdu-5618/</link><pubDate>Tue, 10 Oct 2017 12:53:20 +0000</pubDate><guid>https://111qqz.com/2017/10/hdu-5618/</guid><description>
-题目链接
-题意: If two point such as (xi,yi,zi) and (xj,yj,zj) xi≥xj yi≥yj zi≥zj, the bigger one level add 1
-问每个point的level是多少。
-思路： cdq分治，先去重并统计相同的点的数量，需要注意要记录原id对应到了哪个新id
-/* *********************************************** Author :111qqz Created Time :2017年10月10日 星期二 19时53分38秒 File Name :5618.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define PB push_back #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; const int N=1E5+7; int n; struct point { int x,y,z; int id; int cnt,sum; void input( int _id) { scanf(&amp;quot;%d %d %d&amp;quot;,&amp;amp;x,&amp;amp;y,&amp;amp;z); id=_id; } bool operator &amp;lt; (const point &amp;amp;b)const { if (x!</description></item><item><title>BZOJ 3262: 陌上花开 (cdq分治模板题，三维偏序)</title><link>https://111qqz.com/2017/10/bzoj-3262/</link><pubDate>Tue, 10 Oct 2017 11:43:22 +0000</pubDate><guid>https://111qqz.com/2017/10/bzoj-3262/</guid><description>
-Description 有n朵花，每朵花有三个属性：花形(s)、颜色(c)、气味(m)，又三个整数表示。现要对每朵花评级，一朵花的级别是它拥有的美丽能超过的花的数量。定义一朵花A比另一朵花B要美丽，当且仅当Sa&amp;gt;=Sb,Ca&amp;gt;=Cb,Ma&amp;gt;=Mb。显然，两朵花可能有同样的属性。需要统计出评出每个等级的花的数量。
-Input 第一行为N,K (1 &amp;lt;= N &amp;lt;= 100,000, 1 &amp;lt;= K &amp;lt;= 200,000 ), 分别表示花的数量和最大属性值。
-以下N行，每行三个整数si, ci, mi (1 &amp;lt;= si, ci, mi &amp;lt;= K)，表示第i朵花的属性
-Output 包含N行，分别表示评级为0...N-1的每级花的数量。
-Sample Input 10 3 3 3 3 2 3 3 2 3 1 3 1 1 3 1 2 1 3 1 1 1 2 1 2 2 1 3 2 1 2 1
-Sample Output 3 1 3 0 1 0 1 0 0 1</description></item><item><title>cdq分治学习笔记</title><link>https://111qqz.com/2017/10/cdq-divide-notes/</link><pubDate>Tue, 10 Oct 2017 08:03:06 +0000</pubDate><guid>https://111qqz.com/2017/10/cdq-divide-notes/</guid><description>
-起因是队里的大佬们都会这东西，而我一个老年选手竟然还不会，实在说不过去。
-cdq分治显然是分治的一种，cdq的意思就是超短裙啦（
-这东西网上资料很多（然而还是学不会
-先放一波资料：
-资料1
-【教程】简易CDQ分治教程&amp;amp;学习笔记
-[偏序关系与CDQ分治]【学习笔记】
-学习笔记——cdq分治
-[学习笔记] CDQ分治 从感性理解到彻底晕菜
-lwt菊苣的博客
-下面转自lwt菊苣的博客，豁然开朗。
-* 与普通分治的区别 普通分治中，每一个子问题只解决它本身（可以说是封闭的） CDQ分治中，对于划分出来的两个子问题，前一个子问题用来解决后一个子问题而不是它本身 * 适用的情况 在很多问题中（比如大多数数据结构题），经常需要处理一些动态问题 然而对动态问题的处理总是不如静态问题来的方便，于是就有了CDQ分治 但使用CDQ分治的前提是问题必须具有以下两个性质：
-* 修改操作对询问的贡献独立，修改操作互不影响效果 * 题目允许使用离线算法。 * 一般步骤 * 将整个操作序列分为两个长度相等的部分（分） * 递归处理前一部分的子问题（治1） * 计算前一部分的子问题中的修改操作对后一部分子问题的影响（治2） * 递归处理后一部分子问题（治3） 特别说明： 在整个过程中，最核心的就是步骤3 此时前一部分子问题中的修改操作相对后一部分子问题来说是静态处理，因此可以更加方便地计算后一部分子问题
-cdq分治求三维偏序美滋滋
-一般是，第一维排序，第二维cdq,第三维套一层数据结构（不然的话就要数据结构套数据结构啦差评
-cdq的复杂度和分治的复杂度一样也是O(nlgn),所以可以理解成cdq可以一层数据结构？因为比树套树之类好写，所以有广泛应用（？</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Cdq分治 on 111qqz的小窝</title><link>https://111qqz.com/tags/cdq%E5%88%86%E6%B2%BB/</link><description>Recent content in Cdq分治 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Tue, 10 Oct 2017 12:53:20 +0000</lastBuildDate><atom:link href="https://111qqz.com/tags/cdq%E5%88%86%E6%B2%BB/index.xml" rel="self" type="application/rss+xml"/><item><title>hdu 5618 Jam's problem again （cdq分治+BIT，三维偏序）</title><link>https://111qqz.com/2017/10/hdu-5618/</link><pubDate>Tue, 10 Oct 2017 12:53:20 +0000</pubDate><guid>https://111qqz.com/2017/10/hdu-5618/</guid><description>
+&lt;p&gt;&lt;a href="http://acm.split.hdu.edu.cn/showproblem.php?pid=5618"&gt;题目链接&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id="题意"&gt;题意:&lt;/h1&gt;
+&lt;p&gt;If two point such as (xi,yi,zi) and (xj,yj,zj) xi≥xj yi≥yj zi≥zj, the bigger one level add 1&lt;/p&gt;
+&lt;p&gt;问每个point的level是多少。&lt;/p&gt;
+&lt;h1 id="思路"&gt;思路：&lt;/h1&gt;
+&lt;p&gt;cdq分治，先去重并统计相同的点的数量，&lt;strong&gt;需要注意要记录原id对应到了哪个新id&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>BZOJ 3262: 陌上花开 (cdq分治模板题，三维偏序)</title><link>https://111qqz.com/2017/10/bzoj-3262/</link><pubDate>Tue, 10 Oct 2017 11:43:22 +0000</pubDate><guid>https://111qqz.com/2017/10/bzoj-3262/</guid><description>
+&lt;h2 id="description"&gt;Description&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;有n朵花，每朵花有三个属性：花形(s)、颜色(c)、气味(m)，又三个整数表示。现要对每朵花评级，一朵花的级别是它拥有的美丽能超过的花的数量。定义一朵花A比另一朵花B要美丽，当且仅当Sa&amp;gt;=Sb,Ca&amp;gt;=Cb,Ma&amp;gt;=Mb。显然，两朵花可能有同样的属性。需要统计出评出每个等级的花的数量。&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>cdq分治学习笔记</title><link>https://111qqz.com/2017/10/cdq-divide-notes/</link><pubDate>Tue, 10 Oct 2017 08:03:06 +0000</pubDate><guid>https://111qqz.com/2017/10/cdq-divide-notes/</guid><description>
+&lt;p&gt;起因是队里的大佬们都会这东西，而我一个老年选手竟然还不会，实在说不过去。&lt;/p&gt;
+&lt;p&gt;cdq分治显然是分治的一种，cdq的意思就是超短裙啦（&lt;/p&gt;
+&lt;p&gt;这东西网上资料很多（&lt;del&gt;然而还是学不会&lt;/del&gt;&lt;/p&gt;</description></item></channel></rss>

@@ -1,84 +1,23 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>docker on 111qqz的小窝</title><link>https://111qqz.com/tags/docker/</link><description>Recent content in docker on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sat, 10 Dec 2022 18:04:41 +0800</lastBuildDate><atom:link href="https://111qqz.com/tags/docker/index.xml" rel="self" type="application/rss+xml"/><item><title>【施工中】gitlab ci docker executor指定用户执行</title><link>https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/</link><pubDate>Sat, 10 Dec 2022 18:04:41 +0800</pubDate><guid>https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/</guid><description>
-背景 需要在gitlab pipelines中跑一堆测试 其中某些测试需要与rancher交互，在训练集群上执行一个训练任务
-gitlab pipelines的默认用户是root,而rancher会默认以当前操作的user进行调度。
-这里还涉及若干奇奇怪怪的，比较特异性的原因。 导致gitlab pipeline无法调度成功rancher.
-总之，需求是，要在gitlab上以一个non-root 执行一些任务
-由于缺少官方支持 (参考这里 ), 最终用了非常tricky的办法解决，踩了非常多的坑，因此记录下来，以飨后人
-过程 为了方便表述，假设这个non-root user就叫&amp;quot;renkz&amp;quot;
-在docker中添加renkz为默认user 如果我想以renkz作为user来运行docker,那么docker中肯定要有这个用户。
-最初我是这样在dockerfile设置的。
-1RUN useradd -ms /bin/bash renkz -d /home/renkz -G sudo2USERrenkz3WORKDIR/home/renkz4然后以如下方式启动:
-1docker run -it -v /dssg:/dssg -u renkz image 2 其中挂载的/dssg是数据的存储。然而由于/dssg的权限问题，我需要在我的镜像中也存在这些能访问/dssg的用户。尤其是renkz这个用户。(不要问我为什么这么奇怪。公司现状就是如此。。。) 询问了公司的IT的同事，他们的做法是给所有需要挂载/dssg的容器同时挂载了全局的/etc/group和全局的/etc/passwd
-于是启动方式变成了这样:
-1docker run -it -v /dssg:/dssg -v /global-group:/etc/group -v /global-passwd:/etc/passwd -u renkz image 2 其中/global-passwd和/global-group为两个公司全局的passwd和group文件路径
-然而，奇怪的发现，启动docker后，&amp;quot;whoami&amp;quot;得到的不是renkz,而是&amp;quot;qwe&amp;quot;。。对应着/etc/passwd里user id为1000的用户名。
-排查后认为，是因为 docker --user选项，会把user name先转换成user id。 由于我在docker中创建user renkz的时候是使用的默认user id(1000),因此docker run的时候其实是以user id 1000启动的。在这个过程发生后，/etc/passwd被替换，此时user id为1000的user变成了qwe</description></item><item><title>k8s nodes is forbidden user cannot list resource nodes in api group at the cluster scope</title><link>https://111qqz.com/2020/05/install-k8s-get-nodes-forbidden-error/</link><pubDate>Thu, 07 May 2020 16:01:52 +0800</pubDate><guid>https://111qqz.com/2020/05/install-k8s-get-nodes-forbidden-error/</guid><description>
-继续将k8s用于模型转换和部署的自动化流程...然后发现之前安装k8s的文档不work了．． 时间是2020年5月7日，当前最新的k8s版本是　v1.18.2
-报错如下:
-1 2 3&amp;lt;2kzzqw6rsjid0 --discovery-token-ca-cert-hash sha256:c6c72bdc96c0ff4d59559ff915eee61ba7ac5e8b93c0b2f9e11e813412387ec2 --v=5 4W0507 15:45:12.608784 4768 join.go:346] [preflight] WARNING: JoinControlPane.controlPlane settings will be ignored when control-plane flag is not set. 5I0507 15:45:12.608822 4768 join.go:371] [preflight] found NodeName empty; using OS hostname as NodeName 6I0507 15:45:12.608853 4768 initconfiguration.go:103] detected and using CRI socket: /var/run/dockershim.sock 7[preflight] Running pre-flight checks 8I0507 15:45:12.608902 4768 preflight.go:90] [preflight] Running general checks 9I0507 15:45:12.608933 4768 checks.go:249] validating the existence and emptiness of directory /etc/kubernetes/manifests 10I0507 15:45:12.</description></item><item><title>Kubernetes(k8s)在深度学习模型转换方面的探索</title><link>https://111qqz.com/2019/11/K8s-for-Model-Conversion/</link><pubDate>Fri, 22 Nov 2019 11:14:19 +0800</pubDate><guid>https://111qqz.com/2019/11/K8s-for-Model-Conversion/</guid><description>
-年中的时候接了离职的同事模型转换的锅，在不断地更新迭代的过程中，发现了一些痛点。 发现k8s能够解决一部分痛点，因此来分享一下在这方面的探索。
-什么是模型转换 简单来说，深度学习模型的流程分为training和inference两部分。训练时用的一般是pytorch等框架，这些框架训练出的model是没办法直接部署在各个硬件平台上做inference的。因此需要将使用训练框架得到的模型，转换为能够部署到各个硬件平台上的模型。这个过程就是模型转换。
-模型转换的一般流程为，先将pytorch等训练框架训练得到的模型转换为caffe model（是的，caffe才是业界中间表示的事实标准，而不是号称支持所有框架中间表示的onnx)，再将caffe model 转换到各种硬件上（包括但不限于nvidia系列显卡，华为的海思系列设备等）
-（事实上这个转换流程是有硬伤存在的，这个硬伤在于pytorch的模型权重和模型结构是分离的。调研过业界一些其他模型转换的解决方案，包括百度的X2Paddle,其做法是不把pytorch模型作为模型转换的起点，而是从caffe model/onnx model 开始转换。还调研过微软的MMdnn,里面似乎也没有提到这个问题。不知道pytorch 1.0版本新增的torchscript是不是一条出路...)
-模型转换的痛点 最初模型转换的痛点是依赖比较多，从pytorch,onnx,caffe再到tensorrt,cuda等．　尤其编译caffe,又是出了名的坑多．　解决办法是用了docker,将所有环境封装好．这样其他人可以直接拉镜像下来进行模型转换．
-然而，在用了docker之后，还是有其他痛点，主要是以下三个:
-权限申请的繁琐．
-caffe模型转换到不同硬件上（主要是nvidia显卡），需要在对应的机器上进行转换．通常是客户确定使用某型号的显卡，然后我们采购对应显卡的机器．接下来需要一系列权限申请，包括服务器的权限，docker命令的权限，以及docker镜像仓库的权限．　除此之外，用户还需要将模型文件从其他位置放置到新服务器上，这件事也非常麻烦．
-docker 镜像的版本控制.
-docker的image虽然可以打tag，但是这个tag几乎对版本控制没有帮助．由于模型转换工具更新频繁（包括但是不限于，添加新的op/layer,caffe对新显卡的编译支持，caffe2tensorrt工具的更新），这么弱的版本管理就是灾难．如果我们对于每次升级docker image,都使用一个新的tag来标记的话，docker似乎没有一个机制来通知这个新的tag的存在．用户还是可以在这个旧的镜像上用到天荒地老．如果复用之前的tag的话,同样，用户还是可以不更新．
-对docker commit 的滥用．
-本来docker image的大小只有7G+,但是由于用户非常钟爱docker cp命令以及docker commit 命令．曾经有用户把整个数据集都docker cp进去之后docker commit ..　然后现在镜像大小已经有35G了．．
-上述几个痛点，恰好k8s可以比较好的解决．
-k8s用于模型转换. 官方的说法是,k8s是一个生产级别的容器编排系统，用于容器化应用的自动部署、扩缩和管理
-然而似乎我对k8s的使用是非常非主流的(其实对docker的使用也很非主流...)
-不过我觉得没有规定一项技术只能用来做什么,只要解决的问题多于引入的问题,就可以尝试.
-k8s的引入使得用户不再能直接接触到docker image. 这直接解决了第一和第三两个痛点. 以及可以使用 imagePullPolicy 来进行强制更新,也基本解决了版本控制的问题. 这样就不用天天push 其他用户&amp;quot; 你先docker pull一下&amp;quot;...
-此外,k8s的label机制也很有用. 我们可以通过给node打上不同显卡型号的label.然后维护一个显卡的列表.这样用户不再需要知道哪台服务器上有哪个显卡,只需要添写显卡型号,k8s就可以分配一台对应的机器供用户进行模型转换.
-不过实际上k8s用户模型转换也有一些缺点:
-k8s对显卡的调度是对于pod(pod就是一组container)独占的.也就是说,在一台服务器上,通过k8s只能开启与显卡个数一样多的pod.目前来看不会有什么大的影响,不过这对于对性能要求不敏感的应用,确实算个缺点.
-pod名称的全局唯一性.由于开启任务需要显式提供一个名称,如果多个用户使用了相同的名称的话,结果显然不是我们期望的. 目前的解决方案是制定一个命名规范,要求用户遵守.但是这种规范并没有任何检查的机制,因此只能算一个tricky的办法,算不上真正的解决方案.</description></item><item><title>我在公司的服务器上执行了sudo rm -rf /*</title><link>https://111qqz.com/2018/11/when-I-execute-sudo-rm-rf-on-the-company-server/</link><pubDate>Sat, 24 Nov 2018 08:31:19 +0000</pubDate><guid>https://111qqz.com/2018/11/when-I-execute-sudo-rm-rf-on-the-company-server/</guid><description>
-TL;DR
-* 依靠人的小心谨慎是不靠谱的，人总有失误的时候 * 看了下docker volume的权限机制，貌似是从docker image中继承。 * 写了两个脚本，用来把rm alias到mv，避免手滑 又是一个可以摸鱼的周五晚上，sensespider系统测试了一天，fix了几个Bug,似乎可以发布了。系统一直是部署在了docker中..这几天测试产生了不少结果文件在host的volume中... 看着不舒服，干脆删一下好了
-嗯？怎么所有者是root。。。那我sudo一下，也没什么大不了的嘛
-然而手滑了... 打了个 sudo rm -rf /* ...
-提示无法删除/boot device is busy...
-吓了一跳，下意识Ctrl-C...
-从新在本地ssh到服务器，发现已经登不上去了...报错在找不到sh
-看了一下，果然服务器的/bin 目录已经被删干净了...
-google了一些从rm中恢复文件的帖子...
-试图用 sudo apt-get install 装一些工具包...
-这个时候已经提示我找不到apt-get 了。。。
-非常慌。花了3分钟思考了我到目前为止的一生
-看了下scp命令还在，赶紧趁着这个终端回话还没关，把本地的/bin目录拷贝了上来。
-试了下，ssh命令可以用了。 这样至少后续的修复（在不麻烦IT同事的情况下)不用跑机房了。有些镇定。
-然后发现apt-get 命令还是用不了。。。思考了1分钟。。。
-然后发现服务器用的是centos.......
-再试了各种常用命令，试了docker相关的各种命令，都可以正常工作。
-然而整个人都被吓傻了....睡了一觉才回过神。
-又查了下docker volume权限的事情，发现挂载目录继承docker image中用户的权限是feature Volumes files have root owner when running docker with non-root user. 那似乎就没办法了。
-以及写了两个脚本，来避免手滑，分别是zsh环境和bash环境下的。
-kkrm</description></item><item><title>docker network 与 本地 network 网段冲突</title><link>https://111qqz.com/2018/11/docker-network-conflict-with-local-subnetwork/</link><pubDate>Tue, 20 Nov 2018 08:33:20 +0000</pubDate><guid>https://111qqz.com/2018/11/docker-network-conflict-with-local-subnetwork/</guid><description>
-起因: 公司部署在hk的爬虫服务器突然挂掉了。后来发现只是在深圳办公区无法访问。排查后发现原因是docker的网络(包括docker network的subnet或者是某个容器的ip)与该host在内网的ip段相同，导致冲突。
-排查过程： 有两个方面需要排查。一个是docker服务启动时的默认网络。
-默认网络使用bridge桥接模式，是容器与宿主机进行通讯的默认办法。
-修改默认网段可以参考 http://blog.51cto.com/wsxxsl/2060761
-除此之外，还需要注意docker创建的network的网段。
-使用docker network ls 命令查看当前的网络
-然后可以使用docker inspect 查看每个network的详细信息。
-也可以直接使用ip addr 来查看各种奇怪的虚拟网卡的ip,是否有前两位的地址和host的ip地址相同的。
-解决办法: 本想在docker-compose up 时指定默认网络的subnet
-结果发现好像并不支持？version 1.10.0 error on gateway spec
-Was there any discussion on that? I do need to customize the network, because my company uses the 172.16.0.0/16 address range at some segments and Docker will simply clash with that by default, so every single Docker server in the whole company needs a forced network setting.</description></item><item><title>记一次在 docker compose 中使用volume的踩坑记录</title><link>https://111qqz.com/2018/11/docker-compose-default-volume-name-makes-me-confused/</link><pubDate>Wed, 14 Nov 2018 08:06:57 +0000</pubDate><guid>https://111qqz.com/2018/11/docker-compose-default-volume-name-makes-me-confused/</guid><description>
-现象: 使用docker compose 挂载 named volume 无效（且没有错误提示)
-排查过程: 一开始是没有使用docker-compose命令，直接使用docker run -v 命令，挂载两个绝对路径，没有问题。
-然后使用named volume，在这里使用了local-persist 插件，来指定数据卷(volume)在host上的位置。直接用docker run -v 命令，依然没有问题。
-接下里打算放到docker compose里面，发现并没有挂载成功。
-但是在docker compose里面，挂载两个绝对路径是ok的。
-于是怀疑是volume的问题
-此时使用docker inspect 查看 用docker compose 启动起来的，挂载named volume的容器
-发现mount里面，挂载的named volume并不是我在docker-compose.yml填写的名称，而是多了一个前缀，这个前缀恰好是docker-compose.yml 文件所在的目录名称。
-查了一下，发现果然不止我一个人被坑到orz Docker-compose prepends directory name to named volumes
-其实应该直接使用docker inspect来排查的...应该会更快找到问题
-解决办法： 有几种解决办法：
-* 不手动创建volume，而是在docker-compose.yml中，设置volume的mountpoint * 在docker-compose.yml中，添加external: true的选项到 volume中，参考[external](https://docs.docker.com/compose/compose-file/#external) 顺便附上我的docker-compose.yml文件
-version: '3' services: django: image: &amp;quot;registry.sensetime.com/spider/sensespider:v1.0&amp;quot; volumes: - spiderdata:/data privileged: true ports: - &amp;quot;8000:8000&amp;quot; working_dir: /home/renkuanze/workspace/sensespider entrypoint: bash run.</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Docker on 111qqz的小窝</title><link>https://111qqz.com/tags/docker/</link><description>Recent content in Docker on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sat, 10 Dec 2022 18:04:41 +0800</lastBuildDate><atom:link href="https://111qqz.com/tags/docker/index.xml" rel="self" type="application/rss+xml"/><item><title>【施工中】gitlab ci docker executor指定用户执行</title><link>https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/</link><pubDate>Sat, 10 Dec 2022 18:04:41 +0800</pubDate><guid>https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/</guid><description>
+&lt;h1 id="背景"&gt;背景&lt;/h1&gt;
+&lt;p&gt;需要在gitlab &lt;a href="https://docs.gitlab.com/ee/ci/pipelines/"&gt;pipelines&lt;/a&gt;中跑一堆测试
+其中某些测试需要与rancher交互，在训练集群上执行一个训练任务&lt;/p&gt;
+&lt;p&gt;gitlab pipelines的默认用户是root,而rancher会默认以当前操作的user进行调度。&lt;/p&gt;</description></item><item><title>k8s nodes is forbidden user cannot list resource nodes in api group at the cluster scope</title><link>https://111qqz.com/2020/05/install-k8s-get-nodes-forbidden-error/</link><pubDate>Thu, 07 May 2020 16:01:52 +0800</pubDate><guid>https://111qqz.com/2020/05/install-k8s-get-nodes-forbidden-error/</guid><description>
+&lt;p&gt;继续将k8s用于模型转换和部署的自动化流程...然后发现之前安装k8s的文档不work了．．
+时间是2020年5月7日，当前最新的k8s版本是　v1.18.2&lt;/p&gt;</description></item><item><title>Kubernetes(k8s)在深度学习模型转换方面的探索</title><link>https://111qqz.com/2019/11/K8s-for-Model-Conversion/</link><pubDate>Fri, 22 Nov 2019 11:14:19 +0800</pubDate><guid>https://111qqz.com/2019/11/K8s-for-Model-Conversion/</guid><description>
+&lt;p&gt;年中的时候接了离职的同事模型转换的锅，在不断地更新迭代的过程中，发现了一些痛点。
+发现k8s能够解决一部分痛点，因此来分享一下在这方面的探索。&lt;/p&gt;
+&lt;h2 id="什么是模型转换"&gt;什么是模型转换&lt;/h2&gt;
+&lt;p&gt;简单来说，深度学习模型的流程分为training和inference两部分。训练时用的一般是pytorch等框架，这些框架训练出的model是没办法直接部署在各个硬件平台上做inference的。因此需要将使用训练框架得到的模型，转换为能够部署到各个硬件平台上的模型。这个过程就是模型转换。&lt;/p&gt;</description></item><item><title>我在公司的服务器上执行了sudo rm -rf /*</title><link>https://111qqz.com/2018/11/when-I-execute-sudo-rm-rf-on-the-company-server/</link><pubDate>Sat, 24 Nov 2018 08:31:19 +0000</pubDate><guid>https://111qqz.com/2018/11/when-I-execute-sudo-rm-rf-on-the-company-server/</guid><description>
+&lt;p&gt;TL;DR&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt; * 依靠人的小心谨慎是不靠谱的，人总有失误的时候
+* 看了下docker volume的权限机制，貌似是从docker image中继承。
+* 写了两个脚本，用来把rm alias到mv，避免手滑
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;又是一个&lt;del&gt;可以摸鱼的&lt;/del&gt;周五晚上，sensespider系统测试了一天，fix了几个Bug,似乎可以发布了。系统一直是部署在了docker中..这几天测试产生了不少结果文件在host的volume中... 看着不舒服，干脆删一下好了&lt;/p&gt;</description></item><item><title>docker network 与 本地 network 网段冲突</title><link>https://111qqz.com/2018/11/docker-network-conflict-with-local-subnetwork/</link><pubDate>Tue, 20 Nov 2018 08:33:20 +0000</pubDate><guid>https://111qqz.com/2018/11/docker-network-conflict-with-local-subnetwork/</guid><description>
+&lt;h3 id="起因"&gt;起因:&lt;/h3&gt;
+&lt;p&gt;公司部署在hk的爬虫服务器突然挂掉了。后来发现只是在深圳办公区无法访问。排查后发现原因是docker的网络(包括docker network的subnet或者是某个容器的ip)与该host在内网的ip段相同，导致冲突。&lt;/p&gt;</description></item><item><title>记一次在 docker compose 中使用volume的踩坑记录</title><link>https://111qqz.com/2018/11/docker-compose-default-volume-name-makes-me-confused/</link><pubDate>Wed, 14 Nov 2018 08:06:57 +0000</pubDate><guid>https://111qqz.com/2018/11/docker-compose-default-volume-name-makes-me-confused/</guid><description>
+&lt;h3 id="现象"&gt;现象:&lt;/h3&gt;
+&lt;p&gt;使用docker compose 挂载 named volume 无效（且没有错误提示)&lt;/p&gt;
+&lt;h3 id="排查过程"&gt;排查过程:&lt;/h3&gt;
+&lt;p&gt;一开始是没有使用docker-compose命令，直接使用docker run  -v 命令，挂载两个绝对路径，没有问题。&lt;/p&gt;</description></item></channel></rss>

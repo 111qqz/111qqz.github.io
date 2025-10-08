@@ -1,18 +1,11 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>redis on 111qqz的小窝</title><link>https://111qqz.com/tags/redis/</link><description>Recent content in redis on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Fri, 08 Apr 2022 10:53:16 +0800</lastBuildDate><atom:link href="https://111qqz.com/tags/redis/index.xml" rel="self" type="application/rss+xml"/><item><title>redis学习笔记</title><link>https://111qqz.com/2022/04/redis-notes/</link><pubDate>Fri, 08 Apr 2022 10:53:16 +0800</pubDate><guid>https://111qqz.com/2022/04/redis-notes/</guid><description>
-最近在做一个智能算力的项目，其中需要用到redis维护某个全局的时间窗口
-资料 https://redis.io/docs/about/ 极客时间Redis核心技术与实战 复杂数据结构的表示方式 学习过程中唯一让我迷惑的是一个嵌套的数据结构要如何表示 比如我想表示一个key为string, value为List的Hash 按照c++的语法，也就是一个
-1std::unordered_map&amp;lt;std::string,std::vector&amp;lt;int&amp;gt;&amp;gt; 但是我发现，在redis中我无法设置value的数据类型
-后来发现，redis这种kv存储其实所有的key是在同一个空间的，不存在嵌套关系
-嵌套关系是根据相同的string名称来间接进行的 也就是说； hash的value是一个string, 这个string是list的key名称
-hash: hash_key_name-&amp;gt; value_key_name list: value_key_name -&amp;gt;list
-原子性 redis单个命令是原子操作，但是有的时候需要执行多个命令完成一个操作 比如典型的 Read-Modify-Write 操作，这种操作为了保证原子性通常有两种办法 其一是使用incr/hincrby 等命令，把多个命令合成一个 其二是使用lua script,用以实现更复杂的逻辑
-性能优化 以我遇到的具体问题举例说明吧
-有一个队列，队列中的元素是不断变化的，想知道这个队列中所有元素的和。 队列元素的增加: 当一个请求到来时，就往队列中添加元素。 可能同时到来上百个请求 队列元素的删除: 按照时间删除，当请求到来超过一定时间后，自动删除。 说白了就是想维护一个时间窗口，并查询窗口中元素之和。
-最初考虑过使用redis expire命令来实现自动过期的策略，但是由于expire的key没办法直接把sum也对应删除掉，因此没有选择这个方案。
-于是转而考虑使用一个list来维护请求队列，从右边加入元 素，左边删除元素。 维护窗口的时候按照时间戳进行删除
-当请求量增大时，发现耗时逐渐变慢，于是开始分析可能的性能瓶颈
-使用evalsha替代eval Lua script 每次会把脚本发送到server执行 script没有变化，因此每次传送的开销也是没必要的
-使用evalsha替代eval
-O(n)复杂度的操作 目前的实现中有三个O(n)复杂度的操作，分别是取队列中元素、删除其中过期的元素的key、在队列中清除这些元素
-代码如下
-1 2 local queue_name = redis.call(&amp;#34;hget&amp;#34;,KEYS[1],&amp;#34;queue&amp;#34;) 3 local sum_value = redis.call(&amp;#34;hget&amp;#34;,KEYS[1],&amp;#34;sum_value&amp;#34;) 4 local sum_quota = redis.</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Redis on 111qqz的小窝</title><link>https://111qqz.com/tags/redis/</link><description>Recent content in Redis on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Fri, 08 Apr 2022 10:53:16 +0800</lastBuildDate><atom:link href="https://111qqz.com/tags/redis/index.xml" rel="self" type="application/rss+xml"/><item><title>redis学习笔记</title><link>https://111qqz.com/2022/04/redis-notes/</link><pubDate>Fri, 08 Apr 2022 10:53:16 +0800</pubDate><guid>https://111qqz.com/2022/04/redis-notes/</guid><description>
+&lt;p&gt;最近在做一个智能算力的项目，其中需要用到redis维护某个全局的时间窗口&lt;/p&gt;
+&lt;h2 id="资料"&gt;资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://redis.io/docs/about/"&gt;https://redis.io/docs/about/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://time.geekbang.org/column/intro/100056701"&gt;极客时间Redis核心技术与实战&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="复杂数据结构的表示方式"&gt;复杂数据结构的表示方式&lt;/h2&gt;
+&lt;p&gt;学习过程中唯一让我迷惑的是一个嵌套的数据结构要如何表示
+比如我想表示一个key为string, value为List的Hash
+按照c++的语法，也就是一个&lt;/p&gt;</description></item></channel></rss>

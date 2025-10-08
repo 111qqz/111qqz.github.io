@@ -1,71 +1,116 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>caffe源码阅读笔记 on 111qqz的小窝</title><link>https://111qqz.com/series/caffe%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/</link><description>Recent content in caffe源码阅读笔记 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sat, 06 Aug 2022 12:26:03 +0800</lastBuildDate><atom:link href="https://111qqz.com/series/caffe%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/index.xml" rel="self" type="application/rss+xml"/><item><title>caffe 源码阅读笔记</title><link>https://111qqz.com/2020/06/caffe-notes/</link><pubDate>Tue, 30 Jun 2020 19:47:02 +0800</pubDate><guid>https://111qqz.com/2020/06/caffe-notes/</guid><description>
-caffe做部署是YYDS!
-blob
-layer
-net
-激活函数
-卷积
-reshape
-slice
-loss function
-reduce
-eltwise
-argmax</description></item><item><title>[施工中]caffe 源码学习笔记(11) softmax</title><link>https://111qqz.com/2022/08/caffe-source-code-analysis-part12/</link><pubDate>Sat, 06 Aug 2022 12:26:03 +0800</pubDate><guid>https://111qqz.com/2022/08/caffe-source-code-analysis-part12/</guid><description>
-背景 2022年惊讶的发现，当时竟然没有写关于softmax的笔记，因此来补充一下。
-proto 还是先看proto
-12// Message that stores parameters used by SoftmaxLayer, SoftmaxWithLossLayer 3message SoftmaxParameter {4 enum Engine {5 DEFAULT = 0;6 CAFFE = 1;7 CUDNN = 2;8 }9 optional Engine engine = 1 [default = DEFAULT];1011 // The axis along which to perform the softmax -- may be negative to index 12 // from the end (e.g., -1 for the last axis). 13 // Any other axes will be evaluated as independent softmaxes.</description></item><item><title>caffe 源码学习笔记(11) argmax layer</title><link>https://111qqz.com/2020/05/caffe-source-code-analysis-part11/</link><pubDate>Wed, 06 May 2020 21:26:03 +0800</pubDate><guid>https://111qqz.com/2020/05/caffe-source-code-analysis-part11/</guid><description>
-背景 似乎没什么背景,继续看caffe代码
-argmax的作用是返回一个blob某个维度或者batch_size之后的维度的top_k的index(或者pair(index,value))
-proto 还是先看proto
-12message ArgMaxParameter {3 // If true produce pairs (argmax, maxval) 4 optional bool out_max_val = 1 [default = false];5 optional uint32 top_k = 2 [default = 1];6 // The axis along which to maximise -- may be negative to index from the 7 // end (e.g., -1 for the last axis). 8 // By default ArgMaxLayer maximizes over the flattened trailing dimensions 9 // for each index of the first / num dimension.</description></item><item><title>caffe 源码学习笔记(10) eltwise layer</title><link>https://111qqz.com/2020/05/caffe-source-code-analysis-part10/</link><pubDate>Sun, 03 May 2020 17:53:22 +0800</pubDate><guid>https://111qqz.com/2020/05/caffe-source-code-analysis-part10/</guid><description>
-背景 这个layer和reduce layer有一些相似,就干脆一起看了. 作用是输入至少两个blob,然后对每个blob中的元素所一些运算,最后得到一个blob.
-caffe 支持的运算有&amp;quot;PROD&amp;quot;,&amp;quot;SUM&amp;quot;,&amp;quot;MAX&amp;quot;三种
-顺便提一句,TensorRT支持的要多一些:
-1 2enum class ElementWiseOperation : int 3{ 4 kSUM = 0, //!&amp;lt; Sum of the two elements. 5 kPROD = 1, //!&amp;lt; Product of the two elements. 6 kMAX = 2, //!&amp;lt; Maximum of the two elements. 7 kMIN = 3, //!&amp;lt; Minimum of the two elements. 8 kSUB = 4, //!&amp;lt; Substract the second element from the first. 9 kDIV = 5, //!</description></item><item><title>caffe 源码学习笔记(9) reduce layer</title><link>https://111qqz.com/2020/05/caffe-source-code-analysis-part9/</link><pubDate>Sun, 03 May 2020 15:16:53 +0800</pubDate><guid>https://111qqz.com/2020/05/caffe-source-code-analysis-part9/</guid><description>
-背景 其实没什么背景,继续啃caffe代码而已2333
-reduce layer其实就是做reduce操作,把一个任意shape的blob通过某种运算变成一个scalar.
-caffe目前支持求和(SUM),绝对值的和(ASUM),平方和(SUMSQ),以及对得到的scalar的总数求平均的求和(MEAN).
-说句题外话,TensorRT支持的操作是求和,求积,max,min和ave. 还是有一些gap的
-proto 先看proto
-12message ReductionParameter {3 enum ReductionOp {4 SUM = 1;5 ASUM = 2;6 SUMSQ = 3;7 MEAN = 4;8 }910 optional ReductionOp operation = 1 [default = SUM]; // reduction operation 1112 // The first axis to reduce to a scalar -- may be negative to index from the 13 // end (e.g., -1 for the last axis). 14 // (Currently, only reduction along ALL &amp;#34;tail&amp;#34; axes is supported; reduction 15 // of axis M through N, where N &amp;lt; num_axes - 1, is unsupported.</description></item><item><title>caffe 源码学习笔记(8) loss function</title><link>https://111qqz.com/2020/04/caffe-source-code-analysis-part8/</link><pubDate>Sat, 18 Apr 2020 18:33:29 +0800</pubDate><guid>https://111qqz.com/2020/04/caffe-source-code-analysis-part8/</guid><description>
-背景 虽然不太care 训练的过程，但是由于容易看懂的layer都看得差不多了 所以打算看一下这些loss function.
-Euclidean Loss (L2 loss) 一般用于“real-valued regression tasks” 。　比如之前的项目上用的人脸年龄模型，就是用了这个Loss
-这个loss没什么额外的参数，实现也很简单。
-1 2template &amp;lt;typename Dtype&amp;gt; 3void EuclideanLossLayer&amp;lt;Dtype&amp;gt;::Reshape( 4 const vector&amp;lt;Blob&amp;lt;Dtype&amp;gt;*&amp;gt;&amp;amp; bottom, const vector&amp;lt;Blob&amp;lt;Dtype&amp;gt;*&amp;gt;&amp;amp; top) { 5 LossLayer&amp;lt;Dtype&amp;gt;::Reshape(bottom, top); 6 CHECK_EQ(bottom[0]-&amp;gt;count(1), bottom[1]-&amp;gt;count(1)) 7 &amp;lt;&amp;lt; &amp;#34;Inputs must have the same dimension.&amp;#34;; 8 diff_.ReshapeLike(*bottom[0]); 9} 10 11template &amp;lt;typename Dtype&amp;gt; 12void EuclideanLossLayer&amp;lt;Dtype&amp;gt;::Forward_cpu(const vector&amp;lt;Blob&amp;lt;Dtype&amp;gt;*&amp;gt;&amp;amp; bottom, 13 const vector&amp;lt;Blob&amp;lt;Dtype&amp;gt;*&amp;gt;&amp;amp; top) { 14 int count = bottom[0]-&amp;gt;count(); 15 caffe_sub( 16 count, 17 bottom[0]-&amp;gt;cpu_data(), 18 bottom[1]-&amp;gt;cpu_data(), 19 diff_.</description></item><item><title>caffe 源码学习笔记(7) slice layer</title><link>https://111qqz.com/2020/04/caffe-source-code-analysis-part7/</link><pubDate>Mon, 13 Apr 2020 21:22:54 +0800</pubDate><guid>https://111qqz.com/2020/04/caffe-source-code-analysis-part7/</guid><description>
-背景　 ocr组那边有个shuffle net 的网络,里面有个pytorch op叫chunk,转成的onnx对应的op是 split
-作用是:
-Split a tensor into a list of tensors, along the specified 'axis'. Lengths of the parts can be specified using argument 'split'. Otherwise, the tensor is split to equal sized parts.
-然后发现这个op模型转换里不支持转到caffe的layer,于是想办法支持了一下. 发现是要转到caffe的slice layer.(caffe也有一个split layer,但是这个split layer是除了一个输出blob作为多个layer的输入时用的)
-proto 12message SliceParameter {3 // The axis along which to slice -- may be negative to index from the end 4 // (e.g., -1 for the last axis).</description></item><item><title>caffe 源码学习笔记(6) reshape layer</title><link>https://111qqz.com/2020/04/caffe-source-code-analysis-part6/</link><pubDate>Thu, 09 Apr 2020 21:03:06 +0800</pubDate><guid>https://111qqz.com/2020/04/caffe-source-code-analysis-part6/</guid><description>
-背景　 最近在魔改 tensorRT 的caffe parser 之前caffe模型转到trt模型时，有一个修改是需要将reshape　layer的param末尾补1,比较繁琐，于是看了下caffe的reshape layer的实现．
-proto 12message ReshapeParameter {3 // Specify the output dimensions. If some of the dimensions are set to 0, 4 // the corresponding dimension from the bottom layer is used (unchanged). 5 // Exactly one dimension may be set to -1, in which case its value is 6 // inferred from the count of the bottom blob and the remaining dimensions. 7 // For example, suppose we want to reshape a 2D blob &amp;#34;input&amp;#34; with shape 2 x 8: 8 // 9 // layer { 10 // type: &amp;#34;Reshape&amp;#34; bottom: &amp;#34;input&amp;#34; top: &amp;#34;output&amp;#34; 11 // reshape_param { .</description></item><item><title>caffe 源码学习笔记(5) 卷积</title><link>https://111qqz.com/2020/04/caffe-source-code-analysis-part5/</link><pubDate>Wed, 08 Apr 2020 20:29:37 +0800</pubDate><guid>https://111qqz.com/2020/04/caffe-source-code-analysis-part5/</guid><description>
-caffe中卷积运算的实现 暴力实现的卷积大概是这样子的
-1 2for w in 1..W 3 for h in 1..H 4 for x in 1..K 5 for y in 1..K 6 for m in 1..M 7 for d in 1..D 8 output(w, h, m) += input(w+x, h+y, d) * filter(m, x, y, d) 9 end 10 end 11 end 12 end 13 end 14end 15 这种方式的效率显然很低，不意外地,caffe中并不是这样实现的．
-注释里面说:
-Caffe convolves by reduction to matrix multiplication. This achieves high-throughput and generality of input and filter dimensions but comes at the cost of memory for matrices.</description></item><item><title>caffe 源码学习笔记(4) 激活函数</title><link>https://111qqz.com/2020/04/caffe-source-code-analysis-part4/</link><pubDate>Tue, 07 Apr 2020 23:21:40 +0800</pubDate><guid>https://111qqz.com/2020/04/caffe-source-code-analysis-part4/</guid><description>
-在看过caffe代码的三个核心部分,blob,layer,net之后，陷入了不知道以什么顺序继续看的困境。
-blob,layer,net只是三个最基本的概念，关键还是在于各个layer. 但是layer这么多，要怎么看呢？ 想了一下决定把相同作用的layer放在一起分析。 今天打算先分析一下激活函数。
-sigmoid 表达式为 f(t) = 1/(1+e^-t)
-caffe GPU实现，非常直接
-1 2template &amp;lt;typename Dtype&amp;gt; 3__global__ void SigmoidForward(const int n, const Dtype* in, Dtype* out) { 4 CUDA_KERNEL_LOOP(index, n) { 5 out[index] = 1. / (1. + exp(-in[index])); 6 } 7} 8 sigmoid激活函数的一大优点是求导非常容易，因此backward函数其实也很简单。
-1 2template &amp;lt;typename Dtype&amp;gt; 3__global__ void SigmoidBackward(const int n, const Dtype* in_diff, 4 const Dtype* out_data, Dtype* out_diff) { 5 CUDA_KERNEL_LOOP(index, n) { 6 const Dtype sigmoid_x = out_data[index]; 7 out_diff[index] = in_diff[index] * sigmoid_x * (1 - sigmoid_x); 8 } 9} 10 然后proto里面也没什么内容。因为sigmoid函数没什么参数</description></item><item><title>caffe 源码学习笔记(3) Net</title><link>https://111qqz.com/2020/01/caffe-source-code-analysis-part3/</link><pubDate>Sun, 12 Jan 2020 19:18:15 +0800</pubDate><guid>https://111qqz.com/2020/01/caffe-source-code-analysis-part3/</guid><description>
-Net 基本介绍 网络通过组成和自微分共同定义一个函数及其梯度。
-网络是一些Layer组成的DAG,也就是有向无环图，在caffe中通常由prototxt定义．
-比如
-1name: &amp;#34;LogReg&amp;#34;2layer {3 name: &amp;#34;mnist&amp;#34;4 type: &amp;#34;Data&amp;#34;5 top: &amp;#34;data&amp;#34;6 top: &amp;#34;label&amp;#34;7 data_param {8 source: &amp;#34;input_leveldb&amp;#34;9 batch_size: 6410 }11}12layer {13 name: &amp;#34;ip&amp;#34;14 type: &amp;#34;InnerProduct&amp;#34;15 bottom: &amp;#34;data&amp;#34;16 top: &amp;#34;ip&amp;#34;17 inner_product_param {18 num_output: 219 }20}21layer {22 name: &amp;#34;loss&amp;#34;23 type: &amp;#34;SoftmaxWithLoss&amp;#34;24 bottom: &amp;#34;ip&amp;#34;25 bottom: &amp;#34;label&amp;#34;26 top: &amp;#34;loss&amp;#34;27}定义了
-值得强调的是，caffe中网络结构的定义与实现是无关的,这点比pytorch之类的深度学习框架不知高到哪里去了，也是caffe作为部署端的事实标准的重要原因．
-Net 实现细节 我们先看下NetParameter的proto
-12 message NetParameter {3 optional string name = 1; // consider giving the network a name 4 // DEPRECATED.</description></item><item><title>caffe 源码学习笔记(2) Layer</title><link>https://111qqz.com/2020/01/caffe-source-code-analysis-part2/</link><pubDate>Sat, 11 Jan 2020 17:47:05 +0800</pubDate><guid>https://111qqz.com/2020/01/caffe-source-code-analysis-part2/</guid><description>
-layer 整体介绍 layer是模型计算的基本单元 类似于pytorch或者其他深度学习框架的op layer中的数据流向为,输入若干个blob，称之为&amp;quot;bottom blob&amp;quot;,然后经过layer的计算，输出若干个blob,称之为&amp;quot;top blob&amp;quot;
-也就是数据是从“bottom”流向“top”
-layer通常会进行两种计算，forward和backward
-forward是指，根据bottom blob计算得到top blob backward是指，根据top blob的结果和参数值计算得到的gradient,回传给前面的layer.
-layer 实现细节 layer作为一个base class,实现了所有layer都需要的common的部分。 比如:
-1 /** 2* @brief Implements common layer setup functionality. 3* 4* @param bottom the preshaped input blobs 5* @param top 6* the allocated but unshaped output blobs, to be shaped by Reshape 7* 8* Checks that the number of bottom and top blobs is correct. 9* Calls LayerSetUp to do special layer setup for individual layer types, 10* followed by Reshape to set up sizes of top blobs and internal buffers.</description></item><item><title>caffe 源码学习笔记(1) Blob</title><link>https://111qqz.com/2020/01/caffe-source-code-analysis-part1/</link><pubDate>Fri, 10 Jan 2020 11:24:23 +0800</pubDate><guid>https://111qqz.com/2020/01/caffe-source-code-analysis-part1/</guid><description>
-迫于生计，开始看caffe代码。 会侧重于分析inference部分。
-blob 整体介绍 blob的含义及目的 blob在逻辑上表示的就是所谓的tensor,blob是tensor在caffe中的叫法。 在框架层面上，blob的意义在于对数据进行封装，提供统一的接口。 这里的数据包含训练/inference时用的数据，也包含模型参数，导数等数据。 深度学习离不开在GPU上的计算。 blob对数据的封装使得用户不必关心和cuda有关的数据传输细节。
-blob的表示 对于图像数据，blob通常为４-dim，也就是N*C*H*W 其中N表示number,也就是batch_num C表示channel H表示height W表示width
-在内存中，blob是按照&amp;quot;C-contiguous fashion&amp;quot;存储的，也就是&amp;quot;row-major &amp;quot;
-因此，位于(n,c,h,w)的下标在OS中的位置是　((n * C + c) * H + h) * W + w.
-在代码blob.hpp中，我们也可以看到名为offset的函数是其对应的实现。
-1 inline int offset(const int n, const int c = 0, const int h = 0, 2 const int w = 0) const { 3 CHECK_GE(n, 0); 4 CHECK_LE(n, num()); 5 CHECK_GE(channels(), 0); 6 CHECK_LE(c, channels()); 7 CHECK_GE(height(), 0); 8 CHECK_LE(h, height()); 9 CHECK_GE(width(), 0); 10 CHECK_LE(w, width()); 11 return ((n * channels() + c) * height() + h) * width() + w; 12 } 13 // 给一个indices,计算这是第几个值。 14 inline int offset(const vector&amp;lt;int&amp;gt;&amp;amp; indices) const { 15 CHECK_LE(indices.</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Caffe源码阅读笔记 on 111qqz的小窝</title><link>https://111qqz.com/series/caffe%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/</link><description>Recent content in Caffe源码阅读笔记 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sat, 06 Aug 2022 12:26:03 +0800</lastBuildDate><atom:link href="https://111qqz.com/series/caffe%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/index.xml" rel="self" type="application/rss+xml"/><item><title>caffe 源码阅读笔记</title><link>https://111qqz.com/2020/06/caffe-notes/</link><pubDate>Tue, 30 Jun 2020 19:47:02 +0800</pubDate><guid>https://111qqz.com/2020/06/caffe-notes/</guid><description>
+&lt;p&gt;caffe做部署是YYDS!&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://111qqz.github.io/2020/01/caffe-source-code-analysis-part1/"&gt;blob&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://111qqz.github.io/2020/01/caffe-source-code-analysis-part2/"&gt;layer&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://111qqz.github.io/2020/01/caffe-source-code-analysis-part3/"&gt;net&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://111qqz.github.io/2020/04/caffe-source-code-analysis-part4/"&gt;激活函数&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://111qqz.github.io/2020/04/caffe-source-code-analysis-part5/"&gt;卷积&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://111qqz.github.io/2020/04/caffe-source-code-analysis-part6/"&gt;reshape&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://111qqz.github.io/2020/04/caffe-source-code-analysis-part7/"&gt;slice&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://111qqz.github.io/2020/04/caffe-source-code-analysis-part8/"&gt;loss function&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://111qqz.github.io/2020/05/caffe-source-code-analysis-part9/"&gt;reduce&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://111qqz.github.io/2020/05/caffe-source-code-analysis-part10/"&gt;eltwise&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://111qqz.github.io/2020/05/caffe-source-code-analysis-part11/"&gt;argmax&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;</description></item><item><title>[施工中]caffe 源码学习笔记(11) softmax</title><link>https://111qqz.com/2022/08/caffe-source-code-analysis-part12/</link><pubDate>Sat, 06 Aug 2022 12:26:03 +0800</pubDate><guid>https://111qqz.com/2022/08/caffe-source-code-analysis-part12/</guid><description>
+&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;2022年惊讶的发现，当时竟然没有写关于softmax的笔记，因此来补充一下。&lt;/p&gt;
+&lt;h2 id="proto"&gt;proto&lt;/h2&gt;
+&lt;p&gt;还是先看proto&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-protobuf" data-lang="protobuf"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 1&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 2&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;&lt;/span&gt;&lt;span class="c1"&gt;// Message that stores parameters used by SoftmaxLayer, SoftmaxWithLossLayer
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 3&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;&lt;/span&gt;&lt;span class="kd"&gt;message&lt;/span&gt; &lt;span class="nc"&gt;SoftmaxParameter&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 4&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;&lt;/span&gt; &lt;span class="kd"&gt;enum&lt;/span&gt; &lt;span class="n"&gt;Engine&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 5&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;&lt;/span&gt; &lt;span class="n"&gt;DEFAULT&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 6&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;&lt;/span&gt; &lt;span class="n"&gt;CAFFE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 7&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;&lt;/span&gt; &lt;span class="n"&gt;CUDNN&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 8&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 9&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;&lt;/span&gt; &lt;span class="k"&gt;optional&lt;/span&gt; &lt;span class="n"&gt;Engine&lt;/span&gt; &lt;span class="n"&gt;engine&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="k"&gt;default&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;DEFAULT&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;10&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;11&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;&lt;/span&gt; &lt;span class="c1"&gt;// The axis along which to perform the softmax -- may be negative to index
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;12&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;&lt;/span&gt; &lt;span class="c1"&gt;// from the end (e.g., -1 for the last axis).
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;13&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;&lt;/span&gt; &lt;span class="c1"&gt;// Any other axes will be evaluated as independent softmaxes.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;14&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;&lt;/span&gt; &lt;span class="k"&gt;optional&lt;/span&gt; &lt;span class="kt"&gt;int32&lt;/span&gt; &lt;span class="n"&gt;axis&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="k"&gt;default&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;15&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;axis表示在哪个维护进行softmax&lt;/p&gt;</description></item><item><title>caffe 源码学习笔记(11) argmax layer</title><link>https://111qqz.com/2020/05/caffe-source-code-analysis-part11/</link><pubDate>Wed, 06 May 2020 21:26:03 +0800</pubDate><guid>https://111qqz.com/2020/05/caffe-source-code-analysis-part11/</guid><description>
+&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;似乎没什么背景,继续看caffe代码&lt;/p&gt;
+&lt;p&gt;argmax的作用是返回一个blob某个维度或者batch_size之后的维度的top_k的index(或者pair(index,value))&lt;/p&gt;</description></item><item><title>caffe 源码学习笔记(10) eltwise layer</title><link>https://111qqz.com/2020/05/caffe-source-code-analysis-part10/</link><pubDate>Sun, 03 May 2020 17:53:22 +0800</pubDate><guid>https://111qqz.com/2020/05/caffe-source-code-analysis-part10/</guid><description>
+&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;这个layer和reduce layer有一些相似,就干脆一起看了.
+作用是输入至少两个blob,然后对每个blob中的元素所一些运算,最后得到一个blob.&lt;/p&gt;</description></item><item><title>caffe 源码学习笔记(9) reduce layer</title><link>https://111qqz.com/2020/05/caffe-source-code-analysis-part9/</link><pubDate>Sun, 03 May 2020 15:16:53 +0800</pubDate><guid>https://111qqz.com/2020/05/caffe-source-code-analysis-part9/</guid><description>
+&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;其实没什么背景,继续啃caffe代码而已2333&lt;/p&gt;
+&lt;p&gt;reduce layer其实就是做reduce操作,把一个任意shape的blob通过某种运算变成一个scalar.&lt;/p&gt;</description></item><item><title>caffe 源码学习笔记(8) loss function</title><link>https://111qqz.com/2020/04/caffe-source-code-analysis-part8/</link><pubDate>Sat, 18 Apr 2020 18:33:29 +0800</pubDate><guid>https://111qqz.com/2020/04/caffe-source-code-analysis-part8/</guid><description>
+&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;虽然不太care 训练的过程，&lt;del&gt;但是由于容易看懂的layer都看得差不多了&lt;/del&gt; 所以打算看一下这些loss function.&lt;/p&gt;
+&lt;h2 id="euclidean-loss-l2-loss"&gt;Euclidean Loss (L2 loss)&lt;/h2&gt;
+&lt;p&gt;
+&lt;img class="image_figure image_external" loading="lazy" src="https://111qqz.com/images/migrated/loli/voT7jGEF1BabmpL.png" alt="L2 loss.png" /&gt;
+&lt;/p&gt;
+&lt;p&gt;一般用于“real-valued regression tasks” 。　比如之前的项目上用的人脸年龄模型，就是用了这个Loss&lt;/p&gt;</description></item><item><title>caffe 源码学习笔记(7) slice layer</title><link>https://111qqz.com/2020/04/caffe-source-code-analysis-part7/</link><pubDate>Mon, 13 Apr 2020 21:22:54 +0800</pubDate><guid>https://111qqz.com/2020/04/caffe-source-code-analysis-part7/</guid><description>
+&lt;h2 id="背景"&gt;背景　&lt;/h2&gt;
+&lt;p&gt;ocr组那边有个shuffle net 的网络,里面有个pytorch op叫chunk,转成的onnx对应的op是 &lt;a href="https://github.com/onnx/onnx/blob/master/docs/Operators.md#Split"&gt;split&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;作用是:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Split a tensor into a list of tensors, along the specified 'axis'. Lengths of the parts can be specified using argument 'split'. Otherwise, the tensor is split to equal sized parts.&lt;/p&gt;</description></item><item><title>caffe 源码学习笔记(6) reshape layer</title><link>https://111qqz.com/2020/04/caffe-source-code-analysis-part6/</link><pubDate>Thu, 09 Apr 2020 21:03:06 +0800</pubDate><guid>https://111qqz.com/2020/04/caffe-source-code-analysis-part6/</guid><description>
+&lt;h2 id="背景"&gt;背景　&lt;/h2&gt;
+&lt;p&gt;最近在魔改 tensorRT 的caffe parser
+之前caffe模型转到trt模型时，有一个修改是需要将reshape　layer的param末尾补1,比较繁琐，于是看了下caffe的reshape layer的实现．&lt;/p&gt;</description></item><item><title>caffe 源码学习笔记(5) 卷积</title><link>https://111qqz.com/2020/04/caffe-source-code-analysis-part5/</link><pubDate>Wed, 08 Apr 2020 20:29:37 +0800</pubDate><guid>https://111qqz.com/2020/04/caffe-source-code-analysis-part5/</guid><description>
+&lt;h2 id="caffe中卷积运算的实现"&gt;caffe中卷积运算的实现&lt;/h2&gt;
+&lt;p&gt;暴力实现的卷积大概是这样子的&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-python" data-lang="python"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 1&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 2&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="mf"&gt;1.&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;W&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 3&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;h&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="mf"&gt;1.&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;H&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 4&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="mf"&gt;1.&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;K&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 5&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="mf"&gt;1.&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;K&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 6&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="mf"&gt;1.&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;M&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 7&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="mf"&gt;1.&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;D&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 8&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;output&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;h&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="nb"&gt;input&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;w&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;h&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="nb"&gt;filter&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 9&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;10&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;11&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;12&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;13&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;14&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这种方式的效率显然很低，不意外地,caffe中并不是这样实现的．&lt;/p&gt;
+&lt;p&gt;注释里面说:&lt;/p&gt;</description></item><item><title>caffe 源码学习笔记(4) 激活函数</title><link>https://111qqz.com/2020/04/caffe-source-code-analysis-part4/</link><pubDate>Tue, 07 Apr 2020 23:21:40 +0800</pubDate><guid>https://111qqz.com/2020/04/caffe-source-code-analysis-part4/</guid><description>
+&lt;p&gt;在看过caffe代码的三个核心部分,blob,layer,net之后，陷入了不知道以什么顺序继续看的困境。&lt;/p&gt;
+&lt;p&gt;blob,layer,net只是三个最基本的概念，关键还是在于各个layer. 但是layer这么多，要怎么看呢？ 想了一下决定把相同作用的layer放在一起分析。 今天打算先分析一下激活函数。&lt;/p&gt;</description></item><item><title>caffe 源码学习笔记(3) Net</title><link>https://111qqz.com/2020/01/caffe-source-code-analysis-part3/</link><pubDate>Sun, 12 Jan 2020 19:18:15 +0800</pubDate><guid>https://111qqz.com/2020/01/caffe-source-code-analysis-part3/</guid><description>
+&lt;h2 id="net-基本介绍"&gt;Net 基本介绍&lt;/h2&gt;
+&lt;p&gt;网络通过组成和自微分共同定义一个函数及其梯度。&lt;/p&gt;
+&lt;p&gt;网络是一些Layer组成的DAG,也就是有向无环图，在caffe中通常由prototxt定义．&lt;/p&gt;</description></item><item><title>caffe 源码学习笔记(2) Layer</title><link>https://111qqz.com/2020/01/caffe-source-code-analysis-part2/</link><pubDate>Sat, 11 Jan 2020 17:47:05 +0800</pubDate><guid>https://111qqz.com/2020/01/caffe-source-code-analysis-part2/</guid><description>
+&lt;h2 id="layer-整体介绍"&gt;layer 整体介绍&lt;/h2&gt;
+&lt;p&gt;layer是模型计算的基本单元
+类似于pytorch或者其他深度学习框架的op
+layer中的数据流向为,输入若干个blob，称之为&amp;quot;bottom blob&amp;quot;,然后经过layer的计算，输出若干个blob,称之为&amp;quot;top blob&amp;quot;&lt;/p&gt;</description></item><item><title>caffe 源码学习笔记(1) Blob</title><link>https://111qqz.com/2020/01/caffe-source-code-analysis-part1/</link><pubDate>Fri, 10 Jan 2020 11:24:23 +0800</pubDate><guid>https://111qqz.com/2020/01/caffe-source-code-analysis-part1/</guid><description>
+&lt;p&gt;迫于生计，开始看caffe代码。
+会侧重于分析inference部分。&lt;/p&gt;
+&lt;h2 id="blob-整体介绍"&gt;blob 整体介绍&lt;/h2&gt;
+&lt;h3 id="blob的含义及目的"&gt;blob的含义及目的&lt;/h3&gt;
+&lt;p&gt;blob在逻辑上表示的就是所谓的tensor,blob是tensor在caffe中的叫法。
+在框架层面上，blob的意义在于对数据进行封装，提供统一的接口。
+这里的数据包含训练/inference时用的数据，也包含模型参数，导数等数据。
+深度学习离不开在GPU上的计算。 blob对数据的封装使得用户不必关心和cuda有关的数据传输细节。&lt;/p&gt;</description></item></channel></rss>

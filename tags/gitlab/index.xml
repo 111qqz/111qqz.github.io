@@ -1,15 +1,5 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>gitlab on 111qqz的小窝</title><link>https://111qqz.com/tags/gitlab/</link><description>Recent content in gitlab on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sat, 10 Dec 2022 18:04:41 +0800</lastBuildDate><atom:link href="https://111qqz.com/tags/gitlab/index.xml" rel="self" type="application/rss+xml"/><item><title>【施工中】gitlab ci docker executor指定用户执行</title><link>https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/</link><pubDate>Sat, 10 Dec 2022 18:04:41 +0800</pubDate><guid>https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/</guid><description>
-背景 需要在gitlab pipelines中跑一堆测试 其中某些测试需要与rancher交互，在训练集群上执行一个训练任务
-gitlab pipelines的默认用户是root,而rancher会默认以当前操作的user进行调度。
-这里还涉及若干奇奇怪怪的，比较特异性的原因。 导致gitlab pipeline无法调度成功rancher.
-总之，需求是，要在gitlab上以一个non-root 执行一些任务
-由于缺少官方支持 (参考这里 ), 最终用了非常tricky的办法解决，踩了非常多的坑，因此记录下来，以飨后人
-过程 为了方便表述，假设这个non-root user就叫&amp;quot;renkz&amp;quot;
-在docker中添加renkz为默认user 如果我想以renkz作为user来运行docker,那么docker中肯定要有这个用户。
-最初我是这样在dockerfile设置的。
-1RUN useradd -ms /bin/bash renkz -d /home/renkz -G sudo2USERrenkz3WORKDIR/home/renkz4然后以如下方式启动:
-1docker run -it -v /dssg:/dssg -u renkz image 2 其中挂载的/dssg是数据的存储。然而由于/dssg的权限问题，我需要在我的镜像中也存在这些能访问/dssg的用户。尤其是renkz这个用户。(不要问我为什么这么奇怪。公司现状就是如此。。。) 询问了公司的IT的同事，他们的做法是给所有需要挂载/dssg的容器同时挂载了全局的/etc/group和全局的/etc/passwd
-于是启动方式变成了这样:
-1docker run -it -v /dssg:/dssg -v /global-group:/etc/group -v /global-passwd:/etc/passwd -u renkz image 2 其中/global-passwd和/global-group为两个公司全局的passwd和group文件路径
-然而，奇怪的发现，启动docker后，&amp;quot;whoami&amp;quot;得到的不是renkz,而是&amp;quot;qwe&amp;quot;。。对应着/etc/passwd里user id为1000的用户名。
-排查后认为，是因为 docker --user选项，会把user name先转换成user id。 由于我在docker中创建user renkz的时候是使用的默认user id(1000),因此docker run的时候其实是以user id 1000启动的。在这个过程发生后，/etc/passwd被替换，此时user id为1000的user变成了qwe</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Gitlab on 111qqz的小窝</title><link>https://111qqz.com/tags/gitlab/</link><description>Recent content in Gitlab on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sat, 10 Dec 2022 18:04:41 +0800</lastBuildDate><atom:link href="https://111qqz.com/tags/gitlab/index.xml" rel="self" type="application/rss+xml"/><item><title>【施工中】gitlab ci docker executor指定用户执行</title><link>https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/</link><pubDate>Sat, 10 Dec 2022 18:04:41 +0800</pubDate><guid>https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/</guid><description>
+&lt;h1 id="背景"&gt;背景&lt;/h1&gt;
+&lt;p&gt;需要在gitlab &lt;a href="https://docs.gitlab.com/ee/ci/pipelines/"&gt;pipelines&lt;/a&gt;中跑一堆测试
+其中某些测试需要与rancher交互，在训练集群上执行一个训练任务&lt;/p&gt;
+&lt;p&gt;gitlab pipelines的默认用户是root,而rancher会默认以当前操作的user进行调度。&lt;/p&gt;</description></item></channel></rss>

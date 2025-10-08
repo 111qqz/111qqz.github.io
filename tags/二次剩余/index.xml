@@ -1,49 +1,27 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>二次剩余 on 111qqz的小窝</title><link>https://111qqz.com/tags/%E4%BA%8C%E6%AC%A1%E5%89%A9%E4%BD%99/</link><description>Recent content in 二次剩余 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Wed, 18 Oct 2017 05:38:43 +0000</lastBuildDate><atom:link href="https://111qqz.com/tags/%E4%BA%8C%E6%AC%A1%E5%89%A9%E4%BD%99/index.xml" rel="self" type="application/rss+xml"/><item><title>广义Fibonacci数列找循环节 （二次剩余）</title><link>https://111qqz.com/2017/10/look-for-loop-section-in-generalized-fibonacci-sequence/</link><pubDate>Wed, 18 Oct 2017 05:38:43 +0000</pubDate><guid>https://111qqz.com/2017/10/look-for-loop-section-in-generalized-fibonacci-sequence/</guid><description>
-**问题：**给定 ，满足 ，求 的循
-环节长度。
-原理见广义Fibonacci数列找循环节
-这里只说做法
-我们先写出递推式的特征式子 x^2 =ax + b,整理得到 x^2-ax-b=0求出 delta = a^2+4b
-对于质因数小于等于delta的部分，我们选择暴力求循环节。
-暴力求循环节的代码如下：
-int get_loop( LL p) //暴力得到不大于13的素数的循环节。 { LL a,b,c; a = 0 ; b = 1 ; for ( int i = 2; ; i++) { c = (a+3*b%p)%p; //此处为递推式 a = b; b = c; if (a==0&amp;amp;&amp;amp;b==1) return i-1; } } 通常做法是先暴力求出来之后，写进一个表里。
-通常不会有很多项。
-对于质因数大于delta的部分，我们判断每个质因数是否是delta的二次剩余，如果是，枚举(prime-1)的因子,否则枚举2*(prime+1)的因子。
-贴一个板子，需要注意如果是多个函数嵌套的形式，我们只需要从外向里，依次求循环节即可。
-/* *********************************************** Author :111qqz Created Time :Mon 31 Oct 2016 08:22:17 PM CST File Name :code/hdu/4291_2.</description></item><item><title>hdu 4794 Arnold (二次剩余，斐波那契循环节)</title><link>https://111qqz.com/2017/10/hdu-4794/</link><pubDate>Fri, 13 Oct 2017 12:23:49 +0000</pubDate><guid>https://111qqz.com/2017/10/hdu-4794/</guid><description>
-题意： 给定一个 N∗N(N≤4e9) 的矩阵，现在经过这样一个变换：将 (x,y) 变为 ((x+y)%N,(x+2×y)%N)(0≤x&amp;lt;N,0≤y&amp;lt;N) 现在求经过多少次这样的变换之后在回到 N∗N 的原始矩阵。
-思路： 在模n的剩余系下可以写成(fib(n)x+fib(n+1)y,fib(n+1)x+fib(n+2)y)的形式fib(n)表示Fibonacci数列的第n项
-所以就成了斐波那契数列循环节。。经典题。注意会爆long long,要用ULL
-又写了遍板子，去年的东西都忘得差不多了orz
-/* *********************************************** Author :111qqz File Name :code/hdu/4794.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef unsigned long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; struct Mat { LL mat[2][2]; void clear() { ms(mat,0); } void pr() { for ( int i = 0 ; i &amp;lt; 2 ; i++) for ( int j = 0 ; j &amp;lt; 2 ; j++) printf(&amp;quot;%lld%c&amp;quot;,mat[i][j],j==1?</description></item><item><title>hdu 3977 Evil teacher (斐波那契数列循环节)</title><link>https://111qqz.com/2016/10/hdu-3977/</link><pubDate>Sun, 30 Oct 2016 21:01:37 +0000</pubDate><guid>https://111qqz.com/2016/10/hdu-3977/</guid><description>
-题目链接
-题意：f[0] = 1,f[1] = 1,f[i] = f[i-1] + f[i-2] (i&amp;gt;=2)，问最小的m满足f[n]%p==f[n+m]%p
-思路：求斐波那契数列循环节。
-参考了Acdreamer的博客_Fib数模n的循环节
-对于一个正整数n，我们求Fib数模n的循环节的长度的方法如下： （1）把n素因子分解，即 （2）分别计算Fib数模每个 的循环节长度，假设长度分别是 （3）那么Fib模n的循环节长度 从上面三个步骤看来，貌似最困难的是第二步，那么我们如何求Fib模 的循环节长度呢？
- 这里有一个优美的定理：Fib数模 的最小循环节长度等于 ，其中 表示Fib数模素数 的最小循环节长度。可以看出我们现在最重要的就是求 对于求 我们利用如下定理：
- 如果5是模 的二次剩余，那么循环节的的长度是 的因子，否则，循环节的长度是 的因子。
-顺便说一句，对于小于等于5的素数，我们直接特殊判断，loop(2)=3,loop(3)=8,loop(5)=20。
-那么我们可以先求出所有的因子，然后用矩阵快速幂来一个一个判断，这样时间复杂度不会很大。
-这道题是模板题。博客中的模板代码很好理解...
-换成了自己比较熟悉的矩阵构造方式，以及代码风格。
-需要注意的是下标是从0开始的，当验证k是否为循环节的时候，应该验证f[k]和f[k+1]
-/* *********************************************** Author :111qqz Created Time :Mon 31 Oct 2016 03:54:15 AM CST File Name :code/hdu/3977.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; LL P; struct Mat { LL mat[2][2]; void clear() { ms(mat,0); } }M,M1; Mat mul (Mat a,Mat b,LL mod) { Mat c; c.</description></item><item><title>二次剩余（Cipolla's algorithm）学习笔记</title><link>https://111qqz.com/2016/10/cipollas-algorithm/</link><pubDate>Mon, 10 Oct 2016 12:08:41 +0000</pubDate><guid>https://111qqz.com/2016/10/cipollas-algorithm/</guid><description>
-先放资料。
-前置技能点： 剩余系
-剩余系**:设模为m,则根据余数可将所有的整数分成m类，分别记成[0],[1],[2],…[m-1]****，**
-这m个数**{0,1,2,****…****m-1}**称为一个完全剩余系，
-每个数称为相应类的代表元。
-当m=10（偶数）时候，则{0,1,2,3,4,5,6,7,8,9}是最小非负完全剩余系
-{-5,-4,-3,-2,-1,0,1,2,3,4,5} 是绝对值最小完全剩余系
-{-4,-3,-2,-1,0,1,2,3,4,5} 绝对值最小
-{1,2,3,4,5,6,7,8,9,10}是最小正完全剩余系
-简化剩余系:在每个剩余类选取至1个与m互素代表元构成简化剩余系。
-当m=10则,{0,1,2,3,4,5,6,7,8,9} 完全剩余系
-{1,3,7,9}是简化剩余系(x,10)=1
-当m=5则，{0,1,2,3,4}为完全剩余系,
-{1,2,3,4}是简化剩余系，因为除去余0(正好是倍数)外，其它都互素。
-f(m)=欧拉函数=|{t|0&amp;lt;t&amp;lt;m, (t, m)=1}|
-=简化剩余系的元素个数
-维基百科_高斯引理
-设_p_为奇[质数](https://zh.wikipedia.org/wiki/)，_a_是一个与_p_[互质](https://zh.wikipedia.org/wiki/)的整数。考虑以下数组：![{\displaystyle a,2a,3a,\dots ,{\frac {p-1}{2}}a}](https://wikimedia.org/api/rest_v1/media/math/render/svg/82941c63fd5e49cf0b57612ee5e895d1e1c9096c) 以及它们对_p_的[最小非负剩余](https://zh.wikipedia.org/w/index.php?title=&amp;action=edit&amp;redlink=1)。这些剩余两两不等（**kk:这些剩余两两不等的证明：可以考虑反证，假设两个不同的数x,y对于p同余， 那么x-y和0关于p同余，而x-y同时关于a同余，a与p互质，矛盾。因此这些剩余两两不等**），因此我们共有![\frac{p-1}{2}](https://wikimedia.org/api/rest_v1/media/math/render/svg/a733b8495b0d55ed5bc9d795b7b6821efb1d858b) 个两两不等的介于1和_p（_**kk:这里似乎有问题，如果剩余是在1..p之间，那么前面应该是说最小正剩余而不是最小非负剩余，最小非负剩余应该是在0..p-1之间**_）_之间的整数：![{\displaystyle t_{1},t_{2},t_{3},\dots ,t_{\frac {p-1}{2}}}](https://wikimedia.</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>二次剩余 on 111qqz的小窝</title><link>https://111qqz.com/tags/%E4%BA%8C%E6%AC%A1%E5%89%A9%E4%BD%99/</link><description>Recent content in 二次剩余 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Wed, 18 Oct 2017 05:38:43 +0000</lastBuildDate><atom:link href="https://111qqz.com/tags/%E4%BA%8C%E6%AC%A1%E5%89%A9%E4%BD%99/index.xml" rel="self" type="application/rss+xml"/><item><title>广义Fibonacci数列找循环节 （二次剩余）</title><link>https://111qqz.com/2017/10/look-for-loop-section-in-generalized-fibonacci-sequence/</link><pubDate>Wed, 18 Oct 2017 05:38:43 +0000</pubDate><guid>https://111qqz.com/2017/10/look-for-loop-section-in-generalized-fibonacci-sequence/</guid><description>
+&lt;p&gt;**问题：**给定
+&lt;img class="image_figure image_external" loading="lazy" src="http://img.blog.csdn.net/20140512141202250" alt="" /&gt;
+，满足
+&lt;img class="image_figure image_external" loading="lazy" src="http://img.blog.csdn.net/20140512141344500" alt="" /&gt;
+，求
+&lt;img class="image_figure image_external" loading="lazy" src="http://img.blog.csdn.net/20140512141547343" alt="" /&gt;
+的循&lt;/p&gt;
+&lt;p&gt;环节长度。&lt;/p&gt;
+&lt;p&gt;原理见&lt;a href="http://blog.csdn.net/acdreamers/article/details/25616461"&gt;广义Fibonacci数列找循环节&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;这里只说做法&lt;/p&gt;
+&lt;p&gt;我们先写出递推式的特征式子   x^2 =ax + b,整理得到 x^2-ax-b=0求出 delta = a^2+4b&lt;/p&gt;</description></item><item><title>hdu 4794 Arnold (二次剩余，斐波那契循环节)</title><link>https://111qqz.com/2017/10/hdu-4794/</link><pubDate>Fri, 13 Oct 2017 12:23:49 +0000</pubDate><guid>https://111qqz.com/2017/10/hdu-4794/</guid><description>
+&lt;h1 id="题意"&gt;题意：&lt;/h1&gt;
+&lt;p&gt;给定一个 N∗N(N≤4e9) 的矩阵，现在经过这样一个变换：将 (x,y) 变为 ((x+y)%N,(x+2×y)%N)(0≤x&amp;lt;N,0≤y&amp;lt;N) 现在求经过多少次这样的变换之后在回到 N∗N 的原始矩阵。&lt;/p&gt;</description></item><item><title>hdu 3977 Evil teacher (斐波那契数列循环节)</title><link>https://111qqz.com/2016/10/hdu-3977/</link><pubDate>Sun, 30 Oct 2016 21:01:37 +0000</pubDate><guid>https://111qqz.com/2016/10/hdu-3977/</guid><description>
+&lt;p&gt;&lt;a href="http://acm.hdu.edu.cn/showproblem.php?pid=3977"&gt;题目链接&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;题意：f[0] = 1,f[1] = 1,f[i] = f[i-1] + f[i-2] (i&amp;gt;=2)，问最小的m满足f[n]%p==f[n+m]%p&lt;/p&gt;
+&lt;p&gt;思路：求斐波那契数列循环节。&lt;/p&gt;
+&lt;p&gt;参考了Acdreamer的博客_Fib数模n的循环节&lt;/p&gt;</description></item><item><title>二次剩余（Cipolla's algorithm）学习笔记</title><link>https://111qqz.com/2016/10/cipollas-algorithm/</link><pubDate>Mon, 10 Oct 2016 12:08:41 +0000</pubDate><guid>https://111qqz.com/2016/10/cipollas-algorithm/</guid><description>
+&lt;p&gt;先放资料。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id="前置技能点"&gt;&lt;strong&gt;前置技能点：&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;a href="http://baike.baidu.com/link?url=7nEL8QRUFHmQQor4elIUVpLVJG0i63Q3iRRXhrzzr1p2bhJ4qq4d-whxKrZhx6O8GEBf_iv_wsM2bWH1NJaJDVyLM8Mft0PCPAhMnYj6eNG2zh4lTNt5YvGDn1R4vrYE"&gt;剩余系&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;剩余系&lt;/strong&gt;**:&lt;strong&gt;&lt;strong&gt;设模为&lt;/strong&gt;&lt;/strong&gt;m,&lt;strong&gt;&lt;strong&gt;则根据余数可将所有的整数分成&lt;/strong&gt;&lt;/strong&gt;m&lt;strong&gt;&lt;strong&gt;类，分别记成&lt;/strong&gt;&lt;/strong&gt;[0],[1],[2],&lt;strong&gt;&lt;strong&gt;…&lt;/strong&gt;&lt;/strong&gt;[m-1]****，**&lt;/p&gt;&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;这&lt;strong&gt;&lt;strong&gt;m&lt;/strong&gt;&lt;/strong&gt;个数&lt;/strong&gt;**{0,1,2,****…****m-1}**&lt;strong&gt;称为一个完全剩余系，&lt;/strong&gt;&lt;/p&gt;</description></item></channel></rss>

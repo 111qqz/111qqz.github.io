@@ -1,17 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>内存屏障 on 111qqz的小窝</title><link>https://111qqz.com/tags/%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C/</link><description>Recent content in 内存屏障 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Wed, 22 Mar 2017 05:16:53 +0000</lastBuildDate><atom:link href="https://111qqz.com/tags/%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C/index.xml" rel="self" type="application/rss+xml"/><item><title>内存屏障（Memory Barriers）</title><link>https://111qqz.com/2017/03/memory-barriers/</link><pubDate>Wed, 22 Mar 2017 05:16:53 +0000</pubDate><guid>https://111qqz.com/2017/03/memory-barriers/</guid><description>
-起因是最近在看levelDB源码，其中port里的atomic_pointer.h文件用到了内存屏障。。
-于是来学习一下。。
-粗略得说下我自己的理解。
-代码的顺序并不和执行的顺序完全对应，出于对效率的追求，cpu和编译器会对一些顺序指令重排，以期得到最大的执行效率。
-比如下面这段代码：
-// example 2 // void *ptr, v, _store; v = ptr; _store = v; somefunc(); v = _store; v的值是没有改变的，那么编译器可能会认为_store = v; v = _store; 是多余的，就直接把这一段给“优化”掉了。这段代码在单线程中确实是多余的，但是在多线程环境下，可能在somefunc()被调用的时候，另一个线程把v的值给改变了，而这种情况是编译器无法发现的。因此，为了避免这种情况。。。内存屏障登场！
-摘自维基百科：
-**内存屏障**，也称**内存栅栏**，**内存栅障**，**屏障指令**等，是一类[同步屏障](https://zh.wikipedia.org/wiki/)指令，是CPU或编译器在对内存随机访问的操作中的一个同步点，使得此点之前的所有读写操作都执行后才可以开始执行此点之后的操作。 大多数现代计算机为了提高性能而采取乱序执行，这使得内存屏障成为必须。
-语义上，内存屏障之前的所有写操作都要写入内存；内存屏障之后的读操作都可以获得同步屏障之前的写操作的结果。因此，对于敏感的程序块，写操作之后、读操作之前可以插入内存屏障。
-在多线程环境里需要使用某种技术来使程序结果尽快可见。。请先假定一个事实：一旦内存数据被推送到缓存，就会有消息协议来确保所有的缓存会对所有的共享数据同步并保持一致。这个使内存数据对CPU核可见的技术被称为**内存屏障或内存栅栏**。 再看一个例子
-// get start time for (int i = 0; i != 100000; i++) { MemoryBarrier() } // get end time 这段代码，是想知道for循环空转100000次的耗时，这里就需要加入一个MemoryBarrier，如果不加，那么编译器可能就会直接把这个无意义的for循环直接优化掉了。
-除了编译器，cpu由于指令流水线或者超流水线等计数，也可能导致出现乱序执行的情况。
-内存屏障提供了两个功能。首先，它们通过确保从另一个CPU来看屏障的两边的所有指令都是正确的程序顺序，而保持程序顺序的外部可见性；其次它们可以实现内存数据可见性，确保内存数据会同步到CPU缓存子系统。
-不过内存平展由于阻碍了cpu和编译器的部分优化。。。因此对性能的影响是不忽略的。
-为了达到最佳性能，最好是把要解决的问题模块化，这样处理器可以按单元执行任务，然后在任务单元的边界放上所有需要的内存屏障。采用这个方法可以让处理器不受限的执行一个任务单元。合理的内存屏障组合还有一个好处是：缓冲区在第一次被刷后开销会减少，因为再填充改缓冲区不需要额外工作了。 内存屏障的实现不同平台差别很大。。。因为我们可以看到atomic_pointer.h文件中 一堆和平台相关的条件编译...
-// Copyright (c) 2011 The LevelDB Authors.</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>内存屏障 on 111qqz的小窝</title><link>https://111qqz.com/tags/%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C/</link><description>Recent content in 内存屏障 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Wed, 22 Mar 2017 05:16:53 +0000</lastBuildDate><atom:link href="https://111qqz.com/tags/%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C/index.xml" rel="self" type="application/rss+xml"/><item><title>内存屏障（Memory Barriers）</title><link>https://111qqz.com/2017/03/memory-barriers/</link><pubDate>Wed, 22 Mar 2017 05:16:53 +0000</pubDate><guid>https://111qqz.com/2017/03/memory-barriers/</guid><description>
+&lt;p&gt;起因是最近在看levelDB源码，其中port里的&lt;strong&gt;atomic_pointer.h文件用到了内存屏障。。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;于是来学习一下。。&lt;/p&gt;
+&lt;p&gt;粗略得说下我自己的理解。&lt;/p&gt;</description></item></channel></rss>

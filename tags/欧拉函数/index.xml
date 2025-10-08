@@ -1,52 +1,23 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>欧拉函数 on 111qqz的小窝</title><link>https://111qqz.com/tags/%E6%AC%A7%E6%8B%89%E5%87%BD%E6%95%B0/</link><description>Recent content in 欧拉函数 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sun, 30 Oct 2016 15:29:59 +0000</lastBuildDate><atom:link href="https://111qqz.com/tags/%E6%AC%A7%E6%8B%89%E5%87%BD%E6%95%B0/index.xml" rel="self" type="application/rss+xml"/><item><title>hdu 2837 Calculation (指数循环节+欧拉函数)</title><link>https://111qqz.com/2016/10/hdu-2837/</link><pubDate>Sun, 30 Oct 2016 15:29:59 +0000</pubDate><guid>https://111qqz.com/2016/10/hdu-2837/</guid><description>
-题目链接
-题意：
-Assume that f(0) = 1 and 0^0=1. f(n) = (n)^f(n/10) for all n bigger than zero. Please calculate f(n)%m. (2 ≤ n , m ≤ 10^9, x^y means the y th power of x).
-思路：指数循环节。
-trick点在于0^0=1这点。
-比较容易想到的一层是ksm的时候特判。
-比较不容易想到的一层是，0作为底数的时候，可能出现0^a在用降幂公式加速后，出现0^0。
-举个例子：
-680 80
-phi(80)=32,恰好是8^6的因子
-而0^(8^6)答案应该为0，用降幂公式加速后变成了0^0，答案变成了1，结果错误
-究其原因，是因为这道题中底数可能有0以及0^0是题目中定义的运算。
-解决办法是ksm的结果判断一下，如果是0就加mod。
-/* *********************************************** Author :111qqz Created Time :Sun 30 Oct 2016 07:19:02 PM CST File Name :code/hdu/2837.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; LL n,m; LL digit[20]; int cnt; LL ksm( LL a,LL b,LL mod) { // cout&amp;lt;&amp;lt;&amp;quot;a:&amp;quot;&amp;lt;&amp;lt;a&amp;lt;&amp;lt;&amp;quot; b:&amp;quot;&amp;lt;&amp;lt;b&amp;lt;&amp;lt;&amp;quot; mod:&amp;quot;&amp;lt;&amp;lt;mod&amp;lt;&amp;lt;&amp;quot; &amp;quot;; if (b==0) return 1; if (a==0) return 0; //任何数的0次方都为1，0的任何除0外次方等于0.</description></item><item><title>hdu 4335 What is N? （指数循环节+欧拉函数)</title><link>https://111qqz.com/2016/10/hdu-4335/</link><pubDate>Thu, 27 Oct 2016 12:18:20 +0000</pubDate><guid>https://111qqz.com/2016/10/hdu-4335/</guid><description>
-题目链接
-题意：给出b,p,m（( 0&amp;lt;=b&amp;lt;P, 1&amp;lt;=P&amp;lt;=10^5, 1 &amp;lt;= M &amp;lt;=2^64 – 1 )）,问满足图中条件的n有多少个。
-思路：这题由于对p没有限制，所以细节多一些，需要讨论。
-首先我们知道指数循环节公式，也就是所谓的降幂公式为：a^x = a^(x mod phi(c)+phi(c)) (mod c) x&amp;gt;=phi(c)，（ps:后面的限制条件，在x&amp;lt;phi(c)的时候，该式子依然正确，只不过增加了运算复杂度。。。？ 存疑）
-然后我们只需要对n分两种情况讨论。
-第一种是n&amp;lt;t ,第二种是n&amp;gt;=t (t = min{x| x! % phi(P)==0})
-由于t不会很大。。前一种直接暴力。。。
-后一种用降幂公式搞之。。。
-/* *********************************************** Author :111qqz Created Time :Thu 27 Oct 2016 03:43:05 AM CST File Name :code/hdu/4335.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair typedef unsigned long long ULL; using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; const int N =2E5+7; LL b,p; LL a[N]; unsigned long long M; LL euler( LL x) { LL ret = 1; for ( LL i = 2 ; i * i &amp;lt;= x ; i++) { if (x%i==0) { x/=i; ret*=(i-1); while (x%i==0) { x/=i; ret*=i; } } } if (x&amp;gt;1) ret*=(x-1); return ret; } LL ksm( LL a,LL b,LL k) { LL res = 1; while (b&amp;gt;0) { if (b&amp;amp;1) res = (res * a) % k; b = b &amp;gt;&amp;gt; 1LL; a = (a*a) % k; } return res; } int main() { #ifndef ONLINE_JUDGE freopen(&amp;quot;code/in.</description></item><item><title>uva 10692 Huge Mods (欧拉函数，指数循环节)</title><link>https://111qqz.com/2016/10/uva-10692/</link><pubDate>Wed, 26 Oct 2016 12:24:10 +0000</pubDate><guid>https://111qqz.com/2016/10/uva-10692/</guid><description>
-题目链接
-题意：求一个楼梯数%m的大小。
-思路：指数循环节。
-需要注意的是，模数只有最外层是m，每往里一层，模数都变成m=phi(m)
-所以可以写个dfs或者先预处理出每一层m存一下。
-记得考虑n=1的特殊情况。
-/* *********************************************** Author :111qqz Created Time :Wed 26 Oct 2016 07:07:27 PM CST File Name :code/uva/10692.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; char st[20]; LL n,m; LL a[15]; LL ksm( LL a,LL b,LL k) { LL res = 1; while (b&amp;gt;0) { if (b&amp;amp;1) res = (res * a )% k; b = b &amp;gt;&amp;gt; 1; a = ( a * a) % k; } return res; } LL euler( LL x) { LL ret = 1 ; for ( LL i = 2 ; i*i &amp;lt;= x ; i++) { if (x%i==0) { x/=i; ret*=(i-1); while (x%i==0) { x/=i; ret*=i; } } } if (x&amp;gt;1) ret*=(x-1); return ret; } LL phi[20]; int main() { #ifndef ONLINE_JUDGE freopen(&amp;quot;code/in.</description></item><item><title>codeforces 594 D. REQ (树状数组+欧拉函数+逆元)</title><link>https://111qqz.com/2016/09/cf594d/</link><pubDate>Thu, 22 Sep 2016 07:48:00 +0000</pubDate><guid>https://111qqz.com/2016/09/cf594d/</guid><description>
-题目链接
-题意：给出n个数,q个查询，每组一个区间，询问区间中所有数的乘积的欧拉函数9+7的答案是多少。
-思路：这道题需要一点欧拉函数的知识。
-phi(n)是欧拉函数，意义为小于等于n并且与n互质的数的个数。
-To calculate the answer on every query let's use the formula , where _p_1, p_2, ..., p__k — all prime numbers which divided_n.
-如果知道欧拉函数的这个公式。。。那么这道题就成了水题。。。。
-考虑两个数a,b的欧拉函数。
-一开始考虑也许有什么性质。。。查了下欧拉函数的wiki 欧拉函数_维基百科 欧拉函数是积性函数（但不是完全积性函数。。因此必须phi(ab) =phi(a)*phi(b)成立当且仅当gcd(a,b)==1)
-然而这里并不一定满足互质的条件。。。
-再想一下。。。发现完全没必要由phi(a)和phi(b)得到phi(a*b)
-直接把a*b看成一个数就好了。。。。
-后面质因子乘积部分只需要把两部分的并在一起就好了。。。
-所以根据上面欧拉函数的公式。。。答案分为两部分。。。
-一部分是区间中所有数的乘积。。。
-一部分是区间中所有数的不相同的素因子的p-1/p形式的乘积。。。
-第一部分预处理前缀积即可。。。由于有%运算。。。所以除的时候需要计算逆元。。。
-第二部分的做法同spoj_dquery解题报告
-也是离线处理，把询问按照区间右端点排序升序排列，然后lst数组记录上次该数出现的位置。。。用bit维护一个从1到某个数的乘积。。。在撤销的时候同样需要逆元。。。
-还要注意。。。太长的式子一定要分开写。。。。
-因为写错括号顺序调了半天orz...
-/* *********************************************** Author :111qqz Created Time :Thu 22 Sep 2016 02:07:39 PM CST File Name :code/cf/problem/594D.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; const int N=2E5+7; const int M=1E6+7; const LL MOD = 1E9+7; struct node { int l,r; int id; bool operator &amp;lt; (node b)const { return r&amp;lt;b.</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>欧拉函数 on 111qqz的小窝</title><link>https://111qqz.com/tags/%E6%AC%A7%E6%8B%89%E5%87%BD%E6%95%B0/</link><description>Recent content in 欧拉函数 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sun, 30 Oct 2016 15:29:59 +0000</lastBuildDate><atom:link href="https://111qqz.com/tags/%E6%AC%A7%E6%8B%89%E5%87%BD%E6%95%B0/index.xml" rel="self" type="application/rss+xml"/><item><title>hdu 2837 Calculation (指数循环节+欧拉函数)</title><link>https://111qqz.com/2016/10/hdu-2837/</link><pubDate>Sun, 30 Oct 2016 15:29:59 +0000</pubDate><guid>https://111qqz.com/2016/10/hdu-2837/</guid><description>
+&lt;p&gt;&lt;a href="http://acm.hdu.edu.cn/showproblem.php?pid=2837"&gt;题目链接&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;题意：&lt;/p&gt;
+&lt;p&gt;Assume that f(0) = 1 and 0^0=1. f(n) = (n)^f(n/10) for all n bigger than zero. Please calculate f(n)%m. (2 ≤ n , m ≤ 10^9, x^y means the y th power of x).&lt;/p&gt;
+&lt;p&gt;思路：指数循环节。&lt;/p&gt;
+&lt;p&gt;trick点在于0^0=1这点。&lt;/p&gt;
+&lt;p&gt;比较容易想到的一层是ksm的时候特判。&lt;/p&gt;</description></item><item><title>hdu 4335 What is N? （指数循环节+欧拉函数)</title><link>https://111qqz.com/2016/10/hdu-4335/</link><pubDate>Thu, 27 Oct 2016 12:18:20 +0000</pubDate><guid>https://111qqz.com/2016/10/hdu-4335/</guid><description>
+&lt;p&gt;&lt;a href="http://acm.hdu.edu.cn/showproblem.php?pid=4335"&gt;题目链接&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;题意：给出b,p,m（( 0&amp;lt;=b&amp;lt;P, 1&amp;lt;=P&amp;lt;=10^5, 1 &amp;lt;= M &amp;lt;=2^64 – 1 )）,问满足图中条件的n有多少个。&lt;/p&gt;
+&lt;p&gt;
+&lt;img class="image_figure image_external" loading="lazy" src="http://acm.hdu.edu.cn/data/images/C401-1005-1.jpg" alt="" /&gt;
+&lt;/p&gt;
+&lt;p&gt;思路：这题由于对p没有限制，所以细节多一些，需要讨论。&lt;/p&gt;
+&lt;p&gt;首先我们知道指数循环节公式，也就是所谓的降幂公式为：&lt;strong&gt;a^x = a^(x mod phi(c)+phi(c)) (mod c) x&amp;gt;=phi(c)，（ps:后面的限制条件，在x&amp;lt;phi(c)的时候，该式子依然正确，只不过增加了运算复杂度。。。？ 存疑）&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>uva 10692 Huge Mods (欧拉函数，指数循环节)</title><link>https://111qqz.com/2016/10/uva-10692/</link><pubDate>Wed, 26 Oct 2016 12:24:10 +0000</pubDate><guid>https://111qqz.com/2016/10/uva-10692/</guid><description>
+&lt;p&gt;&lt;a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;amp;Itemid=8&amp;amp;page=show_problem&amp;amp;problem=1633"&gt;题目链接&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;题意：求一个楼梯数%m的大小。&lt;/p&gt;
+&lt;p&gt;思路：指数循环节。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;需要注意的是，模数只有最外层是m，每往里一层，模数都变成m=phi(m)&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;所以可以写个dfs或者先预处理出每一层m存一下。&lt;/p&gt;</description></item><item><title>codeforces 594 D. REQ (树状数组+欧拉函数+逆元)</title><link>https://111qqz.com/2016/09/cf594d/</link><pubDate>Thu, 22 Sep 2016 07:48:00 +0000</pubDate><guid>https://111qqz.com/2016/09/cf594d/</guid><description>
+&lt;p&gt;&lt;a href="http://codeforces.com/problemset/problem/594/D"&gt;题目链接&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;题意：给出n个数,q个查询，每组一个区间，询问区间中所有数的乘积的欧拉函数9+7的答案是多少。&lt;/p&gt;
+&lt;p&gt;思路：这道题需要一点欧拉函数的知识。&lt;/p&gt;
+&lt;p&gt;phi(n)是欧拉函数，意义为小于等于n并且与n互质的数的个数。&lt;/p&gt;</description></item></channel></rss>

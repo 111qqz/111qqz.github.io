@@ -1,46 +1,14 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>推荐系统 on 111qqz的小窝</title><link>https://111qqz.com/tags/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F/</link><description>Recent content in 推荐系统 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sat, 23 Jan 2021 17:42:15 +0800</lastBuildDate><atom:link href="https://111qqz.com/tags/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F/index.xml" rel="self" type="application/rss+xml"/><item><title>【推荐系统】Toward the Next Generation of Recommender Systems: A Survey of the State-of-the-Art and Possible Extensions</title><link>https://111qqz.com/2020/01/toward-the-next-gen-of-recom-sys/</link><pubDate>Sat, 23 Jan 2021 17:42:15 +0800</pubDate><guid>https://111qqz.com/2020/01/toward-the-next-gen-of-recom-sys/</guid><description>
-迫于生计，从今天开始学习推荐系统相关的内容，今天先来读一篇推荐系统领域的综述 Toward the next generation of recommender systems: a survey of the state-of-the-art and possible extensions
-由于目前的工作其实是偏向推荐系统的serving,训练的开发，因此这些paper可能都是粗读，也不会把paper中的内容逐句翻译，而是找出我认为最为重要的一些概念加以记录。
-INTRODUCTION 推荐的问题简单可以归纳成对user未看见的item进行打分的过程，这个分一般称之为rating.有了rating,推荐前top k 个最好的rating给用户即可。 推荐系统的预测内容有两种不同的类别，一种是预测绝对的rating，另外一种是预测一个user对不同item的相对喜好，称为“preference- based recommender systems”. 本文只讲前者，也就是预测具体的rating数值 根据使用的方法不同，推荐系统又分为三类: 基于内容的推荐：user会被推荐与他之前喜欢的item相似的item 基于协同过滤的推荐: user会被推荐其他和该user品味相近的user喜欢的item 将上述两种方法结合在一起使用 基于内容的方法( Content-Based Methods ) 常用在基于text内容的领域，可以用一些keyword来描述内容。具体做法是先拿到keyword的weight,然后基于这些weight来做推荐。计算keyword weight的方法中，比较有名的是 TF-IDF
-TF-IDF tf–idf 是一个用来衡量一篇text中，每个keyword的重要性(或者叫weight)的方法。 从名字就可以看出，这个方法分为两部分。 tf和idf
-tf是&amp;quot;term frequency&amp;quot;的缩写，表示的是某个keyword在一篇text里的频率，也就是出现的次数除以所有字词出现的次数 idf是&amp;quot;inverse document frequency&amp;quot;的缩写，衡量的是某个keyword在语料库里的普遍性。越普遍，改指越小（比如结构助词&amp;quot;的&amp;quot;，几乎在每一个text里都会出现，那么idf值就会很小)
-tf和idf两部分都有一个公式来计算得到数值，tf-idf算法是将两个数值相乘起来，使得最终结果可以被这两部分影响。 tf-idf算法认为，某个keyword的tf值越高，idf越小，说明这个keyword对这篇text越重要。
-直观地说,tf-idf的tf是保留高频重要词语，idf是将常见的词语去除的过程。
-我们刚刚说tf-idf可以用来分析一个text(也就是item)中，每个Keyword的weight 那么实际上，tf-idf也可以用来分析对于一个user,每个keyword的weight 这样我们就得到了两个weight vector,分别表示每个keyword对一个user的重要性和每个keyword对一个item(text)的重要性
-此时可以算一下两个向量的相似度，比如算个cos距离。 然后根据这个相似度进行推荐
-缺点 非text-based的item不好提取feature top k keyword相同的两个item,不好区分 只会推荐之前打分过的item,使得推荐系统缺乏多样性 新用户的冷启动问题，推荐系统中没有新用户的喜好，导致无法做推荐 基于协同过滤的方法 找到和某个user taste类似的user group，然后将这个user group喜欢的item 推给这个user 根据使用的方法不同，通常分为两类:memory-based(or heuristic-based) and model-based。前者我更多的基于某个rule类做预测，后者是通过ML以及之后的DL方法来train 一个model,用这个model 做预测 由于可能需要计算任意两个user的相似度来判断taste,很多sys会先将任意两个user的相似度预处理出来。 虽然协同过滤的方法最初是用于计算user的相似度来做推荐，但是后面也有基于item的相似度来做推荐的方法，通常被写作&amp;quot;user-based CF&amp;quot;和&amp;quot;item-based CF&amp;quot; 优点 能够推荐给user他没见过，但是和他品味类似的user group喜欢的item 由于是基于ratings算相似度，所以适用于任何形态的内容（而不仅仅是text-based content，说白了就是当时其他形态的内容不容易拿到feature) 缺点 new user problem: 不知道新用户的喜好,不知道哪些才是与new user taste 相似的user new item problem: 新item没有被足够的用户打分，很难被推荐给其他user Sparsity: 协同过滤依赖于大量的user.</description></item><item><title>推荐系统之 LFM (Latent Factor Model) 隐因子模型 学习笔记</title><link>https://111qqz.com/2018/02/Latent-Factor-Model-notes/</link><pubDate>Fri, 09 Feb 2018 13:02:06 +0000</pubDate><guid>https://111qqz.com/2018/02/Latent-Factor-Model-notes/</guid><description>
-起因是被assgin了一个新的任务.....要死.
-参考资料:
-推荐系统学习笔记之三 LFM (Latent Factor Model) 隐因子模型 + SVD (singular value decomposition) 奇异值分解
-基于矩阵分解的隐因子模型
-实时推荐系统的三种方式
-先说下我的理解...
-隐因子模型(LFM)是一种推荐算法,&amp;quot;隐&amp;quot;可以理解成用户喜欢某个item的间接原因.
-该算法的核心思想是转化成一个矩阵分解问题..
-然后用传统机器学习算法去优化分解得到的矩阵...
-主要的优势如下： * 比较容易编程实现，随机梯度下降方法依次迭代即可训练出模型。 * 预测的精度比较高，预测准确率要高于基于领域的协同过滤以及基于内容CBR等方法。 * 比较低的时间和空间复杂度，高维矩阵映射为两个低维矩阵节省了存储空间，训练过程比较费时，但是可以离线完成；评分预测一般在线计算，直接使用离线训练得到的参数，可以实时推荐。 * 非常好的扩展性，如由SVD拓展而来的SVD++和 TIME SVD++。 矩阵分解的不足主要有：
-* 训练模型较为费时。 * 推荐结果不具有很好的可解释性，无法用现实概念给分解出来的用户和物品矩阵的每个维度命名，只能理解为潜在语义空间。 我们用user1,2,3表示用户，item 1,2,3表示物品，Rij表示用户i对于物品j的评分，也就是喜好度。那么我们需要得到一个关于用户-物品的二维矩阵，如下面的R。
-常见的系统中，R是一个非常稀疏的矩阵，因为我们不可能得到所有用户对于所有物品的评分。于是利用稀疏的R，填充得到一个满矩阵R’就是我们的目的。
-下面我们就来看看LFM是如何解决上面的问题的？对于一个给定的用户行为数据集（数据集包含的是所有的user, 所有的item，以及每个user有过行为的item列表），使用LFM对其建模后，我们可以得到如下图所示的模型：（假设数据集中有3个user, 4个item, LFM建模的分类数为4）
- R矩阵是user-item矩阵，矩阵值Rij表示的是user i 对item j的兴趣度，这正是我们要求的值。对于一个user来说，当计算出他对所有item的兴趣度后，就可以进行排序并作出推荐。LFM算法从数据集中抽取出若干主题，作为user和item之间连接的桥梁，将R矩阵表示为P矩阵和Q矩阵相乘。其中P矩阵是user-class矩阵，矩阵值Pij表示的是user i对class j的兴趣度；Q矩阵式class-item矩阵，矩阵值Qij表示的是item j在class i中的权重，权重越高越能作为该类的代表。所以LFM根据如下公式来计算用户U对物品I的兴趣度
-我们发现使用LFM后，
-1. 我们不需要关心分类的角度，结果都是基于用户行为统计自动聚类的，全凭数据自己说了算。 2. 不需要关心分类粒度的问题，通过设置LFM的最终分类数就可控制粒度，分类数越大，粒度约细。 3. 对于一个item，并不是明确的划分到某一类，而是计算其属于每一类的概率，是一种标准的软分类。 4.</description></item><item><title>文本相似度判断-simhash算法学习笔记</title><link>https://111qqz.com/2017/03/simhash/</link><pubDate>Fri, 10 Mar 2017 03:33:08 +0000</pubDate><guid>https://111qqz.com/2017/03/simhash/</guid><description>
-先放原始论文。。。以此表达对这个算法的敬意orz
-论文链接
-问题引出： 那天百度一面，frog学姐问了我如何判断两篇新闻稿的相似度的问题....我满篇口胡...也只是回答了一些诸如从图片上考虑。。或者去掉stop word之后得到特征向量然后计算余弦值之类得到传统想法。。。
-今天看到了google在用的网页去重的算法（？。。。感觉好神奇。。。准备面试到现在，第一个让我感到惊异而不是套路的算法orz
-对于处理**大规模文本（500字以上吧）**的时候效果很好。。。但是算法思想却又非常简单。
-这才是算法的美丽之处吧。。。。leetcode上的那些纱布技巧也好意思叫算法。。。？
-网页去重，其实本质还是网页相似度的计算....首先是两篇，之后还可以推广到海量数据。
-算法初探： simhash算法。。。字面上也可以看出。。是一种hash算法。。。那么它和一般的hash有什么不同呢？
-最大的问题在于。。。传统hash的设计目的之一是使得映射后的值的分布尽可能均匀...对于同样的key会有同样的value,但是每当key有轻微的变化的时候，value就会千差万别。
-举个例子：
-“你妈妈喊你回家吃饭哦，回家罗回家罗” 和 “你妈妈叫你回家吃饭啦，回家罗回家罗”。 通过simhash计算结果为：
-1000010010101101111111100000101011010001001111100001001011001011
-1000010010101101011111100000101011010001001111100001101010001011
-通过 hashcode计算为：
-1111111111111111111111111111111110001000001100110100111011011110
-1010010001111111110010110011101
-也就是说。。。没办法通过hash之后得到的值的差异，去分析key的相似程度。
-而simhash就是通过某种方法进行hash，使得hash之后得到的value可以反应key的相似度。
-流程 simhash算法分为5个步骤：分词、hash、加权、合并、降维，具体过程如下所述： * 分词 * 给定一段语句，进行分词，得到有效的特征向量，然后为每一个特征向量设置1-5等5个级别的权重（如果是给定一个文本，那么特征向量可以是文本中的词，其权重可以是这个词出现的次数）。例如给定一段语句：“CSDN博客结构之法算法之道的作者July”，分词后为：“CSDN 博客 结构 之 法 算法 之 道 的 作者 July”，然后为每个特征向量赋予权值：CSDN(4) 博客(5) 结构(3) 之(1) 法(2) 算法(3) 之(1) 道(2) 的(1) 作者(5) July(5)，其中括号里的数字代表这个单词在整条语句中的重要程度，数字越大代表越重要。 * hash * 通过hash函数计算各个特征向量的hash值，hash值为二进制数01组成的n-bit签名。比如“CSDN”的hash值Hash(CSDN)为100101，“博客”的hash值Hash(博客)为“101011”。就这样，字符串就变成了一系列数字。 * 加权 * 在hash值的基础上，给所有特征向量进行加权，即W = Hash * weight，且遇到1则hash值和权值正相乘，遇到0则hash值和权值负相乘。例如给“CSDN”的hash值“100101”加权得到：W(CSDN) = 100101 _4 = 4 -4 -4 4 -4 4，给“博客”的hash值“101011”加权得到：W(博客)=101011 _5 = 5 -5 5 -5 5 5，其余特征向量类似此般操作。 * 合并 * 将上述各个特征向量的加权结果累加，变成只有一个序列串。拿前两个特征向量举例，例如“CSDN”的“4 -4 -4 4 -4 4”和“博客”的“5 -5 5 -5 5 5”进行累加，得到“4+5 -4+-5 -4+5 4+-5 -4+5 4+5”，得到“9 -9 1 -1 1”。 * 降维 * 对于n-bit签名的累加结果，如果大于0则置1，否则置0，从而得到该语句的simhash值，最后我们便可以根据不同语句simhash的海明距离来判断它们的相似度。例如把上面计算出来的“9 -9 1 -1 1 9”降维（某位大于0记为1，小于0记为0），得到的01串为：“1 0 1 0 1 1”，从而形成它们的simhash签名。 每篇文档得到SimHash签名值后，接着计算两个签名的海明距离即可。根据经验值，对64位的 SimHash值，海明距离在3以内的可认为相似度比较高。</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>推荐系统 on 111qqz的小窝</title><link>https://111qqz.com/tags/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F/</link><description>Recent content in 推荐系统 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sat, 23 Jan 2021 17:42:15 +0800</lastBuildDate><atom:link href="https://111qqz.com/tags/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F/index.xml" rel="self" type="application/rss+xml"/><item><title>【推荐系统】Toward the Next Generation of Recommender Systems: A Survey of the State-of-the-Art and Possible Extensions</title><link>https://111qqz.com/2020/01/toward-the-next-gen-of-recom-sys/</link><pubDate>Sat, 23 Jan 2021 17:42:15 +0800</pubDate><guid>https://111qqz.com/2020/01/toward-the-next-gen-of-recom-sys/</guid><description>
+&lt;p&gt;迫于生计，从今天开始学习推荐系统相关的内容，今天先来读一篇推荐系统领域的综述 &lt;a href="https://ieeexplore.ieee.org/document/1423975"&gt;Toward the next generation of recommender systems: a survey of the state-of-the-art and possible extensions&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;由于目前的工作其实是偏向推荐系统的serving,训练的开发，因此这些paper可能都是粗读，也不会把paper中的内容逐句翻译，而是找出我认为最为重要的一些概念加以记录。&lt;/p&gt;</description></item><item><title>推荐系统之 LFM (Latent Factor Model) 隐因子模型 学习笔记</title><link>https://111qqz.com/2018/02/Latent-Factor-Model-notes/</link><pubDate>Fri, 09 Feb 2018 13:02:06 +0000</pubDate><guid>https://111qqz.com/2018/02/Latent-Factor-Model-notes/</guid><description>
+&lt;p&gt;起因是被assgin了一个新的任务.....要死.&lt;/p&gt;
+&lt;p&gt;参考资料:&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://blog.csdn.net/asd136912/article/details/78290679"&gt;推荐系统学习笔记之三 LFM (Latent Factor Model) 隐因子模型 + SVD (singular value decomposition) 奇异值分解&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://blog.csdn.net/ice110956/article/details/21955461"&gt;基于矩阵分解的隐因子模型&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.jianshu.com/p/356656ce2901"&gt;实时推荐系统的三种方式&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;先说下我的理解...&lt;/p&gt;
+&lt;p&gt;隐因子模型(LFM)是一种推荐算法,&amp;quot;隐&amp;quot;可以理解成用户喜欢某个item的间接原因.&lt;/p&gt;</description></item><item><title>文本相似度判断-simhash算法学习笔记</title><link>https://111qqz.com/2017/03/simhash/</link><pubDate>Fri, 10 Mar 2017 03:33:08 +0000</pubDate><guid>https://111qqz.com/2017/03/simhash/</guid><description>
+&lt;p&gt;先放原始论文。。。以此表达对这个算法的敬意orz&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.australianscience.com.au/research/google/33026.pdf"&gt;论文链接&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="问题引出"&gt;问题引出：&lt;/h2&gt;
+&lt;p&gt;那天百度一面，frog学姐问了我如何判断两篇新闻稿的相似度的问题....我满篇口胡...也只是回答了一些诸如从图片上考虑。。或者去掉stop word之后得到特征向量然后计算余弦值之类得到传统想法。。。&lt;/p&gt;</description></item></channel></rss>

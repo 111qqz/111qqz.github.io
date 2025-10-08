@@ -1,98 +1,86 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>mooc on 111qqz的小窝</title><link>https://111qqz.com/categories/mooc/</link><description>Recent content in mooc on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sat, 26 Jun 2021 18:18:52 +0800</lastBuildDate><atom:link href="https://111qqz.com/categories/mooc/index.xml" rel="self" type="application/rss+xml"/><item><title>[施工完成] CSAPP shell lab</title><link>https://111qqz.com/2021/06/csapp-shelllab/</link><pubDate>Sat, 26 Jun 2021 18:18:52 +0800</pubDate><guid>https://111qqz.com/2021/06/csapp-shelllab/</guid><description>
-背景 动手实现一个简单的Lab，主要依赖于课本第八章的内容 感觉主要是05比较难。。发现执行的顺序不太对。。原因是SIGCHLD里面waitpid参数没写对。。 后面的就相对简单了 累计大概花了10个小时的样子
-实现细节 built-in comamnd built-in command 指的是shell自身的命令，因此只有少数几个，比如pwd.在上使用which pwd的时候，会提示&amp;quot;pwd: shell built-in command&amp;quot;
-测试文件的构成 以trace04.txt举例
-1# 2# trace04.txt - Run a background job. 3# 4/bin/echo -e tsh&amp;gt; ./myspin 1 \046 5./myspin 1 &amp;amp; 这是两条测试命令。。第一条是调用了 &amp;quot;/bin/echo -e&amp;quot;来执行，而且这条命令是一个fg job, \046 是'&amp;amp;'的ascii，这是输出字符串的一部分。
-子进程中的log打印不正确 有些执行路径的log没有打印出来 可以调用flush(stdout) 确保打印
-在执行fg job的时候，会等待上一个未结束的bg job执行 这是因为waitpid中的option写了默认的0，没有传入正确的option导致的
-SIGCHLD的实现 感觉这个函数是整个Lab的难点
-注意这里除了要对正常结束的process处理以外，也要处理因为其他原因导致的进程退出 可以根据下图的内容来判断是因为哪种原因进程结束的 这段调了好久。。虽然书上已经讲了比较多的情况。。。不过还是觉得略难
-1void sigchld_handler(int sig) { 2 int olderrno = errno; 3 sigset_t mask_all, prev_all; 4 pid_t pid; 5 int status; 6 Sigfillset(&amp;amp;mask_all); 7 8 while ((pid = waitpid(-1, &amp;amp;status, WNOHANG | WUNTRACED)) &amp;gt; 0) { 9 if (WIFEXITED(status)) { 10 Sigprocmask(SIG_BLOCK, &amp;amp;mask_all, &amp;amp;prev_all); 11 deletejob(jobs, pid); 12 Sigprocmask(SIG_SETMASK, &amp;amp;prev_all, NULL); 13 } else if (WIFSIGNALED(status)) { 14 printf(&amp;#34;Job (%d) [%d] terminated by signal %d\n&amp;#34;, 15 pid2jid(pid), pid, WTERMSIG(status)); 16 Sigprocmask(SIG_BLOCK, &amp;amp;mask_all, &amp;amp;prev_all); 17 18 deletejob(jobs, pid); 19 Sigprocmask(SIG_SETMASK, &amp;amp;prev_all, NULL); 20 } else if (WIFSTOPPED(status)) { 21 printf(&amp;#34;Job (%d) [%d] stopped by signal %d\n&amp;#34;, 22 pid2jid(pid), pid, WSTOPSIG(status)); 23 struct job_t* job = getjobpid(jobs, pid); 24 if (job !</description></item><item><title>(CSE 599W)Reverse Mode Autodiff</title><link>https://111qqz.com/2021/04/reverse-mode-autodiff/</link><pubDate>Mon, 05 Apr 2021 14:44:25 +0800</pubDate><guid>https://111qqz.com/2021/04/reverse-mode-autodiff/</guid><description>
-背景 怎么算微分。。通常有三种方法。
-Symbolic Differentiation Numerical Differentiation Automatic Differentiation (auto diff)
-auto diff中两种主流的方式分别是forward-mode和reverse-mode 由于forward-mode的方法中，计算的时间复杂度是O(n),n是输入的参数个数。而reverse-mode中，计算的时间复杂度是O(m),m是输出节点的个数。在dnn中，n往往很大，远大于m，因此这里主要介绍reverse-mode auto diff方法。
-backprop和reverse mode auto diff的区别 看了reverse mode auto diff的过程，感觉和backprop是一回事呀。。。 实际上，backprop指的是训练神经网络根据loss的gradient来更新weight的过程，而auto diff是backprop使用的一个用来计算gradient的 technique.
-Bakpropagation refers to the whole process of training an artificial neural network using multiple backpropagation steps, each of which computes gradients and uses them to perform a Gradient Descent step. In contrast, reverse-mode auto diff is simply a technique used to compute gradients efficiently and it happens to be used by backpropagation.</description></item><item><title>[施工完成] CSAPP Malloc lab</title><link>https://111qqz.com/2021/04/csapp-malloclab/</link><pubDate>Sun, 14 Mar 2021 16:05:42 +0800</pubDate><guid>https://111qqz.com/2021/04/csapp-malloclab/</guid><description>
-背景 动手实现一个memory allocator,体会core到爆炸的乐趣(不是
-trace file 结构分析 trace file 是对allocator的输入的描述，可以从mdriver.c中的
-1static trace_t *read_trace(char *tracedir, char *filename); 看到Parse的逻辑，从而得到trace file的结构。
-1 fscanf(tracefile, &amp;#34;%d&amp;#34;, &amp;amp;(trace-&amp;gt;sugg_heapsize)); /* not used */ 2 fscanf(tracefile, &amp;#34;%d&amp;#34;, &amp;amp;(trace-&amp;gt;num_ids)); 3 // 似乎只有num_ops用到了。。 4 fscanf(tracefile, &amp;#34;%d&amp;#34;, &amp;amp;(trace-&amp;gt;num_ops)); 5 fscanf(tracefile, &amp;#34;%d&amp;#34;, &amp;amp;(trace-&amp;gt;weight)); /* not used */ trace file起始位置的4个数的含义，其中第二个和第三个比较重要。 num_ids表示一共有多少个不同的内存块(对应后续的指令可以显示指定操作哪个内存块，从而确保allocator对malloc和free的顺序没有任何依赖的保证)，num_ops表示操作数，也就是malloc(对应'a'),realloc(对应'r'),free(对应'f')三种操作的个数。
-1 while (fscanf(tracefile, &amp;#34;%s&amp;#34;, type) != EOF) { 2 switch (type[0]) { 3 case &amp;#39;a&amp;#39;: 4 fscanf(tracefile, &amp;#34;%u %u&amp;#34;, &amp;amp;index, &amp;amp;size); 5 trace-&amp;gt;ops[op_index].type = ALLOC; 6 trace-&amp;gt;ops[op_index].</description></item><item><title>[施工完成] CSAPP Cachelab</title><link>https://111qqz.com/2020/12/csapp-cache-lab/</link><pubDate>Sat, 26 Dec 2020 16:40:42 +0800</pubDate><guid>https://111qqz.com/2020/12/csapp-cache-lab/</guid><description>
-背景 CSAPP:3e 的配套实验 地址 分成了两个部分，第一部分是模拟一下cache的miss,hit,evict的规则。第二部分是优化一个矩阵的转置，使得miss尽可能少。
-PART A 给了一个标程csim-ref,要求实现一个程序，输出与该标程一致。
-写的时候太心急了。。导致没看完作业要求就开始写了。。 然后就纠结了好久。。如果要访问的地址超过了一个block line的边界该怎么办。。
-然而实际上题目里已经把这种情况排除了。。
-For this this lab, you should assume that memory accesses are aligned properly, such that a single memory access never crosses block boundaries. By making this assumption, you can ignore the request sizes in the valgrind traces
-这样的话。。就没什么难度了。。 LRU的替换策略用纯c去撸hashmap+list有点烦。。。干脆就写了暴力的实现。。反正是模拟题(x
-1 2#include &amp;lt;getopt.h&amp;gt;3#include &amp;lt;stdbool.h&amp;gt;4#include &amp;lt;stdio.h&amp;gt;5#include &amp;lt;stdlib.h&amp;gt;6#include &amp;lt;string.h&amp;gt;7#include &amp;lt;unistd.h&amp;gt;8 9#include &amp;#34;cachelab.h&amp;#34;10 11const unsigned int address_space_size = 64; 12// https://stackoverflow.</description></item><item><title>【施工完成】CSAPP archlab</title><link>https://111qqz.com/2020/02/csapp-archlab/</link><pubDate>Wed, 26 Feb 2020 22:54:33 +0800</pubDate><guid>https://111qqz.com/2020/02/csapp-archlab/</guid><description>
-背景 CSAPP:3e第四章配套的实验。 第四章是讲处理器架构的，章节的重点是实现一个六阶段流水线。
-lab的内容也是，需要实现一个Y86-64的流水线，并进行性能调优。
-准备工作 材料里面sim.tar解压之后，有可能是没办法编译通过的。 原因是tk（a windowing toolkit ）在8.5版本的时候废弃了某个接口，与8.6版本不兼容。
-因此需要安装tk 8.5或者更低的版本。 在archlinux/manjaro下可以通过aur安装tk85.
-use tk&amp;lt;=8.5,8.6 or above will not compile Modify the corresponding header file in seq/ssim.c and pipe/psim.c (assmue tk8.5 header file is located in /usr/local/tk8.5) 1 2#ifdef HAS_GUI 3#include &amp;lt;tk8.5/tk.h&amp;gt; // #include &amp;lt;tk/tk.h&amp;gt;4#endif /* HAS_GUI */5 6 7 modify Makefile in sim 1 2 3 4# Comment this out if you don&amp;#39;t have Tcl/Tk on your system 5 6GUIMODE=-DHAS_GUI 7 8# Modify the following line so that gcc can find the libtcl.</description></item><item><title>【施工完成】CSAPP attacklab</title><link>https://111qqz.com/2020/02/csapp-attacklab/</link><pubDate>Sat, 15 Feb 2020 23:24:23 +0800</pubDate><guid>https://111qqz.com/2020/02/csapp-attacklab/</guid><description>
-背景 CSAPP 处理器那章快看完了，猛然发现竟然还有个attacklab.. 之前以为每一章只有一个lab
-这个lab是教大家如何找到程序的漏洞并实施攻击。 知道如何实施攻击，才能更好地写出安全的代码。
-包含5个phase
-前三个没有什么保护措施,栈地址是固定的,可以注入可执行代码,比较容易. 后两个加了随机栈地址以及栈上地址不可执行的保护措施,需要用Return-oriented_programming 的方式搞定.
-phase 1 第一个比较简单，利用buffer overflow 来将函数的返回地址，替换成一个已知函数的地址，达到执行特定函数的目的。
-回忆一下函数调用的机器代码实现，需要先把函数的返回地址压栈，然后开辟栈空间，做些有的没的，做完之后析构开辟的栈空间，并把之前压入栈中的地址赋值给%ip(或者叫PC)，作为下一条指定的地址。函数的返回地址通常就是函数后面第一条指令的地址。
-可以参考如下两张图。
-我们观察getbuf的反汇编代码:
-1 2(gdb) disas getbuf 3Dump of assembler code for function getbuf: 4 0x00000000004017a8 &amp;lt;+0&amp;gt;: sub $0x28,%rsp 5 0x00000000004017ac &amp;lt;+4&amp;gt;: mov %rsp,%rdi 6 0x00000000004017af &amp;lt;+7&amp;gt;: callq 0x401a40 &amp;lt;Gets&amp;gt; 7 0x00000000004017b4 &amp;lt;+12&amp;gt;: mov $0x1,%eax 8 0x00000000004017b9 &amp;lt;+17&amp;gt;: add $0x28,%rsp 9 0x00000000004017bd &amp;lt;+21&amp;gt;: retq 10End of assembler dump. 11 看到getbuf函数开辟了0x28大小的栈空间
-也就是说输入至多0x28个字符，不会有问题。
-那么为了达成我们的目的，我们可以前0x28个字符任意输入，后面输入我们希望执行的touch1函数的地址，也就是 0x00000000004017c0</description></item><item><title>【施工完成】CSAPP bomb lab</title><link>https://111qqz.com/2020/02/csapp-bomblab/</link><pubDate>Sat, 01 Feb 2020 19:36:23 +0800</pubDate><guid>https://111qqz.com/2020/02/csapp-bomblab/</guid><description>
-背景 疫情肆虐,在家百无聊赖,于是开始拆炸弹. 炸弹分为6个阶段,每个阶段必须输入一个特定的字符串,否则炸弹就会爆炸. 提供给我们的是一个.c文件和一个linux可执行文件bomb
-1 2/*************************************************************************** 3* Dr. Evil&amp;#39;s Insidious Bomb, Version 1.1 4* Copyright 2011, Dr. Evil Incorporated. All rights reserved. 5* 6* LICENSE: 7* 8* Dr. Evil Incorporated (the PERPETRATOR) hereby grants you (the 9* VICTIM) explicit permission to use this bomb (the BOMB). This is a 10* time limited license, which expires on the death of the VICTIM. 11* The PERPETRATOR takes no responsibility for damage, frustration, 12* insanity, bug-eyes, carpal-tunnel syndrome, loss of sleep, or other 13* harm to the VICTIM.</description></item><item><title>The Programming Language Course</title><link>https://111qqz.com/2019/10/The-Programming-Language-Course/</link><pubDate>Sat, 19 Oct 2019 19:04:01 +0800</pubDate><guid>https://111qqz.com/2019/10/The-Programming-Language-Course/</guid><description>
-花了三个月的时间,终于跟完了这门编程语言课. 课程内容非常赞,而且也充分发挥了coursera平台的作用. 非要说缺点的话,就是这门课时间有点短,以及peers' assignments总是找不到人...
-这么课是什么 这门课并不是在讲一门特定的编程语言,而是在讲一些通用的编程语言概念.
-课程本身大体上上分为三部分,分别结合sml,racket,ruby三门语言来讲. 每部分大体先是视频内容(有同样内容的文字pdf,便于查询),然后要完成一项作业(10节中有8节是编程作业,2节是多选题的笔试) 作业过后,是备受好评的(?) peers' assignments的环节. 不过由于每个人的作业只能被其他三个人评分...所以如果没有对3个同学做过code review的话,需要经常上来看看有没有新的人提交作业了...
-我的体会 作业难度不算高,每门作业最开始的题目感觉稍微有点难度,不过大体是因为还不太熟悉一门新的语言,热身之后,后面的题目都比较容易了.
-按照Grossman的说法,最难的是第二部分课程中用racket写一个简单的语言解释器.不过实际写起来其实还好,就是一个代码量不到200行的大模拟,难度感觉并不比其他部分的作业更难.
-比较有意思的作业感觉反而是第三部分那个,用OOP和functional的方法实现同样的计算几何...用函数式写几何题好舒服啊...
-这么课应该没有什么必须的前置技能点,因为课程中涉及的语言反正也没什么人学过(?),所以有过编程经验应该就可以跟? 以及,感觉这应该算是CS中比较核心的课程了,可是国内的高校似乎很少有开相关的课程? 有点可惜.
-总之安利一波~ 最后附上我的代码链接: github CSE341</description></item><item><title>【施工中】MIT 6.828 lab 3: User Environments</title><link>https://111qqz.com/2019/03/mit-6-828-lab-3-user-environments/</link><pubDate>Sun, 03 Mar 2019 12:45:25 +0000</pubDate><guid>https://111qqz.com/2019/03/mit-6-828-lab-3-user-environments/</guid><description>
-JOS的environments基本可以理解成&amp;quot;process&amp;quot;进程的同义词，但是由于&amp;quot;process&amp;quot;是一个unix术语，因此使用environment这个词．
-Part A: User Environments and Exception Handling 查看　kern/env.c文件，看到三个全局变量:
-1 struct Env *envs = NULL; // All environments 2 struct Env *curenv = NULL; // The current env 3 static struct Env *env_free_list; // Free environment list envs会在JOS启动后会指向一个Env structures的数组，表示JOS中的全部environments. 理论上，JOS kernel最多能支持NENV个同时运行的environments.　但是实际上不会远不会达到这个数量．
-env_free_list是一个链表结构，用来存放当前没有在运行的Env structure.. 和page_free_list　类似．
-curenv表示的是当前正在运行的environment,当JOS刚刚启动，第一个environment运行之前，curenv的值为NULL.
-接下来我们来阅读一下inc/env.h文件
-1 2 /* See COPYRIGHT for copyright information. */ 3 4 #ifndef JOS_INC_ENV_H 5 #define JOS_INC_ENV_H 6 7 #include &amp;lt;inc/types.h&amp;gt;8 #include &amp;lt;inc/trap.</description></item><item><title>【施工完成】CSAPP data lab</title><link>https://111qqz.com/2019/02/csapp-data-lab/</link><pubDate>Thu, 28 Feb 2019 14:06:42 +0000</pubDate><guid>https://111qqz.com/2019/02/csapp-data-lab/</guid><description>
-CSAPP第二章的内容以前组成原理基本都学过...所以就简单翻了翻。
-对应的lab是用位运算实现各种有的没的...
-题目基本都很tricky...
-除了用到一些常规的位运算性质，还用到了一些奇怪的条件:
-* ~0x7FFFFFFF = 0x7FFFFFFF + 1 * 0xFFFFFFFF +1 = 0x00000000 * 0 == ~0+1
-唯一让我觉得比较有趣的是how many bits这道题
-题目要求是给一个32-bit signed int,问最少用多少位能得到它的补码表示。
-考虑正数，显然，高位的连续的多个0是不必要的，只需要一个符号位的0即可。
-那么对于负数，**高位的连续的多个1也是不必要的。 **原因是，-2^k + 2^(k-1) = -2^(k-1),也就是说，去掉两个连续的1中高位的那个，数值没有改变。
-我们可以将正数和负数统一来看，都是找到最高位的0和1的交界。
-这可以通过和相邻的位置求异或，找到最高位的1的方式来实现。
-接下来就是如何找一个数的最高位的1的位置了。
-方法是构造一个单调的函数f,假设最高位位置为a,那么f((a,32))=0,f([0,a])=1.
-然后在函数f上二分。
-全部问题的代码如下,思路写在注释里了。还有3个涉及浮点数的问题之后补。
-/* * bitXor - x^y using only ~ and &amp;amp; * Example: bitXor(4, 5) = 1 * Legal ops: ~ &amp;amp; * Max ops: 14 * Rating: 1 */ /* 0 0 -&amp;gt; 0 0 1 -&amp;gt; 1 1 0 - &amp;gt; 1 1 1 - &amp;gt; 0 */ // ~(~a &amp;amp; ~b)&amp;amp;~(a&amp;amp;b) int bitXor(int x, int y) { int ans = ~(~x &amp;amp; ~y)&amp;amp;(~(x&amp;amp;y)); // printf(&amp;quot;%d\n&amp;quot;,ans); return ans; } /* * tmin - return minimum two's complement integer * Legal ops: !</description></item><item><title>【施工完毕】MIT 6.828 lab 2: Memory Management</title><link>https://111qqz.com/2019/02/mit-6-828-lab-2/</link><pubDate>Thu, 14 Feb 2019 14:01:46 +0000</pubDate><guid>https://111qqz.com/2019/02/mit-6-828-lab-2/</guid><description>
-2019年2月24:完成了除了&amp;quot;Challenge&amp;quot;以外的全部练习和问题. 总共花费15个小时. 2019年2月26:完成&amp;quot;Challenge 2&amp;quot;(应该是最简单的一个orz，只花了不到一个小时) Part 1: Physical Page Management 操作系统必须时刻追踪哪些物理内存在使用，哪些物理内存没有在使用。
-一个问题是，
-Ex 1. In the file kern/pmap.c, you must implement code for the following functions (probably in the order given). boot_alloc() mem_init() (only up to the call to check_page_free_list(1)) page_init() page_alloc() page_free()
-check_page_free_list() and check_page_alloc() test your physical page allocator. You should boot JOS and see whether check_page_alloc() reports success. Fix your code so that it passes. You may find it helpful to add your own assert()s to verify that your assumptions are correct.</description></item><item><title>C语言变长参数</title><link>https://111qqz.com/2019/02/variadic-function-of-c/</link><pubDate>Fri, 01 Feb 2019 11:19:29 +0000</pubDate><guid>https://111qqz.com/2019/02/variadic-function-of-c/</guid><description>
-说起C语言的变长参数，可能听起来比较陌生，因为很少会需要自己实现。不过想一下scanf和printf，参数个数的确是不固定的。
-stdarg.h 中提供以一套机制来实现变长参数。以及，要说明的是，变长参数不是什么黑魔法，原理依赖于stack frame的结构，具体可以参考x86-calling-conventions 简单来说，由于函数参数入栈的顺序是固定的，**因此一旦我们知道某函数帧的栈上的一个固定参数的位置，我们完全有可能推导出其他变长参数的位置 **
-在实现上，需要了解的是：
-* va_list，一个类型，可以看做是变长参数列表； * [va_start](http://en.cppreference.com/w/cpp/utility/variadic/va_start)，用来初始化变长参数列表的宏，声明为void va_start( va_list ap, parm_n ); ap为va_list变量，parm_n为变长参数前一个变量（C语言要求至少有一个named variable作为函数的parameter) * [va_arg](http://en.cppreference.com/w/cpp/utility/variadic/va_arg),用来得到下一个参数的宏，声明为T va_arg( va_list ap, T ); **返回的类型取决于传入的类型T。特别注意:&amp;quot;If `va_arg` is called when there are no more arguments in `ap`, the behavior is undefined.&amp;quot;** * [va_end](http://en.cppreference.com/w/cpp/utility/variadic/va_end) ,用来将va_list释放的宏。 下面看一个例子就明白怎么用了orz
-1 #include &amp;lt;stdio.h&amp;gt;2 #include &amp;lt;stdarg.h&amp;gt;3 4 /* print all args one at a time until a negative argument is seen; 5all args are assumed to be of int type */ 6 void printargs(int arg1, .</description></item><item><title>x86 calling conventions</title><link>https://111qqz.com/2019/01/x86-calling-conventions/</link><pubDate>Thu, 31 Jan 2019 12:12:22 +0000</pubDate><guid>https://111qqz.com/2019/01/x86-calling-conventions/</guid><description>
-x86的调用约定主要说的是这几件事:
-* The order in which atomic (scalar) parameters, or individual parts of a complex parameter, are allocated * How parameters are passed (pushed on the stack, placed in registers, or a mix of both) * Which registers the called function must preserve for the caller (also known as: callee-saved registers or non-volatile registers) * How the task of preparing the stack for, and restoring after, a function call is divided between the caller and the callee 调用约定实际上并不唯一</description></item><item><title>【施工完成】MIT 6.828 lab 1: C, Assembly, Tools and Bootstrapping</title><link>https://111qqz.com/2019/01/mit-6-828-lab-1/</link><pubDate>Thu, 24 Jan 2019 12:27:58 +0000</pubDate><guid>https://111qqz.com/2019/01/mit-6-828-lab-1/</guid><description>
-花费了30+小时，终于搞定了orz Part 1: PC Bootstrap The PC's Physical Address Space 8086/8088时代 +------------------+ &amp;lt;- 0x00100000 (1MB) | BIOS ROM | +------------------+ &amp;lt;- 0x000F0000 (960KB) | 16-bit devices, | | expansion ROMs | +------------------+ &amp;lt;- 0x000C0000 (768KB) | VGA Display | +------------------+ &amp;lt;- 0x000A0000 (640KB) | | | Low Memory | | | +------------------+ &amp;lt;- 0x00000000 由于8086/8088只有20跟地址线，因此物理内存空间就是2^20=1MB.地址空间从0x00000到0xFFFFF.其中从0x00000开始的640k空间被称为&amp;quot;low memory&amp;quot;，是PC真正能使用的RAM。从 0xA0000 到 0xFFFFF　的384k的non-volatile memory被硬件保留，用作video display buffers和BIOS等。
-80286/80386时代及以后 为了保持向后兼容，因此0-1MB的空间还是和原来保持一致。因此地址空间似乎存在一个“洞”（为什么我觉得其实是两个“洞”。。。不是空着的才叫“洞”吗），PC能使用的RAM被这个“洞”（也就是0xA0000 到 0xFFFFF)分成了0x00000000到0x000BFFFF的640k和 0x00100000到0xFFFFFFFF两部分。
-+------------------+ &amp;lt;- 0xFFFFFFFF (4GB) | 32-bit | | memory mapped | | devices | | | /\/\/\/\/\/\/\/\/\/\ /\/\/\/\/\/\/\/\/\/\ | | | Unused | | | +------------------+ &amp;lt;- depends on amount of RAM | | | | | Extended Memory | | | | | +------------------+ &amp;lt;- 0x00100000 (1MB) | BIOS ROM | +------------------+ &amp;lt;- 0x000F0000 (960KB) | 16-bit devices, | | expansion ROMs | +------------------+ &amp;lt;- 0x000C0000 (768KB) | VGA Display | +------------------+ &amp;lt;- 0x000A0000 (640KB) | | | Low Memory | | | +------------------+ &amp;lt;- 0x00000000 此外，在地址空间的最上面一部分，通常被BIOS保留用于 32-bit PCI devices的memory mapped.</description></item><item><title>【施工中】MIT 6.828 Operating System Engineering 学习笔记</title><link>https://111qqz.com/2019/01/mit-6-828-overview/</link><pubDate>Tue, 15 Jan 2019 16:39:18 +0000</pubDate><guid>https://111qqz.com/2019/01/mit-6-828-overview/</guid><description>
-课程主页
-这课稍微有点硬核...感觉基础稍微有些不扎实就做不下去orz.
-网上似乎是有博客写了6.828的学习笔记，不过我更希望自己能够独立完成，二手的知识，谁知道是对的错的呢...况且课程本身给的参考资料应该还是足够多的。
-环境的话，手头没有ubuntu系统，恰好半年前剁了阿里云的轻应用服务器，就在上面做吧。
-为了这门课，我读了/计划读以下书籍（随时更新）。大概也是为了检查一遍自己的知识体系。
-* [Operating Systems: Three Easy Pieces](http://pages.cs.wisc.edu/~remzi/OSTEP/) 已读完，大概需要120小时 * [PC Assembly Language](https://pdos.csail.mit.edu/6.828/2018/readings/pcasm-book.pdf) 6.828给的汇编参考书籍 每个lab用到的网页形式的参考资料，会在每个lab的博客中分别给出。
-最后，放一段《游褒禅山记》中的文字，与君共勉！
-夫夷以近，则游者众；险以远，则至者少。而世之奇伟、瑰怪，非常之观，常在于险远，而人之所罕至焉，故非有志者不能至也。有志矣，不随以止也，然力不足者，亦不能至也。有志与力，而又不随以怠，至于幽暗昏惑而无物以相之，亦不能至也。然力足以至焉，于人为可讥，而在己为有悔；尽吾志也而不能至者，可以无悔矣，其孰能讥之乎？</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Mooc on 111qqz的小窝</title><link>https://111qqz.com/categories/mooc/</link><description>Recent content in Mooc on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sat, 26 Jun 2021 18:18:52 +0800</lastBuildDate><atom:link href="https://111qqz.com/categories/mooc/index.xml" rel="self" type="application/rss+xml"/><item><title>[施工完成] CSAPP shell lab</title><link>https://111qqz.com/2021/06/csapp-shelllab/</link><pubDate>Sat, 26 Jun 2021 18:18:52 +0800</pubDate><guid>https://111qqz.com/2021/06/csapp-shelllab/</guid><description>
+&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;动手实现一个简单的Lab，主要依赖于课本第八章的内容
+感觉主要是05比较难。。发现执行的顺序不太对。。原因是SIGCHLD里面waitpid参数没写对。。
+后面的就相对简单了
+累计大概花了10个小时的样子&lt;/p&gt;</description></item><item><title>(CSE 599W)Reverse Mode Autodiff</title><link>https://111qqz.com/2021/04/reverse-mode-autodiff/</link><pubDate>Mon, 05 Apr 2021 14:44:25 +0800</pubDate><guid>https://111qqz.com/2021/04/reverse-mode-autodiff/</guid><description>
+&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;怎么算微分。。通常有三种方法。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Symbolic Differentiation&lt;/li&gt;
+&lt;li&gt;Numerical Differentiation&lt;/li&gt;
+&lt;li&gt;Automatic Differentiation (auto diff)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;a href="https://img.so/image/gqMwii"&gt;
+&lt;img class="image_figure image_external" loading="lazy" src="https://111qqz.com/images/migrated/myximage/c8589036cb6d845eb07a05441e2d32f8.md.png" alt="c8589036cb6d845eb07a05441e2d32f8.md.png" /&gt;
+&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://img.so/image/gqMENj"&gt;
+&lt;img class="image_figure image_external" loading="lazy" src="https://111qqz.com/images/migrated/myximage/7f409550ef544562ea67816c7a884fcb.md.png" alt="7f409550ef544562ea67816c7a884fcb.md.png" /&gt;
+&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;auto diff中两种主流的方式分别是forward-mode和reverse-mode
+由于forward-mode的方法中，计算的时间复杂度是O(n),n是输入的参数个数。而reverse-mode中，计算的时间复杂度是O(m),m是输出节点的个数。在dnn中，n往往很大，远大于m，因此这里主要介绍reverse-mode auto diff方法。&lt;/p&gt;</description></item><item><title>[施工完成] CSAPP Malloc lab</title><link>https://111qqz.com/2021/04/csapp-malloclab/</link><pubDate>Sun, 14 Mar 2021 16:05:42 +0800</pubDate><guid>https://111qqz.com/2021/04/csapp-malloclab/</guid><description>
+&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;动手实现一个memory allocator,体会core到爆炸的乐趣(不是&lt;/p&gt;
+&lt;h2 id="trace-file-结构分析"&gt;trace file 结构分析&lt;/h2&gt;
+&lt;p&gt;trace file 是对allocator的输入的描述，可以从mdriver.c中的&lt;/p&gt;</description></item><item><title>[施工完成] CSAPP Cachelab</title><link>https://111qqz.com/2020/12/csapp-cache-lab/</link><pubDate>Sat, 26 Dec 2020 16:40:42 +0800</pubDate><guid>https://111qqz.com/2020/12/csapp-cache-lab/</guid><description>
+&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;CSAPP:3e 的配套实验 &lt;a href="http://csapp.cs.cmu.edu/3e/README-cachelab"&gt;地址&lt;/a&gt;
+分成了两个部分，第一部分是模拟一下cache的miss,hit,evict的规则。第二部分是优化一个矩阵的转置，使得miss尽可能少。&lt;/p&gt;</description></item><item><title>【施工完成】CSAPP archlab</title><link>https://111qqz.com/2020/02/csapp-archlab/</link><pubDate>Wed, 26 Feb 2020 22:54:33 +0800</pubDate><guid>https://111qqz.com/2020/02/csapp-archlab/</guid><description>
+&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;CSAPP:3e第四章配套的实验。 第四章是讲处理器架构的，章节的重点是实现一个六阶段流水线。&lt;/p&gt;
+&lt;p&gt;lab的内容也是，需要实现一个Y86-64的流水线，并进行性能调优。&lt;/p&gt;</description></item><item><title>【施工完成】CSAPP attacklab</title><link>https://111qqz.com/2020/02/csapp-attacklab/</link><pubDate>Sat, 15 Feb 2020 23:24:23 +0800</pubDate><guid>https://111qqz.com/2020/02/csapp-attacklab/</guid><description>
+&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;CSAPP 处理器那章快看完了，猛然发现竟然还有个attacklab.. 之前以为每一章只有一个lab&lt;/p&gt;
+&lt;p&gt;这个lab是教大家如何找到程序的漏洞并实施攻击。
+知道如何实施攻击，才能更好地写出安全的代码。&lt;/p&gt;</description></item><item><title>【施工完成】CSAPP bomb lab</title><link>https://111qqz.com/2020/02/csapp-bomblab/</link><pubDate>Sat, 01 Feb 2020 19:36:23 +0800</pubDate><guid>https://111qqz.com/2020/02/csapp-bomblab/</guid><description>
+&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;疫情肆虐,在家百无聊赖,于是开始拆炸弹.
+炸弹分为6个阶段,每个阶段必须输入一个特定的字符串,否则炸弹就会爆炸.
+提供给我们的是一个.c文件和一个linux可执行文件bomb&lt;/p&gt;</description></item><item><title>The Programming Language Course</title><link>https://111qqz.com/2019/10/The-Programming-Language-Course/</link><pubDate>Sat, 19 Oct 2019 19:04:01 +0800</pubDate><guid>https://111qqz.com/2019/10/The-Programming-Language-Course/</guid><description>
+&lt;p&gt;花了三个月的时间,终于跟完了这门编程语言课.
+&lt;img class="image_figure image_external" loading="lazy" src="https://111qqz.com/images/migrated/loli/xDFXnKT3yWGvdQp.png" alt="课程成绩.png" /&gt;
+课程内容非常赞,而且也充分发挥了coursera平台的作用.
+非要说缺点的话,就是这门课时间有点短,以及peers' assignments总是找不到人...&lt;/p&gt;</description></item><item><title>【施工中】MIT 6.828 lab 3: User Environments</title><link>https://111qqz.com/2019/03/mit-6-828-lab-3-user-environments/</link><pubDate>Sun, 03 Mar 2019 12:45:25 +0000</pubDate><guid>https://111qqz.com/2019/03/mit-6-828-lab-3-user-environments/</guid><description>
+&lt;p&gt;JOS的environments基本可以理解成&amp;quot;process&amp;quot;进程的同义词，但是由于&amp;quot;process&amp;quot;是一个unix术语，因此使用environment这个词．&lt;/p&gt;</description></item><item><title>【施工完成】CSAPP data lab</title><link>https://111qqz.com/2019/02/csapp-data-lab/</link><pubDate>Thu, 28 Feb 2019 14:06:42 +0000</pubDate><guid>https://111qqz.com/2019/02/csapp-data-lab/</guid><description>
+&lt;p&gt;CSAPP第二章的内容以前组成原理基本都学过...所以就简单翻了翻。&lt;/p&gt;
+&lt;p&gt;对应的lab是用位运算实现各种有的没的...&lt;/p&gt;
+&lt;p&gt;题目基本都很tricky...&lt;/p&gt;
+&lt;p&gt;除了用到一些常规的位运算性质，还用到了一些奇怪的条件:&lt;/p&gt;</description></item><item><title>【施工完毕】MIT 6.828 lab 2: Memory Management</title><link>https://111qqz.com/2019/02/mit-6-828-lab-2/</link><pubDate>Thu, 14 Feb 2019 14:01:46 +0000</pubDate><guid>https://111qqz.com/2019/02/mit-6-828-lab-2/</guid><description>
+&lt;h3 id="2019年2月24完成了除了challenge以外的全部练习和问题-总共花费15个小时"&gt;2019年2月24:完成了除了&amp;quot;Challenge&amp;quot;以外的全部练习和问题. 总共花费15个小时.&lt;/h3&gt;
+&lt;h3 id="2019年2月26完成challenge-2应该是最简单的一个orz只花了不到一个小时"&gt;2019年2月26:完成&amp;quot;Challenge 2&amp;quot;(应该是最简单的一个orz，只花了不到一个小时)&lt;/h3&gt;
+&lt;h2 id="part-1-physical-page-management"&gt;Part 1: Physical Page Management&lt;/h2&gt;
+&lt;p&gt;操作系统必须时刻追踪哪些物理内存在使用，哪些物理内存没有在使用。&lt;/p&gt;</description></item><item><title>C语言变长参数</title><link>https://111qqz.com/2019/02/variadic-function-of-c/</link><pubDate>Fri, 01 Feb 2019 11:19:29 +0000</pubDate><guid>https://111qqz.com/2019/02/variadic-function-of-c/</guid><description>
+&lt;p&gt;说起C语言的变长参数，可能听起来比较陌生，因为很少会需要自己实现。不过想一下scanf和printf，参数个数的确是不固定的。&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Stdarg.h#.3Cvarargs.h.3E"&gt;stdarg.h&lt;/a&gt; 中提供以一套机制来实现变长参数。以及，要说明的是，变长参数不是什么黑魔法，原理依赖于stack frame的结构，具体可以参考&lt;a href="https://111qqz.com/2019/01/x86-calling-conventions/"&gt;x86-calling-conventions&lt;/a&gt;   简单来说，由于函数参数入栈的顺序是固定的，**因此一旦我们知道某函数帧的栈上的一个固定参数的位置，我们完全有可能推导出其他变长参数的位置 **&lt;/p&gt;</description></item><item><title>x86 calling conventions</title><link>https://111qqz.com/2019/01/x86-calling-conventions/</link><pubDate>Thu, 31 Jan 2019 12:12:22 +0000</pubDate><guid>https://111qqz.com/2019/01/x86-calling-conventions/</guid><description>
+&lt;p&gt;x86的调用约定主要说的是这几件事:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;/blockquote&gt;
+&lt;pre&gt;&lt;code&gt; * The order in which atomic (scalar) parameters, or individual parts of a complex parameter, are allocated
+* How parameters are passed (pushed on the stack, placed in registers, or a mix of both)
+* Which registers the called function must preserve for the caller (also known as: callee-saved registers or non-volatile registers)
+* How the task of preparing the stack for, and restoring after, a function call is divided between the caller and the callee
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;调用约定实际上并不唯一&lt;/p&gt;</description></item><item><title>【施工完成】MIT 6.828 lab 1: C, Assembly, Tools and Bootstrapping</title><link>https://111qqz.com/2019/01/mit-6-828-lab-1/</link><pubDate>Thu, 24 Jan 2019 12:27:58 +0000</pubDate><guid>https://111qqz.com/2019/01/mit-6-828-lab-1/</guid><description>
+&lt;h2 id="花费了30小时终于搞定了orz"&gt;花费了30+小时，终于搞定了orz&lt;/h2&gt;
+&lt;h2 id="part-1-pc-bootstrap"&gt;Part 1: PC Bootstrap&lt;/h2&gt;
+&lt;h3 id="the-pcs-physical-address-space"&gt;The PC's Physical Address Space&lt;/h3&gt;
+&lt;h4 id="80868088时代"&gt;8086/8088时代&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;+------------------+ &amp;lt;- 0x00100000 (1MB)
+| BIOS ROM |
++------------------+ &amp;lt;- 0x000F0000 (960KB)
+| 16-bit devices, |
+| expansion ROMs |
++------------------+ &amp;lt;- 0x000C0000 (768KB)
+| VGA Display |
++------------------+ &amp;lt;- 0x000A0000 (640KB)
+| |
+| Low Memory |
+| |
++------------------+ &amp;lt;- 0x00000000
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;由于8086/8088只有20跟地址线，因此物理内存空间就是2^20=1MB.地址空间从0x00000到0xFFFFF.其中从0x00000开始的640k空间被称为&amp;quot;low memory&amp;quot;，是PC真正能使用的RAM。从 0xA0000 到 0xFFFFF　的384k的non-volatile memory被硬件保留，用作video display buffers和BIOS等。&lt;/p&gt;</description></item><item><title>【施工中】MIT 6.828 Operating System Engineering 学习笔记</title><link>https://111qqz.com/2019/01/mit-6-828-overview/</link><pubDate>Tue, 15 Jan 2019 16:39:18 +0000</pubDate><guid>https://111qqz.com/2019/01/mit-6-828-overview/</guid><description>
+&lt;p&gt;&lt;a href="https://pdos.csail.mit.edu/6.828/2018/index.html"&gt;课程主页&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;这课稍微有点硬核...感觉基础稍微有些不扎实就做不下去orz.&lt;/p&gt;
+&lt;p&gt;网上似乎是有博客写了6.828的学习笔记，不过我更希望自己能够独立完成，二手的知识，谁知道是对的错的呢...况且课程本身给的参考资料应该还是足够多的。&lt;/p&gt;</description></item></channel></rss>

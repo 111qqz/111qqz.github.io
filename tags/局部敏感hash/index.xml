@@ -1,40 +1,7 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>局部敏感hash on 111qqz的小窝</title><link>https://111qqz.com/tags/%E5%B1%80%E9%83%A8%E6%95%8F%E6%84%9Fhash/</link><description>Recent content in 局部敏感hash on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sat, 11 Mar 2017 07:59:00 +0000</lastBuildDate><atom:link href="https://111qqz.com/tags/%E5%B1%80%E9%83%A8%E6%95%8F%E6%84%9Fhash/index.xml" rel="self" type="application/rss+xml"/><item><title>局部敏感哈希算法(Locality Sensitive Hashing)初探</title><link>https://111qqz.com/2017/03/locality-sensitive-hashing/</link><pubDate>Sat, 11 Mar 2017 07:59:00 +0000</pubDate><guid>https://111qqz.com/2017/03/locality-sensitive-hashing/</guid><description>
-前言： 其实有了前文simhash算法的基础，局部敏感hash算法已经不存在理解上的问题了吧。。。毕竟simhash算法应该是局部敏感哈希算法的一种。。所以我就直接转载几篇我认为比较好的文档结合一下好了。。。会把比较重要的概念或者定义标记重点。
-局部敏感哈希(Locality Sensitive Hashing，LSH)算法是我在前一段时间找工作时接触到的一种衡量文本相似度的算法。局部敏感哈希是近似最近邻搜索算法中最流行的一种，它有坚实的理论依据并且在高维数据空间中表现优异。它的主要作用就是从海量的数据中挖掘出相似的数据，可以具体应用到文本相似度检测、网页搜索等领域。 1. 基本思想 局部敏感哈希的基本思想类似于一种空间域转换思想，LSH算法基于一个假设，如果两个文本在原有的数据空间是相似的，那么分别经过哈希函数转换以后的****它们也具有很高的相似度；相反，如果它们本身是不相似的，那么经过转换后它们应仍不具有相似性。
-哈希函数，大家一定都很熟悉，那么什么样的哈希函数可以具有上述的功能呢，可以保持数据转化前后的相似性？当然，答案就是局部敏感哈希。
-回到顶部
-2. 局部敏感哈希LSH 局部敏感哈希的最大特点就在于保持数据的相似性，我们通过一个反例来具体介绍一下。
-假设一个哈希函数为Hash(x) = x%8，那么我们现在有三个数据分别为255、257和1023，我们知道255和257本身在数值上具有很小的差距，也就是说它们在三者中比较相似。我们将上述的三个数据通过Hash函数转换：
-Hash(255) = 255%8 = 7;
-Hash(257) = 257%8 = 1;
-Hash(1023) = 1023%8 = 7;
-我们通过上述的转换结果可以看出，本身很相似的255和257在转换以后变得差距很大，而在数值上差很多的255和1023却对应相同的转换结果。从这个例子我们可以看出，上述的Hash函数从数值相似度角度来看，它不是一个局部敏感哈希，因为经过它转换后的数据的相似性丧失了。
-我们说局部敏感哈希要求能够保持数据的相似性，那么很多人怀疑这样的哈希函数是否真的存在。我们这样去思考这样一个极端的条件，假设一个局部敏感哈希函数具有10个不同的输出值，而现在我们具有11个完全没有相似度的数据，那么它们经过这个哈希函数必然至少存在两个不相似的数据变为了相似数据。从这个假设中，我们应该意识到局部敏感哈希是相对的，而且我们所说的保持数据的相似度不是说保持100%的相似度，而是保持最大可能的相似度。
-对于局部敏感哈希“保持最大可能的相似度”的这一点，我们也可以从数据降维的角度去考虑。数据对应的维度越高，信息量也就越大，相反，如果数据进行了降维，那么毫无疑问数据所反映的信息必然会有损失。哈希函数从本质上来看就是一直在扮演数据降维的角色。
-回到顶部
-3. 文档相似度计算 我们通过利用LSH来实现文档的相似度计算这个实例来介绍一下LSH的具体用法。
-3.1 Shingling 假设现在有4个网页，我们将它们分别进行Shingling（将待查询的字符串集进行映射，映射到一个集合里，如字符串“abcdeeee&amp;quot;, 映射到集合”(a,b,c,d,e)&amp;quot;, 注意集合中元素是无重复的，这一步骤就叫做Shingling, 意即构建文档中的短字符串集合，即shingle集合。），得到如下的特征矩阵：
-其中“1”代表对应位置的Shingles在文档中出现过，“0”则代表没有出现过。
-在衡量文档的相似度中，我们有很多的方法去完成，比如利用欧式距离、编辑距离、余弦距离、Jaccard距离等来进行相似度的度量。在这里我们运用Jaccard相似度。接下来我们就要去找一种哈希函数，使得在hash后尽量还能保持这些文档之间的Jaccard相似度，即：
-我们的目标就是找到这样一种哈希函数，如果原来文档的Jaccard相似度高，那么它们的hash值相同的概率高，如果原来文档的Jaccard相似度低，那么它们的hash值不相同的概率高，我们称之为Min-hashing(最小哈希)。
-3.2 Min-hashing Min-hashing定义为：特征矩阵按行进行一个随机的排列后，第一个列值为1的行的行号。举例说明如下，假设之前的特征矩阵按行进行的一个随机排列如下：
-元素 S1 S2 S3 S4 他 0 0 1 0 成功 0 0 1 1 我 1 0 0 0 减肥 1 0 1 1 要 0 1 0 1 最小哈希值：h(S1)=3，h(S2)=5，h(S3)=1，h(S4)=2.</description></item><item><title>文本相似度判断-simhash算法学习笔记</title><link>https://111qqz.com/2017/03/simhash/</link><pubDate>Fri, 10 Mar 2017 03:33:08 +0000</pubDate><guid>https://111qqz.com/2017/03/simhash/</guid><description>
-先放原始论文。。。以此表达对这个算法的敬意orz
-论文链接
-问题引出： 那天百度一面，frog学姐问了我如何判断两篇新闻稿的相似度的问题....我满篇口胡...也只是回答了一些诸如从图片上考虑。。或者去掉stop word之后得到特征向量然后计算余弦值之类得到传统想法。。。
-今天看到了google在用的网页去重的算法（？。。。感觉好神奇。。。准备面试到现在，第一个让我感到惊异而不是套路的算法orz
-对于处理**大规模文本（500字以上吧）**的时候效果很好。。。但是算法思想却又非常简单。
-这才是算法的美丽之处吧。。。。leetcode上的那些纱布技巧也好意思叫算法。。。？
-网页去重，其实本质还是网页相似度的计算....首先是两篇，之后还可以推广到海量数据。
-算法初探： simhash算法。。。字面上也可以看出。。是一种hash算法。。。那么它和一般的hash有什么不同呢？
-最大的问题在于。。。传统hash的设计目的之一是使得映射后的值的分布尽可能均匀...对于同样的key会有同样的value,但是每当key有轻微的变化的时候，value就会千差万别。
-举个例子：
-“你妈妈喊你回家吃饭哦，回家罗回家罗” 和 “你妈妈叫你回家吃饭啦，回家罗回家罗”。 通过simhash计算结果为：
-1000010010101101111111100000101011010001001111100001001011001011
-1000010010101101011111100000101011010001001111100001101010001011
-通过 hashcode计算为：
-1111111111111111111111111111111110001000001100110100111011011110
-1010010001111111110010110011101
-也就是说。。。没办法通过hash之后得到的值的差异，去分析key的相似程度。
-而simhash就是通过某种方法进行hash，使得hash之后得到的value可以反应key的相似度。
-流程 simhash算法分为5个步骤：分词、hash、加权、合并、降维，具体过程如下所述： * 分词 * 给定一段语句，进行分词，得到有效的特征向量，然后为每一个特征向量设置1-5等5个级别的权重（如果是给定一个文本，那么特征向量可以是文本中的词，其权重可以是这个词出现的次数）。例如给定一段语句：“CSDN博客结构之法算法之道的作者July”，分词后为：“CSDN 博客 结构 之 法 算法 之 道 的 作者 July”，然后为每个特征向量赋予权值：CSDN(4) 博客(5) 结构(3) 之(1) 法(2) 算法(3) 之(1) 道(2) 的(1) 作者(5) July(5)，其中括号里的数字代表这个单词在整条语句中的重要程度，数字越大代表越重要。 * hash * 通过hash函数计算各个特征向量的hash值，hash值为二进制数01组成的n-bit签名。比如“CSDN”的hash值Hash(CSDN)为100101，“博客”的hash值Hash(博客)为“101011”。就这样，字符串就变成了一系列数字。 * 加权 * 在hash值的基础上，给所有特征向量进行加权，即W = Hash * weight，且遇到1则hash值和权值正相乘，遇到0则hash值和权值负相乘。例如给“CSDN”的hash值“100101”加权得到：W(CSDN) = 100101 _4 = 4 -4 -4 4 -4 4，给“博客”的hash值“101011”加权得到：W(博客)=101011 _5 = 5 -5 5 -5 5 5，其余特征向量类似此般操作。 * 合并 * 将上述各个特征向量的加权结果累加，变成只有一个序列串。拿前两个特征向量举例，例如“CSDN”的“4 -4 -4 4 -4 4”和“博客”的“5 -5 5 -5 5 5”进行累加，得到“4+5 -4+-5 -4+5 4+-5 -4+5 4+5”，得到“9 -9 1 -1 1”。 * 降维 * 对于n-bit签名的累加结果，如果大于0则置1，否则置0，从而得到该语句的simhash值，最后我们便可以根据不同语句simhash的海明距离来判断它们的相似度。例如把上面计算出来的“9 -9 1 -1 1 9”降维（某位大于0记为1，小于0记为0），得到的01串为：“1 0 1 0 1 1”，从而形成它们的simhash签名。 每篇文档得到SimHash签名值后，接着计算两个签名的海明距离即可。根据经验值，对64位的 SimHash值，海明距离在3以内的可认为相似度比较高。</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>局部敏感hash on 111qqz的小窝</title><link>https://111qqz.com/tags/%E5%B1%80%E9%83%A8%E6%95%8F%E6%84%9Fhash/</link><description>Recent content in 局部敏感hash on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Sat, 11 Mar 2017 07:59:00 +0000</lastBuildDate><atom:link href="https://111qqz.com/tags/%E5%B1%80%E9%83%A8%E6%95%8F%E6%84%9Fhash/index.xml" rel="self" type="application/rss+xml"/><item><title>局部敏感哈希算法(Locality Sensitive Hashing)初探</title><link>https://111qqz.com/2017/03/locality-sensitive-hashing/</link><pubDate>Sat, 11 Mar 2017 07:59:00 +0000</pubDate><guid>https://111qqz.com/2017/03/locality-sensitive-hashing/</guid><description>
+&lt;h3 id="前言"&gt;前言：&lt;/h3&gt;
+&lt;p&gt;其实有了前文simhash算法的基础，局部敏感hash算法已经不存在理解上的问题了吧。。。毕竟simhash算法应该是局部敏感哈希算法的一种。。所以我就直接转载几篇我认为比较好的文档结合一下好了。。。会把比较重要的概念或者定义标记重点。&lt;/p&gt;</description></item><item><title>文本相似度判断-simhash算法学习笔记</title><link>https://111qqz.com/2017/03/simhash/</link><pubDate>Fri, 10 Mar 2017 03:33:08 +0000</pubDate><guid>https://111qqz.com/2017/03/simhash/</guid><description>
+&lt;p&gt;先放原始论文。。。以此表达对这个算法的敬意orz&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.australianscience.com.au/research/google/33026.pdf"&gt;论文链接&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="问题引出"&gt;问题引出：&lt;/h2&gt;
+&lt;p&gt;那天百度一面，frog学姐问了我如何判断两篇新闻稿的相似度的问题....我满篇口胡...也只是回答了一些诸如从图片上考虑。。或者去掉stop word之后得到特征向量然后计算余弦值之类得到传统想法。。。&lt;/p&gt;</description></item></channel></rss>

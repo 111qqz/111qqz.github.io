@@ -1,51 +1,27 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>cuda on 111qqz的小窝</title><link>https://111qqz.com/tags/cuda/</link><description>Recent content in cuda on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Tue, 24 Mar 2020 12:26:01 +0800</lastBuildDate><atom:link href="https://111qqz.com/tags/cuda/index.xml" rel="self" type="application/rss+xml"/><item><title>tensorRT 模型兼容性说明</title><link>https://111qqz.com/2020/03/tensorrt-model-compatibility-notes/</link><pubDate>Tue, 24 Mar 2020 12:26:01 +0800</pubDate><guid>https://111qqz.com/2020/03/tensorrt-model-compatibility-notes/</guid><description>
-名词说明 CUDA. 一般来说指的是CUDA SDK. 目前经常使用的是CUDA 8.0和CUDA 10.1两个版本. 8.0和10.1都是SDK的版本号. CUDNN. The NVIDIA CUDA® Deep Neural Network library (cuDNN). 是一个可以为神经网络提供GPU加速的库 compute capability. 是GPU的固有参数,可以理解为GPU的版本.越新的显卡该数值往往越高. tensorRT.NVIDIA TensorRT™ is an SDK for high-performance deep learning inference. 是一个深度学习推理库,旨在提供高性能的推理速度. plan file,也称为 engine plan. 是生成的tensorRT 模型文件. 兼容性说明 Engine plan 的兼容性依赖于GPU的compute capability 和 TensorRT 版本, 不依赖于CUDA和CUDNN版本.
-简单来说,在使用同样TensorRT版本的前提下,在具有相同compute capability 的GPU上的模型是可以通用的.
-但是cuda版本是依赖于GPU的compute capability的. 也就是比较新的GPU(对应较高的compute capability)无法使用低版本的cuda.
-CUDA SDK 8.0 support for compute capability 2.0 – 6.x CUDA SDK 9.0 – 9.</description></item><item><title>CUDA C Best Practices Guide 阅读笔记（二） Heterogeneous Computing</title><link>https://111qqz.com/2018/02/cuda-c-best-practices-guide-heterogeneous-computing/</link><pubDate>Tue, 13 Feb 2018 06:38:38 +0000</pubDate><guid>https://111qqz.com/2018/02/cuda-c-best-practices-guide-heterogeneous-computing/</guid><description>
-CUDA 编程涉及到在不同的平台上同时运行代码:包含CPU的host 和包含GPU的device.
-所以了解host和device的对性能优化是非常重要的。
-2.1. Differences between Host and Device Threading resources host 上能同时运行的线程数目比较少（比如24个）
-device上能同时运行的线程数目比较多（数量级通常为1E3，1E4等）
-Threads 操作系统必须交换CPU执行通道上和下的线程以提供多线程功能。因此，上下文切换(当交换两个线程时)既慢又昂贵。
-相比之下，GPU上的线程非常轻量级。在典型的系统中，成千上万的线程排队等待工作(每个线程有32个线程)。如果GPU必须等待 one warp of threads，它只需开始在另一个线程上执行工作。
-简而言之，CPU内核被设计为每次最小化一个或两个线程的等待时间，而GPU被设计为处理大量并发的轻量级线程以最大化吞吐量。
-RAM host和device 各自具有各自不同的附接物理存储器。host和device内存由PCI Express ( PCIe )总线分隔，因此host内存中的项目必须偶尔通过总线传送到device内存，反之亦然
-2.2. What Runs on a CUDA-Enabled Device? 下面谈谈应该把应用的哪些部分放在device 上运行
-* 大数据集上的算术运算 * 为了获得最佳性能，设备上运行的相邻线程的内存访问应该具有一定的一致性。**某些内存访问模式使硬件能够将多个数据项的读或写组合并到一个操作中**。当在CUDA上的计算中使用时，无法布局以实现合并的数据，或者没有足够的局部性来有效地使用L1或纹理缓存的数据，将倾向于看到较小的加速比。 * host和device之间的数据交换尽可能少 * **换到device上执行的数据一定会被做足够多的运算**，不然数据从Host传送到device的代价 可能与该运算在device上并行计算的优势向抵消，甚至得不偿失。 * **数据应尽可能长时间保存在设备上。**因为传输应该最小化，所以在同一数据上运行多个内核的程序应该倾向于在内核调用之间将数据保留在设备上，而不是将中间结果传输到主机，然后再将它们发送回设备进行后续计算。就是说，如果有一段连续的操作要处理某些数据，就算其中的部分操作在host上运行要比在device上快（比如不是算数运算而是逻辑处理），那么考虑到数据传输的巨大代价，将所有数据都放在device上处理可能会更好。这种处理原则即使相对较慢的内核也可能是有利的，如果它避免了一个或多个PCIe传输。</description></item><item><title>CUDA C Best Practices Guide 阅读笔记（1） 并行计算方法论(APOD)</title><link>https://111qqz.com/2018/02/cuda-c-best-practices-parallel-computing-methodology/</link><pubDate>Mon, 12 Feb 2018 04:58:31 +0000</pubDate><guid>https://111qqz.com/2018/02/cuda-c-best-practices-parallel-computing-methodology/</guid><description>
-APOD指的是Assess, Parallelize, Optimize, Deploy
-如图所示，APOD过程是一个循环的过程，每次只进行一部分，从A到P到O到D,然后再进行下一轮的APOD
-Assess 对于一个项目，第一步要做的是接触(Assess)项目，得到项目代码中每部分的执行时间。有了这部分内容，开发者就可以找到并行优化的瓶颈所在，并开始尝试用GPU加速。
-根据Amdahl's and Gustafson's laws，开发者可以确定并行优化的性能上界。
-Parallelize 找到瓶颈所在并确定了优化的目标和期望，开发者就可以优化代码了。调用一些如cuBLAS, cuFFT, or Thrust 的 GPU-optimized library 可能会很有效。
-另一方面，有些应用需要开发者重构代码，以此让可以被并行优化得部分被暴露出来。
-Optimize 确定了需要被并行优化的部分之后，就要考虑具体得实现方式了。
-具体得实现方式通常不过只有一种，所以充分理解应用的需求是很有必要的。
-要记得，APOD是一个反复迭代的过程（找到可以优化的点，实现并测试优化，验证优化效果，然后再重复）
-因为对于开发者来说，没有必要最初就找到解决所有性能瓶颈的策略。
-优化可以在不同的level上进行，配合性能分析工具是很有帮助的。
-Deploy 大的原则是当优化完一处之后，立刻将这一部分部署到生产环境，而不是再去寻找其他可以优化的地方。
-这样做有很多重要的原因，比如这会使得用户尽早从这个优化中收益（尽管提速只是部分的，但是仍然有价值）
-此外，每次有改动就重新部署，也使得变化是平稳而不是激进的，这有助于减少风险。
-Recommendations and Best Practice 优化根据对性能影响程度的不同有不同的优先级。
-在先要处理低优先级的优化之前，一定要确保其他所有的高优先级优化都做完了。
-这种方法将倾向于为所投入的时间提供最佳结果，并且将避免过早优化的陷阱。
-需要说明的一点是，教程中的代码为了方便简洁没有关于任何 check error的部分。
-在实际上这是不可取的（这不同于编写C++代码!）</description></item><item><title>cuda c++ 基础算法库 thrust 学习笔记</title><link>https://111qqz.com/2018/02/cuda-thrust-notes/</link><pubDate>Sat, 10 Feb 2018 08:43:54 +0000</pubDate><guid>https://111qqz.com/2018/02/cuda-thrust-notes/</guid><description>
-可以了解成并行版的STL(?
-过了一遍nvidia的官方网文档
-发现如果熟悉STL的话,thrust没什么太多好说的,看起来很简单...
-不过还是开一篇记录一下,一段时间内估计要和cuda c++ 打交道,就当记录使用过程中遇到的问题吧.</description></item><item><title>cuda error checking 学习笔记</title><link>https://111qqz.com/2018/02/cuda-error-checking-notes/</link><pubDate>Fri, 09 Feb 2018 06:55:00 +0000</pubDate><guid>https://111qqz.com/2018/02/cuda-error-checking-notes/</guid><description>
-由于发现cuda c++ 的 debug方式和c++ 差别很大,因此打算再开一篇,专门记录一些和error checking 以及debug有关的内容.
-Error checks in CUDA code can help catch CUDA errors at their source. There are 2 sources of errors in CUDA source code:
-1. Errors from CUDA **API** calls. For example, a call to `cudaMalloc()` might fail. 2. Errors from CUDA **kernel** calls. For example, there might be invalid memory access inside a kernel. All CUDA API calls return a cudaError value, so these calls are easy to check:</description></item><item><title>cuda 学习笔记</title><link>https://111qqz.com/2018/02/cuda-notes/</link><pubDate>Thu, 01 Feb 2018 07:20:04 +0000</pubDate><guid>https://111qqz.com/2018/02/cuda-notes/</guid><description>
-uodate:有毒吧。kernel中出问题原来是不会报错的。。。。
-请教了组里的hust学长orz..、
-学到了cuda-memcheck命令和cudaGetLastError来查看问题。。可以参考What is the canonical way to check for errors using the CUDA runtime API?
-先放一波资料。
-* &amp;lt;del&amp;gt;[An Even Easier Introduction to CUDA](https://devblogs.nvidia.com/even-easier-introduction-cuda/)&amp;lt;/del&amp;gt; * &amp;lt;del&amp;gt;[CUDA C/C++ Basics](https://drive.google.com/open?id=1kHYyM4yiJoyjkWjp7FJp0vae_TcvskjK)&amp;lt;/del&amp;gt; * &amp;lt;del&amp;gt;[nvidia-thrust 官方文档](http://docs.nvidia.com/cuda/thrust/index.html)&amp;lt;/del&amp;gt; * [how-access-global-memory-efficiently-cuda-c-kernels](https://devblogs.nvidia.com/how-access-global-memory-efficiently-cuda-c-kernels/) * [efficient-matrix-transpose-cuda-cc](https://devblogs.nvidia.com/efficient-matrix-transpose-cuda-cc/) * [很强大的warp内shuffle](https://devblogs.nvidia.com/faster-parallel-reductions-kepler/) * [cuda-GDB官方文档](http://docs.nvidia.com/cuda/cuda-gdb/index.html) * [cuda-c-best-practices-guide](http://docs.nvidia.com/cuda/cuda-c-best-practices-guide/) cuda 提出的目的是能够让程序员透明地使用GPU来高效地进行并行运算。
-kernel和c语言中的函数相似，函数名字前通常用global来标识。
-下面考虑一个2个大小的1M的数组相加的例子。
-总的思路是通过并行，来观察到计算速度的加快。
-如果不考虑并行，2个数组相加的代码，如下：
-#include &amp;lt;iostream&amp;gt; #include &amp;lt;math.h&amp;gt; // function to add the elements of two arrays void add(int n, float *x, float *y) { for (int i = 0; i &amp;lt; n; i++) y[i] = x[i] + y[i]; } int main(void) { int N = 1&amp;lt;&amp;lt;20; // 1M elements float *x = new float[N]; float *y = new float[N]; // initialize x and y arrays on the host for (int i = 0; i &amp;lt; N; i++) { x[i] = 1.</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Cuda on 111qqz的小窝</title><link>https://111qqz.com/tags/cuda/</link><description>Recent content in Cuda on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Tue, 24 Mar 2020 12:26:01 +0800</lastBuildDate><atom:link href="https://111qqz.com/tags/cuda/index.xml" rel="self" type="application/rss+xml"/><item><title>tensorRT 模型兼容性说明</title><link>https://111qqz.com/2020/03/tensorrt-model-compatibility-notes/</link><pubDate>Tue, 24 Mar 2020 12:26:01 +0800</pubDate><guid>https://111qqz.com/2020/03/tensorrt-model-compatibility-notes/</guid><description>
+&lt;h2 id="名词说明"&gt;名词说明&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;CUDA. 一般来说指的是CUDA SDK. 目前经常使用的是CUDA 8.0和CUDA 10.1两个版本. 8.0和10.1都是SDK的版本号.&lt;/li&gt;
+&lt;li&gt;CUDNN. The NVIDIA CUDA® Deep Neural Network library (cuDNN). 是一个可以为神经网络提供GPU加速的库&lt;/li&gt;
+&lt;li&gt;compute capability. 是GPU的固有参数,可以理解为GPU的版本.越新的显卡该数值往往越高.&lt;/li&gt;
+&lt;li&gt;tensorRT.NVIDIA TensorRT™ is an SDK for high-performance deep learning inference. 是一个深度学习推理库,旨在提供高性能的推理速度.&lt;/li&gt;
+&lt;li&gt;plan file,也称为 engine plan. 是生成的tensorRT 模型文件.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="兼容性说明"&gt;兼容性说明&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Engine plan 的兼容性依赖于GPU的compute capability 和 TensorRT 版本, 不依赖于CUDA和CUDNN版本.&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>CUDA C Best Practices Guide 阅读笔记（二） Heterogeneous Computing</title><link>https://111qqz.com/2018/02/cuda-c-best-practices-guide-heterogeneous-computing/</link><pubDate>Tue, 13 Feb 2018 06:38:38 +0000</pubDate><guid>https://111qqz.com/2018/02/cuda-c-best-practices-guide-heterogeneous-computing/</guid><description>
+&lt;p&gt;CUDA 编程涉及到在不同的平台上同时运行代码:包含CPU的host 和包含GPU的device.&lt;/p&gt;
+&lt;p&gt;所以了解host和device的对性能优化是非常重要的。&lt;/p&gt;</description></item><item><title>CUDA C Best Practices Guide 阅读笔记（1） 并行计算方法论(APOD)</title><link>https://111qqz.com/2018/02/cuda-c-best-practices-parallel-computing-methodology/</link><pubDate>Mon, 12 Feb 2018 04:58:31 +0000</pubDate><guid>https://111qqz.com/2018/02/cuda-c-best-practices-parallel-computing-methodology/</guid><description>
+&lt;p&gt;APOD指的是Assess, Parallelize, Optimize, Deploy&lt;/p&gt;
+&lt;p&gt;
+&lt;img class="image_figure image_external" loading="lazy" src="http://docs.nvidia.com/cuda/cuda-c-best-practices-guide/graphics/apod-cycle.png" alt="Assess, Parallelize, Optimize, Deploy." /&gt;
+&lt;/p&gt;
+&lt;p&gt;如图所示，APOD过程是一个循环的过程，每次只进行一部分，从A到P到O到D,然后再进行下一轮的APOD&lt;/p&gt;</description></item><item><title>cuda c++ 基础算法库 thrust 学习笔记</title><link>https://111qqz.com/2018/02/cuda-thrust-notes/</link><pubDate>Sat, 10 Feb 2018 08:43:54 +0000</pubDate><guid>https://111qqz.com/2018/02/cuda-thrust-notes/</guid><description>
+&lt;p&gt;可以了解成并行版的STL(?&lt;/p&gt;
+&lt;p&gt;过了一遍&lt;a href="http://docs.nvidia.com/cuda/thrust/index.html"&gt;nvidia的官方网文档&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;发现如果熟悉STL的话,thrust没什么太多好说的,看起来很简单...&lt;/p&gt;
+&lt;p&gt;不过还是开一篇记录一下,一段时间内估计要和cuda c++ 打交道,就当记录使用过程中遇到的问题吧.&lt;/p&gt;</description></item><item><title>cuda error checking 学习笔记</title><link>https://111qqz.com/2018/02/cuda-error-checking-notes/</link><pubDate>Fri, 09 Feb 2018 06:55:00 +0000</pubDate><guid>https://111qqz.com/2018/02/cuda-error-checking-notes/</guid><description>
+&lt;p&gt;由于发现cuda c++ 的 debug方式和c++ 差别很大,因此打算再开一篇,专门记录一些和error checking 以及debug有关的内容.&lt;/p&gt;
+&lt;p&gt;Error checks in CUDA code can help catch CUDA errors at their source. There are 2 sources of errors in CUDA source code:&lt;/p&gt;</description></item><item><title>cuda 学习笔记</title><link>https://111qqz.com/2018/02/cuda-notes/</link><pubDate>Thu, 01 Feb 2018 07:20:04 +0000</pubDate><guid>https://111qqz.com/2018/02/cuda-notes/</guid><description>
+&lt;p&gt;uodate:有毒吧。kernel中出问题原来是不会报错的。。。。&lt;/p&gt;
+&lt;p&gt;请教了组里的hust学长orz..、&lt;/p&gt;
+&lt;p&gt;学到了cuda-memcheck命令和cudaGetLastError来查看问题。。可以参考&lt;a href="https://stackoverflow.com/questions/14038589/what-is-the-canonical-way-to-check-for-errors-using-the-cuda-runtime-api"&gt;What is the canonical way to check for errors using the CUDA runtime API?&lt;/a&gt;&lt;/p&gt;</description></item></channel></rss>

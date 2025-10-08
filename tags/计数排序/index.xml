@@ -1,30 +1,6 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>计数排序 on 111qqz的小窝</title><link>https://111qqz.com/tags/%E8%AE%A1%E6%95%B0%E6%8E%92%E5%BA%8F/</link><description>Recent content in 计数排序 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Tue, 04 Oct 2016 18:41:12 +0000</lastBuildDate><atom:link href="https://111qqz.com/tags/%E8%AE%A1%E6%95%B0%E6%8E%92%E5%BA%8F/index.xml" rel="self" type="application/rss+xml"/><item><title>codeforces 558 E. A Simple Task (线段树优化计数排序)</title><link>https://111qqz.com/2016/10/cf558e/</link><pubDate>Tue, 04 Oct 2016 18:41:12 +0000</pubDate><guid>https://111qqz.com/2016/10/cf558e/</guid><description>
-题目链接
-题意：给出一个字符串，仅由小写字母组成。现在给出q个操作，每个操作l,r,k三个参数，k=1表示把区间[l,r]变为升序排列，k=0表示把区间[l,r]变为降序排列。
-思路：首先，最重要的一点是，由于只有26个字母，联想到计数排序。
-对于字符集数目比较小情况，一定要想到计数排序。
-对于字符集数目比较小情况，一定要想到计数排序。
-对于字符集数目比较小情况，一定要想到计数排序。
-那么我们回顾计数排序，不妨考虑升序排列的情况，是怎么做的呢？
-做法是统计该区间中每种字符的个数，然后按照字符的大小，从小到大在区间上从左到右得放置每种字符。
-大概是这样子：
-for(int j=x;j&amp;lt;=y;j++) cnt[s[j] - 'a']++; ind = 0; for(int j=x;j&amp;lt;=y;j++) { while(cnt[ind] == 0) ind++; s[j] = ind + 'a'; cnt[ind]--; } 然而这个复杂度每次是o(n)的。。。
-我们需要用线段树来优化计数排序的过程。。。
-思考计数排序其实分为两个过程：
-一是统计某区间中每个字符的个数。
-二是将字符按照字符的大小顺序重新放回区间。
-我们可以建26棵线段树，一种字母对应一棵。
-对于过程一，我们可以直接query.
-对于过程2，由于相同的字母总是相邻在一起的，因此可以用线段树成段更新来优化，也就是lazy标记。
-tree[id][rt]表示第id棵线段树对应的区间中字母id+'a'-1的个数。
-lazy[id][rt]三种值，-1表示没有标记，0表示重置标记，1表示被某种字母覆盖的标记。（重置的意思是，该区间被排序了，但是还不确定该区间上字母是哪些）
-输出的时候，对于某个位置，只要query到26个字母中值不为0的那个输出就好了。
-总的复杂度：O(26qlgn)
-代码注释中还有部分细节和理解
-/* *********************************************** Author :111qqz Created Time :2016年10月04日 星期二 23时59分11秒 File Name :code/cf/problem/558E.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;deque&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;bitset&amp;gt; #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; const int N=1E5+7; int tree[27][N&amp;lt;&amp;lt;2];//26棵线段树，表示26个字母在对应区间中的个数。 int lazy[27][N&amp;lt;&amp;lt;2];//lazy存储的是某段区间是否被某个字母覆盖.</description></item><item><title>hdu 1280 前m大的数 （计数排序）</title><link>https://111qqz.com/2016/07/hdu-1280/</link><pubDate>Sat, 30 Jul 2016 10:13:30 +0000</pubDate><guid>https://111qqz.com/2016/07/hdu-1280/</guid><description>
-hdu1280
-题意：给出n(3000)个数，两两求和，输出最大的m(5000)个和。
-思路：由于数据有限，想到计数排序。。。以及，m个可能刚好某个数据没有全部输出，要在while里判断一下。。
-。。。好好的人。。怎么开始刷水了。。。。。
-其实是因为最近在看.suffix array...然后里面涉及到了radix sort..算法课的时候到是写过。。。不过快忘了orz。。所以打算找几道题目。。。？ 然而这是计数排序不是基数排序啊摔/！
-/* *********************************************** Author :111qqz Created Time :2016年07月30日 星期六 17时58分04秒 File Name :code/hdu/1280.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; const int N=3005; const int M=1E4+7; int n; int a[N]; int cnt[M]; int m; int main() { #ifndef ONLINE_JUDGE freopen(&amp;quot;code/in.</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>计数排序 on 111qqz的小窝</title><link>https://111qqz.com/tags/%E8%AE%A1%E6%95%B0%E6%8E%92%E5%BA%8F/</link><description>Recent content in 计数排序 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Tue, 04 Oct 2016 18:41:12 +0000</lastBuildDate><atom:link href="https://111qqz.com/tags/%E8%AE%A1%E6%95%B0%E6%8E%92%E5%BA%8F/index.xml" rel="self" type="application/rss+xml"/><item><title>codeforces 558 E. A Simple Task (线段树优化计数排序)</title><link>https://111qqz.com/2016/10/cf558e/</link><pubDate>Tue, 04 Oct 2016 18:41:12 +0000</pubDate><guid>https://111qqz.com/2016/10/cf558e/</guid><description>
+&lt;p&gt;&lt;a href="http://codeforces.com/problemset/problem/558/E"&gt;题目链接&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;题意：给出一个字符串，仅由小写字母组成。现在给出q个操作，每个操作l,r,k三个参数，k=1表示把区间[l,r]变为升序排列，k=0表示把区间[l,r]变为降序排列。&lt;/p&gt;</description></item><item><title>hdu 1280 前m大的数 （计数排序）</title><link>https://111qqz.com/2016/07/hdu-1280/</link><pubDate>Sat, 30 Jul 2016 10:13:30 +0000</pubDate><guid>https://111qqz.com/2016/07/hdu-1280/</guid><description>
+&lt;p&gt;&lt;a href="http://acm.hdu.edu.cn/showproblem.php?pid=1280"&gt;hdu1280&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;题意：给出n(3000)个数，两两求和，输出最大的m(5000)个和。&lt;/p&gt;
+&lt;p&gt;思路：由于数据有限，想到计数排序。。。以及，m个可能刚好某个数据没有全部输出，要在while里判断一下。。&lt;/p&gt;</description></item></channel></rss>

@@ -1,1153 +1,468 @@
-<!doctype html><html lang=en data-figures>
-<head>
-<title>离散化 | 111qqz的小窝</title>
-<meta charset=utf-8>
-<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta http-equiv=x-ua-compatible content="IE=edge">
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-219255388-1"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date),gtag('config','UA-219255388-1')</script>
-<meta property="og:locale" content="en">
-<meta property="og:type" content="article">
-<meta name=description content>
-<meta name=twitter:card content="summary">
-<meta name=twitter:creator content>
-<meta name=twitter:title content="离散化">
-<meta property="og:url" content="https://111qqz.com/tags/%E7%A6%BB%E6%95%A3%E5%8C%96/">
-<meta property="og:title" content="离散化">
-<meta property="og:description" content>
-<meta property="og:image" content="https://111qqz.com/images/thumbnail.png">
-<link rel=apple-touch-icon sizes=180x180 href=https://111qqz.com/icons/apple-touch-icon.png>
-<link rel=icon type=image/png sizes=32x32 href=https://111qqz.com/icons/favicon-32x32.png>
-<link rel=manifest href=https://111qqz.com/icons/site.webmanifest>
-<link rel=canonical href=https://111qqz.com/tags/%E7%A6%BB%E6%95%A3%E5%8C%96/>
-<link rel=alternate type=application/rss+xml href=https://111qqz.com/tags/%E7%A6%BB%E6%95%A3%E5%8C%96/index.xml title=111qqz的小窝>
-<link rel=preload href=https://111qqz.com/css/styles.f143f2039d975cd60c5524f52c5fbb6dd2236d44d0d53d71b5cb6f6127d4fe8082960bbb71fe0345b5bab4119124e0b09c0b7d7f4238a9288afc02815d258f76.css integrity="sha512-8UPyA52XXNYMVST1LF+7bdIjbUTQ1T1xtctvYSfU/oCClgu7cf4DRbW6tBGRJOCwnAt9f0I4qSiK/AKBXSWPdg==" as=style crossorigin=anonymous>
-<link rel=preload href=https://111qqz.com/js/bundle.min.3742850abb67c28705371634ec61c30ef94e46abe2abff0aa69f2d0719bdb4593a80e5d4f8c3e1c6ef6f860b354b7dc6dcc282abc788a7fc2798b214527a5207.js as=script integrity="sha512-N0KFCrtnwocFNxY07GHDDvlORqviq/8Kpp8tBxm9tFk6gOXU+MPhxu9vhgs1S33G3MKCq8eIp/wnmLIUUnpSBw==" crossorigin=anonymous>
-<link rel=stylesheet type=text/css href=https://111qqz.com/css/styles.f143f2039d975cd60c5524f52c5fbb6dd2236d44d0d53d71b5cb6f6127d4fe8082960bbb71fe0345b5bab4119124e0b09c0b7d7f4238a9288afc02815d258f76.css integrity="sha512-8UPyA52XXNYMVST1LF+7bdIjbUTQ1T1xtctvYSfU/oCClgu7cf4DRbW6tBGRJOCwnAt9f0I4qSiK/AKBXSWPdg==" crossorigin=anonymous>
-</head>
-<body data-code=7 data-lines=true id=documentTop>
-<header class=nav_header>
-<nav class=nav><a href=https://111qqz.com/ class="nav_brand nav_item" title=111qqz的小窝>111qqz的小窝
-<div class=nav_close>
-<div><svg class="icon"><use xlink:href="#open-menu"/></svg><svg class="icon"><use xlink:href="#closeme"/></svg></div>
-</div>
-</a>
-<div class="nav_body nav_body_left">
-<div class=nav_parent>
-<a href=https://111qqz.com/ class=nav_item title=Home>Home </a>
-</div>
-<div class=nav_parent>
-<a href=https://111qqz.com/categories/acm/ class=nav_item title=ACM-ICPC>ACM-ICPC </a>
-</div>
-<div class=nav_parent>
-<a href=https://111qqz.com/ class=nav_item title=深度学习>深度学习 <img src=https://111qqz.com/icons/caret-icon.svg alt=icon class=nav_icon></a>
-<div class=nav_sub>
-<span class=nav_child></span>
-<a href=https://111qqz.com/tags/caffe/ class="nav_child nav_item" title=caffe源码阅读笔记>caffe源码阅读笔记</a>
-<a href=https://111qqz.com/tags/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F/ class="nav_child nav_item" title=推荐系统>推荐系统</a>
-<a href=https://111qqz.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89 class="nav_child nav_item" title=计算机视觉>计算机视觉</a>
-</div>
-</div>
-<div class=nav_parent>
-<a href=https://111qqz.com/ class=nav_item title=公开课>公开课 <img src=https://111qqz.com/icons/caret-icon.svg alt=icon class=nav_icon></a>
-<div class=nav_sub>
-<span class=nav_child></span>
-<a href=https://111qqz.com/tags/6.828/ class="nav_child nav_item" title=6.828>6.828</a>
-<a href=https://111qqz.com/tags/cs341/ class="nav_child nav_item" title=CS341>CS341</a>
-<a href=https://111qqz.com/tags/csapp/ class="nav_child nav_item" title=CSAPP>CSAPP</a>
-</div>
-</div>
-<div class=nav_parent>
-<a href=https://111qqz.com/ class=nav_item title=工程>工程 <img src=https://111qqz.com/icons/caret-icon.svg alt=icon class=nav_icon></a>
-<div class=nav_sub>
-<span class=nav_child></span>
-<a href=https://111qqz.com/tags/cpp class="nav_child nav_item" title=cpp>cpp</a>
-<a href=https://111qqz.com/tags/cuda class="nav_child nav_item" title=cuda>cuda</a>
-<a href=https://111qqz.com/tags/leveldb class="nav_child nav_item" title=levelDB源码笔记>levelDB源码笔记</a>
-<a href=https://111qqz.com/tags/linux class="nav_child nav_item" title=linux>linux</a>
-<a href=https://111qqz.com/tags/%E5%89%8D%E7%AB%AF class="nav_child nav_item" title=前端>前端</a>
-<a href=https://111qqz.com/tags/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86 class="nav_child nav_item" title=图像处理>图像处理</a>
-<a href=https://111qqz.com/tags/docker class="nav_child nav_item" title=容器>容器</a>
-</div>
-</div>
-<div class=nav_parent>
-<a href=https://111qqz.com/categories/%E9%9A%8F%E7%AC%94%E6%9D%82%E8%B0%88 class=nav_item title=随笔杂谈>随笔杂谈 </a>
-</div>
-<div class=nav_parent>
-<a href=https://111qqz.com/tags/%E9%9D%A2%E8%AF%95%E7%BB%8F%E5%8E%86 class=nav_item title=面试>面试 </a>
-</div>
-<div class=nav_parent>
-<a href=https://111qqz.com/top/about/ class=nav_item title=About>About </a>
-</div>
-<div class=nav_parent>
-<a href=# class=nav_item>🌐</a>
-<div class=nav_sub>
-<span class=nav_child></span>
-<a href=https://111qqz.com/ class="nav_child nav_item">English</a>
-<a href=https://111qqz.com/zh/ class="nav_child nav_item">Chinese</a>
-</div>
-</div>
-<div class=follow>
-<a href=https://github.com/111qqz><svg class="icon"><use xlink:href="#github"/></svg>
-</a>
-<div class=color_mode>
-<input type=checkbox class=color_choice id=mode>
-</div>
-</div>
-</div>
-</nav>
-</header>
-<main>
-<div class="grid-inverse wrap content">
-<ul class=posts id=posts>
-<li class=post_item>
-<div class=excerpt>
-<div class=excerpt_header>
-<h3 class=post_link>
-<a href=https://111qqz.com/2015/07/hdu5233/ title="hdu 5233  Gunner II (bc #42 B)  （离散化）">hdu 5233 Gunner II (bc #42 B) （离散化）</a>
-</h3>
-<div class=post_meta>
-<span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
-<span class=post_date>
-Jul 31, 2015</span>
-<span class=post_time> · 3 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/%E7%A6%BB%E6%95%A3%E5%8C%96 title=离散化 class="post_tag button button_translucent">离散化
-</a>
-</span>
-</div>
-</div>
-<div class=excerpt_footer>
-<div class=pale>
-<p>Gunner II **Time Limit: 2000/1000 MS (Java/Others) Memory Limit: 65536/65536 K (Java/Others) Total Submission(s): 1433 Accepted Submission(s): 540 **
-Problem Description
-Long long ago, there was a gunner whose name is Jack. He likes to go hunting very much. One day he go to the grove. There are n birds and n trees. The …</p>
-<br>
-<a href=https://111qqz.com/2015/07/hdu5233/ title="Read More" class="excerpt_more button">Read More</a>
-</div>
-</div>
-</div>
-</li>
-<li>
-<ul class="pagination pagination-default">
-<li class=page-item>
-<a href=/tags/%E7%A6%BB%E6%95%A3%E5%8C%96/ aria-label=First class=page-link role=button><span aria-hidden=true>&#171;&#171;</span></a>
-</li>
-<li class=page-item>
-<a href=/tags/%E7%A6%BB%E6%95%A3%E5%8C%96/ aria-label=Previous class=page-link role=button><span aria-hidden=true>&#171;</span></a>
-</li>
-<li class=page-item>
-<a href=/tags/%E7%A6%BB%E6%95%A3%E5%8C%96/ aria-label="Page 1" class=page-link role=button>1</a>
-</li>
-<li class="page-item active">
-<a aria-current=page aria-label="Page 2" class=page-link role=button>2</a>
-</li>
-<li class="page-item disabled">
-<a aria-disabled=true aria-label=Next class=page-link role=button tabindex=-1><span aria-hidden=true>&#187;</span></a>
-</li>
-<li class="page-item disabled">
-<a aria-disabled=true aria-label=Last class=page-link role=button tabindex=-1><span aria-hidden=true>&#187;&#187;</span></a>
-</li>
-</ul>
-</li>
-</ul>
-<aside class=sidebar>
-<section class=sidebar_inner>
-<h2>111qqz</h2>
-<div class=author_bio>
-深度学习框架工程师@Tencent, ex-ICPCer@HUST
-</div>
-<a href=https://111qqz.com/top/about/ class="button mt-1" role=button title="Read More">Read More</a>
-<h2 class=mt-4>Recent Posts</h2>
-<ul class=flex-column>
-<li>
-<a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a>
-</li>
-<li>
-<a href=https://111qqz.com/2025/01/goodbye-2024/ class=nav-link title="Goodbye 2024">Goodbye 2024</a>
-</li>
-<li>
-<a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a>
-</li>
-<li>
-<a href=https://111qqz.com/2023/05/five-years-after-graduation/ class=nav-link title=写在毕业五年之后>写在毕业五年之后</a>
-</li>
-<li>
-<a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a>
-</li>
-<li>
-<a href=https://111qqz.com/2022/12/goodbye-2022/ class=nav-link title="Goodbye 2022">Goodbye 2022</a>
-</li>
-<li>
-<a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a>
-</li>
-<li>
-<a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a>
-</li>
-</ul>
-<div>
-<h2 class="mt-4 taxonomy" id=categories-section>Categories</h2>
-<nav class=tags_nav>
-<a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>
-ACM
+<!doctype html><html lang=zh data-figures><head><title>离散化 | 111qqz的小窝</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta http-equiv=X-UA-Compatible content="IE=edge"><script async src="https://www.googletagmanager.com/gtag/js?id=UA-219255388-1"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","UA-219255388-1")</script><meta property="og:locale" content="zh"><meta property="og:type" content="article"><meta name=description content><meta name=twitter:card content="summary"><meta name=twitter:creator content><meta name=twitter:title content="离散化"><meta property="og:url" content="https://111qqz.com/tags/%E7%A6%BB%E6%95%A3%E5%8C%96/"><meta property="og:title" content="离散化"><meta property="og:description" content><meta property="og:image" content="https://111qqz.com/images/thumbnail.png"><link rel=apple-touch-icon sizes=180x180 href=https://111qqz.com/icons/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=https://111qqz.com/icons/favicon-32x32.png><link rel=manifest href=https://111qqz.com/icons/site.webmanifest><link rel=canonical href=https://111qqz.com/tags/%E7%A6%BB%E6%95%A3%E5%8C%96/><link rel=alternate type=application/rss+xml href=https://111qqz.com/tags/%E7%A6%BB%E6%95%A3%E5%8C%96/index.xml title=111qqz的小窝><link rel=preload href=https://111qqz.com/css/styles.f143f2039d975cd60c5524f52c5fbb6dd2236d44d0d53d71b5cb6f6127d4fe8082960bbb71fe0345b5bab4119124e0b09c0b7d7f4238a9288afc02815d258f76.css integrity="sha512-8UPyA52XXNYMVST1LF+7bdIjbUTQ1T1xtctvYSfU/oCClgu7cf4DRbW6tBGRJOCwnAt9f0I4qSiK/AKBXSWPdg==" as=style crossorigin=anonymous><link rel=preload href=https://111qqz.com/js/bundle.min.f86d286f05bf90a933ff9fa1c1167a1e2db0cb5896fe07d7c95ea7634bd1b758200e370a1a769d90822f39219852f09b3b5744811adb0aacb1892839818ccb11.js as=script integrity="sha512-+G0obwW/kKkz/5+hwRZ6Hi2wy1iW/gfXyV6nY0vRt1ggDjcKGnadkIIvOSGYUvCbO1dEgRrbCqyxiSg5gYzLEQ==" crossorigin=anonymous><link rel=stylesheet type=text/css href=https://111qqz.com/css/styles.f143f2039d975cd60c5524f52c5fbb6dd2236d44d0d53d71b5cb6f6127d4fe8082960bbb71fe0345b5bab4119124e0b09c0b7d7f4238a9288afc02815d258f76.css integrity="sha512-8UPyA52XXNYMVST1LF+7bdIjbUTQ1T1xtctvYSfU/oCClgu7cf4DRbW6tBGRJOCwnAt9f0I4qSiK/AKBXSWPdg==" crossorigin=anonymous></head><body data-code=7 data-lines=true id=documentTop><header class=nav_header><nav class=nav><a href=https://111qqz.com/ class="nav_brand nav_item" title=111qqz的小窝>111qqz的小窝<div class=nav_close><div><svg class="icon"><use xlink:href="#open-menu"/></svg><svg class="icon"><use xlink:href="#closeme"/></svg></div></div></a><div class='nav_body nav_body_left'><div class=nav_parent><a href=# class=nav_item>🌐</a><div class=nav_sub><span class=nav_child></span>
+<a href=https://111qqz.com/ class="nav_child nav_item">中文</a>
+<a href=https://111qqz.com/en/ class="nav_child nav_item">English</a></div></div><div class=follow><div class=color_mode><input type=checkbox class=color_choice id=mode></div></div></div></nav></header><main><div class="grid-inverse wrap content"><ul class=posts id=posts><li class=post_item><div class=excerpt><div class=excerpt_header><h3 class=post_link><a href=https://111qqz.com/2015/07/hdu5233/ title="hdu 5233  Gunner II (bc #42 B)  （离散化）">hdu 5233 Gunner II (bc #42 B) （离散化）</a></h3><div class=post_meta><span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
+<span class=post_date>2015-07-31</span>
+<span class=post_time>· 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/%E7%A6%BB%E6%95%A3%E5%8C%96 title=离散化 class="post_tag button button_translucent">离散化</a></span></div></div><div class=excerpt_footer><div class=pale><h1 id=gunner-ii>Gunner II</h1><p>**Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/65536 K (Java/Others)
+Total Submission(s): 1433    Accepted Submission(s): 540
+**</p><p>Problem Description</p><p>Long long ago, there was a gunner whose name is Jack. He likes to go hunting very much. One day he go to the grove. There are n birds and n …</p><br><a href=https://111qqz.com/2015/07/hdu5233/ title=阅读更多 class="excerpt_more button">阅读更多</a></div></div></div></li><li><ul class="pagination pagination-default"><li class=page-item><a href=/tags/%E7%A6%BB%E6%95%A3%E5%8C%96/ aria-label=First class=page-link role=button><span aria-hidden=true>&#171;&#171;</span></a></li><li class=page-item><a href=/tags/%E7%A6%BB%E6%95%A3%E5%8C%96/ aria-label=Previous class=page-link role=button><span aria-hidden=true>&#171;</span></a></li><li class=page-item><a href=/tags/%E7%A6%BB%E6%95%A3%E5%8C%96/ aria-label="Page 1" class=page-link role=button>1</a></li><li class="page-item active"><a aria-current=page aria-label="Page 2" class=page-link role=button>2</a></li><li class="page-item disabled"><a aria-disabled=true aria-label=Next class=page-link role=button tabindex=-1><span aria-hidden=true>&#187;</span></a></li><li class="page-item disabled"><a aria-disabled=true aria-label=Last class=page-link role=button tabindex=-1><span aria-hidden=true>&#187;&#187;</span></a></li></ul></li></ul><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>深度学习框架工程师@Tencent, ex-ICPCer@HUST</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2025/01/goodbye-2024/ class=nav-link title="Goodbye 2024">Goodbye 2024</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/05/five-years-after-graduation/ class=nav-link title=写在毕业五年之后>写在毕业五年之后</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/goodbye-2022/ class=nav-link title="Goodbye 2022">Goodbye 2022</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
 <span class=button_tally>913</span>
-</a>
-<a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>
-其他
+</a><a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>其他
 <span class=button_tally>90</span>
-</a>
-<a href=https://111qqz.com/categories/deep-learning/ class="post_tag button button_translucent" title=deep-learning>
-DEEP-LEARNING
+</a><a href=https://111qqz.com/categories/deep-learning/ class="post_tag button button_translucent" title=deep-learning>DEEP-LEARNING
 <span class=button_tally>68</span>
-</a>
-<a href=https://111qqz.com/categories/%E9%9D%A2%E8%AF%95/ class="post_tag button button_translucent" title=面试>
-面试
+</a><a href=https://111qqz.com/categories/%E9%9D%A2%E8%AF%95/ class="post_tag button button_translucent" title=面试>面试
 <span class=button_tally>63</span>
-</a>
-<a href=https://111qqz.com/categories/%E9%9A%8F%E7%AC%94%E6%9D%82%E8%B0%88/ class="post_tag button button_translucent" title=随笔杂谈>
-随笔杂谈
+</a><a href=https://111qqz.com/categories/%E9%9A%8F%E7%AC%94%E6%9D%82%E8%B0%88/ class="post_tag button button_translucent" title=随笔杂谈>随笔杂谈
 <span class=button_tally>62</span>
-</a>
-<a href=https://111qqz.com/categories/%E5%B7%A5%E7%A8%8B/ class="post_tag button button_translucent" title=工程>
-工程
+</a><a href=https://111qqz.com/categories/%E5%B7%A5%E7%A8%8B/ class="post_tag button button_translucent" title=工程>工程
 <span class=button_tally>59</span>
-</a>
-<a href=https://111qqz.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/ class="post_tag button button_translucent" title=计算机视觉>
-计算机视觉
+</a><a href=https://111qqz.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/ class="post_tag button button_translucent" title=计算机视觉>计算机视觉
 <span class=button_tally>21</span>
-</a>
-<a href=https://111qqz.com/categories/mooc/ class="post_tag button button_translucent" title=mooc>
-MOOC
+</a><a href=https://111qqz.com/categories/mooc/ class="post_tag button button_translucent" title=mooc>MOOC
 <span class=button_tally>15</span>
-</a>
-<a href=https://111qqz.com/categories/%E4%BC%98%E5%8C%96/ class="post_tag button button_translucent" title=优化>
-优化
+</a><a href=https://111qqz.com/categories/%E4%BC%98%E5%8C%96/ class="post_tag button button_translucent" title=优化>优化
 <span class=button_tally>10</span>
-</a>
-<a href=https://111qqz.com/categories/c++/ class="post_tag button button_translucent" title=c++>
-C++
+</a><a href=https://111qqz.com/categories/c++/ class="post_tag button button_translucent" title=c++>C++
 <span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/categories/%E7%94%9F%E6%B4%BB/ class="post_tag button button_translucent" title=生活>
-生活
-<span class=button_tally>1</span>
-</a>
-</nav>
-</div>
-<div>
-<h2 class="mt-4 taxonomy" id=series-section>Series</h2>
-<nav class=tags_nav>
-<a href=https://111qqz.com/series/caffe%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/ class="post_tag button button_translucent" title=caffe源码阅读笔记>
-CAFFE源码阅读笔记
+</a><a href=https://111qqz.com/categories/%E7%94%9F%E6%B4%BB/ class="post_tag button button_translucent" title=生活>生活
+<span class=button_tally>1</span></a></nav></div><div><h2 class="mt-4 taxonomy" id=series-section>专栏</h2><nav class=tags_nav><a href=https://111qqz.com/series/caffe%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/ class="post_tag button button_translucent" title=caffe源码阅读笔记>CAFFE源码阅读笔记
 <span class=button_tally>13</span>
-</a>
-<a href=https://111qqz.com/series/leveldb%E4%BB%A3%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/ class="post_tag button button_translucent" title=leveldb代码阅读笔记>
-LEVELDB代码阅读笔记
+</a><a href=https://111qqz.com/series/leveldb%E4%BB%A3%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/ class="post_tag button button_translucent" title=leveldb代码阅读笔记>LEVELDB代码阅读笔记
 <span class=button_tally>9</span>
-</a>
-<a href=https://111qqz.com/series/csapp/ class="post_tag button button_translucent" title=csapp>
-CSAPP
+</a><a href=https://111qqz.com/series/csapp/ class="post_tag button button_translucent" title=csapp>CSAPP
 <span class=button_tally>7</span>
-</a>
-<a href=https://111qqz.com/series/cpp-faq/ class="post_tag button button_translucent" title=cpp-faq>
-CPP-FAQ
+</a><a href=https://111qqz.com/series/cpp-faq/ class="post_tag button button_translucent" title="cpp faq">CPP FAQ
 <span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/series/modern-cpp/ class="post_tag button button_translucent" title=modern-cpp>
-MODERN-CPP
-<span class=button_tally>1</span>
-</a>
-</nav>
-</div>
-<div>
-<h2 class="mt-4 taxonomy" id=tags-section>Tags</h2>
-<nav class=tags_nav>
-<a href=https://111qqz.com/tags/dp/ class="post_tag button button_translucent" title=dp>
-DP
+</a><a href=https://111qqz.com/series/modern-cpp/ class="post_tag button button_translucent" title="modern cpp">MODERN CPP
+<span class=button_tally>1</span></a></nav></div><div><h2 class="mt-4 taxonomy" id=tags-section>标签</h2><nav class=tags_nav><a href=https://111qqz.com/tags/dp/ class="post_tag button button_translucent" title=dp>DP
 <span class=button_tally>71</span>
-</a>
-<a href=https://111qqz.com/tags/math/ class="post_tag button button_translucent" title=math>
-MATH
+</a><a href=https://111qqz.com/tags/math/ class="post_tag button button_translucent" title=math>MATH
 <span class=button_tally>49</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%BA%BF%E6%AE%B5%E6%A0%91/ class="post_tag button button_translucent" title=线段树>
-线段树
+</a><a href=https://111qqz.com/tags/%E7%BA%BF%E6%AE%B5%E6%A0%91/ class="post_tag button button_translucent" title=线段树>线段树
 <span class=button_tally>43</span>
-</a>
-<a href=https://111qqz.com/tags/brute-force/ class="post_tag button button_translucent" title=brute-force>
-BRUTE-FORCE
+</a><a href=https://111qqz.com/tags/brute-force/ class="post_tag button button_translucent" title="brute force">BRUTE FORCE
 <span class=button_tally>39</span>
-</a>
-<a href=https://111qqz.com/tags/leetcode/ class="post_tag button button_translucent" title=leetcode>
-LEETCODE
+</a><a href=https://111qqz.com/tags/leetcode/ class="post_tag button button_translucent" title=leetcode>LEETCODE
 <span class=button_tally>38</span>
-</a>
-<a href=https://111qqz.com/tags/greedy/ class="post_tag button button_translucent" title=greedy>
-GREEDY
+</a><a href=https://111qqz.com/tags/greedy/ class="post_tag button button_translucent" title=greedy>GREEDY
 <span class=button_tally>36</span>
-</a>
-<a href=https://111qqz.com/tags/dfs/ class="post_tag button button_translucent" title=dfs>
-DFS
+</a><a href=https://111qqz.com/tags/dfs/ class="post_tag button button_translucent" title=dfs>DFS
 <span class=button_tally>34</span>
-</a>
-<a href=https://111qqz.com/tags/number-theory/ class="post_tag button button_translucent" title=number-theory>
-NUMBER-THEORY
+</a><a href=https://111qqz.com/tags/number-theory/ class="post_tag button button_translucent" title="number theory">NUMBER THEORY
 <span class=button_tally>27</span>
-</a>
-<a href=https://111qqz.com/tags/cpp/ class="post_tag button button_translucent" title=cpp>
-CPP
+</a><a href=https://111qqz.com/tags/cpp/ class="post_tag button button_translucent" title=cpp>CPP
 <span class=button_tally>26</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%A8%A1%E6%8B%9F/ class="post_tag button button_translucent" title=模拟>
-模拟
+</a><a href=https://111qqz.com/tags/%E6%A8%A1%E6%8B%9F/ class="post_tag button button_translucent" title=模拟>模拟
 <span class=button_tally>24</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%8D%9A%E5%BC%88%E8%AE%BA/ class="post_tag button button_translucent" title=博弈论>
-博弈论
+</a><a href=https://111qqz.com/tags/%E5%8D%9A%E5%BC%88%E8%AE%BA/ class="post_tag button button_translucent" title=博弈论>博弈论
 <span class=button_tally>22</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%9E%84%E9%80%A0/ class="post_tag button button_translucent" title=构造>
-构造
+</a><a href=https://111qqz.com/tags/%E6%9E%84%E9%80%A0/ class="post_tag button button_translucent" title=构造>构造
 <span class=button_tally>22</span>
-</a>
-<a href=https://111qqz.com/tags/binary-search/ class="post_tag button button_translucent" title=binary-search>
-BINARY-SEARCH
+</a><a href=https://111qqz.com/tags/binary-search/ class="post_tag button button_translucent" title="binary search">BINARY SEARCH
 <span class=button_tally>21</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%AF%8D%E5%87%BD%E6%95%B0/ class="post_tag button button_translucent" title=母函数>
-母函数
-<span class=button_tally>21</span>
-</a>
-<br>
-<div class="post_tags_toggle button">All Tags</div>
-<div class=post_tags>
-<div class=tags_list>
-<a href=https://111qqz.com/tags/01%E8%83%8C%E5%8C%85/ class="post_tag button button_translucent" data-position=9 title=01背包>01背包<span class=button_tally>9</span>
-</a>
-<a href=https://111qqz.com/tags/2-sat/ class="post_tag button button_translucent" data-position=1 title=2-sat>2-SAT<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/6.828/ class="post_tag button button_translucent" data-position=4 title=6.828>6.828<span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/tags/ac%E8%87%AA%E5%8A%A8%E6%9C%BA/ class="post_tag button button_translucent" data-position=4 title=ac自动机>AC自动机<span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/tags/anaconda/ class="post_tag button button_translucent" data-position=1 title=anaconda>ANACONDA<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/anchor-box/ class="post_tag button button_translucent" data-position=1 title=anchor-box>ANCHOR-BOX<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/anti-sg/ class="post_tag button button_translucent" data-position=2 title=anti-sg>ANTI-SG<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/archlinux/ class="post_tag button button_translucent" data-position=2 title=archlinux>ARCHLINUX<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/async/ class="post_tag button button_translucent" data-position=1 title=async>ASYNC<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/atom/ class="post_tag button button_translucent" data-position=1 title=atom>ATOM<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/avx/ class="post_tag button button_translucent" data-position=1 title=avx>AVX<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/awk/ class="post_tag button button_translucent" data-position=1 title=awk>AWK<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/bazel/ class="post_tag button button_translucent" data-position=1 title=bazel>BAZEL<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/bfs/ class="post_tag button button_translucent" data-position=20 title=bfs>BFS<span class=button_tally>20</span>
-</a>
-<a href=https://111qqz.com/tags/binary-search/ class="post_tag button button_translucent" data-position=21 title=binary-search>BINARY-SEARCH<span class=button_tally>21</span>
-</a>
-<a href=https://111qqz.com/tags/binary-search-tree/ class="post_tag button button_translucent" data-position=1 title=binary-search-tree>BINARY-SEARCH-TREE<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/bitset%E4%BC%98%E5%8C%96/ class="post_tag button button_translucent" data-position=4 title=bitset优化>BITSET优化<span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/tags/blog/ class="post_tag button button_translucent" data-position=1 title=blog>BLOG<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/boost/ class="post_tag button button_translucent" data-position=1 title=boost>BOOST<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/boosting/ class="post_tag button button_translucent" data-position=1 title=boosting>BOOSTING<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/brute-force/ class="post_tag button button_translucent" data-position=39 title=brute-force>BRUTE-FORCE<span class=button_tally>39</span>
-</a>
-<a href=https://111qqz.com/tags/bsgs/ class="post_tag button button_translucent" data-position=4 title=bsgs>BSGS<span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/tags/c++/ class="post_tag button button_translucent" data-position=7 title=c++>C++<span class=button_tally>7</span>
-</a>
-<a href=https://111qqz.com/tags/c++11/ class="post_tag button button_translucent" data-position=1 title=c++11>C++11<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/cache/ class="post_tag button button_translucent" data-position=1 title=cache>CACHE<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/caffe/ class="post_tag button button_translucent" data-position=14 title=caffe>CAFFE<span class=button_tally>14</span>
-</a>
-<a href=https://111qqz.com/tags/caffe2/ class="post_tag button button_translucent" data-position=1 title=caffe2>CAFFE2<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/call-stack/ class="post_tag button button_translucent" data-position=1 title=call-stack>CALL-STACK<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/call_once/ class="post_tag button button_translucent" data-position=1 title=call_once>CALL_ONCE<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/cdq%E5%88%86%E6%B2%BB/ class="post_tag button button_translucent" data-position=3 title=cdq分治>CDQ分治<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/checkpoint/ class="post_tag button button_translucent" data-position=1 title=checkpoint>CHECKPOINT<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/chromebook/ class="post_tag button button_translucent" data-position=1 title=chromebook>CHROMEBOOK<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/ci/ class="post_tag button button_translucent" data-position=1 title=ci>CI<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/cmake/ class="post_tag button button_translucent" data-position=1 title=cmake>CMAKE<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/codeforces/ class="post_tag button button_translucent" data-position=1 title=codeforces>CODEFORCES<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/condition_variable/ class="post_tag button button_translucent" data-position=1 title=condition_variable>CONDITION_VARIABLE<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/convolutional-neural-network/ class="post_tag button button_translucent" data-position=1 title=convolutional-neural-network>CONVOLUTIONAL-NEURAL-NETWORK<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/cpp/ class="post_tag button button_translucent" data-position=26 title=cpp>CPP<span class=button_tally>26</span>
-</a>
-<a href=https://111qqz.com/tags/cs231n/ class="post_tag button button_translucent" data-position=1 title=cs231n>CS231N<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/cs341/ class="post_tag button button_translucent" data-position=1 title=cs341>CS341<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/csapp/ class="post_tag button button_translucent" data-position=7 title=csapp>CSAPP<span class=button_tally>7</span>
-</a>
-<a href=https://111qqz.com/tags/cse599w/ class="post_tag button button_translucent" data-position=1 title=cse599w>CSE599W<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/cuda/ class="post_tag button button_translucent" data-position=6 title=cuda>CUDA<span class=button_tally>6</span>
-</a>
-<a href=https://111qqz.com/tags/cumulative-match-characteristi/ class="post_tag button button_translucent" data-position=1 title=cumulative-match-characteristi>CUMULATIVE-MATCH-CHARACTERISTI<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/cupy/ class="post_tag button button_translucent" data-position=1 title=cupy>CUPY<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/d/ class="post_tag button button_translucent" data-position=1 title=d>D<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/dfs/ class="post_tag button button_translucent" data-position=34 title=dfs>DFS<span class=button_tally>34</span>
-</a>
-<a href=https://111qqz.com/tags/dfs%E5%BA%8F/ class="post_tag button button_translucent" data-position=1 title=dfs序>DFS序<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/dijkstra/ class="post_tag button button_translucent" data-position=2 title=dijkstra>DIJKSTRA<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/discourse/ class="post_tag button button_translucent" data-position=1 title=discourse>DISCOURSE<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/dl-sys/ class="post_tag button button_translucent" data-position=1 title=dl-sys>DL-SYS<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/docker/ class="post_tag button button_translucent" data-position=6 title=docker>DOCKER<span class=button_tally>6</span>
-</a>
-<a href=https://111qqz.com/tags/dp/ class="post_tag button button_translucent" data-position=71 title=dp>DP<span class=button_tally>71</span>
-</a>
-<a href=https://111qqz.com/tags/eigen/ class="post_tag button button_translucent" data-position=1 title=eigen>EIGEN<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/end-to-end/ class="post_tag button button_translucent" data-position=1 title=end-to-end>END-TO-END<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/factorial-number-system/ class="post_tag button button_translucent" data-position=1 title=factorial-number-system>FACTORIAL-NUMBER-SYSTEM<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/faster-rcnn/ class="post_tag button button_translucent" data-position=3 title=faster-rcnn>FASTER-RCNN<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/feature-pyramid-networks/ class="post_tag button button_translucent" data-position=1 title=feature-pyramid-networks>FEATURE-PYRAMID-NETWORKS<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/fedora/ class="post_tag button button_translucent" data-position=1 title=fedora>FEDORA<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/fish/ class="post_tag button button_translucent" data-position=1 title=fish>FISH<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/floyd/ class="post_tag button button_translucent" data-position=10 title=floyd>FLOYD<span class=button_tally>10</span>
-</a>
-<a href=https://111qqz.com/tags/floyd-%E5%88%A4%E5%9C%88/ class="post_tag button button_translucent" data-position=2 title=floyd-判圈>FLOYD-判圈<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/fpn/ class="post_tag button button_translucent" data-position=1 title=fpn>FPN<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/future/ class="post_tag button button_translucent" data-position=2 title=future>FUTURE<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/g++/ class="post_tag button button_translucent" data-position=1 title=g++>G++<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/galliumos/ class="post_tag button button_translucent" data-position=1 title=galliumos>GALLIUMOS<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/gcc/ class="post_tag button button_translucent" data-position=1 title=gcc>GCC<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/gcd/ class="post_tag button button_translucent" data-position=2 title=gcd>GCD<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/gdb/ class="post_tag button button_translucent" data-position=1 title=gdb>GDB<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/gedit/ class="post_tag button button_translucent" data-position=1 title=gedit>GEDIT<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/geekos/ class="post_tag button button_translucent" data-position=4 title=geekos>GEEKOS<span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/tags/github/ class="post_tag button button_translucent" data-position=1 title=github>GITHUB<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/gitlab/ class="post_tag button button_translucent" data-position=1 title=gitlab>GITLAB<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/golang/ class="post_tag button button_translucent" data-position=1 title=golang>GOLANG<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/greedy/ class="post_tag button button_translucent" data-position=36 title=greedy>GREEDY<span class=button_tally>36</span>
-</a>
-<a href=https://111qqz.com/tags/grpc/ class="post_tag button button_translucent" data-position=2 title=grpc>GRPC<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/grub/ class="post_tag button button_translucent" data-position=1 title=grub>GRUB<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/grundy/ class="post_tag button button_translucent" data-position=1 title=grundy>GRUNDY<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/halide/ class="post_tag button button_translucent" data-position=2 title=halide>HALIDE<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/haproxy/ class="post_tag button button_translucent" data-position=1 title=haproxy>HAPROXY<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/hash/ class="post_tag button button_translucent" data-position=13 title=hash>HASH<span class=button_tally>13</span>
-</a>
-<a href=https://111qqz.com/tags/hash-map/ class="post_tag button button_translucent" data-position=1 title=hash-map>HASH-MAP<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/haskell/ class="post_tag button button_translucent" data-position=1 title=haskell>HASKELL<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/high-performance-computing/ class="post_tag button button_translucent" data-position=1 title=high-performance-computing>HIGH-PERFORMANCE-COMPUTING<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/hugo/ class="post_tag button button_translucent" data-position=2 title=hugo>HUGO<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/image-denoising/ class="post_tag button button_translucent" data-position=1 title=image-denoising>IMAGE-DENOISING<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/inception/ class="post_tag button button_translucent" data-position=1 title=inception>INCEPTION<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/java/ class="post_tag button button_translucent" data-position=5 title=java>JAVA<span class=button_tally>5</span>
-</a>
-<a href=https://111qqz.com/tags/javascript/ class="post_tag button button_translucent" data-position=1 title=javascript>JAVASCRIPT<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/jdk/ class="post_tag button button_translucent" data-position=1 title=jdk>JDK<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/jetson-nano/ class="post_tag button button_translucent" data-position=2 title=jetson-nano>JETSON-NANO<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/json/ class="post_tag button button_translucent" data-position=1 title=json>JSON<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/k-means/ class="post_tag button button_translucent" data-position=2 title=k-means>K-MEANS<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/k-sum/ class="post_tag button button_translucent" data-position=3 title=k-sum>K-SUM<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/k8s/ class="post_tag button button_translucent" data-position=2 title=k8s>K8S<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/kafka/ class="post_tag button button_translucent" data-position=1 title=kafka>KAFKA<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/kd-tree/ class="post_tag button button_translucent" data-position=6 title=kd-tree>KD-TREE<span class=button_tally>6</span>
-</a>
-<a href=https://111qqz.com/tags/km/ class="post_tag button button_translucent" data-position=14 title=km>KM<span class=button_tally>14</span>
-</a>
-<a href=https://111qqz.com/tags/kmp/ class="post_tag button button_translucent" data-position=19 title=kmp>KMP<span class=button_tally>19</span>
-</a>
-<a href=https://111qqz.com/tags/km%E7%AE%97%E6%B3%95/ class="post_tag button button_translucent" data-position=1 title=km算法>KM算法<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/latent-factor-model/ class="post_tag button button_translucent" data-position=1 title=latent-factor-model>LATENT-FACTOR-MODEL<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/latex/ class="post_tag button button_translucent" data-position=1 title=latex>LATEX<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/lazy%E6%A0%87%E8%AE%B0/ class="post_tag button button_translucent" data-position=9 title=lazy标记>LAZY标记<span class=button_tally>9</span>
-</a>
-<a href=https://111qqz.com/tags/lca/ class="post_tag button button_translucent" data-position=10 title=lca>LCA<span class=button_tally>10</span>
-</a>
-<a href=https://111qqz.com/tags/leetcode/ class="post_tag button button_translucent" data-position=38 title=leetcode>LEETCODE<span class=button_tally>38</span>
-</a>
-<a href=https://111qqz.com/tags/leveldb/ class="post_tag button button_translucent" data-position=10 title=leveldb>LEVELDB<span class=button_tally>10</span>
-</a>
-<a href=https://111qqz.com/tags/linear-classification/ class="post_tag button button_translucent" data-position=1 title=linear-classification>LINEAR-CLASSIFICATION<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/linux/ class="post_tag button button_translucent" data-position=9 title=linux>LINUX<span class=button_tally>9</span>
-</a>
-<a href=https://111qqz.com/tags/linux-mint/ class="post_tag button button_translucent" data-position=1 title=linux-mint>LINUX-MINT<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/lis/ class="post_tag button button_translucent" data-position=5 title=lis>LIS<span class=button_tally>5</span>
-</a>
-<a href=https://111qqz.com/tags/log/ class="post_tag button button_translucent" data-position=2 title=log>LOG<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/lru/ class="post_tag button button_translucent" data-position=2 title=lru>LRU<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/lstm/ class="post_tag button button_translucent" data-position=1 title=lstm>LSTM<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/lua/ class="post_tag button button_translucent" data-position=1 title=lua>LUA<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/lucas%E5%AE%9A%E7%90%86/ class="post_tag button button_translucent" data-position=3 title=lucas定理>LUCAS定理<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/manacher/ class="post_tag button button_translucent" data-position=4 title=manacher>MANACHER<span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/tags/manjaro/ class="post_tag button button_translucent" data-position=3 title=manjaro>MANJARO<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/map/ class="post_tag button button_translucent" data-position=6 title=map>MAP<span class=button_tally>6</span>
-</a>
-<a href=https://111qqz.com/tags/math/ class="post_tag button button_translucent" data-position=49 title=math>MATH<span class=button_tally>49</span>
-</a>
-<a href=https://111qqz.com/tags/mean-average-precision/ class="post_tag button button_translucent" data-position=1 title=mean-average-precision>MEAN-AVERAGE-PRECISION<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/metric-learning/ class="post_tag button button_translucent" data-position=1 title=metric-learning>METRIC-LEARNING<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/miller-rabin%E7%B4%A0%E6%95%B0%E6%B5%8B%E8%AF%95/ class="post_tag button button_translucent" data-position=1 title=miller-rabin素数测试>MILLER-RABIN素数测试<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/model-convertor/ class="post_tag button button_translucent" data-position=1 title=model-convertor>MODEL-CONVERTOR<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/model-distillation/ class="post_tag button button_translucent" data-position=1 title=model-distillation>MODEL-DISTILLATION<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/modern-cpp/ class="post_tag button button_translucent" data-position=10 title=modern-cpp>MODERN-CPP<span class=button_tally>10</span>
-</a>
-<a href=https://111qqz.com/tags/mpi/ class="post_tag button button_translucent" data-position=1 title=mpi>MPI<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/mst/ class="post_tag button button_translucent" data-position=6 title=mst>MST<span class=button_tally>6</span>
-</a>
-<a href=https://111qqz.com/tags/murmurhash/ class="post_tag button button_translucent" data-position=1 title=murmurhash>MURMURHASH<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/mutual-learning/ class="post_tag button button_translucent" data-position=1 title=mutual-learning>MUTUAL-LEARNING<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/mysql/ class="post_tag button button_translucent" data-position=3 title=mysql>MYSQL<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/nerdtree/ class="post_tag button button_translucent" data-position=1 title=nerdtree>NERDTREE<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/network/ class="post_tag button button_translucent" data-position=1 title=network>NETWORK<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/nim%E6%B8%B8%E6%88%8F/ class="post_tag button button_translucent" data-position=4 title=nim游戏>NIM游戏<span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/tags/nlp/ class="post_tag button button_translucent" data-position=1 title=nlp>NLP<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/nms/ class="post_tag button button_translucent" data-position=1 title=nms>NMS<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/non-local-means/ class="post_tag button button_translucent" data-position=1 title=non-local-means>NON-LOCAL-MEANS<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/non-local-neural-networks/ class="post_tag button button_translucent" data-position=1 title=non-local-neural-networks>NON-LOCAL-NEURAL-NETWORKS<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/number-theory/ class="post_tag button button_translucent" data-position=27 title=number-theory>NUMBER-THEORY<span class=button_tally>27</span>
-</a>
-<a href=https://111qqz.com/tags/numpy/ class="post_tag button button_translucent" data-position=1 title=numpy>NUMPY<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/object-detection/ class="post_tag button button_translucent" data-position=2 title=object-detection>OBJECT-DETECTION<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/once_flag/ class="post_tag button button_translucent" data-position=1 title=once_flag>ONCE_FLAG<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/onnxruntime/ class="post_tag button button_translucent" data-position=1 title=onnxruntime>ONNXRUNTIME<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/packaged_task/ class="post_tag button button_translucent" data-position=1 title=packaged_task>PACKAGED_TASK<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/pca/ class="post_tag button button_translucent" data-position=2 title=pca>PCA<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/perfect-forwarding/ class="post_tag button button_translucent" data-position=1 title=perfect-forwarding>PERFECT-FORWARDING<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/pipline/ class="post_tag button button_translucent" data-position=1 title=pipline>PIPLINE<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/pose-driven/ class="post_tag button button_translucent" data-position=1 title=pose-driven>POSE-DRIVEN<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/prim/ class="post_tag button button_translucent" data-position=1 title=prim>PRIM<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/promise/ class="post_tag button button_translucent" data-position=2 title=promise>PROMISE<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/property_tree/ class="post_tag button button_translucent" data-position=1 title=property_tree>PROPERTY_TREE<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/protobuf/ class="post_tag button button_translucent" data-position=1 title=protobuf>PROTOBUF<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/python/ class="post_tag button button_translucent" data-position=11 title=python>PYTHON<span class=button_tally>11</span>
-</a>
-<a href=https://111qqz.com/tags/pytorch/ class="post_tag button button_translucent" data-position=2 title=pytorch>PYTORCH<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/qt/ class="post_tag button button_translucent" data-position=5 title=qt>QT<span class=button_tally>5</span>
-</a>
-<a href=https://111qqz.com/tags/react/ class="post_tag button button_translucent" data-position=3 title=react>REACT<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/redis/ class="post_tag button button_translucent" data-position=1 title=redis>REDIS<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/redux/ class="post_tag button button_translucent" data-position=1 title=redux>REDUX<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/reid/ class="post_tag button button_translucent" data-position=3 title=reid>REID<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/resnet/ class="post_tag button button_translucent" data-position=2 title=resnet>RESNET<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/retinanet/ class="post_tag button button_translucent" data-position=1 title=retinanet>RETINANET<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/rmq/ class="post_tag button button_translucent" data-position=17 title=rmq>RMQ<span class=button_tally>17</span>
-</a>
-<a href=https://111qqz.com/tags/rnn/ class="post_tag button button_translucent" data-position=1 title=rnn>RNN<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/set/ class="post_tag button button_translucent" data-position=8 title=set>SET<span class=button_tally>8</span>
-</a>
-<a href=https://111qqz.com/tags/sg%E5%87%BD%E6%95%B0/ class="post_tag button button_translucent" data-position=12 title=sg函数>SG函数<span class=button_tally>12</span>
-</a>
-<a href=https://111qqz.com/tags/shadowsocks/ class="post_tag button button_translucent" data-position=2 title=shadowsocks>SHADOWSOCKS<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/simd/ class="post_tag button button_translucent" data-position=1 title=simd>SIMD<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/simhash/ class="post_tag button button_translucent" data-position=1 title=simhash>SIMHASH<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/similarity-learning/ class="post_tag button button_translucent" data-position=1 title=similarity-learning>SIMILARITY-LEARNING<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/single-state-detector/ class="post_tag button button_translucent" data-position=1 title=single-state-detector>SINGLE-STATE-DETECTOR<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/sj%E5%AE%9A%E7%90%86/ class="post_tag button button_translucent" data-position=2 title=sj定理>SJ定理<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/sliding-windows/ class="post_tag button button_translucent" data-position=1 title=sliding-windows>SLIDING-WINDOWS<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/slim/ class="post_tag button button_translucent" data-position=1 title=slim>SLIM<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/sort/ class="post_tag button button_translucent" data-position=1 title=sort>SORT<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/sortings/ class="post_tag button button_translucent" data-position=3 title=sortings>SORTINGS<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/spfa/ class="post_tag button button_translucent" data-position=10 title=spfa>SPFA<span class=button_tally>10</span>
-</a>
-<a href=https://111qqz.com/tags/spring/ class="post_tag button button_translucent" data-position=2 title=spring>SPRING<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/ssd/ class="post_tag button button_translucent" data-position=1 title=ssd>SSD<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/stdany/ class="post_tag button button_translucent" data-position=1 title=stdany>STDANY<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/stdshared_ptr/ class="post_tag button button_translucent" data-position=1 title=stdshared_ptr>STDSHARED_PTR<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/steam/ class="post_tag button button_translucent" data-position=2 title=steam>STEAM<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/stl/ class="post_tag button button_translucent" data-position=16 title=stl>STL<span class=button_tally>16</span>
-</a>
-<a href=https://111qqz.com/tags/stream/ class="post_tag button button_translucent" data-position=1 title=stream>STREAM<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/supercomputing/ class="post_tag button button_translucent" data-position=1 title=supercomputing>SUPERCOMPUTING<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/supervisor/ class="post_tag button button_translucent" data-position=1 title=supervisor>SUPERVISOR<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/tarjan/ class="post_tag button button_translucent" data-position=2 title=tarjan>TARJAN<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/tensorflow/ class="post_tag button button_translucent" data-position=12 title=tensorflow>TENSORFLOW<span class=button_tally>12</span>
-</a>
-<a href=https://111qqz.com/tags/tensorrt/ class="post_tag button button_translucent" data-position=2 title=tensorrt>TENSORRT<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/threading-building-blocks/ class="post_tag button button_translucent" data-position=1 title=threading-building-blocks>THREADING-BUILDING-BLOCKS<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/thrust/ class="post_tag button button_translucent" data-position=1 title=thrust>THRUST<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/tree/ class="post_tag button button_translucent" data-position=7 title=tree>TREE<span class=button_tally>7</span>
-</a>
-<a href=https://111qqz.com/tags/trie/ class="post_tag button button_translucent" data-position=7 title=trie>TRIE<span class=button_tally>7</span>
-</a>
-<a href=https://111qqz.com/tags/triplet-loss/ class="post_tag button button_translucent" data-position=1 title=triplet-loss>TRIPLET-LOSS<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/tsp/ class="post_tag button button_translucent" data-position=2 title=tsp>TSP<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/two-pointer/ class="post_tag button button_translucent" data-position=5 title=two-pointer>TWO-POINTER<span class=button_tally>5</span>
-</a>
-<a href=https://111qqz.com/tags/typescript/ class="post_tag button button_translucent" data-position=1 title=typescript>TYPESCRIPT<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/unicode/ class="post_tag button button_translucent" data-position=1 title=unicode>UNICODE<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/value-catrgory/ class="post_tag button button_translucent" data-position=1 title=value-catrgory>VALUE-CATRGORY<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/variadic-function/ class="post_tag button button_translucent" data-position=1 title=variadic-function>VARIADIC-FUNCTION<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/variety/ class="post_tag button button_translucent" data-position=1 title=variety>VARIETY<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/vector/ class="post_tag button button_translucent" data-position=2 title=vector>VECTOR<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/vim/ class="post_tag button button_translucent" data-position=6 title=vim>VIM<span class=button_tally>6</span>
-</a>
-<a href=https://111qqz.com/tags/vundle/ class="post_tag button button_translucent" data-position=1 title=vundle>VUNDLE<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/whitening/ class="post_tag button button_translucent" data-position=1 title=whitening>WHITENING<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/wordpress/ class="post_tag button button_translucent" data-position=1 title=wordpress>WORDPRESS<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/youcompleteme/ class="post_tag button button_translucent" data-position=1 title=youcompleteme>YOUCOMPLETEME<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/yuv-image-format/ class="post_tag button button_translucent" data-position=1 title=yuv-image-format>YUV-IMAGE-FORMAT<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/ class="post_tag button button_translucent" data-position=1 title=一致性哈希>一致性哈希<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%B8%89%E5%88%86/ class="post_tag button button_translucent" data-position=2 title=三分>三分<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%B8%AD%E5%9B%BD%E5%89%A9%E4%BD%99%E5%AE%9A%E7%90%86/ class="post_tag button button_translucent" data-position=4 title=中国剩余定理>中国剩余定理<span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%B8%BB%E5%B8%AD%E6%A0%91/ class="post_tag button button_translucent" data-position=5 title=主席树>主席树<span class=button_tally>5</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%B9%B1%E6%90%9E/ class="post_tag button button_translucent" data-position=6 title=乱搞>乱搞<span class=button_tally>6</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%BA%8C%E5%88%86/ class="post_tag button button_translucent" data-position=2 title=二分>二分<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%BA%8C%E5%88%86%E5%9B%BE/ class="post_tag button button_translucent" data-position=5 title=二分图>二分图<span class=button_tally>5</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%BA%8C%E5%88%86%E5%9B%BE%E5%8C%B9%E9%85%8D/ class="post_tag button button_translucent" data-position=4 title=二分图匹配>二分图匹配<span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%BA%8C%E5%88%86%E5%9B%BE%E6%9C%80%E4%BD%B3%E5%8C%B9%E9%85%8D/ class="post_tag button button_translucent" data-position=14 title=二分图最佳匹配>二分图最佳匹配<span class=button_tally>14</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%BA%8C%E6%AC%A1%E5%89%A9%E4%BD%99/ class="post_tag button button_translucent" data-position=4 title=二次剩余>二次剩余<span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%BA%8C%E7%BB%B4%E7%BA%BF%E6%AE%B5%E6%A0%91/ class="post_tag button button_translucent" data-position=1 title=二维线段树>二维线段树<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%BA%8C%E8%BF%9B%E5%88%B6/ class="post_tag button button_translucent" data-position=1 title=二进制>二进制<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%BA%8C%E9%A1%B9%E5%BC%8F%E5%AE%9A%E7%90%86/ class="post_tag button button_translucent" data-position=1 title=二项式定理>二项式定理<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%BA%A4%E4%BA%92%E9%A2%98/ class="post_tag button button_translucent" data-position=1 title=交互题>交互题<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%BA%A4%E5%8F%89%E6%9F%93%E8%89%B2%E6%B3%95/ class="post_tag button button_translucent" data-position=6 title=交叉染色法>交叉染色法<span class=button_tally>6</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%BA%AC%E4%B8%9C/ class="post_tag button button_translucent" data-position=1 title=京东>京东<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/ class="post_tag button button_translucent" data-position=4 title=优先队列>优先队列<span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%BC%A0%E9%80%92%E9%97%AD%E5%8C%85/ class="post_tag button button_translucent" data-position=5 title=传递闭包>传递闭包<span class=button_tally>5</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%BD%8D%E8%BF%90%E7%AE%97/ class="post_tag button button_translucent" data-position=4 title=位运算>位运算<span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/tags/%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5/ class="post_tag button button_translucent" data-position=1 title=依赖注入>依赖注入<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%81%8F%E5%BA%A6/ class="post_tag button button_translucent" data-position=1 title=偏度>偏度<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%85%89%E6%B5%81%E6%B3%95/ class="post_tag button button_translucent" data-position=1 title=光流法>光流法<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C/ class="post_tag button button_translucent" data-position=1 title=内存屏障>内存屏障<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%87%B8%E5%8C%85/ class="post_tag button button_translucent" data-position=1 title=凸包>凸包<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%88%86%E5%9D%97/ class="post_tag button button_translucent" data-position=12 title=分块>分块<span class=button_tally>12</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E6%B6%88%E6%81%AF%E7%B3%BB%E7%BB%9F/ class="post_tag button button_translucent" data-position=1 title=分布式消息系统>分布式消息系统<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%88%86%E6%B2%BB/ class="post_tag button button_translucent" data-position=2 title=分治>分治<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%88%86%E7%B1%BB%E8%AE%A8%E8%AE%BA/ class="post_tag button button_translucent" data-position=1 title=分类讨论>分类讨论<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%89%8D%E7%AB%AF/ class="post_tag button button_translucent" data-position=6 title=前端>前端<span class=button_tally>6</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%89%8D%E7%BC%80%E5%92%8C/ class="post_tag button button_translucent" data-position=17 title=前缀和>前缀和<span class=button_tally>17</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%89%A9%E4%BD%99%E7%B3%BB/ class="post_tag button button_translucent" data-position=3 title=剩余系>剩余系<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%89%AA%E6%9E%9D/ class="post_tag button button_translucent" data-position=1 title=剪枝>剪枝<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%8A%A8%E6%80%81%E7%BA%BF%E6%AE%B5%E6%A0%91/ class="post_tag button button_translucent" data-position=1 title=动态线段树>动态线段树<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%8A%A8%E6%80%81%E8%BF%9E%E9%80%9A%E6%80%A7/ class="post_tag button button_translucent" data-position=1 title=动态连通性>动态连通性<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%8B%BE%E8%82%A1%E6%95%B0/ class="post_tag button button_translucent" data-position=1 title=勾股数>勾股数<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%8C%88%E7%89%99%E5%88%A9%E7%AE%97%E6%B3%95/ class="post_tag button button_translucent" data-position=15 title=匈牙利算法>匈牙利算法<span class=button_tally>15</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%8C%BA%E9%97%B4dp/ class="post_tag button button_translucent" data-position=13 title=区间dp>区间DP<span class=button_tally>13</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%8C%BA%E9%97%B4%E5%90%88%E5%B9%B6/ class="post_tag button button_translucent" data-position=1 title=区间合并>区间合并<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%8C%BA%E9%97%B4%E7%AC%ACk%E5%A4%A7/ class="post_tag button button_translucent" data-position=2 title=区间第k大>区间第K大<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%8C%BA%E9%97%B4%E8%AE%A1%E6%95%B0/ class="post_tag button button_translucent" data-position=1 title=区间计数>区间计数<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%8D%8F%E5%90%8C%E8%BF%87%E6%BB%A4/ class="post_tag button button_translucent" data-position=1 title=协同过滤>协同过滤<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%8D%95%E8%B0%83%E6%80%A7%E4%BC%98%E5%8C%96/ class="post_tag button button_translucent" data-position=1 title=单调性优化>单调性优化<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%8D%95%E8%B0%83%E6%A0%88/ class="post_tag button button_translucent" data-position=10 title=单调栈>单调栈<span class=button_tally>10</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%8D%95%E8%B0%83%E9%98%9F%E5%88%97/ class="post_tag button button_translucent" data-position=3 title=单调队列>单调队列<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%8D%9A%E5%BC%88%E8%AE%BA/ class="post_tag button button_translucent" data-position=22 title=博弈论>博弈论<span class=button_tally>22</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD/ class="post_tag button button_translucent" data-position=1 title=反向传播>反向传播<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%8F%8D%E7%B4%A0%E6%95%B0/ class="post_tag button button_translucent" data-position=5 title=反素数>反素数<span class=button_tally>5</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/ class="post_tag button button_translucent" data-position=5 title=可持久化数据结构>可持久化数据结构<span class=button_tally>5</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%90%8C%E6%9E%84/ class="post_tag button button_translucent" data-position=1 title=同构>同构<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%90%8E%E7%BC%80%E5%92%8C/ class="post_tag button button_translucent" data-position=1 title=后缀和>后缀和<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%90%8E%E7%BC%80%E6%95%B0%E7%BB%84/ class="post_tag button button_translucent" data-position=10 title=后缀数组>后缀数组<span class=button_tally>10</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%90%8E%E7%BC%80%E8%87%AA%E5%8A%A8%E6%9C%BA/ class="post_tag button button_translucent" data-position=13 title=后缀自动机>后缀自动机<span class=button_tally>13</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%93%A5%E5%BE%B7%E5%B7%B4%E8%B5%AB%E7%8C%9C%E6%83%B3/ class="post_tag button button_translucent" data-position=1 title=哥德巴赫猜想>哥德巴赫猜想<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%9B%9B%E5%8F%89%E6%A0%91/ class="post_tag button button_translucent" data-position=1 title=四叉树>四叉树<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%9B%9E%E6%96%87%E4%B8%B2/ class="post_tag button button_translucent" data-position=2 title=回文串>回文串<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%9B%9E%E6%96%87%E8%87%AA%E5%8A%A8%E6%9C%BA/ class="post_tag button button_translucent" data-position=7 title=回文自动机>回文自动机<span class=button_tally>7</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/ class="post_tag button button_translucent" data-position=2 title=图像处理>图像处理<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%9B%BE%E8%AE%BA/ class="post_tag button button_translucent" data-position=16 title=图论>图论<span class=button_tally>16</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%9B%BE%E8%AE%BA%E5%9F%BA%E7%A1%80/ class="post_tag button button_translucent" data-position=1 title=图论基础>图论基础<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%9F%BA%E7%A1%80%E5%9B%BE%E8%AE%BA/ class="post_tag button button_translucent" data-position=1 title=基础图论>基础图论<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2/ class="post_tag button button_translucent" data-position=14 title=字符串>字符串<span class=button_tally>14</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2dp/ class="post_tag button button_translucent" data-position=1 title=字符串dp>字符串DP<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%BE%AA%E7%8E%AF%E5%90%8C%E6%9E%84/ class="post_tag button button_translucent" data-position=4 title=字符串循环同构>字符串循环同构<span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%AE%8C%E5%85%A8%E8%83%8C%E5%8C%85/ class="post_tag button button_translucent" data-position=2 title=完全背包>完全背包<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%AE%B9%E6%96%A5%E5%8E%9F%E7%90%86/ class="post_tag button button_translucent" data-position=5 title=容斥原理>容斥原理<span class=button_tally>5</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%AF%B9%E6%8B%8D/ class="post_tag button button_translucent" data-position=1 title=对拍>对拍<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%B0%84%E7%BA%BF%E6%B3%95/ class="post_tag button button_translucent" data-position=1 title=射线法>射线法<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%B0%BA%E5%8F%96/ class="post_tag button button_translucent" data-position=2 title=尺取>尺取<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%B0%BA%E5%8F%96%E6%B3%95/ class="post_tag button button_translucent" data-position=10 title=尺取法>尺取法<span class=button_tally>10</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%B1%80%E9%83%A8%E6%95%8F%E6%84%9Fhash/ class="post_tag button button_translucent" data-position=2 title=局部敏感hash>局部敏感HASH<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%B3%B0%E5%BA%A6/ class="post_tag button button_translucent" data-position=1 title=峰度>峰度<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%B7%AE%E5%88%86%E5%BA%8F%E5%88%97/ class="post_tag button button_translucent" data-position=1 title=差分序列>差分序列<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%B7%B4%E4%BB%80%E5%8D%9A%E5%A5%95/ class="post_tag button button_translucent" data-position=5 title=巴什博奕>巴什博奕<span class=button_tally>5</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/ class="post_tag button button_translucent" data-position=1 title=年终总结>年终总结<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%B9%B6%E6%9F%A5%E9%9B%86/ class="post_tag button button_translucent" data-position=9 title=并查集>并查集<span class=button_tally>9</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%B9%B6%E8%A1%8C%E8%AE%A1%E7%AE%97/ class="post_tag button button_translucent" data-position=2 title=并行计算>并行计算<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%BA%B7%E6%89%98%E5%B1%95%E5%BC%80/ class="post_tag button button_translucent" data-position=1 title=康托展开>康托展开<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%BA%B7%E6%89%98%E5%B1%95%E5%BC%80/%E9%80%86%E5%B1%95%E5%BC%80/ class="post_tag button button_translucent" data-position=2 title=康托展开/逆展开>康托展开/逆展开<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%BE%AA%E7%8E%AF%E5%B1%95%E5%BC%80/ class="post_tag button button_translucent" data-position=1 title=循环展开>循环展开<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%BE%AA%E7%8E%AF%E8%8A%82/ class="post_tag button button_translucent" data-position=8 title=循环节>循环节<span class=button_tally>8</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%BF%AB%E9%80%9F%E4%B9%98/ class="post_tag button button_translucent" data-position=1 title=快速乘>快速乘<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%BF%AB%E9%80%9F%E5%B9%82/ class="post_tag button button_translucent" data-position=20 title=快速幂>快速幂<span class=button_tally>20</span>
-</a>
-<a href=https://111qqz.com/tags/%E5%BF%AB%E9%80%9F%E7%AD%9B/ class="post_tag button button_translucent" data-position=2 title=快速筛>快速筛<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%80%9D%E7%BB%B4/ class="post_tag button button_translucent" data-position=1 title=思维>思维<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%80%9D%E7%BB%B4%E9%A2%98/ class="post_tag button button_translucent" data-position=7 title=思维题>思维题<span class=button_tally>7</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%89%93%E8%A1%A8/ class="post_tag button button_translucent" data-position=2 title=打表>打表<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%89%A9%E5%B1%95bsgs/ class="post_tag button button_translucent" data-position=2 title=扩展bsgs>扩展BSGS<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%89%A9%E5%B1%95%E6%AC%A7%E5%87%A0%E9%87%8C%E5%BE%97%E7%AE%97%E6%B3%95/ class="post_tag button button_translucent" data-position=8 title=扩展欧几里得算法>扩展欧几里得算法<span class=button_tally>8</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%89%AB%E6%8F%8F%E7%BA%BF/ class="post_tag button button_translucent" data-position=4 title=扫描线>扫描线<span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%8A%BD%E5%B1%89%E5%8E%9F%E7%90%86/ class="post_tag button button_translucent" data-position=6 title=抽屉原理>抽屉原理<span class=button_tally>6</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%8B%86%E7%82%B9/ class="post_tag button button_translucent" data-position=6 title=拆点>拆点<span class=button_tally>6</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F/ class="post_tag button button_translucent" data-position=7 title=拓扑排序>拓扑排序<span class=button_tally>7</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%8B%AC%E5%8F%B7%E5%8C%B9%E9%85%8D/ class="post_tag button button_translucent" data-position=2 title=括号匹配>括号匹配<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%8C%87%E6%95%B0%E5%BE%AA%E7%8E%AF%E8%8A%82/ class="post_tag button button_translucent" data-position=7 title=指数循环节>指数循环节<span class=button_tally>7</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%8E%92%E5%88%97%E7%BB%84%E5%90%88/ class="post_tag button button_translucent" data-position=8 title=排列组合>排列组合<span class=button_tally>8</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F/ class="post_tag button button_translucent" data-position=3 title=推荐系统>推荐系统<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%95%B0%E4%BD%8Ddp/ class="post_tag button button_translucent" data-position=17 title=数位dp>数位DP<span class=button_tally>17</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%95%B0%E5%80%BC%E8%AE%A1%E7%AE%97%E6%96%B9%E6%B3%95/ class="post_tag button button_translucent" data-position=2 title=数值计算方法>数值计算方法<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%95%B0%E5%AD%97%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/ class="post_tag button button_translucent" data-position=2 title=数字图像处理>数字图像处理<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%95%B0%E6%8D%AE%E5%8E%8B%E7%BC%A9/ class="post_tag button button_translucent" data-position=1 title=数据压缩>数据压缩<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/ class="post_tag button button_translucent" data-position=2 title=数据结构>数据结构<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%95%B0%E8%AE%BA/ class="post_tag button button_translucent" data-position=2 title=数论>数论<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%96%87%E6%98%8E/ class="post_tag button button_translucent" data-position=1 title=文明>文明<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%96%90%E6%B3%A2%E9%82%A3%E5%A5%91/ class="post_tag button button_translucent" data-position=7 title=斐波那契>斐波那契<span class=button_tally>7</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%96%9C%E7%8E%87%E4%BC%98%E5%8C%96/ class="post_tag button button_translucent" data-position=3 title=斜率优化>斜率优化<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%97%A0%E5%90%91%E5%9B%BE%E7%9A%84%E7%8E%AF/ class="post_tag button button_translucent" data-position=3 title=无向图的环>无向图的环<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%9B%BC%E5%93%88%E9%A1%BF%E8%B7%9D%E7%A6%BB/ class="post_tag button button_translucent" data-position=4 title=曼哈顿距离>曼哈顿距离<span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%9C%80%E5%A4%A7%E7%8B%AC%E7%AB%8B%E9%9B%86/ class="post_tag button button_translucent" data-position=1 title=最大独立集>最大独立集<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%9C%80%E5%A4%A7%E8%BF%9E%E7%BB%AD%E5%8C%BA%E9%97%B4%E5%92%8C/ class="post_tag button button_translucent" data-position=3 title=最大连续区间和>最大连续区间和<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%9C%80%E5%A4%A7%E8%BF%9E%E7%BB%AD%E5%92%8C/ class="post_tag button button_translucent" data-position=1 title=最大连续和>最大连续和<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91/ class="post_tag button button_translucent" data-position=2 title=最小生成树>最小生成树<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%9C%80%E5%B0%8F%E8%A1%A8%E7%A4%BA%E6%B3%95/ class="post_tag button button_translucent" data-position=7 title=最小表示法>最小表示法<span class=button_tally>7</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%9C%80%E5%B0%8F%E8%A6%86%E7%9B%96%E5%AD%90%E4%B8%B2/ class="post_tag button button_translucent" data-position=3 title=最小覆盖子串>最小覆盖子串<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%9C%80%E5%B0%8F%E8%A6%86%E7%9B%96%E5%AD%90%E7%9F%A9%E5%BD%A2/ class="post_tag button button_translucent" data-position=1 title=最小覆盖子矩形>最小覆盖子矩形<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%9C%80%E5%B0%8F%E8%B7%AF%E5%BE%84%E8%A6%86%E7%9B%96/ class="post_tag button button_translucent" data-position=2 title=最小路径覆盖>最小路径覆盖<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%9C%80%E5%B0%8F%E9%A1%B6%E7%82%B9%E8%A6%86%E7%9B%96/ class="post_tag button button_translucent" data-position=2 title=最小顶点覆盖>最小顶点覆盖<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%9C%80%E7%9F%AD%E8%B7%AF/ class="post_tag button button_translucent" data-position=5 title=最短路>最短路<span class=button_tally>5</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%9C%80%E9%95%BF%E4%B8%8B%E9%99%8D%E5%AD%90%E5%BA%8F%E5%88%97/ class="post_tag button button_translucent" data-position=1 title=最长下降子序列>最长下降子序列<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%97%E4%B8%B2/ class="post_tag button button_translucent" data-position=4 title=最长公共字串>最长公共字串<span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%9C%80%E9%95%BF%E8%B7%AF/ class="post_tag button button_translucent" data-position=2 title=最长路>最长路<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%9E%84%E9%80%A0/ class="post_tag button button_translucent" data-position=22 title=构造>构造<span class=button_tally>22</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%9E%9A%E4%B8%BE%E5%AD%90%E9%9B%86/ class="post_tag button button_translucent" data-position=4 title=枚举子集>枚举子集<span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%9F%93%E8%89%B2%E9%97%AE%E9%A2%98/ class="post_tag button button_translucent" data-position=1 title=染色问题>染色问题<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%A0%88/ class="post_tag button button_translucent" data-position=1 title=栈>栈<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%A0%91%E5%A5%97%E6%A0%91/ class="post_tag button button_translucent" data-position=1 title=树套树>树套树<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%A0%91%E5%BD%A2dp/ class="post_tag button button_translucent" data-position=6 title=树形dp>树形DP<span class=button_tally>6</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/ class="post_tag button button_translucent" data-position=20 title=树状数组>树状数组<span class=button_tally>20</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%A0%91%E7%9A%84%E7%9B%B4%E5%BE%84/ class="post_tag button button_translucent" data-position=9 title=树的直径>树的直径<span class=button_tally>9</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/ class="post_tag button button_translucent" data-position=1 title=梯度下降>梯度下降<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%A6%82%E7%8E%87/ class="post_tag button button_translucent" data-position=13 title=概率>概率<span class=button_tally>13</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%A8%A1%E5%9E%8B%E8%BD%AC%E6%8D%A2/ class="post_tag button button_translucent" data-position=1 title=模型转换>模型转换<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%A8%A1%E6%8B%9F/ class="post_tag button button_translucent" data-position=24 title=模拟>模拟<span class=button_tally>24</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%A8%A1%E6%8B%9F%E9%80%80%E7%81%AB/ class="post_tag button button_translucent" data-position=5 title=模拟退火>模拟退火<span class=button_tally>5</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%AC%A1%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91/ class="post_tag button button_translucent" data-position=2 title=次小生成树>次小生成树<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%AC%A7%E6%8B%89%E5%87%BD%E6%95%B0/ class="post_tag button button_translucent" data-position=4 title=欧拉函数>欧拉函数<span class=button_tally>4</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%AC%A7%E6%8B%89%E8%B7%AF/ class="post_tag button button_translucent" data-position=1 title=欧拉路>欧拉路<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/ class="post_tag button button_translucent" data-position=1 title=正则表达式>正则表达式<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%AF%8D%E5%87%BD%E6%95%B0/ class="post_tag button button_translucent" data-position=21 title=母函数>母函数<span class=button_tally>21</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%B0%B4/ class="post_tag button button_translucent" data-position=5 title=水>水<span class=button_tally>5</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%B0%B4%E9%A2%98/ class="post_tag button button_translucent" data-position=7 title=水题>水题<span class=button_tally>7</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%B3%B0%E5%8B%92%E5%B1%95%E5%BC%80/ class="post_tag button button_translucent" data-position=3 title=泰勒展开>泰勒展开<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%B8%B8%E6%88%8F/ class="post_tag button button_translucent" data-position=1 title=游戏>游戏<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/ class="post_tag button button_translucent" data-position=1 title=激活函数>激活函数<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%88%AC%E5%B1%B1%E6%B3%95/ class="post_tag button button_translucent" data-position=1 title=爬山法>爬山法<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%88%AC%E8%99%AB/ class="post_tag button button_translucent" data-position=2 title=爬虫>爬虫<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%8A%B6%E5%8E%8Bdp/ class="post_tag button button_translucent" data-position=1 title=状压dp>状压DP<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%8A%B6%E6%80%81%E5%8E%8B%E7%BC%A9/ class="post_tag button button_translucent" data-position=1 title=状态压缩>状态压缩<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%99%BE%E5%BA%A6/ class="post_tag button button_translucent" data-position=1 title=百度>百度<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%9F%A9%E5%BD%A2%E5%91%A8%E9%95%BF%E5%B9%B6/ class="post_tag button button_translucent" data-position=1 title=矩形周长并>矩形周长并<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%9F%A9%E5%BD%A2%E9%9D%A2%E7%A7%AF%E4%BA%A4/ class="post_tag button button_translucent" data-position=1 title=矩形面积交>矩形面积交<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%9F%A9%E9%98%B5/ class="post_tag button button_translucent" data-position=20 title=矩阵>矩阵<span class=button_tally>20</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/ class="post_tag button button_translucent" data-position=5 title=矩阵快速幂>矩阵快速幂<span class=button_tally>5</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%A6%BB%E6%95%A3%E5%8C%96/ class="post_tag button button_translucent" data-position=11 title=离散化>离散化<span class=button_tally>11</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%AC%A6%E5%8F%B7%E5%8F%AF%E8%A7%81%E6%80%A7/ class="post_tag button button_translucent" data-position=1 title=符号可见性>符号可见性<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%AC%A6%E5%8F%B7%E8%A1%A8/ class="post_tag button button_translucent" data-position=1 title=符号表>符号表<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%AC%AC%E4%BA%8C%E7%B1%BB%E6%96%AF%E7%89%B9%E6%9E%97%E6%95%B0/ class="post_tag button button_translucent" data-position=1 title=第二类斯特林数>第二类斯特林数<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%AD%9B%E6%B3%95/ class="post_tag button button_translucent" data-position=1 title=筛法>筛法<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8/ class="post_tag button button_translucent" data-position=1 title=系统调用>系统调用<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%BA%BF%E6%AE%B5%E6%A0%91/ class="post_tag button button_translucent" data-position=43 title=线段树>线段树<span class=button_tally>43</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%BB%84%E5%90%88%E6%95%B0%E5%AD%A6/ class="post_tag button button_translucent" data-position=10 title=组合数学>组合数学<span class=button_tally>10</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F/ class="post_tag button button_translucent" data-position=1 title=组合模式>组合模式<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/ class="post_tag button button_translucent" data-position=1 title=组成原理>组成原理<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%BB%86%E8%8A%82%E9%A2%98/ class="post_tag button button_translucent" data-position=1 title=细节题>细节题<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%BB%93%E8%AE%BA%E9%A2%98/ class="post_tag button button_translucent" data-position=1 title=结论题>结论题<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86/ class="post_tag button button_translucent" data-position=1 title=编译原理>编译原理<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%BC%96%E8%AF%91%E5%99%A8/ class="post_tag button button_translucent" data-position=1 title=编译器>编译器<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E7%BD%AE%E6%8D%A2%E7%BE%A4/ class="post_tag button button_translucent" data-position=1 title=置换群>置换群<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%8E%AB%E9%98%9F%E7%AE%97%E6%B3%95/ class="post_tag button button_translucent" data-position=10 title=莫队算法>莫队算法<span class=button_tally>10</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%93%84%E6%B0%B4%E6%B1%A0%E6%8A%BD%E6%A0%B7/ class="post_tag button button_translucent" data-position=1 title=蓄水池抽样>蓄水池抽样<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%99%9A%E7%82%B9/ class="post_tag button button_translucent" data-position=1 title=虚点>虚点<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%A3%B4%E8%9C%80%E5%AE%9A%E7%90%86/ class="post_tag button button_translucent" data-position=5 title=裴蜀定理>裴蜀定理<span class=button_tally>5</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F/ class="post_tag button button_translucent" data-position=1 title=观察者模式>观察者模式<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%AE%A1%E6%95%B0%E6%8E%92%E5%BA%8F/ class="post_tag button button_translucent" data-position=2 title=计数排序>计数排序<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%AE%A1%E6%95%B0%E9%97%AE%E9%A2%98/ class="post_tag button button_translucent" data-position=10 title=计数问题>计数问题<span class=button_tally>10</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95/ class="post_tag button button_translucent" data-position=20 title=计算几何>计算几何<span class=button_tally>20</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/ class="post_tag button button_translucent" data-position=2 title=计算机视觉>计算机视觉<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%AE%A1%E7%BB%84/ class="post_tag button button_translucent" data-position=1 title=计组>计组<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%AE%B0%E5%BF%86%E5%8C%96%E6%90%9C%E7%B4%A2/ class="post_tag button button_translucent" data-position=2 title=记忆化搜索>记忆化搜索<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/ class="post_tag button button_translucent" data-position=2 title=设计模式>设计模式<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%B4%9D%E5%B0%94%E6%95%B0/ class="post_tag button button_translucent" data-position=2 title=贝尔数>贝尔数<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%B4%AA%E5%BF%83/ class="post_tag button button_translucent" data-position=1 title=贪心>贪心<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%B4%B9%E9%A9%AC%E5%B0%8F%E5%AE%9A%E7%90%86/ class="post_tag button button_translucent" data-position=3 title=费马小定理>费马小定理<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%B4%B9%E9%A9%AC%E7%82%B9/ class="post_tag button button_translucent" data-position=1 title=费马点>费马点<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%B7%AF%E5%BE%84dp/ class="post_tag button button_translucent" data-position=1 title=路径dp>路径DP<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%B7%AF%E5%BE%84%E8%AE%B0%E5%BD%95/ class="post_tag button button_translucent" data-position=2 title=路径记录>路径记录<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%BE%93%E5%85%A5%E6%8C%82/ class="post_tag button button_translucent" data-position=2 title=输入挂>输入挂<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%BE%9B%E6%99%AE%E6%A3%AE%E7%A7%AF%E5%88%86/ class="post_tag button button_translucent" data-position=2 title=辛普森积分>辛普森积分<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E8%BF%9E%E9%80%9A%E6%80%A7/ class="post_tag button button_translucent" data-position=2 title=连通性>连通性<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E9%80%86%E5%85%83/ class="post_tag button button_translucent" data-position=5 title=逆元>逆元<span class=button_tally>5</span>
-</a>
-<a href=https://111qqz.com/tags/%E9%80%86%E5%BA%8F%E5%AF%B9/ class="post_tag button button_translucent" data-position=5 title=逆序对>逆序对<span class=button_tally>5</span>
-</a>
-<a href=https://111qqz.com/tags/%E9%80%92%E6%8E%A8/ class="post_tag button button_translucent" data-position=2 title=递推>递推<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E9%87%8D%E5%BF%83/ class="post_tag button button_translucent" data-position=1 title=重心>重心<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E9%93%BE%E5%BC%8F%E5%89%8D%E5%90%91%E6%98%9F/ class="post_tag button button_translucent" data-position=1 title=链式前向星>链式前向星<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E9%94%99%E6%8E%92%E5%85%AC%E5%BC%8F/ class="post_tag button button_translucent" data-position=2 title=错排公式>错排公式<span class=button_tally>2</span>
-</a>
-<a href=https://111qqz.com/tags/%E9%9D%A2%E8%AF%95/ class="post_tag button button_translucent" data-position=1 title=面试>面试<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E9%9D%A2%E8%AF%95%E7%BB%8F%E5%8E%86/ class="post_tag button button_translucent" data-position=3 title=面试经历>面试经历<span class=button_tally>3</span>
-</a>
-<a href=https://111qqz.com/tags/%E9%A2%84%E5%A4%84%E7%90%86/ class="post_tag button button_translucent" data-position=1 title=预处理>预处理<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E9%AB%98%E6%96%AF%E6%B6%88%E5%85%83/ class="post_tag button button_translucent" data-position=1 title=高斯消元>高斯消元<span class=button_tally>1</span>
-</a>
-<a href=https://111qqz.com/tags/%E9%AB%98%E7%B2%BE%E5%BA%A6/ class="post_tag button button_translucent" data-position=2 title=高精度>高精度<span class=button_tally>2</span>
-</a>
-<div class=tags_sort><span title="sort alphabetically">[A~Z]</span><span title="sort by count">[0~9]</span>
-</div>
-<span class=tags_hide><svg class="icon"><use xlink:href="#closeme"/></svg></span>
-</div>
-</div>
-</nav>
-</div>
-</section>
-</aside>
-</div>
-</main><svg width="0" height="0" class="hidden"><symbol viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" id="facebook"><path d="M437 0H75C33.648.0.0 33.648.0 75v362c0 41.352 33.648 75 75 75h151V331h-60v-90h60v-61c0-49.629 40.371-90 90-90h91v90h-91v61h91l-15 90h-76v181h121c41.352.0 75-33.648 75-75V75c0-41.352-33.648-75-75-75zm0 0"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18.001 18.001" id="twitter"><path d="M15.891 4.013c.808-.496 1.343-1.173 1.605-2.034a8.68 8.68.0 01-2.351.861c-.703-.756-1.593-1.14-2.66-1.14-1.043.0-1.924.366-2.643 1.078A3.56 3.56.0 008.766 5.383c0 .309.039.585.117.819-3.076-.105-5.622-1.381-7.628-3.837-.34.601-.51 1.213-.51 1.846.0 1.301.549 2.332 1.645 3.089-.625-.053-1.176-.211-1.645-.47.0.929.273 1.705.82 2.388a3.623 3.623.0 002.115 1.291c-.312.08-.641.118-.979.118-.312.0-.533-.026-.664-.083.23.757.664 1.371 1.291 1.841a3.652 3.652.0 002.152.743C4.148 14.173 2.625 14.69.902 14.69c-.422.0-.721-.006-.902-.038 1.697 1.102 3.586 1.649 5.676 1.649 2.139.0 4.029-.542 5.674-1.626 1.645-1.078 2.859-2.408 3.639-3.974a10.77 10.77.0 001.172-4.892v-.468a7.788 7.788.0 001.84-1.921 8.142 8.142.0 01-2.11.593z"/></symbol><symbol aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" id="mail"><path d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V4e2c0 26.5-21.5 48-48 48H48c-26.5.0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5.0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" id="calendar"><path d="M452 40h-24V0h-40v40H124V0H84v40H60C26.916 40 0 66.916.0 1e2v352c0 33.084 26.916 60 60 60h392c33.084.0 60-26.916 60-60V1e2c0-33.084-26.916-60-60-60zm20 412c0 11.028-8.972 20-20 20H60c-11.028.0-20-8.972-20-20V188h432v264zm0-304H40v-48c0-11.028 8.972-20 20-20h24v40h40V80h264v40h40V80h24c11.028.0 20 8.972 20 20v48z"/><path d="M76 230h40v40H76zm80 0h40v40h-40zm80 0h40v40h-40zm80 0h40v40h-40zm80 0h40v40h-40zM76 310h40v40H76zm80 0h40v40h-40zm80 0h40v40h-40zm80 0h40v40h-40zM76 390h40v40H76zm80 0h40v40h-40zm80 0h40v40h-40zm80 0h40v40h-40zm80-80h40v40h-40z"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" id="github"><path d="M255.968 5.329C114.624 5.329.0 120.401.0 262.353c0 113.536 73.344 209.856 175.104 243.872 12.8 2.368 17.472-5.568 17.472-12.384.0-6.112-.224-22.272-.352-43.712-71.2 15.52-86.24-34.464-86.24-34.464-11.616-29.696-28.416-37.6-28.416-37.6-23.264-15.936 1.728-15.616 1.728-15.616 25.696 1.824 39.2 26.496 39.2 26.496 22.848 39.264 59.936 27.936 74.528 21.344 2.304-16.608 8.928-27.936 16.256-34.368-56.832-6.496-116.608-28.544-116.608-127.008.0-28.064 9.984-51.008 26.368-68.992-2.656-6.496-11.424-32.64 2.496-68 0 0 21.504-6.912 70.4 26.336 20.416-5.696 42.304-8.544 64.096-8.64 21.728.128 43.648 2.944 64.096 8.672 48.864-33.248 70.336-26.336 70.336-26.336 13.952 35.392 5.184 61.504 2.56 68 16.416 17.984 26.304 40.928 26.304 68.992.0 98.72-59.84 120.448-116.864 126.816 9.184 7.936 17.376 23.616 17.376 47.584.0 34.368-.32 62.08-.32 70.496.0 6.88 4.608 14.88 17.6 12.352C438.72 472.145 512 375.857 512 262.353 512 120.401 397.376 5.329 255.968 5.329z"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 212 212" id="gitlab"><path d="M12.3 74.7h54L43.3 3c-1-3.6-6.4-3.6-7.6.0L12.3 74.8z"/><path d="M12.3 74.7.5 111c-1 3.2.0 6.8 3 8.8l101.6 74-92.5-119z"/><path d="M105 193.7l-38.6-119h-54l92.7 119z"/><path d="M105 193.7l38.7-119H66.4l38.7 119z"/><path d="M105 193.7l38.7-119H198l-93 119z"/><path d="M198 74.7l11.6 36.2c1 3 0 6.6-3 8.6l-101.5 74 93-119z"/><path d="M198 74.7h-54.3L167 3c1.2-3.6 6.4-3.6 7.6.0L198 74.8z"/></symbol><symbol viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" id="rss"><circle cx="3.429" cy="20.571" r="3.429"/><path d="M11.429 24h4.57C15.999 15.179 8.821 8.001.0 8v4.572c6.302.001 11.429 5.126 11.429 11.428z"/><path d="M24 24C24 10.766 13.234.0.0.0v4.571c10.714.0 19.43 8.714 19.43 19.429z"/></symbol><symbol viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" id="linkedin"><path d="M437 0H75C33.648.0.0 33.648.0 75v362c0 41.352 33.648 75 75 75h362c41.352.0 75-33.648 75-75V75c0-41.352-33.648-75-75-75zM181 406h-60V196h60zm0-240h-60v-60h60zm210 240h-60V286c0-16.54-13.46-30-30-30s-30 13.46-30 30v120h-60V196h60v11.309C286.719 202.422 296.93 196 316 196c40.691.043 75 36.547 75 79.688zm0 0"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 612 612" id="arrow"><path d="M604.501 440.509 325.398 134.956c-5.331-5.357-12.423-7.627-19.386-7.27-6.989-.357-14.056 1.913-19.387 7.27L7.499 440.509c-9.999 10.024-9.999 26.298.0 36.323s26.223 10.024 36.222.0l262.293-287.164L568.28 476.832c9.999 10.024 26.222 10.024 36.221.0 9.999-10.023 9.999-26.298.0-36.323z"/></symbol><symbol viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" id="carly"><path d="M504.971 239.029 448 182.059V84c0-46.317-37.682-84-84-84h-44c-13.255.0-24 10.745-24 24s10.745 24 24 24h44c19.851.0 36 16.149 36 36v108c0 6.365 2.529 12.47 7.029 16.971L454.059 256l-47.029 47.029A24.002 24.002.0 004e2 320v108c0 19.851-16.149 36-36 36h-44c-13.255.0-24 10.745-24 24s10.745 24 24 24h44c46.318.0 84-37.683 84-84v-98.059l56.971-56.971c9.372-9.372 9.372-24.568.0-33.941zM112 192V84c0-19.851 16.149-36 36-36h44c13.255.0 24-10.745 24-24S205.255.0 192 0h-44c-46.318.0-84 37.683-84 84v98.059l-56.971 56.97c-9.373 9.373-9.373 24.568.0 33.941L64 329.941V428c0 46.317 37.682 84 84 84h44c13.255.0 24-10.745 24-24s-10.745-24-24-24h-44c-19.851.0-36-16.149-36-36V320c0-6.365-2.529-12.47-7.029-16.971L57.941 256l47.029-47.029A24.002 24.002.0 00112 192z"/></symbol><symbol viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" id="copy"><path d="M23 2.75A2.75 2.75.0 0020.25.0H8.75A2.75 2.75.0 006 2.75v13.5A2.75 2.75.0 008.75 19h11.5A2.75 2.75.0 0023 16.25zM18.25 14.5h-7.5a.75.75.0 010-1.5h7.5a.75.75.0 010 1.5zm0-3h-7.5a.75.75.0 010-1.5h7.5a.75.75.0 010 1.5zm0-3h-7.5a.75.75.0 010-1.5h7.5a.75.75.0 010 1.5z"/><path d="M8.75 20.5A4.255 4.255.0 014.5 16.25V2.75c0-.086.02-.166.025-.25H3.75A2.752 2.752.0 001 5.25v16A2.752 2.752.0 003.75 24h12a2.752 2.752.0 002.75-2.75v-.75z"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512.001 512.001" id="closeme"><path d="M284.286 256.002 506.143 34.144c7.811-7.811 7.811-20.475.0-28.285-7.811-7.81-20.475-7.811-28.285.0L256 227.717 34.143 5.859c-7.811-7.811-20.475-7.811-28.285.0-7.81 7.811-7.811 20.475.0 28.285l221.857 221.857L5.858 477.859c-7.811 7.811-7.811 20.475.0 28.285a19.938 19.938.0 0014.143 5.857 19.94 19.94.0 0014.143-5.857L256 284.287l221.857 221.857c3.905 3.905 9.024 5.857 14.143 5.857s10.237-1.952 14.143-5.857c7.811-7.811 7.811-20.475.0-28.285L284.286 256.002z"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" id="open-menu"><path d="M492 236H20c-11.046.0-20 8.954-20 20s8.954 20 20 20h472c11.046.0 20-8.954 20-20s-8.954-20-20-20zm0-160H20C8.954 76 0 84.954.0 96s8.954 20 20 20h472c11.046.0 20-8.954 20-20s-8.954-20-20-20zm0 320H20c-11.046.0-20 8.954-20 20s8.954 20 20 20h472c11.046.0 20-8.954 20-20s-8.954-20-20-20z"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="instagram"><path d="M12 2.163c3.204.0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849.0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204.0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849.0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741.0 8.333.014 7.053.072c-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.668.072 4.948c.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24s3.668-.014 4.948-.072c4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948s-.014-3.667-.072-4.947c-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403.0-6.162 2.759-6.162 6.162S8.597 18.163 12 18.163s6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zM12 16c-2.209.0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796.0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795.0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="youtube"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23.0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23.0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 3.993L9 16z"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="stackoverflow"><path d="M21 27v-8h3v11H0V19h3v8h18z"/><path d="M17.1.2 15 1.8l7.9 10.6 2.1-1.6L17.1.2zm3.7 14.7L10.6 6.4l1.7-2 10.2 8.5-1.7 2zM7.2 12.3l12 5.6 1.1-2.4-12-5.6-1.1 2.4zm-1.8 6.8 13.56 1.96.17-2.38-13.26-2.55-.47 2.97zM19 25H5v-3h14v3z"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="xing"><path d="M18.188.0c-.517.0-.741.325-.927.66.0.0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211.0.375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016.0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894.0 21.686.0h-3.498zM3.648 4.74c-.211.0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016.0.021L1.86 16.051c-.099.188-.093.381.0.529.085.142.239.234.45.234h3.461c.518.0.766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></symbol></svg>
-<footer class=footer>
-<div class="footer_inner wrap pale">
-<img src=https://111qqz.com/icons/apple-touch-icon.png class="icon icon_2 transparent" alt=111qqz的小窝>
-<p>Copyright&nbsp;<span class=year></span>&nbsp;111QQZ的小窝. All Rights Reserved</p><a class=to_top href=#documentTop><svg class="icon"><use xlink:href="#arrow"/></svg>
-</a>
-</div>
-</footer>
-<script type=text/javascript src=https://111qqz.com/js/bundle.min.3742850abb67c28705371634ec61c30ef94e46abe2abff0aa69f2d0719bdb4593a80e5d4f8c3e1c6ef6f860b354b7dc6dcc282abc788a7fc2798b214527a5207.js integrity="sha512-N0KFCrtnwocFNxY07GHDDvlORqviq/8Kpp8tBxm9tFk6gOXU+MPhxu9vhgs1S33G3MKCq8eIp/wnmLIUUnpSBw==" crossorigin=anonymous></script>
-</body>
-</html>
+</a><a href=https://111qqz.com/tags/%E6%AF%8D%E5%87%BD%E6%95%B0/ class="post_tag button button_translucent" title=母函数>母函数
+<span class=button_tally>21</span></a><br><div class="post_tags_toggle button">所有标签</div><div class=post_tags><div class=tags_list><a href=https://111qqz.com/tags/01%E8%83%8C%E5%8C%85/ class="post_tag button button_translucent" data-position=9 title=01背包>01背包<span class=button_tally>9</span>
+</a><a href=https://111qqz.com/tags/2-sat/ class="post_tag button button_translucent" data-position=1 title=2-sat>2-SAT<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/6.828/ class="post_tag button button_translucent" data-position=4 title=6.828>6.828<span class=button_tally>4</span>
+</a><a href=https://111qqz.com/tags/ac%E8%87%AA%E5%8A%A8%E6%9C%BA/ class="post_tag button button_translucent" data-position=4 title=ac自动机>AC自动机<span class=button_tally>4</span>
+</a><a href=https://111qqz.com/tags/anaconda/ class="post_tag button button_translucent" data-position=1 title=anaconda>ANACONDA<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/anchor-box/ class="post_tag button button_translucent" data-position=1 title="anchor box">ANCHOR BOX<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/anti-sg/ class="post_tag button button_translucent" data-position=2 title=anti-sg>ANTI-SG<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/archlinux/ class="post_tag button button_translucent" data-position=2 title=archlinux>ARCHLINUX<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/async/ class="post_tag button button_translucent" data-position=1 title=async>ASYNC<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/atom/ class="post_tag button button_translucent" data-position=1 title=atom>ATOM<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/avx/ class="post_tag button button_translucent" data-position=1 title=avx>AVX<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/awk/ class="post_tag button button_translucent" data-position=1 title=awk>AWK<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/bazel/ class="post_tag button button_translucent" data-position=1 title=bazel>BAZEL<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/bfs/ class="post_tag button button_translucent" data-position=20 title=bfs>BFS<span class=button_tally>20</span>
+</a><a href=https://111qqz.com/tags/binary-search/ class="post_tag button button_translucent" data-position=21 title="binary search">BINARY SEARCH<span class=button_tally>21</span>
+</a><a href=https://111qqz.com/tags/binary-search-tree/ class="post_tag button button_translucent" data-position=1 title="binary search tree">BINARY SEARCH TREE<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/bitset%E4%BC%98%E5%8C%96/ class="post_tag button button_translucent" data-position=4 title=bitset优化>BITSET优化<span class=button_tally>4</span>
+</a><a href=https://111qqz.com/tags/blog/ class="post_tag button button_translucent" data-position=1 title=blog>BLOG<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/boost/ class="post_tag button button_translucent" data-position=1 title=boost>BOOST<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/boosting/ class="post_tag button button_translucent" data-position=1 title=boosting>BOOSTING<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/brute-force/ class="post_tag button button_translucent" data-position=39 title="brute force">BRUTE FORCE<span class=button_tally>39</span>
+</a><a href=https://111qqz.com/tags/bsgs/ class="post_tag button button_translucent" data-position=4 title=bsgs>BSGS<span class=button_tally>4</span>
+</a><a href=https://111qqz.com/tags/c++/ class="post_tag button button_translucent" data-position=7 title=c++>C++<span class=button_tally>7</span>
+</a><a href=https://111qqz.com/tags/c++11/ class="post_tag button button_translucent" data-position=1 title=c++11>C++11<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/cache/ class="post_tag button button_translucent" data-position=1 title=cache>CACHE<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/caffe/ class="post_tag button button_translucent" data-position=14 title=caffe>CAFFE<span class=button_tally>14</span>
+</a><a href=https://111qqz.com/tags/caffe2/ class="post_tag button button_translucent" data-position=1 title=caffe2>CAFFE2<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/call-stack/ class="post_tag button button_translucent" data-position=1 title="call stack">CALL STACK<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/call_once/ class="post_tag button button_translucent" data-position=1 title=call_once>CALL_ONCE<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/cdq%E5%88%86%E6%B2%BB/ class="post_tag button button_translucent" data-position=3 title=cdq分治>CDQ分治<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/checkpoint/ class="post_tag button button_translucent" data-position=1 title=checkpoint>CHECKPOINT<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/chromebook/ class="post_tag button button_translucent" data-position=1 title=chromebook>CHROMEBOOK<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/ci/ class="post_tag button button_translucent" data-position=1 title=ci>CI<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/cmake/ class="post_tag button button_translucent" data-position=1 title=cmake>CMAKE<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/codeforces/ class="post_tag button button_translucent" data-position=1 title=codeforces>CODEFORCES<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/condition_variable/ class="post_tag button button_translucent" data-position=1 title=condition_variable>CONDITION_VARIABLE<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/convolutional-neural-network/ class="post_tag button button_translucent" data-position=1 title="convolutional neural network">CONVOLUTIONAL NEURAL NETWORK<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/cpp/ class="post_tag button button_translucent" data-position=26 title=cpp>CPP<span class=button_tally>26</span>
+</a><a href=https://111qqz.com/tags/cs231n/ class="post_tag button button_translucent" data-position=1 title=cs231n>CS231N<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/cs341/ class="post_tag button button_translucent" data-position=1 title=cs341>CS341<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/csapp/ class="post_tag button button_translucent" data-position=7 title=csapp>CSAPP<span class=button_tally>7</span>
+</a><a href=https://111qqz.com/tags/cse599w/ class="post_tag button button_translucent" data-position=1 title=cse599w>CSE599W<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/cuda/ class="post_tag button button_translucent" data-position=6 title=cuda>CUDA<span class=button_tally>6</span>
+</a><a href=https://111qqz.com/tags/cumulative-match-characteristi/ class="post_tag button button_translucent" data-position=1 title="cumulative match characteristi">CUMULATIVE MATCH CHARACTERISTI<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/cupy/ class="post_tag button button_translucent" data-position=1 title=cupy>CUPY<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/d/ class="post_tag button button_translucent" data-position=1 title=d>D<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/dfs/ class="post_tag button button_translucent" data-position=34 title=dfs>DFS<span class=button_tally>34</span>
+</a><a href=https://111qqz.com/tags/dfs%E5%BA%8F/ class="post_tag button button_translucent" data-position=1 title=dfs序>DFS序<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/dijkstra/ class="post_tag button button_translucent" data-position=2 title=dijkstra>DIJKSTRA<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/discourse/ class="post_tag button button_translucent" data-position=1 title=discourse>DISCOURSE<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/dl-sys/ class="post_tag button button_translucent" data-position=1 title=dl-sys>DL-SYS<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/docker/ class="post_tag button button_translucent" data-position=6 title=docker>DOCKER<span class=button_tally>6</span>
+</a><a href=https://111qqz.com/tags/dp/ class="post_tag button button_translucent" data-position=71 title=dp>DP<span class=button_tally>71</span>
+</a><a href=https://111qqz.com/tags/eigen/ class="post_tag button button_translucent" data-position=1 title=eigen>EIGEN<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/end-to-end/ class="post_tag button button_translucent" data-position=1 title=end-to-end>END-TO-END<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/factorial-number-system/ class="post_tag button button_translucent" data-position=1 title="factorial number system">FACTORIAL NUMBER SYSTEM<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/faster-rcnn/ class="post_tag button button_translucent" data-position=3 title=faster-rcnn>FASTER-RCNN<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/feature-pyramid-networks/ class="post_tag button button_translucent" data-position=1 title=feature-pyramid-networks>FEATURE-PYRAMID-NETWORKS<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/fedora/ class="post_tag button button_translucent" data-position=1 title=fedora>FEDORA<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/fish/ class="post_tag button button_translucent" data-position=1 title=fish>FISH<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/floyd/ class="post_tag button button_translucent" data-position=10 title=floyd>FLOYD<span class=button_tally>10</span>
+</a><a href=https://111qqz.com/tags/floyd-%E5%88%A4%E5%9C%88/ class="post_tag button button_translucent" data-position=2 title="floyd 判圈">FLOYD 判圈<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/fpn/ class="post_tag button button_translucent" data-position=1 title=fpn>FPN<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/future/ class="post_tag button button_translucent" data-position=2 title=future>FUTURE<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/g++/ class="post_tag button button_translucent" data-position=1 title=g++>G++<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/galliumos/ class="post_tag button button_translucent" data-position=1 title=galliumos>GALLIUMOS<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/gcc/ class="post_tag button button_translucent" data-position=1 title=gcc>GCC<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/gcd/ class="post_tag button button_translucent" data-position=2 title=gcd>GCD<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/gdb/ class="post_tag button button_translucent" data-position=1 title=gdb>GDB<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/gedit/ class="post_tag button button_translucent" data-position=1 title=gedit>GEDIT<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/geekos/ class="post_tag button button_translucent" data-position=4 title=geekos>GEEKOS<span class=button_tally>4</span>
+</a><a href=https://111qqz.com/tags/github/ class="post_tag button button_translucent" data-position=1 title=github>GITHUB<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/gitlab/ class="post_tag button button_translucent" data-position=1 title=gitlab>GITLAB<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/golang/ class="post_tag button button_translucent" data-position=1 title=golang>GOLANG<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/greedy/ class="post_tag button button_translucent" data-position=36 title=greedy>GREEDY<span class=button_tally>36</span>
+</a><a href=https://111qqz.com/tags/grpc/ class="post_tag button button_translucent" data-position=2 title=grpc>GRPC<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/grub/ class="post_tag button button_translucent" data-position=1 title=grub>GRUB<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/grundy/ class="post_tag button button_translucent" data-position=1 title=grundy>GRUNDY<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/halide/ class="post_tag button button_translucent" data-position=2 title=halide>HALIDE<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/haproxy/ class="post_tag button button_translucent" data-position=1 title=haproxy>HAPROXY<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/hash/ class="post_tag button button_translucent" data-position=13 title=hash>HASH<span class=button_tally>13</span>
+</a><a href=https://111qqz.com/tags/hash-map/ class="post_tag button button_translucent" data-position=1 title="hash map">HASH MAP<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/haskell/ class="post_tag button button_translucent" data-position=1 title=haskell>HASKELL<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/high-performance-computing/ class="post_tag button button_translucent" data-position=1 title="high performance computing">HIGH PERFORMANCE COMPUTING<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/hugo/ class="post_tag button button_translucent" data-position=2 title=hugo>HUGO<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/image-denoising/ class="post_tag button button_translucent" data-position=1 title="image denoising">IMAGE DENOISING<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/inception/ class="post_tag button button_translucent" data-position=1 title=inception>INCEPTION<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/java/ class="post_tag button button_translucent" data-position=5 title=java>JAVA<span class=button_tally>5</span>
+</a><a href=https://111qqz.com/tags/javascript/ class="post_tag button button_translucent" data-position=1 title=javascript>JAVASCRIPT<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/jdk/ class="post_tag button button_translucent" data-position=1 title=jdk>JDK<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/jetson-nano/ class="post_tag button button_translucent" data-position=2 title="jetson nano">JETSON NANO<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/json/ class="post_tag button button_translucent" data-position=1 title=json>JSON<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/k-means/ class="post_tag button button_translucent" data-position=2 title=k-means>K-MEANS<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/k-sum/ class="post_tag button button_translucent" data-position=3 title=k-sum>K-SUM<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/k8s/ class="post_tag button button_translucent" data-position=2 title=k8s>K8S<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/kafka/ class="post_tag button button_translucent" data-position=1 title=kafka>KAFKA<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/kd-tree/ class="post_tag button button_translucent" data-position=6 title=kd-tree>KD-TREE<span class=button_tally>6</span>
+</a><a href=https://111qqz.com/tags/km/ class="post_tag button button_translucent" data-position=14 title=km>KM<span class=button_tally>14</span>
+</a><a href=https://111qqz.com/tags/kmp/ class="post_tag button button_translucent" data-position=19 title=kmp>KMP<span class=button_tally>19</span>
+</a><a href=https://111qqz.com/tags/km%E7%AE%97%E6%B3%95/ class="post_tag button button_translucent" data-position=1 title=km算法>KM算法<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/latent-factor-model/ class="post_tag button button_translucent" data-position=1 title="latent factor model">LATENT FACTOR MODEL<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/latex/ class="post_tag button button_translucent" data-position=1 title=latex>LATEX<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/lazy%E6%A0%87%E8%AE%B0/ class="post_tag button button_translucent" data-position=9 title=lazy标记>LAZY标记<span class=button_tally>9</span>
+</a><a href=https://111qqz.com/tags/lca/ class="post_tag button button_translucent" data-position=10 title=lca>LCA<span class=button_tally>10</span>
+</a><a href=https://111qqz.com/tags/leetcode/ class="post_tag button button_translucent" data-position=38 title=leetcode>LEETCODE<span class=button_tally>38</span>
+</a><a href=https://111qqz.com/tags/leveldb/ class="post_tag button button_translucent" data-position=10 title=leveldb>LEVELDB<span class=button_tally>10</span>
+</a><a href=https://111qqz.com/tags/linear-classification/ class="post_tag button button_translucent" data-position=1 title="linear classification">LINEAR CLASSIFICATION<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/linux/ class="post_tag button button_translucent" data-position=9 title=linux>LINUX<span class=button_tally>9</span>
+</a><a href=https://111qqz.com/tags/linux-mint/ class="post_tag button button_translucent" data-position=1 title="linux mint">LINUX MINT<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/lis/ class="post_tag button button_translucent" data-position=5 title=lis>LIS<span class=button_tally>5</span>
+</a><a href=https://111qqz.com/tags/log/ class="post_tag button button_translucent" data-position=2 title=log>LOG<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/lru/ class="post_tag button button_translucent" data-position=2 title=lru>LRU<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/lstm/ class="post_tag button button_translucent" data-position=1 title=lstm>LSTM<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/lua/ class="post_tag button button_translucent" data-position=1 title=lua>LUA<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/lucas%E5%AE%9A%E7%90%86/ class="post_tag button button_translucent" data-position=3 title=lucas定理>LUCAS定理<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/manacher/ class="post_tag button button_translucent" data-position=4 title=manacher>MANACHER<span class=button_tally>4</span>
+</a><a href=https://111qqz.com/tags/manjaro/ class="post_tag button button_translucent" data-position=3 title=manjaro>MANJARO<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/map/ class="post_tag button button_translucent" data-position=6 title=map>MAP<span class=button_tally>6</span>
+</a><a href=https://111qqz.com/tags/math/ class="post_tag button button_translucent" data-position=49 title=math>MATH<span class=button_tally>49</span>
+</a><a href=https://111qqz.com/tags/mean-average-precision/ class="post_tag button button_translucent" data-position=1 title="mean average precision">MEAN AVERAGE PRECISION<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/metric-learning/ class="post_tag button button_translucent" data-position=1 title="metric learning">METRIC LEARNING<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/miller-rabin%E7%B4%A0%E6%95%B0%E6%B5%8B%E8%AF%95/ class="post_tag button button_translucent" data-position=1 title=miller-rabin素数测试>MILLER-RABIN素数测试<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/model-distillation/ class="post_tag button button_translucent" data-position=1 title="model distillation">MODEL DISTILLATION<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/model-convertor/ class="post_tag button button_translucent" data-position=1 title=model-convertor>MODEL-CONVERTOR<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/modern-cpp/ class="post_tag button button_translucent" data-position=10 title="modern cpp">MODERN CPP<span class=button_tally>10</span>
+</a><a href=https://111qqz.com/tags/mpi/ class="post_tag button button_translucent" data-position=1 title=mpi>MPI<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/mst/ class="post_tag button button_translucent" data-position=6 title=mst>MST<span class=button_tally>6</span>
+</a><a href=https://111qqz.com/tags/murmurhash/ class="post_tag button button_translucent" data-position=1 title=murmurhash>MURMURHASH<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/mutual-learning/ class="post_tag button button_translucent" data-position=1 title="mutual learning">MUTUAL LEARNING<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/mysql/ class="post_tag button button_translucent" data-position=3 title=mysql>MYSQL<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/nerdtree/ class="post_tag button button_translucent" data-position=1 title=nerdtree>NERDTREE<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/network/ class="post_tag button button_translucent" data-position=1 title=network>NETWORK<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/nim%E6%B8%B8%E6%88%8F/ class="post_tag button button_translucent" data-position=4 title=nim游戏>NIM游戏<span class=button_tally>4</span>
+</a><a href=https://111qqz.com/tags/nlp/ class="post_tag button button_translucent" data-position=1 title=nlp>NLP<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/nms/ class="post_tag button button_translucent" data-position=1 title=nms>NMS<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/non-local-means/ class="post_tag button button_translucent" data-position=1 title="non-local means">NON-LOCAL MEANS<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/non-local-neural-networks/ class="post_tag button button_translucent" data-position=1 title="non-local neural networks">NON-LOCAL NEURAL NETWORKS<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/number-theory/ class="post_tag button button_translucent" data-position=27 title="number theory">NUMBER THEORY<span class=button_tally>27</span>
+</a><a href=https://111qqz.com/tags/numpy/ class="post_tag button button_translucent" data-position=1 title=numpy>NUMPY<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/object-detection/ class="post_tag button button_translucent" data-position=2 title="object detection">OBJECT DETECTION<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/once_flag/ class="post_tag button button_translucent" data-position=1 title=once_flag>ONCE_FLAG<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/onnxruntime/ class="post_tag button button_translucent" data-position=1 title=onnxruntime>ONNXRUNTIME<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/packaged_task/ class="post_tag button button_translucent" data-position=1 title=packaged_task>PACKAGED_TASK<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/pca/ class="post_tag button button_translucent" data-position=2 title=pca>PCA<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/perfect-forwarding/ class="post_tag button button_translucent" data-position=1 title="perfect forwarding">PERFECT FORWARDING<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/pipline/ class="post_tag button button_translucent" data-position=1 title=pipline>PIPLINE<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/pose-driven/ class="post_tag button button_translucent" data-position=1 title=pose-driven>POSE-DRIVEN<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/prim/ class="post_tag button button_translucent" data-position=1 title=prim>PRIM<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/promise/ class="post_tag button button_translucent" data-position=2 title=promise>PROMISE<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/property_tree/ class="post_tag button button_translucent" data-position=1 title=property_tree>PROPERTY_TREE<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/protobuf/ class="post_tag button button_translucent" data-position=1 title=protobuf>PROTOBUF<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/python/ class="post_tag button button_translucent" data-position=11 title=python>PYTHON<span class=button_tally>11</span>
+</a><a href=https://111qqz.com/tags/pytorch/ class="post_tag button button_translucent" data-position=2 title=pytorch>PYTORCH<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/qt/ class="post_tag button button_translucent" data-position=5 title=qt>QT<span class=button_tally>5</span>
+</a><a href=https://111qqz.com/tags/react/ class="post_tag button button_translucent" data-position=3 title=react>REACT<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/redis/ class="post_tag button button_translucent" data-position=1 title=redis>REDIS<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/redux/ class="post_tag button button_translucent" data-position=1 title=redux>REDUX<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/reid/ class="post_tag button button_translucent" data-position=3 title=reid>REID<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/resnet/ class="post_tag button button_translucent" data-position=2 title=resnet>RESNET<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/retinanet/ class="post_tag button button_translucent" data-position=1 title=retinanet>RETINANET<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/rmq/ class="post_tag button button_translucent" data-position=17 title=rmq>RMQ<span class=button_tally>17</span>
+</a><a href=https://111qqz.com/tags/rnn/ class="post_tag button button_translucent" data-position=1 title=rnn>RNN<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/set/ class="post_tag button button_translucent" data-position=8 title=set>SET<span class=button_tally>8</span>
+</a><a href=https://111qqz.com/tags/sg%E5%87%BD%E6%95%B0/ class="post_tag button button_translucent" data-position=12 title=sg函数>SG函数<span class=button_tally>12</span>
+</a><a href=https://111qqz.com/tags/shadowsocks/ class="post_tag button button_translucent" data-position=2 title=shadowsocks>SHADOWSOCKS<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/simd/ class="post_tag button button_translucent" data-position=1 title=simd>SIMD<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/simhash/ class="post_tag button button_translucent" data-position=1 title=simhash>SIMHASH<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/similarity-learning/ class="post_tag button button_translucent" data-position=1 title="similarity learning">SIMILARITY LEARNING<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/single-state-detector/ class="post_tag button button_translucent" data-position=1 title="single state detector">SINGLE STATE DETECTOR<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/sj%E5%AE%9A%E7%90%86/ class="post_tag button button_translucent" data-position=2 title=sj定理>SJ定理<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/sliding-windows/ class="post_tag button button_translucent" data-position=1 title="sliding windows">SLIDING WINDOWS<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/slim/ class="post_tag button button_translucent" data-position=1 title=slim>SLIM<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/sort/ class="post_tag button button_translucent" data-position=1 title=sort>SORT<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/sortings/ class="post_tag button button_translucent" data-position=3 title=sortings>SORTINGS<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/spfa/ class="post_tag button button_translucent" data-position=10 title=spfa>SPFA<span class=button_tally>10</span>
+</a><a href=https://111qqz.com/tags/spring/ class="post_tag button button_translucent" data-position=2 title=spring>SPRING<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/ssd/ class="post_tag button button_translucent" data-position=1 title=ssd>SSD<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/stdany/ class="post_tag button button_translucent" data-position=1 title=std::any>STD::ANY<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/stdshared_ptr/ class="post_tag button button_translucent" data-position=1 title=std::shared_ptr>STD::SHARED_PTR<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/steam/ class="post_tag button button_translucent" data-position=2 title=steam>STEAM<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/stl/ class="post_tag button button_translucent" data-position=16 title=stl>STL<span class=button_tally>16</span>
+</a><a href=https://111qqz.com/tags/stream/ class="post_tag button button_translucent" data-position=1 title=stream>STREAM<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/supercomputing/ class="post_tag button button_translucent" data-position=1 title=supercomputing>SUPERCOMPUTING<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/supervisor/ class="post_tag button button_translucent" data-position=1 title=supervisor>SUPERVISOR<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/tarjan/ class="post_tag button button_translucent" data-position=2 title=tarjan>TARJAN<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/tensorflow/ class="post_tag button button_translucent" data-position=12 title=tensorflow>TENSORFLOW<span class=button_tally>12</span>
+</a><a href=https://111qqz.com/tags/tensorrt/ class="post_tag button button_translucent" data-position=2 title=tensorrt>TENSORRT<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/threading-building-blocks/ class="post_tag button button_translucent" data-position=1 title="threading building blocks">THREADING BUILDING BLOCKS<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/thrust/ class="post_tag button button_translucent" data-position=1 title=thrust>THRUST<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/tree/ class="post_tag button button_translucent" data-position=7 title=tree>TREE<span class=button_tally>7</span>
+</a><a href=https://111qqz.com/tags/trie/ class="post_tag button button_translucent" data-position=7 title=trie>TRIE<span class=button_tally>7</span>
+</a><a href=https://111qqz.com/tags/triplet-loss/ class="post_tag button button_translucent" data-position=1 title="triplet loss">TRIPLET LOSS<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/tsp/ class="post_tag button button_translucent" data-position=2 title=tsp>TSP<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/two-pointer/ class="post_tag button button_translucent" data-position=5 title="two pointer">TWO POINTER<span class=button_tally>5</span>
+</a><a href=https://111qqz.com/tags/typescript/ class="post_tag button button_translucent" data-position=1 title=typescript>TYPESCRIPT<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/unicode/ class="post_tag button button_translucent" data-position=1 title=unicode>UNICODE<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/value-catrgory/ class="post_tag button button_translucent" data-position=1 title="value catrgory">VALUE CATRGORY<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/variadic-function/ class="post_tag button button_translucent" data-position=1 title="variadic function">VARIADIC FUNCTION<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/variety/ class="post_tag button button_translucent" data-position=1 title=variety>VARIETY<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/vector/ class="post_tag button button_translucent" data-position=2 title=vector>VECTOR<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/vim/ class="post_tag button button_translucent" data-position=6 title=vim>VIM<span class=button_tally>6</span>
+</a><a href=https://111qqz.com/tags/vundle/ class="post_tag button button_translucent" data-position=1 title=vundle>VUNDLE<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/whitening/ class="post_tag button button_translucent" data-position=1 title=whitening>WHITENING<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/wordpress/ class="post_tag button button_translucent" data-position=1 title=wordpress>WORDPRESS<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/youcompleteme/ class="post_tag button button_translucent" data-position=1 title=youcompleteme>YOUCOMPLETEME<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/yuv-image-format/ class="post_tag button button_translucent" data-position=1 title="yuv image format">YUV IMAGE FORMAT<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%B7%B4%E4%BB%80%E5%8D%9A%E5%A5%95/ class="post_tag button button_translucent" data-position=5 title=巴什博奕>巴什博奕<span class=button_tally>5</span>
+</a><a href=https://111qqz.com/tags/%E7%99%BE%E5%BA%A6/ class="post_tag button button_translucent" data-position=1 title=百度>百度<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E8%B4%9D%E5%B0%94%E6%95%B0/ class="post_tag button button_translucent" data-position=2 title=贝尔数>贝尔数<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E7%BC%96%E8%AF%91%E5%99%A8/ class="post_tag button button_translucent" data-position=1 title=编译器>编译器<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86/ class="post_tag button button_translucent" data-position=1 title=编译原理>编译原理<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%B9%B6%E6%9F%A5%E9%9B%86/ class="post_tag button button_translucent" data-position=9 title=并查集>并查集<span class=button_tally>9</span>
+</a><a href=https://111qqz.com/tags/%E5%B9%B6%E8%A1%8C%E8%AE%A1%E7%AE%97/ class="post_tag button button_translucent" data-position=2 title=并行计算>并行计算<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E5%8D%9A%E5%BC%88%E8%AE%BA/ class="post_tag button button_translucent" data-position=22 title=博弈论>博弈论<span class=button_tally>22</span>
+</a><a href=https://111qqz.com/tags/%E5%B7%AE%E5%88%86%E5%BA%8F%E5%88%97/ class="post_tag button button_translucent" data-position=1 title=差分序列>差分序列<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%8B%86%E7%82%B9/ class="post_tag button button_translucent" data-position=6 title=拆点>拆点<span class=button_tally>6</span>
+</a><a href=https://111qqz.com/tags/%E5%B0%BA%E5%8F%96/ class="post_tag button button_translucent" data-position=2 title=尺取>尺取<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E5%B0%BA%E5%8F%96%E6%B3%95/ class="post_tag button button_translucent" data-position=10 title=尺取法>尺取法<span class=button_tally>10</span>
+</a><a href=https://111qqz.com/tags/%E6%8A%BD%E5%B1%89%E5%8E%9F%E7%90%86/ class="post_tag button button_translucent" data-position=6 title=抽屉原理>抽屉原理<span class=button_tally>6</span>
+</a><a href=https://111qqz.com/tags/%E4%BC%A0%E9%80%92%E9%97%AD%E5%8C%85/ class="post_tag button button_translucent" data-position=5 title=传递闭包>传递闭包<span class=button_tally>5</span>
+</a><a href=https://111qqz.com/tags/%E6%AC%A1%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91/ class="post_tag button button_translucent" data-position=2 title=次小生成树>次小生成树<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E9%94%99%E6%8E%92%E5%85%AC%E5%BC%8F/ class="post_tag button button_translucent" data-position=2 title=错排公式>错排公式<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E6%89%93%E8%A1%A8/ class="post_tag button button_translucent" data-position=2 title=打表>打表<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E5%8D%95%E8%B0%83%E9%98%9F%E5%88%97/ class="post_tag button button_translucent" data-position=3 title=单调队列>单调队列<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/%E5%8D%95%E8%B0%83%E6%80%A7%E4%BC%98%E5%8C%96/ class="post_tag button button_translucent" data-position=1 title=单调性优化>单调性优化<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%8D%95%E8%B0%83%E6%A0%88/ class="post_tag button button_translucent" data-position=10 title=单调栈>单调栈<span class=button_tally>10</span>
+</a><a href=https://111qqz.com/tags/%E9%80%92%E6%8E%A8/ class="post_tag button button_translucent" data-position=2 title=递推>递推<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E7%AC%AC%E4%BA%8C%E7%B1%BB%E6%96%AF%E7%89%B9%E6%9E%97%E6%95%B0/ class="post_tag button button_translucent" data-position=1 title=第二类斯特林数>第二类斯特林数<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%8A%A8%E6%80%81%E8%BF%9E%E9%80%9A%E6%80%A7/ class="post_tag button button_translucent" data-position=1 title=动态连通性>动态连通性<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%8A%A8%E6%80%81%E7%BA%BF%E6%AE%B5%E6%A0%91/ class="post_tag button button_translucent" data-position=1 title=动态线段树>动态线段树<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%AF%B9%E6%8B%8D/ class="post_tag button button_translucent" data-position=1 title=对拍>对拍<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E4%BA%8C%E6%AC%A1%E5%89%A9%E4%BD%99/ class="post_tag button button_translucent" data-position=4 title=二次剩余>二次剩余<span class=button_tally>4</span>
+</a><a href=https://111qqz.com/tags/%E4%BA%8C%E5%88%86/ class="post_tag button button_translucent" data-position=2 title=二分>二分<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E4%BA%8C%E5%88%86%E5%9B%BE/ class="post_tag button button_translucent" data-position=5 title=二分图>二分图<span class=button_tally>5</span>
+</a><a href=https://111qqz.com/tags/%E4%BA%8C%E5%88%86%E5%9B%BE%E5%8C%B9%E9%85%8D/ class="post_tag button button_translucent" data-position=4 title=二分图匹配>二分图匹配<span class=button_tally>4</span>
+</a><a href=https://111qqz.com/tags/%E4%BA%8C%E5%88%86%E5%9B%BE%E6%9C%80%E4%BD%B3%E5%8C%B9%E9%85%8D/ class="post_tag button button_translucent" data-position=14 title=二分图最佳匹配>二分图最佳匹配<span class=button_tally>14</span>
+</a><a href=https://111qqz.com/tags/%E4%BA%8C%E8%BF%9B%E5%88%B6/ class="post_tag button button_translucent" data-position=1 title=二进制>二进制<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E4%BA%8C%E7%BB%B4%E7%BA%BF%E6%AE%B5%E6%A0%91/ class="post_tag button button_translucent" data-position=1 title=二维线段树>二维线段树<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E4%BA%8C%E9%A1%B9%E5%BC%8F%E5%AE%9A%E7%90%86/ class="post_tag button button_translucent" data-position=1 title=二项式定理>二项式定理<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%8F%8D%E7%B4%A0%E6%95%B0/ class="post_tag button button_translucent" data-position=5 title=反素数>反素数<span class=button_tally>5</span>
+</a><a href=https://111qqz.com/tags/%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD/ class="post_tag button button_translucent" data-position=1 title=反向传播>反向传播<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%96%90%E6%B3%A2%E9%82%A3%E5%A5%91/ class="post_tag button button_translucent" data-position=7 title=斐波那契>斐波那契<span class=button_tally>7</span>
+</a><a href=https://111qqz.com/tags/%E8%B4%B9%E9%A9%AC%E7%82%B9/ class="post_tag button button_translucent" data-position=1 title=费马点>费马点<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E8%B4%B9%E9%A9%AC%E5%B0%8F%E5%AE%9A%E7%90%86/ class="post_tag button button_translucent" data-position=3 title=费马小定理>费马小定理<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E6%B6%88%E6%81%AF%E7%B3%BB%E7%BB%9F/ class="post_tag button button_translucent" data-position=1 title=分布式消息系统>分布式消息系统<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%88%86%E5%9D%97/ class="post_tag button button_translucent" data-position=12 title=分块>分块<span class=button_tally>12</span>
+</a><a href=https://111qqz.com/tags/%E5%88%86%E7%B1%BB%E8%AE%A8%E8%AE%BA/ class="post_tag button button_translucent" data-position=1 title=分类讨论>分类讨论<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%88%86%E6%B2%BB/ class="post_tag button button_translucent" data-position=2 title=分治>分治<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E5%B3%B0%E5%BA%A6/ class="post_tag button button_translucent" data-position=1 title=峰度>峰度<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E7%AC%A6%E5%8F%B7%E8%A1%A8/ class="post_tag button button_translucent" data-position=1 title=符号表>符号表<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E7%AC%A6%E5%8F%B7%E5%8F%AF%E8%A7%81%E6%80%A7/ class="post_tag button button_translucent" data-position=1 title=符号可见性>符号可见性<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%A6%82%E7%8E%87/ class="post_tag button button_translucent" data-position=13 title=概率>概率<span class=button_tally>13</span>
+</a><a href=https://111qqz.com/tags/%E9%AB%98%E7%B2%BE%E5%BA%A6/ class="post_tag button button_translucent" data-position=2 title=高精度>高精度<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E9%AB%98%E6%96%AF%E6%B6%88%E5%85%83/ class="post_tag button button_translucent" data-position=1 title=高斯消元>高斯消元<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%93%A5%E5%BE%B7%E5%B7%B4%E8%B5%AB%E7%8C%9C%E6%83%B3/ class="post_tag button button_translucent" data-position=1 title=哥德巴赫猜想>哥德巴赫猜想<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%8B%BE%E8%82%A1%E6%95%B0/ class="post_tag button button_translucent" data-position=1 title=勾股数>勾股数<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%9E%84%E9%80%A0/ class="post_tag button button_translucent" data-position=22 title=构造>构造<span class=button_tally>22</span>
+</a><a href=https://111qqz.com/tags/%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F/ class="post_tag button button_translucent" data-position=1 title=观察者模式>观察者模式<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%85%89%E6%B5%81%E6%B3%95/ class="post_tag button button_translucent" data-position=1 title=光流法>光流法<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%90%8E%E7%BC%80%E5%92%8C/ class="post_tag button button_translucent" data-position=1 title=后缀和>后缀和<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%90%8E%E7%BC%80%E6%95%B0%E7%BB%84/ class="post_tag button button_translucent" data-position=10 title=后缀数组>后缀数组<span class=button_tally>10</span>
+</a><a href=https://111qqz.com/tags/%E5%90%8E%E7%BC%80%E8%87%AA%E5%8A%A8%E6%9C%BA/ class="post_tag button button_translucent" data-position=13 title=后缀自动机>后缀自动机<span class=button_tally>13</span>
+</a><a href=https://111qqz.com/tags/%E5%9B%9E%E6%96%87%E4%B8%B2/ class="post_tag button button_translucent" data-position=2 title=回文串>回文串<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E5%9B%9E%E6%96%87%E8%87%AA%E5%8A%A8%E6%9C%BA/ class="post_tag button button_translucent" data-position=7 title=回文自动机>回文自动机<span class=button_tally>7</span>
+</a><a href=https://111qqz.com/tags/%E5%9F%BA%E7%A1%80%E5%9B%BE%E8%AE%BA/ class="post_tag button button_translucent" data-position=1 title=基础图论>基础图论<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/ class="post_tag button button_translucent" data-position=1 title=激活函数>激活函数<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E8%AE%A1%E6%95%B0%E6%8E%92%E5%BA%8F/ class="post_tag button button_translucent" data-position=2 title=计数排序>计数排序<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E8%AE%A1%E6%95%B0%E9%97%AE%E9%A2%98/ class="post_tag button button_translucent" data-position=10 title=计数问题>计数问题<span class=button_tally>10</span>
+</a><a href=https://111qqz.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/ class="post_tag button button_translucent" data-position=2 title=计算机视觉>计算机视觉<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95/ class="post_tag button button_translucent" data-position=20 title=计算几何>计算几何<span class=button_tally>20</span>
+</a><a href=https://111qqz.com/tags/%E8%AE%A1%E7%BB%84/ class="post_tag button button_translucent" data-position=1 title=计组>计组<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E8%AE%B0%E5%BF%86%E5%8C%96%E6%90%9C%E7%B4%A2/ class="post_tag button button_translucent" data-position=2 title=记忆化搜索>记忆化搜索<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E5%89%AA%E6%9E%9D/ class="post_tag button button_translucent" data-position=1 title=剪枝>剪枝<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E4%BA%A4%E5%8F%89%E6%9F%93%E8%89%B2%E6%B3%95/ class="post_tag button button_translucent" data-position=6 title=交叉染色法>交叉染色法<span class=button_tally>6</span>
+</a><a href=https://111qqz.com/tags/%E4%BA%A4%E4%BA%92%E9%A2%98/ class="post_tag button button_translucent" data-position=1 title=交互题>交互题<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E7%BB%93%E8%AE%BA%E9%A2%98/ class="post_tag button button_translucent" data-position=1 title=结论题>结论题<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E4%BA%AC%E4%B8%9C/ class="post_tag button button_translucent" data-position=1 title=京东>京东<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%B1%80%E9%83%A8%E6%95%8F%E6%84%9Fhash/ class="post_tag button button_translucent" data-position=2 title=局部敏感hash>局部敏感HASH<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E7%9F%A9%E5%BD%A2%E9%9D%A2%E7%A7%AF%E4%BA%A4/ class="post_tag button button_translucent" data-position=1 title=矩形面积交>矩形面积交<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E7%9F%A9%E5%BD%A2%E5%91%A8%E9%95%BF%E5%B9%B6/ class="post_tag button button_translucent" data-position=1 title=矩形周长并>矩形周长并<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E7%9F%A9%E9%98%B5/ class="post_tag button button_translucent" data-position=20 title=矩阵>矩阵<span class=button_tally>20</span>
+</a><a href=https://111qqz.com/tags/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/ class="post_tag button button_translucent" data-position=5 title=矩阵快速幂>矩阵快速幂<span class=button_tally>5</span>
+</a><a href=https://111qqz.com/tags/%E5%BA%B7%E6%89%98%E5%B1%95%E5%BC%80/ class="post_tag button button_translucent" data-position=2 title=康托展开>康托展开<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E5%BA%B7%E6%89%98%E5%B1%95%E5%BC%80/%E9%80%86%E5%B1%95%E5%BC%80/ class="post_tag button button_translucent" data-position=1 title=康托展开/逆展开>康托展开/逆展开<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/ class="post_tag button button_translucent" data-position=5 title=可持久化数据结构>可持久化数据结构<span class=button_tally>5</span>
+</a><a href=https://111qqz.com/tags/%E5%BF%AB%E9%80%9F%E4%B9%98/ class="post_tag button button_translucent" data-position=1 title=快速乘>快速乘<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%BF%AB%E9%80%9F%E5%B9%82/ class="post_tag button button_translucent" data-position=20 title=快速幂>快速幂<span class=button_tally>20</span>
+</a><a href=https://111qqz.com/tags/%E5%BF%AB%E9%80%9F%E7%AD%9B/ class="post_tag button button_translucent" data-position=2 title=快速筛>快速筛<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E6%89%A9%E5%B1%95bsgs/ class="post_tag button button_translucent" data-position=2 title=扩展bsgs>扩展BSGS<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E6%89%A9%E5%B1%95%E6%AC%A7%E5%87%A0%E9%87%8C%E5%BE%97%E7%AE%97%E6%B3%95/ class="post_tag button button_translucent" data-position=8 title=扩展欧几里得算法>扩展欧几里得算法<span class=button_tally>8</span>
+</a><a href=https://111qqz.com/tags/%E6%8B%AC%E5%8F%B7%E5%8C%B9%E9%85%8D/ class="post_tag button button_translucent" data-position=2 title=括号匹配>括号匹配<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E7%A6%BB%E6%95%A3%E5%8C%96/ class="post_tag button button_translucent" data-position=11 title=离散化>离散化<span class=button_tally>11</span>
+</a><a href=https://111qqz.com/tags/%E8%BF%9E%E9%80%9A%E6%80%A7/ class="post_tag button button_translucent" data-position=2 title=连通性>连通性<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E9%93%BE%E5%BC%8F%E5%89%8D%E5%90%91%E6%98%9F/ class="post_tag button button_translucent" data-position=1 title=链式前向星>链式前向星<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E8%B7%AF%E5%BE%84dp/ class="post_tag button button_translucent" data-position=1 title=路径dp>路径DP<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E8%B7%AF%E5%BE%84%E8%AE%B0%E5%BD%95/ class="post_tag button button_translucent" data-position=2 title=路径记录>路径记录<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E4%B9%B1%E6%90%9E/ class="post_tag button button_translucent" data-position=6 title=乱搞>乱搞<span class=button_tally>6</span>
+</a><a href=https://111qqz.com/tags/%E6%9B%BC%E5%93%88%E9%A1%BF%E8%B7%9D%E7%A6%BB/ class="post_tag button button_translucent" data-position=4 title=曼哈顿距离>曼哈顿距离<span class=button_tally>4</span>
+</a><a href=https://111qqz.com/tags/%E6%9E%9A%E4%B8%BE%E5%AD%90%E9%9B%86/ class="post_tag button button_translucent" data-position=4 title=枚举子集>枚举子集<span class=button_tally>4</span>
+</a><a href=https://111qqz.com/tags/%E9%9D%A2%E8%AF%95/ class="post_tag button button_translucent" data-position=1 title=面试>面试<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E9%9D%A2%E8%AF%95%E7%BB%8F%E5%8E%86/ class="post_tag button button_translucent" data-position=3 title=面试经历>面试经历<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/%E6%A8%A1%E6%8B%9F/ class="post_tag button button_translucent" data-position=24 title=模拟>模拟<span class=button_tally>24</span>
+</a><a href=https://111qqz.com/tags/%E6%A8%A1%E6%8B%9F%E9%80%80%E7%81%AB/ class="post_tag button button_translucent" data-position=5 title=模拟退火>模拟退火<span class=button_tally>5</span>
+</a><a href=https://111qqz.com/tags/%E6%A8%A1%E5%9E%8B%E8%BD%AC%E6%8D%A2/ class="post_tag button button_translucent" data-position=1 title=模型转换>模型转换<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E8%8E%AB%E9%98%9F%E7%AE%97%E6%B3%95/ class="post_tag button button_translucent" data-position=10 title=莫队算法>莫队算法<span class=button_tally>10</span>
+</a><a href=https://111qqz.com/tags/%E6%AF%8D%E5%87%BD%E6%95%B0/ class="post_tag button button_translucent" data-position=21 title=母函数>母函数<span class=button_tally>21</span>
+</a><a href=https://111qqz.com/tags/%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C/ class="post_tag button button_translucent" data-position=1 title=内存屏障>内存屏障<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E9%80%86%E5%BA%8F%E5%AF%B9/ class="post_tag button button_translucent" data-position=5 title=逆序对>逆序对<span class=button_tally>5</span>
+</a><a href=https://111qqz.com/tags/%E9%80%86%E5%85%83/ class="post_tag button button_translucent" data-position=5 title=逆元>逆元<span class=button_tally>5</span>
+</a><a href=https://111qqz.com/tags/%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/ class="post_tag button button_translucent" data-position=1 title=年终总结>年终总结<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%AC%A7%E6%8B%89%E5%87%BD%E6%95%B0/ class="post_tag button button_translucent" data-position=4 title=欧拉函数>欧拉函数<span class=button_tally>4</span>
+</a><a href=https://111qqz.com/tags/%E6%AC%A7%E6%8B%89%E8%B7%AF/ class="post_tag button button_translucent" data-position=1 title=欧拉路>欧拉路<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E7%88%AC%E8%99%AB/ class="post_tag button button_translucent" data-position=2 title=爬虫>爬虫<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E7%88%AC%E5%B1%B1%E6%B3%95/ class="post_tag button button_translucent" data-position=1 title=爬山法>爬山法<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%8E%92%E5%88%97%E7%BB%84%E5%90%88/ class="post_tag button button_translucent" data-position=8 title=排列组合>排列组合<span class=button_tally>8</span>
+</a><a href=https://111qqz.com/tags/%E8%A3%B4%E8%9C%80%E5%AE%9A%E7%90%86/ class="post_tag button button_translucent" data-position=5 title=裴蜀定理>裴蜀定理<span class=button_tally>5</span>
+</a><a href=https://111qqz.com/tags/%E5%81%8F%E5%BA%A6/ class="post_tag button button_translucent" data-position=1 title=偏度>偏度<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%89%8D%E7%AB%AF/ class="post_tag button button_translucent" data-position=6 title=前端>前端<span class=button_tally>6</span>
+</a><a href=https://111qqz.com/tags/%E5%89%8D%E7%BC%80%E5%92%8C/ class="post_tag button button_translucent" data-position=17 title=前缀和>前缀和<span class=button_tally>17</span>
+</a><a href=https://111qqz.com/tags/%E5%8C%BA%E9%97%B4dp/ class="post_tag button button_translucent" data-position=13 title=区间dp>区间DP<span class=button_tally>13</span>
+</a><a href=https://111qqz.com/tags/%E5%8C%BA%E9%97%B4%E7%AC%ACk%E5%A4%A7/ class="post_tag button button_translucent" data-position=2 title=区间第k大>区间第K大<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E5%8C%BA%E9%97%B4%E5%90%88%E5%B9%B6/ class="post_tag button button_translucent" data-position=1 title=区间合并>区间合并<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%8C%BA%E9%97%B4%E8%AE%A1%E6%95%B0/ class="post_tag button button_translucent" data-position=1 title=区间计数>区间计数<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%9F%93%E8%89%B2%E9%97%AE%E9%A2%98/ class="post_tag button button_translucent" data-position=1 title=染色问题>染色问题<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%AE%B9%E6%96%A5%E5%8E%9F%E7%90%86/ class="post_tag button button_translucent" data-position=5 title=容斥原理>容斥原理<span class=button_tally>5</span>
+</a><a href=https://111qqz.com/tags/%E4%B8%89%E5%88%86/ class="post_tag button button_translucent" data-position=2 title=三分>三分<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E6%89%AB%E6%8F%8F%E7%BA%BF/ class="post_tag button button_translucent" data-position=4 title=扫描线>扫描线<span class=button_tally>4</span>
+</a><a href=https://111qqz.com/tags/%E7%AD%9B%E6%B3%95/ class="post_tag button button_translucent" data-position=1 title=筛法>筛法<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/ class="post_tag button button_translucent" data-position=2 title=设计模式>设计模式<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E5%B0%84%E7%BA%BF%E6%B3%95/ class="post_tag button button_translucent" data-position=1 title=射线法>射线法<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%89%A9%E4%BD%99%E7%B3%BB/ class="post_tag button button_translucent" data-position=3 title=剩余系>剩余系<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/%E8%BE%93%E5%85%A5%E6%8C%82/ class="post_tag button button_translucent" data-position=2 title=输入挂>输入挂<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E6%A0%91%E7%9A%84%E7%9B%B4%E5%BE%84/ class="post_tag button button_translucent" data-position=9 title=树的直径>树的直径<span class=button_tally>9</span>
+</a><a href=https://111qqz.com/tags/%E6%A0%91%E5%A5%97%E6%A0%91/ class="post_tag button button_translucent" data-position=1 title=树套树>树套树<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%A0%91%E5%BD%A2dp/ class="post_tag button button_translucent" data-position=6 title=树形dp>树形DP<span class=button_tally>6</span>
+</a><a href=https://111qqz.com/tags/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/ class="post_tag button button_translucent" data-position=20 title=树状数组>树状数组<span class=button_tally>20</span>
+</a><a href=https://111qqz.com/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/ class="post_tag button button_translucent" data-position=2 title=数据结构>数据结构<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E6%95%B0%E6%8D%AE%E5%8E%8B%E7%BC%A9/ class="post_tag button button_translucent" data-position=1 title=数据压缩>数据压缩<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%95%B0%E8%AE%BA/ class="post_tag button button_translucent" data-position=2 title=数论>数论<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E6%95%B0%E4%BD%8Ddp/ class="post_tag button button_translucent" data-position=17 title=数位dp>数位DP<span class=button_tally>17</span>
+</a><a href=https://111qqz.com/tags/%E6%95%B0%E5%80%BC%E8%AE%A1%E7%AE%97%E6%96%B9%E6%B3%95/ class="post_tag button button_translucent" data-position=2 title=数值计算方法>数值计算方法<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E6%95%B0%E5%AD%97%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/ class="post_tag button button_translucent" data-position=2 title=数字图像处理>数字图像处理<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E6%B0%B4/ class="post_tag button button_translucent" data-position=5 title=水>水<span class=button_tally>5</span>
+</a><a href=https://111qqz.com/tags/%E6%B0%B4%E9%A2%98/ class="post_tag button button_translucent" data-position=7 title=水题>水题<span class=button_tally>7</span>
+</a><a href=https://111qqz.com/tags/%E6%80%9D%E7%BB%B4/ class="post_tag button button_translucent" data-position=1 title=思维>思维<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%80%9D%E7%BB%B4%E9%A2%98/ class="post_tag button button_translucent" data-position=7 title=思维题>思维题<span class=button_tally>7</span>
+</a><a href=https://111qqz.com/tags/%E5%9B%9B%E5%8F%89%E6%A0%91/ class="post_tag button button_translucent" data-position=1 title=四叉树>四叉树<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F/ class="post_tag button button_translucent" data-position=7 title=拓扑排序>拓扑排序<span class=button_tally>7</span>
+</a><a href=https://111qqz.com/tags/%E6%B3%B0%E5%8B%92%E5%B1%95%E5%BC%80/ class="post_tag button button_translucent" data-position=3 title=泰勒展开>泰勒展开<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/%E8%B4%AA%E5%BF%83/ class="post_tag button button_translucent" data-position=1 title=贪心>贪心<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/ class="post_tag button button_translucent" data-position=1 title=梯度下降>梯度下降<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%90%8C%E6%9E%84/ class="post_tag button button_translucent" data-position=1 title=同构>同构<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%87%B8%E5%8C%85/ class="post_tag button button_translucent" data-position=1 title=凸包>凸包<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%9B%BE%E8%AE%BA/ class="post_tag button button_translucent" data-position=16 title=图论>图论<span class=button_tally>16</span>
+</a><a href=https://111qqz.com/tags/%E5%9B%BE%E8%AE%BA%E5%9F%BA%E7%A1%80/ class="post_tag button button_translucent" data-position=1 title=图论基础>图论基础<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/ class="post_tag button button_translucent" data-position=2 title=图像处理>图像处理<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F/ class="post_tag button button_translucent" data-position=3 title=推荐系统>推荐系统<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/%E5%AE%8C%E5%85%A8%E8%83%8C%E5%8C%85/ class="post_tag button button_translucent" data-position=2 title=完全背包>完全背包<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E4%BD%8D%E8%BF%90%E7%AE%97/ class="post_tag button button_translucent" data-position=4 title=位运算>位运算<span class=button_tally>4</span>
+</a><a href=https://111qqz.com/tags/%E6%96%87%E6%98%8E/ class="post_tag button button_translucent" data-position=1 title=文明>文明<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%97%A0%E5%90%91%E5%9B%BE%E7%9A%84%E7%8E%AF/ class="post_tag button button_translucent" data-position=3 title=无向图的环>无向图的环<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8/ class="post_tag button button_translucent" data-position=1 title=系统调用>系统调用<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E7%BB%86%E8%8A%82%E9%A2%98/ class="post_tag button button_translucent" data-position=1 title=细节题>细节题<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E7%BA%BF%E6%AE%B5%E6%A0%91/ class="post_tag button button_translucent" data-position=43 title=线段树>线段树<span class=button_tally>43</span>
+</a><a href=https://111qqz.com/tags/%E5%8D%8F%E5%90%8C%E8%BF%87%E6%BB%A4/ class="post_tag button button_translucent" data-position=1 title=协同过滤>协同过滤<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%96%9C%E7%8E%87%E4%BC%98%E5%8C%96/ class="post_tag button button_translucent" data-position=3 title=斜率优化>斜率优化<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/%E8%BE%9B%E6%99%AE%E6%A3%AE%E7%A7%AF%E5%88%86/ class="post_tag button button_translucent" data-position=2 title=辛普森积分>辛普森积分<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E5%8C%88%E7%89%99%E5%88%A9%E7%AE%97%E6%B3%95/ class="post_tag button button_translucent" data-position=15 title=匈牙利算法>匈牙利算法<span class=button_tally>15</span>
+</a><a href=https://111qqz.com/tags/%E8%99%9A%E7%82%B9/ class="post_tag button button_translucent" data-position=1 title=虚点>虚点<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E8%93%84%E6%B0%B4%E6%B1%A0%E6%8A%BD%E6%A0%B7/ class="post_tag button button_translucent" data-position=1 title=蓄水池抽样>蓄水池抽样<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%BE%AA%E7%8E%AF%E8%8A%82/ class="post_tag button button_translucent" data-position=8 title=循环节>循环节<span class=button_tally>8</span>
+</a><a href=https://111qqz.com/tags/%E5%BE%AA%E7%8E%AF%E5%B1%95%E5%BC%80/ class="post_tag button button_translucent" data-position=1 title=循环展开>循环展开<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/ class="post_tag button button_translucent" data-position=1 title=一致性哈希>一致性哈希<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5/ class="post_tag button button_translucent" data-position=1 title=依赖注入>依赖注入<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/ class="post_tag button button_translucent" data-position=4 title=优先队列>优先队列<span class=button_tally>4</span>
+</a><a href=https://111qqz.com/tags/%E6%B8%B8%E6%88%8F/ class="post_tag button button_translucent" data-position=1 title=游戏>游戏<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E9%A2%84%E5%A4%84%E7%90%86/ class="post_tag button button_translucent" data-position=1 title=预处理>预处理<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%A0%88/ class="post_tag button button_translucent" data-position=1 title=栈>栈<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/ class="post_tag button button_translucent" data-position=1 title=正则表达式>正则表达式<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%8C%87%E6%95%B0%E5%BE%AA%E7%8E%AF%E8%8A%82/ class="post_tag button button_translucent" data-position=7 title=指数循环节>指数循环节<span class=button_tally>7</span>
+</a><a href=https://111qqz.com/tags/%E7%BD%AE%E6%8D%A2%E7%BE%A4/ class="post_tag button button_translucent" data-position=1 title=置换群>置换群<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E4%B8%AD%E5%9B%BD%E5%89%A9%E4%BD%99%E5%AE%9A%E7%90%86/ class="post_tag button button_translucent" data-position=4 title=中国剩余定理>中国剩余定理<span class=button_tally>4</span>
+</a><a href=https://111qqz.com/tags/%E9%87%8D%E5%BF%83/ class="post_tag button button_translucent" data-position=1 title=重心>重心<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E4%B8%BB%E5%B8%AD%E6%A0%91/ class="post_tag button button_translucent" data-position=5 title=主席树>主席树<span class=button_tally>5</span>
+</a><a href=https://111qqz.com/tags/%E7%8A%B6%E6%80%81%E5%8E%8B%E7%BC%A9/ class="post_tag button button_translucent" data-position=1 title=状态压缩>状态压缩<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E7%8A%B6%E5%8E%8Bdp/ class="post_tag button button_translucent" data-position=1 title=状压dp>状压DP<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2/ class="post_tag button button_translucent" data-position=14 title=字符串>字符串<span class=button_tally>14</span>
+</a><a href=https://111qqz.com/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2dp/ class="post_tag button button_translucent" data-position=1 title=字符串dp>字符串DP<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%BE%AA%E7%8E%AF%E5%90%8C%E6%9E%84/ class="post_tag button button_translucent" data-position=4 title=字符串循环同构>字符串循环同构<span class=button_tally>4</span>
+</a><a href=https://111qqz.com/tags/%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/ class="post_tag button button_translucent" data-position=1 title=组成原理>组成原理<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F/ class="post_tag button button_translucent" data-position=1 title=组合模式>组合模式<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E7%BB%84%E5%90%88%E6%95%B0%E5%AD%A6/ class="post_tag button button_translucent" data-position=10 title=组合数学>组合数学<span class=button_tally>10</span>
+</a><a href=https://111qqz.com/tags/%E6%9C%80%E5%A4%A7%E7%8B%AC%E7%AB%8B%E9%9B%86/ class="post_tag button button_translucent" data-position=1 title=最大独立集>最大独立集<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%9C%80%E5%A4%A7%E8%BF%9E%E7%BB%AD%E5%92%8C/ class="post_tag button button_translucent" data-position=1 title=最大连续和>最大连续和<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%9C%80%E5%A4%A7%E8%BF%9E%E7%BB%AD%E5%8C%BA%E9%97%B4%E5%92%8C/ class="post_tag button button_translucent" data-position=3 title=最大连续区间和>最大连续区间和<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/%E6%9C%80%E7%9F%AD%E8%B7%AF/ class="post_tag button button_translucent" data-position=5 title=最短路>最短路<span class=button_tally>5</span>
+</a><a href=https://111qqz.com/tags/%E6%9C%80%E5%B0%8F%E8%A1%A8%E7%A4%BA%E6%B3%95/ class="post_tag button button_translucent" data-position=7 title=最小表示法>最小表示法<span class=button_tally>7</span>
+</a><a href=https://111qqz.com/tags/%E6%9C%80%E5%B0%8F%E9%A1%B6%E7%82%B9%E8%A6%86%E7%9B%96/ class="post_tag button button_translucent" data-position=2 title=最小顶点覆盖>最小顶点覆盖<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E6%9C%80%E5%B0%8F%E8%A6%86%E7%9B%96%E5%AD%90%E4%B8%B2/ class="post_tag button button_translucent" data-position=3 title=最小覆盖子串>最小覆盖子串<span class=button_tally>3</span>
+</a><a href=https://111qqz.com/tags/%E6%9C%80%E5%B0%8F%E8%A6%86%E7%9B%96%E5%AD%90%E7%9F%A9%E5%BD%A2/ class="post_tag button button_translucent" data-position=1 title=最小覆盖子矩形>最小覆盖子矩形<span class=button_tally>1</span>
+</a><a href=https://111qqz.com/tags/%E6%9C%80%E5%B0%8F%E8%B7%AF%E5%BE%84%E8%A6%86%E7%9B%96/ class="post_tag button button_translucent" data-position=2 title=最小路径覆盖>最小路径覆盖<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91/ class="post_tag button button_translucent" data-position=2 title=最小生成树>最小生成树<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%97%E4%B8%B2/ class="post_tag button button_translucent" data-position=4 title=最长公共字串>最长公共字串<span class=button_tally>4</span>
+</a><a href=https://111qqz.com/tags/%E6%9C%80%E9%95%BF%E8%B7%AF/ class="post_tag button button_translucent" data-position=2 title=最长路>最长路<span class=button_tally>2</span>
+</a><a href=https://111qqz.com/tags/%E6%9C%80%E9%95%BF%E4%B8%8B%E9%99%8D%E5%AD%90%E5%BA%8F%E5%88%97/ class="post_tag button button_translucent" data-position=1 title=最长下降子序列>最长下降子序列<span class=button_tally>1</span></a><div class=tags_sort><span title="sort alphabetically">[A~Z]</span><span title="sort by count">[0~9]</span></div><span class=tags_hide><svg class="icon"><use xlink:href="#closeme"/></svg></span></div></div></nav></div></section></aside></div></main><svg width="0" height="0" class="hidden"><symbol viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" id="facebook"><path d="M437 0H75C33.648.0.0 33.648.0 75v362c0 41.352 33.648 75 75 75h151V331h-60v-90h60v-61c0-49.629 40.371-90 90-90h91v90h-91v61h91l-15 90h-76v181h121c41.352.0 75-33.648 75-75V75c0-41.352-33.648-75-75-75zm0 0"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18.001 18.001" id="twitter"><path d="M15.891 4.013c.808-.496 1.343-1.173 1.605-2.034a8.68 8.68.0 01-2.351.861c-.703-.756-1.593-1.14-2.66-1.14-1.043.0-1.924.366-2.643 1.078A3.56 3.56.0 008.766 5.383c0 .309.039.585.117.819-3.076-.105-5.622-1.381-7.628-3.837-.34.601-.51 1.213-.51 1.846.0 1.301.549 2.332 1.645 3.089-.625-.053-1.176-.211-1.645-.47.0.929.273 1.705.82 2.388a3.623 3.623.0 002.115 1.291c-.312.08-.641.118-.979.118-.312.0-.533-.026-.664-.083.23.757.664 1.371 1.291 1.841a3.652 3.652.0 002.152.743C4.148 14.173 2.625 14.69.902 14.69c-.422.0-.721-.006-.902-.038 1.697 1.102 3.586 1.649 5.676 1.649 2.139.0 4.029-.542 5.674-1.626 1.645-1.078 2.859-2.408 3.639-3.974a10.77 10.77.0 001.172-4.892v-.468a7.788 7.788.0 001.84-1.921 8.142 8.142.0 01-2.11.593z"/></symbol><symbol aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" id="mail"><path d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V4e2c0 26.5-21.5 48-48 48H48c-26.5.0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5.0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" id="calendar"><path d="M452 40h-24V0h-40v40H124V0H84v40H60C26.916 40 0 66.916.0 1e2v352c0 33.084 26.916 60 60 60h392c33.084.0 60-26.916 60-60V1e2c0-33.084-26.916-60-60-60zm20 412c0 11.028-8.972 20-20 20H60c-11.028.0-20-8.972-20-20V188h432v264zm0-304H40v-48c0-11.028 8.972-20 20-20h24v40h40V80h264v40h40V80h24c11.028.0 20 8.972 20 20v48z"/><path d="M76 230h40v40H76zm80 0h40v40h-40zm80 0h40v40h-40zm80 0h40v40h-40zm80 0h40v40h-40zM76 310h40v40H76zm80 0h40v40h-40zm80 0h40v40h-40zm80 0h40v40h-40zM76 390h40v40H76zm80 0h40v40h-40zm80 0h40v40h-40zm80 0h40v40h-40zm80-80h40v40h-40z"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" id="github"><path d="M255.968 5.329C114.624 5.329.0 120.401.0 262.353c0 113.536 73.344 209.856 175.104 243.872 12.8 2.368 17.472-5.568 17.472-12.384.0-6.112-.224-22.272-.352-43.712-71.2 15.52-86.24-34.464-86.24-34.464-11.616-29.696-28.416-37.6-28.416-37.6-23.264-15.936 1.728-15.616 1.728-15.616 25.696 1.824 39.2 26.496 39.2 26.496 22.848 39.264 59.936 27.936 74.528 21.344 2.304-16.608 8.928-27.936 16.256-34.368-56.832-6.496-116.608-28.544-116.608-127.008.0-28.064 9.984-51.008 26.368-68.992-2.656-6.496-11.424-32.64 2.496-68 0 0 21.504-6.912 70.4 26.336 20.416-5.696 42.304-8.544 64.096-8.64 21.728.128 43.648 2.944 64.096 8.672 48.864-33.248 70.336-26.336 70.336-26.336 13.952 35.392 5.184 61.504 2.56 68 16.416 17.984 26.304 40.928 26.304 68.992.0 98.72-59.84 120.448-116.864 126.816 9.184 7.936 17.376 23.616 17.376 47.584.0 34.368-.32 62.08-.32 70.496.0 6.88 4.608 14.88 17.6 12.352C438.72 472.145 512 375.857 512 262.353 512 120.401 397.376 5.329 255.968 5.329z"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 212 212" id="gitlab"><path d="M12.3 74.7h54L43.3 3c-1-3.6-6.4-3.6-7.6.0L12.3 74.8z"/><path d="M12.3 74.7.5 111c-1 3.2.0 6.8 3 8.8l101.6 74-92.5-119z"/><path d="M105 193.7l-38.6-119h-54l92.7 119z"/><path d="M105 193.7l38.7-119H66.4l38.7 119z"/><path d="M105 193.7l38.7-119H198l-93 119z"/><path d="M198 74.7l11.6 36.2c1 3 0 6.6-3 8.6l-101.5 74 93-119z"/><path d="M198 74.7h-54.3L167 3c1.2-3.6 6.4-3.6 7.6.0L198 74.8z"/></symbol><symbol viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" id="rss"><circle cx="3.429" cy="20.571" r="3.429"/><path d="M11.429 24h4.57C15.999 15.179 8.821 8.001.0 8v4.572c6.302.001 11.429 5.126 11.429 11.428z"/><path d="M24 24C24 10.766 13.234.0.0.0v4.571c10.714.0 19.43 8.714 19.43 19.429z"/></symbol><symbol viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" id="linkedin"><path d="M437 0H75C33.648.0.0 33.648.0 75v362c0 41.352 33.648 75 75 75h362c41.352.0 75-33.648 75-75V75c0-41.352-33.648-75-75-75zM181 406h-60V196h60zm0-240h-60v-60h60zm210 240h-60V286c0-16.54-13.46-30-30-30s-30 13.46-30 30v120h-60V196h60v11.309C286.719 202.422 296.93 196 316 196c40.691.043 75 36.547 75 79.688zm0 0"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 612 612" id="arrow"><path d="M604.501 440.509 325.398 134.956c-5.331-5.357-12.423-7.627-19.386-7.27-6.989-.357-14.056 1.913-19.387 7.27L7.499 440.509c-9.999 10.024-9.999 26.298.0 36.323s26.223 10.024 36.222.0l262.293-287.164L568.28 476.832c9.999 10.024 26.222 10.024 36.221.0 9.999-10.023 9.999-26.298.0-36.323z"/></symbol><symbol viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" id="carly"><path d="M504.971 239.029 448 182.059V84c0-46.317-37.682-84-84-84h-44c-13.255.0-24 10.745-24 24s10.745 24 24 24h44c19.851.0 36 16.149 36 36v108c0 6.365 2.529 12.47 7.029 16.971L454.059 256l-47.029 47.029A24.002 24.002.0 004e2 320v108c0 19.851-16.149 36-36 36h-44c-13.255.0-24 10.745-24 24s10.745 24 24 24h44c46.318.0 84-37.683 84-84v-98.059l56.971-56.971c9.372-9.372 9.372-24.568.0-33.941zM112 192V84c0-19.851 16.149-36 36-36h44c13.255.0 24-10.745 24-24S205.255.0 192 0h-44c-46.318.0-84 37.683-84 84v98.059l-56.971 56.97c-9.373 9.373-9.373 24.568.0 33.941L64 329.941V428c0 46.317 37.682 84 84 84h44c13.255.0 24-10.745 24-24s-10.745-24-24-24h-44c-19.851.0-36-16.149-36-36V320c0-6.365-2.529-12.47-7.029-16.971L57.941 256l47.029-47.029A24.002 24.002.0 00112 192z"/></symbol><symbol viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" id="copy"><path d="M23 2.75A2.75 2.75.0 0020.25.0H8.75A2.75 2.75.0 006 2.75v13.5A2.75 2.75.0 008.75 19h11.5A2.75 2.75.0 0023 16.25zM18.25 14.5h-7.5a.75.75.0 010-1.5h7.5a.75.75.0 010 1.5zm0-3h-7.5a.75.75.0 010-1.5h7.5a.75.75.0 010 1.5zm0-3h-7.5a.75.75.0 010-1.5h7.5a.75.75.0 010 1.5z"/><path d="M8.75 20.5A4.255 4.255.0 014.5 16.25V2.75c0-.086.02-.166.025-.25H3.75A2.752 2.752.0 001 5.25v16A2.752 2.752.0 003.75 24h12a2.752 2.752.0 002.75-2.75v-.75z"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512.001 512.001" id="closeme"><path d="M284.286 256.002 506.143 34.144c7.811-7.811 7.811-20.475.0-28.285-7.811-7.81-20.475-7.811-28.285.0L256 227.717 34.143 5.859c-7.811-7.811-20.475-7.811-28.285.0-7.81 7.811-7.811 20.475.0 28.285l221.857 221.857L5.858 477.859c-7.811 7.811-7.811 20.475.0 28.285a19.938 19.938.0 0014.143 5.857 19.94 19.94.0 0014.143-5.857L256 284.287l221.857 221.857c3.905 3.905 9.024 5.857 14.143 5.857s10.237-1.952 14.143-5.857c7.811-7.811 7.811-20.475.0-28.285L284.286 256.002z"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" id="open-menu"><path d="M492 236H20c-11.046.0-20 8.954-20 20s8.954 20 20 20h472c11.046.0 20-8.954 20-20s-8.954-20-20-20zm0-160H20C8.954 76 0 84.954.0 96s8.954 20 20 20h472c11.046.0 20-8.954 20-20s-8.954-20-20-20zm0 320H20c-11.046.0-20 8.954-20 20s8.954 20 20 20h472c11.046.0 20-8.954 20-20s-8.954-20-20-20z"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="instagram"><path d="M12 2.163c3.204.0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849.0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204.0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849.0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741.0 8.333.014 7.053.072c-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.668.072 4.948c.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24s3.668-.014 4.948-.072c4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948s-.014-3.667-.072-4.947c-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403.0-6.162 2.759-6.162 6.162S8.597 18.163 12 18.163s6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zM12 16c-2.209.0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796.0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795.0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="youtube"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23.0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23.0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 3.993L9 16z"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="stackoverflow"><path d="M21 27v-8h3v11H0V19h3v8h18z"/><path d="M17.1.2 15 1.8l7.9 10.6 2.1-1.6L17.1.2zm3.7 14.7L10.6 6.4l1.7-2 10.2 8.5-1.7 2zM7.2 12.3l12 5.6 1.1-2.4-12-5.6-1.1 2.4zm-1.8 6.8 13.56 1.96.17-2.38-13.26-2.55-.47 2.97zM19 25H5v-3h14v3z"/></symbol><symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="xing"><path d="M18.188.0c-.517.0-.741.325-.927.66.0.0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211.0.375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016.0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894.0 21.686.0h-3.498zM3.648 4.74c-.211.0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016.0.021L1.86 16.051c-.099.188-.093.381.0.529.085.142.239.234.45.234h3.461c.518.0.766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></symbol></svg><footer class=footer><div class="footer_inner wrap pale"><img src=https://111qqz.com/icons/apple-touch-icon.png class="icon icon_2 transparent" alt=111qqz的小窝><p>Copyright&nbsp;<span class=year></span>&nbsp;111QQZ的小窝. All Rights Reserved</p><a class=to_top href=#documentTop><svg class="icon"><use xlink:href="#arrow"/></svg></a></div></footer><script type=text/javascript src=https://111qqz.com/js/bundle.min.f86d286f05bf90a933ff9fa1c1167a1e2db0cb5896fe07d7c95ea7634bd1b758200e370a1a769d90822f39219852f09b3b5744811adb0aacb1892839818ccb11.js integrity="sha512-+G0obwW/kKkz/5+hwRZ6Hi2wy1iW/gfXyV6nY0vRt1ggDjcKGnadkIIvOSGYUvCbO1dEgRrbCqyxiSg5gYzLEQ==" crossorigin=anonymous></script></body></html>

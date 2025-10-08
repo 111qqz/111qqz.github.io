@@ -1,87 +1,27 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>矩阵快速幂 on 111qqz的小窝</title><link>https://111qqz.com/tags/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/</link><description>Recent content in 矩阵快速幂 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Tue, 10 Oct 2017 10:19:55 +0000</lastBuildDate><atom:link href="https://111qqz.com/tags/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/index.xml" rel="self" type="application/rss+xml"/><item><title>hdu 5950 Recursive sequence (构造矩阵，快速幂)</title><link>https://111qqz.com/2017/10/hdu-5950/</link><pubDate>Tue, 10 Oct 2017 10:19:55 +0000</pubDate><guid>https://111qqz.com/2017/10/hdu-5950/</guid><description>
-题目链接
-题意： 给f[1],f[2],n,f[i] = 2*f[i-2] + f[i-1] + i^4,求f[n]的值。
-思路： 很容易想到矩阵，但是i^4不是线性的差评，我们可以拆一下
-i^4=(i-1+1)^4,然后二项式展开即可
-i^4=(i-1)^4 + 4*(i-1)^3 + 6(i-1)^2 + 4(i-1) + 1
-所以为了维护i^4这一项，需要(i-1)^4,(i-1)^3,(i-1)^2,(i-1),1,
-再加上f[i-1]和f[i-2]两项，一共7项。
-然后构造矩阵为
-16沈阳 onsite的题，当时好像写了一个小时，现在看来，果然是个人尽皆知的傻逼题orz
-/* *********************************************** Author :111qqz Created Time :2017年10月10日 星期二 17时38分11秒 File Name :5950.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define PB push_back #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; const int N=7; const LL MOD =2147493647LL; LL a,b,n; struct Mat { LL mat[N][N]; void clear() { ms(mat,0); } void print() { for ( int i = 0 ; i &amp;lt; N; i++) for ( int j = 0 ; j &amp;lt; N ; j++) printf(&amp;quot;%lld%c&amp;quot;,mat[i][j],j==N-1?</description></item><item><title>uva 10870 - Recurrences (矩阵加速线性递推式)</title><link>https://111qqz.com/2017/10/uva-10870/</link><pubDate>Sat, 30 Sep 2017 20:35:55 +0000</pubDate><guid>https://111qqz.com/2017/10/uva-10870/</guid><description>
-uva10870题目链接
-题意： f(n) = a1f(n − 1) + a2f(n − 2) + a3f(n − 3) + . . . + adf(n − d), for n &amp;gt; d
-给出f[1]..f[d],a[1]..a[d],问 f[n]%m是多少。
-思路： 构造矩阵，加速递推式。
-趁着这道题说一下一般的构造法。
-转移矩阵M(d*d)的构造方法是，最后一行倒序写a[1]..a[d], 除去第一列和最后一行外，用1填充对角线，其余的为0.
-初始矩阵M1(d*1)的构造方法是从上到下，f[1]..f[d]即可。
-需要注意的是
-*最后答案是 (M^(n-d))M1.mat[d-1][0] (由于经常出现的是d=2的递推式，因此注意不要把此式子的d，写成不够一般化的错误的2
-/* *********************************************** Author :111qqz Created Time :2017年10月01日 星期日 03时57分36秒 File Name :10870.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define PB push_back #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; const int N=20; int n,d; LL mod; LL a[N],f[N]; struct Mat { LL mat[N][N]; void clear() { ms(mat,0); } void print() { for ( int i = 0 ; i &amp;lt; d ; i++) for ( int j = 0 ; j &amp;lt; d ; j++) printf(&amp;quot;%lld%c&amp;quot;,mat[i][j],j==d-1?</description></item><item><title>hdu 4990 Reading comprehension (构造矩阵，快速幂)</title><link>https://111qqz.com/2017/09/hdu-4990/</link><pubDate>Sat, 30 Sep 2017 11:38:05 +0000</pubDate><guid>https://111qqz.com/2017/09/hdu-4990/</guid><description>
-题目链接
-题意： 给出了一段程序，程序实际算的是f[n] = (f[n-1] + n%2)%m的值，其中f[1]=1,给出n,m(1E9)，问f[n]
-思路： 显然是矩阵快速幂，终点在于构造矩阵。
-通过经验可得（这次真的是经验了。。。其实也挺容易的，要点大概在于先把需要的项列在一起，然后增加0或者多个，为了转移需要的辅助项。
-根据当前列和下一列，手动构造转移矩阵）
-转移矩阵M为
-[2, 1,0]
-[0,-1,1]
-[0,0 ,1]
-4A..都是一个原因。。矩阵乘法那里。。。就算你%了m..也是两个1E9在相乘。。。然后就炸了23333,改成LL即可。
-/* *********************************************** Author :111qqz Created Time :2017年09月30日 星期六 19时08分59秒 File Name :4990.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define PB push_back #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f;le int n; LL mod; struct Mat { LL mat[8][8]; void clear() { ms(mat,0); } }M,M1; Mat operator * (Mat a,Mat b) { Mat c; c.</description></item><item><title>hdu 5015 233 Matrix (构造矩阵，快速幂)</title><link>https://111qqz.com/2017/09/hdu-5015/</link><pubDate>Sat, 30 Sep 2017 10:54:07 +0000</pubDate><guid>https://111qqz.com/2017/09/hdu-5015/</guid><description>
-hdu5015题目链接
-题意： 给出矩阵的构造规则： a[0][j] (j&amp;gt;=1) 分别为233,2333,23333....给出a[i][0] (i&amp;gt;=1)，对于其余的i,j,a[i][j]=a[i-1][j] + a[i][j-1]
-现在问a[n][m] 在% 1E7+7 下的值是多少 （n&amp;lt;=10,m&amp;lt;=1E9）
-思路： 显然矩阵快速幂，但是不会构造矩阵，放弃。
-看了很多题解...发现都是“显然”构造出矩阵。。。似乎是直接凑出来的。。。
-可能需要积累一点经验。
-对于这道题，我们观察到n很小
-所以一个直觉就是从n-1列推到第n列，推到n+1列这样地推。
-初始第一列的信息是（假设n为3）
-[a1]
-[a2]
-[a3]
-然后我们想要得到
-[a1+233]
-[a1+a2+233]
-[a1+a2+a3+233]
-我们发现我们需要233这个常数项体现在矩阵中
-而且之后还需要233,2333,23333体现在矩阵中。
-那么，我们可以在初始添加23和3两项，这样23...3就都可以构造出来了（我觉得关键点就在这一步，应该是凭借经验吧，虽然刚开始有点难想到orz)
-因此现在初始列变成了(其实放置顺序无所谓，不过这样放可以让ai和行数对应，比较友好。
-[23]
-[a1]
-[a2]
-[a3]
-[3]
-设该矩阵为A
-现在我们想得到下一列
-[233]
-[a1+233]
-[a1+a2+233]
-[a1+a2+a3+233]
-[3]
-设该矩阵为B
-那么现在的问题就是构造一个矩阵5*5的矩阵X,使得X×A=B
-凭借直觉（经验？
-我们得到这样的矩阵X为
-[10,0,0,0,1]
-[10,1,0,0,1]
-[10,1,1,0,1]
-[10,1,1,1,1]
-[0, 0,0,0,1]
-接下来就是矩阵快速幂了，答案是 (X^m)×A.mat[n][0]
-/* *********************************************** Author :111qqz Created Time :2017年09月30日 星期六 17时47分20秒 File Name :5015.cpp ************************************************ */ #include &amp;lt;cstdio&amp;gt; #include &amp;lt;cstring&amp;gt; #include &amp;lt;iostream&amp;gt; #include &amp;lt;algorithm&amp;gt; #include &amp;lt;vector&amp;gt; #include &amp;lt;queue&amp;gt; #include &amp;lt;set&amp;gt; #include &amp;lt;map&amp;gt; #include &amp;lt;string&amp;gt; #include &amp;lt;cmath&amp;gt; #include &amp;lt;cstdlib&amp;gt; #include &amp;lt;ctime&amp;gt; #define PB push_back #define fst first #define sec second #define lson l,m,rt&amp;lt;&amp;lt;1 #define rson m+1,r,rt&amp;lt;&amp;lt;1|1 #define ms(a,x) memset(a,x,sizeof(a)) typedef long long LL; #define pi pair &amp;lt; int ,int &amp;gt; #define MP make_pair using namespace std; const double eps = 1E-8; const int dx4[4]={1,0,0,-1}; const int dy4[4]={0,-1,1,0}; const int inf = 0x3f3f3f3f; int n,m; int a[15]; const LL MOD=10000007; struct Mat { LL mat[15][15]; void clear() { ms(mat,0); } void print() { for ( int i = 0 ; i &amp;lt;= n+1 ; i++) { for ( int j = 0 ; j &amp;lt;= n+1 ; j++) { printf(&amp;quot;%lld &amp;quot;,mat[i][j]); } printf(&amp;quot;\n&amp;quot;); } } }M,M1; Mat operator * (Mat a,Mat b) { Mat c; c.</description></item><item><title>hdu 4549 M斐波那契数列 (矩阵快速幂+费马小定理+指数循环节)</title><link>https://111qqz.com/2016/10/hdu4549/</link><pubDate>Wed, 26 Oct 2016 09:12:43 +0000</pubDate><guid>https://111qqz.com/2016/10/hdu4549/</guid><description>
-题意：M斐波那契数列F[n]是一种整数数列，它的定义如下：
-F[0] = a F[1] = b F[n] = F[n-1] * F[n-2] ( n &amp;gt; 1 )
-现在给出a, b, n，你能求出F[n]的值吗？
-思路：观察发现。。。F[n] = a^(fib(n-1)) * b ^ (fib(n))
-此处要用到指数循环节的知识：
-111qqz_指数循环节学习笔记
-a^n ≡ a^(n % Phi(M) + Phi(M)) (mod M) (n &amp;gt;= Phi(M))
-然后 因为1000000007是质数，对于任意的x,有gcd(x,1000000007) = 1，所以可以结合费马小定理化简上式：
-a^n ≡ a^(n%(m-1)) * a^(m-1)≡ a^(n%(m-1)) (mod m)
-记得特判一下n为0和1的情况。
-xiaodingli
-/* *********************************************** Author :111qqz Created Time :Wed 26 Oct 2016 09:16:22 AM CST File Name :code/hdu/4549.</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>矩阵快速幂 on 111qqz的小窝</title><link>https://111qqz.com/tags/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/</link><description>Recent content in 矩阵快速幂 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh</language><copyright>Copyright © 2012-2022 all rights reserved.</copyright><lastBuildDate>Tue, 10 Oct 2017 10:19:55 +0000</lastBuildDate><atom:link href="https://111qqz.com/tags/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/index.xml" rel="self" type="application/rss+xml"/><item><title>hdu 5950 Recursive sequence (构造矩阵，快速幂)</title><link>https://111qqz.com/2017/10/hdu-5950/</link><pubDate>Tue, 10 Oct 2017 10:19:55 +0000</pubDate><guid>https://111qqz.com/2017/10/hdu-5950/</guid><description>
+&lt;p&gt;&lt;a href="http://acm.split.hdu.edu.cn/showproblem.php?pid=5950"&gt;题目链接&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id="题意"&gt;题意：&lt;/h1&gt;
+&lt;p&gt;给f[1],f[2],n,f[i] = 2*f[i-2] + f[i-1] + i^4,求f[n]的值。&lt;/p&gt;
+&lt;h1 id="思路"&gt;思路：&lt;/h1&gt;
+&lt;p&gt;很容易想到矩阵，但是i^4不是线性的差评，我们可以拆一下&lt;/p&gt;
+&lt;p&gt;i^4=(i-1+1)^4,然后二项式展开即可&lt;/p&gt;</description></item><item><title>uva 10870 - Recurrences (矩阵加速线性递推式)</title><link>https://111qqz.com/2017/10/uva-10870/</link><pubDate>Sat, 30 Sep 2017 20:35:55 +0000</pubDate><guid>https://111qqz.com/2017/10/uva-10870/</guid><description>
+&lt;p&gt;&lt;a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;amp;Itemid=8&amp;amp;page=show_problem&amp;amp;problem=1811"&gt;uva10870题目链接&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id="题意"&gt;题意：&lt;/h1&gt;
+&lt;p&gt;f(n) = a1f(n − 1) + a2f(n − 2) + a3f(n − 3) + . . . + adf(n − d), for n &amp;gt; d&lt;/p&gt;
+&lt;p&gt;给出f[1]..f[d],a[1]..a[d],问 f[n]%m是多少。&lt;/p&gt;
+&lt;h1 id="思路"&gt;思路：&lt;/h1&gt;
+&lt;p&gt;构造矩阵，加速递推式。&lt;/p&gt;</description></item><item><title>hdu 4990 Reading comprehension (构造矩阵，快速幂)</title><link>https://111qqz.com/2017/09/hdu-4990/</link><pubDate>Sat, 30 Sep 2017 11:38:05 +0000</pubDate><guid>https://111qqz.com/2017/09/hdu-4990/</guid><description>
+&lt;p&gt;&lt;a href="http://acm.hdu.edu.cn/showproblem.php?pid=4990"&gt;题目链接&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id="题意"&gt;题意：&lt;/h1&gt;
+&lt;p&gt;给出了一段程序，程序实际算的是f[n] = (f[n-1] + n%2)%m的值，其中f[1]=1,给出n,m(1E9)，问f[n]&lt;/p&gt;
+&lt;h1 id="思路"&gt;思路：&lt;/h1&gt;
+&lt;p&gt;显然是矩阵快速幂，终点在于构造矩阵。&lt;/p&gt;</description></item><item><title>hdu 5015 233 Matrix (构造矩阵，快速幂)</title><link>https://111qqz.com/2017/09/hdu-5015/</link><pubDate>Sat, 30 Sep 2017 10:54:07 +0000</pubDate><guid>https://111qqz.com/2017/09/hdu-5015/</guid><description>
+&lt;p&gt;&lt;a href="http://acm.hdu.edu.cn/showproblem.php?pid=5015"&gt;hdu5015题目链接&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id="题意"&gt;题意：&lt;/h1&gt;
+&lt;p&gt;给出矩阵的构造规则： a[0][j] (j&amp;gt;=1) 分别为233,2333,23333....给出a[i][0] (i&amp;gt;=1)，对于其余的i,j,a[i][j]=a[i-1][j] + a[i][j-1]&lt;/p&gt;</description></item><item><title>hdu 4549 M斐波那契数列 (矩阵快速幂+费马小定理+指数循环节)</title><link>https://111qqz.com/2016/10/hdu4549/</link><pubDate>Wed, 26 Oct 2016 09:12:43 +0000</pubDate><guid>https://111qqz.com/2016/10/hdu4549/</guid><description>
+&lt;p&gt;题意：M斐波那契数列F[n]是一种整数数列，它的定义如下：&lt;/p&gt;
+&lt;p&gt;F[0] = a
+F[1] = b
+F[n] = F[n-1] * F[n-2] ( n &amp;gt; 1 )&lt;/p&gt;
+&lt;p&gt;现在给出a, b, n，你能求出F[n]的值吗？&lt;/p&gt;
+&lt;p&gt;思路：观察发现。。。F[n] = a^(fib(n-1)) * b ^ (fib(n))&lt;/p&gt;</description></item></channel></rss>
