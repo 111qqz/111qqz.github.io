@@ -18,52 +18,48 @@
 <a href=https://111qqz.com/ class="nav_child nav_item">中文</a>
 <a href=https://111qqz.com/en/ class="nav_child nav_item">English</a></div></div><div class=follow><a href=https://github.com/111qqz><svg class="icon"><use xlink:href="#github"/></svg></a><div class=color_mode><input type=checkbox class=color_choice id=mode></div></div></div></nav></header><main><div class="grid-inverse wrap content"><article class=post_content><h1 class=post_title>caffe2 添加自定义operater</h1><div class=post_meta><span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>2018-04-13</span>
-<span class=post_time>· 3 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/caffe2 title=caffe2 class="post_tag button button_translucent">caffe2</a></span></div><div class=post_body><p>记录一些一个没有之前没有接触过caffe/caffe2的人为了添加自定义的op 到caffe2需要做的工作.</p><p>首先参考caffe2 tutorial,随便跑个op来试试,不妨以比较简单的  <a href=https://caffe2.ai/docs/operators-catalogue.html#accumulate>Accumulate_op</a> 为例子.</p><p>这个op的作用就是计算Y=X+gamma*Y, 其中X为输入,Y为输出,gamma是参数.</p><p>跑起来这个运算所需要的代码如下:</p><pre><code>from caffe2.python import workspace, model_helper
-import numpy as np
-# Create the input data
-data = np.arange(6).reshape(2,3).astype(np.float32)
-print (&quot;data=&quot;,data)
-
-# Create labels for the data as integers [0, 9].
-
-workspace.FeedBlob(&quot;data&quot;, data)
-# Create model using a model helper
-m = model_helper.ModelHelper(name=&quot;my first net&quot;)
-output = m.net.Accumulate([&quot;data&quot;], &quot;output&quot;)
-print(m.net.Proto())
-workspace.RunNetOnce(m.param_init_net)
-workspace.CreateNet(m.net)
-workspace.RunNet(m.name,2)  # run 2 times
-print(&quot;output=&quot;,workspace.FetchBlob('output'))
-</code></pre><p>c之后我们仿照caffe2/operators/accumultate_op.h和affe2/operators/accumultate_op.cc,仿写一个我们自己的运算atest_op.h和atest_op.cc</p><p>实现的功能为Y=5<em>X+gamma</em>Y</p><pre><code> 
+<span class=post_time>· 3 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/caffe2 title=caffe2 class="post_tag button button_translucent">caffe2</a></span></div><div class=post_body><p>记录一些一个没有之前没有接触过caffe/caffe2的人为了添加自定义的op 到caffe2需要做的工作.</p><p>首先参考caffe2 tutorial,随便跑个op来试试,不妨以比较简单的  <a href=https://caffe2.ai/docs/operators-catalogue.html#accumulate>Accumulate_op</a> 为例子.</p><p>这个op的作用就是计算Y=X+gamma*Y, 其中X为输入,Y为输出,gamma是参数.</p><p>跑起来这个运算所需要的代码如下:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=kn>from</span> <span class=nn>caffe2.python</span> <span class=kn>import</span> <span class=n>workspace</span><span class=p>,</span> <span class=n>model_helper</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1># Create the input data</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=n>data</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>arange</span><span class=p>(</span><span class=mi>6</span><span class=p>)</span><span class=o>.</span><span class=n>reshape</span><span class=p>(</span><span class=mi>2</span><span class=p>,</span><span class=mi>3</span><span class=p>)</span><span class=o>.</span><span class=n>astype</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>float32</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=nb>print</span> <span class=p>(</span><span class=s2>&#34;data=&#34;</span><span class=p>,</span><span class=n>data</span><span class=p>)</span>
+</span></span></code></pre></div><pre><code># Create labels for the data as integers [0, 9].
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=n>workspace</span><span class=o>.</span><span class=n>FeedBlob</span><span class=p>(</span><span class=s2>&#34;data&#34;</span><span class=p>,</span> <span class=n>data</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1># Create model using a model helper</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>m</span> <span class=o>=</span> <span class=n>model_helper</span><span class=o>.</span><span class=n>ModelHelper</span><span class=p>(</span><span class=n>name</span><span class=o>=</span><span class=s2>&#34;my first net&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=n>output</span> <span class=o>=</span> <span class=n>m</span><span class=o>.</span><span class=n>net</span><span class=o>.</span><span class=n>Accumulate</span><span class=p>([</span><span class=s2>&#34;data&#34;</span><span class=p>],</span> <span class=s2>&#34;output&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>m</span><span class=o>.</span><span class=n>net</span><span class=o>.</span><span class=n>Proto</span><span class=p>())</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl><span class=n>workspace</span><span class=o>.</span><span class=n>RunNetOnce</span><span class=p>(</span><span class=n>m</span><span class=o>.</span><span class=n>param_init_net</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl><span class=n>workspace</span><span class=o>.</span><span class=n>CreateNet</span><span class=p>(</span><span class=n>m</span><span class=o>.</span><span class=n>net</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>8</span><span class=cl><span class=n>workspace</span><span class=o>.</span><span class=n>RunNet</span><span class=p>(</span><span class=n>m</span><span class=o>.</span><span class=n>name</span><span class=p>,</span><span class=mi>2</span><span class=p>)</span>  <span class=c1># run 2 times</span>
+</span></span><span class=line><span class=ln>9</span><span class=cl><span class=nb>print</span><span class=p>(</span><span class=s2>&#34;output=&#34;</span><span class=p>,</span><span class=n>workspace</span><span class=o>.</span><span class=n>FetchBlob</span><span class=p>(</span><span class=s1>&#39;output&#39;</span><span class=p>))</span>
+</span></span></code></pre></div><p>c之后我们仿照caffe2/operators/accumultate_op.h和affe2/operators/accumultate_op.cc,仿写一个我们自己的运算atest_op.h和atest_op.cc</p><p>实现的功能为Y=5<em>X+gamma</em>Y</p><pre><code> 
 #include &quot;caffe2/operators/atest_op.h&quot;
  
 namespace caffe2 {
 REGISTER_CPU_OPERATOR(Atest, AtestOp&lt;float, CPUContext&gt;);
- 
-OPERATOR_SCHEMA(Atest)
- .NumInputs(1)
- .NumOutputs(1)
- .IdenticalTypeAndShape()
- .SetDoc(R&quot;DOC(
-Accumulate operator accumulates the input tensor to the output tensor. If the
-output tensor already has the right size, we add to it; otherwise, we first
-initialize the output tensor to all zeros, and then do accumulation. Any
-further calls to the operator, given that no one else fiddles with the output
-in the interim, will do simple accumulations.
-Accumulation is done using Axpby operation as shown:
- Y = 1*X + gamma*Y
-where X is the input tensor, Y is the output tensor and gamma is the multiplier
-argument.
-)DOC&quot;)
- .Arg(&quot;gamma&quot;, &quot;(float, default 1.0) Accumulation multiplier&quot;)
- .Input(0, &quot;input&quot;, &quot;The input tensor that has to be accumulated to the &quot;
- &quot;output tensor. If the output size is not the same as input size, the &quot;
- &quot;output tensor is first reshaped and initialized to zero, and only &quot;
- &quot;then, accumulation is done.&quot;)
- .Output(0, &quot;output&quot;, &quot;Accumulated output tensor&quot;);
- 
-SHOULD_NOT_DO_GRADIENT(Atest);
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln> 1</span><span class=cl><span class=kt>OPERATOR_SCHEMA</span><span class=p>(</span><span class=kt>Atest</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl> <span class=o>.</span><span class=kt>NumInputs</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl> <span class=o>.</span><span class=kt>NumOutputs</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl> <span class=o>.</span><span class=kt>IdenticalTypeAndShape</span><span class=nb>()</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl> <span class=o>.</span><span class=kt>SetDoc</span><span class=p>(</span><span class=kt>R</span><span class=s>&#34;DOC(
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=s>Accumulate operator accumulates the input tensor to the output tensor. If the
+</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=s>output tensor already has the right size, we add to it; otherwise, we first
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=s>initialize the output tensor to all zeros, and then do accumulation. Any
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=s>further calls to the operator, given that no one else fiddles with the output
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=s>in the interim, will do simple accumulations.
+</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=s>Accumulation is done using Axpby operation as shown:
+</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=s> Y = 1*X + gamma*Y
+</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=s>where X is the input tensor, Y is the output tensor and gamma is the multiplier
+</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=s>argument.
+</span></span></span><span class=line><span class=ln>15</span><span class=cl><span class=s>)DOC&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl> <span class=o>.</span><span class=kt>Arg</span><span class=p>(</span><span class=s>&#34;gamma&#34;</span><span class=p>,</span> <span class=s>&#34;(float, default 1.0) Accumulation multiplier&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl> <span class=o>.</span><span class=kt>Input</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=s>&#34;input&#34;</span><span class=p>,</span> <span class=s>&#34;The input tensor that has to be accumulated to the &#34;</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl> <span class=s>&#34;output tensor. If the output size is not the same as input size, the &#34;</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl> <span class=s>&#34;output tensor is first reshaped and initialized to zero, and only &#34;</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl> <span class=s>&#34;then, accumulation is done.&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl> <span class=o>.</span><span class=kt>Output</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=s>&#34;output&#34;</span><span class=p>,</span> <span class=s>&#34;Accumulated output tensor&#34;</span><span class=p>);</span>
+</span></span></code></pre></div><pre><code>SHOULD_NOT_DO_GRADIENT(Atest);
 } // namespace caffe2
 
 
@@ -78,62 +74,56 @@ SHOULD_NOT_DO_GRADIENT(Atest);
 #include &quot;caffe2/utils/math.h&quot;
  
 namespace caffe2 {
- 
-template &lt;typename T, class Context&gt;
-class AtestOp final : public Operator&lt;Context&gt; {
- public:
- AtestOp(const OperatorDef&amp; operator_def, Workspace* ws)
- : Operator&lt;Context&gt;(operator_def, ws),
- gamma_(static_cast&lt;T&gt;(
- OperatorBase::template GetSingleArgument&lt;float&gt;(&quot;gamma&quot;, 1.0))) {}
- USE_OPERATOR_CONTEXT_FUNCTIONS;
- 
- bool RunOnDevice() override {
- auto&amp; input = Input(0);
- auto* output = Output(0);
- if (output-&gt;dims() != input.dims()) {
- LOG(INFO) &lt;&lt; &quot;Reshaping and initializing output.&quot;;
- output-&gt;ResizeLike(input);
- math::Set&lt;T, Context&gt;(
- output-&gt;size(), 0, output-&gt;template mutable_data&lt;T&gt;(), &amp;context_);
- }
- math::Axpby&lt;T, Context&gt;(
- input.size(),
- static_cast&lt;T&gt;(5),
- input.template data&lt;T&gt;(),
- gamma_,
- output-&gt;template mutable_data&lt;T&gt;(),
- &amp;context_);
- return true;
- }
- 
- protected:
- T gamma_;
-};
- 
-} // namespace caffe2
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=n>template</span> <span class=o>&lt;</span><span class=n>typename</span> <span class=n>T</span><span class=p>,</span> <span class=k>class</span> <span class=nc>Context</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=k>class</span> <span class=nc>AtestOp</span> <span class=n>final</span> <span class=p>:</span> <span class=n>public</span> <span class=n>Operator</span><span class=o>&lt;</span><span class=n>Context</span><span class=o>&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl> <span class=n>public</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl> <span class=n>AtestOp</span><span class=p>(</span><span class=n>const</span> <span class=n>OperatorDef</span><span class=o>&amp;</span> <span class=n>operator_def</span><span class=p>,</span> <span class=n>Workspace</span><span class=o>*</span> <span class=n>ws</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl> <span class=p>:</span> <span class=n>Operator</span><span class=o>&lt;</span><span class=n>Context</span><span class=o>&gt;</span><span class=p>(</span><span class=n>operator_def</span><span class=p>,</span> <span class=n>ws</span><span class=p>),</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl> <span class=n>gamma_</span><span class=p>(</span><span class=n>static_cast</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;</span><span class=p>(</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl> <span class=n>OperatorBase</span><span class=p>::</span><span class=n>template</span> <span class=n>GetSingleArgument</span><span class=o>&lt;</span><span class=nb>float</span><span class=o>&gt;</span><span class=p>(</span><span class=s2>&#34;gamma&#34;</span><span class=p>,</span> <span class=mf>1.0</span><span class=p>)))</span> <span class=p>{}</span>
+</span></span><span class=line><span class=ln>8</span><span class=cl> <span class=n>USE_OPERATOR_CONTEXT_FUNCTIONS</span><span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln> 1</span><span class=cl> <span class=n>bool</span> <span class=kt>RunOnDevice</span><span class=nb>()</span> <span class=n>override</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl> <span class=n>auto</span><span class=o>&amp;</span> <span class=n>input</span> <span class=ow>=</span> <span class=kt>Input</span><span class=p>(</span><span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl> <span class=n>auto</span><span class=o>*</span> <span class=n>output</span> <span class=ow>=</span> <span class=kt>Output</span><span class=p>(</span><span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl> <span class=kr>if</span> <span class=p>(</span><span class=n>output</span><span class=ow>-&gt;</span><span class=n>dims</span><span class=nb>()</span> <span class=o>!=</span> <span class=n>input</span><span class=o>.</span><span class=n>dims</span><span class=nb>()</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl> <span class=kt>LOG</span><span class=p>(</span><span class=kt>INFO</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Reshaping and initializing output.&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl> <span class=n>output</span><span class=ow>-&gt;</span><span class=kt>ResizeLike</span><span class=p>(</span><span class=n>input</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl> <span class=n>math</span><span class=ow>::</span><span class=kt>Set</span><span class=o>&lt;</span><span class=kt>T</span><span class=p>,</span> <span class=kt>Context</span><span class=o>&gt;</span><span class=p>(</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl> <span class=n>output</span><span class=ow>-&gt;</span><span class=n>size</span><span class=nb>()</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=n>output</span><span class=ow>-&gt;</span><span class=n>template</span> <span class=n>mutable_data</span><span class=o>&lt;</span><span class=kt>T</span><span class=o>&gt;</span><span class=nb>()</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>context_</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl> <span class=p>}</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl> <span class=n>math</span><span class=ow>::</span><span class=kt>Axpby</span><span class=o>&lt;</span><span class=kt>T</span><span class=p>,</span> <span class=kt>Context</span><span class=o>&gt;</span><span class=p>(</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl> <span class=n>input</span><span class=o>.</span><span class=n>size</span><span class=nb>()</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl> <span class=n>static_cast</span><span class=o>&lt;</span><span class=kt>T</span><span class=o>&gt;</span><span class=p>(</span><span class=mi>5</span><span class=p>),</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl> <span class=n>input</span><span class=o>.</span><span class=n>template</span> <span class=kr>data</span><span class=o>&lt;</span><span class=kt>T</span><span class=o>&gt;</span><span class=nb>()</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl> <span class=n>gamma_</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl> <span class=n>output</span><span class=ow>-&gt;</span><span class=n>template</span> <span class=n>mutable_data</span><span class=o>&lt;</span><span class=kt>T</span><span class=o>&gt;</span><span class=nb>()</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl> <span class=o>&amp;</span><span class=n>context_</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl> <span class=n>return</span> <span class=n>true</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl> <span class=p>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl> <span class=n>protected</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl> <span class=n>T</span> <span class=n>gamma_</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=p>};</span>
+</span></span></code></pre></div><pre><code>} // namespace caffe2
  
 #endif // CAFFE2_OPERATORS_Atest_OP_H_
 </code></pre><p>之后我们编译整个caffe2,编译方式是运行pytorch/scripts/build_local.sh</p><p>编译成功后,需要将pytorch目录添加到PYTHONPATH中</p><pre><code>export PYTHONPATH=$PYTHONPATH:/mnt/lustre/renkuanze/workspace/rjm_pytorch
 </code></pre><p>然后运行</p><pre><code>cd ~ &amp;&amp; python -c 'from caffe2.python import core' 2&gt;/dev/null &amp;&amp; echo &quot;Success&quot; || echo &quot;Failure&quot;
-</code></pre><p>看是否成功</p><p>编译的时候可能出现<a href=https://github.com/caffe2/caffe2/issues/2144>mpi_test.cc.o: undefined reference to symbol &lsquo;_ZN3MPI8Datatype4FreeEv</a>  的报错。。解决办法是把CMakeList中的MPI关掉就好了。。。</p><p><strong>以及。。。operators中的文件都不要删。。。本想删一些不相关的op来减少编译时间。。。想法是对的。。。但是似乎只删op是行不通的。。。。不如不删。。。不然会编译出现奇怪的错误！</strong></p><p><strong>不然会编译出现奇怪的错误！</strong></p><p><strong>不然会编译出现奇怪的错误！</strong></p><p>以及。。。从github download的速度太慢了。。。干脆开了个40$/m的vps来搞。。。</p><p>编译成功后修改测试的python代码，来测试一下我们定义的op</p><pre><code>from caffe2.python import workspace, model_helper
-import numpy as np
-# Create the input data
-data = np.arange(6).reshape(2,3).astype(np.float32)
-print (&quot;data=&quot;,data)
- 
-# Create labels for the data as integers [0, 9].
- 
-workspace.FeedBlob(&quot;data&quot;, data)
-# Create model using a model helper
-m = model_helper.ModelHelper(name=&quot;my first net&quot;)
-output = m.net.Atest([&quot;data&quot;], &quot;output&quot;)
-print(m.net.Proto())
-workspace.RunNetOnce(m.param_init_net)
-workspace.CreateNet(m.net)
-workspace.RunNet(m.name,1)  # run 2 times
-print(&quot;output=&quot;,workspace.FetchBlob('output'))
-</code></pre><p>发现确实是得到了Y=5<em>X+gamma</em>Y 的结果。。</p><p>撒花！（然而这只是最近要做的任务中最容易的一条线orz&mldr;</p><p>需要注意的是,运行bash build_local.sh脚本之后会在pytorch目录下生成build文件夹,下次<strong>编译的时候直接在build目录下执行make -j20,这样才是增量编译</strong></p><p><strong>编译的时候直接在build目录下执行make -j20,这样才是增量编译</strong></p><p><strong>编译的时候直接在build目录下执行make -j20,这样才是增量编译</strong></p><p>不然每次执行build_local.sh&mldr;不知caffe2用了什么机制&mldr;每次要把所有文件编译一遍&mldr;简直没有人性啊&mldr;16个cpu一起编也要5分钟Orz</p><p>以及．．．要在自己定义的函数最后返回true&mldr;这样在运行的时候才不会报错．否则会报net error 的错误Ｏｒｚ&mldr;.我好傻啊？</p></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
+</code></pre><p>看是否成功</p><p>编译的时候可能出现<a href=https://github.com/caffe2/caffe2/issues/2144>mpi_test.cc.o: undefined reference to symbol &lsquo;_ZN3MPI8Datatype4FreeEv</a>  的报错。。解决办法是把CMakeList中的MPI关掉就好了。。。</p><p><strong>以及。。。operators中的文件都不要删。。。本想删一些不相关的op来减少编译时间。。。想法是对的。。。但是似乎只删op是行不通的。。。。不如不删。。。不然会编译出现奇怪的错误！</strong></p><p><strong>不然会编译出现奇怪的错误！</strong></p><p><strong>不然会编译出现奇怪的错误！</strong></p><p>以及。。。从github download的速度太慢了。。。干脆开了个40$/m的vps来搞。。。</p><p>编译成功后修改测试的python代码，来测试一下我们定义的op</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=kn>from</span> <span class=nn>caffe2.python</span> <span class=kn>import</span> <span class=n>workspace</span><span class=p>,</span> <span class=n>model_helper</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1># Create the input data</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=n>data</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>arange</span><span class=p>(</span><span class=mi>6</span><span class=p>)</span><span class=o>.</span><span class=n>reshape</span><span class=p>(</span><span class=mi>2</span><span class=p>,</span><span class=mi>3</span><span class=p>)</span><span class=o>.</span><span class=n>astype</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>float32</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=nb>print</span> <span class=p>(</span><span class=s2>&#34;data=&#34;</span><span class=p>,</span><span class=n>data</span><span class=p>)</span>
+</span></span></code></pre></div><pre><code># Create labels for the data as integers [0, 9].
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=n>workspace</span><span class=o>.</span><span class=n>FeedBlob</span><span class=p>(</span><span class=s2>&#34;data&#34;</span><span class=p>,</span> <span class=n>data</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1># Create model using a model helper</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>m</span> <span class=o>=</span> <span class=n>model_helper</span><span class=o>.</span><span class=n>ModelHelper</span><span class=p>(</span><span class=n>name</span><span class=o>=</span><span class=s2>&#34;my first net&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=n>output</span> <span class=o>=</span> <span class=n>m</span><span class=o>.</span><span class=n>net</span><span class=o>.</span><span class=n>Atest</span><span class=p>([</span><span class=s2>&#34;data&#34;</span><span class=p>],</span> <span class=s2>&#34;output&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>m</span><span class=o>.</span><span class=n>net</span><span class=o>.</span><span class=n>Proto</span><span class=p>())</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl><span class=n>workspace</span><span class=o>.</span><span class=n>RunNetOnce</span><span class=p>(</span><span class=n>m</span><span class=o>.</span><span class=n>param_init_net</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl><span class=n>workspace</span><span class=o>.</span><span class=n>CreateNet</span><span class=p>(</span><span class=n>m</span><span class=o>.</span><span class=n>net</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>8</span><span class=cl><span class=n>workspace</span><span class=o>.</span><span class=n>RunNet</span><span class=p>(</span><span class=n>m</span><span class=o>.</span><span class=n>name</span><span class=p>,</span><span class=mi>1</span><span class=p>)</span>  <span class=c1># run 2 times</span>
+</span></span><span class=line><span class=ln>9</span><span class=cl><span class=nb>print</span><span class=p>(</span><span class=s2>&#34;output=&#34;</span><span class=p>,</span><span class=n>workspace</span><span class=o>.</span><span class=n>FetchBlob</span><span class=p>(</span><span class=s1>&#39;output&#39;</span><span class=p>))</span>
+</span></span></code></pre></div><p>发现确实是得到了Y=5<em>X+gamma</em>Y 的结果。。</p><p>撒花！（然而这只是最近要做的任务中最容易的一条线orz&mldr;</p><p>需要注意的是,运行bash build_local.sh脚本之后会在pytorch目录下生成build文件夹,下次<strong>编译的时候直接在build目录下执行make -j20,这样才是增量编译</strong></p><p><strong>编译的时候直接在build目录下执行make -j20,这样才是增量编译</strong></p><p><strong>编译的时候直接在build目录下执行make -j20,这样才是增量编译</strong></p><p>不然每次执行build_local.sh&mldr;不知caffe2用了什么机制&mldr;每次要把所有文件编译一遍&mldr;简直没有人性啊&mldr;16个cpu一起编也要5分钟Orz</p><p>以及．．．要在自己定义的函数最后返回true&mldr;这样在运行的时候才不会报错．否则会报net error 的错误Ｏｒｚ&mldr;.我好傻啊？</p></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
 <span class=button_tally>913</span>
 </a><a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>其他
 <span class=button_tally>90</span>

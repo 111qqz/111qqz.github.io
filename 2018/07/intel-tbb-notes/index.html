@@ -18,74 +18,64 @@
 <a href=https://111qqz.com/ class="nav_child nav_item">中文</a>
 <a href=https://111qqz.com/en/ class="nav_child nav_item">English</a></div></div><div class=follow><a href=https://github.com/111qqz><svg class="icon"><use xlink:href="#github"/></svg></a><div class=color_mode><input type=checkbox class=color_choice id=mode></div></div></div></nav></header><main><div class="grid-inverse wrap content"><article class=post_content><h1 class=post_title>intel tbb 学习笔记</h1><div class=post_meta><span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>2018-07-18</span>
-<span class=post_time>· 1 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/threading-building-blocks title="Threading Building Blocks" class="post_tag button button_translucent">Threading Building Blocks</a></span></div><div class=post_body><p>tbb是**Threading Building Blocks library的缩写,**是一个为开发者提供并行解决方案的库.</p><p>先放个文档https://www.threadingbuildingblocks.org/intel-tbb-tutorial</p><p>再放一个代码示例:</p><pre><code>/* ***********************************************
-Author :111qqz
-mail: renkuanze@sensetime.com
-Created Time :2018年07月18日 星期三 14时20分54秒
-File Name :parallel_for.cpp
-************************************************ */
-#include &lt;iostream&gt;
-#include &quot;tbb/tbb.h&quot;
-#include &lt;chrono&gt;
-
-using namespace std;
+<span class=post_time>· 1 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/threading-building-blocks title="Threading Building Blocks" class="post_tag button button_translucent">Threading Building Blocks</a></span></div><div class=post_body><p>tbb是**Threading Building Blocks library的缩写,**是一个为开发者提供并行解决方案的库.</p><p>先放个文档https://www.threadingbuildingblocks.org/intel-tbb-tutorial</p><p>再放一个代码示例:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=cm>/* ***********************************************
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=cm>Author :111qqz
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=cm>mail: renkuanze@sensetime.com
+</span></span></span><span class=line><span class=ln>4</span><span class=cl><span class=cm>Created Time :2018年07月18日 星期三 14时20分54秒
+</span></span></span><span class=line><span class=ln>5</span><span class=cl><span class=cm>File Name :parallel_for.cpp
+</span></span></span><span class=line><span class=ln>6</span><span class=cl><span class=cm>************************************************ */</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>8</span><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;tbb/tbb.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>9</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;chrono&gt;</span><span class=cp>
+</span></span></span></code></pre></div><pre><code>using namespace std;
 using namespace tbb;
-
-const int N=1E9+7;
-float a[N+5];
-void Foo(float &amp;x) { x -= 100; }
-void SerialApplyFoo( float a[], size_t n ) {
-for( size_t i=0; i!=n; ++i )
-Foo(a[i]);
-}
-
-class ApplyFoo
-{
-    float *const my_a;
-
-  public:
-    void operator()(const blocked_range&lt;size_t&gt; &amp;r) const
-    {
-        float *a = my_a;
-        for (size_t i = r.begin(); i != r.end(); ++i)
-        {
-
-            Foo(a[i]);
-            //printf(&quot;%.4f\n&quot;, a[i]);
-        }
-    }
-    ApplyFoo(float a[]) : my_a(a)
-    {
-    }
-};
-
-void ParallelApplyFoo(float a[], size_t n)
-{
-    parallel_for(blocked_range&lt;size_t&gt;(0, n), ApplyFoo(a));
-}
-
-void print(float a[])
-{
-    for (int i = 0; i &lt; N; i++)
-        printf(&quot;%.4f%c&quot;, a[i], i == 9 ? '\n' : ' ');
-}
-int main()
-{
-    for (int i = 0; i &lt; N; i++)
-        a[i] = 1. * i;
-
-    auto t1 = std::chrono::high_resolution_clock::now();
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>const int <span class=nv>N</span><span class=o>=</span>1E9+7<span class=p>;</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>float a<span class=o>[</span>N+5<span class=o>]</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>void Foo<span class=o>(</span>float <span class=p>&amp;</span>x<span class=o>)</span> <span class=o>{</span> x -<span class=o>=</span> 100<span class=p>;</span> <span class=o>}</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>void SerialApplyFoo<span class=o>(</span> float a<span class=o>[]</span>, size_t n <span class=o>)</span> <span class=o>{</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=k>for</span><span class=o>(</span> size_t <span class=nv>i</span><span class=o>=</span>0<span class=p>;</span> i!<span class=o>=</span>n<span class=p>;</span> ++i <span class=o>)</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>Foo<span class=o>(</span>a<span class=o>[</span>i<span class=o>])</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl><span class=o>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=k>class</span> <span class=nc>ApplyFoo</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=nb>float</span> <span class=o>*</span><span class=n>const</span> <span class=n>my_a</span><span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=ln>1</span><span class=cl>  <span class=kr>public</span><span class=o>:</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=k>void</span> <span class=nx>operator</span><span class=p>()(</span><span class=kr>const</span> <span class=nx>blocked_range</span><span class=p>&lt;</span><span class=nt>size_t</span><span class=p>&gt;</span> <span class=o>&amp;</span><span class=nx>r</span><span class=p>)</span> <span class=kr>const</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=nx>float</span> <span class=o>*</span><span class=nx>a</span> <span class=o>=</span> <span class=nx>my_a</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=nx>size_t</span> <span class=nx>i</span> <span class=o>=</span> <span class=nx>r</span><span class=p>.</span><span class=nx>begin</span><span class=p>();</span> <span class=nx>i</span> <span class=o>!=</span> <span class=nx>r</span><span class=p>.</span><span class=nx>end</span><span class=p>();</span> <span class=o>++</span><span class=nx>i</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>        <span class=p>{</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>            <span class=n>Foo</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>i</span><span class=p>]);</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>            <span class=c1>//printf(&#34;%.4f\n&#34;, a[i]);
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1></span>        <span class=p>}</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>    <span class=n>ApplyFoo</span><span class=p>(</span><span class=kt>float</span> <span class=n>a</span><span class=p>[])</span> <span class=o>:</span> <span class=n>my_a</span><span class=p>(</span><span class=n>a</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>8</span><span class=cl><span class=p>};</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=kt>void</span> <span class=nf>ParallelApplyFoo</span><span class=p>(</span><span class=kt>float</span> <span class=n>a</span><span class=p>[],</span> <span class=n>size_t</span> <span class=n>n</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=n>parallel_for</span><span class=p>(</span><span class=n>blocked_range</span><span class=o>&lt;</span><span class=n>size_t</span><span class=o>&gt;</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=n>n</span><span class=p>),</span> <span class=n>ApplyFoo</span><span class=p>(</span><span class=n>a</span><span class=p>));</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=kt>void</span> <span class=nf>print</span><span class=p>(</span><span class=kt>float</span> <span class=n>a</span><span class=p>[])</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>N</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%.4f%c&#34;</span><span class=p>,</span> <span class=n>a</span><span class=p>[</span><span class=n>i</span><span class=p>],</span> <span class=n>i</span> <span class=o>==</span> <span class=mi>9</span> <span class=o>?</span> <span class=sc>&#39;\n&#39;</span> <span class=o>:</span> <span class=sc>&#39; &#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln>8</span><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>N</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>9</span><span class=cl>        <span class=n>a</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=mf>1.</span> <span class=o>*</span> <span class=n>i</span><span class=p>;</span>
+</span></span></code></pre></div><pre><code>    auto t1 = std::chrono::high_resolution_clock::now();
     SerialApplyFoo(a,N);
-
-    //ParallelApplyFoo(a, N);
-    auto t2 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration&lt;double, std::milli&gt; fp_ms = t2 - t1;
-     std::cout &lt;&lt; &quot;f() took &quot; &lt;&lt; fp_ms.count() &lt;&lt; &quot; ms, &quot;&lt;&lt;std::endl;
-    
-    //print(a);
-    return 0;
-}
-</code></pre><p>编译选项为: g++ -std=c++11 parallel_for.cpp -L/home/sensetime/workspace/graph/3rdparty/tbb/lib/intel64/gcc4.7 -ltbb -o parallel_for</p></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>    <span class=c1>//ParallelApplyFoo(a, N);
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span>    <span class=k>auto</span> <span class=n>t2</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>chrono</span><span class=o>::</span><span class=n>high_resolution_clock</span><span class=o>::</span><span class=n>now</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>chrono</span><span class=o>::</span><span class=n>duration</span><span class=o>&lt;</span><span class=kt>double</span><span class=p>,</span> <span class=n>std</span><span class=o>::</span><span class=n>milli</span><span class=o>&gt;</span> <span class=n>fp_ms</span> <span class=o>=</span> <span class=n>t2</span> <span class=o>-</span> <span class=n>t1</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>     <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;f() took &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>fp_ms</span><span class=p>.</span><span class=n>count</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=s>&#34; ms, &#34;</span><span class=o>&lt;&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl>    <span class=o>//</span><span class=nb>print</span><span class=p>(</span><span class=n>a</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>编译选项为: g++ -std=c++11 parallel_for.cpp -L/home/sensetime/workspace/graph/3rdparty/tbb/lib/intel64/gcc4.7 -ltbb -o parallel_for</p></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
 <span class=button_tally>913</span>
 </a><a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>其他
 <span class=button_tally>90</span>

@@ -21,83 +21,84 @@
 <a href=https://111qqz.com/en/ class="nav_child nav_item">English</a></div></div><div class=follow><a href=https://github.com/111qqz><svg class="icon"><use xlink:href="#github"/></svg></a><div class=color_mode><input type=checkbox class=color_choice id=mode></div></div></div></nav></header><main><div class="grid-inverse wrap content"><article class=post_content><h1 class=post_title>poj 2352 Stars （树状数组||线段树）</h1><div class=post_meta><span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>2015-08-03</span>
 <span class=post_time>· 3 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84 title=树状数组 class="post_tag button button_translucent">树状数组
-</a><a href=https://111qqz.com/tags/%E7%BA%BF%E6%AE%B5%E6%A0%91 title=线段树 class="post_tag button button_translucent">线段树</a></span></div><div class=post_body><p><a href="http://poj.org/problem?id=2352">poj 2352题目链接</a></p><p>题意：给出n个星星的位置，一个星星的level定义为其左下角（不严格）星星的数量。</p><p>要求统计0到n-1 level的星星各有多少个。</p><p>下面是一年前写的树状数组的题解：</p><blockquote>依然想不通，智商是硬伤，绝望的想哭，真的想哭。<p>更新于2015年08月04日01:47:18：</p><p>好像有点明白了&mldr;..详情看注释</blockquote></p><p>树状数组ac代码：</p><pre><code>/*************************************************************************
-	&gt; File Name: code/poj/2352.cpp
-	&gt; Author: 111qqz
-	&gt; Email: rkz2013@126.com 
-	&gt; Created Time: 2015年08月04日 星期二 00时33分52秒
- ************************************************************************/
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=cp>#include&lt;iostream&gt;
-</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cp>#include&lt;iomanip&gt;
-</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cp>#include&lt;cstdio&gt;
-</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cp>#include&lt;algorithm&gt;
-</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cp>#include&lt;cmath&gt;
-</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=cp>#include&lt;cstring&gt;
-</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=cp>#include&lt;string&gt;
-</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=cp>#include&lt;map&gt;
-</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=cp>#include&lt;set&gt;
-</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=cp>#include&lt;queue&gt;
-</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=cp>#include&lt;vector&gt;
-</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=cp>#include&lt;stack&gt;
-</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=cp>#define y0 abc111qqz
-</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=cp>#define y1 hust111qqz
-</span></span></span><span class=line><span class=ln>15</span><span class=cl><span class=cp>#define yn hez111qqz
-</span></span></span><span class=line><span class=ln>16</span><span class=cl><span class=cp>#define j1 cute111qqz
-</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=cp>#define tm crazy111qqz
-</span></span></span><span class=line><span class=ln>18</span><span class=cl><span class=cp>#define lr dying111qqz
-</span></span></span><span class=line><span class=ln>19</span><span class=cl><span class=cp></span><span class=k>using</span> <span class=k>namespace</span> <span class=n>std</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>20</span><span class=cl><span class=cp>#define REP(i, n) for (int i=0;i&lt;int(n);++i)  
-</span></span></span><span class=line><span class=ln>21</span><span class=cl><span class=cp></span><span class=k>typedef</span> <span class=kt>long</span> <span class=kt>long</span> <span class=n>LL</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>22</span><span class=cl><span class=k>typedef</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=kt>long</span> <span class=n>ULL</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>23</span><span class=cl><span class=k>const</span> <span class=kt>int</span> <span class=n>inf</span> <span class=o>=</span> <span class=mh>0x7fffffff</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>24</span><span class=cl><span class=k>const</span> <span class=kt>int</span> <span class=n>N</span><span class=o>=</span><span class=mf>4E4</span><span class=o>+</span><span class=mi>7</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>25</span><span class=cl><span class=kt>int</span> <span class=n>a</span><span class=p>[</span><span class=n>N</span><span class=p>];</span>
-</span></span><span class=line><span class=ln>26</span><span class=cl><span class=kt>int</span> <span class=n>t</span><span class=p>[</span><span class=n>N</span><span class=p>];</span>
-</span></span><span class=line><span class=ln>27</span><span class=cl><span class=kt>int</span> <span class=n>x</span><span class=p>,</span><span class=n>y</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>28</span><span class=cl><span class=kt>int</span> <span class=n>n</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>29</span><span class=cl><span class=kt>int</span> <span class=nf>lowbit</span> <span class=p>(</span><span class=kt>int</span> <span class=n>x</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>30</span><span class=cl><span class=p>{</span>
-</span></span><span class=line><span class=ln>31</span><span class=cl>    <span class=k>return</span> <span class=n>x</span><span class=o>&amp;</span><span class=p>(</span><span class=o>-</span><span class=n>x</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>32</span><span class=cl><span class=p>}</span>
-</span></span><span class=line><span class=ln>33</span><span class=cl><span class=kt>void</span> <span class=nf>update</span><span class=p>(</span><span class=kt>int</span> <span class=n>x</span><span class=p>,</span><span class=kt>int</span> <span class=n>c</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>34</span><span class=cl><span class=p>{</span>
-</span></span><span class=line><span class=ln>35</span><span class=cl>    <span class=kt>int</span> <span class=n>i</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>36</span><span class=cl>    <span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=n>x</span> <span class=p>;</span> <span class=n>i</span> <span class=o>&lt;=</span> <span class=mi>32001</span> <span class=p>;</span> <span class=n>i</span> <span class=o>=</span> <span class=n>i</span> <span class=o>+</span> <span class=n>lowbit</span><span class=p>(</span><span class=n>i</span><span class=p>))</span>
-</span></span><span class=line><span class=ln>37</span><span class=cl>    <span class=p>{</span>
-</span></span><span class=line><span class=ln>38</span><span class=cl>	<span class=n>t</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>t</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>+</span> <span class=n>c</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>39</span><span class=cl>    <span class=p>}</span>
-</span></span><span class=line><span class=ln>40</span><span class=cl><span class=p>}</span>
-</span></span><span class=line><span class=ln>41</span><span class=cl><span class=kt>int</span> <span class=nf>sum</span><span class=p>(</span> <span class=kt>int</span> <span class=n>x</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>42</span><span class=cl><span class=p>{</span>
-</span></span><span class=line><span class=ln>43</span><span class=cl>    <span class=kt>int</span> <span class=n>i</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>44</span><span class=cl>    <span class=kt>int</span> <span class=n>res</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>45</span><span class=cl>    <span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=n>x</span> <span class=p>;</span> <span class=n>i</span> <span class=o>&gt;=</span> <span class=mi>1</span> <span class=p>;</span> <span class=n>i</span> <span class=o>=</span> <span class=n>i</span><span class=o>-</span><span class=n>lowbit</span><span class=p>(</span><span class=n>i</span><span class=p>))</span>
-</span></span><span class=line><span class=ln>46</span><span class=cl>    <span class=p>{</span>
-</span></span><span class=line><span class=ln>47</span><span class=cl>	<span class=n>res</span> <span class=o>=</span> <span class=n>res</span> <span class=o>+</span> <span class=n>t</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
-</span></span><span class=line><span class=ln>48</span><span class=cl>    <span class=p>}</span>
-</span></span><span class=line><span class=ln>49</span><span class=cl>  <span class=c1>//  cout&lt;&lt;&#34;x:&#34;&lt;&lt;x&lt;&lt;&#34; res:&#34;&lt;&lt;res&lt;&lt;endl;
-</span></span></span><span class=line><span class=ln>50</span><span class=cl><span class=c1></span>    <span class=k>return</span> <span class=n>res</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>51</span><span class=cl><span class=p>}</span>
-</span></span><span class=line><span class=ln>52</span><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
-</span></span><span class=line><span class=ln>53</span><span class=cl><span class=p>{</span>
-</span></span><span class=line><span class=ln>54</span><span class=cl>    <span class=n>scanf</span><span class=p>(</span><span class=s>&#34;%d&#34;</span><span class=p>,</span><span class=o>&amp;</span><span class=n>n</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>55</span><span class=cl>    <span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span> <span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>n</span> <span class=p>;</span> <span class=n>i</span> <span class=o>++</span> <span class=p>)</span>
-</span></span><span class=line><span class=ln>56</span><span class=cl>    <span class=p>{</span>
-</span></span><span class=line><span class=ln>57</span><span class=cl>	<span class=n>scanf</span><span class=p>(</span><span class=s>&#34;%d %d&#34;</span><span class=p>,</span><span class=o>&amp;</span><span class=n>x</span><span class=p>,</span><span class=o>&amp;</span><span class=n>y</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>58</span><span class=cl>	<span class=n>a</span><span class=p>[</span><span class=n>sum</span><span class=p>(</span><span class=o>++</span><span class=n>x</span><span class=p>)]</span><span class=o>++</span><span class=p>;</span>  <span class=c1>// ++x是因为坐标是从0 开始，而树状数组的下标一定是从1开始，不然会TLE
-</span></span></span><span class=line><span class=ln>59</span><span class=cl><span class=c1></span>			<span class=c1>// sum(++x)是求 ++x 的level
-</span></span></span><span class=line><span class=ln>60</span><span class=cl><span class=c1></span>			<span class=c1>//
-</span></span></span><span class=line><span class=ln>61</span><span class=cl><span class=c1></span>			<span class=c1>//
-</span></span></span><span class=line><span class=ln>62</span><span class=cl><span class=c1></span>	<span class=n>update</span><span class=p>(</span><span class=n>x</span><span class=p>,</span><span class=mi>1</span><span class=p>);</span>   <span class=c1>//向上更新，对于每一个比x大的位置，由于x的存在，那些位置的点的level都会增加1
-</span></span></span><span class=line><span class=ln>63</span><span class=cl><span class=c1></span>	               <span class=c1>//比如对于星3，因为星1的读入，我向上更新了星2,星3,星4,星5，这时候他们的level都是1
-</span></span></span><span class=line><span class=ln>64</span><span class=cl><span class=c1></span>		       <span class=c1>//之后读入星2，更新了星3和星5，星3的level是2，星5的level也是2，之后由于星4，星5的level又加1，为5.
-</span></span></span><span class=line><span class=ln>65</span><span class=cl><span class=c1></span>    <span class=p>}</span>
-</span></span><span class=line><span class=ln>66</span><span class=cl>    <span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span> <span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>n</span> <span class=p>;</span> <span class=n>i</span> <span class=o>++</span> <span class=p>)</span>
-</span></span><span class=line><span class=ln>67</span><span class=cl>    <span class=p>{</span>
-</span></span><span class=line><span class=ln>68</span><span class=cl>	<span class=n>printf</span><span class=p>(</span><span class=s>&#34;%d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span><span class=n>a</span><span class=p>[</span><span class=n>i</span><span class=p>]);</span> <span class=c1>//数组a存的是level 为i的点有多少个，即为题目所求。
-</span></span></span><span class=line><span class=ln>69</span><span class=cl><span class=c1></span>    <span class=p>}</span>
-</span></span><span class=line><span class=ln>70</span><span class=cl>	<span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>71</span><span class=cl><span class=p>}</span>
+</a><a href=https://111qqz.com/tags/%E7%BA%BF%E6%AE%B5%E6%A0%91 title=线段树 class="post_tag button button_translucent">线段树</a></span></div><div class=post_body><p><a href="http://poj.org/problem?id=2352">poj 2352题目链接</a></p><p>题意：给出n个星星的位置，一个星星的level定义为其左下角（不严格）星星的数量。</p><p>要求统计0到n-1 level的星星各有多少个。</p><p>下面是一年前写的树状数组的题解：</p><blockquote>依然想不通，智商是硬伤，绝望的想哭，真的想哭。<p>更新于2015年08月04日01:47:18：</p><p>好像有点明白了&mldr;..详情看注释</blockquote></p><p>树状数组ac代码：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=cm>/*************************************************************************
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cm>	&gt; File Name: code/poj/2352.cpp
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cm>	&gt; Author: 111qqz
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cm>	&gt; Email: rkz2013@126.com 
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cm>	&gt; Created Time: 2015年08月04日 星期二 00时33分52秒
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=cm> ************************************************************************/</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>
+</span></span><span class=line><span class=ln> 8</span><span class=cl><span class=cp>#include&lt;iostream&gt;
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=cp>#include&lt;iomanip&gt;
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=cp>#include&lt;cstdio&gt;
+</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=cp>#include&lt;algorithm&gt;
+</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=cp>#include&lt;cmath&gt;
+</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=cp>#include&lt;cstring&gt;
+</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=cp>#include&lt;string&gt;
+</span></span></span><span class=line><span class=ln>15</span><span class=cl><span class=cp>#include&lt;map&gt;
+</span></span></span><span class=line><span class=ln>16</span><span class=cl><span class=cp>#include&lt;set&gt;
+</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=cp>#include&lt;queue&gt;
+</span></span></span><span class=line><span class=ln>18</span><span class=cl><span class=cp>#include&lt;vector&gt;
+</span></span></span><span class=line><span class=ln>19</span><span class=cl><span class=cp>#include&lt;stack&gt;
+</span></span></span><span class=line><span class=ln>20</span><span class=cl><span class=cp>#define y0 abc111qqz
+</span></span></span><span class=line><span class=ln>21</span><span class=cl><span class=cp>#define y1 hust111qqz
+</span></span></span><span class=line><span class=ln>22</span><span class=cl><span class=cp>#define yn hez111qqz
+</span></span></span><span class=line><span class=ln>23</span><span class=cl><span class=cp>#define j1 cute111qqz
+</span></span></span><span class=line><span class=ln>24</span><span class=cl><span class=cp>#define tm crazy111qqz
+</span></span></span><span class=line><span class=ln>25</span><span class=cl><span class=cp>#define lr dying111qqz
+</span></span></span><span class=line><span class=ln>26</span><span class=cl><span class=cp></span><span class=k>using</span> <span class=k>namespace</span> <span class=n>std</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>27</span><span class=cl><span class=cp>#define REP(i, n) for (int i=0;i&lt;int(n);++i)  
+</span></span></span><span class=line><span class=ln>28</span><span class=cl><span class=cp></span><span class=k>typedef</span> <span class=kt>long</span> <span class=kt>long</span> <span class=n>LL</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>29</span><span class=cl><span class=k>typedef</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=kt>long</span> <span class=n>ULL</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>30</span><span class=cl><span class=k>const</span> <span class=kt>int</span> <span class=n>inf</span> <span class=o>=</span> <span class=mh>0x7fffffff</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>31</span><span class=cl><span class=k>const</span> <span class=kt>int</span> <span class=n>N</span><span class=o>=</span><span class=mf>4E4</span><span class=o>+</span><span class=mi>7</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>32</span><span class=cl><span class=kt>int</span> <span class=n>a</span><span class=p>[</span><span class=n>N</span><span class=p>];</span>
+</span></span><span class=line><span class=ln>33</span><span class=cl><span class=kt>int</span> <span class=n>t</span><span class=p>[</span><span class=n>N</span><span class=p>];</span>
+</span></span><span class=line><span class=ln>34</span><span class=cl><span class=kt>int</span> <span class=n>x</span><span class=p>,</span><span class=n>y</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>35</span><span class=cl><span class=kt>int</span> <span class=n>n</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>36</span><span class=cl><span class=kt>int</span> <span class=nf>lowbit</span> <span class=p>(</span><span class=kt>int</span> <span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>37</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln>38</span><span class=cl>    <span class=k>return</span> <span class=n>x</span><span class=o>&amp;</span><span class=p>(</span><span class=o>-</span><span class=n>x</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>39</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>40</span><span class=cl><span class=kt>void</span> <span class=nf>update</span><span class=p>(</span><span class=kt>int</span> <span class=n>x</span><span class=p>,</span><span class=kt>int</span> <span class=n>c</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>41</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln>42</span><span class=cl>    <span class=kt>int</span> <span class=n>i</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>43</span><span class=cl>    <span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=n>x</span> <span class=p>;</span> <span class=n>i</span> <span class=o>&lt;=</span> <span class=mi>32001</span> <span class=p>;</span> <span class=n>i</span> <span class=o>=</span> <span class=n>i</span> <span class=o>+</span> <span class=n>lowbit</span><span class=p>(</span><span class=n>i</span><span class=p>))</span>
+</span></span><span class=line><span class=ln>44</span><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=ln>45</span><span class=cl>	<span class=n>t</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>t</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>+</span> <span class=n>c</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>46</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>47</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>48</span><span class=cl><span class=kt>int</span> <span class=nf>sum</span><span class=p>(</span> <span class=kt>int</span> <span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>49</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln>50</span><span class=cl>    <span class=kt>int</span> <span class=n>i</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>51</span><span class=cl>    <span class=kt>int</span> <span class=n>res</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>52</span><span class=cl>    <span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=n>x</span> <span class=p>;</span> <span class=n>i</span> <span class=o>&gt;=</span> <span class=mi>1</span> <span class=p>;</span> <span class=n>i</span> <span class=o>=</span> <span class=n>i</span><span class=o>-</span><span class=n>lowbit</span><span class=p>(</span><span class=n>i</span><span class=p>))</span>
+</span></span><span class=line><span class=ln>53</span><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=ln>54</span><span class=cl>	<span class=n>res</span> <span class=o>=</span> <span class=n>res</span> <span class=o>+</span> <span class=n>t</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+</span></span><span class=line><span class=ln>55</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>56</span><span class=cl>  <span class=c1>//  cout&lt;&lt;&#34;x:&#34;&lt;&lt;x&lt;&lt;&#34; res:&#34;&lt;&lt;res&lt;&lt;endl;
+</span></span></span><span class=line><span class=ln>57</span><span class=cl><span class=c1></span>    <span class=k>return</span> <span class=n>res</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>58</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>59</span><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>60</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln>61</span><span class=cl>    <span class=n>scanf</span><span class=p>(</span><span class=s>&#34;%d&#34;</span><span class=p>,</span><span class=o>&amp;</span><span class=n>n</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>62</span><span class=cl>    <span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span> <span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>n</span> <span class=p>;</span> <span class=n>i</span> <span class=o>++</span> <span class=p>)</span>
+</span></span><span class=line><span class=ln>63</span><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=ln>64</span><span class=cl>	<span class=n>scanf</span><span class=p>(</span><span class=s>&#34;%d %d&#34;</span><span class=p>,</span><span class=o>&amp;</span><span class=n>x</span><span class=p>,</span><span class=o>&amp;</span><span class=n>y</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>65</span><span class=cl>	<span class=n>a</span><span class=p>[</span><span class=n>sum</span><span class=p>(</span><span class=o>++</span><span class=n>x</span><span class=p>)]</span><span class=o>++</span><span class=p>;</span>  <span class=c1>// ++x是因为坐标是从0 开始，而树状数组的下标一定是从1开始，不然会TLE
+</span></span></span><span class=line><span class=ln>66</span><span class=cl><span class=c1></span>			<span class=c1>// sum(++x)是求 ++x 的level
+</span></span></span><span class=line><span class=ln>67</span><span class=cl><span class=c1></span>			<span class=c1>//
+</span></span></span><span class=line><span class=ln>68</span><span class=cl><span class=c1></span>			<span class=c1>//
+</span></span></span><span class=line><span class=ln>69</span><span class=cl><span class=c1></span>	<span class=n>update</span><span class=p>(</span><span class=n>x</span><span class=p>,</span><span class=mi>1</span><span class=p>);</span>   <span class=c1>//向上更新，对于每一个比x大的位置，由于x的存在，那些位置的点的level都会增加1
+</span></span></span><span class=line><span class=ln>70</span><span class=cl><span class=c1></span>	               <span class=c1>//比如对于星3，因为星1的读入，我向上更新了星2,星3,星4,星5，这时候他们的level都是1
+</span></span></span><span class=line><span class=ln>71</span><span class=cl><span class=c1></span>		       <span class=c1>//之后读入星2，更新了星3和星5，星3的level是2，星5的level也是2，之后由于星4，星5的level又加1，为5.
+</span></span></span><span class=line><span class=ln>72</span><span class=cl><span class=c1></span>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>73</span><span class=cl>    <span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span> <span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>n</span> <span class=p>;</span> <span class=n>i</span> <span class=o>++</span> <span class=p>)</span>
+</span></span><span class=line><span class=ln>74</span><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=ln>75</span><span class=cl>	<span class=n>printf</span><span class=p>(</span><span class=s>&#34;%d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span><span class=n>a</span><span class=p>[</span><span class=n>i</span><span class=p>]);</span> <span class=c1>//数组a存的是level 为i的点有多少个，即为题目所求。
+</span></span></span><span class=line><span class=ln>76</span><span class=cl><span class=c1></span>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>77</span><span class=cl>	<span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>78</span><span class=cl><span class=p>}</span>
 </span></span></code></pre></div><p>当然用线段树也是可以的。
 思路同poj 2481
 <a href=/2015/08/poj2481/>poj 2481 解题报告</a></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=cm>/* ***********************************************

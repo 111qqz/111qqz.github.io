@@ -26,25 +26,23 @@
 </a><a href=https://111qqz.com/tags/blog title=blog class="post_tag button button_translucent">blog</a></span></div><div class=post_body><p><strong>20190511更新:</strong></p><p>证书到期了,写一下更换证书的流程.</p><p>重新申请好证书之后,直接把Apache里面对应的123放到/data/cert文件夹.</p><p>其中1对应server-ca.crt,2对应server.crt,3对应server.key</p><p>由于从套路云转移到良心云，迫于国内某些蛋疼的政策，以及一些其他原因，决定全站上https.</p><p>首先是申请SSL证书，这个良心云就可以申请，也有其他地方。</p><p>这里要注意的是，有些证书是只能对应一个域名，腾讯云貌似就是这样，不过好像www.111qqz.com的证书也可以用于111qqz.com</p><p>得到证书中有Apache,Nginx,Tomcat和IIS四个文件夹，由于我们使用的是Apache，所以其他三个不用管。</p><pre><code>  1. 将证书上传到服务器证书目录：/data/cert（没有cert目录可以自己新建）
   2. 在/etc/httpd/conf.d目录下新建一个https配置文件，假设命名为mydomain-ssl.conf。
   3. 拷贝下面的https配置文件模板到mydomain-ssl.conf文件中，并保存
-
-
-&lt;VirtualHost *:443&gt;
-ServerName www.111qqz.com
-ServerAlias 111qqz.com
-DocumentRoot &quot;/data/wwwroot/default/wordpress&quot;
-#ErrorLog &quot;logs/www.mydomain.com-error_log&quot;
-#CustomLog &quot;logs/www.mydomain.com-access_log&quot; common
-&lt;Directory &quot;/data/wwwroot/default/wordpress&quot;&gt;
-Options Indexes FollowSymlinks
-AllowOverride All
-Require all granted
-&lt;/Directory&gt;
-SSLEngine on
-SSLCertificateFile  /data/cert/server.crt
-SSLCertificateKeyFile  /data/cert/server.key
-SSLCertificateChainFile  /data/cert/server-ca.crt
-&lt;/VirtualHost&gt;
-</code></pre><p>需要注意的是，servername那里要写带www的域名，不带www的写在serveralias
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln> 1</span><span class=cl>&lt;VirtualHost *:443&gt;
+</span></span><span class=line><span class=ln> 2</span><span class=cl>ServerName www.111qqz.com
+</span></span><span class=line><span class=ln> 3</span><span class=cl>ServerAlias 111qqz.com
+</span></span><span class=line><span class=ln> 4</span><span class=cl>DocumentRoot <span class=s2>&#34;/data/wwwroot/default/wordpress&#34;</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=c1>#ErrorLog &#34;logs/www.mydomain.com-error_log&#34;</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=c1>#CustomLog &#34;logs/www.mydomain.com-access_log&#34; common</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>&lt;Directory <span class=s2>&#34;/data/wwwroot/default/wordpress&#34;</span>&gt;
+</span></span><span class=line><span class=ln> 8</span><span class=cl>Options Indexes FollowSymlinks
+</span></span><span class=line><span class=ln> 9</span><span class=cl>AllowOverride All
+</span></span><span class=line><span class=ln>10</span><span class=cl>Require all granted
+</span></span><span class=line><span class=ln>11</span><span class=cl>&lt;/Directory&gt;
+</span></span><span class=line><span class=ln>12</span><span class=cl>SSLEngine on
+</span></span><span class=line><span class=ln>13</span><span class=cl>SSLCertificateFile  /data/cert/server.crt
+</span></span><span class=line><span class=ln>14</span><span class=cl>SSLCertificateKeyFile  /data/cert/server.key
+</span></span><span class=line><span class=ln>15</span><span class=cl>SSLCertificateChainFile  /data/cert/server-ca.crt
+</span></span><span class=line><span class=ln>16</span><span class=cl>&lt;/VirtualHost&gt;
+</span></span></code></pre></div><p>需要注意的是，servername那里要写带www的域名，不带www的写在serveralias
 4. 修改配置文件中相关项，并保存
 ServerName  #主域名，务必修改
 ServerAlias   #副域名，可选项
@@ -52,21 +50,19 @@ DocumentRoot #网站路径，务必填写网站实际路径，例如:/data/wwwr
 Directory #同上
 SSLCertificateFile #证书，务必填写网站实际路径
 SSLCertificateKeyFile #证书私钥，务必填写网站实际路径
-SSLCertificateChainFile #证书链（CA文件），务必填写网站实际路径</p><p>然后由于我是迁移了服务器，很大可能是主页可以访问，但任何一个其他页面都会因报错500 internal error 之类，查看日志，位置在/var/log/httpd 里面，发现报错AH00124: Request exceeded the limit of 10 internal redirects due to probable configuration error. Use &lsquo;LimitInternalRecursion&rsquo; to increase the limit if necessary. Use &lsquo;LogLevel debug&rsquo; to get a backtrace., referer: <a href=https://qq.111qqz.com/>https://111qqz.com/</a></p><p>查了很多，最后发现问题是在wordpress的根目录下的.htaccess文件中</p><p>将Rewritebase的  /wordpress 改成/</p><p>将RewriteRule的 .  /wordpress/index.php  改成  .  /index.php</p><p>最后.htaccess文件如下：</p><pre><code>RewriteEngine On
-RewriteCond %{HTTPS} !=on
-RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R=301,L]
-
-# BEGIN WordPress
-&lt;IfModule mod_rewrite.c&gt;
-RewriteEngine On
-RewriteBase /wordpress/
-RewriteRule ^index\.php$ - [L]
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /index.php [L]
-&lt;/IfModule&gt;
-
-# END WordPress
+SSLCertificateChainFile #证书链（CA文件），务必填写网站实际路径</p><p>然后由于我是迁移了服务器，很大可能是主页可以访问，但任何一个其他页面都会因报错500 internal error 之类，查看日志，位置在/var/log/httpd 里面，发现报错AH00124: Request exceeded the limit of 10 internal redirects due to probable configuration error. Use &lsquo;LimitInternalRecursion&rsquo; to increase the limit if necessary. Use &lsquo;LogLevel debug&rsquo; to get a backtrace., referer: <a href=https://qq.111qqz.com/>https://111qqz.com/</a></p><p>查了很多，最后发现问题是在wordpress的根目录下的.htaccess文件中</p><p>将Rewritebase的  /wordpress 改成/</p><p>将RewriteRule的 .  /wordpress/index.php  改成  .  /index.php</p><p>最后.htaccess文件如下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>RewriteEngine On
+</span></span><span class=line><span class=ln>2</span><span class=cl>RewriteCond %<span class=o>{</span>HTTPS<span class=o>}</span> !<span class=o>=</span>on
+</span></span><span class=line><span class=ln>3</span><span class=cl>RewriteRule ^/?<span class=o>(</span>.*<span class=o>)</span> https://%<span class=o>{</span>SERVER_NAME<span class=o>}</span>/<span class=nv>$1</span> <span class=o>[</span><span class=nv>R</span><span class=o>=</span>301,L<span class=o>]</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl><span class=c1># BEGIN WordPress</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>&lt;IfModule mod_rewrite.c&gt;
+</span></span><span class=line><span class=ln>3</span><span class=cl>RewriteEngine On
+</span></span><span class=line><span class=ln>4</span><span class=cl>RewriteBase /wordpress/
+</span></span><span class=line><span class=ln>5</span><span class=cl>RewriteRule ^index<span class=se>\.</span>php$ - <span class=o>[</span>L<span class=o>]</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>RewriteCond %<span class=o>{</span>REQUEST_FILENAME<span class=o>}</span> !-f
+</span></span><span class=line><span class=ln>7</span><span class=cl>RewriteCond %<span class=o>{</span>REQUEST_FILENAME<span class=o>}</span> !-d
+</span></span><span class=line><span class=ln>8</span><span class=cl>RewriteRule . /index.php <span class=o>[</span>L<span class=o>]</span>
+</span></span><span class=line><span class=ln>9</span><span class=cl>&lt;/IfModule&gt;
+</span></span></code></pre></div><pre><code># END WordPress
 </code></pre><p>这个时候发现，虽然一般页面也是可以访问了，但是后台登录不进去，提示重定向次数过多。</p><p>查了下发现基本都在说由于原始链接是http://的问题，并给了几种解决方案。</p><p>我是用phpadmin直接改的，大概是wp_option里面有两项要修改。</p><p>然而修改之后仍然不可以。尝试了好多内容都不行。大概包括排查插件，修改权限之类</p><p>最后发现，http到https在数据库里修改是不行的，必须要在wp-config.php中修改才可以。主要是手动添加wp_home和wp_siteurl</p><p>修改后的wp-config.php如下:</p><pre><code>&lt;?php
 /**
  * The base configuration for WordPress
@@ -86,12 +82,10 @@ RewriteRule . /index.php [L]
  *
  * @package WordPress
  */
-
-// ** MySQL settings - You can get this info from your web host ** //
-/** The name of the database for WordPress */
-define('DB_NAME', 'wordpress');
-
-/** MySQL database username */
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>// ** MySQL settings - You can get this info from your web host ** //
+</span></span><span class=line><span class=ln>2</span><span class=cl>/** The name of the database <span class=k>for</span> WordPress */
+</span></span><span class=line><span class=ln>3</span><span class=cl>define<span class=o>(</span><span class=s1>&#39;DB_NAME&#39;</span>, <span class=s1>&#39;wordpress&#39;</span><span class=o>)</span><span class=p>;</span>
+</span></span></code></pre></div><pre><code>/** MySQL database username */
 define('DB_USER', 'wordpress');
 
 /** MySQL database password */
@@ -105,26 +99,24 @@ define('DB_CHARSET', 'utf8');
 
 /** The Database Collate type. Don't change this if in doubt. */
 define('DB_COLLATE', '');
-
-/**#@+
- * Authentication Unique Keys and Salts.
- *
- * Change these to different unique phrases!
- * You can generate these using the {@link https://api.wordpress.org/secret-key/1.1/salt/ WordPress.org secret-key service}
- * You can change these at any point in time to invalidate all existing cookies. This will force all users to have to log in again.
- *
- * @since 2.6.0
- */
-define('AUTH_KEY',         'put your unique phrase here');
-define('SECURE_AUTH_KEY',  'put your unique phrase here');
-define('LOGGED_IN_KEY',    'put your unique phrase here');
-define('NONCE_KEY',        'put your unique phrase here');
-define('AUTH_SALT',        'put your unique phrase here');
-define('SECURE_AUTH_SALT', 'put your unique phrase here');
-define('LOGGED_IN_SALT',   'put your unique phrase here');
-define('NONCE_SALT',       'put your unique phrase here');
-
-/**#@-*/
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln> 1</span><span class=cl>/**#@+
+</span></span><span class=line><span class=ln> 2</span><span class=cl> * Authentication Unique Keys and Salts.
+</span></span><span class=line><span class=ln> 3</span><span class=cl> *
+</span></span><span class=line><span class=ln> 4</span><span class=cl> * Change these to different unique phrases!
+</span></span><span class=line><span class=ln> 5</span><span class=cl> * You can generate these using the <span class=o>{</span>@link https://api.wordpress.org/secret-key/1.1/salt/ WordPress.org secret-key service<span class=o>}</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl> * You can change these at any point in <span class=nb>time</span> to invalidate all existing cookies. This will force all users to have to log in again.
+</span></span><span class=line><span class=ln> 7</span><span class=cl> *
+</span></span><span class=line><span class=ln> 8</span><span class=cl> * @since 2.6.0
+</span></span><span class=line><span class=ln> 9</span><span class=cl> */
+</span></span><span class=line><span class=ln>10</span><span class=cl>define<span class=o>(</span><span class=s1>&#39;AUTH_KEY&#39;</span>,         <span class=s1>&#39;put your unique phrase here&#39;</span><span class=o>)</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>define<span class=o>(</span><span class=s1>&#39;SECURE_AUTH_KEY&#39;</span>,  <span class=s1>&#39;put your unique phrase here&#39;</span><span class=o>)</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>define<span class=o>(</span><span class=s1>&#39;LOGGED_IN_KEY&#39;</span>,    <span class=s1>&#39;put your unique phrase here&#39;</span><span class=o>)</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>define<span class=o>(</span><span class=s1>&#39;NONCE_KEY&#39;</span>,        <span class=s1>&#39;put your unique phrase here&#39;</span><span class=o>)</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>define<span class=o>(</span><span class=s1>&#39;AUTH_SALT&#39;</span>,        <span class=s1>&#39;put your unique phrase here&#39;</span><span class=o>)</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>define<span class=o>(</span><span class=s1>&#39;SECURE_AUTH_SALT&#39;</span>, <span class=s1>&#39;put your unique phrase here&#39;</span><span class=o>)</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>define<span class=o>(</span><span class=s1>&#39;LOGGED_IN_SALT&#39;</span>,   <span class=s1>&#39;put your unique phrase here&#39;</span><span class=o>)</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>define<span class=o>(</span><span class=s1>&#39;NONCE_SALT&#39;</span>,       <span class=s1>&#39;put your unique phrase here&#39;</span><span class=o>)</span><span class=p>;</span>
+</span></span></code></pre></div><pre><code>/**#@-*/
 
 /**
  * WordPress Database Table prefix.
@@ -133,38 +125,32 @@ define('NONCE_SALT',       'put your unique phrase here');
  * a unique prefix. Only numbers, letters, and underscores please!
  */
 $table_prefix  = 'wp_';
-
-/**
- * For developers: WordPress debugging mode.
- *
- * Change this to true to enable the display of notices during development.
- * It is strongly recommended that plugin and theme developers use WP_DEBUG
- * in their development environments.
- *
- * For information on other constants that can be used for debugging,
- * visit the Codex.
- *
- * @link https://codex.wordpress.org/Debugging_in_WordPress
- */
-define('WP_DEBUG', false);
-
-define('WP_HOME','https://111qqz.com');
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln> 1</span><span class=cl>/**
+</span></span><span class=line><span class=ln> 2</span><span class=cl> * For developers: WordPress debugging mode.
+</span></span><span class=line><span class=ln> 3</span><span class=cl> *
+</span></span><span class=line><span class=ln> 4</span><span class=cl> * Change this to <span class=nb>true</span> to <span class=nb>enable</span> the display of notices during development.
+</span></span><span class=line><span class=ln> 5</span><span class=cl> * It is strongly recommended that plugin and theme developers use WP_DEBUG
+</span></span><span class=line><span class=ln> 6</span><span class=cl> * in their development environments.
+</span></span><span class=line><span class=ln> 7</span><span class=cl> *
+</span></span><span class=line><span class=ln> 8</span><span class=cl> * For information on other constants that can be used <span class=k>for</span> debugging,
+</span></span><span class=line><span class=ln> 9</span><span class=cl> * visit the Codex.
+</span></span><span class=line><span class=ln>10</span><span class=cl> *
+</span></span><span class=line><span class=ln>11</span><span class=cl> * @link https://codex.wordpress.org/Debugging_in_WordPress
+</span></span><span class=line><span class=ln>12</span><span class=cl> */
+</span></span><span class=line><span class=ln>13</span><span class=cl>define<span class=o>(</span><span class=s1>&#39;WP_DEBUG&#39;</span>, <span class=nb>false</span><span class=o>)</span><span class=p>;</span>
+</span></span></code></pre></div><pre><code>define('WP_HOME','https://111qqz.com');
 define('WP_SITEURL','https://111qqz.com');
-
-define('FORCE_SSL_ADMIN',true);
-// in some setups HTTP_X_FORWARDED_PROTO might contain
-// // a comma-separated list e.g. http,https
-// // so check for https existence
- if (strpos($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') !== false)
- $_SERVER['HTTPS']='on';
-
-/* That's all, stop editing! Happy blogging. */
-
-/** Absolute path to the WordPress directory. */
-if ( !defined('ABSPATH') )
-        define('ABSPATH', dirname(__FILE__) . '/');
-
-/** Sets up WordPress vars and included files. */
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>define<span class=o>(</span><span class=s1>&#39;FORCE_SSL_ADMIN&#39;</span>,true<span class=o>)</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>// in some setups HTTP_X_FORWARDED_PROTO might contain
+</span></span><span class=line><span class=ln>3</span><span class=cl>// // a comma-separated list e.g. http,https
+</span></span><span class=line><span class=ln>4</span><span class=cl>// // so check <span class=k>for</span> https existence
+</span></span><span class=line><span class=ln>5</span><span class=cl> <span class=k>if</span> <span class=o>(</span>strpos<span class=o>(</span><span class=nv>$_SERVER</span><span class=o>[</span><span class=s1>&#39;HTTP_X_FORWARDED_PROTO&#39;</span><span class=o>]</span>, <span class=s1>&#39;https&#39;</span><span class=o>)</span> !<span class=o>==</span> <span class=nb>false</span><span class=o>)</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl> <span class=nv>$_SERVER</span><span class=o>[</span><span class=s1>&#39;HTTPS&#39;</span><span class=o>]=</span><span class=s1>&#39;on&#39;</span><span class=p>;</span>
+</span></span></code></pre></div><pre><code>/* That's all, stop editing! Happy blogging. */
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>/** Absolute path to the WordPress directory. */
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=k>if</span> <span class=o>(</span> !defined<span class=o>(</span><span class=s1>&#39;ABSPATH&#39;</span><span class=o>)</span> <span class=o>)</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>        define<span class=o>(</span><span class=s1>&#39;ABSPATH&#39;</span>, dirname<span class=o>(</span>__FILE__<span class=o>)</span> . <span class=s1>&#39;/&#39;</span><span class=o>)</span><span class=p>;</span>
+</span></span></code></pre></div><pre><code>/** Sets up WordPress vars and included files. */
 require_once(ABSPATH . 'wp-settings.php');
 </code></pre><p>至此，博客终于可以访问了&mldr;感动</p><p>然后用了个叫really simple ssl的插件，据说很好用。。。</p></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
 <span class=button_tally>913</span>

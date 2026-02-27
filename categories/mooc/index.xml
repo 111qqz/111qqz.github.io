@@ -66,20 +66,19 @@
 &lt;h2 id="part-1-pc-bootstrap">Part 1: PC Bootstrap&lt;/h2>
 &lt;h3 id="the-pcs-physical-address-space">The PC&amp;rsquo;s Physical Address Space&lt;/h3>
 &lt;h4 id="80868088时代">8086/8088时代&lt;/h4>
-&lt;pre>&lt;code>+------------------+ &amp;lt;- 0x00100000 (1MB)
-| BIOS ROM |
-+------------------+ &amp;lt;- 0x000F0000 (960KB)
-| 16-bit devices, |
-| expansion ROMs |
-+------------------+ &amp;lt;- 0x000C0000 (768KB)
-| VGA Display |
-+------------------+ &amp;lt;- 0x000A0000 (640KB)
-| |
-| Low Memory |
-| |
-+------------------+ &amp;lt;- 0x00000000
-&lt;/code>&lt;/pre>
-&lt;p>由于8086/8088只有20跟地址线，因此物理内存空间就是2^20=1MB.地址空间从0x00000到0xFFFFF.其中从0x00000开始的640k空间被称为&amp;quot;low memory&amp;quot;，是PC真正能使用的RAM。从 0xA0000 到 0xFFFFF　的384k的non-volatile memory被硬件保留，用作video display buffers和BIOS等。&lt;/p></description></item><item><title>【施工中】MIT 6.828 Operating System Engineering 学习笔记</title><link>https://111qqz.com/2019/01/mit-6-828-overview/</link><pubDate>Tue, 15 Jan 2019 16:39:18 +0000</pubDate><guid>https://111qqz.com/2019/01/mit-6-828-overview/</guid><description>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-lua" data-lang="lua">&lt;span class="line">&lt;span class="ln"> 1&lt;/span>&lt;span class="cl">&lt;span class="o">+------------------+&lt;/span> &lt;span class="o">&amp;lt;-&lt;/span> &lt;span class="mh">0x00100000&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="n">MB&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 2&lt;/span>&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="n">BIOS&lt;/span> &lt;span class="n">ROM&lt;/span> &lt;span class="o">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 3&lt;/span>&lt;span class="cl">&lt;span class="o">+------------------+&lt;/span> &lt;span class="o">&amp;lt;-&lt;/span> &lt;span class="mh">0x000F0000&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="mi">960&lt;/span>&lt;span class="n">KB&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 4&lt;/span>&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="mi">16&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="n">bit&lt;/span> &lt;span class="n">devices&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 5&lt;/span>&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="n">expansion&lt;/span> &lt;span class="n">ROMs&lt;/span> &lt;span class="o">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 6&lt;/span>&lt;span class="cl">&lt;span class="o">+------------------+&lt;/span> &lt;span class="o">&amp;lt;-&lt;/span> &lt;span class="mh">0x000C0000&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="mi">768&lt;/span>&lt;span class="n">KB&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 7&lt;/span>&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="n">VGA&lt;/span> &lt;span class="n">Display&lt;/span> &lt;span class="o">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 8&lt;/span>&lt;span class="cl">&lt;span class="o">+------------------+&lt;/span> &lt;span class="o">&amp;lt;-&lt;/span> &lt;span class="mh">0x000A0000&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="mi">640&lt;/span>&lt;span class="n">KB&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 9&lt;/span>&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="o">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">10&lt;/span>&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="n">Low&lt;/span> &lt;span class="n">Memory&lt;/span> &lt;span class="o">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">11&lt;/span>&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="o">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">12&lt;/span>&lt;span class="cl">&lt;span class="o">+------------------+&lt;/span> &lt;span class="o">&amp;lt;-&lt;/span> &lt;span class="mh">0x00000000&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>由于8086/8088只有20跟地址线，因此物理内存空间就是2^20=1MB.地址空间从0x00000到0xFFFFF.其中从0x00000开始的640k空间被称为&amp;quot;low memory&amp;quot;，是PC真正能使用的RAM。从 0xA0000 到 0xFFFFF　的384k的non-volatile memory被硬件保留，用作video display buffers和BIOS等。&lt;/p></description></item><item><title>【施工中】MIT 6.828 Operating System Engineering 学习笔记</title><link>https://111qqz.com/2019/01/mit-6-828-overview/</link><pubDate>Tue, 15 Jan 2019 16:39:18 +0000</pubDate><guid>https://111qqz.com/2019/01/mit-6-828-overview/</guid><description>
 &lt;p>&lt;a href="https://pdos.csail.mit.edu/6.828/2018/index.html">课程主页&lt;/a>&lt;/p>
 &lt;p>这课稍微有点硬核&amp;hellip;感觉基础稍微有些不扎实就做不下去orz.&lt;/p>
 &lt;p>网上似乎是有博客写了6.828的学习笔记，不过我更希望自己能够独立完成，二手的知识，谁知道是对的错的呢&amp;hellip;况且课程本身给的参考资料应该还是足够多的。&lt;/p></description></item></channel></rss>

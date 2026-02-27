@@ -20,297 +20,286 @@
 <a href=https://111qqz.com/ class="nav_child nav_item">中文</a>
 <a href=https://111qqz.com/en/ class="nav_child nav_item">English</a></div></div><div class=follow><a href=https://github.com/111qqz><svg class="icon"><use xlink:href="#github"/></svg></a><div class=color_mode><input type=checkbox class=color_choice id=mode></div></div></div></nav></header><main><div class="grid-inverse wrap content"><article class=post_content><h1 class=post_title>【施工完成】CSAPP data lab</h1><div class=post_meta><span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>2019-02-28</span>
-<span class=post_time>· 5 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/csapp title=csapp class="post_tag button button_translucent">csapp</a></span></div><div class=post_body><p>CSAPP第二章的内容以前组成原理基本都学过&mldr;所以就简单翻了翻。</p><p>对应的lab是用位运算实现各种有的没的&mldr;</p><p>题目基本都很tricky&mldr;</p><p>除了用到一些常规的位运算性质，还用到了一些奇怪的条件:</p><pre><code>  * ~0x7FFFFFFF = 0x7FFFFFFF + 1
+<span class=post_time>· 6 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/csapp title=csapp class="post_tag button button_translucent">csapp</a></span></div><div class=post_body><p>CSAPP第二章的内容以前组成原理基本都学过&mldr;所以就简单翻了翻。</p><p>对应的lab是用位运算实现各种有的没的&mldr;</p><p>题目基本都很tricky&mldr;</p><p>除了用到一些常规的位运算性质，还用到了一些奇怪的条件:</p><pre><code>  * ~0x7FFFFFFF = 0x7FFFFFFF + 1
   * 0xFFFFFFFF +1 =  0x00000000
   * 
-</code></pre><p>0 == ~0+1</p><p>唯一让我觉得比较有趣的是how many bits这道题</p><p>题目要求是给一个32-bit signed int,问最少用多少位能得到它的补码表示。</p><p>考虑正数，显然，<strong>高位的连续的多个0是不必要的</strong>，只需要一个符号位的0即可。</p><p>那么对于负数，**高位的连续的多个1也是不必要的。 **原因是，-2^k + 2^(k-1) =  -2^(k-1),也就是说，去掉两个连续的1中高位的那个，数值没有改变。</p><p>我们可以将正数和负数统一来看，都是找到最高位的0和1的交界。</p><p><strong>这可以通过和相邻的位置求异或，找到最高位的1的方式来实现。</strong></p><p>接下来就是如何找一个数的最高位的1的位置了。</p><p>方法是构造一个单调的函数f,假设最高位位置为a,那么f((a,32))=0,f([0,a])=1.</p><p>然后在函数f上二分。</p><p>全部问题的代码如下,思路写在注释里了。还有3个涉及浮点数的问题之后补。</p><pre><code>/* 
- * bitXor - x^y using only ~ and &amp; 
- *   Example: bitXor(4, 5) = 1
- *   Legal ops: ~ &amp;
- *   Max ops: 14
- *   Rating: 1
- */
-/* 0 0 -&gt; 0
-   0 1 -&gt; 1
-   1 0 - &gt; 1
-   1 1 - &gt; 0
-*/
-// ~(~a &amp; ~b)&amp;~(a&amp;b)
-int bitXor(int x, int y) {
-  int ans = ~(~x &amp; ~y)&amp;(~(x&amp;y));
-  // printf(&quot;%d\n&quot;,ans);
+</code></pre><p>0 == ~0+1</p><p>唯一让我觉得比较有趣的是how many bits这道题</p><p>题目要求是给一个32-bit signed int,问最少用多少位能得到它的补码表示。</p><p>考虑正数，显然，<strong>高位的连续的多个0是不必要的</strong>，只需要一个符号位的0即可。</p><p>那么对于负数，**高位的连续的多个1也是不必要的。 **原因是，-2^k + 2^(k-1) =  -2^(k-1),也就是说，去掉两个连续的1中高位的那个，数值没有改变。</p><p>我们可以将正数和负数统一来看，都是找到最高位的0和1的交界。</p><p><strong>这可以通过和相邻的位置求异或，找到最高位的1的方式来实现。</strong></p><p>接下来就是如何找一个数的最高位的1的位置了。</p><p>方法是构造一个单调的函数f,假设最高位位置为a,那么f((a,32))=0,f([0,a])=1.</p><p>然后在函数f上二分。</p><p>全部问题的代码如下,思路写在注释里了。还有3个涉及浮点数的问题之后补。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=cm>/* 
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cm> * bitXor - x^y using only ~ and &amp; 
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cm> *   Example: bitXor(4, 5) = 1
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cm> *   Legal ops: ~ &amp;
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cm> *   Max ops: 14
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=cm> *   Rating: 1
+</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl><span class=cm>/* 0 0 -&gt; 0
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=cm>   0 1 -&gt; 1
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=cm>   1 0 - &gt; 1
+</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=cm>   1 1 - &gt; 0
+</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=cm>*/</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl><span class=c1>// ~(~a &amp; ~b)&amp;~(a&amp;b)
+</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=c1></span><span class=kt>int</span> <span class=nf>bitXor</span><span class=p>(</span><span class=kt>int</span> <span class=n>x</span><span class=p>,</span> <span class=kt>int</span> <span class=n>y</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>  <span class=kt>int</span> <span class=n>ans</span> <span class=o>=</span> <span class=o>~</span><span class=p>(</span><span class=o>~</span><span class=n>x</span> <span class=o>&amp;</span> <span class=o>~</span><span class=n>y</span><span class=p>)</span><span class=o>&amp;</span><span class=p>(</span><span class=o>~</span><span class=p>(</span><span class=n>x</span><span class=o>&amp;</span><span class=n>y</span><span class=p>));</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>  <span class=c1>// printf(&#34;%d\n&#34;,ans);
+</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=c1></span>  <span class=k>return</span> <span class=n>ans</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl><span class=cm>/* 
+</span></span></span><span class=line><span class=ln>20</span><span class=cl><span class=cm> * tmin - return minimum two&#39;s complement integer 
+</span></span></span><span class=line><span class=ln>21</span><span class=cl><span class=cm> *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
+</span></span></span><span class=line><span class=ln>22</span><span class=cl><span class=cm> *   Max ops: 4
+</span></span></span><span class=line><span class=ln>23</span><span class=cl><span class=cm> *   Rating: 1
+</span></span></span><span class=line><span class=ln>24</span><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=ln>25</span><span class=cl><span class=cm>/*
+</span></span></span><span class=line><span class=ln>26</span><span class=cl><span class=cm>  0X10000000
+</span></span></span><span class=line><span class=ln>27</span><span class=cl><span class=cm>*/</span>
+</span></span><span class=line><span class=ln>28</span><span class=cl><span class=kt>int</span> <span class=nf>tmin</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span> <span class=p>{</span>
+</span></span></code></pre></div><pre><code>  int ans = 0x1 &lt;&lt; 31;
   return ans;
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=c1>//2
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=c1></span><span class=cm>/* 
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cm> * isTmax - returns 1 if x is the maximum, two&#39;s complement number,
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cm> *     and 0 otherwise 
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=cm> *   Legal ops: ! ~ &amp; ^ | +
+</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=cm> *   Max ops: 10
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=cm> *   Rating: 1
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=cm> *   0x7FFFFFFF
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl><span class=kt>int</span> <span class=nf>isTmax</span><span class=p>(</span><span class=kt>int</span> <span class=n>x</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>  <span class=cm>/*
+</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=cm>  大体思路首先是根据，如果x是最大值0x7FFFFFFF,那么~x和x+1(自然溢出)应该相等。
+</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=cm>  不能用等号，但是我们可以用异或。x==y 等价于  !(x^y). 因此有了后半段!(x+1)^(~x)
+</span></span></span><span class=line><span class=ln>15</span><span class=cl><span class=cm>  但是满足这个条件的还有-1,也就是0xFFFFFFFF,因此我们需要排除掉-1.
+</span></span></span><span class=line><span class=ln>16</span><span class=cl><span class=cm>  还是用异或的性质，这回是0异或者任何数都等于其本身。
+</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=cm>  因此如果x为-1，那么前后两部分都为1，结果为0.
+</span></span></span><span class=line><span class=ln>18</span><span class=cl><span class=cm>  如果x为TMAX,那么前面为0，后面为1，结果为1.
+</span></span></span><span class=line><span class=ln>19</span><span class=cl><span class=cm>  如果x为其他任何数，前后结果都应为0. 结果为0。
+</span></span></span><span class=line><span class=ln>20</span><span class=cl><span class=cm>  */</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl>  <span class=k>return</span> <span class=p>(</span><span class=o>!</span><span class=p>(</span><span class=n>x</span><span class=o>+</span><span class=mi>1</span><span class=p>))</span><span class=o>^!</span><span class=p>((</span><span class=n>x</span><span class=o>+</span><span class=mi>1</span><span class=p>)</span><span class=o>^</span><span class=p>(</span><span class=o>~</span><span class=n>x</span><span class=p>));</span>                                                                                                                                   
+</span></span><span class=line><span class=ln>22</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>23</span><span class=cl><span class=cm>/* 
+</span></span></span><span class=line><span class=ln>24</span><span class=cl><span class=cm> * allOddBits - return 1 if all odd-numbered bits in word set to 1
+</span></span></span><span class=line><span class=ln>25</span><span class=cl><span class=cm> *   where bits are numbered from 0 (least significant) to 31 (most significant)
+</span></span></span><span class=line><span class=ln>26</span><span class=cl><span class=cm> *   Examples allOddBits(0xFFFFFFFD) = 0, allOddBits(0xAAAAAAAA) = 1
+</span></span></span><span class=line><span class=ln>27</span><span class=cl><span class=cm> *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
+</span></span></span><span class=line><span class=ln>28</span><span class=cl><span class=cm> *   Max ops: 12
+</span></span></span><span class=line><span class=ln>29</span><span class=cl><span class=cm> *   Rating: 2
+</span></span></span><span class=line><span class=ln>30</span><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=ln>31</span><span class=cl><span class=c1>// 理解错误。误以为是要求当前长度x的所有奇数位上都是1.
+</span></span></span><span class=line><span class=ln>32</span><span class=cl><span class=c1>// 实际上要求和x的长度无关，而是要求[0,31]中，所有奇数位上都是1.
+</span></span></span><span class=line><span class=ln>33</span><span class=cl><span class=c1></span><span class=kt>int</span> <span class=nf>allOddBits</span><span class=p>(</span><span class=kt>int</span> <span class=n>x</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>34</span><span class=cl>  <span class=kt>int</span> <span class=n>half_mask</span> <span class=o>=</span> <span class=p>(</span><span class=mh>0xAA</span><span class=o>&lt;&lt;</span><span class=mi>8</span><span class=p>)</span> <span class=o>|</span> <span class=mh>0xAA</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>35</span><span class=cl>  <span class=kt>int</span> <span class=n>mask</span> <span class=o>=</span> <span class=p>(</span><span class=n>half_mask</span><span class=o>&lt;&lt;</span><span class=mi>16</span><span class=p>)</span> <span class=o>+</span> <span class=n>half_mask</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>36</span><span class=cl>  <span class=c1>// printf(&#34;mask:X x:x x\n&#34;,mask,x,x&amp;mask);
+</span></span></span><span class=line><span class=ln>37</span><span class=cl><span class=c1></span>  <span class=k>return</span>  <span class=o>!</span><span class=p>((</span><span class=n>x</span><span class=o>&amp;</span><span class=n>mask</span><span class=p>)</span><span class=o>^</span><span class=n>mask</span><span class=p>);</span>  
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cm>/* 
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cm> * negate - return -x 
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cm> *   Example: negate(1) = -1.
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cm> *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=cm> *   Max ops: 5
+</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=cm> *   Rating: 2
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl><span class=kt>int</span> <span class=nf>negate</span><span class=p>(</span><span class=kt>int</span> <span class=n>x</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>  <span class=k>return</span> <span class=o>~</span><span class=n>x</span> <span class=o>+</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl><span class=c1>//3
+</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=c1></span><span class=cm>/* 
+</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=cm> * isAsciiDigit - return 1 if 0x30 &lt;= x &lt;= 0x39 (ASCII codes for characters &#39;0&#39; to &#39;9&#39;)
+</span></span></span><span class=line><span class=ln>15</span><span class=cl><span class=cm> *   Example: isAsciiDigit(0x35) = 1.
+</span></span></span><span class=line><span class=ln>16</span><span class=cl><span class=cm> *            isAsciiDigit(0x3a) = 0.
+</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=cm> *            isAsciiDigit(0x05) = 0.
+</span></span></span><span class=line><span class=ln>18</span><span class=cl><span class=cm> *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
+</span></span></span><span class=line><span class=ln>19</span><span class=cl><span class=cm> *   Max ops: 15
+</span></span></span><span class=line><span class=ln>20</span><span class=cl><span class=cm> *   Rating: 3
+</span></span></span><span class=line><span class=ln>21</span><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=ln>22</span><span class=cl><span class=cm>/* 把0-9的二进制写出来，发现0-7占满了3bit的二进制的8种组合。
+</span></span></span><span class=line><span class=ln>23</span><span class=cl><span class=cm>   因此考虑只判断8和9两种4bit的情况
+</span></span></span><span class=line><span class=ln>24</span><span class=cl><span class=cm>   构造mask,不在意的bit的位置放0，在意的bit位置放1.
+</span></span></span><span class=line><span class=ln>25</span><span class=cl><span class=cm>*/</span>
+</span></span><span class=line><span class=ln>26</span><span class=cl><span class=kt>int</span> <span class=nf>isAsciiDigit</span><span class=p>(</span><span class=kt>int</span> <span class=n>x</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>27</span><span class=cl>  <span class=kt>int</span> <span class=n>mask</span> <span class=o>=</span> <span class=mh>0x0E</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>28</span><span class=cl>  <span class=kt>int</span> <span class=n>ones</span> <span class=o>=</span> <span class=n>x</span><span class=o>&amp;</span><span class=n>mask</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>29</span><span class=cl>  <span class=kt>int</span> <span class=n>ones_3</span> <span class=o>=</span> <span class=n>ones</span> <span class=o>&gt;&gt;</span> <span class=mi>3</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>30</span><span class=cl>  <span class=kt>int</span> <span class=n>tens</span> <span class=o>=</span> <span class=n>x</span><span class=o>&gt;&gt;</span><span class=mi>4</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>31</span><span class=cl>  <span class=c1>// printf(&#34;x: x tens: x ones:x\n&#34;,x,tens,ones);
+</span></span></span><span class=line><span class=ln>32</span><span class=cl><span class=c1></span>  <span class=kt>int</span> <span class=n>ones_ok</span> <span class=o>=</span> <span class=p>(</span><span class=o>!</span><span class=p>(</span><span class=n>ones</span><span class=o>^</span><span class=mh>0x8</span><span class=p>))</span> <span class=o>|</span> <span class=p>(</span><span class=o>!</span><span class=n>ones_3</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>33</span><span class=cl>  <span class=kt>int</span> <span class=n>tens_ok</span> <span class=o>=</span> <span class=o>!</span><span class=p>(</span><span class=n>tens</span><span class=o>^</span><span class=mh>0x3</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>34</span><span class=cl>  <span class=k>return</span> <span class=n>ones_ok</span> <span class=o>&amp;</span> <span class=n>tens_ok</span><span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-asm data-lang=asm><span class=line><span class=ln> 1</span><span class=cl><span class=err>}</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cm>/* 
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cm> * conditional - same as x ? y : z 
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cm> *   Example: conditional(2,4,5) = 4
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cm> *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=cm> *   Max ops: 16
+</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=cm> *   Rating: 3
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl><span class=cm>/*
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=cm>  关键思路是0xFFFFFFFF和0x00000000之间差了1.
+</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=cm>  而这两个数一个是全部位置都取的mask,一个是全部位置都不取的mask.
+</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=cm>*/</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl><span class=nf>int</span> <span class=no>conditional</span><span class=p>(</span><span class=no>int</span> <span class=no>x</span><span class=p>,</span> <span class=no>int</span> <span class=no>y</span><span class=p>,</span> <span class=no>int</span> <span class=no>z</span><span class=p>)</span> <span class=err>{</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>  <span class=nf>return</span>   <span class=no>z</span><span class=err>^</span><span class=p>(!</span><span class=no>x</span> <span class=err>+</span> <span class=err>~</span><span class=mi>0</span> <span class=p>)</span><span class=err>&amp;</span><span class=p>(</span><span class=no>y</span><span class=err>^</span><span class=no>z</span><span class=p>)</span><span class=c1>;
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cm>/* 
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cm> * isLessOrEqual - if x &lt;= y  then return 1, else return 0 
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cm> *   Example: isLessOrEqual(4,5) = 1.
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cm> *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=cm> *   Max ops: 24
+</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=cm> *   Rating: 3
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl><span class=cm>/*
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=cm>  大体思路是，符号位相同和符号位不同分别考虑
+</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=cm>  符号位相同:  考虑差的符号位。
+</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=cm>  符号位不同: 当x&lt;0,y&gt;=0时结果为1.
+</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=cm>*/</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl><span class=kt>int</span> <span class=nf>isLessOrEqual</span><span class=p>(</span><span class=kt>int</span> <span class=n>x</span><span class=p>,</span> <span class=kt>int</span> <span class=n>y</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>  <span class=kt>int</span> <span class=n>minus</span> <span class=o>=</span> <span class=n>y</span> <span class=o>+</span> <span class=p>(</span><span class=o>~</span><span class=n>x</span><span class=o>+</span><span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>  <span class=kt>int</span> <span class=n>s_x</span> <span class=o>=</span> <span class=p>(</span><span class=n>x</span><span class=o>&gt;&gt;</span><span class=mi>31</span><span class=p>)</span><span class=o>&amp;</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>  <span class=kt>int</span> <span class=n>s_y</span> <span class=o>=</span> <span class=p>(</span><span class=n>y</span><span class=o>&gt;&gt;</span><span class=mi>31</span><span class=p>)</span><span class=o>&amp;</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>  <span class=kt>int</span> <span class=n>s_minus</span> <span class=o>=</span> <span class=p>(</span><span class=n>minus</span><span class=o>&gt;&gt;</span><span class=mi>31</span><span class=p>)</span> <span class=o>&amp;</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>  <span class=k>return</span> <span class=p>(</span><span class=n>s_x</span><span class=o>&amp;</span><span class=p>(</span><span class=o>!</span><span class=n>s_y</span><span class=p>))</span><span class=o>|</span> <span class=p>(</span><span class=o>!</span><span class=p>(</span><span class=n>s_x</span><span class=o>^</span><span class=n>s_y</span><span class=p>)</span><span class=o>&amp;!</span><span class=n>s_minus</span><span class=p>);</span> 
+</span></span><span class=line><span class=ln>20</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl><span class=c1>//4
+</span></span></span><span class=line><span class=ln>22</span><span class=cl><span class=c1></span><span class=cm>/* 
+</span></span></span><span class=line><span class=ln>23</span><span class=cl><span class=cm> * logicalNeg - implement the ! operator, using all of 
+</span></span></span><span class=line><span class=ln>24</span><span class=cl><span class=cm> *              the legal operators except !
+</span></span></span><span class=line><span class=ln>25</span><span class=cl><span class=cm> *   Examples: logicalNeg(3) = 0, logicalNeg(0) = 1
+</span></span></span><span class=line><span class=ln>26</span><span class=cl><span class=cm> *   Legal ops: ~ &amp; ^ | + &lt;&lt; &gt;&gt;
+</span></span></span><span class=line><span class=ln>27</span><span class=cl><span class=cm> *   Max ops: 12
+</span></span></span><span class=line><span class=ln>28</span><span class=cl><span class=cm> *   Rating: 4 
+</span></span></span><span class=line><span class=ln>29</span><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=ln>30</span><span class=cl><span class=cm>/* 
+</span></span></span><span class=line><span class=ln>31</span><span class=cl><span class=cm>  0 == ~0+1
+</span></span></span><span class=line><span class=ln>32</span><span class=cl><span class=cm>  -2147483648 = ~-2147483648+1
+</span></span></span><span class=line><span class=ln>33</span><span class=cl><span class=cm>  满足 x == ~x+1
+</span></span></span><span class=line><span class=ln>34</span><span class=cl><span class=cm>  重点是x和~x+1的符号位相同，如果都是0那么x=0,如果都是1那么x=-214783648`
+</span></span></span><span class=line><span class=ln>35</span><span class=cl><span class=cm>*/</span>
+</span></span><span class=line><span class=ln>36</span><span class=cl><span class=kt>int</span> <span class=nf>logicalNeg</span><span class=p>(</span><span class=kt>int</span> <span class=n>x</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>37</span><span class=cl>  <span class=kt>int</span> <span class=n>s1</span> <span class=o>=</span> <span class=p>(</span><span class=n>x</span><span class=o>&gt;&gt;</span><span class=mi>31</span><span class=p>)</span><span class=o>&amp;</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>38</span><span class=cl>  <span class=kt>int</span> <span class=n>s2</span> <span class=o>=</span> <span class=p>((</span><span class=o>~</span><span class=n>x</span><span class=o>+</span><span class=mi>1</span><span class=p>)</span><span class=o>&gt;&gt;</span><span class=mi>31</span><span class=p>)</span><span class=o>&amp;</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>39</span><span class=cl>  <span class=c1>// printf(&#34;s1: %d s2:%d  %d  %d\n&#34;,s1,s2,s1|s2,~(s1|s2));
+</span></span></span><span class=line><span class=ln>40</span><span class=cl><span class=c1></span>  <span class=c1>//  1 + negate(0) -&gt; 1
+</span></span></span><span class=line><span class=ln>41</span><span class=cl><span class=c1></span>  <span class=c1>//  1 + neagate(1) -&gt; 0
+</span></span></span><span class=line><span class=ln>42</span><span class=cl><span class=c1></span>  <span class=k>return</span> <span class=mi>1</span><span class=o>+</span><span class=p>(</span><span class=mi>1</span><span class=o>+~</span><span class=p>(</span><span class=n>s1</span><span class=o>|</span><span class=n>s2</span><span class=p>));</span>
+</span></span><span class=line><span class=ln>43</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>44</span><span class=cl><span class=cm>/* howManyBits - return the minimum number of bits required to represent x in
+</span></span></span><span class=line><span class=ln>45</span><span class=cl><span class=cm> *             two&#39;s complement
+</span></span></span><span class=line><span class=ln>46</span><span class=cl><span class=cm> *  Examples: howManyBits(12) = 5
+</span></span></span><span class=line><span class=ln>47</span><span class=cl><span class=cm> *            howManyBits(298) = 10
+</span></span></span><span class=line><span class=ln>48</span><span class=cl><span class=cm> *            howManyBits(-5) = 4
+</span></span></span><span class=line><span class=ln>49</span><span class=cl><span class=cm> *            howManyBits(0)  = 1
+</span></span></span><span class=line><span class=ln>50</span><span class=cl><span class=cm> *            howManyBits(-1) = 1 ??? should be 2?
+</span></span></span><span class=line><span class=ln>51</span><span class=cl><span class=cm> *            howManyBits(0x80000000) = 32
+</span></span></span><span class=line><span class=ln>52</span><span class=cl><span class=cm> *  Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
+</span></span></span><span class=line><span class=ln>53</span><span class=cl><span class=cm> *  Max ops: 90
+</span></span></span><span class=line><span class=ln>54</span><span class=cl><span class=cm> *  Rating: 4
+</span></span></span><span class=line><span class=ln>55</span><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=ln>56</span><span class=cl><span class=cm>/*
+</span></span></span><span class=line><span class=ln>57</span><span class=cl><span class=cm>  思路似乎可以转化成判断一个数（可正可负）的最高位的1的位置。
+</span></span></span><span class=line><span class=ln>58</span><span class=cl><span class=cm>  判断最高位1用二分的办法。
+</span></span></span><span class=line><span class=ln>59</span><span class=cl><span class=cm>  构造一个单调的函数，假设最高位位置为a,那么f((a,32))=0,f([0,a])=1.
+</span></span></span><span class=line><span class=ln>60</span><span class=cl><span class=cm>  被 howManyBits(-1)==1 困扰了好久，实际上就是0x1，只有一位，改位就是符号位的情况。 
+</span></span></span><span class=line><span class=ln>61</span><span class=cl><span class=cm>*/</span>
+</span></span><span class=line><span class=ln>62</span><span class=cl><span class=kt>int</span> <span class=nf>howManyBits</span><span class=p>(</span><span class=kt>int</span> <span class=n>x</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>63</span><span class=cl>  <span class=kt>int</span> <span class=n>n</span> <span class=o>=</span> <span class=mi>0</span> <span class=p>;</span>
+</span></span><span class=line><span class=ln>64</span><span class=cl>  <span class=n>x</span><span class=o>^=</span><span class=p>(</span><span class=n>x</span><span class=o>&lt;&lt;</span><span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>65</span><span class=cl>  <span class=n>n</span> <span class=o>+=</span>  <span class=p>(</span><span class=o>!!</span><span class=p>(</span> <span class=n>x</span> <span class=o>&amp;</span> <span class=p>((</span><span class=o>~</span><span class=mi>0</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=p>(</span><span class=n>n</span> <span class=o>+</span> <span class=mi>16</span><span class=p>))</span> <span class=p>))</span> <span class=o>&lt;&lt;</span> <span class=mi>4</span><span class=p>;</span>   <span class=c1>// 看高16位是否为0，是的话区间为[0,16),否的话为[16,32)
+</span></span></span><span class=line><span class=ln>66</span><span class=cl><span class=c1></span>  <span class=c1>// printf(&#34;n:%d\n&#34;,n);
+</span></span></span><span class=line><span class=ln>67</span><span class=cl><span class=c1></span>  <span class=c1>// printf(&#34;%d\n&#34;,!!(x &amp; ((~0) &lt;&lt; (n + 16))));
+</span></span></span><span class=line><span class=ln>68</span><span class=cl><span class=c1></span>  <span class=n>n</span> <span class=o>+=</span>  <span class=p>(</span><span class=o>!!</span><span class=p>(</span> <span class=n>x</span> <span class=o>&amp;</span> <span class=p>((</span><span class=o>~</span><span class=mi>0</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=p>(</span><span class=n>n</span> <span class=o>+</span> <span class=mi>8</span><span class=p>))</span> <span class=p>))</span> <span class=o>&lt;&lt;</span> <span class=mi>3</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>69</span><span class=cl>  <span class=c1>// printf(&#34;n:%d\n&#34;,n);
+</span></span></span><span class=line><span class=ln>70</span><span class=cl><span class=c1></span>  <span class=n>n</span> <span class=o>+=</span>  <span class=p>(</span><span class=o>!!</span><span class=p>(</span> <span class=n>x</span> <span class=o>&amp;</span> <span class=p>((</span><span class=o>~</span><span class=mi>0</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=p>(</span><span class=n>n</span> <span class=o>+</span> <span class=mi>4</span><span class=p>))</span> <span class=p>))</span> <span class=o>&lt;&lt;</span> <span class=mi>2</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>71</span><span class=cl>  <span class=c1>// printf(&#34;n:%d\n&#34;,n);
+</span></span></span><span class=line><span class=ln>72</span><span class=cl><span class=c1></span>  <span class=n>n</span> <span class=o>+=</span>  <span class=p>(</span><span class=o>!!</span><span class=p>(</span> <span class=n>x</span> <span class=o>&amp;</span> <span class=p>((</span><span class=o>~</span><span class=mi>0</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=p>(</span><span class=n>n</span> <span class=o>+</span> <span class=mi>2</span><span class=p>))</span> <span class=p>))</span> <span class=o>&lt;&lt;</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>73</span><span class=cl>  <span class=c1>// printf(&#34;n:%d\n&#34;,n);
+</span></span></span><span class=line><span class=ln>74</span><span class=cl><span class=c1></span>  <span class=n>n</span> <span class=o>+=</span>  <span class=p>(</span><span class=o>!!</span><span class=p>(</span> <span class=n>x</span> <span class=o>&amp;</span> <span class=p>((</span><span class=o>~</span><span class=mi>0</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=p>(</span><span class=n>n</span> <span class=o>+</span> <span class=mi>1</span><span class=p>))</span> <span class=p>));</span>
+</span></span><span class=line><span class=ln>75</span><span class=cl>  <span class=c1>// printf(&#34;n:%d\n&#34;,n);
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>  <span class=c1>// int s = (x&gt;&gt;31)&amp;1;
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span>  <span class=c1>// int ret = n+1+((1^s)&amp;(!!x));
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1></span>  <span class=c1>// // printf(&#34;x:%d ret:%d\n&#34;,x,ret);
+</span></span></span></code></pre></div><pre><code>  return n+1;
 }
-/* 
- * tmin - return minimum two's complement integer 
- *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
- *   Max ops: 4
- *   Rating: 1
- */
-/*
-  0X10000000
-*/
-int tmin(void) {
-
-  int ans = 0x1 &lt;&lt; 31;
-  return ans;
-
-
-}
-//2
-/* 
- * isTmax - returns 1 if x is the maximum, two's complement number,
- *     and 0 otherwise 
- *   Legal ops: ! ~ &amp; ^ | +
- *   Max ops: 10
- *   Rating: 1
- *   0x7FFFFFFF
- */
-int isTmax(int x) {
-  /*
-  大体思路首先是根据，如果x是最大值0x7FFFFFFF,那么~x和x+1(自然溢出)应该相等。
-  不能用等号，但是我们可以用异或。x==y 等价于  !(x^y). 因此有了后半段!(x+1)^(~x)
-  但是满足这个条件的还有-1,也就是0xFFFFFFFF,因此我们需要排除掉-1.
-  还是用异或的性质，这回是0异或者任何数都等于其本身。
-  因此如果x为-1，那么前后两部分都为1，结果为0.
-  如果x为TMAX,那么前面为0，后面为1，结果为1.
-  如果x为其他任何数，前后结果都应为0. 结果为0。
-  */
-  return (!(x+1))^!((x+1)^(~x));                                                                                                                                   
-}
-/* 
- * allOddBits - return 1 if all odd-numbered bits in word set to 1
- *   where bits are numbered from 0 (least significant) to 31 (most significant)
- *   Examples allOddBits(0xFFFFFFFD) = 0, allOddBits(0xAAAAAAAA) = 1
- *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
- *   Max ops: 12
- *   Rating: 2
- */
-// 理解错误。误以为是要求当前长度x的所有奇数位上都是1.
-// 实际上要求和x的长度无关，而是要求[0,31]中，所有奇数位上都是1.
-int allOddBits(int x) {
-  int half_mask = (0xAA&lt;&lt;8) | 0xAA;
-  int mask = (half_mask&lt;&lt;16) + half_mask;
-  // printf(&quot;mask:X x:x x\n&quot;,mask,x,x&amp;mask);
-  return  !((x&amp;mask)^mask);  
-  
-}
-/* 
- * negate - return -x 
- *   Example: negate(1) = -1.
- *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
- *   Max ops: 5
- *   Rating: 2
- */
-int negate(int x) {
-  return ~x + 1;
-}
-//3
-/* 
- * isAsciiDigit - return 1 if 0x30 &lt;= x &lt;= 0x39 (ASCII codes for characters '0' to '9')
- *   Example: isAsciiDigit(0x35) = 1.
- *            isAsciiDigit(0x3a) = 0.
- *            isAsciiDigit(0x05) = 0.
- *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
- *   Max ops: 15
- *   Rating: 3
- */
-/* 把0-9的二进制写出来，发现0-7占满了3bit的二进制的8种组合。
-   因此考虑只判断8和9两种4bit的情况
-   构造mask,不在意的bit的位置放0，在意的bit位置放1.
-*/
-int isAsciiDigit(int x) {
-  int mask = 0x0E;
-  int ones = x&amp;mask;
-  int ones_3 = ones &gt;&gt; 3;
-  int tens = x&gt;&gt;4;
-  // printf(&quot;x: x tens: x ones:x\n&quot;,x,tens,ones);
-  int ones_ok = (!(ones^0x8)) | (!ones_3);
-  int tens_ok = !(tens^0x3);
-  return ones_ok &amp; tens_ok;
-
-}
-/* 
- * conditional - same as x ? y : z 
- *   Example: conditional(2,4,5) = 4
- *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
- *   Max ops: 16
- *   Rating: 3
- */
-/*
-  关键思路是0xFFFFFFFF和0x00000000之间差了1.
-  而这两个数一个是全部位置都取的mask,一个是全部位置都不取的mask.
-*/
-int conditional(int x, int y, int z) {
-  return   z^(!x + ~0 )&amp;(y^z);
-
-}
-/* 
- * isLessOrEqual - if x &lt;= y  then return 1, else return 0 
- *   Example: isLessOrEqual(4,5) = 1.
- *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
- *   Max ops: 24
- *   Rating: 3
- */
-/*
-  大体思路是，符号位相同和符号位不同分别考虑
-  符号位相同:  考虑差的符号位。
-  符号位不同: 当x&lt;0,y&gt;=0时结果为1.
-*/
-int isLessOrEqual(int x, int y) {
-  int minus = y + (~x+1);
-  int s_x = (x&gt;&gt;31)&amp;1;
-  int s_y = (y&gt;&gt;31)&amp;1;
-  int s_minus = (minus&gt;&gt;31) &amp; 1;
-  return (s_x&amp;(!s_y))| (!(s_x^s_y)&amp;!s_minus); 
-}
-//4
-/* 
- * logicalNeg - implement the ! operator, using all of 
- *              the legal operators except !
- *   Examples: logicalNeg(3) = 0, logicalNeg(0) = 1
- *   Legal ops: ~ &amp; ^ | + &lt;&lt; &gt;&gt;
- *   Max ops: 12
- *   Rating: 4 
- */
-/* 
-  0 == ~0+1
-  -2147483648 = ~-2147483648+1
-  满足 x == ~x+1
-  重点是x和~x+1的符号位相同，如果都是0那么x=0,如果都是1那么x=-214783648`
-*/
-int logicalNeg(int x) {
-  int s1 = (x&gt;&gt;31)&amp;1;
-  int s2 = ((~x+1)&gt;&gt;31)&amp;1;
-  // printf(&quot;s1: %d s2:%d  %d  %d\n&quot;,s1,s2,s1|s2,~(s1|s2));
-  //  1 + negate(0) -&gt; 1
-  //  1 + neagate(1) -&gt; 0
-  return 1+(1+~(s1|s2));
-}
-/* howManyBits - return the minimum number of bits required to represent x in
- *             two's complement
- *  Examples: howManyBits(12) = 5
- *            howManyBits(298) = 10
- *            howManyBits(-5) = 4
- *            howManyBits(0)  = 1
- *            howManyBits(-1) = 1 ??? should be 2?
- *            howManyBits(0x80000000) = 32
- *  Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
- *  Max ops: 90
- *  Rating: 4
- */
-/*
-  思路似乎可以转化成判断一个数（可正可负）的最高位的1的位置。
-  判断最高位1用二分的办法。
-  构造一个单调的函数，假设最高位位置为a,那么f((a,32))=0,f([0,a])=1.
-  被 howManyBits(-1)==1 困扰了好久，实际上就是0x1，只有一位，改位就是符号位的情况。 
-*/
-int howManyBits(int x) {
-  int n = 0 ;
-  x^=(x&lt;&lt;1);
-  n +=  (!!( x &amp; ((~0) &lt;&lt; (n + 16)) )) &lt;&lt; 4;   // 看高16位是否为0，是的话区间为[0,16),否的话为[16,32)
-  // printf(&quot;n:%d\n&quot;,n);
-  // printf(&quot;%d\n&quot;,!!(x &amp; ((~0) &lt;&lt; (n + 16))));
-  n +=  (!!( x &amp; ((~0) &lt;&lt; (n + 8)) )) &lt;&lt; 3;
-  // printf(&quot;n:%d\n&quot;,n);
-  n +=  (!!( x &amp; ((~0) &lt;&lt; (n + 4)) )) &lt;&lt; 2;
-  // printf(&quot;n:%d\n&quot;,n);
-  n +=  (!!( x &amp; ((~0) &lt;&lt; (n + 2)) )) &lt;&lt; 1;
-  // printf(&quot;n:%d\n&quot;,n);
-  n +=  (!!( x &amp; ((~0) &lt;&lt; (n + 1)) ));
-  // printf(&quot;n:%d\n&quot;,n);
-
-  // int s = (x&gt;&gt;31)&amp;1;
-  // int ret = n+1+((1^s)&amp;(!!x));
-  // // printf(&quot;x:%d ret:%d\n&quot;,x,ret);
-  
-  return n+1;
-}
-</code></pre><p>补上三个涉及浮点数的问题&mldr;比较无聊，按照IEEE754操作即可．</p><pre><code>//float
-/* 
- * floatScale2 - Return bit-level equivalent of expression 2*f for
- *   floating point argument f.
- *   Both the argument and result are passed as unsigned int's, but
- *   they are to be interpreted as the bit-level representation of
- *   single-precision floating point values.
- *   When argument is NaN, return argument
- *   Legal ops: Any integer/unsigned operations incl. ||, &amp;&amp;. also if, while
- *   Max ops: 30
- *   Rating: 4
- */
-unsigned floatScale2(unsigned uf)
-{
-  int exp_ = (uf &amp; 0x7f800000) &gt;&gt; 23;
-  int s_ = uf &amp; 0x80000000;
-  if (exp_ == 0)
-    return (uf &lt;&lt; 1) | s_;
-  if (exp_ == 255)
-    return uf;
-  ++exp_;
-  if (exp_ == 255)
-    return 0x7f800000 | s_;
-  return (uf &amp; 0x807fffff) | (exp_ &lt;&lt; 23);
-}
-/* 
- * floatFloat2Int - Return bit-level equivalent of expression (int) f
- *   for floating point argument f.
- *   Argument is passed as unsigned int, but
- *   it is to be interpreted as the bit-level representation of a
- *   single-precision floating point value.
- *   Anything out of range (including NaN and infinity) should return
- *   0x80000000u.
- *   Legal ops: Any integer/unsigned operations incl. ||, &amp;&amp;. also if, while
- *   Max ops: 30
- *   Rating: 4
- */
-int floatFloat2Int(unsigned uf)
-{
-  int s_ = uf &gt;&gt; 31;
-  int exp_ = ((uf &amp; 0x7f800000) &gt;&gt; 23) - 127;
-  int frac_ = (uf &amp; 0x007fffff) | 0x00800000;
-  if (!(uf &amp; 0x7fffffff))
-    return 0;
-
-  if (exp_ &gt; 31)
-    return 0x80000000;
-  if (exp_ &lt; 0)
-    return 0;
-
-  if (exp_ &gt; 23)
-    frac_ &lt;&lt;= (exp_ - 23);
-  else
-    frac_ &gt;&gt;= (23 - exp_);
-
-  if (!((frac_ &gt;&gt; 31) ^ s_))
-    return frac_;
-  else if (frac_ &gt;&gt; 31)
-    return 0x80000000;
-  else
-    return ~frac_ + 1;
-}
-/* 
- * floatPower2 - Return bit-level equivalent of the expression 2.0^x
- *   (2.0 raised to the power x) for any 32-bit integer x.
- *
- *   The unsigned value that is returned should have the identical bit
- *   representation as the single-precision floating-point number 2.0^x.
- *   If the result is too small to be represented as a denorm, return
- *   0. If too large, return +INF.
- * 
- *   Legal ops: Any integer/unsigned operations incl. ||, &amp;&amp;. Also if, while 
- *   Max ops: 30 
- *   Rating: 4
- */
-unsigned floatPower2(int x)
-{
-  int exp = x + 127;
-  if (exp &lt;= 0)
-    return 0;
-  if (exp &gt;= 255)
-    return 0x7f800000;
-  return exp &lt;&lt; 23;
-}
-</code></pre></div><h2 class=post_related>Posts in this Series</h2><ul><li><a href=https://111qqz.com/2021/06/csapp-shelllab/ class=nav-link title="[施工完成] CSAPP shell lab">[施工完成] CSAPP shell lab</a></li><li><a href=https://111qqz.com/2021/04/csapp-malloclab/ class=nav-link title="[施工完成] CSAPP Malloc lab">[施工完成] CSAPP Malloc lab</a></li><li><a href=https://111qqz.com/2020/12/csapp-cache-lab/ class=nav-link title="[施工完成] CSAPP Cachelab">[施工完成] CSAPP Cachelab</a></li><li><a href=https://111qqz.com/2020/02/csapp-archlab/ class=nav-link title="【施工完成】CSAPP archlab">【施工完成】CSAPP archlab</a></li><li><a href=https://111qqz.com/2020/02/csapp-attacklab/ class=nav-link title="【施工完成】CSAPP attacklab">【施工完成】CSAPP attacklab</a></li><li><a href=https://111qqz.com/2020/02/csapp-bomblab/ class=nav-link title="【施工完成】CSAPP bomb lab">【施工完成】CSAPP bomb lab</a></li><li><a href=https://111qqz.com/2019/02/csapp-data-lab/ class=nav-link title="【施工完成】CSAPP data lab">【施工完成】CSAPP data lab</a></li></ul><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
+</code></pre><p>补上三个涉及浮点数的问题&mldr;比较无聊，按照IEEE754操作即可．</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln> 1</span><span class=cl>//float
+</span></span><span class=line><span class=ln> 2</span><span class=cl>/* 
+</span></span><span class=line><span class=ln> 3</span><span class=cl> * floatScale2 - Return bit-level equivalent of expression 2*f <span class=k>for</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl> *   floating point argument f.
+</span></span><span class=line><span class=ln> 5</span><span class=cl> *   Both the argument and result are passed as unsigned int<span class=err>&#39;</span>s, but
+</span></span><span class=line><span class=ln> 6</span><span class=cl> *   they are to be interpreted as the bit-level representation of
+</span></span><span class=line><span class=ln> 7</span><span class=cl> *   single-precision floating point values.
+</span></span><span class=line><span class=ln> 8</span><span class=cl> *   When argument is NaN, <span class=k>return</span> argument
+</span></span><span class=line><span class=ln> 9</span><span class=cl> *   Legal ops: Any integer/unsigned operations incl. <span class=o>||</span>, <span class=o>&amp;&amp;</span>. also <span class=k>if</span>, <span class=k>while</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl> *   Max ops: <span class=m>30</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl> *   Rating: <span class=m>4</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl> */
+</span></span><span class=line><span class=ln>13</span><span class=cl>unsigned floatScale2<span class=o>(</span>unsigned uf<span class=o>)</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl><span class=o>{</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>  int <span class=nv>exp_</span> <span class=o>=</span> <span class=o>(</span>uf <span class=p>&amp;</span> 0x7f800000<span class=o>)</span> &gt;&gt; 23<span class=p>;</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>  int <span class=nv>s_</span> <span class=o>=</span> uf <span class=p>&amp;</span> 0x80000000<span class=p>;</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>  <span class=k>if</span> <span class=o>(</span><span class=nv>exp_</span> <span class=o>==</span> 0<span class=o>)</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>    <span class=k>return</span> <span class=o>(</span>uf <span class=s>&lt;&lt; 1) | s_;
+</span></span></span><span class=line><span class=ln>19</span><span class=cl><span class=s>  if (exp_ == 255)
+</span></span></span><span class=line><span class=ln>20</span><span class=cl><span class=s>    return uf;
+</span></span></span><span class=line><span class=ln>21</span><span class=cl><span class=s>  ++exp_;
+</span></span></span><span class=line><span class=ln>22</span><span class=cl><span class=s>  if (exp_ == 255)
+</span></span></span><span class=line><span class=ln>23</span><span class=cl><span class=s>    return 0x7f800000 | s_;
+</span></span></span><span class=line><span class=ln>24</span><span class=cl><span class=s>  return (uf &amp; 0x807fffff) | (exp_ &lt;&lt; 23);
+</span></span></span><span class=line><span class=ln>25</span><span class=cl><span class=s>}
+</span></span></span><span class=line><span class=ln>26</span><span class=cl><span class=s>/* 
+</span></span></span><span class=line><span class=ln>27</span><span class=cl><span class=s> * floatFloat2Int - Return bit-level equivalent of expression (int) f
+</span></span></span><span class=line><span class=ln>28</span><span class=cl><span class=s> *   for floating point argument f.
+</span></span></span><span class=line><span class=ln>29</span><span class=cl><span class=s> *   Argument is passed as unsigned int, but
+</span></span></span><span class=line><span class=ln>30</span><span class=cl><span class=s> *   it is to be interpreted as the bit-level representation of a
+</span></span></span><span class=line><span class=ln>31</span><span class=cl><span class=s> *   single-precision floating point value.
+</span></span></span><span class=line><span class=ln>32</span><span class=cl><span class=s> *   Anything out of range (including NaN and infinity) should return
+</span></span></span><span class=line><span class=ln>33</span><span class=cl><span class=s> *   0x80000000u.
+</span></span></span><span class=line><span class=ln>34</span><span class=cl><span class=s> *   Legal ops: Any integer/unsigned operations incl. ||, &amp;&amp;. also if, while
+</span></span></span><span class=line><span class=ln>35</span><span class=cl><span class=s> *   Max ops: 30
+</span></span></span><span class=line><span class=ln>36</span><span class=cl><span class=s> *   Rating: 4
+</span></span></span><span class=line><span class=ln>37</span><span class=cl><span class=s> */
+</span></span></span><span class=line><span class=ln>38</span><span class=cl><span class=s>int floatFloat2Int(unsigned uf)
+</span></span></span><span class=line><span class=ln>39</span><span class=cl><span class=s>{
+</span></span></span><span class=line><span class=ln>40</span><span class=cl><span class=s>  int s_ = uf &gt;&gt; 31</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>41</span><span class=cl>  int <span class=nv>exp_</span> <span class=o>=</span> <span class=o>((</span>uf <span class=p>&amp;</span> 0x7f800000<span class=o>)</span> &gt;&gt; 23<span class=o>)</span> - 127<span class=p>;</span>
+</span></span><span class=line><span class=ln>42</span><span class=cl>  int <span class=nv>frac_</span> <span class=o>=</span> <span class=o>(</span>uf <span class=p>&amp;</span> 0x007fffff<span class=o>)</span> <span class=p>|</span> 0x00800000<span class=p>;</span>
+</span></span><span class=line><span class=ln>43</span><span class=cl>  <span class=k>if</span> <span class=o>(</span>!<span class=o>(</span>uf <span class=p>&amp;</span> 0x7fffffff<span class=o>))</span>
+</span></span><span class=line><span class=ln>44</span><span class=cl>    <span class=k>return</span> 0<span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>  <span class=k>if</span> <span class=o>(</span>exp_ &gt; 31<span class=o>)</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=k>return</span> 0x80000000<span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=k>if</span> <span class=o>(</span>exp_ &lt; 0<span class=o>)</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=k>return</span> 0<span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>  <span class=k>if</span> <span class=o>(</span>exp_ &gt; 23<span class=o>)</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    frac_ &lt;&lt;<span class=o>=</span> <span class=o>(</span>exp_ - 23<span class=o>)</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=k>else</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    frac_ &gt;&gt;<span class=o>=</span> <span class=o>(</span><span class=m>23</span> - exp_<span class=o>)</span><span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln> 1</span><span class=cl>  <span class=k>if</span> <span class=o>(</span>!<span class=o>((</span>frac_ &gt;&gt; 31<span class=o>)</span> ^ s_<span class=o>))</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>    <span class=k>return</span> frac_<span class=p>;</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>  <span class=k>else</span> <span class=k>if</span> <span class=o>(</span>frac_ &gt;&gt; 31<span class=o>)</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>    <span class=k>return</span> 0x80000000<span class=p>;</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=k>else</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>    <span class=k>return</span> ~frac_ + 1<span class=p>;</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=o>}</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>/* 
+</span></span><span class=line><span class=ln> 9</span><span class=cl> * floatPower2 - Return bit-level equivalent of the expression 2.0^x
+</span></span><span class=line><span class=ln>10</span><span class=cl> *   <span class=o>(</span>2.0 raised to the power x<span class=o>)</span> <span class=k>for</span> any 32-bit integer x.
+</span></span><span class=line><span class=ln>11</span><span class=cl> *
+</span></span><span class=line><span class=ln>12</span><span class=cl> *   The unsigned value that is returned should have the identical bit
+</span></span><span class=line><span class=ln>13</span><span class=cl> *   representation as the single-precision floating-point number 2.0^x.
+</span></span><span class=line><span class=ln>14</span><span class=cl> *   If the result is too small to be represented as a denorm, <span class=k>return</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl> *   0. If too large, <span class=k>return</span> +INF.
+</span></span><span class=line><span class=ln>16</span><span class=cl> * 
+</span></span><span class=line><span class=ln>17</span><span class=cl> *   Legal ops: Any integer/unsigned operations incl. <span class=o>||</span>, <span class=o>&amp;&amp;</span>. Also <span class=k>if</span>, <span class=k>while</span> 
+</span></span><span class=line><span class=ln>18</span><span class=cl> *   Max ops: <span class=m>30</span> 
+</span></span><span class=line><span class=ln>19</span><span class=cl> *   Rating: <span class=m>4</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl> */
+</span></span><span class=line><span class=ln>21</span><span class=cl>unsigned floatPower2<span class=o>(</span>int x<span class=o>)</span>
+</span></span><span class=line><span class=ln>22</span><span class=cl><span class=o>{</span>
+</span></span><span class=line><span class=ln>23</span><span class=cl>  int <span class=nv>exp</span> <span class=o>=</span> x + 127<span class=p>;</span>
+</span></span><span class=line><span class=ln>24</span><span class=cl>  <span class=k>if</span> <span class=o>(</span>exp &lt;<span class=o>=</span> 0<span class=o>)</span>
+</span></span><span class=line><span class=ln>25</span><span class=cl>    <span class=k>return</span> 0<span class=p>;</span>
+</span></span><span class=line><span class=ln>26</span><span class=cl>  <span class=k>if</span> <span class=o>(</span>exp &gt;<span class=o>=</span> 255<span class=o>)</span>
+</span></span><span class=line><span class=ln>27</span><span class=cl>    <span class=k>return</span> 0x7f800000<span class=p>;</span>
+</span></span><span class=line><span class=ln>28</span><span class=cl>  <span class=k>return</span> exp &lt;&lt; 23<span class=p>;</span>
+</span></span><span class=line><span class=ln>29</span><span class=cl><span class=o>}</span>
+</span></span></code></pre></div></div><h2 class=post_related>Posts in this Series</h2><ul><li><a href=https://111qqz.com/2021/06/csapp-shelllab/ class=nav-link title="[施工完成] CSAPP shell lab">[施工完成] CSAPP shell lab</a></li><li><a href=https://111qqz.com/2021/04/csapp-malloclab/ class=nav-link title="[施工完成] CSAPP Malloc lab">[施工完成] CSAPP Malloc lab</a></li><li><a href=https://111qqz.com/2020/12/csapp-cache-lab/ class=nav-link title="[施工完成] CSAPP Cachelab">[施工完成] CSAPP Cachelab</a></li><li><a href=https://111qqz.com/2020/02/csapp-archlab/ class=nav-link title="【施工完成】CSAPP archlab">【施工完成】CSAPP archlab</a></li><li><a href=https://111qqz.com/2020/02/csapp-attacklab/ class=nav-link title="【施工完成】CSAPP attacklab">【施工完成】CSAPP attacklab</a></li><li><a href=https://111qqz.com/2020/02/csapp-bomblab/ class=nav-link title="【施工完成】CSAPP bomb lab">【施工完成】CSAPP bomb lab</a></li><li><a href=https://111qqz.com/2019/02/csapp-data-lab/ class=nav-link title="【施工完成】CSAPP data lab">【施工完成】CSAPP data lab</a></li></ul><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
 <span class=button_tally>913</span>
 </a><a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>其他
 <span class=button_tally>90</span>

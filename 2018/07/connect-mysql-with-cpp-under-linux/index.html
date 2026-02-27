@@ -37,24 +37,23 @@ sudo apt-get install libmysqlclient15-dev  mysql-server mysql-client
 　　　　mysql&gt; select * from test; 　　//查询test表中数据
 
 　　　　mysql&gt;quit
-</code></pre><p>然后用如下cpp代码连接</p><pre><code>#include &lt;cstdio&gt;
-#include &lt;mysql.h&gt;
-#include &lt;cstring&gt;
-int main(int argc,char *argv[])
-{
-	MYSQL conn;
-	int res;
-	mysql_init(&amp;conn);
-	if (mysql_real_connect(&amp;conn,&quot;localhost&quot;,&quot;root&quot;,&quot;2254965&quot;,&quot;test&quot;,0,NULL,CLIENT_FOUND_ROWS))
-	{
-		puts(&quot;connect success&quot;);
-		res = mysql_query(&amp;conn,&quot;insert into test values('sensetime','23333')&quot;);
-		if (res) puts(&quot;error&quot;);
-		else puts(&quot;success&quot;);
-		printf(&quot;res=%d\n&quot;,res);
-	}
-
-	return 0;
+</code></pre><p>然后用如下cpp代码连接</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cstdio&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;mysql.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cstring&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cp></span><span class=kt>int</span> <span class=nf>main</span><span class=p>(</span><span class=kt>int</span> <span class=n>argc</span><span class=p>,</span><span class=kt>char</span> <span class=o>*</span><span class=n>argv</span><span class=p>[])</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>	<span class=n>MYSQL</span> <span class=n>conn</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>	<span class=kt>int</span> <span class=n>res</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>	<span class=n>mysql_init</span><span class=p>(</span><span class=o>&amp;</span><span class=n>conn</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=n>mysql_real_connect</span><span class=p>(</span><span class=o>&amp;</span><span class=n>conn</span><span class=p>,</span><span class=s>&#34;localhost&#34;</span><span class=p>,</span><span class=s>&#34;root&#34;</span><span class=p>,</span><span class=s>&#34;2254965&#34;</span><span class=p>,</span><span class=s>&#34;test&#34;</span><span class=p>,</span><span class=mi>0</span><span class=p>,</span><span class=nb>NULL</span><span class=p>,</span><span class=n>CLIENT_FOUND_ROWS</span><span class=p>))</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>	<span class=p>{</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>		<span class=n>puts</span><span class=p>(</span><span class=s>&#34;connect success&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>		<span class=n>res</span> <span class=o>=</span> <span class=n>mysql_query</span><span class=p>(</span><span class=o>&amp;</span><span class=n>conn</span><span class=p>,</span><span class=s>&#34;insert into test values(&#39;sensetime&#39;,&#39;23333&#39;)&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>res</span><span class=p>)</span> <span class=n>puts</span><span class=p>(</span><span class=s>&#34;error&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>		<span class=k>else</span> <span class=n>puts</span><span class=p>(</span><span class=s>&#34;success&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>		<span class=n>printf</span><span class=p>(</span><span class=s>&#34;res=%d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span><span class=n>res</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>	<span class=p>}</span>
+</span></span></code></pre></div><pre><code>	return 0;
 }
 </code></pre><p>编译:</p><pre><code>g++ test.cpp `mysql_config --cflags --libs` -o test
 </code></pre><p>此次从mysql中查询，发现成功插入了一条数据．</p></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM

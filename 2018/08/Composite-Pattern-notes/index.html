@@ -16,69 +16,62 @@
 <a href=https://111qqz.com/ class="nav_child nav_item">中文</a>
 <a href=https://111qqz.com/en/ class="nav_child nav_item">English</a></div></div><div class=follow><a href=https://github.com/111qqz><svg class="icon"><use xlink:href="#github"/></svg></a><div class=color_mode><input type=checkbox class=color_choice id=mode></div></div></div></nav></header><main><div class="grid-inverse wrap content"><article class=post_content><h1 class=post_title>[设计模式] 组合模式（composite） 学习笔记</h1><div class=post_meta><span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>2018-08-28</span>
-<span class=post_time>· 1 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F title=组合模式 class="post_tag button button_translucent">组合模式
+<span class=post_time>· 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F title=组合模式 class="post_tag button button_translucent">组合模式
 </a><a href=https://111qqz.com/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F title=设计模式 class="post_tag button button_translucent">设计模式
-</a><a href=https://111qqz.com/tags/c++ title=c++ class="post_tag button button_translucent">c++</a></span></div><div class=post_body><p>目的是忽略单一对象和组合对象的不同。 有点像以前写过的用链表定义一个树结构，每个节点是一个val + 多个<em>tree 。如果某个节点是叶子节点了，那么对应的</em>tree都为NULL. 只不过这里用了更加面向对象的实现。</p><p>具体看代码：</p><pre><code>/* ***********************************************
-Author :111qqz
-mail: renkuanze@sensetime.com
-Created Time :2018年08月28日 星期二 14时21分51秒
-File Name :composite.cpp
-************************************************ */
-#include &lt;iostream&gt;
-#include &lt;list&gt;
-#include &lt;string&gt;
-using namespace std;
-
-class Component { // 为组合中的对象声明接口，在适当情况下，实现所有类共有接口的默认行为
-protected:
-    string name;
-public:
-    Component(string n) { name = n; }
-    virtual ~Component() {}
-    virtual void Add(Component* c) = 0;
-    virtual void Remove(Component* c) = 0;
-    virtual void Display(int depth) = 0;
-};
-
-class Leaf : public Component { // 在组合中表示叶节点对象，叶节点没有子节点
-public:
-    Leaf(string name) : Component(name) {}
-    void Add(Component* c){} // 叶节点没有Add功能，但这样做能使接口具备一致性，这就是透明方式，如果不加入Add和Remove方法，那就是安全方式。
-    void Remove(Component* c){} // 同上
-    void Display(int depth) { cout &lt;&lt; name &lt;&lt; &quot;  &quot; &lt;&lt; depth &lt;&lt; endl; }
-};
-
-class Composite : public Component { // 定义有枝节点行为，用来存储子部件
-private:
-    list&lt;Component* &gt; children;
-public:
-    Composite(string name) : Component(name) {}
-    void Add(Component* c) { children.push_back(c); }
-    void Remove(Component* c) { children.remove(c); }
-    void Display(int depth) {
-        cout &lt;&lt; name &lt;&lt; &quot;  &quot; &lt;&lt; depth &lt;&lt; endl;
-        for (auto c = children.begin(); c != children.end(); c++) {
-            (*c)-&gt;Display(depth+1);
-        }
-    }
-};
-
-int main() { // 客户端实现代码
-    Composite* root = new Composite(&quot;root&quot;);
-    root-&gt;Add(new Leaf(&quot;Leaf A&quot;));
-    root-&gt;Add(new Leaf(&quot;Leaf B&quot;));
-
-    Composite* comp = new Composite(&quot;Composite X&quot;);
-    comp-&gt;Add(new Leaf(&quot;Leaf XA&quot;));
-    comp-&gt;Add(new Leaf(&quot;Leaf XB&quot;));
-    root-&gt;Add(comp);
-
-    Composite* comp2 = new Composite(&quot;Composite XY&quot;);
-    comp2-&gt;Add(new Leaf(&quot;Leaf XYA&quot;));
-    comp2-&gt;Add(new Leaf(&quot;Leaf XYB&quot;));
-    comp-&gt;Add(comp2);
-
-    root-&gt;Display(1);
+</a><a href=https://111qqz.com/tags/c++ title=c++ class="post_tag button button_translucent">c++</a></span></div><div class=post_body><p>目的是忽略单一对象和组合对象的不同。 有点像以前写过的用链表定义一个树结构，每个节点是一个val + 多个<em>tree 。如果某个节点是叶子节点了，那么对应的</em>tree都为NULL. 只不过这里用了更加面向对象的实现。</p><p>具体看代码：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=cm>/* ***********************************************
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cm>Author :111qqz
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cm>mail: renkuanze@sensetime.com
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cm>Created Time :2018年08月28日 星期二 14时21分51秒
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cm>File Name :composite.cpp
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=cm>************************************************ */</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;list&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;string&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=cp></span><span class=k>using</span> <span class=k>namespace</span> <span class=n>std</span><span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=ln> 1</span><span class=cl><span class=kr>class</span> <span class=nx>Component</span> <span class=p>{</span> <span class=c1>// 为组合中的对象声明接口，在适当情况下，实现所有类共有接口的默认行为
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=c1></span><span class=kr>protected</span><span class=o>:</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>    <span class=kt>string</span> <span class=nx>name</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl><span class=kr>public</span><span class=o>:</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>    <span class=nx>Component</span><span class=p>(</span><span class=kt>string</span> <span class=nx>n</span><span class=p>)</span> <span class=p>{</span> <span class=nx>name</span> <span class=o>=</span> <span class=nx>n</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>    <span class=nx>virtual</span> <span class=o>~</span><span class=nx>Component() {</span><span class=p>}</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>    <span class=nx>virtual</span> <span class=k>void</span> <span class=nx>Add</span><span class=p>(</span><span class=nx>Component</span><span class=o>*</span> <span class=nx>c</span><span class=p>)</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>    <span class=nx>virtual</span> <span class=k>void</span> <span class=nx>Remove</span><span class=p>(</span><span class=nx>Component</span><span class=o>*</span> <span class=nx>c</span><span class=p>)</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>    <span class=nx>virtual</span> <span class=k>void</span> <span class=nx>Display</span><span class=p>(</span><span class=nx>int</span> <span class=nx>depth</span><span class=p>)</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl><span class=p>};</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=k>class</span> <span class=nc>Leaf</span> <span class=p>:</span> <span class=n>public</span> <span class=n>Component</span> <span class=p>{</span> <span class=o>//</span> <span class=n>在组合中表示叶节点对象</span><span class=err>，</span><span class=n>叶节点没有子节点</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=n>public</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=n>Leaf</span><span class=p>(</span><span class=n>string</span> <span class=n>name</span><span class=p>)</span> <span class=p>:</span> <span class=n>Component</span><span class=p>(</span><span class=n>name</span><span class=p>)</span> <span class=p>{}</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=n>void</span> <span class=n>Add</span><span class=p>(</span><span class=n>Component</span><span class=o>*</span> <span class=n>c</span><span class=p>){}</span> <span class=o>//</span> <span class=n>叶节点没有Add功能</span><span class=err>，</span><span class=n>但这样做能使接口具备一致性</span><span class=err>，</span><span class=n>这就是透明方式</span><span class=err>，</span><span class=n>如果不加入Add和Remove方法</span><span class=err>，</span><span class=n>那就是安全方式</span><span class=err>。</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>    <span class=n>void</span> <span class=n>Remove</span><span class=p>(</span><span class=n>Component</span><span class=o>*</span> <span class=n>c</span><span class=p>){}</span> <span class=o>//</span> <span class=n>同上</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>    <span class=n>void</span> <span class=n>Display</span><span class=p>(</span><span class=nb>int</span> <span class=n>depth</span><span class=p>)</span> <span class=p>{</span> <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>name</span> <span class=o>&lt;&lt;</span> <span class=s2>&#34;  &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>depth</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl><span class=p>};</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl><span class=k>class</span> <span class=nc>Composite</span> <span class=p>:</span> <span class=n>public</span> <span class=n>Component</span> <span class=p>{</span> <span class=o>//</span> <span class=n>定义有枝节点行为</span><span class=err>，</span><span class=n>用来存储子部件</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=n>private</span><span class=p>:</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>    <span class=nb>list</span><span class=o>&lt;</span><span class=n>Component</span><span class=o>*</span> <span class=o>&gt;</span> <span class=n>children</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl><span class=n>public</span><span class=p>:</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>    <span class=n>Composite</span><span class=p>(</span><span class=n>string</span> <span class=n>name</span><span class=p>)</span> <span class=p>:</span> <span class=n>Component</span><span class=p>(</span><span class=n>name</span><span class=p>)</span> <span class=p>{}</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>    <span class=n>void</span> <span class=n>Add</span><span class=p>(</span><span class=n>Component</span><span class=o>*</span> <span class=n>c</span><span class=p>)</span> <span class=p>{</span> <span class=n>children</span><span class=o>.</span><span class=n>push_back</span><span class=p>(</span><span class=n>c</span><span class=p>);</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>    <span class=n>void</span> <span class=n>Remove</span><span class=p>(</span><span class=n>Component</span><span class=o>*</span> <span class=n>c</span><span class=p>)</span> <span class=p>{</span> <span class=n>children</span><span class=o>.</span><span class=n>remove</span><span class=p>(</span><span class=n>c</span><span class=p>);</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>    <span class=n>void</span> <span class=n>Display</span><span class=p>(</span><span class=nb>int</span> <span class=n>depth</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>name</span> <span class=o>&lt;&lt;</span> <span class=s2>&#34;  &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>depth</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=n>auto</span> <span class=n>c</span> <span class=o>=</span> <span class=n>children</span><span class=o>.</span><span class=n>begin</span><span class=p>();</span> <span class=n>c</span> <span class=o>!=</span> <span class=n>children</span><span class=o>.</span><span class=n>end</span><span class=p>();</span> <span class=n>c</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>            <span class=p>(</span><span class=o>*</span><span class=n>c</span><span class=p>)</span><span class=o>-&gt;</span><span class=n>Display</span><span class=p>(</span><span class=n>depth</span><span class=o>+</span><span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl><span class=p>};</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span> <span class=c1>// 客户端实现代码
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span>    <span class=n>Composite</span><span class=o>*</span> <span class=n>root</span> <span class=o>=</span> <span class=k>new</span> <span class=n>Composite</span><span class=p>(</span><span class=s>&#34;root&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=n>root</span><span class=o>-&gt;</span><span class=n>Add</span><span class=p>(</span><span class=k>new</span> <span class=n>Leaf</span><span class=p>(</span><span class=s>&#34;Leaf A&#34;</span><span class=p>));</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=n>root</span><span class=o>-&gt;</span><span class=n>Add</span><span class=p>(</span><span class=k>new</span> <span class=n>Leaf</span><span class=p>(</span><span class=s>&#34;Leaf B&#34;</span><span class=p>));</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln>1</span><span class=cl>    <span class=kt>Composite</span><span class=o>*</span> <span class=n>comp</span> <span class=ow>=</span> <span class=n>new</span> <span class=kt>Composite</span><span class=p>(</span><span class=s>&#34;Composite X&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=n>comp</span><span class=ow>-&gt;</span><span class=kt>Add</span><span class=p>(</span><span class=n>new</span> <span class=kt>Leaf</span><span class=p>(</span><span class=s>&#34;Leaf XA&#34;</span><span class=p>));</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=n>comp</span><span class=ow>-&gt;</span><span class=kt>Add</span><span class=p>(</span><span class=n>new</span> <span class=kt>Leaf</span><span class=p>(</span><span class=s>&#34;Leaf XB&#34;</span><span class=p>));</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=n>root</span><span class=ow>-&gt;</span><span class=kt>Add</span><span class=p>(</span><span class=n>comp</span><span class=p>);</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln>1</span><span class=cl>    <span class=kt>Composite</span><span class=o>*</span> <span class=n>comp2</span> <span class=ow>=</span> <span class=n>new</span> <span class=kt>Composite</span><span class=p>(</span><span class=s>&#34;Composite XY&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=n>comp2</span><span class=ow>-&gt;</span><span class=kt>Add</span><span class=p>(</span><span class=n>new</span> <span class=kt>Leaf</span><span class=p>(</span><span class=s>&#34;Leaf XYA&#34;</span><span class=p>));</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=n>comp2</span><span class=ow>-&gt;</span><span class=kt>Add</span><span class=p>(</span><span class=n>new</span> <span class=kt>Leaf</span><span class=p>(</span><span class=s>&#34;Leaf XYB&#34;</span><span class=p>));</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=n>comp</span><span class=ow>-&gt;</span><span class=kt>Add</span><span class=p>(</span><span class=n>comp2</span><span class=p>);</span>
+</span></span></code></pre></div><pre><code>    root-&gt;Display(1);
 
     return 0;
 }

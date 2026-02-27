@@ -27,105 +27,85 @@
 <a href=https://111qqz.com/en/ class="nav_child nav_item">English</a></div></div><div class=follow><a href=https://github.com/111qqz><svg class="icon"><use xlink:href="#github"/></svg></a><div class=color_mode><input type=checkbox class=color_choice id=mode></div></div></div></nav></header><main><div class="grid-inverse wrap content"><article class=post_content><h1 class=post_title>爬虫学习笔记</h1><div class=post_meta><span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>2018-10-19</span>
 <span class=post_time>· 3 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/python title=python class="post_tag button button_translucent">python
-</a><a href=https://111qqz.com/tags/%E7%88%AC%E8%99%AB title=爬虫 class="post_tag button button_translucent">爬虫</a></span></div><div class=post_body><p>再次迫于生计。。。</p><p>参考了<a href=https://www.v2ex.com/t/370455#reply9>面向新人的 Python 爬虫学习资料</a></p><p>大致的学习路线为:</p><blockquote>一： 简单的定向脚本爬虫（ request --- bs4 --- re ）<p>二： 大型框架式爬虫（ Scrapy 框架为主）</p><p>三：浏览器模拟爬虫 （ Mechanize 模拟 和 Selenium 模拟）</blockquote></p><p>有Python基础和一点html基础的话。。。貌似上手是0难度的</p><p>年轻人的第一个爬虫(虽然代码是直接copy的&mldr;</p><pre><code>'''
-抓取百度贴吧---生活大爆炸吧的基本内容
-爬虫线路： requests - bs4
-Python版本： 3.6
-OS： mac os 12.12.4
-'''
-
-import requests
-import time
-from bs4 import BeautifulSoup
-
-# 首先我们写好抓取网页的函数
-
-
-def get_html(url):
-    try:
-        r = requests.get(url, timeout=30)
-        r.raise_for_status()
-        # 这里我们知道百度贴吧的编码是utf-8，所以手动设置的。爬去其他的页面时建议使用：
-        # r.endcodding = r.apparent_endconding
-        r.encoding = 'utf-8'
-        return r.text
-    except:
-        return &quot; ERROR &quot;
-
-
-def get_content(url):
-    '''
-    分析贴吧的网页文件，整理信息，保存在列表变量中
-    '''
-
-    # 初始化一个列表来保存所有的帖子信息：
-    comments = []
-    # 首先，我们把需要爬取信息的网页下载到本地
-    html = get_html(url)
-
-    # 我们来做一锅汤
+</a><a href=https://111qqz.com/tags/%E7%88%AC%E8%99%AB title=爬虫 class="post_tag button button_translucent">爬虫</a></span></div><div class=post_body><p>再次迫于生计。。。</p><p>参考了<a href=https://www.v2ex.com/t/370455#reply9>面向新人的 Python 爬虫学习资料</a></p><p>大致的学习路线为:</p><blockquote>一： 简单的定向脚本爬虫（ request --- bs4 --- re ）<p>二： 大型框架式爬虫（ Scrapy 框架为主）</p><p>三：浏览器模拟爬虫 （ Mechanize 模拟 和 Selenium 模拟）</blockquote></p><p>有Python基础和一点html基础的话。。。貌似上手是0难度的</p><p>年轻人的第一个爬虫(虽然代码是直接copy的&mldr;</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=s1>&#39;&#39;&#39;
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=s1>抓取百度贴吧---生活大爆炸吧的基本内容
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=s1>爬虫线路： requests - bs4
+</span></span></span><span class=line><span class=ln>4</span><span class=cl><span class=s1>Python版本： 3.6
+</span></span></span><span class=line><span class=ln>5</span><span class=cl><span class=s1>OS： mac os 12.12.4
+</span></span></span><span class=line><span class=ln>6</span><span class=cl><span class=s1>&#39;&#39;&#39;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=kn>import</span> <span class=nn>requests</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=kn>import</span> <span class=nn>time</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=kn>from</span> <span class=nn>bs4</span> <span class=kn>import</span> <span class=n>BeautifulSoup</span>
+</span></span></code></pre></div><pre><code># 首先我们写好抓取网页的函数
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl><span class=k>def</span> <span class=nf>get_html</span><span class=p>(</span><span class=n>url</span><span class=p>):</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>    <span class=k>try</span><span class=p>:</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>        <span class=n>r</span> <span class=o>=</span> <span class=n>requests</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=n>url</span><span class=p>,</span> <span class=n>timeout</span><span class=o>=</span><span class=mi>30</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>        <span class=n>r</span><span class=o>.</span><span class=n>raise_for_status</span><span class=p>()</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>        <span class=c1># 这里我们知道百度贴吧的编码是utf-8，所以手动设置的。爬去其他的页面时建议使用：</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>        <span class=c1># r.endcodding = r.apparent_endconding</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>        <span class=n>r</span><span class=o>.</span><span class=n>encoding</span> <span class=o>=</span> <span class=s1>&#39;utf-8&#39;</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>        <span class=k>return</span> <span class=n>r</span><span class=o>.</span><span class=n>text</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>    <span class=k>except</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>        <span class=k>return</span> <span class=s2>&#34; ERROR &#34;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=k>def</span> <span class=nf>get_content</span><span class=p>(</span><span class=n>url</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=s1>&#39;&#39;&#39;
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=s1>    分析贴吧的网页文件，整理信息，保存在列表变量中
+</span></span></span><span class=line><span class=ln>4</span><span class=cl><span class=s1>    &#39;&#39;&#39;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl>    <span class=c1># 初始化一个列表来保存所有的帖子信息：</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=n>comments</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=c1># 首先，我们把需要爬取信息的网页下载到本地</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=n>html</span> <span class=o>=</span> <span class=n>get_html</span><span class=p>(</span><span class=n>url</span><span class=p>)</span>
+</span></span></code></pre></div><pre><code>    # 我们来做一锅汤
     soup = BeautifulSoup(html, 'lxml')
 
     # 按照之前的分析，我们找到所有具有‘ j_thread_list clearfix’属性的li标签。返回一个列表类型。
     liTags = soup.find_all('li', attrs={'class': ' j_thread_list clearfix'})
-
-    # 通过循环找到每个帖子里的我们需要的信息：
-    for li in liTags:
-        # 初始化一个字典来存储文章信息
-        comment = {}
-        # 这里使用一个try except 防止爬虫找不到信息从而停止运行
-        try:
-            # 开始筛选信息，并保存到字典中
-            comment['title'] = li.find(
-                'a', attrs={'class': 'j_th_tit '}).text.strip()
-            comment['link'] = &quot;http://tieba.baidu.com/&quot; + \
-                li.find('a', attrs={'class': 'j_th_tit '})['href']
-            comment['name'] = li.find(
-                'span', attrs={'class': 'tb_icon_author '}).text.strip()
-            comment['time'] = li.find(
-                'span', attrs={'class': 'pull-right is_show_create_time'}).text.strip()
-            comment['replyNum'] = li.find(
-                'span', attrs={'class': 'threadlist_rep_num center_text'}).text.strip()
-            comments.append(comment)
-        except:
-            print('出了点小问题')
-
-    return comments
-
-
-def Out2File(dict):
-    '''
-    将爬取到的文件写入到本地
-    保存到当前目录的 TTBT.txt文件中。
-
-    '''
-    with open('TBBT.txt', 'a+') as f:
-        for comment in dict:
-            f.write('标题： {} \t 链接：{} \t 发帖人：{} \t 发帖时间：{} \t 回复数量： {} \n'.format(
-                comment['title'], comment['link'], comment['name'], comment['time'], comment['replyNum']))
-
-        print('当前页面爬取完成')
-
-
-def main(base_url, deep):
-    url_list = []
-    # 将所有需要爬去的url存入列表
-    for i in range(0, deep):
-        url_list.append(base_url + '&amp;pn=' + str(50 * i))
-    print('所有的网页已经下载到本地！ 开始筛选信息。。。。')
-
-    #循环写入所有的数据
-    for url in url_list:
-        content = get_content(url)
-        Out2File(content)
-    print('所有的信息都已经保存完毕！')
-
-
-base_url = 'http://tieba.baidu.com/f?kw=&amp;ie=utf-8'
-# 设置需要爬取的页码数量
-deep = 100
-
-if __name__ == '__main__':
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl>    <span class=c1># 通过循环找到每个帖子里的我们需要的信息：</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>    <span class=k>for</span> <span class=n>li</span> <span class=ow>in</span> <span class=n>liTags</span><span class=p>:</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>        <span class=c1># 初始化一个字典来存储文章信息</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>        <span class=n>comment</span> <span class=o>=</span> <span class=p>{}</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>        <span class=c1># 这里使用一个try except 防止爬虫找不到信息从而停止运行</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>        <span class=k>try</span><span class=p>:</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>            <span class=c1># 开始筛选信息，并保存到字典中</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>            <span class=n>comment</span><span class=p>[</span><span class=s1>&#39;title&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=n>li</span><span class=o>.</span><span class=n>find</span><span class=p>(</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>                <span class=s1>&#39;a&#39;</span><span class=p>,</span> <span class=n>attrs</span><span class=o>=</span><span class=p>{</span><span class=s1>&#39;class&#39;</span><span class=p>:</span> <span class=s1>&#39;j_th_tit &#39;</span><span class=p>})</span><span class=o>.</span><span class=n>text</span><span class=o>.</span><span class=n>strip</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>            <span class=n>comment</span><span class=p>[</span><span class=s1>&#39;link&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=s2>&#34;http://tieba.baidu.com/&#34;</span> <span class=o>+</span> \
+</span></span><span class=line><span class=ln>11</span><span class=cl>                <span class=n>li</span><span class=o>.</span><span class=n>find</span><span class=p>(</span><span class=s1>&#39;a&#39;</span><span class=p>,</span> <span class=n>attrs</span><span class=o>=</span><span class=p>{</span><span class=s1>&#39;class&#39;</span><span class=p>:</span> <span class=s1>&#39;j_th_tit &#39;</span><span class=p>})[</span><span class=s1>&#39;href&#39;</span><span class=p>]</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>            <span class=n>comment</span><span class=p>[</span><span class=s1>&#39;name&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=n>li</span><span class=o>.</span><span class=n>find</span><span class=p>(</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>                <span class=s1>&#39;span&#39;</span><span class=p>,</span> <span class=n>attrs</span><span class=o>=</span><span class=p>{</span><span class=s1>&#39;class&#39;</span><span class=p>:</span> <span class=s1>&#39;tb_icon_author &#39;</span><span class=p>})</span><span class=o>.</span><span class=n>text</span><span class=o>.</span><span class=n>strip</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>            <span class=n>comment</span><span class=p>[</span><span class=s1>&#39;time&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=n>li</span><span class=o>.</span><span class=n>find</span><span class=p>(</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>                <span class=s1>&#39;span&#39;</span><span class=p>,</span> <span class=n>attrs</span><span class=o>=</span><span class=p>{</span><span class=s1>&#39;class&#39;</span><span class=p>:</span> <span class=s1>&#39;pull-right is_show_create_time&#39;</span><span class=p>})</span><span class=o>.</span><span class=n>text</span><span class=o>.</span><span class=n>strip</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>            <span class=n>comment</span><span class=p>[</span><span class=s1>&#39;replyNum&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=n>li</span><span class=o>.</span><span class=n>find</span><span class=p>(</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>                <span class=s1>&#39;span&#39;</span><span class=p>,</span> <span class=n>attrs</span><span class=o>=</span><span class=p>{</span><span class=s1>&#39;class&#39;</span><span class=p>:</span> <span class=s1>&#39;threadlist_rep_num center_text&#39;</span><span class=p>})</span><span class=o>.</span><span class=n>text</span><span class=o>.</span><span class=n>strip</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>            <span class=n>comments</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>comment</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>        <span class=k>except</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl>            <span class=nb>print</span><span class=p>(</span><span class=s1>&#39;出了点小问题&#39;</span><span class=p>)</span>
+</span></span></code></pre></div><pre><code>    return comments
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=k>def</span> <span class=nf>Out2File</span><span class=p>(</span><span class=nb>dict</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=s1>&#39;&#39;&#39;
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=s1>    将爬取到的文件写入到本地
+</span></span></span><span class=line><span class=ln>4</span><span class=cl><span class=s1>    保存到当前目录的 TTBT.txt文件中。
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>    <span class=s1>&#39;&#39;&#39;
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=s1>    with open(&#39;</span>TBBT.txt<span class=s1>&#39;, &#39;</span>a+<span class=s1>&#39;) as f:
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=s1>        for comment in dict:
+</span></span></span><span class=line><span class=ln>4</span><span class=cl><span class=s1>            f.write(&#39;</span>标题： <span class=o>{}</span> <span class=se>\t</span> 链接：<span class=o>{}</span> <span class=se>\t</span> 发帖人：<span class=o>{}</span> <span class=se>\t</span> 发帖时间：<span class=o>{}</span> <span class=se>\t</span> 回复数量： <span class=o>{}</span> <span class=se>\n</span><span class=s1>&#39;.format(
+</span></span></span><span class=line><span class=ln>5</span><span class=cl><span class=s1>                comment[&#39;</span>title<span class=s1>&#39;], comment[&#39;</span>link<span class=s1>&#39;], comment[&#39;</span>name<span class=s1>&#39;], comment[&#39;</span>time<span class=s1>&#39;], comment[&#39;</span>replyNum<span class=err>&#39;</span><span class=o>]))</span>
+</span></span></code></pre></div><pre><code>        print('当前页面爬取完成')
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=k>def</span> <span class=nf>main</span><span class=p>(</span><span class=n>base_url</span><span class=p>,</span> <span class=n>deep</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=n>url_list</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=c1># 将所有需要爬去的url存入列表</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=n>deep</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=n>url_list</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>base_url</span> <span class=o>+</span> <span class=s1>&#39;&amp;pn=&#39;</span> <span class=o>+</span> <span class=nb>str</span><span class=p>(</span><span class=mi>50</span> <span class=o>*</span> <span class=n>i</span><span class=p>))</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=s1>&#39;所有的网页已经下载到本地！ 开始筛选信息。。。。&#39;</span><span class=p>)</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl>    <span class=c1>#循环写入所有的数据</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=k>for</span> <span class=n>url</span> <span class=ow>in</span> <span class=n>url_list</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=n>content</span> <span class=o>=</span> <span class=n>get_content</span><span class=p>(</span><span class=n>url</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=n>Out2File</span><span class=p>(</span><span class=n>content</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=s1>&#39;所有的信息都已经保存完毕！&#39;</span><span class=p>)</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=n>base_url</span> <span class=o>=</span> <span class=s1>&#39;http://tieba.baidu.com/f?kw=&amp;ie=utf-8&#39;</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1># 设置需要爬取的页码数量</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>deep</span> <span class=o>=</span> <span class=mi>100</span>
+</span></span></code></pre></div><pre><code>if __name__ == '__main__':
     main(base_url, deep)
 </code></pre><p>年轻人的第二个爬虫:https://github.com/111qqz/spider-demo，爬了我家一周的天气情况</p><p>爬虫能够work我觉得主要取决于两个因素</p><p>一个是，一个网站的网页源码，其实是在我们本地存储的</p><p>另一个是，网页的代码是有规律的&mldr;</p><p>所以初级的爬虫的难度就仅仅在于找规律。。。然后配合chrome 开发者工具的模拟点击功能和　xpath这种文本解析工具&mldr;　就可以搞定了。。。</p><p>关于反爬虫的处理办法，以及如何提高爬虫的速度，可能才是“爬虫工程师”的核心技能？</p><p>参考资料:</p><p><a href=https://www.crummy.com/software/BeautifulSoup/bs4/doc/>BeautifulSoup官方文档，一个将html数据结构化的python库</a></p><p><a href=https://docs.scrapy.org/en/latest/intro/overview.html>Scrapy官方文档，一个爬虫框架</a></p></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
 <span class=button_tally>913</span>

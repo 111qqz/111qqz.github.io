@@ -21,244 +21,225 @@
 <a href=https://111qqz.com/en/ class="nav_child nav_item">English</a></div></div><div class=follow><a href=https://github.com/111qqz><svg class="icon"><use xlink:href="#github"/></svg></a><div class=color_mode><input type=checkbox class=color_choice id=mode></div></div></div></nav></header><main><div class="grid-inverse wrap content"><article class=post_content><h1 class=post_title>内存屏障（Memory Barriers）</h1><div class=post_meta><span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>2017-03-22</span>
 <span class=post_time>· 5 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=levelDB class="post_tag button button_translucent">levelDB
-</a><a href=https://111qqz.com/tags/%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C title=内存屏障 class="post_tag button button_translucent">内存屏障</a></span></div><div class=post_body><p>起因是最近在看levelDB源码，其中port里的<strong>atomic_pointer.h文件用到了内存屏障。。</strong></p><p>于是来学习一下。。</p><p>粗略得说下我自己的理解。</p><p>代码的顺序并不和执行的顺序完全对应，出于对效率的追求，cpu和编译器会对一些顺序指令重排，以期得到最大的执行效率。</p><p>比如下面这段代码：</p><pre><code>// example 2
-    // void *ptr, v, _store;
-    v = ptr;
-    _store = v;
-    somefunc();
-    v = _store;
-</code></pre><p>v的值是没有改变的，那么编译器可能会认为<code>_store = v; v = _store;</code> 是多余的，就直接把这一段给“优化”掉了。这段代码在单线程中确实是多余的，<strong>但是在多线程环境下</strong>，可能在<code>somefunc()</code>被调用的时候，另一个线程把v的值给改变了，而这种情况是编译器无法发现的。因此，为了避免这种情况。。。内存屏障登场！</p><p>摘自维基百科：</p><blockquote>**内存屏障**，也称**内存栅栏**，**内存栅障**，**屏障指令**等，是一类[同步屏障](https://zh.wikipedia.org/wiki/)指令，是CPU或编译器在对内存随机访问的操作中的一个同步点，使得此点之前的所有读写操作都执行后才可以开始执行此点之后的操作。<p>大多数现代计算机为了提高性能而采取<a href=https://zh.wikipedia.org/wiki/>乱序执行</a>，这使得内存屏障成为必须。</p><p>语义上，内存屏障之前的所有写操作都要写入内存；内存屏障之后的读操作都可以获得同步屏障之前的写操作的结果。因此，对于敏感的程序块，写操作之后、读操作之前可以插入内存屏障。</blockquote></p><blockquote>在多线程环境里需要使用某种技术来使程序结果尽快可见。。请先假定一个事实：一旦内存数据被推送到缓存，就会有消息协议来确保所有的缓存会对所有的共享数据同步并保持一致。这个使内存数据对CPU核可见的技术被称为**内存屏障或内存栅栏**。</blockquote><p>再看一个例子</p><pre><code>// get start time
-for (int i = 0; i != 100000; i++) {
-    MemoryBarrier()
-}
-// get end time
-</code></pre><p>这段代码，是想知道for循环空转100000次的耗时，这里就需要加入一个<strong>MemoryBarrier</strong>，如果不加，那么编译器可能就会直接把这个无意义的for循环直接优化掉了。</p><p>除了编译器，cpu由于指令流水线或者超流水线等计数，也可能导致出现乱序执行的情况。</p><p>内存屏障提供了两个功能。首先，它们通过确保从另一个CPU来看屏障的两边的所有指令都是正确的程序顺序，而保持程序顺序的外部可见性；其次它们可以实现内存数据可见性，确保内存数据会同步到CPU缓存子系统。</p><p>不过内存平展由于阻碍了cpu和编译器的部分优化。。。因此对性能的影响是不忽略的。</p><blockquote>为了达到最佳性能，最好是把要解决的问题模块化，这样处理器可以按单元执行任务，然后在任务单元的边界放上所有需要的内存屏障。采用这个方法可以让处理器不受限的执行一个任务单元。合理的内存屏障组合还有一个好处是：缓冲区在第一次被刷后开销会减少，因为再填充改缓冲区不需要额外工作了。</blockquote><p>内存屏障的实现不同平台差别很大。。。因为我们可以看到<strong>atomic_pointer.h文件中 一堆和平台相关的条件编译&mldr;</strong></p><pre><code>// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+</a><a href=https://111qqz.com/tags/%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C title=内存屏障 class="post_tag button button_translucent">内存屏障</a></span></div><div class=post_body><p>起因是最近在看levelDB源码，其中port里的<strong>atomic_pointer.h文件用到了内存屏障。。</strong></p><p>于是来学习一下。。</p><p>粗略得说下我自己的理解。</p><p>代码的顺序并不和执行的顺序完全对应，出于对效率的追求，cpu和编译器会对一些顺序指令重排，以期得到最大的执行效率。</p><p>比如下面这段代码：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=c1>// example 2
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span>    <span class=c1>// void *ptr, v, _store;
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1></span>    <span class=n>v</span> <span class=o>=</span> <span class=n>ptr</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=n>_store</span> <span class=o>=</span> <span class=n>v</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>    <span class=n>somefunc</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>    <span class=n>v</span> <span class=o>=</span> <span class=n>_store</span><span class=p>;</span>
+</span></span></code></pre></div><p>v的值是没有改变的，那么编译器可能会认为<code>_store = v; v = _store;</code> 是多余的，就直接把这一段给“优化”掉了。这段代码在单线程中确实是多余的，<strong>但是在多线程环境下</strong>，可能在<code>somefunc()</code>被调用的时候，另一个线程把v的值给改变了，而这种情况是编译器无法发现的。因此，为了避免这种情况。。。内存屏障登场！</p><p>摘自维基百科：</p><blockquote>**内存屏障**，也称**内存栅栏**，**内存栅障**，**屏障指令**等，是一类[同步屏障](https://zh.wikipedia.org/wiki/)指令，是CPU或编译器在对内存随机访问的操作中的一个同步点，使得此点之前的所有读写操作都执行后才可以开始执行此点之后的操作。<p>大多数现代计算机为了提高性能而采取<a href=https://zh.wikipedia.org/wiki/>乱序执行</a>，这使得内存屏障成为必须。</p><p>语义上，内存屏障之前的所有写操作都要写入内存；内存屏障之后的读操作都可以获得同步屏障之前的写操作的结果。因此，对于敏感的程序块，写操作之后、读操作之前可以插入内存屏障。</blockquote></p><blockquote>在多线程环境里需要使用某种技术来使程序结果尽快可见。。请先假定一个事实：一旦内存数据被推送到缓存，就会有消息协议来确保所有的缓存会对所有的共享数据同步并保持一致。这个使内存数据对CPU核可见的技术被称为**内存屏障或内存栅栏**。</blockquote><p>再看一个例子</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>// get start <span class=nb>time</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=k>for</span> <span class=o>(</span>int <span class=nv>i</span> <span class=o>=</span> 0<span class=p>;</span> i !<span class=o>=</span> 100000<span class=p>;</span> i++<span class=o>)</span> <span class=o>{</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    MemoryBarrier<span class=o>()</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=o>}</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>// get end <span class=nb>time</span>
+</span></span></code></pre></div><p>这段代码，是想知道for循环空转100000次的耗时，这里就需要加入一个<strong>MemoryBarrier</strong>，如果不加，那么编译器可能就会直接把这个无意义的for循环直接优化掉了。</p><p>除了编译器，cpu由于指令流水线或者超流水线等计数，也可能导致出现乱序执行的情况。</p><p>内存屏障提供了两个功能。首先，它们通过确保从另一个CPU来看屏障的两边的所有指令都是正确的程序顺序，而保持程序顺序的外部可见性；其次它们可以实现内存数据可见性，确保内存数据会同步到CPU缓存子系统。</p><p>不过内存平展由于阻碍了cpu和编译器的部分优化。。。因此对性能的影响是不忽略的。</p><blockquote>为了达到最佳性能，最好是把要解决的问题模块化，这样处理器可以按单元执行任务，然后在任务单元的边界放上所有需要的内存屏障。采用这个方法可以让处理器不受限的执行一个任务单元。合理的内存屏障组合还有一个好处是：缓冲区在第一次被刷后开销会减少，因为再填充改缓冲区不需要额外工作了。</blockquote><p>内存屏障的实现不同平台差别很大。。。因为我们可以看到<strong>atomic_pointer.h文件中 一堆和平台相关的条件编译&mldr;</strong></p><pre><code>// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
-
-// AtomicPointer provides storage for a lock-free pointer.
-// Platform-dependent implementation of AtomicPointer:
-// - If the platform provides a cheap barrier, we use it with raw pointers
-// - If &lt;atomic&gt; is present (on newer versions of gcc, it is), we use
-//   a &lt;atomic&gt;-based AtomicPointer.  However we prefer the memory
-//   barrier based version, because at least on a gcc 4.4 32-bit build
-//   on linux, we have encountered a buggy &lt;atomic&gt; implementation.
-//   Also, some &lt;atomic&gt; implementations are much slower than a memory-barrier
-//   based implementation (~16ns for &lt;atomic&gt; based acquire-load vs. ~1ns for
-//   a barrier based acquire-load).
-// This code is based on atomicops-internals-* in Google's perftools:
-// http://code.google.com/p/google-perftools/source/browse/#svntrunksrcbase
-
-#ifndef PORT_ATOMIC_POINTER_H_
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=c1>// AtomicPointer provides storage for a lock-free pointer.
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=c1>// Platform-dependent implementation of AtomicPointer:
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=c1>// - If the platform provides a cheap barrier, we use it with raw pointers
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=c1>// - If &lt;atomic&gt; is present (on newer versions of gcc, it is), we use
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=c1>//   a &lt;atomic&gt;-based AtomicPointer.  However we prefer the memory
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=c1>//   barrier based version, because at least on a gcc 4.4 32-bit build
+</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=c1>//   on linux, we have encountered a buggy &lt;atomic&gt; implementation.
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=c1>//   Also, some &lt;atomic&gt; implementations are much slower than a memory-barrier
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=c1>//   based implementation (~16ns for &lt;atomic&gt; based acquire-load vs. ~1ns for
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=c1>//   a barrier based acquire-load).
+</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=c1>// This code is based on atomicops-internals-* in Google&#39;s perftools:
+</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=c1>// http://code.google.com/p/google-perftools/source/browse/#svntrunksrcbase
+</span></span></span></code></pre></div><pre><code>#ifndef PORT_ATOMIC_POINTER_H_
 #define PORT_ATOMIC_POINTER_H_
-
-#include &lt;stdint.h&gt;
-#ifdef LEVELDB_ATOMIC_PRESENT
-#include &lt;atomic&gt;
-#endif
-#ifdef OS_WIN
-#include &lt;windows.h&gt;
-#endif
-#ifdef OS_MACOSX
-#include &lt;libkern/OSAtomic.h&gt;
-#endif
-
-#if defined(_M_X64) || defined(__x86_64__)
-#define ARCH_CPU_X86_FAMILY 1
-#elif defined(_M_IX86) || defined(__i386__) || defined(__i386)
-#define ARCH_CPU_X86_FAMILY 1
-#elif defined(__ARMEL__)
-#define ARCH_CPU_ARM_FAMILY 1
-#elif defined(__aarch64__)
-#define ARCH_CPU_ARM64_FAMILY 1
-#elif defined(__ppc__) || defined(__powerpc__) || defined(__powerpc64__)
-#define ARCH_CPU_PPC_FAMILY 1
-#elif defined(__mips__)
-#define ARCH_CPU_MIPS_FAMILY 1
-#endif
-
-namespace leveldb {
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;stdint.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cp>#ifdef LEVELDB_ATOMIC_PRESENT
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;atomic&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cp>#ifdef OS_WIN
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;windows.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=cp>#ifdef OS_MACOSX
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;libkern/OSAtomic.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=cp>#endif
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=cp>#if defined(_M_X64) || defined(__x86_64__)
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cp>#define ARCH_CPU_X86_FAMILY 1
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cp>#elif defined(_M_IX86) || defined(__i386__) || defined(__i386)
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cp>#define ARCH_CPU_X86_FAMILY 1
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cp>#elif defined(__ARMEL__)
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=cp>#define ARCH_CPU_ARM_FAMILY 1
+</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=cp>#elif defined(__aarch64__)
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=cp>#define ARCH_CPU_ARM64_FAMILY 1
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=cp>#elif defined(__ppc__) || defined(__powerpc__) || defined(__powerpc64__)
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=cp>#define ARCH_CPU_PPC_FAMILY 1
+</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=cp>#elif defined(__mips__)
+</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=cp>#define ARCH_CPU_MIPS_FAMILY 1
+</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=cp>#endif
+</span></span></span></code></pre></div><pre><code>namespace leveldb {
 namespace port {
-
-// Define MemoryBarrier() if available
-// Windows on x86
-#if defined(OS_WIN) &amp;&amp; defined(COMPILER_MSVC) &amp;&amp; defined(ARCH_CPU_X86_FAMILY)
-// windows.h already provides a MemoryBarrier(void) macro
-// http://msdn.microsoft.com/en-us/library/ms684208(v=vs.85).aspx
-#define LEVELDB_HAVE_MEMORY_BARRIER
-
-// Mac OS
-#elif defined(OS_MACOSX)
-inline void MemoryBarrier() {
-  OSMemoryBarrier();
-}
-#define LEVELDB_HAVE_MEMORY_BARRIER
-
-// Gcc on x86
-#elif defined(ARCH_CPU_X86_FAMILY) &amp;&amp; defined(__GNUC__)
-inline void MemoryBarrier() {
-  // See http://gcc.gnu.org/ml/gcc/2003-04/msg01180.html for a discussion on
-  // this idiom. Also see http://en.wikipedia.org/wiki/Memory_ordering.
-  __asm__ __volatile__(&quot;&quot; : : : &quot;memory&quot;);
-}
-#define LEVELDB_HAVE_MEMORY_BARRIER
-
-// Sun Studio
-#elif defined(ARCH_CPU_X86_FAMILY) &amp;&amp; defined(__SUNPRO_CC)
-inline void MemoryBarrier() {
-  // See http://gcc.gnu.org/ml/gcc/2003-04/msg01180.html for a discussion on
-  // this idiom. Also see http://en.wikipedia.org/wiki/Memory_ordering.
-  asm volatile(&quot;&quot; : : : &quot;memory&quot;);
-}
-#define LEVELDB_HAVE_MEMORY_BARRIER
-
-// ARM Linux
-#elif defined(ARCH_CPU_ARM_FAMILY) &amp;&amp; defined(__linux__)
-typedef void (*LinuxKernelMemoryBarrierFunc)(void);
-// The Linux ARM kernel provides a highly optimized device-specific memory
-// barrier function at a fixed memory address that is mapped in every
-// user-level process.
-//
-// This beats using CPU-specific instructions which are, on single-core
-// devices, un-necessary and very costly (e.g. ARMv7-A &quot;dmb&quot; takes more
-// than 180ns on a Cortex-A8 like the one on a Nexus One). Benchmarking
-// shows that the extra function call cost is completely negligible on
-// multi-core devices.
-//
-inline void MemoryBarrier() {
-  (*(LinuxKernelMemoryBarrierFunc)0xffff0fa0)();
-}
-#define LEVELDB_HAVE_MEMORY_BARRIER
-
-// ARM64
-#elif defined(ARCH_CPU_ARM64_FAMILY)
-inline void MemoryBarrier() {
-  asm volatile(&quot;dmb sy&quot; : : : &quot;memory&quot;);
-}
-#define LEVELDB_HAVE_MEMORY_BARRIER
-
-// PPC
-#elif defined(ARCH_CPU_PPC_FAMILY) &amp;&amp; defined(__GNUC__)
-inline void MemoryBarrier() {
-  // TODO for some powerpc expert: is there a cheaper suitable variant?
-  // Perhaps by having separate barriers for acquire and release ops.
-  asm volatile(&quot;sync&quot; : : : &quot;memory&quot;);
-}
-#define LEVELDB_HAVE_MEMORY_BARRIER
-
-// MIPS
-#elif defined(ARCH_CPU_MIPS_FAMILY) &amp;&amp; defined(__GNUC__)
-inline void MemoryBarrier() {
-  __asm__ __volatile__(&quot;sync&quot; : : : &quot;memory&quot;);
-}
-#define LEVELDB_HAVE_MEMORY_BARRIER
-
-#endif
-
-// AtomicPointer built using platform-specific MemoryBarrier()
-#if defined(LEVELDB_HAVE_MEMORY_BARRIER)
-class AtomicPointer {
- private:
-  void* rep_;
- public:
-  AtomicPointer() { }
-  explicit AtomicPointer(void* p) : rep_(p) {}
-  inline void* NoBarrier_Load() const { return rep_; }
-  inline void NoBarrier_Store(void* v) { rep_ = v; }
-  inline void* Acquire_Load() const {
-    void* result = rep_;
-    MemoryBarrier();
-    return result;
-  }
-  inline void Release_Store(void* v) {
-    MemoryBarrier();
-    rep_ = v;
-  }
-};
-
-// AtomicPointer based on &lt;cstdatomic&gt;
-#elif defined(LEVELDB_ATOMIC_PRESENT)
-class AtomicPointer {
- private:
-  std::atomic&lt;void*&gt; rep_;
- public:
-  AtomicPointer() { }
-  explicit AtomicPointer(void* v) : rep_(v) { }
-  inline void* Acquire_Load() const {
-    return rep_.load(std::memory_order_acquire);
-  }
-  inline void Release_Store(void* v) {
-    rep_.store(v, std::memory_order_release);
-  }
-  inline void* NoBarrier_Load() const {
-    return rep_.load(std::memory_order_relaxed);
-  }
-  inline void NoBarrier_Store(void* v) {
-    rep_.store(v, std::memory_order_relaxed);
-  }
-};
-
-// Atomic pointer based on sparc memory barriers
-#elif defined(__sparcv9) &amp;&amp; defined(__GNUC__)
-class AtomicPointer {
- private:
-  void* rep_;
- public:
-  AtomicPointer() { }
-  explicit AtomicPointer(void* v) : rep_(v) { }
-  inline void* Acquire_Load() const {
-    void* val;
-    __asm__ __volatile__ (
-        &quot;ldx [%[rep_]], %[val] \n\t&quot;
-         &quot;membar #LoadLoad|#LoadStore \n\t&quot;
-        : [val] &quot;=r&quot; (val)
-        : [rep_] &quot;r&quot; (&amp;rep_)
-        : &quot;memory&quot;);
-    return val;
-  }
-  inline void Release_Store(void* v) {
-    __asm__ __volatile__ (
-        &quot;membar #LoadStore|#StoreStore \n\t&quot;
-        &quot;stx %[v], [%[rep_]] \n\t&quot;
-        :
-        : [rep_] &quot;r&quot; (&amp;rep_), [v] &quot;r&quot; (v)
-        : &quot;memory&quot;);
-  }
-  inline void* NoBarrier_Load() const { return rep_; }
-  inline void NoBarrier_Store(void* v) { rep_ = v; }
-};
-
-// Atomic pointer based on ia64 acq/rel
-#elif defined(__ia64) &amp;&amp; defined(__GNUC__)
-class AtomicPointer {
- private:
-  void* rep_;
- public:
-  AtomicPointer() { }
-  explicit AtomicPointer(void* v) : rep_(v) { }
-  inline void* Acquire_Load() const {
-    void* val    ;
-    __asm__ __volatile__ (
-        &quot;ld8.acq %[val] = [%[rep_]] \n\t&quot;
-        : [val] &quot;=r&quot; (val)
-        : [rep_] &quot;r&quot; (&amp;rep_)
-        : &quot;memory&quot;
-        );
-    return val;
-  }
-  inline void Release_Store(void* v) {
-    __asm__ __volatile__ (
-        &quot;st8.rel [%[rep_]] = %[v]  \n\t&quot;
-        :
-        : [rep_] &quot;r&quot; (&amp;rep_), [v] &quot;r&quot; (v)
-        : &quot;memory&quot;
-        );
-  }
-  inline void* NoBarrier_Load() const { return rep_; }
-  inline void NoBarrier_Store(void* v) { rep_ = v; }
-};
-
-// We have neither MemoryBarrier(), nor &lt;atomic&gt;
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=c1>// Define MemoryBarrier() if available
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>// Windows on x86
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1></span><span class=cp>#if defined(OS_WIN) &amp;&amp; defined(COMPILER_MSVC) &amp;&amp; defined(ARCH_CPU_X86_FAMILY)
+</span></span></span><span class=line><span class=ln>4</span><span class=cl><span class=cp></span><span class=c1>// windows.h already provides a MemoryBarrier(void) macro
+</span></span></span><span class=line><span class=ln>5</span><span class=cl><span class=c1>// http://msdn.microsoft.com/en-us/library/ms684208(v=vs.85).aspx
+</span></span></span><span class=line><span class=ln>6</span><span class=cl><span class=c1></span><span class=cp>#define LEVELDB_HAVE_MEMORY_BARRIER
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=c1>// Mac OS
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span><span class=cp>#elif defined(OS_MACOSX)
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=cp></span><span class=kr>inline</span> <span class=kt>void</span> <span class=nf>MemoryBarrier</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=n>OSMemoryBarrier</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl><span class=cp>#define LEVELDB_HAVE_MEMORY_BARRIER
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=c1>// Gcc on x86
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span><span class=cp>#elif defined(ARCH_CPU_X86_FAMILY) &amp;&amp; defined(__GNUC__)
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=cp></span><span class=kr>inline</span> <span class=kt>void</span> <span class=nf>MemoryBarrier</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=c1>// See http://gcc.gnu.org/ml/gcc/2003-04/msg01180.html for a discussion on
+</span></span></span><span class=line><span class=ln>5</span><span class=cl><span class=c1></span>  <span class=c1>// this idiom. Also see http://en.wikipedia.org/wiki/Memory_ordering.
+</span></span></span><span class=line><span class=ln>6</span><span class=cl><span class=c1></span>  <span class=n>__asm__</span> <span class=n>__volatile__</span><span class=p>(</span><span class=s>&#34;&#34;</span> <span class=o>:</span> <span class=o>:</span> <span class=o>:</span> <span class=s>&#34;memory&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>8</span><span class=cl><span class=cp>#define LEVELDB_HAVE_MEMORY_BARRIER
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=c1>// Sun Studio
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span><span class=cp>#elif defined(ARCH_CPU_X86_FAMILY) &amp;&amp; defined(__SUNPRO_CC)
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=cp></span><span class=kr>inline</span> <span class=kt>void</span> <span class=nf>MemoryBarrier</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=c1>// See http://gcc.gnu.org/ml/gcc/2003-04/msg01180.html for a discussion on
+</span></span></span><span class=line><span class=ln>5</span><span class=cl><span class=c1></span>  <span class=c1>// this idiom. Also see http://en.wikipedia.org/wiki/Memory_ordering.
+</span></span></span><span class=line><span class=ln>6</span><span class=cl><span class=c1></span>  <span class=k>asm</span> <span class=k>volatile</span><span class=p>(</span><span class=s>&#34;&#34;</span> <span class=o>:</span> <span class=o>:</span> <span class=o>:</span> <span class=s>&#34;memory&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>8</span><span class=cl><span class=cp>#define LEVELDB_HAVE_MEMORY_BARRIER
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-asm data-lang=asm><span class=line><span class=ln> 1</span><span class=cl><span class=c1>// ARM Linux
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=c1>#elif defined(ARCH_CPU_ARM_FAMILY) &amp;&amp; defined(__linux__)
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=c1></span><span class=nf>typedef</span> <span class=no>void</span> <span class=p>(*</span><span class=no>LinuxKernelMemoryBarrierFunc</span><span class=p>)(</span><span class=no>void</span><span class=p>)</span><span class=c1>;
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=c1>// The Linux ARM kernel provides a highly optimized device-specific memory
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=c1>// barrier function at a fixed memory address that is mapped in every
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=c1>// user-level process.
+</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=c1>//
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=c1>// This beats using CPU-specific instructions which are, on single-core
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=c1>// devices, un-necessary and very costly (e.g. ARMv7-A &#34;dmb&#34; takes more
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=c1>// than 180ns on a Cortex-A8 like the one on a Nexus One). Benchmarking
+</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=c1>// shows that the extra function call cost is completely negligible on
+</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=c1>// multi-core devices.
+</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=c1>//
+</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=c1></span><span class=nf>inline</span> <span class=no>void</span> <span class=no>MemoryBarrier</span><span class=p>()</span> <span class=err>{</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>  <span class=err>(*(</span><span class=nf>LinuxKernelMemoryBarrierFunc</span><span class=p>)</span><span class=mi>0xffff0fa0</span><span class=p>)()</span><span class=c1>;
+</span></span></span><span class=line><span class=ln>16</span><span class=cl><span class=c1></span><span class=err>}</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl><span class=c1>#define LEVELDB_HAVE_MEMORY_BARRIER
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=c1>// ARM64
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span><span class=cp>#elif defined(ARCH_CPU_ARM64_FAMILY)
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=cp></span><span class=kr>inline</span> <span class=kt>void</span> <span class=nf>MemoryBarrier</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=k>asm</span> <span class=k>volatile</span><span class=p>(</span><span class=s>&#34;dmb sy&#34;</span> <span class=o>:</span> <span class=o>:</span> <span class=o>:</span> <span class=s>&#34;memory&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl><span class=cp>#define LEVELDB_HAVE_MEMORY_BARRIER
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=c1>// PPC
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span><span class=cp>#elif defined(ARCH_CPU_PPC_FAMILY) &amp;&amp; defined(__GNUC__)
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=cp></span><span class=kr>inline</span> <span class=kt>void</span> <span class=nf>MemoryBarrier</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=c1>// TODO for some powerpc expert: is there a cheaper suitable variant?
+</span></span></span><span class=line><span class=ln>5</span><span class=cl><span class=c1></span>  <span class=c1>// Perhaps by having separate barriers for acquire and release ops.
+</span></span></span><span class=line><span class=ln>6</span><span class=cl><span class=c1></span>  <span class=k>asm</span> <span class=k>volatile</span><span class=p>(</span><span class=s>&#34;sync&#34;</span> <span class=o>:</span> <span class=o>:</span> <span class=o>:</span> <span class=s>&#34;memory&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>8</span><span class=cl><span class=cp>#define LEVELDB_HAVE_MEMORY_BARRIER
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=c1>// MIPS
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span><span class=cp>#elif defined(ARCH_CPU_MIPS_FAMILY) &amp;&amp; defined(__GNUC__)
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=cp></span><span class=kr>inline</span> <span class=kt>void</span> <span class=nf>MemoryBarrier</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=n>__asm__</span> <span class=n>__volatile__</span><span class=p>(</span><span class=s>&#34;sync&#34;</span> <span class=o>:</span> <span class=o>:</span> <span class=o>:</span> <span class=s>&#34;memory&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl><span class=cp>#define LEVELDB_HAVE_MEMORY_BARRIER
+</span></span></span></code></pre></div><pre><code>#endif
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=ln> 1</span><span class=cl><span class=c1>// AtomicPointer built using platform-specific MemoryBarrier()
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=c1></span><span class=err>#</span><span class=k>if</span> <span class=nx>defined</span><span class=p>(</span><span class=nx>LEVELDB_HAVE_MEMORY_BARRIER</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=kr>class</span> <span class=nx>AtomicPointer</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl> <span class=kr>private</span><span class=o>:</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=k>void</span><span class=o>*</span> <span class=nx>rep_</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl> <span class=kr>public</span><span class=o>:</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>  <span class=nx>AtomicPointer() {</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>  <span class=nx>explicit</span> <span class=nx>AtomicPointer</span><span class=p>(</span><span class=k>void</span><span class=o>*</span> <span class=nx>p</span><span class=p>)</span> <span class=o>:</span> <span class=nx>rep_</span><span class=p>(</span><span class=nx>p</span><span class=p>)</span> <span class=p>{}</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>  <span class=nx>inline</span> <span class=k>void</span><span class=o>*</span> <span class=nx>NoBarrier_Load</span><span class=p>()</span> <span class=kr>const</span> <span class=p>{</span> <span class=k>return</span> <span class=nx>rep_</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>  <span class=nx>inline</span> <span class=k>void</span> <span class=nx>NoBarrier_Store</span><span class=p>(</span><span class=k>void</span><span class=o>*</span> <span class=nx>v</span><span class=p>)</span> <span class=p>{</span> <span class=nx>rep_</span> <span class=o>=</span> <span class=nx>v</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>  <span class=nx>inline</span> <span class=k>void</span><span class=o>*</span> <span class=nx>Acquire_Load</span><span class=p>()</span> <span class=kr>const</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>    <span class=k>void</span><span class=o>*</span> <span class=nx>result</span> <span class=o>=</span> <span class=nx>rep_</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>    <span class=nx>MemoryBarrier</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>    <span class=k>return</span> <span class=nx>result</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>  <span class=nx>inline</span> <span class=k>void</span> <span class=nx>Release_Store</span><span class=p>(</span><span class=k>void</span><span class=o>*</span> <span class=nx>v</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>    <span class=nx>MemoryBarrier</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>    <span class=nx>rep_</span> <span class=o>=</span> <span class=nx>v</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl><span class=p>};</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl><span class=o>//</span> <span class=n>AtomicPointer</span> <span class=n>based</span> <span class=n>on</span> <span class=o>&lt;</span><span class=n>cstdatomic</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=c1>#elif defined(LEVELDB_ATOMIC_PRESENT)</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=k>class</span> <span class=nc>AtomicPointer</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl> <span class=n>private</span><span class=p>:</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=n>std</span><span class=p>::</span><span class=n>atomic</span><span class=o>&lt;</span><span class=n>void</span><span class=o>*&gt;</span> <span class=n>rep_</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl> <span class=n>public</span><span class=p>:</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>  <span class=n>AtomicPointer</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>  <span class=n>explicit</span> <span class=n>AtomicPointer</span><span class=p>(</span><span class=n>void</span><span class=o>*</span> <span class=n>v</span><span class=p>)</span> <span class=p>:</span> <span class=n>rep_</span><span class=p>(</span><span class=n>v</span><span class=p>)</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>  <span class=n>inline</span> <span class=n>void</span><span class=o>*</span> <span class=n>Acquire_Load</span><span class=p>()</span> <span class=n>const</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>    <span class=k>return</span> <span class=n>rep_</span><span class=o>.</span><span class=n>load</span><span class=p>(</span><span class=n>std</span><span class=p>::</span><span class=n>memory_order_acquire</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>  <span class=n>inline</span> <span class=n>void</span> <span class=n>Release_Store</span><span class=p>(</span><span class=n>void</span><span class=o>*</span> <span class=n>v</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>    <span class=n>rep_</span><span class=o>.</span><span class=n>store</span><span class=p>(</span><span class=n>v</span><span class=p>,</span> <span class=n>std</span><span class=p>::</span><span class=n>memory_order_release</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>  <span class=n>inline</span> <span class=n>void</span><span class=o>*</span> <span class=n>NoBarrier_Load</span><span class=p>()</span> <span class=n>const</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>    <span class=k>return</span> <span class=n>rep_</span><span class=o>.</span><span class=n>load</span><span class=p>(</span><span class=n>std</span><span class=p>::</span><span class=n>memory_order_relaxed</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>  <span class=n>inline</span> <span class=n>void</span> <span class=n>NoBarrier_Store</span><span class=p>(</span><span class=n>void</span><span class=o>*</span> <span class=n>v</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>    <span class=n>rep_</span><span class=o>.</span><span class=n>store</span><span class=p>(</span><span class=n>v</span><span class=p>,</span> <span class=n>std</span><span class=p>::</span><span class=n>memory_order_relaxed</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl><span class=p>};</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=ln> 1</span><span class=cl><span class=c1>// Atomic pointer based on sparc memory barriers
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=c1></span><span class=err>#</span><span class=nx>elif</span> <span class=nx>defined</span><span class=p>(</span><span class=nx>__sparcv9</span><span class=p>)</span> <span class=o>&amp;&amp;</span> <span class=nx>defined</span><span class=p>(</span><span class=nx>__GNUC__</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=kr>class</span> <span class=nx>AtomicPointer</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl> <span class=kr>private</span><span class=o>:</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=k>void</span><span class=o>*</span> <span class=nx>rep_</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl> <span class=kr>public</span><span class=o>:</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>  <span class=nx>AtomicPointer() {</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>  <span class=nx>explicit</span> <span class=nx>AtomicPointer</span><span class=p>(</span><span class=k>void</span><span class=o>*</span> <span class=nx>v</span><span class=p>)</span> <span class=o>:</span> <span class=nx>rep_</span><span class=p>(</span><span class=nx>v</span><span class=p>)</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>  <span class=nx>inline</span> <span class=k>void</span><span class=o>*</span> <span class=nx>Acquire_Load</span><span class=p>()</span> <span class=kr>const</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>    <span class=k>void</span><span class=o>*</span> <span class=nx>val</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>    <span class=nx>__asm__</span> <span class=nx>__volatile__</span> <span class=p>(</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>        <span class=s2>&#34;ldx [%[rep_]], %[val] \n\t&#34;</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>         <span class=s2>&#34;membar #LoadLoad|#LoadStore \n\t&#34;</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>        <span class=o>:</span> <span class=p>[</span><span class=nx>val</span><span class=p>]</span> <span class=s2>&#34;=r&#34;</span> <span class=p>(</span><span class=nx>val</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>        <span class=o>:</span> <span class=p>[</span><span class=nx>rep_</span><span class=p>]</span> <span class=s2>&#34;r&#34;</span> <span class=p>(</span><span class=o>&amp;</span><span class=nx>rep_</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>        <span class=o>:</span> <span class=s2>&#34;memory&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>    <span class=k>return</span> <span class=nx>val</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>  <span class=nx>inline</span> <span class=k>void</span> <span class=nx>Release_Store</span><span class=p>(</span><span class=k>void</span><span class=o>*</span> <span class=nx>v</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl>    <span class=nx>__asm__</span> <span class=nx>__volatile__</span> <span class=p>(</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl>        <span class=s2>&#34;membar #LoadStore|#StoreStore \n\t&#34;</span>
+</span></span><span class=line><span class=ln>22</span><span class=cl>        <span class=s2>&#34;stx %[v], [%[rep_]] \n\t&#34;</span>
+</span></span><span class=line><span class=ln>23</span><span class=cl>        <span class=o>:</span>
+</span></span><span class=line><span class=ln>24</span><span class=cl>        <span class=o>:</span> <span class=p>[</span><span class=nx>rep_</span><span class=p>]</span> <span class=s2>&#34;r&#34;</span> <span class=p>(</span><span class=o>&amp;</span><span class=nx>rep_</span><span class=p>),</span> <span class=p>[</span><span class=nx>v</span><span class=p>]</span> <span class=s2>&#34;r&#34;</span> <span class=p>(</span><span class=nx>v</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>25</span><span class=cl>        <span class=o>:</span> <span class=s2>&#34;memory&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>26</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>27</span><span class=cl>  <span class=nx>inline</span> <span class=k>void</span><span class=o>*</span> <span class=nx>NoBarrier_Load</span><span class=p>()</span> <span class=kr>const</span> <span class=p>{</span> <span class=k>return</span> <span class=nx>rep_</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>28</span><span class=cl>  <span class=nx>inline</span> <span class=k>void</span> <span class=nx>NoBarrier_Store</span><span class=p>(</span><span class=k>void</span><span class=o>*</span> <span class=nx>v</span><span class=p>)</span> <span class=p>{</span> <span class=nx>rep_</span> <span class=o>=</span> <span class=nx>v</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>29</span><span class=cl><span class=p>};</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=ln> 1</span><span class=cl><span class=c1>// Atomic pointer based on ia64 acq/rel
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=c1></span><span class=err>#</span><span class=nx>elif</span> <span class=nx>defined</span><span class=p>(</span><span class=nx>__ia64</span><span class=p>)</span> <span class=o>&amp;&amp;</span> <span class=nx>defined</span><span class=p>(</span><span class=nx>__GNUC__</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=kr>class</span> <span class=nx>AtomicPointer</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl> <span class=kr>private</span><span class=o>:</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=k>void</span><span class=o>*</span> <span class=nx>rep_</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl> <span class=kr>public</span><span class=o>:</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>  <span class=nx>AtomicPointer() {</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>  <span class=nx>explicit</span> <span class=nx>AtomicPointer</span><span class=p>(</span><span class=k>void</span><span class=o>*</span> <span class=nx>v</span><span class=p>)</span> <span class=o>:</span> <span class=nx>rep_</span><span class=p>(</span><span class=nx>v</span><span class=p>)</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>  <span class=nx>inline</span> <span class=k>void</span><span class=o>*</span> <span class=nx>Acquire_Load</span><span class=p>()</span> <span class=kr>const</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>    <span class=k>void</span><span class=o>*</span> <span class=nx>val</span>    <span class=p>;</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>    <span class=nx>__asm__</span> <span class=nx>__volatile__</span> <span class=p>(</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>        <span class=s2>&#34;ld8.acq %[val] = [%[rep_]] \n\t&#34;</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>        <span class=o>:</span> <span class=p>[</span><span class=nx>val</span><span class=p>]</span> <span class=s2>&#34;=r&#34;</span> <span class=p>(</span><span class=nx>val</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>        <span class=o>:</span> <span class=p>[</span><span class=nx>rep_</span><span class=p>]</span> <span class=s2>&#34;r&#34;</span> <span class=p>(</span><span class=o>&amp;</span><span class=nx>rep_</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>        <span class=o>:</span> <span class=s2>&#34;memory&#34;</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>        <span class=p>);</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>    <span class=k>return</span> <span class=nx>val</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>  <span class=nx>inline</span> <span class=k>void</span> <span class=nx>Release_Store</span><span class=p>(</span><span class=k>void</span><span class=o>*</span> <span class=nx>v</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl>    <span class=nx>__asm__</span> <span class=nx>__volatile__</span> <span class=p>(</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl>        <span class=s2>&#34;st8.rel [%[rep_]] = %[v]  \n\t&#34;</span>
+</span></span><span class=line><span class=ln>22</span><span class=cl>        <span class=o>:</span>
+</span></span><span class=line><span class=ln>23</span><span class=cl>        <span class=o>:</span> <span class=p>[</span><span class=nx>rep_</span><span class=p>]</span> <span class=s2>&#34;r&#34;</span> <span class=p>(</span><span class=o>&amp;</span><span class=nx>rep_</span><span class=p>),</span> <span class=p>[</span><span class=nx>v</span><span class=p>]</span> <span class=s2>&#34;r&#34;</span> <span class=p>(</span><span class=nx>v</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>24</span><span class=cl>        <span class=o>:</span> <span class=s2>&#34;memory&#34;</span>
+</span></span><span class=line><span class=ln>25</span><span class=cl>        <span class=p>);</span>
+</span></span><span class=line><span class=ln>26</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>27</span><span class=cl>  <span class=nx>inline</span> <span class=k>void</span><span class=o>*</span> <span class=nx>NoBarrier_Load</span><span class=p>()</span> <span class=kr>const</span> <span class=p>{</span> <span class=k>return</span> <span class=nx>rep_</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>28</span><span class=cl>  <span class=nx>inline</span> <span class=k>void</span> <span class=nx>NoBarrier_Store</span><span class=p>(</span><span class=k>void</span><span class=o>*</span> <span class=nx>v</span><span class=p>)</span> <span class=p>{</span> <span class=nx>rep_</span> <span class=o>=</span> <span class=nx>v</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>29</span><span class=cl><span class=p>};</span>
+</span></span></code></pre></div><pre><code>// We have neither MemoryBarrier(), nor &lt;atomic&gt;
 #else
 #error Please implement AtomicPointer for this platform.
 

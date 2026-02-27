@@ -63,10 +63,10 @@
 然而很快就排除了这个问题。因为faster rcnn的模型已经在另一个产品中经过长期验证了。
 而且proposal layer是tensorrt自己实现的，有bug早就有人发现了。</p><p>然后根据batch size为1时结果正确，但是batch size大于1时结果错误来看，怀疑是proposal layer前面rpn做的softmax的维度 不太对。
 因为rpn前景和背景的得分有两种不同的排列方式
-可能是</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=ln>1</span><span class=cl>+ + + + + +
-</span></span><span class=line><span class=ln>2</span><span class=cl>- - - - - -
-</span></span></code></pre></div><p>也可能是</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=ln>1</span><span class=cl>+ - + - + -
-</span></span><span class=line><span class=ln>2</span><span class=cl>+ - + - + -
+可能是</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=o>+</span> <span class=o>+</span> <span class=o>+</span> <span class=o>+</span> <span class=o>+</span> <span class=o>+</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=o>-</span> <span class=o>-</span> <span class=o>-</span> <span class=o>-</span> <span class=o>-</span> <span class=o>-</span>
+</span></span></code></pre></div><p>也可能是</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=o>+</span> <span class=o>-</span> <span class=o>+</span> <span class=o>-</span> <span class=o>+</span> <span class=o>-</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=o>+</span> <span class=o>-</span> <span class=o>+</span> <span class=o>-</span> <span class=o>+</span> <span class=o>-</span>
 </span></span></code></pre></div><p>其中‘+’代表前景，‘-’代表背景。</p><p>前者的排列方式在softmax前的维度应该是 N×2×A×H×W</p><p>后者的排列方式在softmax前的维度应该是 N×A×2×H×W</p><p>其中N为batch size,A为anchor的个数。</p><p>排查发现pytorch模型的输出是后者的排列方式，而tensorrt proposal layer期望的排列方式是前者，也就是<strong>N×2×A×H×W</strong></p><p>所以在做softmax之前要先permute 一下</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-protobuf data-lang=protobuf><span class=line><span class=ln> 1</span><span class=cl><span class=err>
 </span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=err></span><span class=n>layer</span> <span class=p>{</span><span class=err>
 </span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=err></span>  <span class=n>name</span><span class=o>:</span> <span class=s>&#34;tmp_add_for_continue&#34;</span><span class=err>

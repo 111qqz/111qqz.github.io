@@ -20,7 +20,7 @@
 <a href=https://111qqz.com/ class="nav_child nav_item">中文</a>
 <a href=https://111qqz.com/en/ class="nav_child nav_item">English</a></div></div><div class=follow><a href=https://github.com/111qqz><svg class="icon"><use xlink:href="#github"/></svg></a><div class=color_mode><input type=checkbox class=color_choice id=mode></div></div></div></nav></header><main><div class="grid-inverse wrap content"><article class=post_content><h1 class=post_title>levelDB 使用笔记</h1><div class=post_meta><span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>2018-04-19</span>
-<span class=post_time>· 5 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb</a></span></div><div class=post_body><p>2022-02-26 update:</p><p><strong>说学习笔记听起来像在分析代码。。。但是实际上什么都没干，还是写"使用笔记"好了</strong></p><p>大三的时候看过一点levelDB的源码，不过没有怎么用过。</p><p>最近有个需求是存人脸的feature到硬盘，似乎使用levelDB比较合适，因此来学习一下使用。</p><p>先放参考资料。</p><p>关于levelDB的语法，看<a href=https://github.com/google/leveldb/blob/master/doc/index.md>这里</a>就好了。</p><p>以及由于caffe中使用了levelDB，因此也可以参考下caffe源码。不过caffe中对levelDB的使用是又封装了一层。</p><p>具体可以参考：</p><pre><code>#ifdef USE_LEVELDB
+<span class=post_time>· 6 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb</a></span></div><div class=post_body><p>2022-02-26 update:</p><p><strong>说学习笔记听起来像在分析代码。。。但是实际上什么都没干，还是写"使用笔记"好了</strong></p><p>大三的时候看过一点levelDB的源码，不过没有怎么用过。</p><p>最近有个需求是存人脸的feature到硬盘，似乎使用levelDB比较合适，因此来学习一下使用。</p><p>先放参考资料。</p><p>关于levelDB的语法，看<a href=https://github.com/google/leveldb/blob/master/doc/index.md>这里</a>就好了。</p><p>以及由于caffe中使用了levelDB，因此也可以参考下caffe源码。不过caffe中对levelDB的使用是又封装了一层。</p><p>具体可以参考：</p><pre><code>#ifdef USE_LEVELDB
 #ifndef CAFFE_UTIL_DB_LEVELDB_HPP
 #define CAFFE_UTIL_DB_LEVELDB_HPP
 
@@ -32,68 +32,59 @@
 #include &quot;caffe/util/db.hpp&quot;
 
 namespace caffe { namespace db {
-
-class LevelDBCursor : public Cursor {
- public:
-  explicit LevelDBCursor(leveldb::Iterator* iter)
-    : iter_(iter) {
-    SeekToFirst();
-    CHECK(iter_-&gt;status().ok()) &lt;&lt; iter_-&gt;status().ToString();
-  }
-  ~LevelDBCursor() { delete iter_; }
-  virtual void SeekToFirst() { iter_-&gt;SeekToFirst(); }
-  virtual void Next() { iter_-&gt;Next(); }
-  virtual string key() { return iter_-&gt;key().ToString(); }
-  virtual string value() { return iter_-&gt;value().ToString(); }
-  virtual bool valid() { return iter_-&gt;Valid(); }
-
- private:
-  leveldb::Iterator* iter_;
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln> 1</span><span class=cl><span class=kr>class</span> <span class=kt>LevelDBCursor</span> <span class=kt>:</span> <span class=n>public</span> <span class=kt>Cursor</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl> <span class=n>public</span><span class=kt>:</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>  <span class=n>explicit</span> <span class=kt>LevelDBCursor</span><span class=p>(</span><span class=n>leveldb</span><span class=ow>::</span><span class=kt>Iterator</span><span class=o>*</span> <span class=n>iter</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>    <span class=kt>:</span> <span class=n>iter_</span><span class=p>(</span><span class=n>iter</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>    <span class=kt>SeekToFirst</span><span class=nb>()</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>    <span class=kt>CHECK</span><span class=p>(</span><span class=n>iter_</span><span class=ow>-&gt;</span><span class=n>status</span><span class=nb>()</span><span class=o>.</span><span class=n>ok</span><span class=nb>()</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=n>iter_</span><span class=ow>-&gt;</span><span class=n>status</span><span class=nb>()</span><span class=o>.</span><span class=kt>ToString</span><span class=nb>()</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>  <span class=o>~</span><span class=kt>LevelDBCursor</span><span class=nb>()</span> <span class=p>{</span> <span class=n>delete</span> <span class=n>iter_</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=kt>SeekToFirst</span><span class=nb>()</span> <span class=p>{</span> <span class=n>iter_</span><span class=ow>-&gt;</span><span class=kt>SeekToFirst</span><span class=nb>()</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=kt>Next</span><span class=nb>()</span> <span class=p>{</span> <span class=n>iter_</span><span class=ow>-&gt;</span><span class=kt>Next</span><span class=nb>()</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>  <span class=n>virtual</span> <span class=n>string</span> <span class=n>key</span><span class=nb>()</span> <span class=p>{</span> <span class=n>return</span> <span class=n>iter_</span><span class=ow>-&gt;</span><span class=n>key</span><span class=nb>()</span><span class=o>.</span><span class=kt>ToString</span><span class=nb>()</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>  <span class=n>virtual</span> <span class=n>string</span> <span class=n>value</span><span class=nb>()</span> <span class=p>{</span> <span class=n>return</span> <span class=n>iter_</span><span class=ow>-&gt;</span><span class=n>value</span><span class=nb>()</span><span class=o>.</span><span class=kt>ToString</span><span class=nb>()</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>  <span class=n>virtual</span> <span class=n>bool</span> <span class=n>valid</span><span class=nb>()</span> <span class=p>{</span> <span class=n>return</span> <span class=n>iter_</span><span class=ow>-&gt;</span><span class=kt>Valid</span><span class=nb>()</span><span class=p>;</span> <span class=p>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln>1</span><span class=cl> <span class=n>private</span><span class=kt>:</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=n>leveldb</span><span class=ow>::</span><span class=kt>Iterator</span><span class=o>*</span> <span class=n>iter_</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=p>};</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln> 1</span><span class=cl><span class=kr>class</span> <span class=kt>LevelDBTransaction</span> <span class=kt>:</span> <span class=n>public</span> <span class=kt>Transaction</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl> <span class=n>public</span><span class=kt>:</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>  <span class=n>explicit</span> <span class=kt>LevelDBTransaction</span><span class=p>(</span><span class=n>leveldb</span><span class=ow>::</span><span class=kt>DB</span><span class=o>*</span> <span class=n>db</span><span class=p>)</span> <span class=kt>:</span> <span class=n>db_</span><span class=p>(</span><span class=n>db</span><span class=p>)</span> <span class=p>{</span> <span class=kt>CHECK_NOTNULL</span><span class=p>(</span><span class=n>db_</span><span class=p>);</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=kt>Put</span><span class=p>(</span><span class=n>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>key</span><span class=p>,</span> <span class=n>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>value</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>    <span class=n>batch_</span><span class=o>.</span><span class=kt>Put</span><span class=p>(</span><span class=n>key</span><span class=p>,</span> <span class=n>value</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=kt>Commit</span><span class=nb>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>    <span class=n>leveldb</span><span class=ow>::</span><span class=kt>Status</span> <span class=n>status</span> <span class=ow>=</span> <span class=n>db_</span><span class=ow>-&gt;</span><span class=kt>Write</span><span class=p>(</span><span class=n>leveldb</span><span class=ow>::</span><span class=kt>WriteOptions</span><span class=nb>()</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>batch_</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>    <span class=kt>CHECK</span><span class=p>(</span><span class=n>status</span><span class=o>.</span><span class=n>ok</span><span class=nb>()</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Failed to write batch to leveldb &#34;</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>                       <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=ow>::</span><span class=n>endl</span> <span class=o>&lt;&lt;</span> <span class=n>status</span><span class=o>.</span><span class=kt>ToString</span><span class=nb>()</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>  <span class=p>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln>1</span><span class=cl> <span class=n>private</span><span class=kt>:</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=n>leveldb</span><span class=ow>::</span><span class=kt>DB</span><span class=o>*</span> <span class=n>db_</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>leveldb</span><span class=ow>::</span><span class=kt>WriteBatch</span> <span class=n>batch_</span><span class=p>;</span>
+</span></span></code></pre></div><pre><code>  DISABLE_COPY_AND_ASSIGN(LevelDBTransaction);
 };
-
-class LevelDBTransaction : public Transaction {
- public:
-  explicit LevelDBTransaction(leveldb::DB* db) : db_(db) { CHECK_NOTNULL(db_); }
-  virtual void Put(const string&amp; key, const string&amp; value) {
-    batch_.Put(key, value);
-  }
-  virtual void Commit() {
-    leveldb::Status status = db_-&gt;Write(leveldb::WriteOptions(), &amp;batch_);
-    CHECK(status.ok()) &lt;&lt; &quot;Failed to write batch to leveldb &quot;
-                       &lt;&lt; std::endl &lt;&lt; status.ToString();
-  }
-
- private:
-  leveldb::DB* db_;
-  leveldb::WriteBatch batch_;
-
-  DISABLE_COPY_AND_ASSIGN(LevelDBTransaction);
-};
-
-class LevelDB : public DB {
- public:
-  LevelDB() : db_(NULL) { }
-  virtual ~LevelDB() { Close(); }
-  virtual void Open(const string&amp; source, Mode mode);
-  virtual void Close() {
-    if (db_ != NULL) {
-      delete db_;
-      db_ = NULL;
-    }
-  }
-  virtual LevelDBCursor* NewCursor() {
-    return new LevelDBCursor(db_-&gt;NewIterator(leveldb::ReadOptions()));
-  }
-  virtual LevelDBTransaction* NewTransaction() {
-    return new LevelDBTransaction(db_);
-  }
-
- private:
-  leveldb::DB* db_;
-};
-
-
-}  // namespace db
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln> 1</span><span class=cl><span class=kr>class</span> <span class=kt>LevelDB</span> <span class=kt>:</span> <span class=n>public</span> <span class=kt>DB</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl> <span class=n>public</span><span class=kt>:</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>  <span class=kt>LevelDB</span><span class=nb>()</span> <span class=kt>:</span> <span class=n>db_</span><span class=p>(</span><span class=kt>NULL</span><span class=p>)</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>  <span class=n>virtual</span> <span class=o>~</span><span class=kt>LevelDB</span><span class=nb>()</span> <span class=p>{</span> <span class=kt>Close</span><span class=nb>()</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=kt>Open</span><span class=p>(</span><span class=n>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>source</span><span class=p>,</span> <span class=kt>Mode</span> <span class=n>mode</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=kt>Close</span><span class=nb>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>    <span class=kr>if</span> <span class=p>(</span><span class=n>db_</span> <span class=o>!=</span> <span class=kt>NULL</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>      <span class=n>delete</span> <span class=n>db_</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>      <span class=n>db_</span> <span class=ow>=</span> <span class=kt>NULL</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>  <span class=n>virtual</span> <span class=kt>LevelDBCursor</span><span class=o>*</span> <span class=kt>NewCursor</span><span class=nb>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>    <span class=n>return</span> <span class=n>new</span> <span class=kt>LevelDBCursor</span><span class=p>(</span><span class=n>db_</span><span class=ow>-&gt;</span><span class=kt>NewIterator</span><span class=p>(</span><span class=n>leveldb</span><span class=ow>::</span><span class=kt>ReadOptions</span><span class=nb>()</span><span class=p>));</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>  <span class=n>virtual</span> <span class=kt>LevelDBTransaction</span><span class=o>*</span> <span class=kt>NewTransaction</span><span class=nb>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>    <span class=n>return</span> <span class=n>new</span> <span class=kt>LevelDBTransaction</span><span class=p>(</span><span class=n>db_</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>  <span class=p>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln>1</span><span class=cl> <span class=n>private</span><span class=kt>:</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=n>leveldb</span><span class=ow>::</span><span class=kt>DB</span><span class=o>*</span> <span class=n>db_</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=p>};</span>
+</span></span></code></pre></div><pre><code>}  // namespace db
 }  // namespace caffe
 
 #endif  // CAFFE_UTIL_DB_LEVELDB_HPP
@@ -115,40 +106,34 @@ class LevelDB : public DB {
 namespace caffe { namespace db {
 
 enum Mode { READ, WRITE, NEW };
-
-class Cursor {
- public:
-  Cursor() { }
-  virtual ~Cursor() { }
-  virtual void SeekToFirst() = 0;
-  virtual void Next() = 0;
-  virtual string key() = 0;
-  virtual string value() = 0;
-  virtual bool valid() = 0;
-
-  DISABLE_COPY_AND_ASSIGN(Cursor);
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=k>class</span> <span class=nc>Cursor</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl> <span class=n>public</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>Cursor</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=n>virtual</span> <span class=o>~</span><span class=n>Cursor</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=n>SeekToFirst</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=n>Next</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl>  <span class=n>virtual</span> <span class=n>string</span> <span class=n>key</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>8</span><span class=cl>  <span class=n>virtual</span> <span class=n>string</span> <span class=n>value</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>9</span><span class=cl>  <span class=n>virtual</span> <span class=nb>bool</span> <span class=n>valid</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span></code></pre></div><pre><code>  DISABLE_COPY_AND_ASSIGN(Cursor);
 };
-
-class Transaction {
- public:
-  Transaction() { }
-  virtual ~Transaction() { }
-  virtual void Put(const string&amp; key, const string&amp; value) = 0;
-  virtual void Commit() = 0;
-
-  DISABLE_COPY_AND_ASSIGN(Transaction);
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=k>class</span> <span class=nc>Transaction</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl> <span class=n>public</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>Transaction</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=n>virtual</span> <span class=o>~</span><span class=n>Transaction</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=n>Put</span><span class=p>(</span><span class=n>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>key</span><span class=p>,</span> <span class=n>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>value</span><span class=p>)</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=n>Commit</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span></code></pre></div><pre><code>  DISABLE_COPY_AND_ASSIGN(Transaction);
 };
-
-class DB {
- public:
-  DB() { }
-  virtual ~DB() { }
-  virtual void Open(const string&amp; source, Mode mode) = 0;
-  virtual void Close() = 0;
-  virtual Cursor* NewCursor() = 0;
-  virtual Transaction* NewTransaction() = 0;
-
-  DISABLE_COPY_AND_ASSIGN(DB);
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=k>class</span> <span class=nc>DB</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl> <span class=n>public</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>DB</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=n>virtual</span> <span class=o>~</span><span class=n>DB</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=n>Open</span><span class=p>(</span><span class=n>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>source</span><span class=p>,</span> <span class=n>Mode</span> <span class=n>mode</span><span class=p>)</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=n>Close</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl>  <span class=n>virtual</span> <span class=n>Cursor</span><span class=o>*</span> <span class=n>NewCursor</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>8</span><span class=cl>  <span class=n>virtual</span> <span class=n>Transaction</span><span class=o>*</span> <span class=n>NewTransaction</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span></code></pre></div><pre><code>  DISABLE_COPY_AND_ASSIGN(DB);
 };
 
 DB* GetDB(DataParameter::DB backend);
@@ -170,92 +155,74 @@ DB* GetDB(const string&amp; backend);
 #include &lt;string&gt;
 
 namespace caffe { namespace db {
-
-void LevelDB::Open(const string&amp; source, Mode mode) {
-  leveldb::Options options;
-  options.block_size = 65536;
-  options.write_buffer_size = 268435456;
-  options.max_open_files = 100;
-  options.error_if_exists = mode == NEW;
-  options.create_if_missing = mode != READ;
-  leveldb::Status status = leveldb::DB::Open(options, source, &amp;db_);
-  CHECK(status.ok()) &lt;&lt; &quot;Failed to open leveldb &quot; &lt;&lt; source
-                     &lt;&lt; std::endl &lt;&lt; status.ToString();
-  LOG(INFO) &lt;&lt; &quot;Opened leveldb &quot; &lt;&lt; source;
-}
-
-}  // namespace db
-}  // namespace caffe
-#endif  // USE_LEVELDB
-
-
-
-
-
-
-#include &quot;caffe/util/db.hpp&quot;
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=kt>void</span> <span class=n>LevelDB</span><span class=o>::</span><span class=n>Open</span><span class=p>(</span><span class=k>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>source</span><span class=p>,</span> <span class=n>Mode</span> <span class=n>mode</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>  <span class=n>leveldb</span><span class=o>::</span><span class=n>Options</span> <span class=n>options</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>  <span class=n>options</span><span class=p>.</span><span class=n>block_size</span> <span class=o>=</span> <span class=mi>65536</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>  <span class=n>options</span><span class=p>.</span><span class=n>write_buffer_size</span> <span class=o>=</span> <span class=mi>268435456</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=n>options</span><span class=p>.</span><span class=n>max_open_files</span> <span class=o>=</span> <span class=mi>100</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>  <span class=n>options</span><span class=p>.</span><span class=n>error_if_exists</span> <span class=o>=</span> <span class=n>mode</span> <span class=o>==</span> <span class=n>NEW</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>  <span class=n>options</span><span class=p>.</span><span class=n>create_if_missing</span> <span class=o>=</span> <span class=n>mode</span> <span class=o>!=</span> <span class=n>READ</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>  <span class=n>leveldb</span><span class=o>::</span><span class=n>Status</span> <span class=n>status</span> <span class=o>=</span> <span class=n>leveldb</span><span class=o>::</span><span class=n>DB</span><span class=o>::</span><span class=n>Open</span><span class=p>(</span><span class=n>options</span><span class=p>,</span> <span class=n>source</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>db_</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>  <span class=n>CHECK</span><span class=p>(</span><span class=n>status</span><span class=p>.</span><span class=n>ok</span><span class=p>())</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Failed to open leveldb &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>source</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>                     <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span> <span class=o>&lt;&lt;</span> <span class=n>status</span><span class=p>.</span><span class=n>ToString</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>  <span class=n>LOG</span><span class=p>(</span><span class=n>INFO</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Opened leveldb &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>source</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=p>}</span>  <span class=c1>// namespace db
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span><span class=p>}</span>  <span class=c1>// namespace caffe
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1></span><span class=cp>#endif  </span><span class=c1>// USE_LEVELDB
+</span></span></span></code></pre></div><pre><code>#include &quot;caffe/util/db.hpp&quot;
 #include &quot;caffe/util/db_leveldb.hpp&quot;
 #include &quot;caffe/util/db_lmdb.hpp&quot;
 
 #include &lt;string&gt;
 
 namespace caffe { namespace db {
-
-DB* GetDB(DataParameter::DB backend) {
-  switch (backend) {
-#ifdef USE_LEVELDB
-  case DataParameter_DB_LEVELDB:
-    return new LevelDB();
-#endif  // USE_LEVELDB
-#ifdef USE_LMDB
-  case DataParameter_DB_LMDB:
-    return new LMDB();
-#endif  // USE_LMDB
-  default:
-    LOG(FATAL) &lt;&lt; &quot;Unknown database backend&quot;;
-    return NULL;
-  }
-}
-
-DB* GetDB(const string&amp; backend) {
-#ifdef USE_LEVELDB
-  if (backend == &quot;leveldb&quot;) {
-    return new LevelDB();
-  }
-#endif  // USE_LEVELDB
-#ifdef USE_LMDB
-  if (backend == &quot;lmdb&quot;) {
-    return new LMDB();
-  }
-#endif  // USE_LMDB
-  LOG(FATAL) &lt;&lt; &quot;Unknown database backend&quot;;
-  return NULL;
-}
-
-}  // namespace db
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln> 1</span><span class=cl><span class=kt>DB</span><span class=o>*</span> <span class=kt>GetDB</span><span class=p>(</span><span class=kt>DataParameter</span><span class=ow>::</span><span class=kt>DB</span> <span class=n>backend</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>  <span class=n>switch</span> <span class=p>(</span><span class=n>backend</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=o>#</span><span class=n>ifdef</span> <span class=kt>USE_LEVELDB</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>  <span class=kr>case</span> <span class=kt>DataParameter_DB_LEVELDB:</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>    <span class=n>return</span> <span class=n>new</span> <span class=kt>LevelDB</span><span class=nb>()</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=o>#</span><span class=n>endif</span>  <span class=o>//</span> <span class=kt>USE_LEVELDB</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=o>#</span><span class=n>ifdef</span> <span class=kt>USE_LMDB</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>  <span class=kr>case</span> <span class=kt>DataParameter_DB_LMDB:</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>    <span class=n>return</span> <span class=n>new</span> <span class=kt>LMDB</span><span class=nb>()</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl><span class=o>#</span><span class=n>endif</span>  <span class=o>//</span> <span class=kt>USE_LMDB</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>  <span class=kr>default</span><span class=kt>:</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>    <span class=kt>LOG</span><span class=p>(</span><span class=kt>FATAL</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Unknown database backend&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>    <span class=n>return</span> <span class=kt>NULL</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln> 1</span><span class=cl>DB* GetDB<span class=o>(</span>const string<span class=p>&amp;</span> backend<span class=o>)</span> <span class=o>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=c1>#ifdef USE_LEVELDB</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>  <span class=k>if</span> <span class=o>(</span><span class=nv>backend</span> <span class=o>==</span> <span class=s2>&#34;leveldb&#34;</span><span class=o>)</span> <span class=o>{</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>    <span class=k>return</span> new LevelDB<span class=o>()</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=o>}</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=c1>#endif  // USE_LEVELDB</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=c1>#ifdef USE_LMDB</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>  <span class=k>if</span> <span class=o>(</span><span class=nv>backend</span> <span class=o>==</span> <span class=s2>&#34;lmdb&#34;</span><span class=o>)</span> <span class=o>{</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>    <span class=k>return</span> new LMDB<span class=o>()</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>  <span class=o>}</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl><span class=c1>#endif  // USE_LMDB</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>  LOG<span class=o>(</span>FATAL<span class=o>)</span> &lt;&lt; <span class=s2>&#34;Unknown database backend&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>  <span class=k>return</span> NULL<span class=p>;</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl><span class=o>}</span>
+</span></span></code></pre></div><pre><code>}  // namespace db
 }  // namespace caffe
-
-
-
-
-
-// This program converts a set of images to a lmdb/leveldb by storing them
-// as Datum proto buffers.
-// Usage:
-//   convert_imageset [FLAGS] ROOTFOLDER/ LISTFILE DB_NAME
-//
-// where ROOTFOLDER is the root folder that holds all the images, and LISTFILE
-// should be a list of files as well as their labels, in the format as
-//   subfolder1/file1.JPEG 7
-//   ....
-
-#include &lt;algorithm&gt;
-#include &lt;fstream&gt;  // NOLINT(readability/streams)
-#include &lt;string&gt;
-#include &lt;utility&gt;
-#include &lt;vector&gt;
-
-#include &quot;boost/scoped_ptr.hpp&quot;
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln>1</span><span class=cl><span class=o>//</span> <span class=kt>This</span> <span class=n>program</span> <span class=n>converts</span> <span class=n>a</span> <span class=n>set</span> <span class=kr>of</span> <span class=n>images</span> <span class=n>to</span> <span class=n>a</span> <span class=n>lmdb</span><span class=o>/</span><span class=n>leveldb</span> <span class=n>by</span> <span class=n>storing</span> <span class=n>them</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=o>//</span> <span class=n>as</span> <span class=kt>Datum</span> <span class=n>proto</span> <span class=n>buffers</span><span class=o>.</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=o>//</span> <span class=kt>Usage:</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=o>//</span>   <span class=n>convert_imageset</span> <span class=p>[</span><span class=kt>FLAGS</span><span class=p>]</span> <span class=kt>ROOTFOLDER</span><span class=o>/</span> <span class=kt>LISTFILE</span> <span class=kt>DB_NAME</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=o>//</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl><span class=o>//</span> <span class=kr>where</span> <span class=kt>ROOTFOLDER</span> <span class=n>is</span> <span class=n>the</span> <span class=n>root</span> <span class=n>folder</span> <span class=n>that</span> <span class=n>holds</span> <span class=n>all</span> <span class=n>the</span> <span class=n>images</span><span class=p>,</span> <span class=n>and</span> <span class=kt>LISTFILE</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl><span class=o>//</span> <span class=n>should</span> <span class=n>be</span> <span class=n>a</span> <span class=n>list</span> <span class=kr>of</span> <span class=n>files</span> <span class=n>as</span> <span class=n>well</span> <span class=n>as</span> <span class=n>their</span> <span class=n>labels</span><span class=p>,</span> <span class=kr>in</span> <span class=n>the</span> <span class=n>format</span> <span class=n>as</span>
+</span></span><span class=line><span class=ln>8</span><span class=cl><span class=o>//</span>   <span class=n>subfolder1</span><span class=o>/</span><span class=n>file1</span><span class=o>.</span><span class=kt>JPEG</span> <span class=mi>7</span>
+</span></span><span class=line><span class=ln>9</span><span class=cl><span class=o>//</span>   <span class=o>....</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;algorithm&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;fstream&gt;</span><span class=cp>  </span><span class=c1>// NOLINT(readability/streams)
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1></span><span class=cp>#include</span> <span class=cpf>&lt;string&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>4</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;utility&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>5</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;vector&gt;</span><span class=cp>
+</span></span></span></code></pre></div><pre><code>#include &quot;boost/scoped_ptr.hpp&quot;
 #include &quot;gflags/gflags.h&quot;
 #include &quot;glog/logging.h&quot;
 
@@ -264,174 +231,160 @@ DB* GetDB(const string&amp; backend) {
 #include &quot;caffe/util/format.hpp&quot;
 #include &quot;caffe/util/io.hpp&quot;
 #include &quot;caffe/util/rng.hpp&quot;
-
-using namespace caffe;  // NOLINT(build/namespaces)
-using std::pair;
-using boost::scoped_ptr;
-
-DEFINE_bool(gray, false,
-    &quot;When this option is on, treat images as grayscale ones&quot;);
-DEFINE_bool(shuffle, false,
-    &quot;Randomly shuffle the order of images and their labels&quot;);
-DEFINE_string(backend, &quot;lmdb&quot;,
-        &quot;The backend {lmdb, leveldb} for storing the result&quot;);
-DEFINE_int32(resize_width, 0, &quot;Width images are resized to&quot;);
-DEFINE_int32(resize_height, 0, &quot;Height images are resized to&quot;);
-DEFINE_bool(check_size, false,
-    &quot;When this option is on, check that all the datum have the same size&quot;);
-DEFINE_bool(encoded, false,
-    &quot;When this option is on, the encoded image will be save in datum&quot;);
-DEFINE_string(encode_type, &quot;&quot;,
-    &quot;Optional: What type should we encode the image as ('png','jpg',...).&quot;);
-
-int main(int argc, char** argv) {
-#ifdef USE_OPENCV
-  ::google::InitGoogleLogging(argv[0]);
-  // Print output to stderr (while still logging)
-  FLAGS_alsologtostderr = 1;
-
-#ifndef GFLAGS_GFLAGS_H_
-  namespace gflags = google;
-#endif
-
-  gflags::SetUsageMessage(&quot;Convert a set of images to the leveldb/lmdb\n&quot;
-        &quot;format used as input for Caffe.\n&quot;
-        &quot;Usage:\n&quot;
-        &quot;    convert_imageset [FLAGS] ROOTFOLDER/ LISTFILE DB_NAME\n&quot;
-        &quot;The ImageNet dataset for the training demo is at\n&quot;
-        &quot;    http://www.image-net.org/download-images\n&quot;);
-  gflags::ParseCommandLineFlags(&amp;argc, &amp;argv, true);
-
-  if (argc &lt; 4) {
-    gflags::ShowUsageWithFlagsRestrict(argv[0], &quot;tools/convert_imageset&quot;);
-    return 1;
-  }
-
-  const bool is_color = !FLAGS_gray;
-  const bool check_size = FLAGS_check_size;
-  const bool encoded = FLAGS_encoded;
-  const string encode_type = FLAGS_encode_type;
-
-  std::ifstream infile(argv[2]);
-  std::vector&lt;std::pair&lt;std::string, int&gt; &gt; lines;
-  std::string line;
-  size_t pos;
-  int label;
-  while (std::getline(infile, line)) {
-    pos = line.find_last_of(' ');
-    label = atoi(line.substr(pos + 1).c_str());
-    lines.push_back(std::make_pair(line.substr(0, pos), label));
-  }
-  if (FLAGS_shuffle) {
-    // randomly shuffle data
-    LOG(INFO) &lt;&lt; &quot;Shuffling data&quot;;
-    shuffle(lines.begin(), lines.end());
-  }
-  LOG(INFO) &lt;&lt; &quot;A total of &quot; &lt;&lt; lines.size() &lt;&lt; &quot; images.&quot;;
-
-  if (encode_type.size() &amp;&amp; !encoded)
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=k>using</span> <span class=k>namespace</span> <span class=n>caffe</span><span class=p>;</span>  <span class=c1>// NOLINT(build/namespaces)
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span><span class=k>using</span> <span class=n>std</span><span class=o>::</span><span class=n>pair</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=k>using</span> <span class=n>boost</span><span class=o>::</span><span class=n>scoped_ptr</span><span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=n>DEFINE_bool</span><span class=p>(</span><span class=n>gray</span><span class=p>,</span> <span class=nb>false</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>    <span class=s>&#34;When this option is on, treat images as grayscale ones&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=n>DEFINE_bool</span><span class=p>(</span><span class=n>shuffle</span><span class=p>,</span> <span class=nb>false</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>    <span class=s>&#34;Randomly shuffle the order of images and their labels&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=n>DEFINE_string</span><span class=p>(</span><span class=n>backend</span><span class=p>,</span> <span class=s>&#34;lmdb&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>        <span class=s>&#34;The backend {lmdb, leveldb} for storing the result&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=n>DEFINE_int32</span><span class=p>(</span><span class=n>resize_width</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=s>&#34;Width images are resized to&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl><span class=n>DEFINE_int32</span><span class=p>(</span><span class=n>resize_height</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=s>&#34;Height images are resized to&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl><span class=n>DEFINE_bool</span><span class=p>(</span><span class=n>check_size</span><span class=p>,</span> <span class=nb>false</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>    <span class=s>&#34;When this option is on, check that all the datum have the same size&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl><span class=n>DEFINE_bool</span><span class=p>(</span><span class=n>encoded</span><span class=p>,</span> <span class=nb>false</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>    <span class=s>&#34;When this option is on, the encoded image will be save in datum&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl><span class=n>DEFINE_string</span><span class=p>(</span><span class=n>encode_type</span><span class=p>,</span> <span class=s>&#34;&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>    <span class=s>&#34;Optional: What type should we encode the image as (&#39;png&#39;,&#39;jpg&#39;,...).&#34;</span><span class=p>);</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>(</span><span class=kt>int</span> <span class=n>argc</span><span class=p>,</span> <span class=kt>char</span><span class=o>**</span> <span class=n>argv</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=cp>#ifdef USE_OPENCV
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=cp></span>  <span class=o>::</span><span class=n>google</span><span class=o>::</span><span class=n>InitGoogleLogging</span><span class=p>(</span><span class=n>argv</span><span class=p>[</span><span class=mi>0</span><span class=p>]);</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=c1>// Print output to stderr (while still logging)
+</span></span></span><span class=line><span class=ln>5</span><span class=cl><span class=c1></span>  <span class=n>FLAGS_alsologtostderr</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=cp>#ifndef GFLAGS_GFLAGS_H_
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=cp></span>  <span class=k>namespace</span> <span class=n>gflags</span> <span class=o>=</span> <span class=n>google</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=cp>#endif
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln>1</span><span class=cl>  <span class=n>gflags</span><span class=ow>::</span><span class=kt>SetUsageMessage</span><span class=p>(</span><span class=s>&#34;Convert a set of images to the leveldb/lmdb</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>        <span class=s>&#34;format used as input for Caffe.</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=s>&#34;Usage:</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=s>&#34;    convert_imageset [FLAGS] ROOTFOLDER/ LISTFILE DB_NAME</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=s>&#34;The ImageNet dataset for the training demo is at</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>        <span class=s>&#34;    http://www.image-net.org/download-images</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl>  <span class=n>gflags</span><span class=ow>::</span><span class=kt>ParseCommandLineFlags</span><span class=p>(</span><span class=o>&amp;</span><span class=n>argc</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>argv</span><span class=p>,</span> <span class=n>true</span><span class=p>);</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>  <span class=k>if</span> <span class=o>(</span>argc &lt; 4<span class=o>)</span> <span class=o>{</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    gflags::ShowUsageWithFlagsRestrict<span class=o>(</span>argv<span class=o>[</span>0<span class=o>]</span>, <span class=s2>&#34;tools/convert_imageset&#34;</span><span class=o>)</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=k>return</span> 1<span class=p>;</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=o>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>  <span class=k>const</span> <span class=kt>bool</span> <span class=n>is_color</span> <span class=o>=</span> <span class=o>!</span><span class=n>FLAGS_gray</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=k>const</span> <span class=kt>bool</span> <span class=n>check_size</span> <span class=o>=</span> <span class=n>FLAGS_check_size</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=k>const</span> <span class=kt>bool</span> <span class=n>encoded</span> <span class=o>=</span> <span class=n>FLAGS_encoded</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=k>const</span> <span class=n>string</span> <span class=n>encode_type</span> <span class=o>=</span> <span class=n>FLAGS_encode_type</span><span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl>  <span class=n>std</span><span class=o>::</span><span class=n>ifstream</span> <span class=n>infile</span><span class=p>(</span><span class=n>argv</span><span class=p>[</span><span class=mi>2</span><span class=p>]);</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>  <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>pair</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=p>,</span> <span class=kt>int</span><span class=o>&gt;</span> <span class=o>&gt;</span> <span class=n>lines</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>  <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>line</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>  <span class=n>size_t</span> <span class=n>pos</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=kt>int</span> <span class=n>label</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>  <span class=k>while</span> <span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>getline</span><span class=p>(</span><span class=n>infile</span><span class=p>,</span> <span class=n>line</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>    <span class=n>pos</span> <span class=o>=</span> <span class=n>line</span><span class=p>.</span><span class=n>find_last_of</span><span class=p>(</span><span class=sc>&#39; &#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>    <span class=n>label</span> <span class=o>=</span> <span class=n>atoi</span><span class=p>(</span><span class=n>line</span><span class=p>.</span><span class=n>substr</span><span class=p>(</span><span class=n>pos</span> <span class=o>+</span> <span class=mi>1</span><span class=p>).</span><span class=n>c_str</span><span class=p>());</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>    <span class=n>lines</span><span class=p>.</span><span class=n>push_back</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>make_pair</span><span class=p>(</span><span class=n>line</span><span class=p>.</span><span class=n>substr</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=n>pos</span><span class=p>),</span> <span class=n>label</span><span class=p>));</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>FLAGS_shuffle</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>    <span class=c1>// randomly shuffle data
+</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=c1></span>    <span class=n>LOG</span><span class=p>(</span><span class=n>INFO</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Shuffling data&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>    <span class=n>shuffle</span><span class=p>(</span><span class=n>lines</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span> <span class=n>lines</span><span class=p>.</span><span class=n>end</span><span class=p>());</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>  <span class=n>LOG</span><span class=p>(</span><span class=n>INFO</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;A total of &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>lines</span><span class=p>.</span><span class=n>size</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=s>&#34; images.&#34;</span><span class=p>;</span>
+</span></span></code></pre></div><pre><code>  if (encode_type.size() &amp;&amp; !encoded)
     LOG(INFO) &lt;&lt; &quot;encode_type specified, assuming encoded=true.&quot;;
 
   int resize_height = std::max&lt;int&gt;(0, FLAGS_resize_height);
   int resize_width = std::max&lt;int&gt;(0, FLAGS_resize_width);
-
-  // Create new DB
-  scoped_ptr&lt;db::DB&gt; db(db::GetDB(FLAGS_backend));
-  db-&gt;Open(argv[3], db::NEW);
-  scoped_ptr&lt;db::Transaction&gt; txn(db-&gt;NewTransaction());
-
-  // Storing to db
-  std::string root_folder(argv[1]);
-  Datum datum;
-  int count = 0;
-  int data_size = 0;
-  bool data_size_initialized = false;
-
-  for (int line_id = 0; line_id &lt; lines.size(); ++line_id) {
-    bool status;
-    std::string enc = encode_type;
-    if (encoded &amp;&amp; !enc.size()) {
-      // Guess the encoding type from the file name
-      string fn = lines[line_id].first;
-      size_t p = fn.rfind('.');
-      if ( p == fn.npos )
-        LOG(WARNING) &lt;&lt; &quot;Failed to guess the encoding of '&quot; &lt;&lt; fn &lt;&lt; &quot;'&quot;;
-      enc = fn.substr(p+1);
-      std::transform(enc.begin(), enc.end(), enc.begin(), ::tolower);
-    }
-    status = ReadImageToDatum(root_folder + lines[line_id].first,
-        lines[line_id].second, resize_height, resize_width, is_color,
-        enc, &amp;datum);
-    if (status == false) continue;
-    if (check_size) {
-      if (!data_size_initialized) {
-        data_size = datum.channels() * datum.height() * datum.width();
-        data_size_initialized = true;
-      } else {
-        const std::string&amp; data = datum.data();
-        CHECK_EQ(data.size(), data_size) &lt;&lt; &quot;Incorrect data field size &quot;
-            &lt;&lt; data.size();
-      }
-    }
-    // sequential
-    string key_str = caffe::format_int(line_id, 8) + &quot;_&quot; + lines[line_id].first;
-
-    // Put in db
-    string out;
-    CHECK(datum.SerializeToString(&amp;out));
-    txn-&gt;Put(key_str, out);
-
-    if (++count % 1000 == 0) {
-      // Commit db
-      txn-&gt;Commit();
-      txn.reset(db-&gt;NewTransaction());
-      LOG(INFO) &lt;&lt; &quot;Processed &quot; &lt;&lt; count &lt;&lt; &quot; files.&quot;;
-    }
-  }
-  // write the last batch
-  if (count % 1000 != 0) {
-    txn-&gt;Commit();
-    LOG(INFO) &lt;&lt; &quot;Processed &quot; &lt;&lt; count &lt;&lt; &quot; files.&quot;;
-  }
-#else
-  LOG(FATAL) &lt;&lt; &quot;This tool requires OpenCV; compile with USE_OPENCV.&quot;;
-#endif  // USE_OPENCV
-  return 0;
-}
-</code></pre><p>几个文件。。。感觉比看文档更有实际意义orz</p><h3 id=leveldb简介>levelDB简介</h3><p>Leveldb是google开源的一个高效率的K/V数据库.有如下特点：</p><pre><code>  1. 首先，LevelDb是一个持久化存储的KV系统，和Redis这种内存型的KV系统不同，LevelDb不会像Redis一样狂吃内存，而是将大部分数据存储到磁盘上。
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln>1</span><span class=cl>  <span class=o>//</span> <span class=kt>Create</span> <span class=n>new</span> <span class=kt>DB</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=n>scoped_ptr</span><span class=o>&lt;</span><span class=n>db</span><span class=ow>::</span><span class=kt>DB</span><span class=o>&gt;</span> <span class=n>db</span><span class=p>(</span><span class=n>db</span><span class=ow>::</span><span class=kt>GetDB</span><span class=p>(</span><span class=kt>FLAGS_backend</span><span class=p>));</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>db</span><span class=ow>-&gt;</span><span class=kt>Open</span><span class=p>(</span><span class=n>argv</span><span class=p>[</span><span class=mi>3</span><span class=p>],</span> <span class=n>db</span><span class=ow>::</span><span class=kt>NEW</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=n>scoped_ptr</span><span class=o>&lt;</span><span class=n>db</span><span class=ow>::</span><span class=kt>Transaction</span><span class=o>&gt;</span> <span class=n>txn</span><span class=p>(</span><span class=n>db</span><span class=ow>-&gt;</span><span class=kt>NewTransaction</span><span class=nb>()</span><span class=p>);</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>  <span class=c1>// Storing to db
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span>  <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>root_folder</span><span class=p>(</span><span class=n>argv</span><span class=p>[</span><span class=mi>1</span><span class=p>]);</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>Datum</span> <span class=n>datum</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=kt>int</span> <span class=n>count</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=kt>int</span> <span class=n>data_size</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>  <span class=kt>bool</span> <span class=n>data_size_initialized</span> <span class=o>=</span> <span class=nb>false</span><span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl>  <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>line_id</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>line_id</span> <span class=o>&lt;</span> <span class=n>lines</span><span class=p>.</span><span class=n>size</span><span class=p>();</span> <span class=o>++</span><span class=n>line_id</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>    <span class=kt>bool</span> <span class=n>status</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>enc</span> <span class=o>=</span> <span class=n>encode_type</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>encoded</span> <span class=o>&amp;&amp;</span> <span class=o>!</span><span class=n>enc</span><span class=p>.</span><span class=n>size</span><span class=p>())</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>      <span class=c1>// Guess the encoding type from the file name
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=c1></span>      <span class=n>string</span> <span class=n>fn</span> <span class=o>=</span> <span class=n>lines</span><span class=p>[</span><span class=n>line_id</span><span class=p>].</span><span class=n>first</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>      <span class=n>size_t</span> <span class=n>p</span> <span class=o>=</span> <span class=n>fn</span><span class=p>.</span><span class=n>rfind</span><span class=p>(</span><span class=sc>&#39;.&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>      <span class=k>if</span> <span class=p>(</span> <span class=n>p</span> <span class=o>==</span> <span class=n>fn</span><span class=p>.</span><span class=n>npos</span> <span class=p>)</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>        <span class=n>LOG</span><span class=p>(</span><span class=n>WARNING</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Failed to guess the encoding of &#39;&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>fn</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;&#39;&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>      <span class=n>enc</span> <span class=o>=</span> <span class=n>fn</span><span class=p>.</span><span class=n>substr</span><span class=p>(</span><span class=n>p</span><span class=o>+</span><span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>      <span class=n>std</span><span class=o>::</span><span class=n>transform</span><span class=p>(</span><span class=n>enc</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span> <span class=n>enc</span><span class=p>.</span><span class=n>end</span><span class=p>(),</span> <span class=n>enc</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span> <span class=o>::</span><span class=n>tolower</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>    <span class=n>status</span> <span class=o>=</span> <span class=n>ReadImageToDatum</span><span class=p>(</span><span class=n>root_folder</span> <span class=o>+</span> <span class=n>lines</span><span class=p>[</span><span class=n>line_id</span><span class=p>].</span><span class=n>first</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>        <span class=n>lines</span><span class=p>[</span><span class=n>line_id</span><span class=p>].</span><span class=n>second</span><span class=p>,</span> <span class=n>resize_height</span><span class=p>,</span> <span class=n>resize_width</span><span class=p>,</span> <span class=n>is_color</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>        <span class=n>enc</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>datum</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>status</span> <span class=o>==</span> <span class=nb>false</span><span class=p>)</span> <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>check_size</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>      <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>data_size_initialized</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>        <span class=n>data_size</span> <span class=o>=</span> <span class=n>datum</span><span class=p>.</span><span class=n>channels</span><span class=p>()</span> <span class=o>*</span> <span class=n>datum</span><span class=p>.</span><span class=n>height</span><span class=p>()</span> <span class=o>*</span> <span class=n>datum</span><span class=p>.</span><span class=n>width</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl>        <span class=n>data_size_initialized</span> <span class=o>=</span> <span class=nb>true</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl>      <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>22</span><span class=cl>        <span class=k>const</span> <span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=o>&amp;</span> <span class=n>data</span> <span class=o>=</span> <span class=n>datum</span><span class=p>.</span><span class=n>data</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>23</span><span class=cl>        <span class=n>CHECK_EQ</span><span class=p>(</span><span class=n>data</span><span class=p>.</span><span class=n>size</span><span class=p>(),</span> <span class=n>data_size</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Incorrect data field size &#34;</span>
+</span></span><span class=line><span class=ln>24</span><span class=cl>            <span class=o>&lt;&lt;</span> <span class=n>data</span><span class=p>.</span><span class=n>size</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>25</span><span class=cl>      <span class=p>}</span>
+</span></span><span class=line><span class=ln>26</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>27</span><span class=cl>    <span class=c1>// sequential
+</span></span></span><span class=line><span class=ln>28</span><span class=cl><span class=c1></span>    <span class=n>string</span> <span class=n>key_str</span> <span class=o>=</span> <span class=n>caffe</span><span class=o>::</span><span class=n>format_int</span><span class=p>(</span><span class=n>line_id</span><span class=p>,</span> <span class=mi>8</span><span class=p>)</span> <span class=o>+</span> <span class=s>&#34;_&#34;</span> <span class=o>+</span> <span class=n>lines</span><span class=p>[</span><span class=n>line_id</span><span class=p>].</span><span class=n>first</span><span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln>1</span><span class=cl>    <span class=o>//</span> <span class=kt>Put</span> <span class=kr>in</span> <span class=n>db</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=n>string</span> <span class=n>out</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=kt>CHECK</span><span class=p>(</span><span class=n>datum</span><span class=o>.</span><span class=kt>SerializeToString</span><span class=p>(</span><span class=o>&amp;</span><span class=n>out</span><span class=p>));</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=n>txn</span><span class=ow>-&gt;</span><span class=kt>Put</span><span class=p>(</span><span class=n>key_str</span><span class=p>,</span> <span class=n>out</span><span class=p>);</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln> 1</span><span class=cl>    <span class=k>if</span> <span class=o>(</span>++count % <span class=nv>1000</span> <span class=o>==</span> 0<span class=o>)</span> <span class=o>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>      // Commit db
+</span></span><span class=line><span class=ln> 3</span><span class=cl>      txn-&gt;Commit<span class=o>()</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>      txn.reset<span class=o>(</span>db-&gt;NewTransaction<span class=o>())</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>      LOG<span class=o>(</span>INFO<span class=o>)</span> &lt;&lt; <span class=s2>&#34;Processed &#34;</span> <span class=s>&lt;&lt; count &lt;&lt; &#34; files.&#34;;
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=s>    }
+</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=s>  }
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=s>  // write the last batch
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=s>  if (count</span> % <span class=m>1000</span> !<span class=o>=</span> 0<span class=o>)</span> <span class=o>{</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>    txn-&gt;Commit<span class=o>()</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>    LOG<span class=o>(</span>INFO<span class=o>)</span> &lt;&lt; <span class=s2>&#34;Processed &#34;</span> <span class=s>&lt;&lt; count &lt;&lt; &#34; files.&#34;;
+</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=s>  }
+</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=s>#else
+</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=s>  LOG(FATAL) &lt;&lt; &#34;This tool requires OpenCV; co</span>mpile with USE_OPENCV.<span class=s2>&#34;;
+</span></span></span><span class=line><span class=ln>15</span><span class=cl><span class=s2>#endif  // USE_OPENCV
+</span></span></span><span class=line><span class=ln>16</span><span class=cl><span class=s2>  return 0;
+</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=s2>}
+</span></span></span></code></pre></div><p>几个文件。。。感觉比看文档更有实际意义orz</p><h3 id=leveldb简介>levelDB简介</h3><p>Leveldb是google开源的一个高效率的K/V数据库.有如下特点：</p><pre><code>  1. 首先，LevelDb是一个持久化存储的KV系统，和Redis这种内存型的KV系统不同，LevelDb不会像Redis一样狂吃内存，而是将大部分数据存储到磁盘上。
   2. 其次，LevleDb在存储数据时，是根据记录的key值有序存储的，就是说相邻的key值在存储文件中是依次顺序存储的，而应用可以自定义key大小比较函数，LevleDb会按照用户定义的比较函数依序存储这些记录。
   3. 再次，像大多数KV系统一样，LevelDb的操作接口很简单，基本操作包括写记录，读记录以及删除记录。也支持针对多条操作的原子批量操作。
   4. 另外，LevelDb支持数据快照(snapshot)功能，使得读取操作不受写操作影响，可以在读操作过程中始终看到一致的数据。
   5. 除此外，LevelDb还支持数据压缩等操作，这对于减小存储空间以及增快IO效率都有直接的帮助。
   6. LevelDb性能非常突出，官方网站报道其随机写性能达到40万条记录每秒，而随机读性能达到6万条记录每秒。总体来说，LevelDb的写操作要大大快于读操作，而顺序读写操作则大大快于随机读写操作。
 </code></pre><h3 id=leveldb的安装>LevelDB的安装</h3><p>以ubuntu14.04为例，但实际上除了路径可能不同，其他部分是系统无关的。</p><p><a href=https://github.com/google/leveldb>leveldb_github地址</a></p><p>然后记得切换到指定tag</p><p>可以使用git tag命令得到,然后用git checkout命令切换，我这里使用的是1.20版本</p><p>之后直接执行make</p><p>之后将头文件拷贝到系统路径下：</p><pre><code>sudo cp -r include/leveldb /usr/include
-</code></pre><p>编译之后分别会得到out-shared和out-static两个文件夹，分别是动态库和静态库</p><p>我们进入out-shared文件夹，讲libleveldb.so*的三个文件（有两个是链接）拷贝到/usr/lib下</p><p>然后用sudo ldconfig 命令将动态库加到缓存中。</p><p>我们用如下代码测试一下：</p><pre><code>#include &lt;iostream&gt;
-#include &lt;cassert&gt;
-#include &lt;cstdlib&gt;
-#include &lt;string&gt;
-#include &lt;leveldb/db.h&gt;
-using namespace std;
-int main(void)
-{
-	leveldb::DB *db;
-	leveldb::Options options;
-	options.create_if_missing=true;
-	leveldb::Status status = leveldb::DB::Open(options,&quot;./testdb&quot;,&amp;db);
-	assert(status.ok());
-	std::string key1=&quot;people&quot;;
-	std::string value1=&quot;jason&quot;;
-	std::string value;
-	leveldb::Status s=db-&gt;Put(leveldb::WriteOptions(),key1,value1);
-	if(s.ok())
-		s=db-&gt;Get(leveldb::ReadOptions(),&quot;people&quot;,&amp;value);
-	if(s.ok())
-		cout&lt;&lt;value&lt;&lt;endl;
-	else
-		cout&lt;&lt;s.ToString()&lt;&lt;endl;
-	delete db;
-	return 0;
-}
-</code></pre><p>编译选项为：</p><p>g++ mytest.cc -o mytest -lpthread -lleveldb</p><p>如果运行得到jason，表示安装成功。</p><h3 id=leveldb的使用>LevelDB的使用</h3><p>一些基本操作可以参考<a href=https://github.com/google/leveldb/blob/master/doc/index.md>github文档</a></p><p>不过发现levelDB的接口似乎只支持key和value都是string类型。。</p><p>然而对于人脸提取feature,实际上需要的是string映射到float**</p><p>,偶然发现caffe中使用了levelDB,</p><p>发现它的做法是使用protobuf将数据序列化，然后再存储。</p><p><a href=/2018/04/protobuf-notes/>protobuf学习笔记</a></p><h3 id=注意事项>注意事项</h3><p>记录一些踩坑的经历..</p><p>如果有100条数据，想要每10条存一个数据库，那么每１０条执行一次DB::Open就行了&mldr;不然会报错在put那里，导致core dumped</p></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
+</code></pre><p>编译之后分别会得到out-shared和out-static两个文件夹，分别是动态库和静态库</p><p>我们进入out-shared文件夹，讲libleveldb.so*的三个文件（有两个是链接）拷贝到/usr/lib下</p><p>然后用sudo ldconfig 命令将动态库加到缓存中。</p><p>我们用如下代码测试一下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cassert&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cstdlib&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;string&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;leveldb/db.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=cp></span><span class=k>using</span> <span class=k>namespace</span> <span class=n>std</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>	<span class=n>leveldb</span><span class=o>::</span><span class=n>DB</span> <span class=o>*</span><span class=n>db</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>	<span class=n>leveldb</span><span class=o>::</span><span class=n>Options</span> <span class=n>options</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>	<span class=n>options</span><span class=p>.</span><span class=n>create_if_missing</span><span class=o>=</span><span class=nb>true</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>	<span class=n>leveldb</span><span class=o>::</span><span class=n>Status</span> <span class=n>status</span> <span class=o>=</span> <span class=n>leveldb</span><span class=o>::</span><span class=n>DB</span><span class=o>::</span><span class=n>Open</span><span class=p>(</span><span class=n>options</span><span class=p>,</span><span class=s>&#34;./testdb&#34;</span><span class=p>,</span><span class=o>&amp;</span><span class=n>db</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>	<span class=n>assert</span><span class=p>(</span><span class=n>status</span><span class=p>.</span><span class=n>ok</span><span class=p>());</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>	<span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>key1</span><span class=o>=</span><span class=s>&#34;people&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>	<span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>value1</span><span class=o>=</span><span class=s>&#34;jason&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>	<span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>value</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>	<span class=n>leveldb</span><span class=o>::</span><span class=n>Status</span> <span class=n>s</span><span class=o>=</span><span class=n>db</span><span class=o>-&gt;</span><span class=n>Put</span><span class=p>(</span><span class=n>leveldb</span><span class=o>::</span><span class=n>WriteOptions</span><span class=p>(),</span><span class=n>key1</span><span class=p>,</span><span class=n>value1</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>	<span class=k>if</span><span class=p>(</span><span class=n>s</span><span class=p>.</span><span class=n>ok</span><span class=p>())</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>		<span class=n>s</span><span class=o>=</span><span class=n>db</span><span class=o>-&gt;</span><span class=n>Get</span><span class=p>(</span><span class=n>leveldb</span><span class=o>::</span><span class=n>ReadOptions</span><span class=p>(),</span><span class=s>&#34;people&#34;</span><span class=p>,</span><span class=o>&amp;</span><span class=n>value</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl>	<span class=k>if</span><span class=p>(</span><span class=n>s</span><span class=p>.</span><span class=n>ok</span><span class=p>())</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl>		<span class=n>cout</span><span class=o>&lt;&lt;</span><span class=n>value</span><span class=o>&lt;&lt;</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>22</span><span class=cl>	<span class=k>else</span>
+</span></span><span class=line><span class=ln>23</span><span class=cl>		<span class=n>cout</span><span class=o>&lt;&lt;</span><span class=n>s</span><span class=p>.</span><span class=n>ToString</span><span class=p>()</span><span class=o>&lt;&lt;</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>24</span><span class=cl>	<span class=k>delete</span> <span class=n>db</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>25</span><span class=cl>	<span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>26</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>编译选项为：</p><p>g++ mytest.cc -o mytest -lpthread -lleveldb</p><p>如果运行得到jason，表示安装成功。</p><h3 id=leveldb的使用>LevelDB的使用</h3><p>一些基本操作可以参考<a href=https://github.com/google/leveldb/blob/master/doc/index.md>github文档</a></p><p>不过发现levelDB的接口似乎只支持key和value都是string类型。。</p><p>然而对于人脸提取feature,实际上需要的是string映射到float**</p><p>,偶然发现caffe中使用了levelDB,</p><p>发现它的做法是使用protobuf将数据序列化，然后再存储。</p><p><a href=/2018/04/protobuf-notes/>protobuf学习笔记</a></p><h3 id=注意事项>注意事项</h3><p>记录一些踩坑的经历..</p><p>如果有100条数据，想要每10条存一个数据库，那么每１０条执行一次DB::Open就行了&mldr;不然会报错在put那里，导致core dumped</p></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
 <span class=button_tally>913</span>
 </a><a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>其他
 <span class=button_tally>90</span>

@@ -30,68 +30,57 @@
   * [cuda-c-best-practices-guide](http://docs.nvidia.com/cuda/cuda-c-best-practices-guide/)
 </code></pre><p>cuda 提出的目的是能够让程序员透明地使用GPU来高效地进行并行运算。</p><p>kernel和c语言中的函数相似，函数名字前通常用<strong>global</strong>来标识。</p><p>下面考虑一个2个大小的1M的数组相加的例子。</p><p>总的思路是通过并行，来观察到计算速度的加快。</p><p>如果不考虑并行，2个数组相加的代码，如下：</p><pre><code>#include &lt;iostream&gt;
 #include &lt;math.h&gt;
-
-// function to add the elements of two arrays
-void add(int n, float *x, float *y)
-{
-  for (int i = 0; i &lt; n; i++)
-      y[i] = x[i] + y[i];
-}
-
-int main(void)
-{
-  int N = 1&lt;&lt;20; // 1M elements
-
-  float *x = new float[N];
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>// <span class=k>function</span> to add the elements of two arrays
+</span></span><span class=line><span class=ln>2</span><span class=cl>void add<span class=o>(</span>int n, float *x, float *y<span class=o>)</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=o>{</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=k>for</span> <span class=o>(</span>int <span class=nv>i</span> <span class=o>=</span> 0<span class=p>;</span> i &lt; n<span class=p>;</span> i++<span class=o>)</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>      y<span class=o>[</span>i<span class=o>]</span> <span class=o>=</span> x<span class=o>[</span>i<span class=o>]</span> + y<span class=o>[</span>i<span class=o>]</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl><span class=o>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=kt>int</span> <span class=n>N</span> <span class=o>=</span> <span class=mi>1</span><span class=o>&lt;&lt;</span><span class=mi>20</span><span class=p>;</span> <span class=c1>// 1M elements
+</span></span></span></code></pre></div><pre><code>  float *x = new float[N];
   float *y = new float[N];
-
-  // initialize x and y arrays on the host
-  for (int i = 0; i &lt; N; i++) {
-    x[i] = 1.0f;
-    y[i] = 2.0f;
-  }
-</code></pre><p>如果用cuda的方式来搞，代码如下：</p><pre><code>#include &lt;iostream&gt;
-#include &lt;math.h&gt;
-// Kernel function to add the elements of two arrays
-__global__
-void add(int n, float *x, float *y)
-{
-  for (int i = 0; i &lt; n; i++)
-    y[i] = x[i] + y[i];
-}
-
-int main(void)
-{
-  int N = 1&lt;&lt;20;
-  float *x, *y;
-
-  // Allocate Unified Memory – accessible from CPU or GPU
-  cudaMallocManaged(&amp;x, N*sizeof(float));
-  cudaMallocManaged(&amp;y, N*sizeof(float));
-
-  // initialize x and y arrays on the host
-  for (int i = 0; i &lt; N; i++) {
-    x[i] = 1.0f;
-    y[i] = 2.0f;
-  }
-
-  // Run kernel on 1M elements on the GPU
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>  // initialize x and y arrays on the host
+</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=k>for</span> <span class=o>(</span>int <span class=nv>i</span> <span class=o>=</span> 0<span class=p>;</span> i &lt; N<span class=p>;</span> i++<span class=o>)</span> <span class=o>{</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    x<span class=o>[</span>i<span class=o>]</span> <span class=o>=</span> 1.0f<span class=p>;</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    y<span class=o>[</span>i<span class=o>]</span> <span class=o>=</span> 2.0f<span class=p>;</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=o>}</span>
+</span></span></code></pre></div><p>如果用cuda的方式来搞，代码如下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=line><span class=ln>1</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;math.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=cp></span><span class=c1>// Kernel function to add the elements of two arrays
+</span></span></span><span class=line><span class=ln>4</span><span class=cl><span class=c1></span><span class=n>__global__</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=kt>void</span> <span class=nf>add</span><span class=p>(</span><span class=kt>int</span> <span class=n>n</span><span class=p>,</span> <span class=kt>float</span> <span class=o>*</span><span class=n>x</span><span class=p>,</span> <span class=kt>float</span> <span class=o>*</span><span class=n>y</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl>  <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>n</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>8</span><span class=cl>    <span class=n>y</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>x</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>+</span> <span class=n>y</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+</span></span><span class=line><span class=ln>9</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=kt>int</span> <span class=n>N</span> <span class=o>=</span> <span class=mi>1</span><span class=o>&lt;&lt;</span><span class=mi>20</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=kt>float</span> <span class=o>*</span><span class=n>x</span><span class=p>,</span> <span class=o>*</span><span class=n>y</span><span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=ln>1</span><span class=cl>  // Allocate Unified Memory – accessible from CPU or GPU
+</span></span><span class=line><span class=ln>2</span><span class=cl>  cudaMallocManaged(&amp;x, N*sizeof(float));
+</span></span><span class=line><span class=ln>3</span><span class=cl>  cudaMallocManaged(&amp;y, N*sizeof(float));
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>  // initialize x and y arrays on the host
+</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=k>for</span> <span class=o>(</span>int <span class=nv>i</span> <span class=o>=</span> 0<span class=p>;</span> i &lt; N<span class=p>;</span> i++<span class=o>)</span> <span class=o>{</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    x<span class=o>[</span>i<span class=o>]</span> <span class=o>=</span> 1.0f<span class=p>;</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    y<span class=o>[</span>i<span class=o>]</span> <span class=o>=</span> 2.0f<span class=p>;</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=o>}</span>
+</span></span></code></pre></div><pre><code>  // Run kernel on 1M elements on the GPU
   add&lt;&lt;&lt;1, 1&gt;&gt;&gt;(N, x, y);
 
   // Wait for GPU to finish before accessing on host
   cudaDeviceSynchronize();
-
-  // Check for errors (all values should be 3.0f)
-  float maxError = 0.0f;
-  for (int i = 0; i &lt; N; i++)
-    maxError = fmax(maxError, fabs(y[i]-3.0f));
-  std::cout &lt;&lt; &quot;Max error: &quot; &lt;&lt; maxError &lt;&lt; std::endl;
-
-  // Free memory
-  cudaFree(x);
-  cudaFree(y);
-  
-  return 0;
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>  <span class=c1>// Check for errors (all values should be 3.0f)
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span>  <span class=kt>float</span> <span class=n>maxError</span> <span class=o>=</span> <span class=mf>0.0f</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>N</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=n>maxError</span> <span class=o>=</span> <span class=n>fmax</span><span class=p>(</span><span class=n>maxError</span><span class=p>,</span> <span class=n>fabs</span><span class=p>(</span><span class=n>y</span><span class=p>[</span><span class=n>i</span><span class=p>]</span><span class=o>-</span><span class=mf>3.0f</span><span class=p>));</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Max error: &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>maxError</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=ln>1</span><span class=cl>  // Free memory
+</span></span><span class=line><span class=ln>2</span><span class=cl>  cudaFree(x);
+</span></span><span class=line><span class=ln>3</span><span class=cl>  cudaFree(y);
+</span></span></code></pre></div><pre><code>  return 0;
 }
 </code></pre><p>除了代码注释，还有几个地方要说明：</p><pre><code>  * 函数名字前面的global 是 cuda kernel  标识符
   * cuda kernel的调用方式是 &lt;&lt;&lt;,&gt;&gt;&gt;  更具体地说，是add&lt;&lt;&lt;numBlocks,blockSize&gt;&gt;&gt;(N,x,y)
@@ -99,168 +88,132 @@ int main(void)
   * nvcc是cuda C++ 的编译器，其将source code分成**host code**和**device code**两部分。前者通过c++编译器编译，后者通过nvidia编译器编译。
 </code></pre><p>关于devide code 和 host code，参考下图。</p><p><a href=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-145751.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-145751.png alt></a></p><p>现在我们单线程地跑了一个cuda kernel, 接下来是如何使它并行.关键在于&#171;&lt;1,1&#187;>这部分。</p><p>这行代码告诉了cuda runtime 有多少个并行的线程要被执行。
 这里有2个参数，不过我们可以先改变第二个，也就是一个线程block中线程的个数。
-cuda GPu的kernel 使用的blocks中线程的个数应该是32的倍数（后面会解释32代表什么），所以256看起来很合理。</p><pre><code>#include &lt;cstdio&gt;
-#include &lt;iostream&gt;
-#include &lt;math.h&gt;
-// Kernel function to add the elements of two arrays
-    __global__
-void add(int n, float *x, float *y)
-{
-
-
-     int index = blockIdx.x * blockDim.x + threadIdx.x;
-    int stride = blockDim.x * gridDim.x;
-printf(&quot; %d %d&quot;,index,stride);
-    for ( int i = index ; i &lt; n ; i += stride)
-    y[i] = x[i] + y[i];
-}
-
-int main(void)
-{
-    int N = 1&lt;&lt;20;
-    float *x, *y;
-
-    // Allocate Unified Memory – accessible from CPU or GPU
-    cudaMallocManaged(&amp;x, N*sizeof(float));
-    cudaMallocManaged(&amp;y, N*sizeof(float));
-
-    // initialize x and y arrays on the host
-    for (int i = 0; i &lt; N; i++) {
-    x[i] = 1.0f;
-    y[i] = 2.0f;
-    }
-
-
-    int blockSize = 256;
-    int numBlocks = (N + blockSize - 1) / blockSize;
-    add&lt;&lt;&lt;numBlocks, blockSize&gt;&gt;&gt;(N, x, y);
-    // Wait for GPU to finish before accessing on host
-    cudaDeviceSynchronize();
-
-    // Check for errors (all values should be 3.0f)
-    float maxError = 0.0f;
-    for (int i = 0; i &lt; N; i++)
-    maxError = fmax(maxError, fabs(y[i]-3.0f));
-//    std::cout &lt;&lt; &quot;Max error: &quot; &lt;&lt; maxError &lt;&lt; std::endl;
-
-    // Free memory
-    cudaFree(x);
-    cudaFree(y);
-
-    return 0;
+cuda GPu的kernel 使用的blocks中线程的个数应该是32的倍数（后面会解释32代表什么），所以256看起来很合理。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=line><span class=ln>1</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cstdio&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;math.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>4</span><span class=cl><span class=cp></span><span class=c1>// Kernel function to add the elements of two arrays
+</span></span></span><span class=line><span class=ln>5</span><span class=cl><span class=c1></span>    <span class=n>__global__</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl><span class=kt>void</span> <span class=nf>add</span><span class=p>(</span><span class=kt>int</span> <span class=n>n</span><span class=p>,</span> <span class=kt>float</span> <span class=o>*</span><span class=n>x</span><span class=p>,</span> <span class=kt>float</span> <span class=o>*</span><span class=n>y</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl><span class=p>{</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>     <span class=kt>int</span> <span class=n>index</span> <span class=o>=</span> <span class=n>blockIdx</span><span class=p>.</span><span class=n>x</span> <span class=o>*</span> <span class=n>blockDim</span><span class=p>.</span><span class=n>x</span> <span class=o>+</span> <span class=n>threadIdx</span><span class=p>.</span><span class=n>x</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=kt>int</span> <span class=n>stride</span> <span class=o>=</span> <span class=n>blockDim</span><span class=p>.</span><span class=n>x</span> <span class=o>*</span> <span class=n>gridDim</span><span class=p>.</span><span class=n>x</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>printf</span><span class=p>(</span><span class=s>&#34; %d %d&#34;</span><span class=p>,</span><span class=n>index</span><span class=p>,</span><span class=n>stride</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=n>index</span> <span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>n</span> <span class=p>;</span> <span class=n>i</span> <span class=o>+=</span> <span class=n>stride</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>    <span class=n>y</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>x</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>+</span> <span class=n>y</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=kt>int</span> <span class=n>N</span> <span class=o>=</span> <span class=mi>1</span><span class=o>&lt;&lt;</span><span class=mi>20</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=kt>float</span> <span class=o>*</span><span class=n>x</span><span class=p>,</span> <span class=o>*</span><span class=n>y</span><span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=ln>1</span><span class=cl>    // Allocate Unified Memory – accessible from CPU or GPU
+</span></span><span class=line><span class=ln>2</span><span class=cl>    cudaMallocManaged(&amp;x, N*sizeof(float));
+</span></span><span class=line><span class=ln>3</span><span class=cl>    cudaMallocManaged(&amp;y, N*sizeof(float));
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>    // initialize x and y arrays on the host
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=k>for</span> <span class=o>(</span>int <span class=nv>i</span> <span class=o>=</span> 0<span class=p>;</span> i &lt; N<span class=p>;</span> i++<span class=o>)</span> <span class=o>{</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    x<span class=o>[</span>i<span class=o>]</span> <span class=o>=</span> 1.0f<span class=p>;</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    y<span class=o>[</span>i<span class=o>]</span> <span class=o>=</span> 2.0f<span class=p>;</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>    <span class=o>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=ln>1</span><span class=cl>    int blockSize = 256;
+</span></span><span class=line><span class=ln>2</span><span class=cl>    int numBlocks = (N + blockSize - 1) / blockSize;
+</span></span><span class=line><span class=ln>3</span><span class=cl>    add&lt;&lt;&lt;numBlocks, blockSize&gt;&gt;&gt;(N, x, y);
+</span></span><span class=line><span class=ln>4</span><span class=cl>    // Wait for GPU to finish before accessing on host
+</span></span><span class=line><span class=ln>5</span><span class=cl>    cudaDeviceSynchronize();
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>    <span class=c1>// Check for errors (all values should be 3.0f)
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span>    <span class=kt>float</span> <span class=n>maxError</span> <span class=o>=</span> <span class=mf>0.0f</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>N</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=n>maxError</span> <span class=o>=</span> <span class=n>fmax</span><span class=p>(</span><span class=n>maxError</span><span class=p>,</span> <span class=n>fabs</span><span class=p>(</span><span class=n>y</span><span class=p>[</span><span class=n>i</span><span class=p>]</span><span class=o>-</span><span class=mf>3.0f</span><span class=p>));</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=c1>//    std::cout &lt;&lt; &#34;Max error: &#34; &lt;&lt; maxError &lt;&lt; std::endl;
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=ln>1</span><span class=cl>    // Free memory
+</span></span><span class=line><span class=ln>2</span><span class=cl>    cudaFree(x);
+</span></span><span class=line><span class=ln>3</span><span class=cl>    cudaFree(y);
+</span></span></code></pre></div><pre><code>    return 0;
 }
 </code></pre><p>不过如果只是修改了&#171;&lt;1,1&#187;> 到  &#171;&lt;1,256&#187;>
 那实际上是对于每个线程都算了整个array的相加，而没有将整个计算任务分给多个并行的线程。
 为了解决这个问题，我们需要修改kernel的代码。
 cuda C++ 提供了关键字，允许kernel得到正要执行的thread是哪一个
 threadIdx.x  表示当前运行的thread是block中的哪一个
-blockDim.x 表示block中的线程个数</p><p>关于threadIdx.x等 下标问题，参考下图。</p><p><a href=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-151308.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-151308.png alt></a></p><p>我们需要观察到使用cuda的方法之后时间的变化。</p><p>可以使用nvprof命令</p><pre><code>➜ learn&gt;nvprof ./add_cuda
-==9312== NVPROF is profiling process 9312, command: ./add_cuda
-Max error: 0
-==9312== Profiling application: ./add_cuda
-==9312== Profiling result:
-Time(%)      Time     Calls       Avg       Min       Max  Name
-100.00%  167.48ms         1  167.48ms  167.48ms  167.48ms  add(int, float*, float*)
-
-
-
-
-
-
-
-
-==9382== Profiling application: ./add_block
-==9382== Profiling result:
-Time(%)      Time     Calls       Avg       Min       Max  Name
-100.00%  3.5144ms         1  3.5144ms  3.5144ms  3.5144ms  add(int, float*, float*)
-
-
-
-
-
-
-
-==9447== Profiling application: ./add_grid
-==9447== Profiling result:
-Time(%)      Time     Calls       Avg       Min       Max  Name
-100.00%  1.8084ms         1  1.8084ms  1.8084ms  1.8084ms  add(int, float*, float*)
-</code></pre><p>可以看出时间的变化，从167.48ms到3.5144ms，再到1.8084ms</p><p>我们注意到，对线程的管理实际上是三维的 :grid,block,thread.</p><p>为什么要这样设计？</p><p>一个这样做的目的是，在一个block中，thread可以通过share_memory 来共享数据。</p><p>通过在声明的变量前面添加 <strong>shared</strong>  来表示，这个变量是声明在share memory部分了。</p><p>share memory类似与缓存，容量小，但是速度快。不过这个cache是可以编程控制的。</p><p><strong>在一个block中共享的data,对于其他block是不可见的。</strong></p><p>我们不妨考虑一个例子，有2个数组a,b</p><p>进行如下运算：</p><p><a href=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-210339.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-210339.png alt></a></p><p>为了加快运行速度，我们还是考虑多线程的办法。</p><p>让每一个线程处理一个输出。</p><p><a href=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-095804.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-095804.png alt></a></p><p>然而我们发现，in中除了边界元素，每一个元素都被读了7次。</p><p>这显然是没有必要的。</p><p>问题的关键在于，不同的线程之间，不知道某个元素已经被读入了。</p><p>更进一步，不同线程之间可以共享数据吗？</p><p>答案是可以的。也就是上面提到的shared_memory</p><p>然而这样就可以了吗。。</p><p>由于线程的访问顺序是不固定的(?</p><p>会发生如下的问题：</p><p><a href=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-100824.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-100824.png alt></a></p><p>解决办法很无脑。。。因为cuda并没有想象中得那么底层。。。</p><p>就是使用__syncthreads(); 来同步一个block中的所有进程。。。</p><p>完整代码如下：</p><pre><code>#include &lt;iostream&gt;
-#include &lt;cstdio&gt;
-#include &lt;cmath&gt;
-#include &lt;ctime&gt;
-
-const int R=3;
-const int N=1&lt;&lt;20;
-const int BLOCK_SIZE=256;
-    __global__ 
-void solve( int *in,int *out)
-{
-    __shared__ int tmp[BLOCK_SIZE + 2*R];
-    int gindex = threadIdx.x + blockIdx.x * blockDim.x;
-    int lindex = threadIdx.x + R;
-//     printf (&quot;%d %d\n&quot;,gindex,lindex-R);
-//    printf(&quot;wang\n&quot;);
-    //if (lindex &lt; BLOCK_SIZE+2*R &amp;&amp; gindex &lt; N)
-      tmp[lindex] = in[gindex];
-
-
-//    if 这部分有问题。。。貌似是访问越界。。
-    if (threadIdx.x &lt; R)
-    {
-    if (lindex&gt;=R &amp;&amp; gindex&gt;=R&amp;&amp;lindex-R&lt;BLOCK_SIZE+2*R&amp;&amp;gindex-R&lt;N)
-       tmp[lindex-R] = in[gindex-R];
-    if (lindex + BLOCK_SIZE&lt; BLOCK_SIZE+2*R &amp;&amp; gindex + BLOCK_SIZE &lt; N )
-       tmp[lindex+BLOCK_SIZE] = in[gindex + BLOCK_SIZE];
-    }
-    
-  //  printf(&quot;miao\n&quot;);
-    __syncthreads();
-    int res = 0 ;
-    
-    for ( int offset = -R ; offset &lt;= R ; offset++)
-    {
-//  printf (&quot;offset:%d\n&quot;,offset);
-//  if (lindex + offset &lt; BLOCK_SIZE+2*R)
-    res += tmp[lindex + offset];
-    }
-    
-    out[gindex] = res;
-    printf(&quot;res=%d\n&quot;,res);
-}
-
-void pr( int *A,int n)
-{
-    for ( int i = 0 ;i  &lt;  10 ; i++) printf (&quot;%d%c&quot;,A[i*10],i==9?'\n':' ');
-}
-
-int main(void)
-{
-    int *a,*b;
-    if (cudaSuccess != cudaMallocManaged(&amp;a,N*sizeof(int)))
-    printf(&quot;Cuda Malloc error\n&quot;);
-
-    if (cudaSuccess != cudaMallocManaged(&amp;b,N*sizeof(int)))
-    printf(&quot;Cuda Malloc error\n&quot;);
-    for ( int i = 0 ; i &lt; N ; i++)
-    {
-    a[i] = 1;
-    }
-    pr(a,N);
-    pr(b,N);
-    int numBlocks = ( N + BLOCK_SIZE -1 ) / BLOCK_SIZE;
-    //solve&lt;&lt;&lt;numBlocks,BLOCK_SIZE&gt;&gt;&gt;(a,b);
-    solve&lt;&lt;&lt;1,256&gt;&gt;&gt;(a,b);
-    if (cudaSuccess !=cudaGetLastError())
-    printf(&quot;kernel error!&quot;);
-    // prt&lt;&lt;&lt;numBlocks,BLOCK_SIZE&gt;&gt;&gt;();
-    cudaDeviceSynchronize();
-    pr(b,N);
-
-    //printf(cudaGetLastError());
-    cudaFree(a);
-    cudaFree(b);
-
-    return 0;
+blockDim.x 表示block中的线程个数</p><p>关于threadIdx.x等 下标问题，参考下图。</p><p><a href=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-151308.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-151308.png alt></a></p><p>我们需要观察到使用cuda的方法之后时间的变化。</p><p>可以使用nvprof命令</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=ln>1</span><span class=cl>➜ learn&gt;nvprof ./add_cuda
+</span></span><span class=line><span class=ln>2</span><span class=cl>==9312== NVPROF is profiling process 9312, command: ./add_cuda
+</span></span><span class=line><span class=ln>3</span><span class=cl>Max error: 0
+</span></span><span class=line><span class=ln>4</span><span class=cl>==9312== Profiling application: ./add_cuda
+</span></span><span class=line><span class=ln>5</span><span class=cl>==9312== Profiling result:
+</span></span><span class=line><span class=ln>6</span><span class=cl>Time(%)      Time     Calls       Avg       Min       Max  Name
+</span></span><span class=line><span class=ln>7</span><span class=cl>100.00%  167.48ms         1  167.48ms  167.48ms  167.48ms  add(int, float*, float*)
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=ln>1</span><span class=cl>==9382== Profiling application: ./add_block
+</span></span><span class=line><span class=ln>2</span><span class=cl>==9382== Profiling result:
+</span></span><span class=line><span class=ln>3</span><span class=cl>Time(%)      Time     Calls       Avg       Min       Max  Name
+</span></span><span class=line><span class=ln>4</span><span class=cl>100.00%  3.5144ms         1  3.5144ms  3.5144ms  3.5144ms  add(int, float*, float*)
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=ln>1</span><span class=cl>==9447== Profiling application: ./add_grid
+</span></span><span class=line><span class=ln>2</span><span class=cl>==9447== Profiling result:
+</span></span><span class=line><span class=ln>3</span><span class=cl>Time(%)      Time     Calls       Avg       Min       Max  Name
+</span></span><span class=line><span class=ln>4</span><span class=cl>100.00%  1.8084ms         1  1.8084ms  1.8084ms  1.8084ms  add(int, float*, float*)
+</span></span></code></pre></div><p>可以看出时间的变化，从167.48ms到3.5144ms，再到1.8084ms</p><p>我们注意到，对线程的管理实际上是三维的 :grid,block,thread.</p><p>为什么要这样设计？</p><p>一个这样做的目的是，在一个block中，thread可以通过share_memory 来共享数据。</p><p>通过在声明的变量前面添加 <strong>shared</strong>  来表示，这个变量是声明在share memory部分了。</p><p>share memory类似与缓存，容量小，但是速度快。不过这个cache是可以编程控制的。</p><p><strong>在一个block中共享的data,对于其他block是不可见的。</strong></p><p>我们不妨考虑一个例子，有2个数组a,b</p><p>进行如下运算：</p><p><a href=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-210339.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-08-210339.png alt></a></p><p>为了加快运行速度，我们还是考虑多线程的办法。</p><p>让每一个线程处理一个输出。</p><p><a href=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-095804.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-095804.png alt></a></p><p>然而我们发现，in中除了边界元素，每一个元素都被读了7次。</p><p>这显然是没有必要的。</p><p>问题的关键在于，不同的线程之间，不知道某个元素已经被读入了。</p><p>更进一步，不同线程之间可以共享数据吗？</p><p>答案是可以的。也就是上面提到的shared_memory</p><p>然而这样就可以了吗。。</p><p>由于线程的访问顺序是不固定的(?</p><p>会发生如下的问题：</p><p><a href=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-100824.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2018/02/Screenshot-from-2018-02-09-100824.png alt></a></p><p>解决办法很无脑。。。因为cuda并没有想象中得那么底层。。。</p><p>就是使用__syncthreads(); 来同步一个block中的所有进程。。。</p><p>完整代码如下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cstdio&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cmath&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>4</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;ctime&gt;</span><span class=cp>
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=ln> 1</span><span class=cl><span class=k>const</span> <span class=ne>int</span> <span class=n>R</span><span class=o>=</span><span class=mi>3</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=k>const</span> <span class=ne>int</span> <span class=n>N</span><span class=o>=</span><span class=mi>1</span><span class=o>&lt;&lt;</span><span class=mi>20</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=k>const</span> <span class=ne>int</span> <span class=n>BLOCK_SIZE</span><span class=o>=</span><span class=mi>256</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>    <span class=n>__global__</span> 
+</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=n>void</span> <span class=n>solve</span><span class=p>(</span> <span class=ne>int</span> <span class=o>*</span><span class=ow>in</span><span class=p>,</span><span class=ne>int</span> <span class=o>*</span><span class=n>out</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>    <span class=n>__shared__</span> <span class=ne>int</span> <span class=n>tmp</span><span class=p>[</span><span class=n>BLOCK_SIZE</span> <span class=o>+</span> <span class=mi>2</span><span class=o>*</span><span class=n>R</span><span class=p>];</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>    <span class=ne>int</span> <span class=n>gindex</span> <span class=o>=</span> <span class=n>threadIdx</span><span class=o>.</span><span class=n>x</span> <span class=o>+</span> <span class=n>blockIdx</span><span class=o>.</span><span class=n>x</span> <span class=o>*</span> <span class=n>blockDim</span><span class=o>.</span><span class=n>x</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>    <span class=ne>int</span> <span class=n>lindex</span> <span class=o>=</span> <span class=n>threadIdx</span><span class=o>.</span><span class=n>x</span> <span class=o>+</span> <span class=n>R</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl><span class=o>//</span>     <span class=n>printf</span> <span class=p>(</span><span class=s2>&#34;</span><span class=si>%d</span><span class=s2> </span><span class=si>%d</span><span class=se>\n</span><span class=s2>&#34;</span><span class=p>,</span><span class=n>gindex</span><span class=p>,</span><span class=n>lindex</span><span class=o>-</span><span class=n>R</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl><span class=o>//</span>    <span class=n>printf</span><span class=p>(</span><span class=s2>&#34;wang</span><span class=se>\n</span><span class=s2>&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>    <span class=o>//</span><span class=k>if</span> <span class=p>(</span><span class=n>lindex</span> <span class=o>&lt;</span> <span class=n>BLOCK_SIZE</span><span class=o>+</span><span class=mi>2</span><span class=o>*</span><span class=n>R</span> <span class=o>&amp;&amp;</span> <span class=n>gindex</span> <span class=o>&lt;</span> <span class=n>N</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>      <span class=n>tmp</span><span class=p>[</span><span class=n>lindex</span><span class=p>]</span> <span class=o>=</span> <span class=ow>in</span><span class=p>[</span><span class=n>gindex</span><span class=p>];</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>//    <span class=k>if</span> 这部分有问题。。。貌似是访问越界。。
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=k>if</span> <span class=o>(</span>threadIdx.x &lt; R<span class=o>)</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=o>{</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=k>if</span> <span class=o>(</span>lindex&gt;<span class=o>=</span>R <span class=o>&amp;&amp;</span> gindex&gt;<span class=o>=</span>R<span class=o>&amp;&amp;</span>lindex-R&lt;BLOCK_SIZE+2*R<span class=o>&amp;&amp;</span>gindex-R&lt;N<span class=o>)</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>       tmp<span class=o>[</span>lindex-R<span class=o>]</span> <span class=o>=</span> in<span class=o>[</span>gindex-R<span class=o>]</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>    <span class=k>if</span> <span class=o>(</span>lindex + BLOCK_SIZE&lt; BLOCK_SIZE+2*R <span class=o>&amp;&amp;</span> gindex + BLOCK_SIZE &lt; N <span class=o>)</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl>       tmp<span class=o>[</span>lindex+BLOCK_SIZE<span class=o>]</span> <span class=o>=</span> in<span class=o>[</span>gindex + BLOCK_SIZE<span class=o>]</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>8</span><span class=cl>    <span class=o>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>  <span class=c1>//  printf(&#34;miao\n&#34;);
+</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span>    <span class=n>__syncthreads</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=kt>int</span> <span class=n>res</span> <span class=o>=</span> <span class=mi>0</span> <span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>    <span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>offset</span> <span class=o>=</span> <span class=o>-</span><span class=n>R</span> <span class=p>;</span> <span class=n>offset</span> <span class=o>&lt;=</span> <span class=n>R</span> <span class=p>;</span> <span class=n>offset</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1>//  printf (&#34;offset:%d\n&#34;,offset);
+</span></span></span><span class=line><span class=ln>4</span><span class=cl><span class=c1>//  if (lindex + offset &lt; BLOCK_SIZE+2*R)
+</span></span></span><span class=line><span class=ln>5</span><span class=cl><span class=c1></span>    <span class=n>res</span> <span class=o>+=</span> <span class=n>tmp</span><span class=p>[</span><span class=n>lindex</span> <span class=o>+</span> <span class=n>offset</span><span class=p>];</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>    <span class=p>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>    <span class=n>out</span><span class=p>[</span><span class=n>gindex</span><span class=p>]</span> <span class=o>=</span> <span class=n>res</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=n>printf</span><span class=p>(</span><span class=s>&#34;res=%d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span><span class=n>res</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=kt>void</span> <span class=nf>pr</span><span class=p>(</span> <span class=kt>int</span> <span class=o>*</span><span class=n>A</span><span class=p>,</span><span class=kt>int</span> <span class=n>n</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span> <span class=p>;</span><span class=n>i</span>  <span class=o>&lt;</span>  <span class=mi>10</span> <span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span> <span class=n>printf</span> <span class=p>(</span><span class=s>&#34;%d%c&#34;</span><span class=p>,</span><span class=n>A</span><span class=p>[</span><span class=n>i</span><span class=o>*</span><span class=mi>10</span><span class=p>],</span><span class=n>i</span><span class=o>==</span><span class=mi>9</span><span class=o>?</span><span class=sc>&#39;\n&#39;</span><span class=o>:</span><span class=sc>&#39; &#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=kt>int</span> <span class=o>*</span><span class=n>a</span><span class=p>,</span><span class=o>*</span><span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>cudaSuccess</span> <span class=o>!=</span> <span class=n>cudaMallocManaged</span><span class=p>(</span><span class=o>&amp;</span><span class=n>a</span><span class=p>,</span><span class=n>N</span><span class=o>*</span><span class=k>sizeof</span><span class=p>(</span><span class=kt>int</span><span class=p>)))</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>    <span class=n>printf</span><span class=p>(</span><span class=s>&#34;Cuda Malloc error</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=ln> 1</span><span class=cl>    if (cudaSuccess != cudaMallocManaged(&amp;b,N*sizeof(int)))
+</span></span><span class=line><span class=ln> 2</span><span class=cl>    printf(&#34;Cuda Malloc error\n&#34;);
+</span></span><span class=line><span class=ln> 3</span><span class=cl>    for ( int i = 0 ; i &lt; N ; i++)
+</span></span><span class=line><span class=ln> 4</span><span class=cl>    {
+</span></span><span class=line><span class=ln> 5</span><span class=cl>    a[i] = 1;
+</span></span><span class=line><span class=ln> 6</span><span class=cl>    }
+</span></span><span class=line><span class=ln> 7</span><span class=cl>    pr(a,N);
+</span></span><span class=line><span class=ln> 8</span><span class=cl>    pr(b,N);
+</span></span><span class=line><span class=ln> 9</span><span class=cl>    int numBlocks = ( N + BLOCK_SIZE -1 ) / BLOCK_SIZE;
+</span></span><span class=line><span class=ln>10</span><span class=cl>    //solve&lt;&lt;&lt;numBlocks,BLOCK_SIZE&gt;&gt;&gt;(a,b);
+</span></span><span class=line><span class=ln>11</span><span class=cl>    solve&lt;&lt;&lt;1,256&gt;&gt;&gt;(a,b);
+</span></span><span class=line><span class=ln>12</span><span class=cl>    if (cudaSuccess !=cudaGetLastError())
+</span></span><span class=line><span class=ln>13</span><span class=cl>    printf(&#34;kernel error!&#34;);
+</span></span><span class=line><span class=ln>14</span><span class=cl>    // prt&lt;&lt;&lt;numBlocks,BLOCK_SIZE&gt;&gt;&gt;();
+</span></span><span class=line><span class=ln>15</span><span class=cl>    cudaDeviceSynchronize();
+</span></span><span class=line><span class=ln>16</span><span class=cl>    pr(b,N);
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=ln>1</span><span class=cl>    //printf(cudaGetLastError());
+</span></span><span class=line><span class=ln>2</span><span class=cl>    cudaFree(a);
+</span></span><span class=line><span class=ln>3</span><span class=cl>    cudaFree(b);
+</span></span></code></pre></div><pre><code>    return 0;
 }
 </code></pre><p>需要特别强调的是，cuda代码的debug问题，很多错误，不用特定的工具查看是不会显示的。
 以及，虽然cuda代码是在c++上添加了一些东西，但是device code部分用的是nvidia的编译器。

@@ -47,80 +47,78 @@ struct Exe_Format *exeFormat)</p><p>原理部分不过多阐释，具体可见�
 </span></span><span class=line><span class=ln>14</span><span class=cl>          <span class=n>exeFormat</span><span class=o>-&gt;</span><span class=n>segmentList</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>protFlags</span> <span class=o>=</span> <span class=n>pHeader</span><span class=o>-&gt;</span><span class=n>flags</span><span class=p>;</span>
 </span></span><span class=line><span class=ln>15</span><span class=cl>          <span class=n>pHeader</span><span class=o>++</span><span class=p>;</span>
 </span></span><span class=line><span class=ln>16</span><span class=cl>      <span class=p>}</span>
-</span></span></code></pre></div><pre><code>      return 0; //!!
-  
-      //TODO(&quot;Parse an ELF executable image&quot;);
-  }
-</code></pre><p><strong>然后由于编译之后比project0多生成了一个diskc.img文件</strong></p><p>所以还需要相应得修改配置文件.bochsrc</p><p>最后内容如下：</p><pre><code>config_interface: textconfig
-romimage: file=/usr/share/bochs/BIOS-bochs-latest
-megs: 8
-vgaromimage: file=/usr/share/vgabios/vgabios.bin
-floppya: 1_44=./fd.img, status=inserted
-ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
-ata1: enabled=0, ioaddr1=0x170, ioaddr2=0x370, irq=15
-#ata2: enabled=0, ioaddr1=0x1e8, ioaddr2=0x3e0, irq=11
-#ata3: enabled=0, ioaddr1=0x168, ioaddr2=0x360, irq=9
-ata0-master: type=disk, path=./diskc.img, mode=flat, cylinders=40, heads=8, spt=64
-#ata0-slave: type=cdrom, path=&quot;/dev/cdrom&quot;, status=inserted
-boot: a
-#ips: 1000000
-log:./bochs.out
-vga_update_interval: 300000
-keyboard_serial_delay: 250
-keyboard_paste_delay: 100000
-private_colormap: enabled=0
-
-display_library: sdl
-</code></pre><p>project0遇到的启动bochs的那些问题project1也会遇到一遍233</p><p>然后。。。启动。。。</p><p>报错如下：</p><p><a href=https://111qqz.com/wordpress/wp-content/uploads/2016/06/%E9%80%89%E5%8C%BA_123.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2016/06/%e9%80%89%e5%8c%ba_123.png alt=选区_123></a></p><p>查了好多。。。一无所获。。。</p><p>最后看到一遍博客： <a href=http://blog.csdn.net/wu5795175/article/details/8560805>参考博客1</a></p><p>那篇博客里虽然和我遇到的问题不一致。。。</p><p>但是死马当做活马医。。。</p><p>objdump -d a.exe 查看了反汇编代码。。。。a.exe的路径是project1/build/user/</p><pre><code>00001000 &lt;_Entry&gt;:
-    1000:	83 ec 1c             	sub    $0x1c,%esp
-    1003:	c7 44 24 04 00 00 00 	movl   $0x0,0x4(%esp)
-    100a:	00 
-    100b:	c7 04 24 00 00 00 00 	movl   $0x0,(%esp)
-    1012:	e8 06 00 00 00       	call   101d &lt;main&gt;
-    1017:	c9                   	leave  
-    1018:	cb                   	lret   
-    1019:	83 c4 1c             	add    $0x1c,%esp
-    101c:	c3                   	ret    
-
-0000101d &lt;main&gt;:
-    101d:	55                   	push   p
-    101e:	89 e5                	mov    %esp,p
-    1020:	83 e4 f0             	and    $0xfffffff0,%esp
-    1023:	83 ec 40             	sub    $0x40,%esp
-    1026:	c7 44 24 18 48 69 20 	movl   $0x21206948,0x18(%esp)
-    102d:	21 
-    102e:	c7 44 24 1c 20 54 68 	movl   $0x69685420,0x1c(%esp)
-    1035:	69 
-    1036:	c7 44 24 20 73 20 69 	movl   $0x73692073,0x20(%esp)
-    103d:	73 
-    103e:	c7 44 24 24 20 74 68 	movl   $0x65687420,0x24(%esp)
-    1045:	65 
-    1046:	c7 44 24 28 20 73 65 	movl   $0x63657320,0x28(%esp)
-    104d:	63 
-    104e:	c7 44 24 2c 6f 6e 64 	movl   $0x20646e6f,0x2c(%esp)
-    1055:	20 
-    1056:	c7 44 24 30 73 74 72 	movl   $0x69727473,0x30(%esp)
-    105d:	69 
-    105e:	c7 44 24 34 6e 67 0a 	movl   $0xa676e,0x34(%esp)
-    1065:	00 
-    1066:	c7 44 24 38 00 00 00 	movl   $0x0,0x38(%esp)
-    106d:	00 
-    106e:	c7 44 24 3c 00 00 00 	movl   $0x0,0x3c(%esp)
-    1075:	00 
-    1076:	c7 04 24 00 21 00 00 	movl   $0x2100,(%esp)
-    107d:	e8 13 00 00 00       	call   1095 &lt;ELF_Print&gt;
-    1082:	8d 44 24 18          	lea    0x18(%esp),x
-    1086:	89 04 24             	mov    x,(%esp)
-    1089:	e8 07 00 00 00       	call   1095 &lt;ELF_Print&gt;
-    108e:	b8 00 00 00 00       	mov    $0x0,x
-    1093:	c9                   	leave  
-    1094:	c3                   	ret    
-
-00001095 &lt;ELF_Print&gt;:
-    1095:	8b 44 24 04          	mov    0x4(%esp),x
-    1099:	cd 90                	int    $0x90
-    109b:	c3                   	ret
-</code></pre><p>可以看到在_Entry入口处的汇编，首先</p><p>sub    $0x1c,%esp</p><p>然而程序却抢先在</p><p>add    $0x1c,%esp</p><p>之前使用leave和lret长跳转返回了，这样程序当然出错了。</p><p>我这里是将</p><p>  <strong>asm</strong> <strong>volatile</strong> (&ldquo;leave&rdquo;);
+</span></span><span class=line><span class=ln>17</span><span class=cl>
+</span></span><span class=line><span class=ln>18</span><span class=cl>      <span class=k>return</span> <span class=mi>0</span><span class=p>;</span> <span class=c1>//!!
+</span></span></span><span class=line><span class=ln>19</span><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=ln>20</span><span class=cl>      <span class=c1>//TODO(&#34;Parse an ELF executable image&#34;);
+</span></span></span><span class=line><span class=ln>21</span><span class=cl><span class=c1></span>  <span class=p>}</span>
+</span></span></code></pre></div><p><strong>然后由于编译之后比project0多生成了一个diskc.img文件</strong></p><p>所以还需要相应得修改配置文件.bochsrc</p><p>最后内容如下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-asm data-lang=asm><span class=line><span class=ln> 1</span><span class=cl><span class=nl>config_interface:</span> <span class=nf>textconfig</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=nl>romimage:</span> <span class=nf>file</span><span class=err>=/</span><span class=no>usr</span><span class=err>/</span><span class=no>share</span><span class=err>/</span><span class=no>bochs</span><span class=err>/</span><span class=no>BIOS-bochs-latest</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=nl>megs:</span> <span class=err>8</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl><span class=nl>vgaromimage:</span> <span class=nf>file</span><span class=err>=/</span><span class=no>usr</span><span class=err>/</span><span class=no>share</span><span class=err>/</span><span class=no>vgabios</span><span class=err>/</span><span class=no>vgabios.bin</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=nl>floppya:</span> <span class=err>1</span><span class=nf>_44</span><span class=err>=</span><span class=p>.</span><span class=err>/</span><span class=no>fd.img</span><span class=p>,</span> <span class=no>status</span><span class=err>=</span><span class=no>inserted</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=nl>ata0:</span> <span class=nf>enabled</span><span class=err>=</span><span class=mi>1</span><span class=p>,</span> <span class=no>ioaddr1</span><span class=err>=</span><span class=mi>0x1f0</span><span class=p>,</span> <span class=no>ioaddr2</span><span class=err>=</span><span class=mi>0x3f0</span><span class=p>,</span> <span class=no>irq</span><span class=err>=</span><span class=mi>14</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=nl>ata1:</span> <span class=nf>enabled</span><span class=err>=</span><span class=mi>0</span><span class=p>,</span> <span class=no>ioaddr1</span><span class=err>=</span><span class=mi>0x170</span><span class=p>,</span> <span class=no>ioaddr2</span><span class=err>=</span><span class=mi>0x370</span><span class=p>,</span> <span class=no>irq</span><span class=err>=</span><span class=mi>15</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl><span class=c1>#ata2: enabled=0, ioaddr1=0x1e8, ioaddr2=0x3e0, irq=11
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=c1>#ata3: enabled=0, ioaddr1=0x168, ioaddr2=0x360, irq=9
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=c1></span><span class=nl>ata0-master:</span> <span class=nf>type</span><span class=err>=</span><span class=no>disk</span><span class=p>,</span> <span class=no>path</span><span class=err>=</span><span class=p>.</span><span class=err>/</span><span class=no>diskc.img</span><span class=p>,</span> <span class=no>mode</span><span class=err>=</span><span class=no>flat</span><span class=p>,</span> <span class=no>cylinders</span><span class=err>=</span><span class=mi>40</span><span class=p>,</span> <span class=no>heads</span><span class=err>=</span><span class=mi>8</span><span class=p>,</span> <span class=no>spt</span><span class=err>=</span><span class=mi>64</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl><span class=c1>#ata0-slave: type=cdrom, path=&#34;/dev/cdrom&#34;, status=inserted
+</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=c1></span><span class=nl>boot:</span> <span class=nf>a</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl><span class=c1>#ips: 1000000
+</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=c1></span><span class=nl>log:</span><span class=err>./</span><span class=nf>bochs.out</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl><span class=nl>vga_update_interval:</span> <span class=err>300000</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl><span class=nl>keyboard_serial_delay:</span> <span class=err>250</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl><span class=nl>keyboard_paste_delay:</span> <span class=err>100000</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl><span class=nl>private_colormap:</span> <span class=nf>enabled</span><span class=err>=</span><span class=mi>0</span>
+</span></span></code></pre></div><pre><code>display_library: sdl
+</code></pre><p>project0遇到的启动bochs的那些问题project1也会遇到一遍233</p><p>然后。。。启动。。。</p><p>报错如下：</p><p><a href=https://111qqz.com/wordpress/wp-content/uploads/2016/06/%E9%80%89%E5%8C%BA_123.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2016/06/%e9%80%89%e5%8c%ba_123.png alt=选区_123></a></p><p>查了好多。。。一无所获。。。</p><p>最后看到一遍博客： <a href=http://blog.csdn.net/wu5795175/article/details/8560805>参考博客1</a></p><p>那篇博客里虽然和我遇到的问题不一致。。。</p><p>但是死马当做活马医。。。</p><p>objdump -d a.exe 查看了反汇编代码。。。。a.exe的路径是project1/build/user/</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-asm data-lang=asm><span class=line><span class=ln> 1</span><span class=cl><span class=err>00001000</span> <span class=err>&lt;</span><span class=nf>_Entry</span><span class=err>&gt;</span><span class=p>:</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>    <span class=err>1000:</span>	<span class=err>83</span> <span class=nf>ec</span> <span class=mi>1</span><span class=no>c</span>             	<span class=no>sub</span>    <span class=no>$0x1c</span><span class=p>,</span><span class=nv>%esp</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>    <span class=err>1003:</span>	<span class=nf>c7</span> <span class=mi>44</span> <span class=mi>24</span> <span class=mi>04</span> <span class=mi>00</span> <span class=mi>00</span> <span class=mi>00</span> 	<span class=no>movl</span>   <span class=no>$0x0</span><span class=p>,</span><span class=mi>0x4</span><span class=p>(</span><span class=nv>%esp</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>    <span class=err>100</span><span class=nl>a:</span>	<span class=err>00</span> 
+</span></span><span class=line><span class=ln> 5</span><span class=cl>    <span class=err>100</span><span class=nl>b:</span>	<span class=nf>c7</span> <span class=mi>04</span> <span class=mi>24</span> <span class=mi>00</span> <span class=mi>00</span> <span class=mi>00</span> <span class=mi>00</span> 	<span class=no>movl</span>   <span class=no>$0x0</span><span class=p>,(</span><span class=nv>%esp</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>    <span class=err>1012:</span>	<span class=nf>e8</span> <span class=mi>06</span> <span class=mi>00</span> <span class=mi>00</span> <span class=mi>00</span>       	<span class=no>call</span>   <span class=mh>101d</span> <span class=p>&lt;</span><span class=no>main</span><span class=p>&gt;</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>    <span class=err>1017:</span>	<span class=nf>c9</span>                   	<span class=no>leave</span>  
+</span></span><span class=line><span class=ln> 8</span><span class=cl>    <span class=mi>1018</span><span class=p>:</span>	<span class=no>cb</span>                   	<span class=no>lret</span>   
+</span></span><span class=line><span class=ln> 9</span><span class=cl>    <span class=mi>1019</span><span class=p>:</span>	<span class=mi>83</span> <span class=no>c4</span> <span class=mi>1</span><span class=no>c</span>             	<span class=no>add</span>    <span class=no>$0x1c</span><span class=p>,</span><span class=nv>%esp</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>    <span class=err>101</span><span class=nl>c:</span>	<span class=nf>c3</span>                   	<span class=no>ret</span>    
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-asm data-lang=asm><span class=line><span class=ln> 1</span><span class=cl><span class=err>0000101</span><span class=nf>d</span> <span class=err>&lt;</span><span class=no>main</span><span class=err>&gt;</span><span class=p>:</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>    <span class=err>101</span><span class=nl>d:</span>	<span class=err>55</span>                   	<span class=nf>push</span>   <span class=no>p</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>    <span class=err>101</span><span class=nl>e:</span>	<span class=err>89</span> <span class=nf>e5</span>                	<span class=no>mov</span>    <span class=nv>%esp</span><span class=p>,</span><span class=no>p</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>    <span class=err>1020:</span>	<span class=err>83</span> <span class=nf>e4</span> <span class=no>f0</span>             	<span class=no>and</span>    <span class=no>$0xfffffff0</span><span class=p>,</span><span class=nv>%esp</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>    <span class=err>1023:</span>	<span class=err>83</span> <span class=nf>ec</span> <span class=mi>40</span>             	<span class=no>sub</span>    <span class=no>$0x40</span><span class=p>,</span><span class=nv>%esp</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>    <span class=err>1026:</span>	<span class=nf>c7</span> <span class=mi>44</span> <span class=mi>24</span> <span class=mi>18</span> <span class=mi>48</span> <span class=mi>69</span> <span class=mi>20</span> 	<span class=no>movl</span>   <span class=no>$0x21206948</span><span class=p>,</span><span class=mi>0x18</span><span class=p>(</span><span class=nv>%esp</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>    <span class=err>102</span><span class=nl>d:</span>	<span class=err>21</span> 
+</span></span><span class=line><span class=ln> 8</span><span class=cl>    <span class=err>102</span><span class=nl>e:</span>	<span class=nf>c7</span> <span class=mi>44</span> <span class=mi>24</span> <span class=mi>1</span><span class=no>c</span> <span class=mi>20</span> <span class=mi>54</span> <span class=mi>68</span> 	<span class=no>movl</span>   <span class=no>$0x69685420</span><span class=p>,</span><span class=mi>0x1c</span><span class=p>(</span><span class=nv>%esp</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>    <span class=err>1035:</span>	<span class=err>69</span> 
+</span></span><span class=line><span class=ln>10</span><span class=cl>    <span class=err>1036:</span>	<span class=nf>c7</span> <span class=mi>44</span> <span class=mi>24</span> <span class=mi>20</span> <span class=mi>73</span> <span class=mi>20</span> <span class=mi>69</span> 	<span class=no>movl</span>   <span class=no>$0x73692073</span><span class=p>,</span><span class=mi>0x20</span><span class=p>(</span><span class=nv>%esp</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>    <span class=err>103</span><span class=nl>d:</span>	<span class=err>73</span> 
+</span></span><span class=line><span class=ln>12</span><span class=cl>    <span class=err>103</span><span class=nl>e:</span>	<span class=nf>c7</span> <span class=mi>44</span> <span class=mi>24</span> <span class=mi>24</span> <span class=mi>20</span> <span class=mi>74</span> <span class=mi>68</span> 	<span class=no>movl</span>   <span class=no>$0x65687420</span><span class=p>,</span><span class=mi>0x24</span><span class=p>(</span><span class=nv>%esp</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>    <span class=err>1045:</span>	<span class=err>65</span> 
+</span></span><span class=line><span class=ln>14</span><span class=cl>    <span class=err>1046:</span>	<span class=nf>c7</span> <span class=mi>44</span> <span class=mi>24</span> <span class=mi>28</span> <span class=mi>20</span> <span class=mi>73</span> <span class=mi>65</span> 	<span class=no>movl</span>   <span class=no>$0x63657320</span><span class=p>,</span><span class=mi>0x28</span><span class=p>(</span><span class=nv>%esp</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>    <span class=err>104</span><span class=nl>d:</span>	<span class=err>63</span> 
+</span></span><span class=line><span class=ln>16</span><span class=cl>    <span class=err>104</span><span class=nl>e:</span>	<span class=nf>c7</span> <span class=mi>44</span> <span class=mi>24</span> <span class=mi>2</span><span class=no>c</span> <span class=mi>6</span><span class=no>f</span> <span class=mi>6</span><span class=no>e</span> <span class=mi>64</span> 	<span class=no>movl</span>   <span class=no>$0x20646e6f</span><span class=p>,</span><span class=mi>0x2c</span><span class=p>(</span><span class=nv>%esp</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>    <span class=err>1055:</span>	<span class=err>20</span> 
+</span></span><span class=line><span class=ln>18</span><span class=cl>    <span class=err>1056:</span>	<span class=nf>c7</span> <span class=mi>44</span> <span class=mi>24</span> <span class=mi>30</span> <span class=mi>73</span> <span class=mi>74</span> <span class=mi>72</span> 	<span class=no>movl</span>   <span class=no>$0x69727473</span><span class=p>,</span><span class=mi>0x30</span><span class=p>(</span><span class=nv>%esp</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>    <span class=err>105</span><span class=nl>d:</span>	<span class=err>69</span> 
+</span></span><span class=line><span class=ln>20</span><span class=cl>    <span class=err>105</span><span class=nl>e:</span>	<span class=nf>c7</span> <span class=mi>44</span> <span class=mi>24</span> <span class=mi>34</span> <span class=mi>6</span><span class=no>e</span> <span class=mi>67</span> <span class=mi>0</span><span class=no>a</span> 	<span class=no>movl</span>   <span class=no>$0xa676e</span><span class=p>,</span><span class=mi>0x34</span><span class=p>(</span><span class=nv>%esp</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl>    <span class=err>1065:</span>	<span class=err>00</span> 
+</span></span><span class=line><span class=ln>22</span><span class=cl>    <span class=err>1066:</span>	<span class=nf>c7</span> <span class=mi>44</span> <span class=mi>24</span> <span class=mi>38</span> <span class=mi>00</span> <span class=mi>00</span> <span class=mi>00</span> 	<span class=no>movl</span>   <span class=no>$0x0</span><span class=p>,</span><span class=mi>0x38</span><span class=p>(</span><span class=nv>%esp</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>23</span><span class=cl>    <span class=err>106</span><span class=nl>d:</span>	<span class=err>00</span> 
+</span></span><span class=line><span class=ln>24</span><span class=cl>    <span class=err>106</span><span class=nl>e:</span>	<span class=nf>c7</span> <span class=mi>44</span> <span class=mi>24</span> <span class=mi>3</span><span class=no>c</span> <span class=mi>00</span> <span class=mi>00</span> <span class=mi>00</span> 	<span class=no>movl</span>   <span class=no>$0x0</span><span class=p>,</span><span class=mi>0x3c</span><span class=p>(</span><span class=nv>%esp</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>25</span><span class=cl>    <span class=err>1075:</span>	<span class=err>00</span> 
+</span></span><span class=line><span class=ln>26</span><span class=cl>    <span class=err>1076:</span>	<span class=nf>c7</span> <span class=mi>04</span> <span class=mi>24</span> <span class=mi>00</span> <span class=mi>21</span> <span class=mi>00</span> <span class=mi>00</span> 	<span class=no>movl</span>   <span class=no>$0x2100</span><span class=p>,(</span><span class=nv>%esp</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>27</span><span class=cl>    <span class=err>107</span><span class=nl>d:</span>	<span class=nf>e8</span> <span class=mi>13</span> <span class=mi>00</span> <span class=mi>00</span> <span class=mi>00</span>       	<span class=no>call</span>   <span class=mh>1095</span> <span class=p>&lt;</span><span class=no>ELF_Print</span><span class=p>&gt;</span>
+</span></span><span class=line><span class=ln>28</span><span class=cl>    <span class=err>1082:</span>	<span class=err>8</span><span class=nf>d</span> <span class=mi>44</span> <span class=mi>24</span> <span class=mi>18</span>          	<span class=no>lea</span>    <span class=mi>0x18</span><span class=p>(</span><span class=nv>%esp</span><span class=p>),</span><span class=no>x</span>
+</span></span><span class=line><span class=ln>29</span><span class=cl>    <span class=err>1086:</span>	<span class=err>89</span> <span class=err>04</span> <span class=err>24</span>             	<span class=nf>mov</span>    <span class=no>x</span><span class=p>,(</span><span class=nv>%esp</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>30</span><span class=cl>    <span class=err>1089:</span>	<span class=nf>e8</span> <span class=mi>07</span> <span class=mi>00</span> <span class=mi>00</span> <span class=mi>00</span>       	<span class=no>call</span>   <span class=mh>1095</span> <span class=p>&lt;</span><span class=no>ELF_Print</span><span class=p>&gt;</span>
+</span></span><span class=line><span class=ln>31</span><span class=cl>    <span class=err>108</span><span class=nl>e:</span>	<span class=nf>b8</span> <span class=mi>00</span> <span class=mi>00</span> <span class=mi>00</span> <span class=mi>00</span>       	<span class=no>mov</span>    <span class=no>$0x0</span><span class=p>,</span><span class=no>x</span>
+</span></span><span class=line><span class=ln>32</span><span class=cl>    <span class=err>1093:</span>	<span class=nf>c9</span>                   	<span class=no>leave</span>  
+</span></span><span class=line><span class=ln>33</span><span class=cl>    <span class=mi>1094</span><span class=p>:</span>	<span class=no>c3</span>                   	<span class=no>ret</span>    
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-asm data-lang=asm><span class=line><span class=ln>1</span><span class=cl><span class=err>00001095</span> <span class=err>&lt;</span><span class=nf>ELF_Print</span><span class=err>&gt;</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=err>1095:</span>	<span class=err>8</span><span class=nf>b</span> <span class=mi>44</span> <span class=mi>24</span> <span class=mi>04</span>          	<span class=no>mov</span>    <span class=mi>0x4</span><span class=p>(</span><span class=nv>%esp</span><span class=p>),</span><span class=no>x</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=err>1099:</span>	<span class=nf>cd</span> <span class=mi>90</span>                	<span class=no>int</span>    <span class=no>$0x90</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=err>109</span><span class=nl>b:</span>	<span class=nf>c3</span>                   	<span class=no>ret</span>
+</span></span></code></pre></div><p>可以看到在_Entry入口处的汇编，首先</p><p>sub    $0x1c,%esp</p><p>然而程序却抢先在</p><p>add    $0x1c,%esp</p><p>之前使用leave和lret长跳转返回了，这样程序当然出错了。</p><p>我这里是将</p><p>  <strong>asm</strong> <strong>volatile</strong> (&ldquo;leave&rdquo;);
 <strong>asm</strong> <strong>volatile</strong> (&ldquo;lret&rdquo;);</p><p>改成了</p><p>**  <strong>asm</strong> <strong>volatile</strong> (&ldquo;add $0x1c, %esp&rdquo;);    （注意，原文作者这里把%esp写成$esp,坑死小白啊。。还写错两次）**</p><p>  <strong>asm</strong> <strong>volatile</strong> (&ldquo;lret&rdquo;);</p><p>就能正常工作了。</p><p><a href=https://111qqz.com/wordpress/wp-content/uploads/2016/06/%E9%80%89%E5%8C%BA_125.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2016/06/%e9%80%89%e5%8c%ba_125.png alt=选区_125></a></p></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
 <span class=button_tally>913</span>
 </a><a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>其他

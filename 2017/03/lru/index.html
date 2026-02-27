@@ -42,69 +42,77 @@ LRU（Least recently used，最近最少使用）算法根据数据的历史�
 </span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=cm> */</span><span class=w> 
 </span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=w></span><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>LRULinkedHashMap</span><span class=o>&lt;</span><span class=n>K</span><span class=p>,</span><span class=w> </span><span class=n>V</span><span class=o>&gt;</span><span class=w> </span><span class=kd>extends</span><span class=w> </span><span class=n>LinkedHashMap</span><span class=o>&lt;</span><span class=n>K</span><span class=p>,</span><span class=w> </span><span class=n>V</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w> 
 </span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>maxCapacity</span><span class=p>;</span><span class=w> 
-</span></span></span></code></pre></div><pre><code>    private static final float DEFAULT_LOAD_FACTOR = 0.75f; 
-   
-    private final Lock lock = new ReentrantLock(); 
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>    <span class=k>public</span> <span class=nf>LRULinkedHashMap</span><span class=p>(</span><span class=kt>int</span> <span class=n>maxCapacity</span><span class=p>)</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln>2</span><span class=cl>        <span class=n>super</span><span class=p>(</span><span class=n>maxCapacity</span><span class=p>,</span> <span class=n>DEFAULT_LOAD_FACTOR</span><span class=p>,</span> <span class=nb>true</span><span class=p>);</span> 
-</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=k>this</span><span class=p>.</span><span class=n>maxCapacity</span> <span class=o>=</span> <span class=n>maxCapacity</span><span class=p>;</span> 
-</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=p>}</span> 
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl>    <span class=err>@</span><span class=n>Override</span> 
-</span></span><span class=line><span class=ln> 2</span><span class=cl>    <span class=k>protected</span> <span class=n>boolean</span> <span class=n>removeEldestEntry</span><span class=p>(</span><span class=n>java</span><span class=p>.</span><span class=n>util</span><span class=p>.</span><span class=n>Map</span><span class=p>.</span><span class=n>Entry</span><span class=o>&lt;</span><span class=n>K</span><span class=p>,</span> <span class=n>V</span><span class=o>&gt;</span> <span class=n>eldest</span><span class=p>)</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln> 3</span><span class=cl>        <span class=k>return</span> <span class=nf>size</span><span class=p>()</span> <span class=o>&gt;</span> <span class=n>maxCapacity</span><span class=p>;</span> 
+</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=w>
+</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=kt>float</span><span class=w> </span><span class=n>DEFAULT_LOAD_FACTOR</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>0</span><span class=p>.</span><span class=na>75f</span><span class=p>;</span><span class=w> 
+</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=w>
+</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>Lock</span><span class=w> </span><span class=n>lock</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ReentrantLock</span><span class=p>();</span><span class=w> 
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl>    <span class=k>public</span> <span class=nf>LRULinkedHashMap</span><span class=p>(</span><span class=kt>int</span> <span class=n>maxCapacity</span><span class=p>)</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln> 2</span><span class=cl>        <span class=n>super</span><span class=p>(</span><span class=n>maxCapacity</span><span class=p>,</span> <span class=n>DEFAULT_LOAD_FACTOR</span><span class=p>,</span> <span class=nb>true</span><span class=p>);</span> 
+</span></span><span class=line><span class=ln> 3</span><span class=cl>        <span class=k>this</span><span class=p>.</span><span class=n>maxCapacity</span> <span class=o>=</span> <span class=n>maxCapacity</span><span class=p>;</span> 
 </span></span><span class=line><span class=ln> 4</span><span class=cl>    <span class=p>}</span> 
-</span></span><span class=line><span class=ln> 5</span><span class=cl>    <span class=err>@</span><span class=n>Override</span> 
-</span></span><span class=line><span class=ln> 6</span><span class=cl>    <span class=k>public</span> <span class=n>boolean</span> <span class=n>containsKey</span><span class=p>(</span><span class=n>Object</span> <span class=n>key</span><span class=p>)</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln> 7</span><span class=cl>        <span class=k>try</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln> 8</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>lock</span><span class=p>();</span> 
-</span></span><span class=line><span class=ln> 9</span><span class=cl>            <span class=k>return</span> <span class=n>super</span><span class=p>.</span><span class=n>containsKey</span><span class=p>(</span><span class=n>key</span><span class=p>);</span> 
-</span></span><span class=line><span class=ln>10</span><span class=cl>        <span class=p>}</span> <span class=n>finally</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln>11</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>unlock</span><span class=p>();</span> 
-</span></span><span class=line><span class=ln>12</span><span class=cl>        <span class=p>}</span> 
-</span></span><span class=line><span class=ln>13</span><span class=cl>    <span class=p>}</span> 
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>    <span class=err>@</span><span class=n>Override</span> 
-</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=k>public</span> <span class=n>V</span> <span class=n>get</span><span class=p>(</span><span class=n>Object</span> <span class=n>key</span><span class=p>)</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=k>try</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln>4</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>lock</span><span class=p>();</span> 
-</span></span><span class=line><span class=ln>5</span><span class=cl>            <span class=k>return</span> <span class=n>super</span><span class=p>.</span><span class=n>get</span><span class=p>(</span><span class=n>key</span><span class=p>);</span> 
-</span></span><span class=line><span class=ln>6</span><span class=cl>        <span class=p>}</span> <span class=n>finally</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln>7</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>unlock</span><span class=p>();</span> 
-</span></span><span class=line><span class=ln>8</span><span class=cl>        <span class=p>}</span> 
-</span></span><span class=line><span class=ln>9</span><span class=cl>    <span class=p>}</span> 
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>    <span class=err>@</span><span class=n>Override</span> 
-</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=k>public</span> <span class=n>V</span> <span class=n>put</span><span class=p>(</span><span class=n>K</span> <span class=n>key</span><span class=p>,</span> <span class=n>V</span> <span class=n>value</span><span class=p>)</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=k>try</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln>4</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>lock</span><span class=p>();</span> 
-</span></span><span class=line><span class=ln>5</span><span class=cl>            <span class=k>return</span> <span class=n>super</span><span class=p>.</span><span class=n>put</span><span class=p>(</span><span class=n>key</span><span class=p>,</span> <span class=n>value</span><span class=p>);</span> 
-</span></span><span class=line><span class=ln>6</span><span class=cl>        <span class=p>}</span> <span class=n>finally</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln>7</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>unlock</span><span class=p>();</span> 
-</span></span><span class=line><span class=ln>8</span><span class=cl>        <span class=p>}</span> 
-</span></span><span class=line><span class=ln>9</span><span class=cl>    <span class=p>}</span> 
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>    <span class=k>public</span> <span class=kt>int</span> <span class=nf>size</span><span class=p>()</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln>2</span><span class=cl>        <span class=k>try</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln>3</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>lock</span><span class=p>();</span> 
-</span></span><span class=line><span class=ln>4</span><span class=cl>            <span class=k>return</span> <span class=n>super</span><span class=p>.</span><span class=n>size</span><span class=p>();</span> 
-</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=p>}</span> <span class=n>finally</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln>6</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>unlock</span><span class=p>();</span> 
-</span></span><span class=line><span class=ln>7</span><span class=cl>        <span class=p>}</span> 
-</span></span><span class=line><span class=ln>8</span><span class=cl>    <span class=p>}</span> 
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>    <span class=k>public</span> <span class=kt>void</span> <span class=nf>clear</span><span class=p>()</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln>2</span><span class=cl>        <span class=k>try</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln>3</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>lock</span><span class=p>();</span> 
-</span></span><span class=line><span class=ln>4</span><span class=cl>            <span class=n>super</span><span class=p>.</span><span class=n>clear</span><span class=p>();</span> 
-</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=p>}</span> <span class=n>finally</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln>6</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>unlock</span><span class=p>();</span> 
-</span></span><span class=line><span class=ln>7</span><span class=cl>        <span class=p>}</span> 
-</span></span><span class=line><span class=ln>8</span><span class=cl>    <span class=p>}</span> 
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>    <span class=k>public</span> <span class=n>Collection</span><span class=o>&lt;</span><span class=n>Map</span><span class=p>.</span><span class=n>Entry</span><span class=o>&lt;</span><span class=n>K</span><span class=p>,</span> <span class=n>V</span><span class=o>&gt;&gt;</span> <span class=n>getAll</span><span class=p>()</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln>2</span><span class=cl>        <span class=k>try</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln>3</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>lock</span><span class=p>();</span> 
-</span></span><span class=line><span class=ln>4</span><span class=cl>            <span class=k>return</span> <span class=k>new</span> <span class=n>ArrayList</span><span class=o>&lt;</span><span class=n>Map</span><span class=p>.</span><span class=n>Entry</span><span class=o>&lt;</span><span class=n>K</span><span class=p>,</span> <span class=n>V</span><span class=o>&gt;&gt;</span><span class=p>(</span><span class=n>super</span><span class=p>.</span><span class=n>entrySet</span><span class=p>());</span> 
-</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=p>}</span> <span class=n>finally</span> <span class=p>{</span> 
-</span></span><span class=line><span class=ln>6</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>unlock</span><span class=p>();</span> 
-</span></span><span class=line><span class=ln>7</span><span class=cl>        <span class=p>}</span> 
-</span></span><span class=line><span class=ln>8</span><span class=cl>    <span class=p>}</span> 
-</span></span><span class=line><span class=ln>9</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>    <span class=err>@</span><span class=n>Override</span> 
+</span></span><span class=line><span class=ln> 7</span><span class=cl>    <span class=k>protected</span> <span class=n>boolean</span> <span class=n>removeEldestEntry</span><span class=p>(</span><span class=n>java</span><span class=p>.</span><span class=n>util</span><span class=p>.</span><span class=n>Map</span><span class=p>.</span><span class=n>Entry</span><span class=o>&lt;</span><span class=n>K</span><span class=p>,</span> <span class=n>V</span><span class=o>&gt;</span> <span class=n>eldest</span><span class=p>)</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln> 8</span><span class=cl>        <span class=k>return</span> <span class=nf>size</span><span class=p>()</span> <span class=o>&gt;</span> <span class=n>maxCapacity</span><span class=p>;</span> 
+</span></span><span class=line><span class=ln> 9</span><span class=cl>    <span class=p>}</span> 
+</span></span><span class=line><span class=ln>10</span><span class=cl>    <span class=err>@</span><span class=n>Override</span> 
+</span></span><span class=line><span class=ln>11</span><span class=cl>    <span class=k>public</span> <span class=n>boolean</span> <span class=n>containsKey</span><span class=p>(</span><span class=n>Object</span> <span class=n>key</span><span class=p>)</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln>12</span><span class=cl>        <span class=k>try</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln>13</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>lock</span><span class=p>();</span> 
+</span></span><span class=line><span class=ln>14</span><span class=cl>            <span class=k>return</span> <span class=n>super</span><span class=p>.</span><span class=n>containsKey</span><span class=p>(</span><span class=n>key</span><span class=p>);</span> 
+</span></span><span class=line><span class=ln>15</span><span class=cl>        <span class=p>}</span> <span class=n>finally</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln>16</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>unlock</span><span class=p>();</span> 
+</span></span><span class=line><span class=ln>17</span><span class=cl>        <span class=p>}</span> 
+</span></span><span class=line><span class=ln>18</span><span class=cl>    <span class=p>}</span> 
+</span></span><span class=line><span class=ln>19</span><span class=cl>
+</span></span><span class=line><span class=ln>20</span><span class=cl>
+</span></span><span class=line><span class=ln>21</span><span class=cl>    <span class=err>@</span><span class=n>Override</span> 
+</span></span><span class=line><span class=ln>22</span><span class=cl>    <span class=k>public</span> <span class=n>V</span> <span class=n>get</span><span class=p>(</span><span class=n>Object</span> <span class=n>key</span><span class=p>)</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln>23</span><span class=cl>        <span class=k>try</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln>24</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>lock</span><span class=p>();</span> 
+</span></span><span class=line><span class=ln>25</span><span class=cl>            <span class=k>return</span> <span class=n>super</span><span class=p>.</span><span class=n>get</span><span class=p>(</span><span class=n>key</span><span class=p>);</span> 
+</span></span><span class=line><span class=ln>26</span><span class=cl>        <span class=p>}</span> <span class=n>finally</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln>27</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>unlock</span><span class=p>();</span> 
+</span></span><span class=line><span class=ln>28</span><span class=cl>        <span class=p>}</span> 
+</span></span><span class=line><span class=ln>29</span><span class=cl>    <span class=p>}</span> 
+</span></span><span class=line><span class=ln>30</span><span class=cl>
+</span></span><span class=line><span class=ln>31</span><span class=cl>    <span class=err>@</span><span class=n>Override</span> 
+</span></span><span class=line><span class=ln>32</span><span class=cl>    <span class=k>public</span> <span class=n>V</span> <span class=n>put</span><span class=p>(</span><span class=n>K</span> <span class=n>key</span><span class=p>,</span> <span class=n>V</span> <span class=n>value</span><span class=p>)</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln>33</span><span class=cl>        <span class=k>try</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln>34</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>lock</span><span class=p>();</span> 
+</span></span><span class=line><span class=ln>35</span><span class=cl>            <span class=k>return</span> <span class=n>super</span><span class=p>.</span><span class=n>put</span><span class=p>(</span><span class=n>key</span><span class=p>,</span> <span class=n>value</span><span class=p>);</span> 
+</span></span><span class=line><span class=ln>36</span><span class=cl>        <span class=p>}</span> <span class=n>finally</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln>37</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>unlock</span><span class=p>();</span> 
+</span></span><span class=line><span class=ln>38</span><span class=cl>        <span class=p>}</span> 
+</span></span><span class=line><span class=ln>39</span><span class=cl>    <span class=p>}</span> 
+</span></span><span class=line><span class=ln>40</span><span class=cl>
+</span></span><span class=line><span class=ln>41</span><span class=cl>    <span class=k>public</span> <span class=kt>int</span> <span class=nf>size</span><span class=p>()</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln>42</span><span class=cl>        <span class=k>try</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln>43</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>lock</span><span class=p>();</span> 
+</span></span><span class=line><span class=ln>44</span><span class=cl>            <span class=k>return</span> <span class=n>super</span><span class=p>.</span><span class=n>size</span><span class=p>();</span> 
+</span></span><span class=line><span class=ln>45</span><span class=cl>        <span class=p>}</span> <span class=n>finally</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln>46</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>unlock</span><span class=p>();</span> 
+</span></span><span class=line><span class=ln>47</span><span class=cl>        <span class=p>}</span> 
+</span></span><span class=line><span class=ln>48</span><span class=cl>    <span class=p>}</span> 
+</span></span><span class=line><span class=ln>49</span><span class=cl>
+</span></span><span class=line><span class=ln>50</span><span class=cl>    <span class=k>public</span> <span class=kt>void</span> <span class=nf>clear</span><span class=p>()</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln>51</span><span class=cl>        <span class=k>try</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln>52</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>lock</span><span class=p>();</span> 
+</span></span><span class=line><span class=ln>53</span><span class=cl>            <span class=n>super</span><span class=p>.</span><span class=n>clear</span><span class=p>();</span> 
+</span></span><span class=line><span class=ln>54</span><span class=cl>        <span class=p>}</span> <span class=n>finally</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln>55</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>unlock</span><span class=p>();</span> 
+</span></span><span class=line><span class=ln>56</span><span class=cl>        <span class=p>}</span> 
+</span></span><span class=line><span class=ln>57</span><span class=cl>    <span class=p>}</span> 
+</span></span><span class=line><span class=ln>58</span><span class=cl>
+</span></span><span class=line><span class=ln>59</span><span class=cl>    <span class=k>public</span> <span class=n>Collection</span><span class=o>&lt;</span><span class=n>Map</span><span class=p>.</span><span class=n>Entry</span><span class=o>&lt;</span><span class=n>K</span><span class=p>,</span> <span class=n>V</span><span class=o>&gt;&gt;</span> <span class=n>getAll</span><span class=p>()</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln>60</span><span class=cl>        <span class=k>try</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln>61</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>lock</span><span class=p>();</span> 
+</span></span><span class=line><span class=ln>62</span><span class=cl>            <span class=k>return</span> <span class=k>new</span> <span class=n>ArrayList</span><span class=o>&lt;</span><span class=n>Map</span><span class=p>.</span><span class=n>Entry</span><span class=o>&lt;</span><span class=n>K</span><span class=p>,</span> <span class=n>V</span><span class=o>&gt;&gt;</span><span class=p>(</span><span class=n>super</span><span class=p>.</span><span class=n>entrySet</span><span class=p>());</span> 
+</span></span><span class=line><span class=ln>63</span><span class=cl>        <span class=p>}</span> <span class=n>finally</span> <span class=p>{</span> 
+</span></span><span class=line><span class=ln>64</span><span class=cl>            <span class=n>lock</span><span class=p>.</span><span class=n>unlock</span><span class=p>();</span> 
+</span></span><span class=line><span class=ln>65</span><span class=cl>        <span class=p>}</span> 
+</span></span><span class=line><span class=ln>66</span><span class=cl>    <span class=p>}</span> 
+</span></span><span class=line><span class=ln>67</span><span class=cl><span class=p>}</span>
 </span></span></code></pre></div><p>基于双链表 的LRU实现:</p><p>传统意义的LRU算法是为每一个Cache对象设置一个计数器，每次Cache命中则给计数器+1，而Cache用完，需要淘汰旧内容，放置新内容时，就查看所有的计数器，并将最少使用的内容替换掉。</p><p>它的弊端很明显，如果Cache的数量少，问题不会很大， 但是如果Cache的空间过大，达到10W或者100W以上，一旦需要淘汰，则需要遍历所有计算器，其性能与资源消耗是巨大的。效率也就非常的慢了。</p><p>它的原理： 将Cache的所有位置都用双连表连接起来，当一个位置被命中之后，就将通过调整链表的指向，将该位置调整到链表头的位置，新加入的Cache直接加到链表头中。</p><p>这样，在多次进行Cache操作后，最近被命中的，就会被向链表头方向移动，而没有命中的，而想链表后面移动，链表尾则表示最近最少使用的Cache。</p><p>当需要替换内容时候，链表的最后位置就是最少被命中的位置，我们只需要淘汰链表最后的部分即可。</p><p>上面说了这么多的理论， 下面用代码来实现一个LRU策略的缓存。</p><p>我们用一个对象来表示Cache，并实现双链表，</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=ln> 1</span><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>LRUCache</span><span class=w> </span><span class=p>{</span><span class=w>
 </span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=w>	</span><span class=cm>/**
 </span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cm>	 * 链表节点
@@ -120,131 +128,137 @@ LRU（Least recently used，最近最少使用）算法根据数据的历史�
 </span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=w>	</span><span class=kd>private</span><span class=w> </span><span class=n>CacheNode</span><span class=w> </span><span class=n>first</span><span class=p>;</span><span class=c1>//(实现双链表)链表头</span><span class=w>
 </span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=w>	</span><span class=kd>private</span><span class=w> </span><span class=n>CacheNode</span><span class=w> </span><span class=n>last</span><span class=p>;</span><span class=c1>//(实现双链表)链表尾</span><span class=w>
 </span></span></span><span class=line><span class=ln>15</span><span class=cl><span class=w></span><span class=p>}</span><span class=w>
-</span></span></span></code></pre></div><pre><code> 下面给出完整的实现，这个类也被Tomcat所使用（ org.apache.tomcat.util.collections.LRUCache），但是在tomcat6.x版本中，已经被弃用，使用另外其他的缓存类来替代它。
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=ln> 1</span><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>LRUCache</span><span class=w> </span><span class=p>{</span><span class=w>
-</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=w>	</span><span class=cm>/**
-</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cm>	 * 链表节点
-</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cm>	 * @author Administrator
-</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cm>	 *
-</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=cm>	 */</span><span class=w>
-</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=w>	</span><span class=kd>class</span> <span class=nc>CacheNode</span><span class=w> </span><span class=p>{</span><span class=w>
-</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=w>		</span><span class=n>CacheNode</span><span class=w> </span><span class=n>prev</span><span class=p>;</span><span class=c1>//前一节点</span><span class=w>
-</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=w>		</span><span class=n>CacheNode</span><span class=w> </span><span class=n>next</span><span class=p>;</span><span class=c1>//后一节点</span><span class=w>
-</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=w>		</span><span class=n>Object</span><span class=w> </span><span class=n>value</span><span class=p>;</span><span class=c1>//值</span><span class=w>
-</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=w>		</span><span class=n>Object</span><span class=w> </span><span class=n>key</span><span class=p>;</span><span class=c1>//键</span><span class=w>
-</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=w>		</span><span class=n>CacheNode</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
-</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=w>		</span><span class=p>}</span><span class=w>
-</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=w>	</span><span class=p>}</span><span class=w>
-</span></span></span><span class=line><span class=ln>15</span><span class=cl><span class=w>	</span><span class=kd>public</span><span class=w> </span><span class=nf>LRUCache</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
-</span></span></span><span class=line><span class=ln>16</span><span class=cl><span class=w>		</span><span class=n>currentSize</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>0</span><span class=p>;</span><span class=w>
-</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=w>		</span><span class=n>cacheSize</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>i</span><span class=p>;</span><span class=w>
-</span></span></span><span class=line><span class=ln>18</span><span class=cl><span class=w>		</span><span class=n>nodes</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Hashtable</span><span class=p>(</span><span class=n>i</span><span class=p>);</span><span class=c1>//缓存容器</span><span class=w>
-</span></span></span><span class=line><span class=ln>19</span><span class=cl><span class=w>	</span><span class=p>}</span><span class=w>
-</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl>	<span class=cm>/**
-</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cm>	 * 获取缓存中对象
-</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cm>	 * @param key
-</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cm>	 * @return
-</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cm>	 */</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl>	<span class=k>public</span> <span class=n>Object</span> <span class=nf>get</span><span class=p>(</span><span class=n>Object</span> <span class=n>key</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl>		<span class=n>CacheNode</span> <span class=n>node</span> <span class=o>=</span> <span class=p>(</span><span class=n>CacheNode</span><span class=p>)</span> <span class=n>nodes</span><span class=p>.</span><span class=n>get</span><span class=p>(</span><span class=n>key</span><span class=p>);</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>node</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl>			<span class=n>moveToHead</span><span class=p>(</span><span class=n>node</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl>			<span class=k>return</span> <span class=n>node</span><span class=p>.</span><span class=n>value</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl>		<span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>12</span><span class=cl>			<span class=k>return</span> <span class=n>null</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>13</span><span class=cl>		<span class=p>}</span>
-</span></span><span class=line><span class=ln>14</span><span class=cl>	<span class=p>}</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>	<span class=cm>/**
-</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=cm>	 * 添加缓存
-</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=cm>	 * @param key
-</span></span></span><span class=line><span class=ln>4</span><span class=cl><span class=cm>	 * @param value
-</span></span></span><span class=line><span class=ln>5</span><span class=cl><span class=cm>	 */</span>
-</span></span><span class=line><span class=ln>6</span><span class=cl>	<span class=k>public</span> <span class=kt>void</span> <span class=nf>put</span><span class=p>(</span><span class=n>Object</span> <span class=n>key</span><span class=p>,</span> <span class=n>Object</span> <span class=n>value</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>7</span><span class=cl>		<span class=n>CacheNode</span> <span class=n>node</span> <span class=o>=</span> <span class=p>(</span><span class=n>CacheNode</span><span class=p>)</span> <span class=n>nodes</span><span class=p>.</span><span class=n>get</span><span class=p>(</span><span class=n>key</span><span class=p>);</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>node</span> <span class=o>==</span> <span class=n>null</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>			<span class=c1>//缓存容器是否已经超过大小.
-</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1></span>			<span class=k>if</span> <span class=p>(</span><span class=n>currentSize</span> <span class=o>&gt;=</span> <span class=n>cacheSize</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>				<span class=k>if</span> <span class=p>(</span><span class=n>last</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span><span class=c1>//将最少使用的删除
-</span></span></span><span class=line><span class=ln>5</span><span class=cl><span class=c1></span>					<span class=n>nodes</span><span class=p>.</span><span class=n>remove</span><span class=p>(</span><span class=n>last</span><span class=p>.</span><span class=n>key</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>6</span><span class=cl>				<span class=n>removeLast</span><span class=p>();</span>
-</span></span><span class=line><span class=ln>7</span><span class=cl>			<span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>8</span><span class=cl>				<span class=n>currentSize</span><span class=o>++</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>9</span><span class=cl>			<span class=p>}</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl>			<span class=n>node</span> <span class=o>=</span> <span class=k>new</span> <span class=n>CacheNode</span><span class=p>();</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl>		<span class=p>}</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl>		<span class=n>node</span><span class=p>.</span><span class=n>value</span> <span class=o>=</span> <span class=n>value</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl>		<span class=n>node</span><span class=p>.</span><span class=n>key</span> <span class=o>=</span> <span class=n>key</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl>		<span class=c1>//将最新使用的节点放到链表头，表示最新使用的.
-</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=c1></span>		<span class=n>moveToHead</span><span class=p>(</span><span class=n>node</span><span class=p>);</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl>		<span class=n>nodes</span><span class=p>.</span><span class=n>put</span><span class=p>(</span><span class=n>key</span><span class=p>,</span> <span class=n>node</span><span class=p>);</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl>	<span class=p>}</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl>	<span class=cm>/**
-</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=cm>	 * 将缓存删除
-</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=cm>	 * @param key
-</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=cm>	 * @return
-</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=cm>	 */</span>
-</span></span><span class=line><span class=ln>14</span><span class=cl>	<span class=k>public</span> <span class=n>Object</span> <span class=nf>remove</span><span class=p>(</span><span class=n>Object</span> <span class=n>key</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>15</span><span class=cl>		<span class=n>CacheNode</span> <span class=n>node</span> <span class=o>=</span> <span class=p>(</span><span class=n>CacheNode</span><span class=p>)</span> <span class=n>nodes</span><span class=p>.</span><span class=n>get</span><span class=p>(</span><span class=n>key</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>16</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>node</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>17</span><span class=cl>			<span class=k>if</span> <span class=p>(</span><span class=n>node</span><span class=p>.</span><span class=n>prev</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>18</span><span class=cl>				<span class=n>node</span><span class=p>.</span><span class=n>prev</span><span class=p>.</span><span class=n>next</span> <span class=o>=</span> <span class=n>node</span><span class=p>.</span><span class=n>next</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>19</span><span class=cl>			<span class=p>}</span>
-</span></span><span class=line><span class=ln>20</span><span class=cl>			<span class=k>if</span> <span class=p>(</span><span class=n>node</span><span class=p>.</span><span class=n>next</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>21</span><span class=cl>				<span class=n>node</span><span class=p>.</span><span class=n>next</span><span class=p>.</span><span class=n>prev</span> <span class=o>=</span> <span class=n>node</span><span class=p>.</span><span class=n>prev</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>22</span><span class=cl>			<span class=p>}</span>
-</span></span><span class=line><span class=ln>23</span><span class=cl>			<span class=k>if</span> <span class=p>(</span><span class=n>last</span> <span class=o>==</span> <span class=n>node</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>24</span><span class=cl>				<span class=n>last</span> <span class=o>=</span> <span class=n>node</span><span class=p>.</span><span class=n>prev</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>25</span><span class=cl>			<span class=k>if</span> <span class=p>(</span><span class=n>first</span> <span class=o>==</span> <span class=n>node</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>26</span><span class=cl>				<span class=n>first</span> <span class=o>=</span> <span class=n>node</span><span class=p>.</span><span class=n>next</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>27</span><span class=cl>		<span class=p>}</span>
-</span></span><span class=line><span class=ln>28</span><span class=cl>		<span class=k>return</span> <span class=n>node</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>29</span><span class=cl>	<span class=p>}</span>
-</span></span><span class=line><span class=ln>30</span><span class=cl>	<span class=k>public</span> <span class=kt>void</span> <span class=nf>clear</span><span class=p>()</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>31</span><span class=cl>		<span class=n>first</span> <span class=o>=</span> <span class=n>null</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>32</span><span class=cl>		<span class=n>last</span> <span class=o>=</span> <span class=n>null</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>33</span><span class=cl>	<span class=p>}</span>
-</span></span><span class=line><span class=ln>34</span><span class=cl>	<span class=cm>/**
-</span></span></span><span class=line><span class=ln>35</span><span class=cl><span class=cm>	 * 删除链表尾部节点
-</span></span></span><span class=line><span class=ln>36</span><span class=cl><span class=cm>	 *  表示 删除最少使用的缓存对象
-</span></span></span><span class=line><span class=ln>37</span><span class=cl><span class=cm>	 */</span>
-</span></span><span class=line><span class=ln>38</span><span class=cl>	<span class=k>private</span> <span class=kt>void</span> <span class=nf>removeLast</span><span class=p>()</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>39</span><span class=cl>		<span class=c1>//链表尾不为空,则将链表尾指向null. 删除连表尾（删除最少使用的缓存对象）
-</span></span></span><span class=line><span class=ln>40</span><span class=cl><span class=c1></span>		<span class=k>if</span> <span class=p>(</span><span class=n>last</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>41</span><span class=cl>			<span class=k>if</span> <span class=p>(</span><span class=n>last</span><span class=p>.</span><span class=n>prev</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>42</span><span class=cl>				<span class=n>last</span><span class=p>.</span><span class=n>prev</span><span class=p>.</span><span class=n>next</span> <span class=o>=</span> <span class=n>null</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>43</span><span class=cl>			<span class=k>else</span>
-</span></span><span class=line><span class=ln>44</span><span class=cl>				<span class=n>first</span> <span class=o>=</span> <span class=n>null</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>45</span><span class=cl>			<span class=n>last</span> <span class=o>=</span> <span class=n>last</span><span class=p>.</span><span class=n>prev</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>46</span><span class=cl>		<span class=p>}</span>
-</span></span><span class=line><span class=ln>47</span><span class=cl>	<span class=p>}</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl>	<span class=cm>/**
-</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cm>	 * 移动到链表头，表示这个节点是最新使用过的
-</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cm>	 * @param node
-</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cm>	 */</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl>	<span class=k>private</span> <span class=kt>void</span> <span class=nf>moveToHead</span><span class=p>(</span><span class=n>CacheNode</span> <span class=n>node</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>node</span> <span class=o>==</span> <span class=n>first</span><span class=p>)</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl>			<span class=k>return</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>node</span><span class=p>.</span><span class=n>prev</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl>			<span class=n>node</span><span class=p>.</span><span class=n>prev</span><span class=p>.</span><span class=n>next</span> <span class=o>=</span> <span class=n>node</span><span class=p>.</span><span class=n>next</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>node</span><span class=p>.</span><span class=n>next</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl>			<span class=n>node</span><span class=p>.</span><span class=n>next</span><span class=p>.</span><span class=n>prev</span> <span class=o>=</span> <span class=n>node</span><span class=p>.</span><span class=n>prev</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>12</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>last</span> <span class=o>==</span> <span class=n>node</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>13</span><span class=cl>			<span class=n>last</span> <span class=o>=</span> <span class=n>node</span><span class=p>.</span><span class=n>prev</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>14</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>first</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>15</span><span class=cl>			<span class=n>node</span><span class=p>.</span><span class=n>next</span> <span class=o>=</span> <span class=n>first</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>16</span><span class=cl>			<span class=n>first</span><span class=p>.</span><span class=n>prev</span> <span class=o>=</span> <span class=n>node</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>17</span><span class=cl>		<span class=p>}</span>
-</span></span><span class=line><span class=ln>18</span><span class=cl>		<span class=n>first</span> <span class=o>=</span> <span class=n>node</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>19</span><span class=cl>		<span class=n>node</span><span class=p>.</span><span class=n>prev</span> <span class=o>=</span> <span class=n>null</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>20</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>last</span> <span class=o>==</span> <span class=n>null</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>21</span><span class=cl>			<span class=n>last</span> <span class=o>=</span> <span class=n>first</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>22</span><span class=cl>	<span class=p>}</span>
-</span></span><span class=line><span class=ln>23</span><span class=cl>	<span class=k>private</span> <span class=kt>int</span> <span class=n>cacheSize</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>24</span><span class=cl>	<span class=k>private</span> <span class=n>Hashtable</span> <span class=n>nodes</span><span class=p>;</span><span class=c1>//缓存容器
-</span></span></span><span class=line><span class=ln>25</span><span class=cl><span class=c1></span>	<span class=k>private</span> <span class=kt>int</span> <span class=n>currentSize</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>26</span><span class=cl>	<span class=k>private</span> <span class=n>CacheNode</span> <span class=n>first</span><span class=p>;</span><span class=c1>//链表头
-</span></span></span><span class=line><span class=ln>27</span><span class=cl><span class=c1></span>	<span class=k>private</span> <span class=n>CacheNode</span> <span class=n>last</span><span class=p>;</span><span class=c1>//链表尾
-</span></span></span><span class=line><span class=ln>28</span><span class=cl><span class=c1></span><span class=p>}</span>
+</span></span></span><span class=line><span class=ln>16</span><span class=cl><span class=w>
+</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=w> </span><span class=n>下面给出完整的实现</span><span class=err>，</span><span class=n>这个类也被Tomcat所使用</span><span class=err>（</span><span class=w> </span><span class=n>org</span><span class=p>.</span><span class=na>apache</span><span class=p>.</span><span class=na>tomcat</span><span class=p>.</span><span class=na>util</span><span class=p>.</span><span class=na>collections</span><span class=p>.</span><span class=na>LRUCache</span><span class=err>），</span><span class=n>但是在tomcat6</span><span class=p>.</span><span class=na>x版本中</span><span class=err>，</span><span class=n>已经被弃用</span><span class=err>，</span><span class=n>使用另外其他的缓存类来替代它</span><span class=err>。</span><span class=w>
+</span></span></span><span class=line><span class=ln>18</span><span class=cl><span class=w>
+</span></span></span><span class=line><span class=ln>19</span><span class=cl><span class=w></span><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>LRUCache</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=ln>20</span><span class=cl><span class=w>	</span><span class=cm>/**
+</span></span></span><span class=line><span class=ln>21</span><span class=cl><span class=cm>	 * 链表节点
+</span></span></span><span class=line><span class=ln>22</span><span class=cl><span class=cm>	 * @author Administrator
+</span></span></span><span class=line><span class=ln>23</span><span class=cl><span class=cm>	 *
+</span></span></span><span class=line><span class=ln>24</span><span class=cl><span class=cm>	 */</span><span class=w>
+</span></span></span><span class=line><span class=ln>25</span><span class=cl><span class=w>	</span><span class=kd>class</span> <span class=nc>CacheNode</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=ln>26</span><span class=cl><span class=w>		</span><span class=n>CacheNode</span><span class=w> </span><span class=n>prev</span><span class=p>;</span><span class=c1>//前一节点</span><span class=w>
+</span></span></span><span class=line><span class=ln>27</span><span class=cl><span class=w>		</span><span class=n>CacheNode</span><span class=w> </span><span class=n>next</span><span class=p>;</span><span class=c1>//后一节点</span><span class=w>
+</span></span></span><span class=line><span class=ln>28</span><span class=cl><span class=w>		</span><span class=n>Object</span><span class=w> </span><span class=n>value</span><span class=p>;</span><span class=c1>//值</span><span class=w>
+</span></span></span><span class=line><span class=ln>29</span><span class=cl><span class=w>		</span><span class=n>Object</span><span class=w> </span><span class=n>key</span><span class=p>;</span><span class=c1>//键</span><span class=w>
+</span></span></span><span class=line><span class=ln>30</span><span class=cl><span class=w>		</span><span class=n>CacheNode</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=ln>31</span><span class=cl><span class=w>		</span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=ln>32</span><span class=cl><span class=w>	</span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=ln>33</span><span class=cl><span class=w>	</span><span class=kd>public</span><span class=w> </span><span class=nf>LRUCache</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=ln>34</span><span class=cl><span class=w>		</span><span class=n>currentSize</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>0</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=ln>35</span><span class=cl><span class=w>		</span><span class=n>cacheSize</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>i</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=ln>36</span><span class=cl><span class=w>		</span><span class=n>nodes</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Hashtable</span><span class=p>(</span><span class=n>i</span><span class=p>);</span><span class=c1>//缓存容器</span><span class=w>
+</span></span></span><span class=line><span class=ln>37</span><span class=cl><span class=w>	</span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>  1</span><span class=cl>	<span class=cm>/**
+</span></span></span><span class=line><span class=ln>  2</span><span class=cl><span class=cm>	 * 获取缓存中对象
+</span></span></span><span class=line><span class=ln>  3</span><span class=cl><span class=cm>	 * @param key
+</span></span></span><span class=line><span class=ln>  4</span><span class=cl><span class=cm>	 * @return
+</span></span></span><span class=line><span class=ln>  5</span><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=ln>  6</span><span class=cl>	<span class=k>public</span> <span class=n>Object</span> <span class=nf>get</span><span class=p>(</span><span class=n>Object</span> <span class=n>key</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>  7</span><span class=cl>		<span class=n>CacheNode</span> <span class=n>node</span> <span class=o>=</span> <span class=p>(</span><span class=n>CacheNode</span><span class=p>)</span> <span class=n>nodes</span><span class=p>.</span><span class=n>get</span><span class=p>(</span><span class=n>key</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>  8</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>node</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>  9</span><span class=cl>			<span class=n>moveToHead</span><span class=p>(</span><span class=n>node</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 10</span><span class=cl>			<span class=k>return</span> <span class=n>node</span><span class=p>.</span><span class=n>value</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 11</span><span class=cl>		<span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 12</span><span class=cl>			<span class=k>return</span> <span class=n>null</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 13</span><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=ln> 14</span><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=ln> 15</span><span class=cl>
+</span></span><span class=line><span class=ln> 16</span><span class=cl>	<span class=cm>/**
+</span></span></span><span class=line><span class=ln> 17</span><span class=cl><span class=cm>	 * 添加缓存
+</span></span></span><span class=line><span class=ln> 18</span><span class=cl><span class=cm>	 * @param key
+</span></span></span><span class=line><span class=ln> 19</span><span class=cl><span class=cm>	 * @param value
+</span></span></span><span class=line><span class=ln> 20</span><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=ln> 21</span><span class=cl>	<span class=k>public</span> <span class=kt>void</span> <span class=nf>put</span><span class=p>(</span><span class=n>Object</span> <span class=n>key</span><span class=p>,</span> <span class=n>Object</span> <span class=n>value</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 22</span><span class=cl>		<span class=n>CacheNode</span> <span class=n>node</span> <span class=o>=</span> <span class=p>(</span><span class=n>CacheNode</span><span class=p>)</span> <span class=n>nodes</span><span class=p>.</span><span class=n>get</span><span class=p>(</span><span class=n>key</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 23</span><span class=cl>
+</span></span><span class=line><span class=ln> 24</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>node</span> <span class=o>==</span> <span class=n>null</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 25</span><span class=cl>			<span class=c1>//缓存容器是否已经超过大小.
+</span></span></span><span class=line><span class=ln> 26</span><span class=cl><span class=c1></span>			<span class=k>if</span> <span class=p>(</span><span class=n>currentSize</span> <span class=o>&gt;=</span> <span class=n>cacheSize</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 27</span><span class=cl>				<span class=k>if</span> <span class=p>(</span><span class=n>last</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span><span class=c1>//将最少使用的删除
+</span></span></span><span class=line><span class=ln> 28</span><span class=cl><span class=c1></span>					<span class=n>nodes</span><span class=p>.</span><span class=n>remove</span><span class=p>(</span><span class=n>last</span><span class=p>.</span><span class=n>key</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 29</span><span class=cl>				<span class=n>removeLast</span><span class=p>();</span>
+</span></span><span class=line><span class=ln> 30</span><span class=cl>			<span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 31</span><span class=cl>				<span class=n>currentSize</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 32</span><span class=cl>			<span class=p>}</span>
+</span></span><span class=line><span class=ln> 33</span><span class=cl>
+</span></span><span class=line><span class=ln> 34</span><span class=cl>			<span class=n>node</span> <span class=o>=</span> <span class=k>new</span> <span class=n>CacheNode</span><span class=p>();</span>
+</span></span><span class=line><span class=ln> 35</span><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=ln> 36</span><span class=cl>		<span class=n>node</span><span class=p>.</span><span class=n>value</span> <span class=o>=</span> <span class=n>value</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 37</span><span class=cl>		<span class=n>node</span><span class=p>.</span><span class=n>key</span> <span class=o>=</span> <span class=n>key</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 38</span><span class=cl>		<span class=c1>//将最新使用的节点放到链表头，表示最新使用的.
+</span></span></span><span class=line><span class=ln> 39</span><span class=cl><span class=c1></span>		<span class=n>moveToHead</span><span class=p>(</span><span class=n>node</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 40</span><span class=cl>		<span class=n>nodes</span><span class=p>.</span><span class=n>put</span><span class=p>(</span><span class=n>key</span><span class=p>,</span> <span class=n>node</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 41</span><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=ln> 42</span><span class=cl>	<span class=cm>/**
+</span></span></span><span class=line><span class=ln> 43</span><span class=cl><span class=cm>	 * 将缓存删除
+</span></span></span><span class=line><span class=ln> 44</span><span class=cl><span class=cm>	 * @param key
+</span></span></span><span class=line><span class=ln> 45</span><span class=cl><span class=cm>	 * @return
+</span></span></span><span class=line><span class=ln> 46</span><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=ln> 47</span><span class=cl>	<span class=k>public</span> <span class=n>Object</span> <span class=nf>remove</span><span class=p>(</span><span class=n>Object</span> <span class=n>key</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 48</span><span class=cl>		<span class=n>CacheNode</span> <span class=n>node</span> <span class=o>=</span> <span class=p>(</span><span class=n>CacheNode</span><span class=p>)</span> <span class=n>nodes</span><span class=p>.</span><span class=n>get</span><span class=p>(</span><span class=n>key</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 49</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>node</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 50</span><span class=cl>			<span class=k>if</span> <span class=p>(</span><span class=n>node</span><span class=p>.</span><span class=n>prev</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 51</span><span class=cl>				<span class=n>node</span><span class=p>.</span><span class=n>prev</span><span class=p>.</span><span class=n>next</span> <span class=o>=</span> <span class=n>node</span><span class=p>.</span><span class=n>next</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 52</span><span class=cl>			<span class=p>}</span>
+</span></span><span class=line><span class=ln> 53</span><span class=cl>			<span class=k>if</span> <span class=p>(</span><span class=n>node</span><span class=p>.</span><span class=n>next</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 54</span><span class=cl>				<span class=n>node</span><span class=p>.</span><span class=n>next</span><span class=p>.</span><span class=n>prev</span> <span class=o>=</span> <span class=n>node</span><span class=p>.</span><span class=n>prev</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 55</span><span class=cl>			<span class=p>}</span>
+</span></span><span class=line><span class=ln> 56</span><span class=cl>			<span class=k>if</span> <span class=p>(</span><span class=n>last</span> <span class=o>==</span> <span class=n>node</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 57</span><span class=cl>				<span class=n>last</span> <span class=o>=</span> <span class=n>node</span><span class=p>.</span><span class=n>prev</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 58</span><span class=cl>			<span class=k>if</span> <span class=p>(</span><span class=n>first</span> <span class=o>==</span> <span class=n>node</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 59</span><span class=cl>				<span class=n>first</span> <span class=o>=</span> <span class=n>node</span><span class=p>.</span><span class=n>next</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 60</span><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=ln> 61</span><span class=cl>		<span class=k>return</span> <span class=n>node</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 62</span><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=ln> 63</span><span class=cl>	<span class=k>public</span> <span class=kt>void</span> <span class=nf>clear</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 64</span><span class=cl>		<span class=n>first</span> <span class=o>=</span> <span class=n>null</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 65</span><span class=cl>		<span class=n>last</span> <span class=o>=</span> <span class=n>null</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 66</span><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=ln> 67</span><span class=cl>	<span class=cm>/**
+</span></span></span><span class=line><span class=ln> 68</span><span class=cl><span class=cm>	 * 删除链表尾部节点
+</span></span></span><span class=line><span class=ln> 69</span><span class=cl><span class=cm>	 *  表示 删除最少使用的缓存对象
+</span></span></span><span class=line><span class=ln> 70</span><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=ln> 71</span><span class=cl>	<span class=k>private</span> <span class=kt>void</span> <span class=nf>removeLast</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 72</span><span class=cl>		<span class=c1>//链表尾不为空,则将链表尾指向null. 删除连表尾（删除最少使用的缓存对象）
+</span></span></span><span class=line><span class=ln> 73</span><span class=cl><span class=c1></span>		<span class=k>if</span> <span class=p>(</span><span class=n>last</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 74</span><span class=cl>			<span class=k>if</span> <span class=p>(</span><span class=n>last</span><span class=p>.</span><span class=n>prev</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 75</span><span class=cl>				<span class=n>last</span><span class=p>.</span><span class=n>prev</span><span class=p>.</span><span class=n>next</span> <span class=o>=</span> <span class=n>null</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 76</span><span class=cl>			<span class=k>else</span>
+</span></span><span class=line><span class=ln> 77</span><span class=cl>				<span class=n>first</span> <span class=o>=</span> <span class=n>null</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 78</span><span class=cl>			<span class=n>last</span> <span class=o>=</span> <span class=n>last</span><span class=p>.</span><span class=n>prev</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 79</span><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=ln> 80</span><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=ln> 81</span><span class=cl>
+</span></span><span class=line><span class=ln> 82</span><span class=cl>	<span class=cm>/**
+</span></span></span><span class=line><span class=ln> 83</span><span class=cl><span class=cm>	 * 移动到链表头，表示这个节点是最新使用过的
+</span></span></span><span class=line><span class=ln> 84</span><span class=cl><span class=cm>	 * @param node
+</span></span></span><span class=line><span class=ln> 85</span><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=ln> 86</span><span class=cl>	<span class=k>private</span> <span class=kt>void</span> <span class=nf>moveToHead</span><span class=p>(</span><span class=n>CacheNode</span> <span class=n>node</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 87</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>node</span> <span class=o>==</span> <span class=n>first</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 88</span><span class=cl>			<span class=k>return</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 89</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>node</span><span class=p>.</span><span class=n>prev</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 90</span><span class=cl>			<span class=n>node</span><span class=p>.</span><span class=n>prev</span><span class=p>.</span><span class=n>next</span> <span class=o>=</span> <span class=n>node</span><span class=p>.</span><span class=n>next</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 91</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>node</span><span class=p>.</span><span class=n>next</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 92</span><span class=cl>			<span class=n>node</span><span class=p>.</span><span class=n>next</span><span class=p>.</span><span class=n>prev</span> <span class=o>=</span> <span class=n>node</span><span class=p>.</span><span class=n>prev</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 93</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>last</span> <span class=o>==</span> <span class=n>node</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 94</span><span class=cl>			<span class=n>last</span> <span class=o>=</span> <span class=n>node</span><span class=p>.</span><span class=n>prev</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 95</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>first</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 96</span><span class=cl>			<span class=n>node</span><span class=p>.</span><span class=n>next</span> <span class=o>=</span> <span class=n>first</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 97</span><span class=cl>			<span class=n>first</span><span class=p>.</span><span class=n>prev</span> <span class=o>=</span> <span class=n>node</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 98</span><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=ln> 99</span><span class=cl>		<span class=n>first</span> <span class=o>=</span> <span class=n>node</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>100</span><span class=cl>		<span class=n>node</span><span class=p>.</span><span class=n>prev</span> <span class=o>=</span> <span class=n>null</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>101</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>last</span> <span class=o>==</span> <span class=n>null</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>102</span><span class=cl>			<span class=n>last</span> <span class=o>=</span> <span class=n>first</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>103</span><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=ln>104</span><span class=cl>	<span class=k>private</span> <span class=kt>int</span> <span class=n>cacheSize</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>105</span><span class=cl>	<span class=k>private</span> <span class=n>Hashtable</span> <span class=n>nodes</span><span class=p>;</span><span class=c1>//缓存容器
+</span></span></span><span class=line><span class=ln>106</span><span class=cl><span class=c1></span>	<span class=k>private</span> <span class=kt>int</span> <span class=n>currentSize</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>107</span><span class=cl>	<span class=k>private</span> <span class=n>CacheNode</span> <span class=n>first</span><span class=p>;</span><span class=c1>//链表头
+</span></span></span><span class=line><span class=ln>108</span><span class=cl><span class=c1></span>	<span class=k>private</span> <span class=n>CacheNode</span> <span class=n>last</span><span class=p>;</span><span class=c1>//链表尾
+</span></span></span><span class=line><span class=ln>109</span><span class=cl><span class=c1></span><span class=p>}</span>
 </span></span></code></pre></div></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
 <span class=button_tally>913</span>
 </a><a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>其他

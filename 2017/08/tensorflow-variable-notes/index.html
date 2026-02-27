@@ -23,112 +23,112 @@ tf/Variable
 <a href=https://111qqz.com/en/ class="nav_child nav_item">English</a></div></div><div class=follow><a href=https://github.com/111qqz><svg class="icon"><use xlink:href="#github"/></svg></a><div class=color_mode><input type=checkbox class=color_choice id=mode></div></div></div></nav></header><main><div class="grid-inverse wrap content"><article class=post_content><h1 class=post_title>tensorflow variable 学习笔记</h1><div class=post_meta><span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>2017-08-20</span>
 <span class=post_time>· 7 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/checkpoint title=checkpoint class="post_tag button button_translucent">checkpoint
-</a><a href=https://111qqz.com/tags/tensorflow title=tensorflow class="post_tag button button_translucent">tensorflow</a></span></div><div class=post_body><p>参考资料：</p><p><a href=https://www.tensorflow.org/programmers_guide/variables>programmers_guide/variables</a></p><p><a href=https://www.tensorflow.org/api_docs/python/tf/Variable>tf/Variable</a></p><p>之前感觉对tensorflow 的variable的理解不是很深刻&mldr;跑个模型啥的倒不会有什么问题，但是涉及分布式，模型并行之类的，感觉有些地方还是要理解得仔细一点比较好。</p><h1 id=overview>OVERVIEW</h1><p>variable的目的是将状态可持久化。</p><p>Unlike <code>tf.Tensor</code> objects, a <code>tf.Variable</code> exists outside the context of a single<code>session.run</code> call.</p><p>通俗地说就是，variable可以用来存储一个可持久化的tensor</p><p>一些op允许读取或者修改tensor的值，这些修改是<strong>跨session可见的</strong>，也就是说，<strong>对于用variable可持久化过的tensor,多个worker（多卡之间）之间可以看到相同的值</strong>。</p><h1 id=creating-a-variable>Creating a Variable</h1><p>创建变量可以通过调用tf.get_variable function的方法实现。这个函数要求指明变量名称，这个名称会被作为标识该变量的key。</p><p>tf.get_variable也允许变量复用，意思是用之前创建过的有相同名字的变量，创建当前的变量。</p><pre><code>my_int_variable = tf.get_variable(&quot;my_int_variable&quot;, [1, 2, 3], dtype=tf.int32, 
-  initializer=tf.zeros_initializer)
-
-#分别是变量名，shape，变量类型，初始化方法。
-#默认类型为tf.float32，默认初始化方法是随机数。
-#tf提供很多其他的初始化方法，以及也可以用一个tensor作为初始化。
-#注意用tensor作为初始化时，shape就不用提供了，因为会用tensor的shape作为variable的shape
-</code></pre><h1 id=variable-collections>Variable collections</h1><p>由于在不同的部分创建了的变量可能有是够想一起访问，所以我们需要一个简单的能访问一个集合的变量的方法。tensorflow提供了collecetions,可以理解成python list,</p><p>是一个存储tensor，variable或者其他实例的容器。</p><p>默认情况下，tf.variable被收集到如下两个collcetions:</p><pre><code>  * tf.GraphKeys.GLOBAL_VARIABLES：放置可以被多个设备共享的variable(从名字中的GLOBAL也可以看出来...)
-  * tf.GraphKeys.TRAINABLE_VARIABLES:用来放置用来计算梯度的variable
-</code></pre><p>如果不想训练某个variable,那么将它加入名字叫tf.GraphKeys.LOCAL_VARIABLES 的默认collection&mldr;</p><p>下面是一个将名字叫my_local的variable加入tf.GraphKeys.LOCAL_VARIABLES的例子</p><pre><code>my_local = tf.get_variable(&quot;my_local&quot;, shape=(), 
-collections=[tf.GraphKeys.LOCAL_VARIABLES])
-</code></pre><p>一个等价写法是，将trainable属性设置为False</p><pre><code>my_non_trainable = tf.get_variable(&quot;my_non_trainable&quot;, 
-                                   shape=(), 
-                                   trainable=False)
-</code></pre><p>当然自定义collcetion也是可以的，名字可以是任何字符串。</p><pre><code>#将名字为my_local的variable放置进名字为my_collcetion_name的collection
-#如果当前这个collcetion不存在，则会自动创建
-#也就是说collcetion不用显式定义，在引用的时候如果不存在会自动定义。
-tf.add_to_collection(&quot;my_collection_name&quot;, my_local)
-
-
-
-
-
-
-
-
-#得到名字为my_collcetion_name 的collcetion中  的所有varibale,
-#返回一个元素为variable的list，顺序按照这些variable被collect的顺序
-tf.get_collection(&quot;my_collection_name&quot;)
-</code></pre><h1 id=device-placement>Device placement</h1><p>variable和op一样，也可以放在指定的设备上。</p><p>在分布式tensorflow中，<strong>variable放在合适的设备上非常重要</strong>，如果不慎将variable 放在了 worker(GPU device)而不是PS(CPU device)上，将会严重减慢训练速度</p><p>基于这样的原因，我们提供<a href=https://www.tensorflow.org/api_docs/python/tf/train/replica_device_setter>replica_device_setter</a>,来自动将variable放置在ps上&mldr;默认是轮盘转的放置策略</p><pre><code>cluster_spec = {
-    &quot;ps&quot;: [&quot;ps0:2222&quot;, &quot;ps1:2222&quot;],
-    &quot;worker&quot;: [&quot;worker0:2222&quot;, &quot;worker1:2222&quot;, &quot;worker2:2222&quot;]}
-with tf.device(tf.train.replica_device_setter(cluster=cluster_spec)):
-  v = tf.get_variable(&quot;v&quot;, shape=[20, 20])  # this variable is placed 
-                                            # in the parameter server
-                                            # by the replica_device_setter
-</code></pre><h1 id=initializing-variables>Initializing variables</h1><p>在使用一个变量之前，必须先进行初始化。如果你用原生tensorflow，那初始化一般要手动显示完成。如果是使用slim,keras之类，variable的初始化一般是自动完成的。</p><p>Explicit initialization is otherwise useful because it allows you not to rerun potentially expensive initializers when reloading a model from a checkpoint as well as allowing determinism when randomly-initialized variables are shared in a distributed setting.</p><p>另一方面，明确地初始化可以保证你不会多次运行计算代价可能很昂贵的初始化操作，当你reload一个模型时。</p><p>一次性初始化所有变量可以使用tf.global_variables_initializer()，运行
+</a><a href=https://111qqz.com/tags/tensorflow title=tensorflow class="post_tag button button_translucent">tensorflow</a></span></div><div class=post_body><p>参考资料：</p><p><a href=https://www.tensorflow.org/programmers_guide/variables>programmers_guide/variables</a></p><p><a href=https://www.tensorflow.org/api_docs/python/tf/Variable>tf/Variable</a></p><p>之前感觉对tensorflow 的variable的理解不是很深刻&mldr;跑个模型啥的倒不会有什么问题，但是涉及分布式，模型并行之类的，感觉有些地方还是要理解得仔细一点比较好。</p><h1 id=overview>OVERVIEW</h1><p>variable的目的是将状态可持久化。</p><p>Unlike <code>tf.Tensor</code> objects, a <code>tf.Variable</code> exists outside the context of a single<code>session.run</code> call.</p><p>通俗地说就是，variable可以用来存储一个可持久化的tensor</p><p>一些op允许读取或者修改tensor的值，这些修改是<strong>跨session可见的</strong>，也就是说，<strong>对于用variable可持久化过的tensor,多个worker（多卡之间）之间可以看到相同的值</strong>。</p><h1 id=creating-a-variable>Creating a Variable</h1><p>创建变量可以通过调用tf.get_variable function的方法实现。这个函数要求指明变量名称，这个名称会被作为标识该变量的key。</p><p>tf.get_variable也允许变量复用，意思是用之前创建过的有相同名字的变量，创建当前的变量。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=n>my_int_variable</span> <span class=o>=</span> <span class=n>tf</span><span class=p>.</span><span class=n>get_variable</span><span class=p>(</span><span class=s>&#34;my_int_variable&#34;</span><span class=p>,</span> <span class=p>[</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>],</span> <span class=n>dtype</span><span class=o>=</span><span class=n>tf</span><span class=p>.</span><span class=n>int32</span><span class=p>,</span> 
+</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=n>initializer</span><span class=o>=</span><span class=n>tf</span><span class=p>.</span><span class=n>zeros_initializer</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=cp>#分别是变量名，shape，变量类型，初始化方法。
+</span></span></span><span class=line><span class=ln>5</span><span class=cl><span class=cp>#默认类型为tf.float32，默认初始化方法是随机数。
+</span></span></span><span class=line><span class=ln>6</span><span class=cl><span class=cp>#tf提供很多其他的初始化方法，以及也可以用一个tensor作为初始化。
+</span></span></span><span class=line><span class=ln>7</span><span class=cl><span class=cp>#注意用tensor作为初始化时，shape就不用提供了，因为会用tensor的shape作为variable的shape
+</span></span></span></code></pre></div><h1 id=variable-collections>Variable collections</h1><p>由于在不同的部分创建了的变量可能有是够想一起访问，所以我们需要一个简单的能访问一个集合的变量的方法。tensorflow提供了collecetions,可以理解成python list,</p><p>是一个存储tensor，variable或者其他实例的容器。</p><p>默认情况下，tf.variable被收集到如下两个collcetions:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>  <span class=o>*</span> <span class=n>tf</span><span class=p>.</span><span class=n>GraphKeys</span><span class=p>.</span><span class=n>GLOBAL_VARIABLES</span><span class=err>：放置可以被多个设备共享的</span><span class=n>variable</span><span class=p>(</span><span class=err>从名字中的</span><span class=n>GLOBAL也可以看出来</span><span class=p>...)</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=o>*</span> <span class=n>tf</span><span class=p>.</span><span class=n>GraphKeys</span><span class=p>.</span><span class=nl>TRAINABLE_VARIABLES</span><span class=p>:</span><span class=err>用来放置用来计算梯度的</span><span class=n>variable</span>
+</span></span></code></pre></div><p>如果不想训练某个variable,那么将它加入名字叫tf.GraphKeys.LOCAL_VARIABLES 的默认collection&mldr;</p><p>下面是一个将名字叫my_local的variable加入tf.GraphKeys.LOCAL_VARIABLES的例子</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=n>my_local</span> <span class=o>=</span> <span class=n>tf</span><span class=p>.</span><span class=n>get_variable</span><span class=p>(</span><span class=s>&#34;my_local&#34;</span><span class=p>,</span> <span class=n>shape</span><span class=o>=</span><span class=p>(),</span> 
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=n>collections</span><span class=o>=</span><span class=p>[</span><span class=n>tf</span><span class=p>.</span><span class=n>GraphKeys</span><span class=p>.</span><span class=n>LOCAL_VARIABLES</span><span class=p>])</span>
+</span></span></code></pre></div><p>一个等价写法是，将trainable属性设置为False</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=n>my_non_trainable</span> <span class=o>=</span> <span class=n>tf</span><span class=p>.</span><span class=n>get_variable</span><span class=p>(</span><span class=s>&#34;my_non_trainable&#34;</span><span class=p>,</span> 
+</span></span><span class=line><span class=ln>2</span><span class=cl>                                   <span class=n>shape</span><span class=o>=</span><span class=p>(),</span> 
+</span></span><span class=line><span class=ln>3</span><span class=cl>                                   <span class=n>trainable</span><span class=o>=</span><span class=n>False</span><span class=p>)</span>
+</span></span></code></pre></div><p>当然自定义collcetion也是可以的，名字可以是任何字符串。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=cp>#将名字为my_local的variable放置进名字为my_collcetion_name的collection
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cp>#如果当前这个collcetion不存在，则会自动创建
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cp>#也就是说collcetion不用显式定义，在引用的时候如果不存在会自动定义。
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cp></span><span class=n>tf</span><span class=p>.</span><span class=n>add_to_collection</span><span class=p>(</span><span class=s>&#34;my_collection_name&#34;</span><span class=p>,</span> <span class=n>my_local</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>
+</span></span><span class=line><span class=ln>10</span><span class=cl>
+</span></span><span class=line><span class=ln>11</span><span class=cl>
+</span></span><span class=line><span class=ln>12</span><span class=cl>
+</span></span><span class=line><span class=ln>13</span><span class=cl><span class=cp>#得到名字为my_collcetion_name 的collcetion中  的所有varibale,
+</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=cp>#返回一个元素为variable的list，顺序按照这些variable被collect的顺序
+</span></span></span><span class=line><span class=ln>15</span><span class=cl><span class=cp></span><span class=n>tf</span><span class=p>.</span><span class=n>get_collection</span><span class=p>(</span><span class=s>&#34;my_collection_name&#34;</span><span class=p>)</span>
+</span></span></code></pre></div><h1 id=device-placement>Device placement</h1><p>variable和op一样，也可以放在指定的设备上。</p><p>在分布式tensorflow中，<strong>variable放在合适的设备上非常重要</strong>，如果不慎将variable 放在了 worker(GPU device)而不是PS(CPU device)上，将会严重减慢训练速度</p><p>基于这样的原因，我们提供<a href=https://www.tensorflow.org/api_docs/python/tf/train/replica_device_setter>replica_device_setter</a>,来自动将variable放置在ps上&mldr;默认是轮盘转的放置策略</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=n>cluster_spec</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=s>&#34;ps&#34;</span><span class=o>:</span> <span class=p>[</span><span class=s>&#34;ps0:2222&#34;</span><span class=p>,</span> <span class=s>&#34;ps1:2222&#34;</span><span class=p>],</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=s>&#34;worker&#34;</span><span class=o>:</span> <span class=p>[</span><span class=s>&#34;worker0:2222&#34;</span><span class=p>,</span> <span class=s>&#34;worker1:2222&#34;</span><span class=p>,</span> <span class=s>&#34;worker2:2222&#34;</span><span class=p>]}</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=n>with</span> <span class=n>tf</span><span class=p>.</span><span class=n>device</span><span class=p>(</span><span class=n>tf</span><span class=p>.</span><span class=n>train</span><span class=p>.</span><span class=n>replica_device_setter</span><span class=p>(</span><span class=n>cluster</span><span class=o>=</span><span class=n>cluster_spec</span><span class=p>))</span><span class=o>:</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=n>v</span> <span class=o>=</span> <span class=n>tf</span><span class=p>.</span><span class=n>get_variable</span><span class=p>(</span><span class=s>&#34;v&#34;</span><span class=p>,</span> <span class=n>shape</span><span class=o>=</span><span class=p>[</span><span class=mi>20</span><span class=p>,</span> <span class=mi>20</span><span class=p>])</span>  <span class=err>#</span> <span class=k>this</span> <span class=n>variable</span> <span class=n>is</span> <span class=n>placed</span> 
+</span></span><span class=line><span class=ln>6</span><span class=cl>                                            <span class=err>#</span> <span class=n>in</span> <span class=n>the</span> <span class=n>parameter</span> <span class=n>server</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl>                                            <span class=cp># by the replica_device_setter
+</span></span></span></code></pre></div><h1 id=initializing-variables>Initializing variables</h1><p>在使用一个变量之前，必须先进行初始化。如果你用原生tensorflow，那初始化一般要手动显示完成。如果是使用slim,keras之类，variable的初始化一般是自动完成的。</p><p>Explicit initialization is otherwise useful because it allows you not to rerun potentially expensive initializers when reloading a model from a checkpoint as well as allowing determinism when randomly-initialized variables are shared in a distributed setting.</p><p>另一方面，明确地初始化可以保证你不会多次运行计算代价可能很昂贵的初始化操作，当你reload一个模型时。</p><p>一次性初始化所有变量可以使用tf.global_variables_initializer()，运行
 session.run(tf.global_variables_initializer())
-这个操作会把tf.GraphKeys.GLOBAL_VARIABLES 中的所有变量初始化。</p><p>也可以手动初始化特定变量，</p><pre><code>session.run(my_variable.initializer)
-</code></pre><p>还可以得到当前没有被初始化的变量有那些（这样就可以只初始化仍然没有初始化的变量，避免重复初始化，减小计算代价。</p><pre><code>print(session.run(tf.report_uninitialized_variables()))
-</code></pre><p><strong>需要注意的是,tf.global_variables_initializer()初始化所有变量时并没有固定的顺序，所以如果你的某个variable的值依赖于另一个variable的值，那么就很可能出错。</strong></p><p>Any time you use the value of a variable in a context in which not all variables are initialized (say, if you use a variable&rsquo;s value while initializing another variable), it is best to use <code>variable.initialized_value()</code> instead of <code>variable</code>:</p><p>任何时候如果你处于一个不是所有变量都被初始化 的环境，最后使用myvar.initialized_value()来替代myvar</p><pre><code>v = tf.get_variable(&quot;v&quot;, shape=(), initializer=tf.zeros_initializer())
-w = tf.get_variable(&quot;w&quot;, initializer=v.initialized_value() + 1)
-</code></pre><h1 id=using-variables>Using variables</h1><p>variable可以直接看做tensor</p><pre><code>v = tf.get_variable(&quot;v&quot;, shape=(), initializer=tf.zeros_initializer())
-w = v + 1  # w is a tf.Tensor which is computed based on the value of v.
-           # Any time a variable is used in an expression it gets automatically
-           # converted to a tf.Tensor representing its value.
-</code></pre><p>对变量赋值可以使用assign,assign_add或者tf.variable class中的方法</p><h1 id=saving-and-restoring>Saving and Restoring</h1><p>保存和恢复一个模型的最容易的方法就是使用tf.train.Saver object. <strong>该object包含save和restore两个op,</strong></p><p>使用save 或者 restore  op来保存或者恢复<strong>图中</strong>全部，或者指定的varibales</p><p>如果想在图外面恢复一个模型的checkpoint,必须先用tf.train.import_meta_graph将checkpoint中的metafile(以meta为后缀）的文件导入</p><p>这样会返回一个Saver object，然后才能执行resotre op</p><h2 id=checkpoint-files>Checkpoint Files</h2><p>tensorflow将variable存储为二进制文件的形式，通俗地说，就是map variable names to tensor values</p><p>当你创建了Saver object 之后，你可以选择为你保存进checkpoint files 文件的变量起一个名字。默认情况下，变量被使用tf.Variabel.name的名字。</p><p>如果想检查checkpoint 中的variable,可以使用inspect_checkpoint库，尤其是其中的print_tensors_in_checkpoint_file 函数。</p><h2 id=saving-variables>Saving Variables</h2><p>下面是一个如何使用Saver object 中的save操作来保存变量的例子</p><pre><code># Create some variables.
-v1 = tf.get_variable(&quot;v1&quot;, shape=[3], initializer = tf.zeros_initializer)
-v2 = tf.get_variable(&quot;v2&quot;, shape=[5], initializer = tf.zeros_initializer)
-
-inc_v1 = v1.assign(v1+1)
-dec_v2 = v2.assign(v2-1)
-
-# Add an op to initialize the variables.
-init_op = tf.global_variables_initializer()
-
-# Add ops to save and restore all the variables.
-saver = tf.train.Saver()
-
-# Later, launch the model, initialize the variables, do some work, and save the
-# variables to disk.
-with tf.Session() as sess:
-  sess.run(init_op)
-  # Do some work with the model.
-  inc_v1.op.run()
-  dec_v2.op.run()
-  # Save the variables to disk.
-  save_path = saver.save(sess, &quot;/tmp/model.ckpt&quot;)
-  print(&quot;Model saved in file: %s&quot; % save_path)
-</code></pre><h2 id=restoring-variables>Restoring Variables</h2><p>注意从checkpoint文件中恢复variables的时候没有必要初始化</p><p>下面是一个使用saver object 的restore op的例子：</p><pre><code>tf.reset_default_graph()
-
-# Create some variables.
-v1 = tf.get_variable(&quot;v1&quot;, shape=[3])
-v2 = tf.get_variable(&quot;v2&quot;, shape=[5])
-
-# Add ops to save and restore all the variables.
-saver = tf.train.Saver()
-
-# Later, launch the model, use the saver to restore variables from disk, and
-# do some work with the model.
-with tf.Session() as sess:
-  # Restore variables from disk.
-  saver.restore(sess, &quot;/tmp/model.ckpt&quot;)
-  print(&quot;Model restored.&quot;)
-  # Check the values of the variables
-  print(&quot;v1 : %s&quot; % v1.eval())
-  print(&quot;v2 : %s&quot; % v2.eval())
-</code></pre><h2 id=choosing-which-variables-to-save-and-restore>Choosing which Variables to Save and Restore</h2><p>如果tf.train.Saver()中不传入任何参数就会默认处理所有变量。</p><p>我们可以传入一些变量名，表示处理特定的变量。例子如下：</p><pre><code>tf.reset_default_graph()
-# Create some variables.
-v1 = tf.get_variable(&quot;v1&quot;, [3], initializer = tf.zeros_initializer)
-v2 = tf.get_variable(&quot;v2&quot;, [5], initializer = tf.zeros_initializer)
-
-# Add ops to save and restore only `v2` using the name &quot;v2&quot;
-saver = tf.train.Saver({&quot;v2&quot;: v2})
-
-# Use the saver object normally after that.
-with tf.Session() as sess:
-  # Initialize v1 since the saver will not.
-  v1.initializer.run()
-  saver.restore(sess, &quot;/tmp/model.ckpt&quot;)
-
-  print(&quot;v1 : %s&quot; % v1.eval())
-  print(&quot;v2 : %s&quot; % v2.eval())
-</code></pre><p>需要注意的是:</p><pre><code>  * **Saver object可以有任意多个，同一个变量也可以被任意多个Saver object save**
-  * **restore的时候如果只是restore了一部分变量，其余的变量记得要初始化**
-</code></pre><h1 id=sharing-variables>Sharing variables</h1><p>暂时用不上，有空补吧，困了orz</p></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
+这个操作会把tf.GraphKeys.GLOBAL_VARIABLES 中的所有变量初始化。</p><p>也可以手动初始化特定变量，</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=n>session</span><span class=p>.</span><span class=n>run</span><span class=p>(</span><span class=n>my_variable</span><span class=p>.</span><span class=n>initializer</span><span class=p>)</span>
+</span></span></code></pre></div><p>还可以得到当前没有被初始化的变量有那些（这样就可以只初始化仍然没有初始化的变量，避免重复初始化，减小计算代价。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>session</span><span class=o>.</span><span class=n>run</span><span class=p>(</span><span class=n>tf</span><span class=o>.</span><span class=n>report_uninitialized_variables</span><span class=p>()))</span>
+</span></span></code></pre></div><p><strong>需要注意的是,tf.global_variables_initializer()初始化所有变量时并没有固定的顺序，所以如果你的某个variable的值依赖于另一个variable的值，那么就很可能出错。</strong></p><p>Any time you use the value of a variable in a context in which not all variables are initialized (say, if you use a variable&rsquo;s value while initializing another variable), it is best to use <code>variable.initialized_value()</code> instead of <code>variable</code>:</p><p>任何时候如果你处于一个不是所有变量都被初始化 的环境，最后使用myvar.initialized_value()来替代myvar</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=n>v</span> <span class=o>=</span> <span class=n>tf</span><span class=p>.</span><span class=n>get_variable</span><span class=p>(</span><span class=s>&#34;v&#34;</span><span class=p>,</span> <span class=n>shape</span><span class=o>=</span><span class=p>(),</span> <span class=n>initializer</span><span class=o>=</span><span class=n>tf</span><span class=p>.</span><span class=n>zeros_initializer</span><span class=p>())</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=n>w</span> <span class=o>=</span> <span class=n>tf</span><span class=p>.</span><span class=n>get_variable</span><span class=p>(</span><span class=s>&#34;w&#34;</span><span class=p>,</span> <span class=n>initializer</span><span class=o>=</span><span class=n>v</span><span class=p>.</span><span class=n>initialized_value</span><span class=p>()</span> <span class=o>+</span> <span class=mi>1</span><span class=p>)</span>
+</span></span></code></pre></div><h1 id=using-variables>Using variables</h1><p>variable可以直接看做tensor</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=n>v</span> <span class=o>=</span> <span class=n>tf</span><span class=p>.</span><span class=n>get_variable</span><span class=p>(</span><span class=s>&#34;v&#34;</span><span class=p>,</span> <span class=n>shape</span><span class=o>=</span><span class=p>(),</span> <span class=n>initializer</span><span class=o>=</span><span class=n>tf</span><span class=p>.</span><span class=n>zeros_initializer</span><span class=p>())</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=n>w</span> <span class=o>=</span> <span class=n>v</span> <span class=o>+</span> <span class=mi>1</span>  <span class=err>#</span> <span class=n>w</span> <span class=n>is</span> <span class=n>a</span> <span class=n>tf</span><span class=p>.</span><span class=n>Tensor</span> <span class=n>which</span> <span class=n>is</span> <span class=n>computed</span> <span class=n>based</span> <span class=n>on</span> <span class=n>the</span> <span class=n>value</span> <span class=n>of</span> <span class=n>v</span><span class=p>.</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>           <span class=cp># Any time a variable is used in an expression it gets automatically
+</span></span></span><span class=line><span class=ln>4</span><span class=cl><span class=cp></span>           <span class=cp># converted to a tf.Tensor representing its value.
+</span></span></span></code></pre></div><p>对变量赋值可以使用assign,assign_add或者tf.variable class中的方法</p><h1 id=saving-and-restoring>Saving and Restoring</h1><p>保存和恢复一个模型的最容易的方法就是使用tf.train.Saver object. <strong>该object包含save和restore两个op,</strong></p><p>使用save 或者 restore  op来保存或者恢复<strong>图中</strong>全部，或者指定的varibales</p><p>如果想在图外面恢复一个模型的checkpoint,必须先用tf.train.import_meta_graph将checkpoint中的metafile(以meta为后缀）的文件导入</p><p>这样会返回一个Saver object，然后才能执行resotre op</p><h2 id=checkpoint-files>Checkpoint Files</h2><p>tensorflow将variable存储为二进制文件的形式，通俗地说，就是map variable names to tensor values</p><p>当你创建了Saver object 之后，你可以选择为你保存进checkpoint files 文件的变量起一个名字。默认情况下，变量被使用tf.Variabel.name的名字。</p><p>如果想检查checkpoint 中的variable,可以使用inspect_checkpoint库，尤其是其中的print_tensors_in_checkpoint_file 函数。</p><h2 id=saving-variables>Saving Variables</h2><p>下面是一个如何使用Saver object 中的save操作来保存变量的例子</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl><span class=c1># Create some variables.</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=n>v1</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>get_variable</span><span class=p>(</span><span class=s2>&#34;v1&#34;</span><span class=p>,</span> <span class=n>shape</span><span class=o>=</span><span class=p>[</span><span class=mi>3</span><span class=p>],</span> <span class=n>initializer</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>zeros_initializer</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=n>v2</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>get_variable</span><span class=p>(</span><span class=s2>&#34;v2&#34;</span><span class=p>,</span> <span class=n>shape</span><span class=o>=</span><span class=p>[</span><span class=mi>5</span><span class=p>],</span> <span class=n>initializer</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>zeros_initializer</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>
+</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=n>inc_v1</span> <span class=o>=</span> <span class=n>v1</span><span class=o>.</span><span class=n>assign</span><span class=p>(</span><span class=n>v1</span><span class=o>+</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=n>dec_v2</span> <span class=o>=</span> <span class=n>v2</span><span class=o>.</span><span class=n>assign</span><span class=p>(</span><span class=n>v2</span><span class=o>-</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>
+</span></span><span class=line><span class=ln> 8</span><span class=cl><span class=c1># Add an op to initialize the variables.</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl><span class=n>init_op</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>global_variables_initializer</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>
+</span></span><span class=line><span class=ln>11</span><span class=cl><span class=c1># Add ops to save and restore all the variables.</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl><span class=n>saver</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>train</span><span class=o>.</span><span class=n>Saver</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>
+</span></span><span class=line><span class=ln>14</span><span class=cl><span class=c1># Later, launch the model, initialize the variables, do some work, and save the</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl><span class=c1># variables to disk.</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl><span class=k>with</span> <span class=n>tf</span><span class=o>.</span><span class=n>Session</span><span class=p>()</span> <span class=k>as</span> <span class=n>sess</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>  <span class=n>sess</span><span class=o>.</span><span class=n>run</span><span class=p>(</span><span class=n>init_op</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>  <span class=c1># Do some work with the model.</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>  <span class=n>inc_v1</span><span class=o>.</span><span class=n>op</span><span class=o>.</span><span class=n>run</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl>  <span class=n>dec_v2</span><span class=o>.</span><span class=n>op</span><span class=o>.</span><span class=n>run</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl>  <span class=c1># Save the variables to disk.</span>
+</span></span><span class=line><span class=ln>22</span><span class=cl>  <span class=n>save_path</span> <span class=o>=</span> <span class=n>saver</span><span class=o>.</span><span class=n>save</span><span class=p>(</span><span class=n>sess</span><span class=p>,</span> <span class=s2>&#34;/tmp/model.ckpt&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>23</span><span class=cl>  <span class=nb>print</span><span class=p>(</span><span class=s2>&#34;Model saved in file: </span><span class=si>%s</span><span class=s2>&#34;</span> <span class=o>%</span> <span class=n>save_path</span><span class=p>)</span>
+</span></span></code></pre></div><h2 id=restoring-variables>Restoring Variables</h2><p>注意从checkpoint文件中恢复variables的时候没有必要初始化</p><p>下面是一个使用saver object 的restore op的例子：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl><span class=n>tf</span><span class=o>.</span><span class=n>reset_default_graph</span><span class=p>()</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>
+</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=c1># Create some variables.</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl><span class=n>v1</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>get_variable</span><span class=p>(</span><span class=s2>&#34;v1&#34;</span><span class=p>,</span> <span class=n>shape</span><span class=o>=</span><span class=p>[</span><span class=mi>3</span><span class=p>])</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=n>v2</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>get_variable</span><span class=p>(</span><span class=s2>&#34;v2&#34;</span><span class=p>,</span> <span class=n>shape</span><span class=o>=</span><span class=p>[</span><span class=mi>5</span><span class=p>])</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>
+</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=c1># Add ops to save and restore all the variables.</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl><span class=n>saver</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>train</span><span class=o>.</span><span class=n>Saver</span><span class=p>()</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>
+</span></span><span class=line><span class=ln>10</span><span class=cl><span class=c1># Later, launch the model, use the saver to restore variables from disk, and</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl><span class=c1># do some work with the model.</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl><span class=k>with</span> <span class=n>tf</span><span class=o>.</span><span class=n>Session</span><span class=p>()</span> <span class=k>as</span> <span class=n>sess</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>  <span class=c1># Restore variables from disk.</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>  <span class=n>saver</span><span class=o>.</span><span class=n>restore</span><span class=p>(</span><span class=n>sess</span><span class=p>,</span> <span class=s2>&#34;/tmp/model.ckpt&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>  <span class=nb>print</span><span class=p>(</span><span class=s2>&#34;Model restored.&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>  <span class=c1># Check the values of the variables</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>  <span class=nb>print</span><span class=p>(</span><span class=s2>&#34;v1 : </span><span class=si>%s</span><span class=s2>&#34;</span> <span class=o>%</span> <span class=n>v1</span><span class=o>.</span><span class=n>eval</span><span class=p>())</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>  <span class=nb>print</span><span class=p>(</span><span class=s2>&#34;v2 : </span><span class=si>%s</span><span class=s2>&#34;</span> <span class=o>%</span> <span class=n>v2</span><span class=o>.</span><span class=n>eval</span><span class=p>())</span>
+</span></span></code></pre></div><h2 id=choosing-which-variables-to-save-and-restore>Choosing which Variables to Save and Restore</h2><p>如果tf.train.Saver()中不传入任何参数就会默认处理所有变量。</p><p>我们可以传入一些变量名，表示处理特定的变量。例子如下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl><span class=n>tf</span><span class=o>.</span><span class=n>reset_default_graph</span><span class=p>()</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=c1># Create some variables.</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=n>v1</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>get_variable</span><span class=p>(</span><span class=s2>&#34;v1&#34;</span><span class=p>,</span> <span class=p>[</span><span class=mi>3</span><span class=p>],</span> <span class=n>initializer</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>zeros_initializer</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl><span class=n>v2</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>get_variable</span><span class=p>(</span><span class=s2>&#34;v2&#34;</span><span class=p>,</span> <span class=p>[</span><span class=mi>5</span><span class=p>],</span> <span class=n>initializer</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>zeros_initializer</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>
+</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=c1># Add ops to save and restore only `v2` using the name &#34;v2&#34;</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=n>saver</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>train</span><span class=o>.</span><span class=n>Saver</span><span class=p>({</span><span class=s2>&#34;v2&#34;</span><span class=p>:</span> <span class=n>v2</span><span class=p>})</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>
+</span></span><span class=line><span class=ln> 9</span><span class=cl><span class=c1># Use the saver object normally after that.</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl><span class=k>with</span> <span class=n>tf</span><span class=o>.</span><span class=n>Session</span><span class=p>()</span> <span class=k>as</span> <span class=n>sess</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>  <span class=c1># Initialize v1 since the saver will not.</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>  <span class=n>v1</span><span class=o>.</span><span class=n>initializer</span><span class=o>.</span><span class=n>run</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>  <span class=n>saver</span><span class=o>.</span><span class=n>restore</span><span class=p>(</span><span class=n>sess</span><span class=p>,</span> <span class=s2>&#34;/tmp/model.ckpt&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>
+</span></span><span class=line><span class=ln>15</span><span class=cl>  <span class=nb>print</span><span class=p>(</span><span class=s2>&#34;v1 : </span><span class=si>%s</span><span class=s2>&#34;</span> <span class=o>%</span> <span class=n>v1</span><span class=o>.</span><span class=n>eval</span><span class=p>())</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>  <span class=nb>print</span><span class=p>(</span><span class=s2>&#34;v2 : </span><span class=si>%s</span><span class=s2>&#34;</span> <span class=o>%</span> <span class=n>v2</span><span class=o>.</span><span class=n>eval</span><span class=p>())</span>
+</span></span></code></pre></div><p>需要注意的是:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>  <span class=o>*</span> <span class=o>**</span><span class=n>Saver</span> <span class=n>object可以有任意多个</span><span class=err>，同一个变量也可以被任意多个</span><span class=n>Saver</span> <span class=n>object</span> <span class=n>save</span><span class=o>**</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=o>*</span> <span class=o>**</span><span class=n>restore的时候如果只是restore了一部分变量</span><span class=err>，其余的变量记得要初始化</span><span class=o>**</span>
+</span></span></code></pre></div><h1 id=sharing-variables>Sharing variables</h1><p>暂时用不上，有空补吧，困了orz</p></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
 <span class=button_tally>913</span>
 </a><a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>其他
 <span class=button_tally>90</span>

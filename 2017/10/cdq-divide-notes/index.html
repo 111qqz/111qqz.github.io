@@ -20,23 +20,22 @@ cdq分治显然是分治的一种，cdq的意思就是超短裙啦（
 <a href=https://111qqz.com/ class="nav_child nav_item">中文</a>
 <a href=https://111qqz.com/en/ class="nav_child nav_item">English</a></div></div><div class=follow><a href=https://github.com/111qqz><svg class="icon"><use xlink:href="#github"/></svg></a><div class=color_mode><input type=checkbox class=color_choice id=mode></div></div></div></nav></header><main><div class="grid-inverse wrap content"><article class=post_content><h1 class=post_title>cdq分治学习笔记</h1><div class=post_meta><span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>2017-10-10</span>
-<span class=post_time>· 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/cdq%E5%88%86%E6%B2%BB title=cdq分治 class="post_tag button button_translucent">cdq分治</a></span></div><div class=post_body><p>起因是队里的大佬们都会这东西，而我一个老年选手竟然还不会，实在说不过去。</p><p>cdq分治显然是分治的一种，cdq的意思就是超短裙啦（</p><p>这东西网上资料很多（<del>然而还是学不会</del></p><p>先放一波资料：</p><p><a href=https://xianglujia.github.io/2017/07/26/_CDQ/>资料1</a></p><p><a href=http://www.cnblogs.com/mlystdcall/p/6219421.html>【教程】简易CDQ分治教程&学习笔记</a></p><p><a href=http://www.cnblogs.com/candy99/p/cdq.html>[偏序关系与CDQ分治]【学习笔记】</a></p><p><a href=http://blog.csdn.net/loveyayoi/article/details/54773528>学习笔记——cdq分治</a></p><p><a href=http://www.cnblogs.com/rvalue/p/7214242.html>[学习笔记] CDQ分治 从感性理解到彻底晕菜</a></p><p><a href=http://blog.csdn.net/lwt36/article/details/50625573>lwt菊苣的博客</a></p><p>下面转自lwt菊苣的博客，豁然开朗。</p><blockquote><blockquote></blockquote><pre><code>  * 与普通分治的区别
-</code></pre><p>普通分治中，每一个子问题只解决它本身（可以说是封闭的）
-CDQ分治中，对于划分出来的两个子问题，前一个子问题用来解决后一个子问题而不是它本身
-* 适用的情况
-在很多问题中（比如大多数数据结构题），经常需要处理一些动态问题
+<span class=post_time>· 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/cdq%E5%88%86%E6%B2%BB title=cdq分治 class="post_tag button button_translucent">cdq分治</a></span></div><div class=post_body><p>起因是队里的大佬们都会这东西，而我一个老年选手竟然还不会，实在说不过去。</p><p>cdq分治显然是分治的一种，cdq的意思就是超短裙啦（</p><p>这东西网上资料很多（<del>然而还是学不会</del></p><p>先放一波资料：</p><p><a href=https://xianglujia.github.io/2017/07/26/_CDQ/>资料1</a></p><p><a href=http://www.cnblogs.com/mlystdcall/p/6219421.html>【教程】简易CDQ分治教程&学习笔记</a></p><p><a href=http://www.cnblogs.com/candy99/p/cdq.html>[偏序关系与CDQ分治]【学习笔记】</a></p><p><a href=http://blog.csdn.net/loveyayoi/article/details/54773528>学习笔记——cdq分治</a></p><p><a href=http://www.cnblogs.com/rvalue/p/7214242.html>[学习笔记] CDQ分治 从感性理解到彻底晕菜</a></p><p><a href=http://blog.csdn.net/lwt36/article/details/50625573>lwt菊苣的博客</a></p><p>下面转自lwt菊苣的博客，豁然开朗。</p><blockquote><blockquote></blockquote><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>  <span class=o>*</span> <span class=err>与普通分治的区别</span>
+</span></span></code></pre></div><p>普通分治中，每一个子问题只解决它本身（可以说是封闭的）
+CDQ分治中，对于划分出来的两个子问题，前一个子问题用来解决后一个子问题而不是它本身</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>  <span class=o>*</span> <span class=err>适用的情况</span>
+</span></span></code></pre></div><p>在很多问题中（比如大多数数据结构题），经常需要处理一些动态问题
 然而对动态问题的处理总是不如静态问题来的方便，于是就有了CDQ分治
-但使用CDQ分治的前提是问题必须具有以下两个性质：</p><pre><code>    * 修改操作对询问的贡献独立，修改操作互不影响效果
-    * 题目允许使用离线算法。
-
-
-  * 一般步骤
-
-    * 将整个操作序列分为两个长度相等的部分（分）
-    * 递归处理前一部分的子问题（治1）
-    * 计算前一部分的子问题中的修改操作对后一部分子问题的影响（治2）
-    * 递归处理后一部分子问题（治3）
-</code></pre><p>特别说明：
+但使用CDQ分治的前提是问题必须具有以下两个性质：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl>    <span class=o>*</span> <span class=err>修改操作对询问的贡献独立，修改操作互不影响效果</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>    <span class=o>*</span> <span class=err>题目允许使用离线算法。</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=o>*</span> <span class=err>一般步骤</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>    <span class=o>*</span> <span class=err>将整个操作序列分为两个长度相等的部分（分）</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>    <span class=o>*</span> <span class=err>递归处理前一部分的子问题（治</span><span class=mi>1</span><span class=err>）</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>    <span class=o>*</span> <span class=err>计算前一部分的子问题中的修改操作对后一部分子问题的影响（治</span><span class=mi>2</span><span class=err>）</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>    <span class=o>*</span> <span class=err>递归处理后一部分子问题（治</span><span class=mi>3</span><span class=err>）</span>
+</span></span></code></pre></div><p>特别说明：
 在整个过程中，最核心的就是步骤3
 此时前一部分子问题中的修改操作相对后一部分子问题来说是静态处理，因此可以更加方便地计算后一部分子问题</p></blockquote><p>cdq分治求三维偏序美滋滋</p><p><strong>一般是，第一维排序，第二维cdq,第三维套一层数据结构（<del>不然的话就要数据结构套数据结构啦差评</del></strong></p><p>cdq的复杂度和分治的复杂度一样也是O(nlgn),所以可以理解成cdq可以一层数据结构？因为比树套树之类好写，所以有广泛应用（？</p></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
 <span class=button_tally>913</span>

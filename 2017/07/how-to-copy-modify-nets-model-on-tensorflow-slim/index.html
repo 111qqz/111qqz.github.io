@@ -19,12 +19,12 @@
 <a href=https://111qqz.com/en/ class="nav_child nav_item">English</a></div></div><div class=follow><a href=https://github.com/111qqz><svg class="icon"><use xlink:href="#github"/></svg></a><div class=color_mode><input type=checkbox class=color_choice id=mode></div></div></div></nav></header><main><div class="grid-inverse wrap content"><article class=post_content><h1 class=post_title>how to copy & modify nets model on tensorflow slim</h1><div class=post_meta><span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>2017-07-19</span>
 <span class=post_time>· 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/slim title=slim class="post_tag button button_translucent">slim
-</a><a href=https://111qqz.com/tags/tensorflow title=tensorflow class="post_tag button button_translucent">tensorflow</a></span></div><div class=post_body><p>想要修改tensorflow-slim 中 nets中的某个model,例如明明为kk_v2.py</p><p>观察到train_image_classifier.py中调用模型的部分</p><pre><code>network_fn = nets_factory.get_network_fn(
-        FLAGS.model_name,
-        num_classes=(dataset.num_classes - FLAGS.labels_offset),
-        weight_decay=FLAGS.weight_decay,
-        is_training=True)
-</code></pre><p>调用了nets_factory.get_network_fn，get_network如下：</p><pre><code>def get_network_fn(name, num_classes, weight_decay=0.0, is_training=False):
+</a><a href=https://111qqz.com/tags/tensorflow title=tensorflow class="post_tag button button_translucent">tensorflow</a></span></div><div class=post_body><p>想要修改tensorflow-slim 中 nets中的某个model,例如明明为kk_v2.py</p><p>观察到train_image_classifier.py中调用模型的部分</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=n>network_fn</span> <span class=o>=</span> <span class=n>nets_factory</span><span class=o>.</span><span class=n>get_network_fn</span><span class=p>(</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>        <span class=n>FLAGS</span><span class=o>.</span><span class=n>model_name</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=n>num_classes</span><span class=o>=</span><span class=p>(</span><span class=n>dataset</span><span class=o>.</span><span class=n>num_classes</span> <span class=o>-</span> <span class=n>FLAGS</span><span class=o>.</span><span class=n>labels_offset</span><span class=p>),</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=n>weight_decay</span><span class=o>=</span><span class=n>FLAGS</span><span class=o>.</span><span class=n>weight_decay</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=n>is_training</span><span class=o>=</span><span class=kc>True</span><span class=p>)</span>
+</span></span></code></pre></div><p>调用了nets_factory.get_network_fn，get_network如下：</p><pre><code>def get_network_fn(name, num_classes, weight_decay=0.0, is_training=False):
   &quot;&quot;&quot;Returns a network_fn such as `logits, end_points = network_fn(images)`.
 
   Args:
@@ -33,50 +33,48 @@
     weight_decay: The l2 coefficient for the model weights.
     is_training: `True` if the model is being used for training and `False`
       otherwise.
-
-  Returns:
-    network_fn: A function that applies the model to a batch of images. It has
-      the following signature:
-        logits, end_points = network_fn(images)
-  Raises:
-    ValueError: If network `name` is not recognized.
-  &quot;&quot;&quot;
-  if name not in networks_map:
-    raise ValueError('Name of network unknown %s' % name)
-  func = networks_map[name]
-  @functools.wraps(func)
-  def network_fn(images):
-    arg_scope = arg_scopes_map[name](weight_decay=weight_decay)
-    with slim.arg_scope(arg_scope):
-      return func(images, num_classes, is_training=is_training)
-  if hasattr(func, 'default_image_size'):
-    network_fn.default_image_size = func.default_image_size
-
-  return network_fn
-</code></pre><p>我们看到model name 是通过 networks_map映射到func的</p><p>因此需要添加对于我们新的model,kk_v2的映射</p><pre><code>networks_map = {'alexnet_v2': alexnet.alexnet_v2,
-                'cifarnet': cifarnet.cifarnet,
-                'overfeat': overfeat.overfeat,
-                'vgg_a': vgg.vgg_a,
-                'vgg_16': vgg.vgg_16,
-                'vgg_19': vgg.vgg_19,
-                'inception_v1': inception.inception_v1,
-                'inception_v2': inception.inception_v2,
-                'inception_v3': inception.inception_v3,
-                'inception_v4': inception.inception_v4,
-                'inception_resnet_v2': inception.inception_resnet_v2,
-                'kk_v2':inception.inception_resnet_v2,
-                'lenet': lenet.lenet,
-                'resnet_v1_50': resnet_v1.resnet_v1_50,
-                'resnet_v1_101': resnet_v1.resnet_v1_101,
-                'resnet_v1_152': resnet_v1.resnet_v1_152,
-                'resnet_v1_200': resnet_v1.resnet_v1_200,
-                'resnet_v2_50': resnet_v2.resnet_v2_50,
-                'resnet_v2_101': resnet_v2.resnet_v2_101,
-                'resnet_v2_152': resnet_v2.resnet_v2_152,
-                'resnet_v2_200': resnet_v2.resnet_v2_200,
-                'mobilenet_v1': mobilenet_v1.mobilenet_v1,
-               }
-</code></pre><p>由于train_image_classifier.py中有如下参数，</p><pre><code>tf.app.flags.DEFINE_string(
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl>  <span class=n>Returns</span><span class=p>:</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>    <span class=n>network_fn</span><span class=p>:</span> <span class=n>A</span> <span class=n>function</span> <span class=n>that</span> <span class=n>applies</span> <span class=n>the</span> <span class=n>model</span> <span class=n>to</span> <span class=n>a</span> <span class=n>batch</span> <span class=n>of</span> <span class=n>images</span><span class=o>.</span> <span class=n>It</span> <span class=n>has</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>      <span class=n>the</span> <span class=n>following</span> <span class=n>signature</span><span class=p>:</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>        <span class=n>logits</span><span class=p>,</span> <span class=n>end_points</span> <span class=o>=</span> <span class=n>network_fn</span><span class=p>(</span><span class=n>images</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=n>Raises</span><span class=p>:</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>    <span class=ne>ValueError</span><span class=p>:</span> <span class=n>If</span> <span class=n>network</span> <span class=err>`</span><span class=n>name</span><span class=err>`</span> <span class=ow>is</span> <span class=ow>not</span> <span class=n>recognized</span><span class=o>.</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>  <span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=s2>  if name not in networks_map:
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=s2>    raise ValueError(&#39;Name of network unknown </span><span class=si>%s</span><span class=s2>&#39; % name)
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=s2>  func = networks_map[name]
+</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=s2>  @functools.wraps(func)
+</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=s2>  def network_fn(images):
+</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=s2>    arg_scope = arg_scopes_map[name](weight_decay=weight_decay)
+</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=s2>    with slim.arg_scope(arg_scope):
+</span></span></span><span class=line><span class=ln>15</span><span class=cl><span class=s2>      return func(images, num_classes, is_training=is_training)
+</span></span></span><span class=line><span class=ln>16</span><span class=cl><span class=s2>  if hasattr(func, &#39;default_image_size&#39;):
+</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=s2>    network_fn.default_image_size = func.default_image_size
+</span></span></span></code></pre></div><pre><code>  return network_fn
+</code></pre><p>我们看到model name 是通过 networks_map映射到func的</p><p>因此需要添加对于我们新的model,kk_v2的映射</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl><span class=n>networks_map</span> <span class=o>=</span> <span class=p>{</span><span class=s1>&#39;alexnet_v2&#39;</span><span class=p>:</span> <span class=n>alexnet</span><span class=o>.</span><span class=n>alexnet_v2</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>                <span class=s1>&#39;cifarnet&#39;</span><span class=p>:</span> <span class=n>cifarnet</span><span class=o>.</span><span class=n>cifarnet</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>                <span class=s1>&#39;overfeat&#39;</span><span class=p>:</span> <span class=n>overfeat</span><span class=o>.</span><span class=n>overfeat</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>                <span class=s1>&#39;vgg_a&#39;</span><span class=p>:</span> <span class=n>vgg</span><span class=o>.</span><span class=n>vgg_a</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>                <span class=s1>&#39;vgg_16&#39;</span><span class=p>:</span> <span class=n>vgg</span><span class=o>.</span><span class=n>vgg_16</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>                <span class=s1>&#39;vgg_19&#39;</span><span class=p>:</span> <span class=n>vgg</span><span class=o>.</span><span class=n>vgg_19</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>                <span class=s1>&#39;inception_v1&#39;</span><span class=p>:</span> <span class=n>inception</span><span class=o>.</span><span class=n>inception_v1</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>                <span class=s1>&#39;inception_v2&#39;</span><span class=p>:</span> <span class=n>inception</span><span class=o>.</span><span class=n>inception_v2</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>                <span class=s1>&#39;inception_v3&#39;</span><span class=p>:</span> <span class=n>inception</span><span class=o>.</span><span class=n>inception_v3</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>                <span class=s1>&#39;inception_v4&#39;</span><span class=p>:</span> <span class=n>inception</span><span class=o>.</span><span class=n>inception_v4</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>                <span class=s1>&#39;inception_resnet_v2&#39;</span><span class=p>:</span> <span class=n>inception</span><span class=o>.</span><span class=n>inception_resnet_v2</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>                <span class=s1>&#39;kk_v2&#39;</span><span class=p>:</span><span class=n>inception</span><span class=o>.</span><span class=n>inception_resnet_v2</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>                <span class=s1>&#39;lenet&#39;</span><span class=p>:</span> <span class=n>lenet</span><span class=o>.</span><span class=n>lenet</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>                <span class=s1>&#39;resnet_v1_50&#39;</span><span class=p>:</span> <span class=n>resnet_v1</span><span class=o>.</span><span class=n>resnet_v1_50</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>                <span class=s1>&#39;resnet_v1_101&#39;</span><span class=p>:</span> <span class=n>resnet_v1</span><span class=o>.</span><span class=n>resnet_v1_101</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>                <span class=s1>&#39;resnet_v1_152&#39;</span><span class=p>:</span> <span class=n>resnet_v1</span><span class=o>.</span><span class=n>resnet_v1_152</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>                <span class=s1>&#39;resnet_v1_200&#39;</span><span class=p>:</span> <span class=n>resnet_v1</span><span class=o>.</span><span class=n>resnet_v1_200</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>                <span class=s1>&#39;resnet_v2_50&#39;</span><span class=p>:</span> <span class=n>resnet_v2</span><span class=o>.</span><span class=n>resnet_v2_50</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>                <span class=s1>&#39;resnet_v2_101&#39;</span><span class=p>:</span> <span class=n>resnet_v2</span><span class=o>.</span><span class=n>resnet_v2_101</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl>                <span class=s1>&#39;resnet_v2_152&#39;</span><span class=p>:</span> <span class=n>resnet_v2</span><span class=o>.</span><span class=n>resnet_v2_152</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl>                <span class=s1>&#39;resnet_v2_200&#39;</span><span class=p>:</span> <span class=n>resnet_v2</span><span class=o>.</span><span class=n>resnet_v2_200</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>22</span><span class=cl>                <span class=s1>&#39;mobilenet_v1&#39;</span><span class=p>:</span> <span class=n>mobilenet_v1</span><span class=o>.</span><span class=n>mobilenet_v1</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>23</span><span class=cl>               <span class=p>}</span>
+</span></span></code></pre></div><p>由于train_image_classifier.py中有如下参数，</p><pre><code>tf.app.flags.DEFINE_string(
     'preprocessing_name', None, 'The name of the preprocessing to use. If left '
     'as `None`, then the model_name flag is used.'
 
@@ -84,56 +82,56 @@
 
 
 preprocessing_name = FLAGS.preprocessing_name or FLAGS.model_name
-</code></pre><p>因此还需要修改预处理的映射表</p><pre><code> preprocessing_fn_map = {
-      'cifarnet': cifarnet_preprocessing,
-      'inception': inception_preprocessing,
-      'inception_v1': inception_preprocessing,
-      'inception_v2': inception_preprocessing,
-      'inception_v3': inception_preprocessing,
-      'inception_v4': inception_preprocessing,
-      'inception_resnet_v2': inception_preprocessing,
-      'kk_v2': inception_preprocessing,
-      'lenet': lenet_preprocessing,
-      'mobilenet_v1': inception_preprocessing,
-      'resnet_v1_50': vgg_preprocessing,
-      'resnet_v1_101': vgg_preprocessing,
-      'resnet_v1_152': vgg_preprocessing,
-      'resnet_v1_200': vgg_preprocessing,
-      'resnet_v2_50': vgg_preprocessing,
-      'resnet_v2_101': vgg_preprocessing,
-      'resnet_v2_152': vgg_preprocessing,
-      'resnet_v2_200': vgg_preprocessing,
-      'vgg': vgg_preprocessing,
-      'vgg_a': vgg_preprocessing,
-      'vgg_16': vgg_preprocessing,
-      'vgg_19': vgg_preprocessing,
-  }
-</code></pre><p>还要修改arg_scopes_map，添加kk_v2的key</p><pre><code>arg_scopes_map = {'alexnet_v2': alexnet.alexnet_v2_arg_scope,
-                  'cifarnet': cifarnet.cifarnet_arg_scope,
-                  'overfeat': overfeat.overfeat_arg_scope,
-                  'vgg_a': vgg.vgg_arg_scope,
-                  'vgg_16': vgg.vgg_arg_scope,
-                  'vgg_19': vgg.vgg_arg_scope,
-                  'inception_v1': inception.inception_v3_arg_scope,
-                  'inception_v2': inception.inception_v3_arg_scope,
-                  'inception_v3': inception.inception_v3_arg_scope,
-                  'inception_v4': inception.inception_v4_arg_scope,
-                  'inception_resnet_v2':
-                  inception.inception_resnet_v2_arg_scope,
-                  'kk_v2':
-                  inception.inception_resnet_v2_arg_scope,
-                  'lenet': lenet.lenet_arg_scope,
-                  'resnet_v1_50': resnet_v1.resnet_arg_scope,
-                  'resnet_v1_101': resnet_v1.resnet_arg_scope,
-                  'resnet_v1_152': resnet_v1.resnet_arg_scope,
-                  'resnet_v1_200': resnet_v1.resnet_arg_scope,
-                  'resnet_v2_50': resnet_v2.resnet_arg_scope,
-                  'resnet_v2_101': resnet_v2.resnet_arg_scope,
-                  'resnet_v2_152': resnet_v2.resnet_arg_scope,
-                  'resnet_v2_200': resnet_v2.resnet_arg_scope,
-                  'mobilenet_v1': mobilenet_v1.mobilenet_v1_arg_scope,
-                 }
-</code></pre></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
+</code></pre><p>因此还需要修改预处理的映射表</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl> <span class=n>preprocessing_fn_map</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>      <span class=s1>&#39;cifarnet&#39;</span><span class=p>:</span> <span class=n>cifarnet_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>      <span class=s1>&#39;inception&#39;</span><span class=p>:</span> <span class=n>inception_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>      <span class=s1>&#39;inception_v1&#39;</span><span class=p>:</span> <span class=n>inception_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>      <span class=s1>&#39;inception_v2&#39;</span><span class=p>:</span> <span class=n>inception_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>      <span class=s1>&#39;inception_v3&#39;</span><span class=p>:</span> <span class=n>inception_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>      <span class=s1>&#39;inception_v4&#39;</span><span class=p>:</span> <span class=n>inception_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>      <span class=s1>&#39;inception_resnet_v2&#39;</span><span class=p>:</span> <span class=n>inception_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>      <span class=s1>&#39;kk_v2&#39;</span><span class=p>:</span> <span class=n>inception_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>      <span class=s1>&#39;lenet&#39;</span><span class=p>:</span> <span class=n>lenet_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>      <span class=s1>&#39;mobilenet_v1&#39;</span><span class=p>:</span> <span class=n>inception_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>      <span class=s1>&#39;resnet_v1_50&#39;</span><span class=p>:</span> <span class=n>vgg_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>      <span class=s1>&#39;resnet_v1_101&#39;</span><span class=p>:</span> <span class=n>vgg_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>      <span class=s1>&#39;resnet_v1_152&#39;</span><span class=p>:</span> <span class=n>vgg_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>      <span class=s1>&#39;resnet_v1_200&#39;</span><span class=p>:</span> <span class=n>vgg_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>      <span class=s1>&#39;resnet_v2_50&#39;</span><span class=p>:</span> <span class=n>vgg_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>      <span class=s1>&#39;resnet_v2_101&#39;</span><span class=p>:</span> <span class=n>vgg_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>      <span class=s1>&#39;resnet_v2_152&#39;</span><span class=p>:</span> <span class=n>vgg_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>      <span class=s1>&#39;resnet_v2_200&#39;</span><span class=p>:</span> <span class=n>vgg_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl>      <span class=s1>&#39;vgg&#39;</span><span class=p>:</span> <span class=n>vgg_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl>      <span class=s1>&#39;vgg_a&#39;</span><span class=p>:</span> <span class=n>vgg_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>22</span><span class=cl>      <span class=s1>&#39;vgg_16&#39;</span><span class=p>:</span> <span class=n>vgg_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>23</span><span class=cl>      <span class=s1>&#39;vgg_19&#39;</span><span class=p>:</span> <span class=n>vgg_preprocessing</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>24</span><span class=cl>  <span class=p>}</span>
+</span></span></code></pre></div><p>还要修改arg_scopes_map，添加kk_v2的key</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl><span class=n>arg_scopes_map</span> <span class=o>=</span> <span class=p>{</span><span class=s1>&#39;alexnet_v2&#39;</span><span class=p>:</span> <span class=n>alexnet</span><span class=o>.</span><span class=n>alexnet_v2_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>                  <span class=s1>&#39;cifarnet&#39;</span><span class=p>:</span> <span class=n>cifarnet</span><span class=o>.</span><span class=n>cifarnet_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>                  <span class=s1>&#39;overfeat&#39;</span><span class=p>:</span> <span class=n>overfeat</span><span class=o>.</span><span class=n>overfeat_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>                  <span class=s1>&#39;vgg_a&#39;</span><span class=p>:</span> <span class=n>vgg</span><span class=o>.</span><span class=n>vgg_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>                  <span class=s1>&#39;vgg_16&#39;</span><span class=p>:</span> <span class=n>vgg</span><span class=o>.</span><span class=n>vgg_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>                  <span class=s1>&#39;vgg_19&#39;</span><span class=p>:</span> <span class=n>vgg</span><span class=o>.</span><span class=n>vgg_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>                  <span class=s1>&#39;inception_v1&#39;</span><span class=p>:</span> <span class=n>inception</span><span class=o>.</span><span class=n>inception_v3_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>                  <span class=s1>&#39;inception_v2&#39;</span><span class=p>:</span> <span class=n>inception</span><span class=o>.</span><span class=n>inception_v3_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>                  <span class=s1>&#39;inception_v3&#39;</span><span class=p>:</span> <span class=n>inception</span><span class=o>.</span><span class=n>inception_v3_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>                  <span class=s1>&#39;inception_v4&#39;</span><span class=p>:</span> <span class=n>inception</span><span class=o>.</span><span class=n>inception_v4_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>                  <span class=s1>&#39;inception_resnet_v2&#39;</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>                  <span class=n>inception</span><span class=o>.</span><span class=n>inception_resnet_v2_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>                  <span class=s1>&#39;kk_v2&#39;</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>                  <span class=n>inception</span><span class=o>.</span><span class=n>inception_resnet_v2_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>                  <span class=s1>&#39;lenet&#39;</span><span class=p>:</span> <span class=n>lenet</span><span class=o>.</span><span class=n>lenet_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>                  <span class=s1>&#39;resnet_v1_50&#39;</span><span class=p>:</span> <span class=n>resnet_v1</span><span class=o>.</span><span class=n>resnet_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>                  <span class=s1>&#39;resnet_v1_101&#39;</span><span class=p>:</span> <span class=n>resnet_v1</span><span class=o>.</span><span class=n>resnet_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>                  <span class=s1>&#39;resnet_v1_152&#39;</span><span class=p>:</span> <span class=n>resnet_v1</span><span class=o>.</span><span class=n>resnet_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>                  <span class=s1>&#39;resnet_v1_200&#39;</span><span class=p>:</span> <span class=n>resnet_v1</span><span class=o>.</span><span class=n>resnet_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl>                  <span class=s1>&#39;resnet_v2_50&#39;</span><span class=p>:</span> <span class=n>resnet_v2</span><span class=o>.</span><span class=n>resnet_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl>                  <span class=s1>&#39;resnet_v2_101&#39;</span><span class=p>:</span> <span class=n>resnet_v2</span><span class=o>.</span><span class=n>resnet_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>22</span><span class=cl>                  <span class=s1>&#39;resnet_v2_152&#39;</span><span class=p>:</span> <span class=n>resnet_v2</span><span class=o>.</span><span class=n>resnet_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>23</span><span class=cl>                  <span class=s1>&#39;resnet_v2_200&#39;</span><span class=p>:</span> <span class=n>resnet_v2</span><span class=o>.</span><span class=n>resnet_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>24</span><span class=cl>                  <span class=s1>&#39;mobilenet_v1&#39;</span><span class=p>:</span> <span class=n>mobilenet_v1</span><span class=o>.</span><span class=n>mobilenet_v1_arg_scope</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>25</span><span class=cl>                 <span class=p>}</span>
+</span></span></code></pre></div></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
 <span class=button_tally>913</span>
 </a><a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>其他
 <span class=button_tally>90</span>

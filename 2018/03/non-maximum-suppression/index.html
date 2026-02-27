@@ -26,39 +26,34 @@
 
   * 根据 scores 进行排序（一般从小到大），将 score 最大的bounding box置于队列，接下来计算其余 bounding box 与当前 score 最大的 bounding box 的 IoU，抑制（忽略也即去除）IoU大于设定阈值的 bounding box；
   * 重复以上过程，直至候选 bounding boxes 为空；
-</code></pre></blockquote><p>最后上一段python代码吧&mldr;也很简单，直接转载了别人的&mldr;</p><pre><code>def nms(dets, thresh):
-    x1 = dets[:, 0]
-    y1 = dets[:, 1]
-    x2 = dets[:, 2]
-    y2 = dets[:, 3]
-    scores = dets[:, 4]
-    
-    areas = (x2 - x1 + 1) * (y2 - y1 + 1) # 每个boundingbox的面积
-    order = scores.argsort()[::-1] # boundingbox的置信度排序
-    keep = [] # 用来保存最后留下来的boundingbox
-    while order.size &gt; 0:     
-        i = order[0] # 置信度最高的boundingbox的index
-        keep.append(i) # 添加本次置信度最高的boundingbox的index
-        
-        # 当前bbox和剩下bbox之间的交叉区域
-        # 选择大于x1,y1和小于x2,y2的区域
-        xx1 = np.maximum(x1[i], x1[order[1:]])
-        yy1 = np.maximum(y1[i], y1[order[1:]])
-        xx2 = np.minimum(x2[i], x2[order[1:]])
-        yy2 = np.minimum(y2[i], y2[order[1:]])
-        
-        # 当前bbox和其他剩下bbox之间交叉区域的面积
-        w = np.maximum(0.0, xx2 - xx1 + 1)
-        h = np.maximum(0.0, yy2 - yy1 + 1)
-        inter = w * h
-        
-        # 交叉区域面积 / (bbox + 某区域面积 - 交叉区域面积)
-        ovr = inter / (areas[i] + areas[order[1:]] - inter)
-        #保留交集小于一定阈值的boundingbox
-        inds = np.where(ovr &lt;= thresh)[0]
-        order = order[inds + 1]
-        
-    return keep
+</code></pre></blockquote><p>最后上一段python代码吧&mldr;也很简单，直接转载了别人的&mldr;</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=k>def</span> <span class=nf>nms</span><span class=p>(</span><span class=n>dets</span><span class=p>,</span> <span class=n>thresh</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=n>x1</span> <span class=o>=</span> <span class=n>dets</span><span class=p>[:,</span> <span class=mi>0</span><span class=p>]</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=n>y1</span> <span class=o>=</span> <span class=n>dets</span><span class=p>[:,</span> <span class=mi>1</span><span class=p>]</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=n>x2</span> <span class=o>=</span> <span class=n>dets</span><span class=p>[:,</span> <span class=mi>2</span><span class=p>]</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>    <span class=n>y2</span> <span class=o>=</span> <span class=n>dets</span><span class=p>[:,</span> <span class=mi>3</span><span class=p>]</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>    <span class=n>scores</span> <span class=o>=</span> <span class=n>dets</span><span class=p>[:,</span> <span class=mi>4</span><span class=p>]</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln>1</span><span class=cl>    <span class=n>areas</span> <span class=ow>=</span> <span class=p>(</span><span class=n>x2</span> <span class=o>-</span> <span class=n>x1</span> <span class=o>+</span> <span class=mi>1</span><span class=p>)</span> <span class=o>*</span> <span class=p>(</span><span class=n>y2</span> <span class=o>-</span> <span class=n>y1</span> <span class=o>+</span> <span class=mi>1</span><span class=p>)</span> <span class=o>#</span> <span class=err>每个</span><span class=n>boundingbox的面积</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=n>order</span> <span class=ow>=</span> <span class=n>scores</span><span class=o>.</span><span class=n>argsort</span><span class=nb>()</span><span class=p>[</span><span class=kt>::-</span><span class=mi>1</span><span class=p>]</span> <span class=o>#</span> <span class=n>boundingbox的置信度排序</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=n>keep</span> <span class=ow>=</span> <span class=kt>[]</span> <span class=o>#</span> <span class=err>用来保存最后留下来的</span><span class=n>boundingbox</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=n>while</span> <span class=n>order</span><span class=o>.</span><span class=n>size</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=kt>:</span>     
+</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=n>i</span> <span class=ow>=</span> <span class=n>order</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>#</span> <span class=err>置信度最高的</span><span class=n>boundingbox的index</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>        <span class=n>keep</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>i</span><span class=p>)</span> <span class=o>#</span> <span class=err>添加本次置信度最高的</span><span class=n>boundingbox的index</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl>        <span class=c1># 当前bbox和剩下bbox之间的交叉区域</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>        <span class=c1># 选择大于x1,y1和小于x2,y2的区域</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=n>xx1</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>maximum</span><span class=p>(</span><span class=n>x1</span><span class=p>[</span><span class=n>i</span><span class=p>],</span> <span class=n>x1</span><span class=p>[</span><span class=n>order</span><span class=p>[</span><span class=mi>1</span><span class=p>:]])</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=n>yy1</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>maximum</span><span class=p>(</span><span class=n>y1</span><span class=p>[</span><span class=n>i</span><span class=p>],</span> <span class=n>y1</span><span class=p>[</span><span class=n>order</span><span class=p>[</span><span class=mi>1</span><span class=p>:]])</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=n>xx2</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>minimum</span><span class=p>(</span><span class=n>x2</span><span class=p>[</span><span class=n>i</span><span class=p>],</span> <span class=n>x2</span><span class=p>[</span><span class=n>order</span><span class=p>[</span><span class=mi>1</span><span class=p>:]])</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>        <span class=n>yy2</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>minimum</span><span class=p>(</span><span class=n>y2</span><span class=p>[</span><span class=n>i</span><span class=p>],</span> <span class=n>y2</span><span class=p>[</span><span class=n>order</span><span class=p>[</span><span class=mi>1</span><span class=p>:]])</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl>        <span class=c1># 当前bbox和其他剩下bbox之间交叉区域的面积</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>        <span class=n>w</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>maximum</span><span class=p>(</span><span class=mf>0.0</span><span class=p>,</span> <span class=n>xx2</span> <span class=o>-</span> <span class=n>xx1</span> <span class=o>+</span> <span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=n>h</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>maximum</span><span class=p>(</span><span class=mf>0.0</span><span class=p>,</span> <span class=n>yy2</span> <span class=o>-</span> <span class=n>yy1</span> <span class=o>+</span> <span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=n>inter</span> <span class=o>=</span> <span class=n>w</span> <span class=o>*</span> <span class=n>h</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl>        <span class=c1># 交叉区域面积 / (bbox + 某区域面积 - 交叉区域面积)</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>        <span class=n>ovr</span> <span class=o>=</span> <span class=n>inter</span> <span class=o>/</span> <span class=p>(</span><span class=n>areas</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>+</span> <span class=n>areas</span><span class=p>[</span><span class=n>order</span><span class=p>[</span><span class=mi>1</span><span class=p>:]]</span> <span class=o>-</span> <span class=n>inter</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=c1>#保留交集小于一定阈值的boundingbox</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=n>inds</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>where</span><span class=p>(</span><span class=n>ovr</span> <span class=o>&lt;=</span> <span class=n>thresh</span><span class=p>)[</span><span class=mi>0</span><span class=p>]</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=n>order</span> <span class=o>=</span> <span class=n>order</span><span class=p>[</span><span class=n>inds</span> <span class=o>+</span> <span class=mi>1</span><span class=p>]</span>
+</span></span></code></pre></div><pre><code>    return keep
 print nms(dets, thresh)
 </code></pre><p>参考链接</p><p><a href=https://chenzomi12.github.io/2016/12/14/YOLO-nms/>目标窗口检测算法-NMS非极大值抑制</a></p></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
 <span class=button_tally>913</span>

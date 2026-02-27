@@ -33,93 +33,78 @@ pandas 数据结构介绍
 <a href=https://111qqz.com/en/ class="nav_child nav_item">English</a></div></div><div class=follow><a href=https://github.com/111qqz><svg class="icon"><use xlink:href="#github"/></svg></a><div class=color_mode><input type=checkbox class=color_choice id=mode></div></div></div></nav></header><main><div class="grid-inverse wrap content"><article class=post_content><h1 class=post_title>PCA + kmeans</h1><div class=post_meta><span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>2017-11-26</span>
 <span class=post_time>· 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/k-means title=k-means class="post_tag button button_translucent">k-means
-</a><a href=https://111qqz.com/tags/pca title=PCA class="post_tag button button_translucent">PCA</a></span></div><div class=post_body><h3 id=先记录一下pca实战需要用到的安装包arch下python2环境>先记录一下PCA实战需要用到的安装包(arch下,python2环境)</h3><h3 id=python2-scikit-learn><a href=https://www.archlinux.org/packages/community/x86_64/python-scikit-learn/>python2-scikit-learn</a></h3><p>python2-numpy</p><p>python2-pandas</p><p>python2-matplotlib</p><p>python2-seaborn</p><p><a href=https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>pandas.DataFrame</a></p><p><a href=http://pda.readthedocs.io/en/latest/chp5.html>pandas 数据结构介绍</a></p><p>几个和科学计算数据分析有关的重要的python库:<code>Numpy</code>、<code>Matplotlib</code> ,pandas</p><p>(之前数字图像处理课程都接触过了orz)</p><p>其中matplotlib 主要用于图像绘制</p><p>sklearn 是用于机器学习的python 模块</p><p>Seaborn也是用于图像绘制</p><p>str.fomat() 是 python2语法</p><p>format中的变量会按照str中{} 出现的顺序替换</p><pre><code>import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-from sklearn.datasets import fetch_mldata
-from sklearn.decomposition import PCA
-import seaborn as sns
-mnist = fetch_mldata(&quot;MNIST original&quot;)
-
-X = mnist.data / 255.0
+</a><a href=https://111qqz.com/tags/pca title=PCA class="post_tag button button_translucent">PCA</a></span></div><div class=post_body><h3 id=先记录一下pca实战需要用到的安装包arch下python2环境>先记录一下PCA实战需要用到的安装包(arch下,python2环境)</h3><h3 id=python2-scikit-learn><a href=https://www.archlinux.org/packages/community/x86_64/python-scikit-learn/>python2-scikit-learn</a></h3><p>python2-numpy</p><p>python2-pandas</p><p>python2-matplotlib</p><p>python2-seaborn</p><p><a href=https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>pandas.DataFrame</a></p><p><a href=http://pda.readthedocs.io/en/latest/chp5.html>pandas 数据结构介绍</a></p><p>几个和科学计算数据分析有关的重要的python库:<code>Numpy</code>、<code>Matplotlib</code> ,pandas</p><p>(之前数字图像处理课程都接触过了orz)</p><p>其中matplotlib 主要用于图像绘制</p><p>sklearn 是用于机器学习的python 模块</p><p>Seaborn也是用于图像绘制</p><p>str.fomat() 是 python2语法</p><p>format中的变量会按照str中{} 出现的顺序替换</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=kn>import</span> <span class=nn>matplotlib.pyplot</span> <span class=k>as</span> <span class=nn>plt</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=kn>import</span> <span class=nn>pandas</span> <span class=k>as</span> <span class=nn>pd</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=kn>from</span> <span class=nn>sklearn.datasets</span> <span class=kn>import</span> <span class=n>fetch_mldata</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=kn>from</span> <span class=nn>sklearn.decomposition</span> <span class=kn>import</span> <span class=n>PCA</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl><span class=kn>import</span> <span class=nn>seaborn</span> <span class=k>as</span> <span class=nn>sns</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl><span class=n>mnist</span> <span class=o>=</span> <span class=n>fetch_mldata</span><span class=p>(</span><span class=s2>&#34;MNIST original&#34;</span><span class=p>)</span>
+</span></span></code></pre></div><pre><code>X = mnist.data / 255.0
 y = mnist.target
 
 #print X.shape, y.shape
-
-
-feat_cols = [ 'pixel'+str(i) for i in range(X.shape[1]) ]
-df = pd.DataFrame(X,columns=feat_cols) # transform into some pandas DS named DataFrame
-df['label'] = y  # add a column named 'label',valued by variable y
-df['label'] = df['label'].apply(lambda i: str(i))  # df.apply (some funciton)
-X, y = None, None
-#print 'Size of the dataframe: {}' .format(df.shape)   # str.format() , '{}' is replaced by some value 
-
-# Plot the graph
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=n>feat_cols</span> <span class=o>=</span> <span class=p>[</span> <span class=s1>&#39;pixel&#39;</span><span class=o>+</span><span class=nb>str</span><span class=p>(</span><span class=n>i</span><span class=p>)</span> <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=n>X</span><span class=o>.</span><span class=n>shape</span><span class=p>[</span><span class=mi>1</span><span class=p>])</span> <span class=p>]</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=n>df</span> <span class=o>=</span> <span class=n>pd</span><span class=o>.</span><span class=n>DataFrame</span><span class=p>(</span><span class=n>X</span><span class=p>,</span><span class=n>columns</span><span class=o>=</span><span class=n>feat_cols</span><span class=p>)</span> <span class=c1># transform into some pandas DS named DataFrame</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>df</span><span class=p>[</span><span class=s1>&#39;label&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=n>y</span>  <span class=c1># add a column named &#39;label&#39;,valued by variable y</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=n>df</span><span class=p>[</span><span class=s1>&#39;label&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=n>df</span><span class=p>[</span><span class=s1>&#39;label&#39;</span><span class=p>]</span><span class=o>.</span><span class=n>apply</span><span class=p>(</span><span class=k>lambda</span> <span class=n>i</span><span class=p>:</span> <span class=nb>str</span><span class=p>(</span><span class=n>i</span><span class=p>))</span>  <span class=c1># df.apply (some funciton)</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=n>X</span><span class=p>,</span> <span class=n>y</span> <span class=o>=</span> <span class=kc>None</span><span class=p>,</span> <span class=kc>None</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl><span class=c1>#print &#39;Size of the dataframe: {}&#39; .format(df.shape)   # str.format() , &#39;{}&#39; is replaced by some value </span>
+</span></span></code></pre></div><pre><code># Plot the graph
 #print df
-
-#rndperm = np.random.permutation(df.shape[0])
-#plt.gray()
-#fig = plt.figure( figsize=(16,7) )
-#for i in range(0,30):
-#    ax = fig.add_subplot(3,10,i+1, title='Digit: ' + str(df.loc[rndperm[i],'label']) )
-#    ax.matshow(df.loc[rndperm[i],feat_cols].values.reshape((28,28)).astype(float))
-#plt.show()
-
-#print df
-
-n_components_pca = 3
-pca = PCA(n_components=n_components_pca)
-pca_result = pca.fit_transform(df[feat_cols].values)
-
-print 'kkkkk?'
-df['pca-one'] = pca_result[:,0]
-df['pca-two'] = pca_result[:,1] 
-df['pca-three'] = pca_result[:,2]
-
-print 'Explained variation per principal component: {}'.format(pca.explained_variance_ratio_)
-
-
-pca_var_explained_df = pd.DataFrame({'principal component':np.arange(1,n_components_pca+1),
-                                    'variance_explained':pca.explained_variance_ratio_})
-print pca_var_explained_df.sum()
-
-
-ax = sns.barplot(x='principal component',
-                 y='variance_explained',
-                 data=pca_var_explained_df,
-                 palette=&quot;Set1&quot;)
-ax.set_title('PCA - Variance explained')
-plt.show()
-</code></pre><p><a href=https://111qqz.com/wordpress/wp-content/uploads/2017/11/pca_3.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2017/11/pca_3.png alt>
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=c1>#rndperm = np.random.permutation(df.shape[0])</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>#plt.gray()</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1>#fig = plt.figure( figsize=(16,7) )</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=c1>#for i in range(0,30):</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=c1>#    ax = fig.add_subplot(3,10,i+1, title=&#39;Digit: &#39; + str(df.loc[rndperm[i],&#39;label&#39;]) )</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl><span class=c1>#    ax.matshow(df.loc[rndperm[i],feat_cols].values.reshape((28,28)).astype(float))</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl><span class=c1>#plt.show()</span>
+</span></span></code></pre></div><pre><code>#print df
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=n>n_components_pca</span> <span class=o>=</span> <span class=mi>3</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=n>pca</span> <span class=o>=</span> <span class=n>PCA</span><span class=p>(</span><span class=n>n_components</span><span class=o>=</span><span class=n>n_components_pca</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>pca_result</span> <span class=o>=</span> <span class=n>pca</span><span class=o>.</span><span class=n>fit_transform</span><span class=p>(</span><span class=n>df</span><span class=p>[</span><span class=n>feat_cols</span><span class=p>]</span><span class=o>.</span><span class=n>values</span><span class=p>)</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=nb>print</span> <span class=s1>&#39;kkkkk?&#39;</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=n>df</span><span class=p>[</span><span class=s1>&#39;pca-one&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=n>pca_result</span><span class=p>[:,</span><span class=mi>0</span><span class=p>]</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>df</span><span class=p>[</span><span class=s1>&#39;pca-two&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=n>pca_result</span><span class=p>[:,</span><span class=mi>1</span><span class=p>]</span> 
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=n>df</span><span class=p>[</span><span class=s1>&#39;pca-three&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=n>pca_result</span><span class=p>[:,</span><span class=mi>2</span><span class=p>]</span>
+</span></span></code></pre></div><pre><code>print 'Explained variation per principal component: {}'.format(pca.explained_variance_ratio_)
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=n>pca_var_explained_df</span> <span class=o>=</span> <span class=n>pd</span><span class=o>.</span><span class=n>DataFrame</span><span class=p>({</span><span class=s1>&#39;principal component&#39;</span><span class=p>:</span><span class=n>np</span><span class=o>.</span><span class=n>arange</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=n>n_components_pca</span><span class=o>+</span><span class=mi>1</span><span class=p>),</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>                                    <span class=s1>&#39;variance_explained&#39;</span><span class=p>:</span><span class=n>pca</span><span class=o>.</span><span class=n>explained_variance_ratio_</span><span class=p>})</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=nb>print</span> <span class=n>pca_var_explained_df</span><span class=o>.</span><span class=n>sum</span><span class=p>()</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=n>ax</span> <span class=o>=</span> <span class=n>sns</span><span class=o>.</span><span class=n>barplot</span><span class=p>(</span><span class=n>x</span><span class=o>=</span><span class=s1>&#39;principal component&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>                 <span class=n>y</span><span class=o>=</span><span class=s1>&#39;variance_explained&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>                 <span class=n>data</span><span class=o>=</span><span class=n>pca_var_explained_df</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>                 <span class=n>palette</span><span class=o>=</span><span class=s2>&#34;Set1&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=n>ax</span><span class=o>.</span><span class=n>set_title</span><span class=p>(</span><span class=s1>&#39;PCA - Variance explained&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>show</span><span class=p>()</span>
+</span></span></code></pre></div><p><a href=https://111qqz.com/wordpress/wp-content/uploads/2017/11/pca_3.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2017/11/pca_3.png alt>
 </a><a href=https://111qqz.com/wordpress/wp-content/uploads/2017/11/pca_3_pic.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2017/11/pca_3_pic.png alt>
 </a><a href=https://111qqz.com/wordpress/wp-content/uploads/2017/11/pca_3_sum.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2017/11/pca_3_sum.png alt>
 </a><a href=https://111qqz.com/wordpress/wp-content/uploads/2017/11/pca_10.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2017/11/pca_10.png alt>
 </a><a href=https://111qqz.com/wordpress/wp-content/uploads/2017/11/pca_10_pic.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2017/11/pca_10_pic.png alt>
 </a><a href=https://111qqz.com/wordpress/wp-content/uploads/2017/11/pca_10_sum.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2017/11/pca_10_sum.png alt>
-</a><a href=https://111qqz.com/wordpress/wp-content/uploads/2017/11/%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2017/11/%e6%89%8b%e5%86%99%e6%95%b0%e5%ad%97.png alt></a></p><p>PCA+kmeans 时间对比:</p><p><a href=https://111qqz.com/wordpress/wp-content/uploads/2017/11/kmeans_pca.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2017/11/kmeans_pca.png alt></a></p><p>代码:</p><pre><code>import time
-import numpy as np
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA  
-vec_num=120
-data = np.random.rand(10000, vec_num) #生成一个随机数据，样本大小为10000, 特征数为120
-#print (data)
-
-t0 = time.clock()
-estimator = KMeans(n_clusters=4)#构造聚类器
-estimator.fit(data)#聚类
-print (&quot;kmeans time:&quot;,time.clock()-t0)
-inertia = estimator.inertia_ # 某种度量,比如距离平方和,用来check k-means算法的效果
-print (&quot;sum:&quot;,inertia/vec_num)
-
-com_num=10
-pca=PCA(n_components=com_num)
-newdata = pca.fit_transform(data)
-t0 = time.clock()
-estimator.fit(newdata)
-print(&quot;kmeans time after PCA:&quot;,time.clock()-t0)
-inertia = estimator.inertia_
-print (&quot;sum after PCA&quot;,inertia/com_num)
-</code></pre></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
+</a><a href=https://111qqz.com/wordpress/wp-content/uploads/2017/11/%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2017/11/%e6%89%8b%e5%86%99%e6%95%b0%e5%ad%97.png alt></a></p><p>PCA+kmeans 时间对比:</p><p><a href=https://111qqz.com/wordpress/wp-content/uploads/2017/11/kmeans_pca.png><img class="image_figure image_external" loading=lazy src=https://111qqz.com/wordpress/wp-content/uploads/2017/11/kmeans_pca.png alt></a></p><p>代码:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=kn>import</span> <span class=nn>time</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=kn>from</span> <span class=nn>sklearn.cluster</span> <span class=kn>import</span> <span class=n>KMeans</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=kn>from</span> <span class=nn>sklearn.decomposition</span> <span class=kn>import</span> <span class=n>PCA</span>  
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=n>vec_num</span><span class=o>=</span><span class=mi>120</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl><span class=n>data</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>random</span><span class=o>.</span><span class=n>rand</span><span class=p>(</span><span class=mi>10000</span><span class=p>,</span> <span class=n>vec_num</span><span class=p>)</span> <span class=c1>#生成一个随机数据，样本大小为10000, 特征数为120</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl><span class=c1>#print (data)</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=n>t0</span> <span class=o>=</span> <span class=n>time</span><span class=o>.</span><span class=n>clock</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=n>estimator</span> <span class=o>=</span> <span class=n>KMeans</span><span class=p>(</span><span class=n>n_clusters</span><span class=o>=</span><span class=mi>4</span><span class=p>)</span><span class=c1>#构造聚类器</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>estimator</span><span class=o>.</span><span class=n>fit</span><span class=p>(</span><span class=n>data</span><span class=p>)</span><span class=c1>#聚类</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=nb>print</span> <span class=p>(</span><span class=s2>&#34;kmeans time:&#34;</span><span class=p>,</span><span class=n>time</span><span class=o>.</span><span class=n>clock</span><span class=p>()</span><span class=o>-</span><span class=n>t0</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=n>inertia</span> <span class=o>=</span> <span class=n>estimator</span><span class=o>.</span><span class=n>inertia_</span> <span class=c1># 某种度量,比如距离平方和,用来check k-means算法的效果</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl><span class=nb>print</span> <span class=p>(</span><span class=s2>&#34;sum:&#34;</span><span class=p>,</span><span class=n>inertia</span><span class=o>/</span><span class=n>vec_num</span><span class=p>)</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=n>com_num</span><span class=o>=</span><span class=mi>10</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=n>pca</span><span class=o>=</span><span class=n>PCA</span><span class=p>(</span><span class=n>n_components</span><span class=o>=</span><span class=n>com_num</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>newdata</span> <span class=o>=</span> <span class=n>pca</span><span class=o>.</span><span class=n>fit_transform</span><span class=p>(</span><span class=n>data</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=n>t0</span> <span class=o>=</span> <span class=n>time</span><span class=o>.</span><span class=n>clock</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=n>estimator</span><span class=o>.</span><span class=n>fit</span><span class=p>(</span><span class=n>newdata</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl><span class=nb>print</span><span class=p>(</span><span class=s2>&#34;kmeans time after PCA:&#34;</span><span class=p>,</span><span class=n>time</span><span class=o>.</span><span class=n>clock</span><span class=p>()</span><span class=o>-</span><span class=n>t0</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl><span class=n>inertia</span> <span class=o>=</span> <span class=n>estimator</span><span class=o>.</span><span class=n>inertia_</span>
+</span></span><span class=line><span class=ln>8</span><span class=cl><span class=nb>print</span> <span class=p>(</span><span class=s2>&#34;sum after PCA&#34;</span><span class=p>,</span><span class=n>inertia</span><span class=o>/</span><span class=n>com_num</span><span class=p>)</span>
+</span></span></code></pre></div></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
 <span class=button_tally>913</span>
 </a><a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>其他
 <span class=button_tally>90</span>

@@ -2,24 +2,22 @@
 <meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta http-equiv=X-UA-Compatible content="IE=edge"><script async src="https://www.googletagmanager.com/gtag/js?id=UA-219255388-1"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","UA-219255388-1")</script><meta property="og:locale" content="zh"><meta property="og:type" content="article"><meta name=description content="迫于生计，最近要学习halide
 先去学习/复习一下常见的编译优化技巧。
 loop unrolling，也就是循环展开，顾名思义，就是把循环展开来写。
-normal loop:
-int x;
- for (x = 0; x < 100; x++)
- {
-     delete(x);
- }
-
-after loop …"><meta name=twitter:card content="summary"><meta name=twitter:creator content><meta name=twitter:title content="优化学习笔记(1):Loop unrolling"><meta property="og:url" content="https://111qqz.com/2019/01/loop-unrolling/"><meta property="og:title" content="优化学习笔记(1):Loop unrolling"><meta property="og:description" content="迫于生计，最近要学习halide
+1normal loop:
+2int x;
+3 for (x = 0; x < 100; x++)
+4 {
+5     delete(x);
+6 }
+ 1 …"><meta name=twitter:card content="summary"><meta name=twitter:creator content><meta name=twitter:title content="优化学习笔记(1):Loop unrolling"><meta property="og:url" content="https://111qqz.com/2019/01/loop-unrolling/"><meta property="og:title" content="优化学习笔记(1):Loop unrolling"><meta property="og:description" content="迫于生计，最近要学习halide
 先去学习/复习一下常见的编译优化技巧。
 loop unrolling，也就是循环展开，顾名思义，就是把循环展开来写。
-normal loop:
-int x;
- for (x = 0; x < 100; x++)
- {
-     delete(x);
- }
-
-after loop …"><meta property="og:image" content="https://111qqz.com/images/2.png"><link rel=apple-touch-icon sizes=180x180 href=https://111qqz.com/icons/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=https://111qqz.com/icons/favicon-32x32.png><link rel=manifest href=https://111qqz.com/icons/site.webmanifest><link rel=canonical href=https://111qqz.com/2019/01/loop-unrolling/><link rel=preload href=https://111qqz.com/css/styles.f143f2039d975cd60c5524f52c5fbb6dd2236d44d0d53d71b5cb6f6127d4fe8082960bbb71fe0345b5bab4119124e0b09c0b7d7f4238a9288afc02815d258f76.css integrity="sha512-8UPyA52XXNYMVST1LF+7bdIjbUTQ1T1xtctvYSfU/oCClgu7cf4DRbW6tBGRJOCwnAt9f0I4qSiK/AKBXSWPdg==" as=style crossorigin=anonymous><link rel=preload href=https://111qqz.com/js/bundle.min.bcaa4356b3671ffa6f41987d56e87dfd749683d23fd99a70769b5dda29225b669759d387454da9cdf0988ec4da70f274486671d24ab4dcea2ae987fe33bdc030.js as=script integrity="sha512-vKpDVrNnH/pvQZh9Vuh9/XSWg9I/2Zpwdptd2ikiW2aXWdOHRU2pzfCYjsTacPJ0SGZx0kq03Ooq6Yf+M73AMA==" crossorigin=anonymous><link rel=stylesheet type=text/css href=https://111qqz.com/css/styles.f143f2039d975cd60c5524f52c5fbb6dd2236d44d0d53d71b5cb6f6127d4fe8082960bbb71fe0345b5bab4119124e0b09c0b7d7f4238a9288afc02815d258f76.css integrity="sha512-8UPyA52XXNYMVST1LF+7bdIjbUTQ1T1xtctvYSfU/oCClgu7cf4DRbW6tBGRJOCwnAt9f0I4qSiK/AKBXSWPdg==" crossorigin=anonymous></head><body data-code=15 data-lines=true id=documentTop><header class=nav_header><nav class=nav><a href=https://111qqz.com/ class="nav_brand nav_item" title=111qqz的小窝><img src=https://111qqz.com/logos/logo.png class=logo alt=111qqz的小窝><div class=nav_close><div><svg class="icon"><use xlink:href="#open-menu"/></svg><svg class="icon"><use xlink:href="#closeme"/></svg></div></div></a><div class='nav_body nav_body_left'><div class=nav_parent><a href=https://111qqz.com/ class=nav_item title=Home>Home</a></div><div class=nav_parent><a href=https://111qqz.com/categories/acm/ class=nav_item title=ACM-ICPC>ACM-ICPC</a></div><div class=nav_parent><a href=https://111qqz.com/ class=nav_item title=深度学习>深度学习 <img src=https://111qqz.com/icons/caret-icon.svg alt=icon class=nav_icon></a><div class=nav_sub><span class=nav_child></span>
+1normal loop:
+2int x;
+3 for (x = 0; x < 100; x++)
+4 {
+5     delete(x);
+6 }
+ 1 …"><meta property="og:image" content="https://111qqz.com/images/2.png"><link rel=apple-touch-icon sizes=180x180 href=https://111qqz.com/icons/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=https://111qqz.com/icons/favicon-32x32.png><link rel=manifest href=https://111qqz.com/icons/site.webmanifest><link rel=canonical href=https://111qqz.com/2019/01/loop-unrolling/><link rel=preload href=https://111qqz.com/css/styles.f143f2039d975cd60c5524f52c5fbb6dd2236d44d0d53d71b5cb6f6127d4fe8082960bbb71fe0345b5bab4119124e0b09c0b7d7f4238a9288afc02815d258f76.css integrity="sha512-8UPyA52XXNYMVST1LF+7bdIjbUTQ1T1xtctvYSfU/oCClgu7cf4DRbW6tBGRJOCwnAt9f0I4qSiK/AKBXSWPdg==" as=style crossorigin=anonymous><link rel=preload href=https://111qqz.com/js/bundle.min.bcaa4356b3671ffa6f41987d56e87dfd749683d23fd99a70769b5dda29225b669759d387454da9cdf0988ec4da70f274486671d24ab4dcea2ae987fe33bdc030.js as=script integrity="sha512-vKpDVrNnH/pvQZh9Vuh9/XSWg9I/2Zpwdptd2ikiW2aXWdOHRU2pzfCYjsTacPJ0SGZx0kq03Ooq6Yf+M73AMA==" crossorigin=anonymous><link rel=stylesheet type=text/css href=https://111qqz.com/css/styles.f143f2039d975cd60c5524f52c5fbb6dd2236d44d0d53d71b5cb6f6127d4fe8082960bbb71fe0345b5bab4119124e0b09c0b7d7f4238a9288afc02815d258f76.css integrity="sha512-8UPyA52XXNYMVST1LF+7bdIjbUTQ1T1xtctvYSfU/oCClgu7cf4DRbW6tBGRJOCwnAt9f0I4qSiK/AKBXSWPdg==" crossorigin=anonymous></head><body data-code=15 data-lines=true id=documentTop><header class=nav_header><nav class=nav><a href=https://111qqz.com/ class="nav_brand nav_item" title=111qqz的小窝><img src=https://111qqz.com/logos/logo.png class=logo alt=111qqz的小窝><div class=nav_close><div><svg class="icon"><use xlink:href="#open-menu"/></svg><svg class="icon"><use xlink:href="#closeme"/></svg></div></div></a><div class='nav_body nav_body_left'><div class=nav_parent><a href=https://111qqz.com/ class=nav_item title=Home>Home</a></div><div class=nav_parent><a href=https://111qqz.com/categories/acm/ class=nav_item title=ACM-ICPC>ACM-ICPC</a></div><div class=nav_parent><a href=https://111qqz.com/ class=nav_item title=深度学习>深度学习 <img src=https://111qqz.com/icons/caret-icon.svg alt=icon class=nav_icon></a><div class=nav_sub><span class=nav_child></span>
 <a href=https://111qqz.com/tags/caffe/ class="nav_child nav_item" title=caffe源码阅读笔记>caffe源码阅读笔记</a>
 <a href=https://111qqz.com/tags/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F/ class="nav_child nav_item" title=推荐系统>推荐系统</a>
 <a href=https://111qqz.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89 class="nav_child nav_item" title=计算机视觉>计算机视觉</a></div></div><div class=nav_parent><a href=https://111qqz.com/ class=nav_item title=公开课>公开课 <img src=https://111qqz.com/icons/caret-icon.svg alt=icon class=nav_icon></a><div class=nav_sub><span class=nav_child></span>
@@ -38,59 +36,53 @@ after loop …"><meta property="og:image" content="https://111qqz.com/images/2.p
 <span class=post_date>2019-01-23</span>
 <span class=post_time>· 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/halide title=halide class="post_tag button button_translucent">halide
 </a><a href=https://111qqz.com/tags/%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86 title=编译原理 class="post_tag button button_translucent">编译原理
-</a><a href=https://111qqz.com/tags/%E5%BE%AA%E7%8E%AF%E5%B1%95%E5%BC%80 title=循环展开 class="post_tag button button_translucent">循环展开</a></span></div><div class=post_body><p><del>迫于生计，</del>最近要学习<a href=http://halide-lang.org/>halide</a></p><p>先去学习/复习一下常见的编译优化技巧。</p><p>loop unrolling，也就是循环展开，顾名思义，就是把循环展开来写。</p><pre><code>normal loop:
-int x;
- for (x = 0; x &lt; 100; x++)
- {
-     delete(x);
- }
-
-after loop unrolling:
-int x; 
- for (x = 0; x &lt; 100; x += 5 )
- {
-     delete(x);
-     delete(x + 1);
-     delete(x + 2);
-     delete(x + 3);
-     delete(x + 4);
- }
-</code></pre><p>循环展开是一种优化，可以手动实现也可以编译器自动实现。</p><h3 id=为什么要将循环展开>为什么要将循环展开？</h3><pre><code>  * 循环每次都需要判断终止条件，展开后可以消除这部分开销。
+</a><a href=https://111qqz.com/tags/%E5%BE%AA%E7%8E%AF%E5%B1%95%E5%BC%80 title=循环展开 class="post_tag button button_translucent">循环展开</a></span></div><div class=post_body><p><del>迫于生计，</del>最近要学习<a href=http://halide-lang.org/>halide</a></p><p>先去学习/复习一下常见的编译优化技巧。</p><p>loop unrolling，也就是循环展开，顾名思义，就是把循环展开来写。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>normal loop:
+</span></span><span class=line><span class=ln>2</span><span class=cl>int x<span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl> <span class=k>for</span> <span class=o>(</span><span class=nv>x</span> <span class=o>=</span> 0<span class=p>;</span> x &lt; 100<span class=p>;</span> x++<span class=o>)</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl> <span class=o>{</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>     delete<span class=o>(</span>x<span class=o>)</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl> <span class=o>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln> 1</span><span class=cl>after loop unrolling:
+</span></span><span class=line><span class=ln> 2</span><span class=cl>int x<span class=p>;</span> 
+</span></span><span class=line><span class=ln> 3</span><span class=cl> <span class=k>for</span> <span class=o>(</span><span class=nv>x</span> <span class=o>=</span> 0<span class=p>;</span> x &lt; 100<span class=p>;</span> <span class=nv>x</span> <span class=o>+=</span> <span class=m>5</span> <span class=o>)</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl> <span class=o>{</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>     delete<span class=o>(</span>x<span class=o>)</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>     delete<span class=o>(</span>x + 1<span class=o>)</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>     delete<span class=o>(</span>x + 2<span class=o>)</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>     delete<span class=o>(</span>x + 3<span class=o>)</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>     delete<span class=o>(</span>x + 4<span class=o>)</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl> <span class=o>}</span>
+</span></span></code></pre></div><p>循环展开是一种优化，可以手动实现也可以编译器自动实现。</p><h3 id=为什么要将循环展开>为什么要将循环展开？</h3><pre><code>  * 循环每次都需要判断终止条件，展开后可以消除这部分开销。
   * 减少[分支预测](https://en.wikipedia.org/wiki/Branch_predictor)开销。循环里的分支是指“跳出循环”还是“进行下一次迭代”
   * [vectorization](https://en.wikipedia.org/wiki/Automatic_vectorization)
-
-
-for (int y = 0; y &lt; 4; y++) {
-            for (int x_outer = 0; x_outer &lt; 2; x_outer++) {
-                // The loop over x_inner has gone away, and has been
-                // replaced by a vectorized version of the
-                // expression. On x86 processors, Halide generates SSE
-                // for all of this.
-                int x_vec[] = {x_outer * 4 + 0,
-                               x_outer * 4 + 1,
-                               x_outer * 4 + 2,
-                               x_outer * 4 + 3};
-                int val[] = {x_vec[0] + y,
-                             x_vec[1] + y,
-                             x_vec[2] + y,
-                             x_vec[3] + y};
-                printf(&quot;Evaluating at &lt;%d, %d, %d, %d&gt;, &lt;%d, %d, %d, %d&gt;:&quot;
-                       &quot; &lt;%d, %d, %d, %d&gt;\n&quot;,
-                       x_vec[0], x_vec[1], x_vec[2], x_vec[3],
-                       y, y, y, y,
-                       val[0], val[1], val[2], val[3]);
-            }
-        }zhichi
-</code></pre><p>可以看到最里面一层循环被展开以实现向量化.向量化是一种优化计算的手段。该优化的实现基于<a href=https://en.wikipedia.org/wiki/SIMD>SIMD</a> 和<a href=https://en.wikipedia.org/wiki/Advanced_Vector_Extensions>Advanced_Vector_Extensions(AVX)</a>指令集架构的支持。
-* 消除和loop counter(i)有关的除法计算。</p><pre><code>     for (int fused = 0; fused &lt; 4*4; fused++) {
-            int y = fused / 4;
-            int x = fused % 4;
-            printf(&quot;Evaluating at x = %d, y = %d: %d\n&quot;, x, y, x + y);
-        }
-
-
-
-  * 消除循环内部的分支。比如loop counter奇数和偶数时会进入不同的分支，那么将循环展开后，就消除了该分支。
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>y</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>y</span> <span class=o>&lt;</span> <span class=mi>4</span><span class=p>;</span> <span class=n>y</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>            <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>x_outer</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>x_outer</span> <span class=o>&lt;</span> <span class=mi>2</span><span class=p>;</span> <span class=n>x_outer</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>                <span class=c1>// The loop over x_inner has gone away, and has been
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=c1></span>                <span class=c1>// replaced by a vectorized version of the
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=c1></span>                <span class=c1>// expression. On x86 processors, Halide generates SSE
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=c1></span>                <span class=c1>// for all of this.
+</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=c1></span>                <span class=kt>int</span> <span class=n>x_vec</span><span class=p>[]</span> <span class=o>=</span> <span class=p>{</span><span class=n>x_outer</span> <span class=o>*</span> <span class=mi>4</span> <span class=o>+</span> <span class=mi>0</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>                               <span class=n>x_outer</span> <span class=o>*</span> <span class=mi>4</span> <span class=o>+</span> <span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>                               <span class=n>x_outer</span> <span class=o>*</span> <span class=mi>4</span> <span class=o>+</span> <span class=mi>2</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>                               <span class=n>x_outer</span> <span class=o>*</span> <span class=mi>4</span> <span class=o>+</span> <span class=mi>3</span><span class=p>};</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>                <span class=kt>int</span> <span class=n>val</span><span class=p>[]</span> <span class=o>=</span> <span class=p>{</span><span class=n>x_vec</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>+</span> <span class=n>y</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>                             <span class=n>x_vec</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span> <span class=o>+</span> <span class=n>y</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>                             <span class=n>x_vec</span><span class=p>[</span><span class=mi>2</span><span class=p>]</span> <span class=o>+</span> <span class=n>y</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>                             <span class=n>x_vec</span><span class=p>[</span><span class=mi>3</span><span class=p>]</span> <span class=o>+</span> <span class=n>y</span><span class=p>};</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>                <span class=n>printf</span><span class=p>(</span><span class=s>&#34;Evaluating at &lt;%d, %d, %d, %d&gt;, &lt;%d, %d, %d, %d&gt;:&#34;</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>                       <span class=s>&#34; &lt;%d, %d, %d, %d&gt;</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>                       <span class=n>x_vec</span><span class=p>[</span><span class=mi>0</span><span class=p>],</span> <span class=n>x_vec</span><span class=p>[</span><span class=mi>1</span><span class=p>],</span> <span class=n>x_vec</span><span class=p>[</span><span class=mi>2</span><span class=p>],</span> <span class=n>x_vec</span><span class=p>[</span><span class=mi>3</span><span class=p>],</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>                       <span class=n>y</span><span class=p>,</span> <span class=n>y</span><span class=p>,</span> <span class=n>y</span><span class=p>,</span> <span class=n>y</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>                       <span class=n>val</span><span class=p>[</span><span class=mi>0</span><span class=p>],</span> <span class=n>val</span><span class=p>[</span><span class=mi>1</span><span class=p>],</span> <span class=n>val</span><span class=p>[</span><span class=mi>2</span><span class=p>],</span> <span class=n>val</span><span class=p>[</span><span class=mi>3</span><span class=p>]);</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl>        <span class=p>}</span><span class=n>zhichi</span>
+</span></span></code></pre></div><p>可以看到最里面一层循环被展开以实现向量化.向量化是一种优化计算的手段。该优化的实现基于<a href=https://en.wikipedia.org/wiki/SIMD>SIMD</a> 和<a href=https://en.wikipedia.org/wiki/Advanced_Vector_Extensions>Advanced_Vector_Extensions(AVX)</a>指令集架构的支持。
+* 消除和loop counter(i)有关的除法计算。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>     <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>fused</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>fused</span> <span class=o>&lt;</span> <span class=mi>4</span><span class=o>*</span><span class=mi>4</span><span class=p>;</span> <span class=n>fused</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>            <span class=kt>int</span> <span class=n>y</span> <span class=o>=</span> <span class=n>fused</span> <span class=o>/</span> <span class=mi>4</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>            <span class=kt>int</span> <span class=n>x</span> <span class=o>=</span> <span class=n>fused</span> <span class=o>%</span> <span class=mi>4</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>            <span class=n>printf</span><span class=p>(</span><span class=s>&#34;Evaluating at x = %d, y = %d: %d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>,</span> <span class=n>x</span> <span class=o>+</span> <span class=n>y</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=p>}</span>
+</span></span></code></pre></div><pre><code>  * 消除循环内部的分支。比如loop counter奇数和偶数时会进入不同的分支，那么将循环展开后，就消除了该分支。
 </code></pre><h3 id=有什么缺点>有什么缺点？</h3><pre><code>  * 代码体积增加了。这对于嵌入式设备等往往是不可接受的。
   * 代码可读性变差了。
   * 单一指令可能会使用更多的寄存器，导致性能下降。

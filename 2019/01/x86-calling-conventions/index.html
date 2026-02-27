@@ -38,43 +38,43 @@
 </span></span><span class=line><span class=ln>5</span><span class=cl>    <span class=p>{</span>
 </span></span><span class=line><span class=ln>6</span><span class=cl>    	<span class=k>return</span> <span class=n>callee</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>)</span> <span class=o>+</span> <span class=mi>5</span><span class=p>;</span>
 </span></span><span class=line><span class=ln>7</span><span class=cl>    <span class=p>}</span>
-</span></span></code></pre></div><p>调用过程如下:</p><pre><code>caller:
-	; make new call frame
-	; (some compilers may produce an 'enter' instruction instead)
-	push    ebp       ; save old call frame
-	mov     ebp, esp  ; initialize new call frame
-	; push call arguments, in reverse
-	; (some compilers may subtract the required space from the stack pointer,
-	; then write each argument directly, see below.
-	; The 'enter' instruction can also do something similar)
-	; sub esp, 12      : 'enter' instruction could do this for us
-	; mov [ebp-4], 3   : or mov [esp+8], 3
-	; mov [ebp-8], 2   : or mov [esp+4], 2
-	; mov [ebp-12], 1  : or mov [esp], 1
-	push    3
-	push    2
-	push    1
-	call    callee    ; call subroutine 'callee'
-	add     eax, 5    ; modify subroutine result
-	                  ; (eax is the return value of our callee,
-	                  ; so we don't have to move it into a local variable)
-	; restore old call frame
-	; (some compilers may produce a 'leave' instruction instead)
-	; add   esp, 12   ; remove arguments from frame, ebp - esp = 12.
-	                  ; compilers will usually produce the following instead,
-	                  ; which is just as fast, and, unlike the add instruction,
-	                  ; also works for variable length arguments
-	                  ; and variable length arrays allocated on the stack.
-	mov     esp, ebp  ; most calling conventions dictate ebp be callee-saved,
-	                  ; i.e. it's preserved after calling the callee.
-	                  ; it therefore still points to the start of our stack frame.
-	                  ; we do need to make sure
-	                  ; callee doesn't modify (or restores) ebp, though,
-	                  ; so we need to make sure
-	                  ; it uses a calling convention which does this
-	pop     ebp       ; restore old call frame
-	ret               ; return
-</code></pre><p><strong>在c语言中，函数的参数被以从右向左的顺序压入栈，也就是最后一个参数最先入栈。</strong></p><p>这里是栈指的是调用栈(<a href=https://en.wikipedia.org/wiki/Call_stack>Call_stack</a>)</p><p>调用栈的结构如下(<strong>注意此图的栈是从下往上增长的，这与通常情况并不相符</strong>，不过不影响此处的说明)，这是在调用的DrawSquare函数中调用DrawLine函数时的情景</p><p><img class="image_figure image_external" loading=lazy src=https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Call_stack_layout.svg/342px-Call_stack_layout.svg.png alt></p><p>stack frame通常按照入栈顺序(写在前面的先入栈)由三部分组成（可能某部分为空):</p><pre><code>  * 函数的参数值（以从右向左的顺序入栈)
+</span></span></code></pre></div><p>调用过程如下:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-asm data-lang=asm><span class=line><span class=ln> 1</span><span class=cl><span class=nl>caller:</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>	<span class=c1>; make new call frame
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=c1></span>	<span class=c1>; (some compilers may produce an &#39;enter&#39; instruction instead)
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=c1></span>	<span class=nf>push</span>    <span class=no>ebp</span>       <span class=c1>; save old call frame
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=c1></span>	<span class=nf>mov</span>     <span class=no>ebp</span><span class=p>,</span> <span class=no>esp</span>  <span class=c1>; initialize new call frame
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=c1></span>	<span class=c1>; push call arguments, in reverse
+</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=c1></span>	<span class=c1>; (some compilers may subtract the required space from the stack pointer,
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=c1></span>	<span class=c1>; then write each argument directly, see below.
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=c1></span>	<span class=c1>; The &#39;enter&#39; instruction can also do something similar)
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=c1></span>	<span class=c1>; sub esp, 12      : &#39;enter&#39; instruction could do this for us
+</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=c1></span>	<span class=c1>; mov [ebp-4], 3   : or mov [esp+8], 3
+</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=c1></span>	<span class=c1>; mov [ebp-8], 2   : or mov [esp+4], 2
+</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=c1></span>	<span class=c1>; mov [ebp-12], 1  : or mov [esp], 1
+</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=c1></span>	<span class=nf>push</span>    <span class=mi>3</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>	<span class=nf>push</span>    <span class=mi>2</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>	<span class=nf>push</span>    <span class=mi>1</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>	<span class=nf>call</span>    <span class=no>callee</span>    <span class=c1>; call subroutine &#39;callee&#39;
+</span></span></span><span class=line><span class=ln>18</span><span class=cl><span class=c1></span>	<span class=nf>add</span>     <span class=no>eax</span><span class=p>,</span> <span class=mi>5</span>    <span class=c1>; modify subroutine result
+</span></span></span><span class=line><span class=ln>19</span><span class=cl><span class=c1></span>	                  <span class=c1>; (eax is the return value of our callee,
+</span></span></span><span class=line><span class=ln>20</span><span class=cl><span class=c1></span>	                  <span class=c1>; so we don&#39;t have to move it into a local variable)
+</span></span></span><span class=line><span class=ln>21</span><span class=cl><span class=c1></span>	<span class=c1>; restore old call frame
+</span></span></span><span class=line><span class=ln>22</span><span class=cl><span class=c1></span>	<span class=c1>; (some compilers may produce a &#39;leave&#39; instruction instead)
+</span></span></span><span class=line><span class=ln>23</span><span class=cl><span class=c1></span>	<span class=c1>; add   esp, 12   ; remove arguments from frame, ebp - esp = 12.
+</span></span></span><span class=line><span class=ln>24</span><span class=cl><span class=c1></span>	                  <span class=c1>; compilers will usually produce the following instead,
+</span></span></span><span class=line><span class=ln>25</span><span class=cl><span class=c1></span>	                  <span class=c1>; which is just as fast, and, unlike the add instruction,
+</span></span></span><span class=line><span class=ln>26</span><span class=cl><span class=c1></span>	                  <span class=c1>; also works for variable length arguments
+</span></span></span><span class=line><span class=ln>27</span><span class=cl><span class=c1></span>	                  <span class=c1>; and variable length arrays allocated on the stack.
+</span></span></span><span class=line><span class=ln>28</span><span class=cl><span class=c1></span>	<span class=nf>mov</span>     <span class=no>esp</span><span class=p>,</span> <span class=no>ebp</span>  <span class=c1>; most calling conventions dictate ebp be callee-saved,
+</span></span></span><span class=line><span class=ln>29</span><span class=cl><span class=c1></span>	                  <span class=c1>; i.e. it&#39;s preserved after calling the callee.
+</span></span></span><span class=line><span class=ln>30</span><span class=cl><span class=c1></span>	                  <span class=c1>; it therefore still points to the start of our stack frame.
+</span></span></span><span class=line><span class=ln>31</span><span class=cl><span class=c1></span>	                  <span class=c1>; we do need to make sure
+</span></span></span><span class=line><span class=ln>32</span><span class=cl><span class=c1></span>	                  <span class=c1>; callee doesn&#39;t modify (or restores) ebp, though,
+</span></span></span><span class=line><span class=ln>33</span><span class=cl><span class=c1></span>	                  <span class=c1>; so we need to make sure
+</span></span></span><span class=line><span class=ln>34</span><span class=cl><span class=c1></span>	                  <span class=c1>; it uses a calling convention which does this
+</span></span></span><span class=line><span class=ln>35</span><span class=cl><span class=c1></span>	<span class=nf>pop</span>     <span class=no>ebp</span>       <span class=c1>; restore old call frame
+</span></span></span><span class=line><span class=ln>36</span><span class=cl><span class=c1></span>	<span class=nf>ret</span>               <span class=c1>; return
+</span></span></span></code></pre></div><p><strong>在c语言中，函数的参数被以从右向左的顺序压入栈，也就是最后一个参数最先入栈。</strong></p><p>这里是栈指的是调用栈(<a href=https://en.wikipedia.org/wiki/Call_stack>Call_stack</a>)</p><p>调用栈的结构如下(<strong>注意此图的栈是从下往上增长的，这与通常情况并不相符</strong>，不过不影响此处的说明)，这是在调用的DrawSquare函数中调用DrawLine函数时的情景</p><p><img class="image_figure image_external" loading=lazy src=https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Call_stack_layout.svg/342px-Call_stack_layout.svg.png alt></p><p>stack frame通常按照入栈顺序(写在前面的先入栈)由三部分组成（可能某部分为空):</p><pre><code>  * 函数的参数值（以从右向左的顺序入栈)
   * caller的地址值，为的是调用函数之后能继续执行caller其余的代码。
   * 函数的局部变量
 </code></pre><p>接下来我们看一下调用过程对寄存器的影响。这里暂且不提eax寄存器通常用来保存结果之类，主要想谈谈调用过程对sp和bp两个寄存器的影响。</p><p>sp是stack pointer，保存的是当前栈顶地址</p><p>bp是base pointer(就是stack frame中的frame pointer), 值为函数刚刚被调用时的栈顶位置。</p><p>bp这个寄存器的作用主要是比较方便，因为如果只有stack pointer，那么在函数里面，stack pointer也是可能变的，显然不如使用base pointer方便。</p><p><strong>具体来说，在使用base pointer的情况下，函数的返回地址永远为ebp + 4，第一个参数的地址为ebp+8,第一个局部变量的地址为ebp-4</strong></p><p>而且使用bp的情况下，回溯调用栈会变得非常方便。</p><blockquote>**At ebp is a pointer to ebp for the previous frame** (**this is why push ebp; mov ebp, esp** is such a common way to start a function).  This effectively creates a linked list of base pointers.  This linked list makes it very easy to trace backwards up the stack.  For example if foo() calls bar() and bar() calls baz() and you’re debugging baz() you can easily find the parameters and local variables for foo() and bar().</blockquote><p>为什么ebp指向的内容是上一个 stack frame中的ebp？我们看push ebp; mov ebp esp这两条指令。push ebp相当于先esp-=4,然后将ebp放到esp所指向的位置。接着mov ebp esp,相当于把当前的esp，也就是上一个ebp所在的位置，赋值给新的ebp.  所以。。<strong>这其实是个链表啊</strong>！</p><p>参考资料:</p><p><a href=https://en.wikipedia.org/wiki/X86_calling_conventions#x86-64_calling_conventions>x86 calling conventions</a></p><p><a href=https://en.wikipedia.org/wiki/Stack_register>Stack_register</a></p><p><a href=https://en.wikipedia.org/wiki/Call_stack#STACK-FRAME>Call_stack#STACK-FRAME</a></p><p><a href=https://stackoverflow.com/questions/1395591/what-is-exactly-the-base-pointer-and-stack-pointer-to-what-do-they-point>What is exactly the base pointer and stack pointer? To what do they point?</a></p><p><a href=https://practicalmalwareanalysis.com/2012/04/03/all-about-ebp/>All About EBP</a></p></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM

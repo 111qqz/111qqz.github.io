@@ -27,61 +27,51 @@ $ source venv/bin/activate
 $ pip install django scrapy scrapyd python-scrapyd-api
 </code></pre><p><a href=https://github.com/scrapy/scrapyd>Scrapyd</a> is a daemon service for running <a href=https://github.com/scrapy/scrapy>Scrapy</a> spiders. You can discover its details from <a href=http://scrapyd.readthedocs.io/en/stable/>here</a>.</p><p><a href=https://github.com/djm/python-scrapyd-api>python-scrapyd-api</a> is a wrapper allows us to talk <code>scrapyd</code> from our Python progam.</p><p><strong>Note: I am going to use Python 3.5 for this project</strong></p><h4 id=creating-djangoproject>Creating Django Project</h4><p>Create a django project with an app named <code>main</code> :</p><pre><code>$ django-admin startproject iCrawler
 $ cd iCrawler &amp;&amp; python manage.py startapp main
-</code></pre><p>We also need a model to save our scraped data. Let’s keep it simple:</p><pre><code>import json
-from django.db import models
-from django.utils import timezone
-
-class ScrapyItem(models.Model):
-    unique_id = models.CharField(max_length=100, null=True)
-    data = models.TextField() # this stands for our crawled data
-    date = models.DateTimeField(default=timezone.now)
-    
-    # This is for basic and custom serialisation to return it to client as a JSON.
-    @property
-    def to_dict(self):
-        data = {
-            'data': json.loads(self.data),
-            'date': self.date
-        }
-        return data
-
-    def __str__(self):
+</code></pre><p>We also need a model to save our scraped data. Let’s keep it simple:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=kn>import</span> <span class=nn>json</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=kn>from</span> <span class=nn>django.db</span> <span class=kn>import</span> <span class=n>models</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=kn>from</span> <span class=nn>django.utils</span> <span class=kn>import</span> <span class=n>timezone</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=k>class</span> <span class=nc>ScrapyItem</span><span class=p>(</span><span class=n>models</span><span class=o>.</span><span class=n>Model</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=n>unique_id</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=kc>True</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=n>data</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>TextField</span><span class=p>()</span> <span class=c1># this stands for our crawled data</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=n>date</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>DateTimeField</span><span class=p>(</span><span class=n>default</span><span class=o>=</span><span class=n>timezone</span><span class=o>.</span><span class=n>now</span><span class=p>)</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl>    <span class=c1># This is for basic and custom serialisation to return it to client as a JSON.</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=nd>@property</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=k>def</span> <span class=nf>to_dict</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=n>data</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>            <span class=s1>&#39;data&#39;</span><span class=p>:</span> <span class=n>json</span><span class=o>.</span><span class=n>loads</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>data</span><span class=p>),</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>            <span class=s1>&#39;date&#39;</span><span class=p>:</span> <span class=bp>self</span><span class=o>.</span><span class=n>date</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=ln>8</span><span class=cl>        <span class=k>return</span> <span class=n>data</span>
+</span></span></code></pre></div><pre><code>    def __str__(self):
         return self.unique_id
 </code></pre><p>Add <code>main</code> app into <code>INSTALLED_APPS</code> in <code>settings.py</code> And as a final step, migrations:</p><pre><code>$ python manage.py makemigrations
 $ python manage.py migrate
-</code></pre><p>Let’s add a view and url to our <code>main</code> app:</p><pre><code>from uuid import uuid4
-from urllib.parse import urlparse
-from django.core.validators import URLValidator
-from django.core.exceptions import ValidationError
-from django.views.decorators.http import require_POST, require_http_methods
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from scrapyd_api import ScrapydAPI
-from main.utils import URLUtil
-from main.models import ScrapyItem
-
-# connect scrapyd service
+</code></pre><p>Let’s add a view and url to our <code>main</code> app:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl><span class=kn>from</span> <span class=nn>uuid</span> <span class=kn>import</span> <span class=n>uuid4</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=kn>from</span> <span class=nn>urllib.parse</span> <span class=kn>import</span> <span class=n>urlparse</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=kn>from</span> <span class=nn>django.core.validators</span> <span class=kn>import</span> <span class=n>URLValidator</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl><span class=kn>from</span> <span class=nn>django.core.exceptions</span> <span class=kn>import</span> <span class=n>ValidationError</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=kn>from</span> <span class=nn>django.views.decorators.http</span> <span class=kn>import</span> <span class=n>require_POST</span><span class=p>,</span> <span class=n>require_http_methods</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=kn>from</span> <span class=nn>django.shortcuts</span> <span class=kn>import</span> <span class=n>render</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=kn>from</span> <span class=nn>django.http</span> <span class=kn>import</span> <span class=n>JsonResponse</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl><span class=kn>from</span> <span class=nn>django.views.decorators.csrf</span> <span class=kn>import</span> <span class=n>csrf_exempt</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl><span class=kn>from</span> <span class=nn>scrapyd_api</span> <span class=kn>import</span> <span class=n>ScrapydAPI</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl><span class=kn>from</span> <span class=nn>main.utils</span> <span class=kn>import</span> <span class=n>URLUtil</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl><span class=kn>from</span> <span class=nn>main.models</span> <span class=kn>import</span> <span class=n>ScrapyItem</span>
+</span></span></code></pre></div><pre><code># connect scrapyd service
 scrapyd = ScrapydAPI('http://localhost:6800')
-
-
-def is_valid_url(url):
-    validate = URLValidator()
-    try:
-        validate(url) # check if url format is valid
-    except ValidationError:
-        return False
-
-    return True
-
-
-@csrf_exempt
-@require_http_methods(['POST', 'GET']) # only get and post
-def crawl(request):
-    # Post requests are for new crawling tasks
-    if request.method == 'POST':
-
-        url = request.POST.get('url', None) # take url comes from client. (From an input may be?)
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=k>def</span> <span class=nf>is_valid_url</span><span class=p>(</span><span class=n>url</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=n>validate</span> <span class=o>=</span> <span class=n>URLValidator</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=k>try</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=n>validate</span><span class=p>(</span><span class=n>url</span><span class=p>)</span> <span class=c1># check if url format is valid</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>    <span class=k>except</span> <span class=n>ValidationError</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>        <span class=k>return</span> <span class=kc>False</span>
+</span></span></code></pre></div><pre><code>    return True
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=nd>@csrf_exempt</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=nd>@require_http_methods</span><span class=p>([</span><span class=s1>&#39;POST&#39;</span><span class=p>,</span> <span class=s1>&#39;GET&#39;</span><span class=p>])</span> <span class=c1># only get and post</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=k>def</span> <span class=nf>crawl</span><span class=p>(</span><span class=n>request</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=c1># Post requests are for new crawling tasks</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>    <span class=k>if</span> <span class=n>request</span><span class=o>.</span><span class=n>method</span> <span class=o>==</span> <span class=s1>&#39;POST&#39;</span><span class=p>:</span>
+</span></span></code></pre></div><pre><code>        url = request.POST.get('url', None) # take url comes from client. (From an input may be?)
 
         if not url:
             return JsonResponse({'error': 'Missing  args'})
@@ -91,68 +81,60 @@ def crawl(request):
         
         domain = urlparse(url).netloc # parse the url and extract the domain
         unique_id = str(uuid4()) # create a unique ID. 
-        
-        # This is the custom settings for scrapy spider. 
-        # We can send anything we want to use it inside spiders and pipelines. 
-        # I mean, anything
-        settings = {
-            'unique_id': unique_id, # unique ID for each record for DB
-            'USER_AGENT': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
-        }
-
-        # Here we schedule a new crawling task from scrapyd. 
-        # Notice that settings is a special argument name. 
-        # But we can pass other arguments, though.
-        # This returns a ID which belongs and will be belong to this task
-        # We are goint to use that to check task's status.
-        task = scrapyd.schedule('default', 'icrawler', 
-            settings=settings, url=url, domain=domain)
-
-        return JsonResponse({'task_id': task, 'unique_id': unique_id, 'status': 'started' })
-
-    # Get requests are for getting result of a specific crawling task
-    elif request.method == 'GET':
-        # We were passed these from past request above. Remember ?
-        # They were trying to survive in client side.
-        # Now they are here again, thankfully. &lt;3
-        # We passed them back to here to check the status of crawling
-        # And if crawling is completed, we respond back with a crawled data.
-        task_id = request.GET.get('task_id', None)
-        unique_id = request.GET.get('unique_id', None)
-
-        if not task_id or not unique_id:
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=ln>1</span><span class=cl>        <span class=err>#</span> <span class=nx>This</span> <span class=nx>is</span> <span class=nx>the</span> <span class=nx>custom</span> <span class=nx>settings</span> <span class=k>for</span> <span class=nx>scrapy</span> <span class=nx>spider</span><span class=p>.</span> 
+</span></span><span class=line><span class=ln>2</span><span class=cl>        <span class=err>#</span> <span class=nx>We</span> <span class=nx>can</span> <span class=nx>send</span> <span class=nx>anything</span> <span class=nx>we</span> <span class=nx>want</span> <span class=nx>to</span> <span class=nx>use</span> <span class=nx>it</span> <span class=nx>inside</span> <span class=nx>spiders</span> <span class=nx>and</span> <span class=nx>pipelines</span><span class=p>.</span> 
+</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=err>#</span> <span class=nx>I</span> <span class=nx>mean</span><span class=p>,</span> <span class=nx>anything</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=nx>settings</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>            <span class=s1>&#39;unique_id&#39;</span><span class=o>:</span> <span class=nx>unique_id</span><span class=p>,</span> <span class=err>#</span> <span class=nx>unique</span> <span class=nx>ID</span> <span class=k>for</span> <span class=nx>each</span> <span class=nx>record</span> <span class=k>for</span> <span class=nx>DB</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>            <span class=s1>&#39;USER_AGENT&#39;</span><span class=o>:</span> <span class=s1>&#39;Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)&#39;</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl>        <span class=p>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=ln>1</span><span class=cl>        <span class=err>#</span> <span class=nx>Here</span> <span class=nx>we</span> <span class=nx>schedule</span> <span class=nx>a</span> <span class=k>new</span> <span class=nx>crawling</span> <span class=nx>task</span> <span class=nx>from</span> <span class=nx>scrapyd</span><span class=p>.</span> 
+</span></span><span class=line><span class=ln>2</span><span class=cl>        <span class=err>#</span> <span class=nx>Notice</span> <span class=nx>that</span> <span class=nx>settings</span> <span class=nx>is</span> <span class=nx>a</span> <span class=nx>special</span> <span class=nx>argument</span> <span class=nx>name</span><span class=p>.</span> 
+</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=err>#</span> <span class=nx>But</span> <span class=nx>we</span> <span class=nx>can</span> <span class=nx>pass</span> <span class=nx>other</span> <span class=nx>arguments</span><span class=p>,</span> <span class=nx>though</span><span class=p>.</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=err>#</span> <span class=nx>This</span> <span class=nx>returns</span> <span class=nx>a</span> <span class=nx>ID</span> <span class=nx>which</span> <span class=nx>belongs</span> <span class=nx>and</span> <span class=nx>will</span> <span class=nx>be</span> <span class=nx>belong</span> <span class=nx>to</span> <span class=k>this</span> <span class=nx>task</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=err>#</span> <span class=nx>We</span> <span class=nx>are</span> <span class=nx>goint</span> <span class=nx>to</span> <span class=nx>use</span> <span class=nx>that</span> <span class=nx>to</span> <span class=nx>check</span> <span class=nx>task</span><span class=s1>&#39;s status.
+</span></span></span><span class=line><span class=ln>6</span><span class=cl><span class=s1>        task = scrapyd.schedule(&#39;</span><span class=k>default</span><span class=s1>&#39;, &#39;</span><span class=nx>icrawler</span><span class=err>&#39;</span><span class=p>,</span> 
+</span></span><span class=line><span class=ln>7</span><span class=cl>            <span class=nx>settings</span><span class=o>=</span><span class=nx>settings</span><span class=p>,</span> <span class=nx>url</span><span class=o>=</span><span class=nx>url</span><span class=p>,</span> <span class=nx>domain</span><span class=o>=</span><span class=nx>domain</span><span class=p>)</span>
+</span></span></code></pre></div><pre><code>        return JsonResponse({'task_id': task, 'unique_id': unique_id, 'status': 'started' })
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=ln>1</span><span class=cl>    <span class=err>#</span> <span class=nx>Get</span> <span class=nx>requests</span> <span class=nx>are</span> <span class=k>for</span> <span class=nx>getting</span> <span class=nx>result</span> <span class=k>of</span> <span class=nx>a</span> <span class=nx>specific</span> <span class=nx>crawling</span> <span class=nx>task</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=nx>elif</span> <span class=nx>request</span><span class=p>.</span><span class=nx>method</span> <span class=o>==</span> <span class=s1>&#39;GET&#39;</span><span class=o>:</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=err>#</span> <span class=nx>We</span> <span class=nx>were</span> <span class=nx>passed</span> <span class=nx>these</span> <span class=nx>from</span> <span class=nx>past</span> <span class=nx>request</span> <span class=nx>above</span><span class=p>.</span> <span class=nx>Remember</span> <span class=o>?</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=err>#</span> <span class=nx>They</span> <span class=nx>were</span> <span class=nx>trying</span> <span class=nx>to</span> <span class=nx>survive</span> <span class=k>in</span> <span class=nx>client</span> <span class=nx>side</span><span class=p>.</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=err>#</span> <span class=nx>Now</span> <span class=nx>they</span> <span class=nx>are</span> <span class=nx>here</span> <span class=nx>again</span><span class=p>,</span> <span class=nx>thankfully</span><span class=p>.</span> <span class=o>&lt;</span><span class=mi>3</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>        <span class=err>#</span> <span class=nx>We</span> <span class=nx>passed</span> <span class=nx>them</span> <span class=nx>back</span> <span class=nx>to</span> <span class=nx>here</span> <span class=nx>to</span> <span class=nx>check</span> <span class=nx>the</span> <span class=nx>status</span> <span class=k>of</span> <span class=nx>crawling</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl>        <span class=err>#</span> <span class=nx>And</span> <span class=k>if</span> <span class=nx>crawling</span> <span class=nx>is</span> <span class=nx>completed</span><span class=p>,</span> <span class=nx>we</span> <span class=nx>respond</span> <span class=nx>back</span> <span class=kd>with</span> <span class=nx>a</span> <span class=nx>crawled</span> <span class=nx>data</span><span class=p>.</span>
+</span></span><span class=line><span class=ln>8</span><span class=cl>        <span class=nx>task_id</span> <span class=o>=</span> <span class=nx>request</span><span class=p>.</span><span class=nx>GET</span><span class=p>.</span><span class=nx>get</span><span class=p>(</span><span class=s1>&#39;task_id&#39;</span><span class=p>,</span> <span class=nx>None</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>9</span><span class=cl>        <span class=nx>unique_id</span> <span class=o>=</span> <span class=nx>request</span><span class=p>.</span><span class=nx>GET</span><span class=p>.</span><span class=nx>get</span><span class=p>(</span><span class=s1>&#39;unique_id&#39;</span><span class=p>,</span> <span class=nx>None</span><span class=p>)</span>
+</span></span></code></pre></div><pre><code>        if not task_id or not unique_id:
             return JsonResponse({'error': 'Missing args'})
-
-        # Here we check status of crawling that just started a few seconds ago.
-        # If it is finished, we can query from database and get results
-        # If it is not finished we can return active status
-        # Possible results are -&gt; pending, running, finished
-        status = scrapyd.job_status('default', task_id)
-        if status == 'finished':
-            try:
-                # this is the unique_id that we created even before crawling started.
-                item = ScrapyItem.objects.get(unique_id=unique_id) 
-                return JsonResponse({'data': item.to_dict['data']})
-            except Exception as e:
-                return JsonResponse({'error': str(e)})
-        else:
-            return JsonResponse({'status': status})
-</code></pre><p>I tried to document the code as much as i can.</p><p>But the main trick is, <code>unique_id.</code> Normally, we save an object to database, then we get its <code>ID</code>. In our case, we are specifying its <code>unique_id</code> before creating it. Once crawling completed and client asks for the crawled data; we can create a query with that <code>unique_id</code> and fetch results.</p><p>And an url for this view:</p><pre><code>from django.conf import settings
-from django.conf.urls import url,static
-from django.views.generic import TemplateView
-from main import views
-
-urlpatterns = [
-    url(r'^$', TemplateView.as_view(template_name='index.html'), name='home'),
-    url(r'^api/crawl/', views.crawl, name='crawl'),
-]
-
-# This is required for static files while in development mode. (DEBUG=TRUE)
-# No, not relevant to scrapy or crawling :)
-if settings.DEBUG:
-    urlpatterns += static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    urlpatterns += static.static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-</code></pre><h4 id=creating-scrapyproject>Creating Scrapy Project\</h4><p>It is better if we create Scrapy project under (or next to) our Django project. This makes easier to connect them together. So let’s create it under Django project folder:</p><pre><code>$ cd iCrawler
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln> 1</span><span class=cl>        <span class=c1># Here we check status of crawling that just started a few seconds ago.</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>        <span class=c1># If it is finished, we can query from database and get results</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>        <span class=c1># If it is not finished we can return active status</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>        <span class=c1># Possible results are -&gt; pending, running, finished</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>        <span class=nv>status</span> <span class=o>=</span> scrapyd.job_status<span class=o>(</span><span class=s1>&#39;default&#39;</span>, task_id<span class=o>)</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>        <span class=k>if</span> <span class=nv>status</span> <span class=o>==</span> <span class=s1>&#39;finished&#39;</span>:
+</span></span><span class=line><span class=ln> 7</span><span class=cl>            try:
+</span></span><span class=line><span class=ln> 8</span><span class=cl>                <span class=c1># this is the unique_id that we created even before crawling started.</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>                <span class=nv>item</span> <span class=o>=</span> ScrapyItem.objects.get<span class=o>(</span><span class=nv>unique_id</span><span class=o>=</span>unique_id<span class=o>)</span> 
+</span></span><span class=line><span class=ln>10</span><span class=cl>                <span class=k>return</span> JsonResponse<span class=o>({</span><span class=s1>&#39;data&#39;</span>: item.to_dict<span class=o>[</span><span class=s1>&#39;data&#39;</span><span class=o>]})</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>            except Exception as e:
+</span></span><span class=line><span class=ln>12</span><span class=cl>                <span class=k>return</span> JsonResponse<span class=o>({</span><span class=s1>&#39;error&#39;</span>: str<span class=o>(</span>e<span class=o>)})</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>        <span class=k>else</span>:
+</span></span><span class=line><span class=ln>14</span><span class=cl>            <span class=k>return</span> JsonResponse<span class=o>({</span><span class=s1>&#39;status&#39;</span>: status<span class=o>})</span>
+</span></span></code></pre></div><p>I tried to document the code as much as i can.</p><p>But the main trick is, <code>unique_id.</code> Normally, we save an object to database, then we get its <code>ID</code>. In our case, we are specifying its <code>unique_id</code> before creating it. Once crawling completed and client asks for the crawled data; we can create a query with that <code>unique_id</code> and fetch results.</p><p>And an url for this view:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=kn>from</span> <span class=nn>django.conf</span> <span class=kn>import</span> <span class=n>settings</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=kn>from</span> <span class=nn>django.conf.urls</span> <span class=kn>import</span> <span class=n>url</span><span class=p>,</span><span class=n>static</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=kn>from</span> <span class=nn>django.views.generic</span> <span class=kn>import</span> <span class=n>TemplateView</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=kn>from</span> <span class=nn>main</span> <span class=kn>import</span> <span class=n>views</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=ln>1</span><span class=cl><span class=nx>urlpatterns</span> <span class=o>=</span> <span class=p>[</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=nx>url</span><span class=p>(</span><span class=nx>r</span><span class=s1>&#39;^$&#39;</span><span class=p>,</span> <span class=nx>TemplateView</span><span class=p>.</span><span class=nx>as_view</span><span class=p>(</span><span class=nx>template_name</span><span class=o>=</span><span class=s1>&#39;index.html&#39;</span><span class=p>),</span> <span class=nx>name</span><span class=o>=</span><span class=s1>&#39;home&#39;</span><span class=p>),</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=nx>url</span><span class=p>(</span><span class=nx>r</span><span class=s1>&#39;^api/crawl/&#39;</span><span class=p>,</span> <span class=nx>views</span><span class=p>.</span><span class=nx>crawl</span><span class=p>,</span> <span class=nx>name</span><span class=o>=</span><span class=s1>&#39;crawl&#39;</span><span class=p>),</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=p>]</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl><span class=c1># This is required for static files while in development mode. (DEBUG=TRUE)</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1># No, not relevant to scrapy or crawling :)</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=k>if</span> settings.DEBUG:
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=nv>urlpatterns</span> <span class=o>+=</span> static.static<span class=o>(</span>settings.STATIC_URL, <span class=nv>document_root</span><span class=o>=</span>settings.STATIC_ROOT<span class=o>)</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>    <span class=nv>urlpatterns</span> <span class=o>+=</span> static.static<span class=o>(</span>settings.MEDIA_URL, <span class=nv>document_root</span><span class=o>=</span>settings.MEDIA_ROOT<span class=o>)</span>
+</span></span></code></pre></div><h4 id=creating-scrapyproject>Creating Scrapy Project\</h4><p>It is better if we create Scrapy project under (or next to) our Django project. This makes easier to connect them together. So let’s create it under Django project folder:</p><pre><code>$ cd iCrawler
 $ scrapy startproject scrapy_app
 </code></pre><p>Now we need to create our first spider from inside <code>scrapy_app</code> folder:</p><pre><code>$ cd scrapy_app
 $ scrapy genspider -t crawl icrawler https://google.com
@@ -166,161 +148,146 @@ xmlfeed
 import sys
 
 # DJANGO INTEGRATION
-
-sys.path.append(os.path.dirname(os.path.abspath('.')))
-# Do not forget the change iCrawler part based on your project name
-os.environ['DJANGO_SETTINGS_MODULE'] = 'iCrawler.settings'
-
-# This is required only if Django Version &gt; 1.8
-import django
-django.setup()
-
-# DJANGO INTEGRATION
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=ln>1</span><span class=cl><span class=nx>sys</span><span class=p>.</span><span class=nx>path</span><span class=p>.</span><span class=nx>append</span><span class=p>(</span><span class=nx>os</span><span class=p>.</span><span class=nx>path</span><span class=p>.</span><span class=nx>dirname</span><span class=p>(</span><span class=nx>os</span><span class=p>.</span><span class=nx>path</span><span class=p>.</span><span class=nx>abspath</span><span class=p>(</span><span class=s1>&#39;.&#39;</span><span class=p>)))</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=err>#</span> <span class=nx>Do</span> <span class=nx>not</span> <span class=nx>forget</span> <span class=nx>the</span> <span class=nx>change</span> <span class=nx>iCrawler</span> <span class=nx>part</span> <span class=nx>based</span> <span class=nx>on</span> <span class=nx>your</span> <span class=nx>project</span> <span class=nx>name</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=nx>os</span><span class=p>.</span><span class=nx>environ</span><span class=p>[</span><span class=s1>&#39;DJANGO_SETTINGS_MODULE&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=s1>&#39;iCrawler.settings&#39;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=c1># This is required only if Django Version &gt; 1.8</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=kn>import</span> <span class=nn>django</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>django</span><span class=o>.</span><span class=n>setup</span><span class=p>()</span>
+</span></span></code></pre></div><pre><code># DJANGO INTEGRATION
 
 ## Rest of settings are below ..
 </code></pre><p>That’s it. Now let’s start <code>scrapyd</code> to make sure everything installed and configured properly. Inside <code>scrapy_app/</code> folder run:</p><p>$ scrapyd</p><p>This will start scrapyd and generate some outputs. Scrapyd also has a very minimal and simple web console. We don’t need it on production but we can use it to watch active jobs while developing. Once you start the scrapyd go to <a href=http://127.0.0.1:6800/>http://127.0.0.1:6800</a> and see if it is working.</p><h4 id=configuring-our-scrapyproject>Configuring Our Scrapy Project</h4><p>Since this post is not about fundamentals of scrapy, i will skip the part about modifying spiders. You can create your spider with official documentation. I will put my example spider here, though:</p><pre><code>class IcrawlerSpider(CrawlSpider):
     name = 'icrawler'
-
-    def __init__(self, *args, **kwargs):
-        # We are going to pass these args from our django view.
-        # To make everything dynamic, we need to override them inside __init__ method
-        self.url = kwargs.get('url')
-        self.domain = kwargs.get('domain')
-        self.start_urls = [self.url]
-        self.allowed_domains = [self.domain]
-
-        IcrawlerSpider.rules = [
-           Rule(LinkExtractor(unique=True), callback='parse_item'),
-        ]
-        super(IcrawlerSpider, self).__init__(*args, **kwargs)
-
-    def parse_item(self, response):
-        # You can tweak each crawled page here
-        # Don't forget to return an object.
-        i = {}
-        i['url'] = response.url
-        return i
-</code></pre><p>Above is <code>icrawler.py</code> file from <code>scrapy_app/scrapy_app/spiders</code>. Attention to <code>__init__</code> method. It is important. If we want to make a method or property dynamic, we need to define it under <code>__init__</code> method, so we can pass arguments from Django and use them here.</p><p>We also need to create a <code>Item Pipeline</code> for our scrapy project. Pipeline is a class for making actions over scraped items. From <a href=https://doc.scrapy.org/en/latest/topics/item-pipeline.html>documentation</a>:</p><blockquote>Typical uses of item pipelines are:</blockquote><pre><code>  * cleansing HTML data
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=o>*</span><span class=n>args</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>        <span class=c1># We are going to pass these args from our django view.</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=c1># To make everything dynamic, we need to override them inside __init__ method</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>url</span> <span class=o>=</span> <span class=n>kwargs</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=s1>&#39;url&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>domain</span> <span class=o>=</span> <span class=n>kwargs</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=s1>&#39;domain&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>start_urls</span> <span class=o>=</span> <span class=p>[</span><span class=bp>self</span><span class=o>.</span><span class=n>url</span><span class=p>]</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>allowed_domains</span> <span class=o>=</span> <span class=p>[</span><span class=bp>self</span><span class=o>.</span><span class=n>domain</span><span class=p>]</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=ln>1</span><span class=cl>        <span class=nx>IcrawlerSpider</span><span class=p>.</span><span class=nx>rules</span> <span class=o>=</span> <span class=p>[</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>           <span class=nx>Rule</span><span class=p>(</span><span class=nx>LinkExtractor</span><span class=p>(</span><span class=nx>unique</span><span class=o>=</span><span class=nx>True</span><span class=p>),</span> <span class=nx>callback</span><span class=o>=</span><span class=s1>&#39;parse_item&#39;</span><span class=p>),</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=p>]</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=kr>super</span><span class=p>(</span><span class=nx>IcrawlerSpider</span><span class=p>,</span> <span class=nx>self</span><span class=p>).</span><span class=nx>__init__</span><span class=p>(</span><span class=o>*</span><span class=nx>args</span><span class=p>,</span> <span class=o>**</span><span class=nx>kwargs</span><span class=p>)</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl>    <span class=k>def</span> <span class=nf>parse_item</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>response</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>        <span class=c1># You can tweak each crawled page here</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=c1># Don&#39;t forget to return an object.</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=n>i</span> <span class=o>=</span> <span class=p>{}</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=n>i</span><span class=p>[</span><span class=s1>&#39;url&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=n>response</span><span class=o>.</span><span class=n>url</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>        <span class=k>return</span> <span class=n>i</span>
+</span></span></code></pre></div><p>Above is <code>icrawler.py</code> file from <code>scrapy_app/scrapy_app/spiders</code>. Attention to <code>__init__</code> method. It is important. If we want to make a method or property dynamic, we need to define it under <code>__init__</code> method, so we can pass arguments from Django and use them here.</p><p>We also need to create a <code>Item Pipeline</code> for our scrapy project. Pipeline is a class for making actions over scraped items. From <a href=https://doc.scrapy.org/en/latest/topics/item-pipeline.html>documentation</a>:</p><blockquote>Typical uses of item pipelines are:</blockquote><pre><code>  * cleansing HTML data
   * validating scraped data (checking that the items contain certain fields)
   * checking for duplicates (and dropping them)
   * **storing the scraped item in a database**
 </code></pre><p>Yay! <code>Storing the scraped item in a database</code>. Now let’s create one. Actually there is already a file named <code>pipelines.py</code> inside <code>scrapy_project</code> folder. And also that file contains an empty-but-ready pipeline. We just need to modify it a little bit:</p><pre><code>from main.models import ScrapyItem
 import json
-
-class ScrapyAppPipeline(object):
-    def __init__(self, unique_id, *args, **kwargs):
-        self.unique_id = unique_id
-        self.items = []
-
-    @classmethod
-    def from_crawler(cls, crawler):
-        return cls(
-            unique_id=crawler.settings.get('unique_id'), # this will be passed from django view
-        )
-
-    def close_spider(self, spider):
-        # And here we are saving our crawled data with django models.
-        item = ScrapyItem()
-        item.unique_id = self.unique_id
-        item.data = json.dumps(self.items)
-        item.save()
-
-    def process_item(self, item, spider):
-        self.items.append(item['url'])
-        return item
-</code></pre><p>And as a final step, we need to enable (uncomment) this pipeline in scrapy <code>settings.py</code> file:</p><pre><code># Configure item pipelines
-# See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-    'scrapy_app.pipelines.ScrapyAppPipeline': 300,
-}
-</code></pre><blockquote>Don’t forget to restart `scraypd` if it is working.</blockquote><p>This scrapy project basically,</p><pre><code>  * Crawls a website (comes from Django view)
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=k>class</span> <span class=nc>ScrapyAppPipeline</span><span class=p>(</span><span class=nb>object</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>unique_id</span><span class=p>,</span> <span class=o>*</span><span class=n>args</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>unique_id</span> <span class=o>=</span> <span class=n>unique_id</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>items</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl>    <span class=nd>@classmethod</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=k>def</span> <span class=nf>from_crawler</span><span class=p>(</span><span class=bp>cls</span><span class=p>,</span> <span class=n>crawler</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=k>return</span> <span class=bp>cls</span><span class=p>(</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>            <span class=n>unique_id</span><span class=o>=</span><span class=n>crawler</span><span class=o>.</span><span class=n>settings</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=s1>&#39;unique_id&#39;</span><span class=p>),</span> <span class=c1># this will be passed from django view</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=p>)</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl>    <span class=k>def</span> <span class=nf>close_spider</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>spider</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>        <span class=c1># And here we are saving our crawled data with django models.</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=n>item</span> <span class=o>=</span> <span class=n>ScrapyItem</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=n>item</span><span class=o>.</span><span class=n>unique_id</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>unique_id</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=n>item</span><span class=o>.</span><span class=n>data</span> <span class=o>=</span> <span class=n>json</span><span class=o>.</span><span class=n>dumps</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>items</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>        <span class=n>item</span><span class=o>.</span><span class=n>save</span><span class=p>()</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl>    <span class=k>def</span> <span class=nf>process_item</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>item</span><span class=p>,</span> <span class=n>spider</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>items</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>item</span><span class=p>[</span><span class=s1>&#39;url&#39;</span><span class=p>])</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=k>return</span> <span class=n>item</span>
+</span></span></code></pre></div><p>And as a final step, we need to enable (uncomment) this pipeline in scrapy <code>settings.py</code> file:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=ln>1</span><span class=cl><span class=err>#</span> <span class=nx>Configure</span> <span class=nx>item</span> <span class=nx>pipelines</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=err>#</span> <span class=nx>See</span> <span class=nx>http</span><span class=o>:</span><span class=c1>//scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1></span><span class=nx>ITEM_PIPELINES</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=s1>&#39;scrapy_app.pipelines.ScrapyAppPipeline&#39;</span><span class=o>:</span> <span class=mi>300</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><blockquote>Don’t forget to restart `scraypd` if it is working.</blockquote><p>This scrapy project basically,</p><pre><code>  * Crawls a website (comes from Django view)
   * Extract all URLs from website
   * Put them into a list
   * Save the list to database over Django models.
-</code></pre><p>And that’s all for the back-end part. Django and Scrapy are both integrated and should be working fine.</p><h3 id=notes-on-front-end-part>Notes on Front-End Part</h3><p>Well, this part is so subjective. We have tons of options. Personally I have build my front-end with <code>React</code> . The only part that is not subjective is <code>usage of setInterval</code> . Yes, let’s remember our options: <code>web sockets</code> and <code>to send requests to server every X seconds</code>.</p><p>To clarify base logic, this is simplified version of my React Component:</p><pre><code>class Home extends React.Component {
-  constructor(props) {
-      super(props)
-      this.state = {
-          url: '',
-          crawlingStatus: null,
-          data: null,
-          taskID: null,
-          uniqueID: null
-      }
-      this.statusInterval = 1
-  }
-
-  handleStartButton = (event) =&gt; {
+</code></pre><p>And that’s all for the back-end part. Django and Scrapy are both integrated and should be working fine.</p><h3 id=notes-on-front-end-part>Notes on Front-End Part</h3><p>Well, this part is so subjective. We have tons of options. Personally I have build my front-end with <code>React</code> . The only part that is not subjective is <code>usage of setInterval</code> . Yes, let’s remember our options: <code>web sockets</code> and <code>to send requests to server every X seconds</code>.</p><p>To clarify base logic, this is simplified version of my React Component:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl><span class=k>class</span> <span class=nc>Home</span> <span class=n>extends</span> <span class=n>React</span><span class=o>.</span><span class=n>Component</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>  <span class=n>constructor</span><span class=p>(</span><span class=n>props</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>      <span class=nb>super</span><span class=p>(</span><span class=n>props</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>      <span class=n>this</span><span class=o>.</span><span class=n>state</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>          <span class=n>url</span><span class=p>:</span> <span class=s1>&#39;&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>          <span class=n>crawlingStatus</span><span class=p>:</span> <span class=n>null</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>          <span class=n>data</span><span class=p>:</span> <span class=n>null</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>          <span class=n>taskID</span><span class=p>:</span> <span class=n>null</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>          <span class=n>uniqueID</span><span class=p>:</span> <span class=n>null</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>      <span class=p>}</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>      <span class=n>this</span><span class=o>.</span><span class=n>statusInterval</span> <span class=o>=</span> <span class=mi>1</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>  <span class=p>}</span>
+</span></span></code></pre></div><pre><code>  handleStartButton = (event) =&gt; {
     if (!this.state.url) return false;
-
-    // send a post request to client when form button clicked
-    // django response back with task_id and unique_id.
-    // We have created them in views.py file, remember?
-    $.post('/api/crawl/', { url: this.state.url }, resp =&gt; {
-        if (resp.error) {
-            alert(resp.error)
-            return
-        }
-        // Update the state with new task and unique id
-        this.setState({
-            taskID: resp.task_id,
-            uniqueID: resp.unique_id,
-            crawlingStatus: resp.status
-        }, () =&gt; {
-            // ####################### HERE ########################
-            // After updating state, 
-            // i start to execute checkCrawlStatus method for every 2 seconds
-            // Check method's body for more details
-            // ####################### HERE ########################
-            this.statusInterval = setInterval(this.checkCrawlStatus, 2000)
-        });
-    });
-  }
-
-  componentWillUnmount() {
-      // i create this.statusInterval inside constructor method
-      // So clear it anyway on page reloads or 
-      clearInterval(this.statusInterval)
-  }
-
-  checkCrawlStatus = () =&gt; {
-      // this method do only one thing.
-      // Making a request to server to ask status of crawling job
-      $.get('/api/crawl/',
-            { task_id: this.state.taskID, unique_id: this.state.uniqueID }, resp =&gt; {
-          if (resp.data) {
-              // If response contains a data array
-              // That means crawling completed and we have results here
-              // No need to make more requests.
-              // Just clear interval
-              clearInterval(this.statusInterval)
-              this.setState({
-                  data: resp.data
-              })
-          } else if (resp.error) {
-              // If there is an error
-              // also no need to keep requesting
-              // just show it to user
-              // and clear interval
-              clearInterval(this.statusInterval)
-              alert(resp.error)
-          } else if (resp.status) {
-              // but response contains a `status` key and no data or error
-              // that means crawling process is still active and running (or pending)
-              // don't clear the interval.
-              this.setState({
-                  crawlingStatus: resp.status
-              });
-          }
-      })
-  }
-  
-  render () {
-    // render componenet
-    return (&lt;div&gt;&lt;/div&gt;)
-  }
-}
-</code></pre><p>You can discover the details by comments i added. It is quite simple actually.</p><p>Oh, that’s it. It took longer than i expected. Please leave a comment for any kind of feedback.</p></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=ln> 1</span><span class=cl>    <span class=c1>// send a post request to client when form button clicked
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=c1></span>    <span class=c1>// django response back with task_id and unique_id.
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=c1></span>    <span class=c1>// We have created them in views.py file, remember?
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=c1></span>    <span class=nx>$</span><span class=p>.</span><span class=nx>post</span><span class=p>(</span><span class=s1>&#39;/api/crawl/&#39;</span><span class=p>,</span> <span class=p>{</span> <span class=nx>url</span><span class=o>:</span> <span class=k>this</span><span class=p>.</span><span class=nx>state</span><span class=p>.</span><span class=nx>url</span> <span class=p>},</span> <span class=nx>resp</span> <span class=p>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=nx>resp</span><span class=p>.</span><span class=nx>error</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>            <span class=nx>alert</span><span class=p>(</span><span class=nx>resp</span><span class=p>.</span><span class=nx>error</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>            <span class=k>return</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>        <span class=c1>// Update the state with new task and unique id
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=c1></span>        <span class=k>this</span><span class=p>.</span><span class=nx>setState</span><span class=p>({</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>            <span class=nx>taskID</span><span class=o>:</span> <span class=nx>resp</span><span class=p>.</span><span class=nx>task_id</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>            <span class=nx>uniqueID</span><span class=o>:</span> <span class=nx>resp</span><span class=p>.</span><span class=nx>unique_id</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>            <span class=nx>crawlingStatus</span><span class=o>:</span> <span class=nx>resp</span><span class=p>.</span><span class=nx>status</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>        <span class=p>},</span> <span class=p>()</span> <span class=p>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>            <span class=c1>// ####################### HERE ########################
+</span></span></span><span class=line><span class=ln>16</span><span class=cl><span class=c1></span>            <span class=c1>// After updating state, 
+</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=c1></span>            <span class=c1>// i start to execute checkCrawlStatus method for every 2 seconds
+</span></span></span><span class=line><span class=ln>18</span><span class=cl><span class=c1></span>            <span class=c1>// Check method&#39;s body for more details
+</span></span></span><span class=line><span class=ln>19</span><span class=cl><span class=c1></span>            <span class=c1>// ####################### HERE ########################
+</span></span></span><span class=line><span class=ln>20</span><span class=cl><span class=c1></span>            <span class=k>this</span><span class=p>.</span><span class=nx>statusInterval</span> <span class=o>=</span> <span class=nx>setInterval</span><span class=p>(</span><span class=k>this</span><span class=p>.</span><span class=nx>checkCrawlStatus</span><span class=p>,</span> <span class=mi>2000</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl>        <span class=p>});</span>
+</span></span><span class=line><span class=ln>22</span><span class=cl>    <span class=p>});</span>
+</span></span><span class=line><span class=ln>23</span><span class=cl>  <span class=p>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=ln>1</span><span class=cl>  <span class=nx>componentWillUnmount</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>      <span class=c1>// i create this.statusInterval inside constructor method
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1></span>      <span class=c1>// So clear it anyway on page reloads or 
+</span></span></span><span class=line><span class=ln>4</span><span class=cl><span class=c1></span>      <span class=nx>clearInterval</span><span class=p>(</span><span class=k>this</span><span class=p>.</span><span class=nx>statusInterval</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=p>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=ln> 1</span><span class=cl>  <span class=nx>checkCrawlStatus</span> <span class=o>=</span> <span class=p>()</span> <span class=p>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>      <span class=c1>// this method do only one thing.
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=c1></span>      <span class=c1>// Making a request to server to ask status of crawling job
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=c1></span>      <span class=nx>$</span><span class=p>.</span><span class=nx>get</span><span class=p>(</span><span class=s1>&#39;/api/crawl/&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>            <span class=p>{</span> <span class=nx>task_id</span><span class=o>:</span> <span class=k>this</span><span class=p>.</span><span class=nx>state</span><span class=p>.</span><span class=nx>taskID</span><span class=p>,</span> <span class=nx>unique_id</span><span class=o>:</span> <span class=k>this</span><span class=p>.</span><span class=nx>state</span><span class=p>.</span><span class=nx>uniqueID</span> <span class=p>},</span> <span class=nx>resp</span> <span class=p>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>          <span class=k>if</span> <span class=p>(</span><span class=nx>resp</span><span class=p>.</span><span class=nx>data</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>              <span class=c1>// If response contains a data array
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=c1></span>              <span class=c1>// That means crawling completed and we have results here
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=c1></span>              <span class=c1>// No need to make more requests.
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=c1></span>              <span class=c1>// Just clear interval
+</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=c1></span>              <span class=nx>clearInterval</span><span class=p>(</span><span class=k>this</span><span class=p>.</span><span class=nx>statusInterval</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>              <span class=k>this</span><span class=p>.</span><span class=nx>setState</span><span class=p>({</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>                  <span class=nx>data</span><span class=o>:</span> <span class=nx>resp</span><span class=p>.</span><span class=nx>data</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>              <span class=p>})</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>          <span class=p>}</span> <span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=nx>resp</span><span class=p>.</span><span class=nx>error</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>              <span class=c1>// If there is an error
+</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=c1></span>              <span class=c1>// also no need to keep requesting
+</span></span></span><span class=line><span class=ln>18</span><span class=cl><span class=c1></span>              <span class=c1>// just show it to user
+</span></span></span><span class=line><span class=ln>19</span><span class=cl><span class=c1></span>              <span class=c1>// and clear interval
+</span></span></span><span class=line><span class=ln>20</span><span class=cl><span class=c1></span>              <span class=nx>clearInterval</span><span class=p>(</span><span class=k>this</span><span class=p>.</span><span class=nx>statusInterval</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl>              <span class=nx>alert</span><span class=p>(</span><span class=nx>resp</span><span class=p>.</span><span class=nx>error</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>22</span><span class=cl>          <span class=p>}</span> <span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=nx>resp</span><span class=p>.</span><span class=nx>status</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>23</span><span class=cl>              <span class=c1>// but response contains a `status` key and no data or error
+</span></span></span><span class=line><span class=ln>24</span><span class=cl><span class=c1></span>              <span class=c1>// that means crawling process is still active and running (or pending)
+</span></span></span><span class=line><span class=ln>25</span><span class=cl><span class=c1></span>              <span class=c1>// don&#39;t clear the interval.
+</span></span></span><span class=line><span class=ln>26</span><span class=cl><span class=c1></span>              <span class=k>this</span><span class=p>.</span><span class=nx>setState</span><span class=p>({</span>
+</span></span><span class=line><span class=ln>27</span><span class=cl>                  <span class=nx>crawlingStatus</span><span class=o>:</span> <span class=nx>resp</span><span class=p>.</span><span class=nx>status</span>
+</span></span><span class=line><span class=ln>28</span><span class=cl>              <span class=p>});</span>
+</span></span><span class=line><span class=ln>29</span><span class=cl>          <span class=p>}</span>
+</span></span><span class=line><span class=ln>30</span><span class=cl>      <span class=p>})</span>
+</span></span><span class=line><span class=ln>31</span><span class=cl>  <span class=p>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=ln>1</span><span class=cl>  <span class=nx>render</span> <span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=c1>// render componenet
+</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1></span>    <span class=k>return</span> <span class=p>(</span><span class=o>&lt;</span><span class=nx>div</span><span class=o>&gt;&lt;</span><span class=err>/div&gt;)</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>You can discover the details by comments i added. It is quite simple actually.</p><p>Oh, that’s it. It took longer than i expected. Please leave a comment for any kind of feedback.</p></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
 <span class=button_tally>913</span>
 </a><a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>其他
 <span class=button_tally>90</span>

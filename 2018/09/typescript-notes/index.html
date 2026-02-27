@@ -25,94 +25,78 @@ typescript是javascript的语法扩展。。。好处是提供了类型。。可
 <a href=https://111qqz.com/en/ class="nav_child nav_item">English</a></div></div><div class=follow><a href=https://github.com/111qqz><svg class="icon"><use xlink:href="#github"/></svg></a><div class=color_mode><input type=checkbox class=color_choice id=mode></div></div></div></nav></header><main><div class="grid-inverse wrap content"><article class=post_content><h1 class=post_title>typescript学习笔记</h1><div class=post_meta><span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>2018-09-05</span>
 <span class=post_time>· 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/typescript title=typescript class="post_tag button button_translucent">typescript
-</a><a href=https://111qqz.com/tags/%E5%89%8D%E7%AB%AF title=前端 class="post_tag button button_translucent">前端</a></span></div><div class=post_body><p>先放参考资料:</p><p><a href=https://ts.xcatliu.com/>TypeScript 入门教程</a></p><p><a href=http://www.typescriptlang.org/docs/handbook/react-&-webpack.html>React & Webpack</a></p><p><a href=https://github.com/sw-yx/react-typescript-cheatsheet/blob/master/README.md>react-typescript-cheatsheet </a>(强推一波，讲了很多react+ts的实践）</p><p>typescript是javascript的语法扩展。。。好处是提供了类型。。可以在编译（结果为js文件)的时候提供静态的类型检查。。。</p><p>typescript的问号语法:标记某个参数为可选。</p><p>例子:</p><pre><code>export class Thread {
-  id: string;
-  lastMessage: Message;
-  name: string;
-  avatarSrc: string;
-
-  constructor(id?: string,
-              name?: string,
-              avatarSrc?: string) {
-    this.id = id || uuid();
-    this.name = name;
-    this.avatarSrc = avatarSrc;
-  }
-}
-</code></pre><p>关于typescript的类型推断。。如果在定义时直接赋值则会进行推断，否则会推断类型为any.</p><pre><code>let myFavoriteNumber = 'seven';
+</a><a href=https://111qqz.com/tags/%E5%89%8D%E7%AB%AF title=前端 class="post_tag button button_translucent">前端</a></span></div><div class=post_body><p>先放参考资料:</p><p><a href=https://ts.xcatliu.com/>TypeScript 入门教程</a></p><p><a href=http://www.typescriptlang.org/docs/handbook/react-&-webpack.html>React & Webpack</a></p><p><a href=https://github.com/sw-yx/react-typescript-cheatsheet/blob/master/README.md>react-typescript-cheatsheet </a>(强推一波，讲了很多react+ts的实践）</p><p>typescript是javascript的语法扩展。。。好处是提供了类型。。可以在编译（结果为js文件)的时候提供静态的类型检查。。。</p><p>typescript的问号语法:标记某个参数为可选。</p><p>例子:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=ln>1</span><span class=cl><span class=kr>export</span> <span class=kr>class</span> <span class=nx>Thread</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=nx>id</span>: <span class=kt>string</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=nx>lastMessage</span>: <span class=kt>Message</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=nx>name</span>: <span class=kt>string</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=nx>avatarSrc</span>: <span class=kt>string</span><span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=ln>1</span><span class=cl>  <span class=kr>constructor</span><span class=p>(</span><span class=nx>id?</span>: <span class=kt>string</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>              <span class=nx>name?</span>: <span class=kt>string</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>              <span class=nx>avatarSrc?</span>: <span class=kt>string</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=k>this</span><span class=p>.</span><span class=nx>id</span> <span class=o>=</span> <span class=nx>id</span> <span class=o>||</span> <span class=nx>uuid</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>    <span class=k>this</span><span class=p>.</span><span class=nx>name</span> <span class=o>=</span> <span class=nx>name</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>    <span class=k>this</span><span class=p>.</span><span class=nx>avatarSrc</span> <span class=o>=</span> <span class=nx>avatarSrc</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>8</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>关于typescript的类型推断。。如果在定义时直接赋值则会进行推断，否则会推断类型为any.</p><pre><code>let myFavoriteNumber = 'seven';
 myFavoriteNumber = 7;
 
 // index.ts(2,1): error TS2322: Type 'number' is not assignable to type 'string'.
 //上面的写法会编译错误，原因是定义时已经推断类型为string
 //但是下面的写法没有问题
-
-let myFavoriteNumber;
-myFavoriteNumber = 'seven';
-myFavoriteNumber = 7;
-
-
-
-
-
-let myFavoriteNumber: string | number;
-myFavoriteNumber = 'seven';
-myFavoriteNumber = 7;
-
-这里的 let myFavoriteNumber: string | number 的含义是，
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=ln>1</span><span class=cl><span class=kd>let</span> <span class=nx>myFavoriteNumber</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=nx>myFavoriteNumber</span> <span class=o>=</span> <span class=s1>&#39;seven&#39;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=nx>myFavoriteNumber</span> <span class=o>=</span> <span class=mi>7</span><span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=ln>1</span><span class=cl><span class=kd>let</span> <span class=nx>myFavoriteNumber</span>: <span class=kt>string</span> <span class=o>|</span> <span class=kt>number</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl><span class=nx>myFavoriteNumber</span> <span class=o>=</span> <span class=s1>&#39;seven&#39;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=nx>myFavoriteNumber</span> <span class=o>=</span> <span class=mi>7</span><span class=p>;</span>
+</span></span></code></pre></div><pre><code>这里的 let myFavoriteNumber: string | number 的含义是，
 允许 myFavoriteNumber 的类型是 string 或者 number，但是不能是其他类型。
-</code></pre><p>当 TypeScript 不确定一个联合类型的变量到底是哪个类型的时候，我们<strong>只能访问此联合类型的所有类型里共有的属性或方法</strong></p><pre><code>function getLength(something: string | number): number {
-    return something.length;
-}
-
-// index.ts(2,22): error TS2339: Property 'length' does not exist on type 'string | number'.
+</code></pre><p>当 TypeScript 不确定一个联合类型的变量到底是哪个类型的时候，我们<strong>只能访问此联合类型的所有类型里共有的属性或方法</strong></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=kr>function</span> <span class=nf>getLength</span><span class=p>(</span><span class=n>something</span><span class=p>:</span> <span class=n>string</span> <span class=o>|</span> <span class=n>number</span><span class=p>):</span> <span class=n>number</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=kr>return</span> <span class=n>something.length</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><pre><code>// index.ts(2,22): error TS2339: Property 'length' does not exist on type 'string | number'.
 //   Property 'length' does not exist on type 'number'.
-</code></pre><p>类型断言:</p><pre><code>functionf  getLength(something: string | number): number {
-    if ((&lt;string&gt;something).length) {
-        return (&lt;string&gt;something).length;
-    } else {
-        return something.toString().length;
-    }
-}
-</code></pre><p><strong>类型断言不是类型转换，断言成一个联合类型中不存在的类型是不允许的</strong></p><p>泛型:</p><pre><code>function createArray&lt;T&gt;(length: number, value: T): Array&lt;T&gt; {
-    let result: T[] = [];
-    for (let i = 0; i &lt; length; i++) {
-        result[i] = value;
-    }
-    return result;
-}
-
-createArray&lt;string&gt;(3, 'x'); // ['x', 'x', 'x']
-
-
-
-
-function swap&lt;T, U&gt;(tuple: [T, U]): [U, T] {
-    return [tuple[1], tuple[0]];
-}
-
-swap([7, 'seven']); // ['seven', 7]
-</code></pre><p>泛型约束:传入的模板参数必须包含接口的形状:</p><pre><code>interface Lengthwise {
-    length: number;
-}
-
-function loggingIdentity&lt;T extends Lengthwise&gt;(arg: T): T {
-    console.log(arg.length);
-    return arg;
-}
-</code></pre><p>上面的代码表示，传入的参数必须包含一个类型为number，<strong>名字为length的属性</strong></p><p>这里要强调的是，这里名字是重要的。如果把length改为其他名字，将不能通过编译。</p><p>定义一个普通的class属性（不是props)的办法:</p><p>在构造函数之前声明即可，参考如下代码中的pointer:number</p><pre><code>class App extends React.Component&lt;{
-  message: string,
-}&gt; {
-  pointer: number // like this
-  componentDidMount() {
-    this.pointer = 3;
-  }
-  render() {
-    return (
-      &lt;div&gt;{this.props.message} and {this.pointer}&lt;/div&gt;
-    );
-  }
-}
-</code></pre></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
+</code></pre><p>类型断言:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=ln>1</span><span class=cl><span class=nx>functionf</span>  <span class=nx>getLength</span><span class=p>(</span><span class=nx>something</span>: <span class=kt>string</span> <span class=o>|</span> <span class=kt>number</span><span class=p>)</span><span class=o>:</span> <span class=kt>number</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=k>if</span> <span class=p>((&lt;</span><span class=nt>string</span><span class=p>&gt;</span><span class=nx>something</span><span class=p>).</span><span class=nx>length</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=k>return</span> <span class=p>(&lt;</span><span class=nt>string</span><span class=p>&gt;</span><span class=nx>something</span><span class=p>).</span><span class=nx>length</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=k>return</span> <span class=nx>something</span><span class=p>.</span><span class=nx>toString</span><span class=p>().</span><span class=nx>length</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p><strong>类型断言不是类型转换，断言成一个联合类型中不存在的类型是不允许的</strong></p><p>泛型:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=ln>1</span><span class=cl><span class=kd>function</span> <span class=nx>createArray</span><span class=p>&lt;</span><span class=nt>T</span><span class=p>&gt;(</span><span class=nx>length</span>: <span class=kt>number</span><span class=p>,</span> <span class=nx>value</span>: <span class=kt>T</span><span class=p>)</span><span class=o>:</span> <span class=nb>Array</span><span class=p>&lt;</span><span class=nt>T</span><span class=p>&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=kd>let</span> <span class=nx>result</span>: <span class=kt>T</span><span class=p>[]</span> <span class=o>=</span> <span class=p>[];</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=kd>let</span> <span class=nx>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>i</span> <span class=o>&lt;</span> <span class=nx>length</span><span class=p>;</span> <span class=nx>i</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=nx>result</span><span class=p>[</span><span class=nx>i</span><span class=p>]</span> <span class=o>=</span> <span class=nx>value</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>6</span><span class=cl>    <span class=k>return</span> <span class=nx>result</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>7</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><pre><code>createArray&lt;string&gt;(3, 'x'); // ['x', 'x', 'x']
+</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=kr>function</span> <span class=nf>swap</span><span class=o>&lt;</span><span class=n>T</span><span class=p>,</span> <span class=n>U</span><span class=o>&gt;</span><span class=p>(</span><span class=n>tuple</span><span class=p>:</span> <span class=p>[</span><span class=n>T</span><span class=p>,</span> <span class=n>U</span><span class=p>]):</span> <span class=p>[</span><span class=n>U</span><span class=p>,</span> <span class=n>T</span><span class=p>]</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=kr>return</span> <span class=p>[</span><span class=n>tuple</span><span class=p>[</span><span class=mi>1</span><span class=p>],</span> <span class=n>tuple</span><span class=p>[</span><span class=mi>0</span><span class=p>]];</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><pre><code>swap([7, 'seven']); // ['seven', 7]
+</code></pre><p>泛型约束:传入的模板参数必须包含接口的形状:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=ln>1</span><span class=cl><span class=kr>interface</span> <span class=nx>Lengthwise</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=nx>length</span>: <span class=kt>number</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=ln>1</span><span class=cl><span class=kd>function</span> <span class=nx>loggingIdentity</span><span class=o>&lt;</span><span class=nx>T</span> <span class=kr>extends</span> <span class=nx>Lengthwise</span><span class=o>&gt;</span><span class=p>(</span><span class=nx>arg</span><span class=o>:</span> <span class=nx>T</span><span class=p>)</span><span class=o>:</span> <span class=nx>T</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=nx>arg</span><span class=p>.</span><span class=nx>length</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=k>return</span> <span class=nx>arg</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>上面的代码表示，传入的参数必须包含一个类型为number，<strong>名字为length的属性</strong></p><p>这里要强调的是，这里名字是重要的。如果把length改为其他名字，将不能通过编译。</p><p>定义一个普通的class属性（不是props)的办法:</p><p>在构造函数之前声明即可，参考如下代码中的pointer:number</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=ln> 1</span><span class=cl><span class=kr>class</span> <span class=nx>App</span> <span class=kr>extends</span> <span class=nx>React</span><span class=p>.</span><span class=nx>Component</span><span class=o>&lt;</span><span class=p>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>  <span class=nx>message</span>: <span class=kt>string</span><span class=p>,</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=p>}</span><span class=o>&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>  <span class=nx>pointer</span>: <span class=kt>number</span> <span class=c1>// like this
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=c1></span>  <span class=nx>componentDidMount() {</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>    <span class=k>this</span><span class=p>.</span><span class=nx>pointer</span> <span class=o>=</span> <span class=mi>3</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>  <span class=nx>render() {</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>    <span class=k>return</span> <span class=p>(</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>      <span class=p>&lt;</span><span class=nt>div</span><span class=p>&gt;{</span><span class=k>this</span><span class=p>.</span><span class=nx>props</span><span class=p>.</span><span class=nx>message</span><span class=p>}</span> <span class=nx>and</span> <span class=p>{</span><span class=k>this</span><span class=p>.</span><span class=nx>pointer</span><span class=p>}&lt;/</span><span class=nt>div</span><span class=p>&gt;</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>    <span class=p>);</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
 <span class=button_tally>913</span>
 </a><a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>其他
 <span class=button_tally>90</span>

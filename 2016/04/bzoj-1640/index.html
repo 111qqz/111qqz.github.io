@@ -34,587 +34,606 @@ C
 D
 B
 C
-B</p><h2 id=sample-output>Sample Output</h2><p>ABCBCD</p><h2 id=hint>HINT</h2><p><img class="image_figure image_external" loading=lazy src=http://www.lydsy.com/JudgeOnline/upload/201401/22%289%29.jpg alt></p><h2 id=source>Source</h2><p><a href="http://www.lydsy.com/JudgeOnline/problemset.php?search=Silver">Silver</a></p><p>思路：比较麻烦的一个贪心。。对拍才找出了一个错误。。。</p><p>写丑了QAQ</p><pre><code>/* ***********************************************
-Author :111qqz
-Created Time :2016年04月08日 星期五 16时16分34秒
-File Name :code/bzoj/1640.cpp
-************************************************ */
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cstdio&gt;</span><span class=cp>
-</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cstring&gt;</span><span class=cp>
-</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
-</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;algorithm&gt;</span><span class=cp>
-</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;vector&gt;</span><span class=cp>
-</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;queue&gt;</span><span class=cp>
-</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;set&gt;</span><span class=cp>
-</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;map&gt;</span><span class=cp>
-</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;string&gt;</span><span class=cp>
-</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cmath&gt;</span><span class=cp>
-</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cstdlib&gt;</span><span class=cp>
-</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;ctime&gt;</span><span class=cp>
-</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=cp>#define fst first
-</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=cp>#define sec second
-</span></span></span><span class=line><span class=ln>15</span><span class=cl><span class=cp>#define lson l,m,rt&lt;&lt;1
-</span></span></span><span class=line><span class=ln>16</span><span class=cl><span class=cp>#define rson m+1,r,rt&lt;&lt;1|1
-</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=cp>#define ms(a,x) memset(a,x,sizeof(a))
-</span></span></span><span class=line><span class=ln>18</span><span class=cl><span class=cp></span><span class=k>typedef</span> <span class=kt>long</span> <span class=kt>long</span> <span class=n>LL</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>19</span><span class=cl><span class=cp>#define pi pair &lt; int ,int &gt;
-</span></span></span><span class=line><span class=ln>20</span><span class=cl><span class=cp>#define MP make_pair
-</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=k>using</span> <span class=k>namespace</span> <span class=n>std</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=k>const</span> <span class=kt>double</span> <span class=n>eps</span> <span class=o>=</span> <span class=mf>1E-8</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=k>const</span> <span class=kt>int</span> <span class=n>dx4</span><span class=p>[</span><span class=mi>4</span><span class=p>]</span><span class=o>=</span><span class=p>{</span><span class=mi>1</span><span class=p>,</span><span class=mi>0</span><span class=p>,</span><span class=mi>0</span><span class=p>,</span><span class=o>-</span><span class=mi>1</span><span class=p>};</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl><span class=k>const</span> <span class=kt>int</span> <span class=n>dy4</span><span class=p>[</span><span class=mi>4</span><span class=p>]</span><span class=o>=</span><span class=p>{</span><span class=mi>0</span><span class=p>,</span><span class=o>-</span><span class=mi>1</span><span class=p>,</span><span class=mi>1</span><span class=p>,</span><span class=mi>0</span><span class=p>};</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=k>const</span> <span class=kt>int</span> <span class=n>inf</span> <span class=o>=</span> <span class=mh>0x3f3f3f3f</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=k>const</span> <span class=kt>int</span> <span class=n>N</span><span class=o>=</span><span class=mf>2E3</span><span class=o>+</span><span class=mi>7</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=kt>int</span> <span class=n>n</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl><span class=kt>int</span> <span class=n>a</span><span class=p>[</span><span class=n>N</span><span class=p>];</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl><span class=n>string</span> <span class=n>ans</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl><span class=p>{</span>
-</span></span><span class=line><span class=ln>12</span><span class=cl>	<span class=cp>#ifndef  ONLINE_JUDGE 
-</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=cp></span>	<span class=n>freopen</span><span class=p>(</span><span class=s>&#34;code/in.txt&#34;</span><span class=p>,</span><span class=s>&#34;r&#34;</span><span class=p>,</span><span class=n>stdin</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>14</span><span class=cl>  <span class=cp>#endif
-</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>	<span class=n>ios</span><span class=o>::</span><span class=n>sync_with_stdio</span><span class=p>(</span><span class=nb>false</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>	<span class=n>cin</span><span class=o>&gt;&gt;</span><span class=n>n</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>	<span class=n>ans</span> <span class=o>=</span><span class=s>&#34;&#34;</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>	<span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>1</span> <span class=p>;</span><span class=n>i</span> <span class=o>&lt;=</span> <span class=n>n</span> <span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>5</span><span class=cl>	<span class=p>{</span>
-</span></span><span class=line><span class=ln>6</span><span class=cl>	    <span class=kt>char</span> <span class=n>ch</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>7</span><span class=cl>	    <span class=n>cin</span><span class=o>&gt;&gt;</span><span class=n>ch</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>8</span><span class=cl>	    <span class=n>a</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>ch</span><span class=o>-</span><span class=sc>&#39;A&#39;</span><span class=o>+</span><span class=mi>1</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>9</span><span class=cl>	<span class=p>}</span>
-</span></span></code></pre></div><pre><code>	int l = 1;
-	int r = n ;
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>	<span class=k>while</span> <span class=p>(</span><span class=n>l</span><span class=o>&lt;=</span><span class=n>r</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>	<span class=p>{</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>	    <span class=k>if</span> <span class=p>(</span><span class=n>l</span><span class=o>==</span><span class=n>r</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>	    <span class=p>{</span>
-</span></span><span class=line><span class=ln>5</span><span class=cl>	<span class=c1>//	cout&lt;&lt;&#34;aans:&#34;&lt;&lt;ans&lt;&lt;endl;
-</span></span></span><span class=line><span class=ln>6</span><span class=cl><span class=c1></span>		<span class=n>ans</span> <span class=o>+=</span> <span class=kt>char</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>+</span><span class=mi>64</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>7</span><span class=cl>	<span class=c1>//	cout&lt;&lt;&#34;aaans:&#34;&lt;&lt;ans&lt;&lt;endl;
-</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl>		<span class=k>break</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl>	    <span class=p>}</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl>	    <span class=k>if</span> <span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>!=</span><span class=n>a</span><span class=p>[</span><span class=n>r</span><span class=p>])</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl>	    <span class=p>{</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>&lt;</span><span class=n>a</span><span class=p>[</span><span class=n>r</span><span class=p>])</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl>		<span class=p>{</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl>		    <span class=n>ans</span> <span class=o>+=</span> <span class=kt>char</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>+</span><span class=mi>64</span><span class=p>);</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl>		    <span class=n>l</span><span class=o>++</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl>		<span class=p>}</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl>		<span class=k>else</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl>		<span class=p>{</span>
-</span></span><span class=line><span class=ln>12</span><span class=cl>		    <span class=n>ans</span> <span class=o>+=</span> <span class=kt>char</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>r</span><span class=p>]</span><span class=o>+</span><span class=mi>64</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>13</span><span class=cl>		    <span class=n>r</span><span class=o>--</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>14</span><span class=cl>		<span class=p>}</span>
-</span></span><span class=line><span class=ln>15</span><span class=cl>	    <span class=p>}</span>
-</span></span><span class=line><span class=ln>16</span><span class=cl>	    <span class=k>else</span>
-</span></span><span class=line><span class=ln>17</span><span class=cl>	    <span class=p>{</span>
-</span></span><span class=line><span class=ln>18</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>l</span><span class=o>==</span><span class=n>r</span><span class=p>)</span> <span class=k>continue</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>19</span><span class=cl>		<span class=kt>int</span> <span class=n>tmpl</span> <span class=o>=</span> <span class=n>l</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>20</span><span class=cl>		<span class=kt>int</span> <span class=n>tmpr</span> <span class=o>=</span> <span class=n>r</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>21</span><span class=cl>		<span class=k>while</span> <span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>tmpl</span><span class=p>]</span><span class=o>==</span><span class=n>a</span><span class=p>[</span><span class=n>tmpr</span><span class=p>]</span><span class=o>&amp;&amp;</span><span class=n>tmpl</span><span class=o>&lt;</span><span class=n>tmpr</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>22</span><span class=cl>		<span class=p>{</span>
-</span></span><span class=line><span class=ln>23</span><span class=cl>		    <span class=n>tmpl</span><span class=o>++</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>24</span><span class=cl>		    <span class=n>tmpr</span><span class=o>--</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>25</span><span class=cl>		<span class=p>}</span>
-</span></span><span class=line><span class=ln>26</span><span class=cl><span class=c1>//		cout&lt;&lt;&#34;tmpl:&#34;&lt;&lt;tmpl&lt;&lt;&#34; tmpr:&#34;&lt;&lt;tmpr&lt;&lt;&#34; ans:&#34;&lt;&lt;ans&lt;&lt;endl;	
-</span></span></span><span class=line><span class=ln>27</span><span class=cl><span class=c1></span>		<span class=k>if</span> <span class=p>(</span><span class=n>tmpl</span><span class=o>&gt;=</span><span class=n>tmpr</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>28</span><span class=cl>		<span class=p>{</span>
-</span></span><span class=line><span class=ln>29</span><span class=cl>		    <span class=k>while</span> <span class=p>(</span><span class=n>l</span><span class=o>&lt;=</span><span class=n>r</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>30</span><span class=cl>		    <span class=p>{</span>
-</span></span><span class=line><span class=ln>31</span><span class=cl>	<span class=c1>//		cout&lt;&lt;&#34;l:&#34;&lt;&lt;l&lt;&lt;&#34; r:&#34;&lt;&lt;r&lt;&lt;&#34; ans:&#34;&lt;&lt;ans&lt;&lt;endl;
-</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl>			<span class=k>if</span> <span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>&lt;=</span><span class=n>a</span><span class=p>[</span><span class=n>r</span><span class=p>])</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl>			<span class=p>{</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl>			    <span class=n>ans</span> <span class=o>+=</span> <span class=kt>char</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>+</span><span class=mi>64</span><span class=p>);</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl>			    <span class=n>l</span><span class=o>++</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl>			    <span class=k>break</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl>			<span class=p>}</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl>			<span class=k>else</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl>			<span class=p>{</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl>			    <span class=n>ans</span> <span class=o>+=</span> <span class=kt>char</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>r</span><span class=p>]</span><span class=o>+</span><span class=mi>64</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl>			    <span class=n>r</span><span class=o>--</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl>			    <span class=k>break</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>12</span><span class=cl>			<span class=p>}</span>
-</span></span><span class=line><span class=ln>13</span><span class=cl>			<span class=c1>//cout&lt;&lt;&#34; ans:&#34;&lt;&lt;ans&lt;&lt;endl;
-</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=c1></span>		    <span class=p>}</span>
-</span></span><span class=line><span class=ln>15</span><span class=cl>		 <span class=cm>/*   for ( int i = l ;  i &lt;= r ; i++)
-</span></span></span><span class=line><span class=ln>16</span><span class=cl><span class=cm>		    {
-</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=cm>			if (tmpl==tmpr&amp;&amp;a[tmpl]&gt;a[l]&amp;&amp;i==tmpl) continue;
-</span></span></span><span class=line><span class=ln>18</span><span class=cl><span class=cm>			ans +=char(a[i]+64);
-</span></span></span><span class=line><span class=ln>19</span><span class=cl><span class=cm>		    }
-</span></span></span><span class=line><span class=ln>20</span><span class=cl><span class=cm>		    if (tmpl==tmpr&amp;&amp;a[tmpl]&gt;a[l]) ans += char(a[tmpl]+64); */</span>
-</span></span><span class=line><span class=ln>21</span><span class=cl>		    <span class=c1>//break;
-</span></span></span><span class=line><span class=ln>22</span><span class=cl><span class=c1></span>		<span class=p>}</span>
-</span></span><span class=line><span class=ln>23</span><span class=cl>		<span class=k>else</span>
-</span></span><span class=line><span class=ln>24</span><span class=cl>		<span class=p>{</span>
-</span></span><span class=line><span class=ln>25</span><span class=cl>		    <span class=k>while</span> <span class=p>(</span><span class=n>l</span><span class=o>&lt;</span><span class=n>tmpl</span><span class=o>&amp;&amp;</span><span class=n>r</span><span class=o>&gt;</span><span class=n>tmpr</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>26</span><span class=cl>		    <span class=p>{</span>
-</span></span><span class=line><span class=ln>27</span><span class=cl>	<span class=c1>//		cout&lt;&lt;&#34;l:&#34;&lt;&lt;l&lt;&lt;&#34; r:&#34;&lt;&lt;r&lt;&lt;&#34; anssss:&#34;&lt;&lt;ans&lt;&lt;endl;
-</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl>			<span class=k>if</span> <span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>==</span><span class=n>a</span><span class=p>[</span><span class=n>r</span><span class=p>])</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl>			<span class=p>{</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl>			    <span class=k>if</span> <span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>tmpl</span><span class=p>]</span><span class=o>&lt;=</span><span class=n>a</span><span class=p>[</span><span class=n>tmpr</span><span class=p>])</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl>			    <span class=p>{</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl>				<span class=n>ans</span> <span class=o>+=</span> <span class=kt>char</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>+</span><span class=mi>64</span><span class=p>);</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl>				<span class=n>l</span><span class=o>++</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl>				<span class=k>break</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl>			    <span class=p>}</span><span class=k>else</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl>			    <span class=p>{</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl>				<span class=n>ans</span> <span class=o>+=</span> <span class=kt>char</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>r</span><span class=p>]</span><span class=o>+</span><span class=mi>64</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl>				<span class=n>r</span><span class=o>--</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>12</span><span class=cl>				<span class=k>break</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>13</span><span class=cl>			    <span class=p>}</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>			<span class=p>}</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>			<span class=k>else</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>			<span class=p>{</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl>			    <span class=k>if</span> <span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>&lt;</span><span class=n>a</span><span class=p>[</span><span class=n>r</span><span class=p>])</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl>			    <span class=p>{</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl>				<span class=n>ans</span><span class=o>+=</span><span class=kt>char</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>+</span><span class=mi>64</span><span class=p>);</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl>				<span class=n>l</span><span class=o>++</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl>				<span class=k>break</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl>			    <span class=p>}</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl>			    <span class=k>else</span> 
-</span></span><span class=line><span class=ln> 8</span><span class=cl>			    <span class=p>{</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl>				<span class=n>ans</span><span class=o>+=</span><span class=kt>char</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>r</span><span class=p>]</span><span class=o>+</span><span class=mi>64</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl>				<span class=n>r</span><span class=o>--</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl>				<span class=k>break</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>12</span><span class=cl>			    <span class=p>}</span>
-</span></span><span class=line><span class=ln>13</span><span class=cl>			 <span class=c1>//   cout&lt;&lt;&#34;l:&#34;&lt;&lt;l&lt;&lt;&#34; r:&#34;&lt;&lt;r&lt;&lt;&#34; anssss:&#34;&lt;&lt;ans&lt;&lt;endl;    
-</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=c1></span>			<span class=p>}</span>
-</span></span><span class=line><span class=ln>15</span><span class=cl>		    <span class=p>}</span>
-</span></span><span class=line><span class=ln>16</span><span class=cl>			<span class=cm>/*   if (a[tmpl]&lt;a[tmpr])
-</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=cm>		    {
-</span></span></span><span class=line><span class=ln>18</span><span class=cl><span class=cm>			for ( int i = l ; i &lt;= tmpl ; i++) ans +=char(a[i]+64);
-</span></span></span><span class=line><span class=ln>19</span><span class=cl><span class=cm>			l = tmpl+1;
-</span></span></span><span class=line><span class=ln>20</span><span class=cl><span class=cm>		    }
-</span></span></span><span class=line><span class=ln>21</span><span class=cl><span class=cm>		    else
-</span></span></span><span class=line><span class=ln>22</span><span class=cl><span class=cm>		    {
-</span></span></span><span class=line><span class=ln>23</span><span class=cl><span class=cm>			for ( int i = r ; i &gt;= tmpr ; i--) ans +=char(a[i]+64);
-</span></span></span><span class=line><span class=ln>24</span><span class=cl><span class=cm>			r = tmpr-1;
-</span></span></span><span class=line><span class=ln>25</span><span class=cl><span class=cm>		    }   */</span>
-</span></span><span class=line><span class=ln>26</span><span class=cl>		<span class=p>}</span>
-</span></span><span class=line><span class=ln>27</span><span class=cl>	    <span class=p>}</span>
-</span></span><span class=line><span class=ln>28</span><span class=cl>	   <span class=c1>// cout&lt;&lt;&#34;l:&#34;&lt;&lt;l&lt;&lt;&#34; r:&#34;&lt;&lt;r&lt;&lt;&#34; ans:&#34;&lt;&lt;ans&lt;&lt;endl;
-</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl>	<span class=p>}</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl>	<span class=kt>int</span> <span class=n>len</span> <span class=o>=</span> <span class=n>ans</span><span class=p>.</span><span class=n>length</span><span class=p>();</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl>	<span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span> <span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>len</span> <span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl>	<span class=p>{</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl>	    <span class=n>cout</span><span class=o>&lt;&lt;</span><span class=n>ans</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl>	    <span class=k>if</span> <span class=p>((</span><span class=n>i</span><span class=o>+</span><span class=mi>1</span><span class=p>)</span><span class=o>==</span><span class=mi>0</span><span class=p>)</span> <span class=n>cout</span><span class=o>&lt;&lt;</span><span class=n>endl</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl>	<span class=p>}</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl><span class=c1>//	cout&lt;&lt;ans&lt;&lt;endl;
-</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=c1></span>  <span class=cp>#ifndef ONLINE_JUDGE  
-</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=cp></span>  <span class=n>fclose</span><span class=p>(</span><span class=n>stdin</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl>  <span class=cp>#endif
-</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=cp></span>    <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>13</span><span class=cl><span class=p>}</span>
-</span></span></code></pre></div><pre><code>出错数据：
-input:
-393
-A
-C
-A
-A
-B
-C
-C
-C
-C
-B
-B
-C
-A
-C
-C
-C
-B
-B
-A
-C
-C
-B
-C
-C
-C
-C
-A
-A
-A
-A
-C
-A
-A
-A
-B
-C
-C
-C
-B
-A
-A
-B
-A
-A
-B
-C
-C
-C
-A
-A
-C
-A
-C
-A
-C
-B
-C
-C
-B
-A
-A
-B
-C
-B
-B
-A
-B
-B
-C
-A
-B
-A
-B
-B
-B
-B
-B
-B
-A
-B
-A
-B
-A
-C
-B
-A
-B
-B
-B
-A
-B
-C
-C
-A
-B
-B
-C
-C
-A
-B
-C
-C
-A
-C
-C
-B
-A
-A
-A
-A
-A
-A
-B
-A
-A
-A
-B
-C
-B
-C
-A
-A
-C
-A
-B
-A
-B
-A
-C
-C
-A
-C
-C
-A
-B
-C
-C
-B
-C
-C
-A
-A
-B
-C
-B
-B
-A
-A
-B
-B
-A
-B
-C
-C
-C
-C
-A
-C
-A
-A
-B
-A
-A
-B
-B
-B
-A
-A
-A
-B
-B
-B
-B
-C
-A
-A
-B
-B
-B
-A
-A
-B
-B
-A
-C
-C
-C
-C
-B
-A
-A
-A
-B
-A
-C
-B
-B
-A
-C
-C
-B
-A
-A
-B
-A
-C
-C
-C
-A
-A
-C
-B
-C
-C
-C
-B
-B
-C
-B
-C
-A
-B
-C
-A
-C
-C
-B
-A
-A
-A
-B
-C
-C
-C
-B
-C
-B
-A
-A
-C
-B
-C
-A
-C
-B
-A
-A
-C
-B
-B
-C
-B
-A
-A
-C
-C
-C
-A
-B
-A
-C
-A
-B
-B
-C
-C
-B
-C
-B
-B
-B
-A
-C
-C
-C
-A
-B
-A
-B
-C
-C
-B
-B
-A
-B
-B
-A
-C
-C
-C
-C
-B
-C
-A
-A
-A
-A
-A
-C
-C
-C
-B
-C
-B
-A
-C
-A
-B
-A
-C
-B
-C
-A
-A
-A
-A
-C
-C
-C
-B
-B
-B
-B
-C
-C
-B
-A
-A
-C
-C
-C
-A
-A
-C
-B
-B
-B
-C
-B
-C
-B
-C
-C
-A
-A
-C
-A
-C
-C
-C
-C
-B
-A
-A
-B
-A
-C
-B
-B
-C
-B
-B
-C
-B
-B
-B
-C
-A
-C
-B
-A
-B
-B
-C
-C
-B
-C
-C
-C
-A
-C
-B
-C
-B
-B
-A
-B
-B
-C
-B
-A
-A
-C
-
-我的输出：ACAABCBBABBCAABCBCACCCBCCBBABCACBBBCBBCBBCABAABCCCCACAACCBCBCBBBCAACCCAABCCBBBBC
-CCAAAACBCABACABCBCCCAAAAACBCCCCABBABBCCBABACCCABBBCBCCBBACABACCCAABCBBCAABCACBCA
-ABCBCCCBAAABCCACBACBCBBCCCBCAACCCABAABCCABBCABAAABCCCCABBAABBBAACBBBBAAABBBAABAA
-CACCCCBABBAABBCBAACCBCCBACCACCABABACAACBCBAAABAAAAAABCCACCBACCBBACCBABBBABCABABA
-BBBBBBABACBBABBCBAABCCBCACACAACCCBAABAABCCCBAAACAAAACCCCBBCACCCBBACCBCCCC
-
-正确输出：ACAABCAABCBBABBCBCACCCBCCBBABCACBBBCBBCBBCABAABCCCCACAACCBCBCBBBCAACCCAABCCBBBBC
-CCAAAACBCABACABCBCCCAAAAACBCCCCABBABBCCBABACCCABBBCBCCBBACABACCCAABCBBCAABCACBCA
-ABCBCCCBAAABCCACBACBCBBCCCBCAACCCABAABCCABBCABAAABCCCCABBAABBBAACBBBBAAABBBAABAA
-CACCCCBABBAABBCBAACCBCCBACCACCABABACAACBCBAAABAAAAAABCCACCBACCBBACCBABBBABCABABA
-BBBBBBABACBBABBCBAABCCBCACACAACCCBAABAABCCCBAAACAAAACCCCBBCACCCBBACCBCCCC
-</code></pre></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
+B</p><h2 id=sample-output>Sample Output</h2><p>ABCBCD</p><h2 id=hint>HINT</h2><p><img class="image_figure image_external" loading=lazy src=http://www.lydsy.com/JudgeOnline/upload/201401/22%289%29.jpg alt></p><h2 id=source>Source</h2><p><a href="http://www.lydsy.com/JudgeOnline/problemset.php?search=Silver">Silver</a></p><p>思路：比较麻烦的一个贪心。。对拍才找出了一个错误。。。</p><p>写丑了QAQ</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>  1</span><span class=cl><span class=cm>/* ***********************************************
+</span></span></span><span class=line><span class=ln>  2</span><span class=cl><span class=cm>Author :111qqz
+</span></span></span><span class=line><span class=ln>  3</span><span class=cl><span class=cm>Created Time :2016年04月08日 星期五 16时16分34秒
+</span></span></span><span class=line><span class=ln>  4</span><span class=cl><span class=cm>File Name :code/bzoj/1640.cpp
+</span></span></span><span class=line><span class=ln>  5</span><span class=cl><span class=cm>************************************************ */</span>
+</span></span><span class=line><span class=ln>  6</span><span class=cl>
+</span></span><span class=line><span class=ln>  7</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cstdio&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>  8</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cstring&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>  9</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 10</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;algorithm&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 11</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;vector&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 12</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;queue&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 13</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;set&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 14</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;map&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 15</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;string&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 16</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cmath&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 17</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cstdlib&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 18</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;ctime&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 19</span><span class=cl><span class=cp>#define fst first
+</span></span></span><span class=line><span class=ln> 20</span><span class=cl><span class=cp>#define sec second
+</span></span></span><span class=line><span class=ln> 21</span><span class=cl><span class=cp>#define lson l,m,rt&lt;&lt;1
+</span></span></span><span class=line><span class=ln> 22</span><span class=cl><span class=cp>#define rson m+1,r,rt&lt;&lt;1|1
+</span></span></span><span class=line><span class=ln> 23</span><span class=cl><span class=cp>#define ms(a,x) memset(a,x,sizeof(a))
+</span></span></span><span class=line><span class=ln> 24</span><span class=cl><span class=cp></span><span class=k>typedef</span> <span class=kt>long</span> <span class=kt>long</span> <span class=n>LL</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 25</span><span class=cl><span class=cp>#define pi pair &lt; int ,int &gt;
+</span></span></span><span class=line><span class=ln> 26</span><span class=cl><span class=cp>#define MP make_pair
+</span></span></span><span class=line><span class=ln> 27</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln> 28</span><span class=cl><span class=k>using</span> <span class=k>namespace</span> <span class=n>std</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 29</span><span class=cl><span class=k>const</span> <span class=kt>double</span> <span class=n>eps</span> <span class=o>=</span> <span class=mf>1E-8</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 30</span><span class=cl><span class=k>const</span> <span class=kt>int</span> <span class=n>dx4</span><span class=p>[</span><span class=mi>4</span><span class=p>]</span><span class=o>=</span><span class=p>{</span><span class=mi>1</span><span class=p>,</span><span class=mi>0</span><span class=p>,</span><span class=mi>0</span><span class=p>,</span><span class=o>-</span><span class=mi>1</span><span class=p>};</span>
+</span></span><span class=line><span class=ln> 31</span><span class=cl><span class=k>const</span> <span class=kt>int</span> <span class=n>dy4</span><span class=p>[</span><span class=mi>4</span><span class=p>]</span><span class=o>=</span><span class=p>{</span><span class=mi>0</span><span class=p>,</span><span class=o>-</span><span class=mi>1</span><span class=p>,</span><span class=mi>1</span><span class=p>,</span><span class=mi>0</span><span class=p>};</span>
+</span></span><span class=line><span class=ln> 32</span><span class=cl><span class=k>const</span> <span class=kt>int</span> <span class=n>inf</span> <span class=o>=</span> <span class=mh>0x3f3f3f3f</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 33</span><span class=cl><span class=k>const</span> <span class=kt>int</span> <span class=n>N</span><span class=o>=</span><span class=mf>2E3</span><span class=o>+</span><span class=mi>7</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 34</span><span class=cl><span class=kt>int</span> <span class=n>n</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 35</span><span class=cl><span class=kt>int</span> <span class=n>a</span><span class=p>[</span><span class=n>N</span><span class=p>];</span>
+</span></span><span class=line><span class=ln> 36</span><span class=cl><span class=n>string</span> <span class=n>ans</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 37</span><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+</span></span><span class=line><span class=ln> 38</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln> 39</span><span class=cl>	<span class=cp>#ifndef  ONLINE_JUDGE 
+</span></span></span><span class=line><span class=ln> 40</span><span class=cl><span class=cp></span>	<span class=n>freopen</span><span class=p>(</span><span class=s>&#34;code/in.txt&#34;</span><span class=p>,</span><span class=s>&#34;r&#34;</span><span class=p>,</span><span class=n>stdin</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 41</span><span class=cl>  <span class=cp>#endif
+</span></span></span><span class=line><span class=ln> 42</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln> 43</span><span class=cl>	<span class=n>ios</span><span class=o>::</span><span class=n>sync_with_stdio</span><span class=p>(</span><span class=nb>false</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 44</span><span class=cl>	<span class=n>cin</span><span class=o>&gt;&gt;</span><span class=n>n</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 45</span><span class=cl>	<span class=n>ans</span> <span class=o>=</span><span class=s>&#34;&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 46</span><span class=cl>	<span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>1</span> <span class=p>;</span><span class=n>i</span> <span class=o>&lt;=</span> <span class=n>n</span> <span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 47</span><span class=cl>	<span class=p>{</span>
+</span></span><span class=line><span class=ln> 48</span><span class=cl>	    <span class=kt>char</span> <span class=n>ch</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 49</span><span class=cl>	    <span class=n>cin</span><span class=o>&gt;&gt;</span><span class=n>ch</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 50</span><span class=cl>	    <span class=n>a</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>ch</span><span class=o>-</span><span class=sc>&#39;A&#39;</span><span class=o>+</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 51</span><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=ln> 52</span><span class=cl>
+</span></span><span class=line><span class=ln> 53</span><span class=cl>	<span class=kt>int</span> <span class=n>l</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 54</span><span class=cl>	<span class=kt>int</span> <span class=n>r</span> <span class=o>=</span> <span class=n>n</span> <span class=p>;</span>
+</span></span><span class=line><span class=ln> 55</span><span class=cl>
+</span></span><span class=line><span class=ln> 56</span><span class=cl>	<span class=k>while</span> <span class=p>(</span><span class=n>l</span><span class=o>&lt;=</span><span class=n>r</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 57</span><span class=cl>	<span class=p>{</span>
+</span></span><span class=line><span class=ln> 58</span><span class=cl>	    <span class=k>if</span> <span class=p>(</span><span class=n>l</span><span class=o>==</span><span class=n>r</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 59</span><span class=cl>	    <span class=p>{</span>
+</span></span><span class=line><span class=ln> 60</span><span class=cl>	<span class=c1>//	cout&lt;&lt;&#34;aans:&#34;&lt;&lt;ans&lt;&lt;endl;
+</span></span></span><span class=line><span class=ln> 61</span><span class=cl><span class=c1></span>		<span class=n>ans</span> <span class=o>+=</span> <span class=kt>char</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>+</span><span class=mi>64</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 62</span><span class=cl>	<span class=c1>//	cout&lt;&lt;&#34;aaans:&#34;&lt;&lt;ans&lt;&lt;endl;
+</span></span></span><span class=line><span class=ln> 63</span><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=ln> 64</span><span class=cl>		<span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 65</span><span class=cl>	    <span class=p>}</span>
+</span></span><span class=line><span class=ln> 66</span><span class=cl>	    <span class=k>if</span> <span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>!=</span><span class=n>a</span><span class=p>[</span><span class=n>r</span><span class=p>])</span>
+</span></span><span class=line><span class=ln> 67</span><span class=cl>	    <span class=p>{</span>
+</span></span><span class=line><span class=ln> 68</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>&lt;</span><span class=n>a</span><span class=p>[</span><span class=n>r</span><span class=p>])</span>
+</span></span><span class=line><span class=ln> 69</span><span class=cl>		<span class=p>{</span>
+</span></span><span class=line><span class=ln> 70</span><span class=cl>		    <span class=n>ans</span> <span class=o>+=</span> <span class=kt>char</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>+</span><span class=mi>64</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 71</span><span class=cl>		    <span class=n>l</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 72</span><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=ln> 73</span><span class=cl>		<span class=k>else</span>
+</span></span><span class=line><span class=ln> 74</span><span class=cl>		<span class=p>{</span>
+</span></span><span class=line><span class=ln> 75</span><span class=cl>		    <span class=n>ans</span> <span class=o>+=</span> <span class=kt>char</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>r</span><span class=p>]</span><span class=o>+</span><span class=mi>64</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 76</span><span class=cl>		    <span class=n>r</span><span class=o>--</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 77</span><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=ln> 78</span><span class=cl>	    <span class=p>}</span>
+</span></span><span class=line><span class=ln> 79</span><span class=cl>	    <span class=k>else</span>
+</span></span><span class=line><span class=ln> 80</span><span class=cl>	    <span class=p>{</span>
+</span></span><span class=line><span class=ln> 81</span><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>l</span><span class=o>==</span><span class=n>r</span><span class=p>)</span> <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 82</span><span class=cl>		<span class=kt>int</span> <span class=n>tmpl</span> <span class=o>=</span> <span class=n>l</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 83</span><span class=cl>		<span class=kt>int</span> <span class=n>tmpr</span> <span class=o>=</span> <span class=n>r</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 84</span><span class=cl>		<span class=k>while</span> <span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>tmpl</span><span class=p>]</span><span class=o>==</span><span class=n>a</span><span class=p>[</span><span class=n>tmpr</span><span class=p>]</span><span class=o>&amp;&amp;</span><span class=n>tmpl</span><span class=o>&lt;</span><span class=n>tmpr</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 85</span><span class=cl>		<span class=p>{</span>
+</span></span><span class=line><span class=ln> 86</span><span class=cl>		    <span class=n>tmpl</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 87</span><span class=cl>		    <span class=n>tmpr</span><span class=o>--</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 88</span><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=ln> 89</span><span class=cl><span class=c1>//		cout&lt;&lt;&#34;tmpl:&#34;&lt;&lt;tmpl&lt;&lt;&#34; tmpr:&#34;&lt;&lt;tmpr&lt;&lt;&#34; ans:&#34;&lt;&lt;ans&lt;&lt;endl;	
+</span></span></span><span class=line><span class=ln> 90</span><span class=cl><span class=c1></span>		<span class=k>if</span> <span class=p>(</span><span class=n>tmpl</span><span class=o>&gt;=</span><span class=n>tmpr</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 91</span><span class=cl>		<span class=p>{</span>
+</span></span><span class=line><span class=ln> 92</span><span class=cl>		    <span class=k>while</span> <span class=p>(</span><span class=n>l</span><span class=o>&lt;=</span><span class=n>r</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 93</span><span class=cl>		    <span class=p>{</span>
+</span></span><span class=line><span class=ln> 94</span><span class=cl>	<span class=c1>//		cout&lt;&lt;&#34;l:&#34;&lt;&lt;l&lt;&lt;&#34; r:&#34;&lt;&lt;r&lt;&lt;&#34; ans:&#34;&lt;&lt;ans&lt;&lt;endl;
+</span></span></span><span class=line><span class=ln> 95</span><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=ln> 96</span><span class=cl>
+</span></span><span class=line><span class=ln> 97</span><span class=cl>			<span class=k>if</span> <span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>&lt;=</span><span class=n>a</span><span class=p>[</span><span class=n>r</span><span class=p>])</span>
+</span></span><span class=line><span class=ln> 98</span><span class=cl>			<span class=p>{</span>
+</span></span><span class=line><span class=ln> 99</span><span class=cl>			    <span class=n>ans</span> <span class=o>+=</span> <span class=kt>char</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>+</span><span class=mi>64</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>100</span><span class=cl>			    <span class=n>l</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>101</span><span class=cl>			    <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>102</span><span class=cl>			<span class=p>}</span>
+</span></span><span class=line><span class=ln>103</span><span class=cl>			<span class=k>else</span>
+</span></span><span class=line><span class=ln>104</span><span class=cl>			<span class=p>{</span>
+</span></span><span class=line><span class=ln>105</span><span class=cl>			    <span class=n>ans</span> <span class=o>+=</span> <span class=kt>char</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>r</span><span class=p>]</span><span class=o>+</span><span class=mi>64</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>106</span><span class=cl>			    <span class=n>r</span><span class=o>--</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>107</span><span class=cl>			    <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>108</span><span class=cl>			<span class=p>}</span>
+</span></span><span class=line><span class=ln>109</span><span class=cl>			<span class=c1>//cout&lt;&lt;&#34; ans:&#34;&lt;&lt;ans&lt;&lt;endl;
+</span></span></span><span class=line><span class=ln>110</span><span class=cl><span class=c1></span>		    <span class=p>}</span>
+</span></span><span class=line><span class=ln>111</span><span class=cl>		 <span class=cm>/*   for ( int i = l ;  i &lt;= r ; i++)
+</span></span></span><span class=line><span class=ln>112</span><span class=cl><span class=cm>		    {
+</span></span></span><span class=line><span class=ln>113</span><span class=cl><span class=cm>			if (tmpl==tmpr&amp;&amp;a[tmpl]&gt;a[l]&amp;&amp;i==tmpl) continue;
+</span></span></span><span class=line><span class=ln>114</span><span class=cl><span class=cm>			ans +=char(a[i]+64);
+</span></span></span><span class=line><span class=ln>115</span><span class=cl><span class=cm>		    }
+</span></span></span><span class=line><span class=ln>116</span><span class=cl><span class=cm>		    if (tmpl==tmpr&amp;&amp;a[tmpl]&gt;a[l]) ans += char(a[tmpl]+64); */</span>
+</span></span><span class=line><span class=ln>117</span><span class=cl>		    <span class=c1>//break;
+</span></span></span><span class=line><span class=ln>118</span><span class=cl><span class=c1></span>		<span class=p>}</span>
+</span></span><span class=line><span class=ln>119</span><span class=cl>		<span class=k>else</span>
+</span></span><span class=line><span class=ln>120</span><span class=cl>		<span class=p>{</span>
+</span></span><span class=line><span class=ln>121</span><span class=cl>		    <span class=k>while</span> <span class=p>(</span><span class=n>l</span><span class=o>&lt;</span><span class=n>tmpl</span><span class=o>&amp;&amp;</span><span class=n>r</span><span class=o>&gt;</span><span class=n>tmpr</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>122</span><span class=cl>		    <span class=p>{</span>
+</span></span><span class=line><span class=ln>123</span><span class=cl>	<span class=c1>//		cout&lt;&lt;&#34;l:&#34;&lt;&lt;l&lt;&lt;&#34; r:&#34;&lt;&lt;r&lt;&lt;&#34; anssss:&#34;&lt;&lt;ans&lt;&lt;endl;
+</span></span></span><span class=line><span class=ln>124</span><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=ln>125</span><span class=cl>			<span class=k>if</span> <span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>==</span><span class=n>a</span><span class=p>[</span><span class=n>r</span><span class=p>])</span>
+</span></span><span class=line><span class=ln>126</span><span class=cl>			<span class=p>{</span>
+</span></span><span class=line><span class=ln>127</span><span class=cl>			    <span class=k>if</span> <span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>tmpl</span><span class=p>]</span><span class=o>&lt;=</span><span class=n>a</span><span class=p>[</span><span class=n>tmpr</span><span class=p>])</span>
+</span></span><span class=line><span class=ln>128</span><span class=cl>			    <span class=p>{</span>
+</span></span><span class=line><span class=ln>129</span><span class=cl>				<span class=n>ans</span> <span class=o>+=</span> <span class=kt>char</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>+</span><span class=mi>64</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>130</span><span class=cl>				<span class=n>l</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>131</span><span class=cl>				<span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>132</span><span class=cl>			    <span class=p>}</span><span class=k>else</span>
+</span></span><span class=line><span class=ln>133</span><span class=cl>			    <span class=p>{</span>
+</span></span><span class=line><span class=ln>134</span><span class=cl>				<span class=n>ans</span> <span class=o>+=</span> <span class=kt>char</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>r</span><span class=p>]</span><span class=o>+</span><span class=mi>64</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>135</span><span class=cl>				<span class=n>r</span><span class=o>--</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>136</span><span class=cl>				<span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>137</span><span class=cl>			    <span class=p>}</span>
+</span></span><span class=line><span class=ln>138</span><span class=cl>
+</span></span><span class=line><span class=ln>139</span><span class=cl>			<span class=p>}</span>
+</span></span><span class=line><span class=ln>140</span><span class=cl>			<span class=k>else</span>
+</span></span><span class=line><span class=ln>141</span><span class=cl>			<span class=p>{</span>
+</span></span><span class=line><span class=ln>142</span><span class=cl>
+</span></span><span class=line><span class=ln>143</span><span class=cl>			    <span class=k>if</span> <span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>&lt;</span><span class=n>a</span><span class=p>[</span><span class=n>r</span><span class=p>])</span>
+</span></span><span class=line><span class=ln>144</span><span class=cl>			    <span class=p>{</span>
+</span></span><span class=line><span class=ln>145</span><span class=cl>				<span class=n>ans</span><span class=o>+=</span><span class=kt>char</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>l</span><span class=p>]</span><span class=o>+</span><span class=mi>64</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>146</span><span class=cl>				<span class=n>l</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>147</span><span class=cl>				<span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>148</span><span class=cl>			    <span class=p>}</span>
+</span></span><span class=line><span class=ln>149</span><span class=cl>			    <span class=k>else</span> 
+</span></span><span class=line><span class=ln>150</span><span class=cl>			    <span class=p>{</span>
+</span></span><span class=line><span class=ln>151</span><span class=cl>				<span class=n>ans</span><span class=o>+=</span><span class=kt>char</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>r</span><span class=p>]</span><span class=o>+</span><span class=mi>64</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>152</span><span class=cl>				<span class=n>r</span><span class=o>--</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>153</span><span class=cl>				<span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>154</span><span class=cl>			    <span class=p>}</span>
+</span></span><span class=line><span class=ln>155</span><span class=cl>			 <span class=c1>//   cout&lt;&lt;&#34;l:&#34;&lt;&lt;l&lt;&lt;&#34; r:&#34;&lt;&lt;r&lt;&lt;&#34; anssss:&#34;&lt;&lt;ans&lt;&lt;endl;    
+</span></span></span><span class=line><span class=ln>156</span><span class=cl><span class=c1></span>			<span class=p>}</span>
+</span></span><span class=line><span class=ln>157</span><span class=cl>		    <span class=p>}</span>
+</span></span><span class=line><span class=ln>158</span><span class=cl>			<span class=cm>/*   if (a[tmpl]&lt;a[tmpr])
+</span></span></span><span class=line><span class=ln>159</span><span class=cl><span class=cm>		    {
+</span></span></span><span class=line><span class=ln>160</span><span class=cl><span class=cm>			for ( int i = l ; i &lt;= tmpl ; i++) ans +=char(a[i]+64);
+</span></span></span><span class=line><span class=ln>161</span><span class=cl><span class=cm>			l = tmpl+1;
+</span></span></span><span class=line><span class=ln>162</span><span class=cl><span class=cm>		    }
+</span></span></span><span class=line><span class=ln>163</span><span class=cl><span class=cm>		    else
+</span></span></span><span class=line><span class=ln>164</span><span class=cl><span class=cm>		    {
+</span></span></span><span class=line><span class=ln>165</span><span class=cl><span class=cm>			for ( int i = r ; i &gt;= tmpr ; i--) ans +=char(a[i]+64);
+</span></span></span><span class=line><span class=ln>166</span><span class=cl><span class=cm>			r = tmpr-1;
+</span></span></span><span class=line><span class=ln>167</span><span class=cl><span class=cm>		    }   */</span>
+</span></span><span class=line><span class=ln>168</span><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=ln>169</span><span class=cl>	    <span class=p>}</span>
+</span></span><span class=line><span class=ln>170</span><span class=cl>	   <span class=c1>// cout&lt;&lt;&#34;l:&#34;&lt;&lt;l&lt;&lt;&#34; r:&#34;&lt;&lt;r&lt;&lt;&#34; ans:&#34;&lt;&lt;ans&lt;&lt;endl;
+</span></span></span><span class=line><span class=ln>171</span><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=ln>172</span><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=ln>173</span><span class=cl>	<span class=kt>int</span> <span class=n>len</span> <span class=o>=</span> <span class=n>ans</span><span class=p>.</span><span class=n>length</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>174</span><span class=cl>	<span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span> <span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>len</span> <span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>175</span><span class=cl>	<span class=p>{</span>
+</span></span><span class=line><span class=ln>176</span><span class=cl>	    <span class=n>cout</span><span class=o>&lt;&lt;</span><span class=n>ans</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+</span></span><span class=line><span class=ln>177</span><span class=cl>	    <span class=k>if</span> <span class=p>((</span><span class=n>i</span><span class=o>+</span><span class=mi>1</span><span class=p>)</span><span class=o>==</span><span class=mi>0</span><span class=p>)</span> <span class=n>cout</span><span class=o>&lt;&lt;</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>178</span><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=ln>179</span><span class=cl><span class=c1>//	cout&lt;&lt;ans&lt;&lt;endl;
+</span></span></span><span class=line><span class=ln>180</span><span class=cl><span class=c1></span>  <span class=cp>#ifndef ONLINE_JUDGE  
+</span></span></span><span class=line><span class=ln>181</span><span class=cl><span class=cp></span>  <span class=n>fclose</span><span class=p>(</span><span class=n>stdin</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>182</span><span class=cl>  <span class=cp>#endif
+</span></span></span><span class=line><span class=ln>183</span><span class=cl><span class=cp></span>    <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>184</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>185</span><span class=cl>
+</span></span><span class=line><span class=ln>186</span><span class=cl>
+</span></span><span class=line><span class=ln>187</span><span class=cl>
+</span></span><span class=line><span class=ln>188</span><span class=cl>
+</span></span><span class=line><span class=ln>189</span><span class=cl>
+</span></span><span class=line><span class=ln>190</span><span class=cl>
+</span></span><span class=line><span class=ln>191</span><span class=cl>
+</span></span><span class=line><span class=ln>192</span><span class=cl><span class=err>出错数据：</span>
+</span></span><span class=line><span class=ln>193</span><span class=cl><span class=nl>input</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>194</span><span class=cl><span class=mi>393</span>
+</span></span><span class=line><span class=ln>195</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>196</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>197</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>198</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>199</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>200</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>201</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>202</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>203</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>204</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>205</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>206</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>207</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>208</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>209</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>210</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>211</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>212</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>213</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>214</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>215</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>216</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>217</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>218</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>219</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>220</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>221</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>222</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>223</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>224</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>225</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>226</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>227</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>228</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>229</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>230</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>231</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>232</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>233</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>234</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>235</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>236</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>237</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>238</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>239</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>240</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>241</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>242</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>243</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>244</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>245</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>246</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>247</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>248</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>249</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>250</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>251</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>252</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>253</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>254</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>255</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>256</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>257</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>258</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>259</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>260</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>261</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>262</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>263</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>264</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>265</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>266</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>267</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>268</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>269</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>270</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>271</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>272</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>273</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>274</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>275</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>276</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>277</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>278</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>279</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>280</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>281</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>282</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>283</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>284</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>285</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>286</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>287</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>288</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>289</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>290</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>291</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>292</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>293</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>294</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>295</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>296</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>297</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>298</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>299</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>300</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>301</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>302</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>303</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>304</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>305</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>306</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>307</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>308</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>309</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>310</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>311</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>312</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>313</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>314</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>315</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>316</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>317</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>318</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>319</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>320</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>321</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>322</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>323</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>324</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>325</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>326</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>327</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>328</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>329</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>330</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>331</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>332</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>333</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>334</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>335</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>336</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>337</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>338</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>339</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>340</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>341</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>342</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>343</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>344</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>345</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>346</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>347</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>348</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>349</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>350</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>351</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>352</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>353</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>354</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>355</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>356</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>357</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>358</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>359</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>360</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>361</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>362</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>363</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>364</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>365</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>366</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>367</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>368</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>369</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>370</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>371</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>372</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>373</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>374</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>375</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>376</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>377</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>378</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>379</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>380</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>381</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>382</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>383</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>384</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>385</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>386</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>387</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>388</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>389</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>390</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>391</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>392</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>393</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>394</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>395</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>396</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>397</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>398</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>399</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>400</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>401</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>402</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>403</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>404</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>405</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>406</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>407</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>408</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>409</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>410</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>411</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>412</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>413</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>414</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>415</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>416</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>417</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>418</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>419</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>420</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>421</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>422</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>423</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>424</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>425</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>426</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>427</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>428</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>429</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>430</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>431</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>432</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>433</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>434</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>435</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>436</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>437</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>438</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>439</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>440</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>441</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>442</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>443</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>444</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>445</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>446</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>447</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>448</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>449</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>450</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>451</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>452</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>453</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>454</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>455</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>456</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>457</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>458</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>459</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>460</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>461</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>462</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>463</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>464</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>465</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>466</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>467</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>468</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>469</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>470</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>471</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>472</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>473</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>474</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>475</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>476</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>477</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>478</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>479</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>480</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>481</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>482</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>483</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>484</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>485</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>486</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>487</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>488</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>489</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>490</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>491</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>492</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>493</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>494</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>495</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>496</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>497</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>498</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>499</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>500</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>501</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>502</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>503</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>504</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>505</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>506</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>507</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>508</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>509</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>510</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>511</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>512</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>513</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>514</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>515</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>516</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>517</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>518</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>519</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>520</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>521</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>522</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>523</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>524</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>525</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>526</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>527</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>528</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>529</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>530</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>531</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>532</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>533</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>534</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>535</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>536</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>537</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>538</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>539</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>540</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>541</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>542</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>543</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>544</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>545</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>546</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>547</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>548</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>549</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>550</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>551</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>552</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>553</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>554</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>555</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>556</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>557</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>558</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>559</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>560</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>561</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>562</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>563</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>564</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>565</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>566</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>567</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>568</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>569</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>570</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>571</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>572</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>573</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>574</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>575</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>576</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>577</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>578</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>579</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>580</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>581</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>582</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>583</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>584</span><span class=cl><span class=n>B</span>
+</span></span><span class=line><span class=ln>585</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>586</span><span class=cl><span class=n>A</span>
+</span></span><span class=line><span class=ln>587</span><span class=cl><span class=n>C</span>
+</span></span><span class=line><span class=ln>588</span><span class=cl>
+</span></span><span class=line><span class=ln>589</span><span class=cl><span class=err>我的输出：</span><span class=n>ACAABCBBABBCAABCBCACCCBCCBBABCACBBBCBBCBBCABAABCCCCACAACCBCBCBBBCAACCCAABCCBBBBC</span>
+</span></span><span class=line><span class=ln>590</span><span class=cl><span class=n>CCAAAACBCABACABCBCCCAAAAACBCCCCABBABBCCBABACCCABBBCBCCBBACABACCCAABCBBCAABCACBCA</span>
+</span></span><span class=line><span class=ln>591</span><span class=cl><span class=n>ABCBCCCBAAABCCACBACBCBBCCCBCAACCCABAABCCABBCABAAABCCCCABBAABBBAACBBBBAAABBBAABAA</span>
+</span></span><span class=line><span class=ln>592</span><span class=cl><span class=n>CACCCCBABBAABBCBAACCBCCBACCACCABABACAACBCBAAABAAAAAABCCACCBACCBBACCBABBBABCABABA</span>
+</span></span><span class=line><span class=ln>593</span><span class=cl><span class=n>BBBBBBABACBBABBCBAABCCBCACACAACCCBAABAABCCCBAAACAAAACCCCBBCACCCBBACCBCCCC</span>
+</span></span><span class=line><span class=ln>594</span><span class=cl>
+</span></span><span class=line><span class=ln>595</span><span class=cl><span class=err>正确输出：</span><span class=n>ACAABCAABCBBABBCBCACCCBCCBBABCACBBBCBBCBBCABAABCCCCACAACCBCBCBBBCAACCCAABCCBBBBC</span>
+</span></span><span class=line><span class=ln>596</span><span class=cl><span class=n>CCAAAACBCABACABCBCCCAAAAACBCCCCABBABBCCBABACCCABBBCBCCBBACABACCCAABCBBCAABCACBCA</span>
+</span></span><span class=line><span class=ln>597</span><span class=cl><span class=n>ABCBCCCBAAABCCACBACBCBBCCCBCAACCCABAABCCABBCABAAABCCCCABBAABBBAACBBBBAAABBBAABAA</span>
+</span></span><span class=line><span class=ln>598</span><span class=cl><span class=n>CACCCCBABBAABBCBAACCBCCBACCACCABABACAACBCBAAABAAAAAABCCACCBACCBBACCBABBBABCABABA</span>
+</span></span><span class=line><span class=ln>599</span><span class=cl><span class=n>BBBBBBABACBBABBCBAABCCBCACACAACCCBAABAABCCCBAAACAAAACCCCBBCACCCBBACCBCCCC</span>
+</span></span></code></pre></div></div><div class=post_comments><script src=https://utteranc.es/client.js repo=111qqz/111qqz.github.io issue-term=pathname theme=github-light crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06/caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12/cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01/build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12/Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08/caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04/cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04/redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03/ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
 <span class=button_tally>913</span>
 </a><a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>其他
 <span class=button_tally>90</span>
