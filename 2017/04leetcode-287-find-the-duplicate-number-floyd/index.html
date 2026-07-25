@@ -21,19 +21,19 @@
   2. You must use only constant, _O_(1) extra space.
   3. Your runtime complexity should be less than `O(n2)`.
   4. There is only one duplicate number in the array, but it could be repeated more than once.
-</code></pre><p>思路：O(n^2)的复杂度暴力即可，说个O(n)复杂度的解法。</p><p>需要注意元素范围1..n是个很重要的条件。</p><p>使得我们可以把位置和元素映射起来。</p><p>可以看成一个迭代函数</p><p>由于存在重复重复元素，因此一定存在一个环。</p><p>因此可以用floyd判圈算法。</p><p><a href=https://zh.wikipedia.org/wiki/Floyd>floyd判圈算法_维基百科</a></p><p>这算法以前遇到过<a href=/2015/07sgu455/>sgu455 解题报告</a>，所以不算很陌生&mldr;</p><p>但是从有重复元素没有联想到会有环orz，我好菜啊&mldr;</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl><span class=o>/*</span> <span class=o>***********************************************</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=n>Author</span> <span class=p>:</span><span class=mi>111</span><span class=n>qqz</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=n>Created</span> <span class=n>Time</span> <span class=p>:</span><span class=mi>2017</span><span class=n>年04月05日</span> <span class=n>星期三</span> <span class=mi>15</span><span class=n>时16分11秒</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl><span class=n>File</span> <span class=n>Name</span> <span class=p>:</span><span class=mf>287.</span><span class=n>cpp</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=o>************************************************</span> <span class=o>*/</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=o>/*</span> <span class=o>***********************************************</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=n>Author</span> <span class=p>:</span><span class=mi>111</span><span class=n>qqz</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl><span class=n>Created</span> <span class=n>Time</span> <span class=p>:</span><span class=mi>2017</span><span class=n>年04月05日</span> <span class=n>星期三</span> <span class=mi>14</span><span class=n>时58分11秒</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl><span class=n>File</span> <span class=n>Name</span> <span class=p>:</span><span class=mf>287.</span><span class=n>cpp</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl><span class=o>************************************************</span> <span class=o>*/</span>
+</code></pre><p>思路：O(n^2)的复杂度暴力即可，说个O(n)复杂度的解法。</p><p>需要注意元素范围1..n是个很重要的条件。</p><p>使得我们可以把位置和元素映射起来。</p><p>可以看成一个迭代函数</p><p>由于存在重复重复元素，因此一定存在一个环。</p><p>因此可以用floyd判圈算法。</p><p><a href=https://zh.wikipedia.org/wiki/Floyd>floyd判圈算法_维基百科</a></p><p>这算法以前遇到过<a href=/2015/07sgu455/>sgu455 解题报告</a>，所以不算很陌生&mldr;</p><p>但是从有重复元素没有联想到会有环orz，我好菜啊&mldr;</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=cm>/* ***********************************************
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cm>Author :111qqz
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cm>Created Time :2017年04月05日 星期三 15时16分11秒
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cm>File Name :287.cpp
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cm>************************************************ */</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=cm>/* ***********************************************
+</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=cm>Author :111qqz
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=cm>Created Time :2017年04月05日 星期三 14时58分11秒
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=cm>File Name :287.cpp
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=cm>************************************************ */</span>
 </span></span><span class=line><span class=ln>11</span><span class=cl><span class=k>class</span> <span class=nc>Solution</span> <span class=p>{</span>
 </span></span><span class=line><span class=ln>12</span><span class=cl>
-</span></span><span class=line><span class=ln>13</span><span class=cl><span class=n>public</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl><span class=k>public</span><span class=o>:</span>
 </span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl>    <span class=kt>int</span> <span class=nf>findDuplicate</span><span class=p>(</span><span class=n>vector</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;&amp;</span> <span class=n>nums</span><span class=p>)</span> <span class=p>{</span>
 </span></span><span class=line><span class=ln> 2</span><span class=cl>    <span class=kt>int</span> <span class=n>slow</span> <span class=o>=</span> <span class=n>nums</span><span class=p>[</span><span class=mi>0</span><span class=p>];</span>
 </span></span><span class=line><span class=ln> 3</span><span class=cl>    <span class=kt>int</span> <span class=n>fast</span> <span class=o>=</span> <span class=n>nums</span><span class=p>[</span><span class=n>nums</span><span class=p>[</span><span class=mi>0</span><span class=p>]];</span>

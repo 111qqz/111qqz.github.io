@@ -29,32 +29,32 @@ Total Submission(s): 18287    Accepted Submission(s): 7320
 4 0.1
 4 0.2
 5 0.3
-0 0</p><p>Sample Output</p><p>44.0%</p><p><em>Hint</em></p><p>You should use printf("%%") to print a &lsquo;%&rsquo;.</p><p>01背包</p><p>最开始WA在初始化，dp数组全都赋值为1，忘赋了dp[0]，导致如果恰好是花光所有钱得到答案的时候答案错误。</p><p>然后还一直WA。</p><p>后来发现是当N=0的时候，我直接取了所有A[I]=0对应的B[I]中最大的值。。。这显然是错的，少年你是脑抽吗。。。。。</p><p>然后修改了下，终于A掉了。。。。。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=line><span class=ln> 1</span><span class=cl>    
+0 0</p><p>Sample Output</p><p>44.0%</p><p><em>Hint</em></p><p>You should use printf("%%") to print a &lsquo;%&rsquo;.</p><p>01背包</p><p>最开始WA在初始化，dp数组全都赋值为1，忘赋了dp[0]，导致如果恰好是花光所有钱得到答案的时候答案错误。</p><p>然后还一直WA。</p><p>后来发现是当N=0的时候，我直接取了所有A[I]=0对应的B[I]中最大的值。。。这显然是错的，少年你是脑抽吗。。。。。</p><p>然后修改了下，终于A掉了。。。。。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=line><span class=ln> 1</span><span class=cl>
 </span></span><span class=line><span class=ln> 2</span><span class=cl>    <span class=cm>/* ***********************************************
 </span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cm>    Author :111qqz
 </span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cm>    Created Time :2016年02月22日 星期一 22时50分40秒
 </span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cm>    File Name :code/hdu/1203.cpp
 </span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=cm>    ************************************************ */</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl>    
+</span></span><span class=line><span class=ln> 7</span><span class=cl>
 </span></span><span class=line><span class=ln> 8</span><span class=cl>    <span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
 </span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;algorithm&gt;</span><span class=cp>
 </span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;cstring&gt;</span><span class=cp>
 </span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;cstdio&gt;</span><span class=cp>
 </span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=cp></span>    <span class=cp>#include</span> <span class=cpf>&lt;cmath&gt;</span><span class=cp>
-</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=cp></span>    
+</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=cp></span>
 </span></span><span class=line><span class=ln>14</span><span class=cl>    <span class=k>using</span> <span class=k>namespace</span> <span class=n>std</span><span class=p>;</span>
 </span></span><span class=line><span class=ln>15</span><span class=cl>        <span class=kt>int</span> <span class=n>n</span><span class=p>,</span><span class=n>m</span><span class=p>;</span>
 </span></span><span class=line><span class=ln>16</span><span class=cl>        <span class=k>const</span> <span class=kt>int</span> <span class=n>N</span> <span class=o>=</span> <span class=mf>1E4</span><span class=o>+</span><span class=mi>5</span><span class=p>;</span>
 </span></span><span class=line><span class=ln>17</span><span class=cl>        <span class=kt>int</span> <span class=n>a</span><span class=p>[</span><span class=n>N</span><span class=p>];</span>
 </span></span><span class=line><span class=ln>18</span><span class=cl>        <span class=kt>double</span> <span class=n>b</span><span class=p>[</span><span class=n>N</span><span class=p>],</span><span class=n>dp</span><span class=p>[</span><span class=n>N</span><span class=p>];</span>
 </span></span><span class=line><span class=ln>19</span><span class=cl>        <span class=kt>double</span> <span class=n>ans</span><span class=p>,</span><span class=n>mmax</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>20</span><span class=cl>    
+</span></span><span class=line><span class=ln>20</span><span class=cl>
 </span></span><span class=line><span class=ln>21</span><span class=cl>    <span class=kt>void</span> <span class=nf>solve</span><span class=p>(</span><span class=kt>int</span> <span class=n>cost</span><span class=p>,</span><span class=kt>double</span> <span class=n>value</span><span class=p>)</span>
 </span></span><span class=line><span class=ln>22</span><span class=cl>    <span class=p>{</span>
 </span></span><span class=line><span class=ln>23</span><span class=cl>        <span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=n>n</span> <span class=p>;</span> <span class=n>i</span> <span class=o>&gt;=</span> <span class=n>cost</span> <span class=p>;</span> <span class=n>i</span><span class=o>--</span> <span class=p>)</span>
 </span></span><span class=line><span class=ln>24</span><span class=cl>            <span class=n>dp</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>min</span><span class=p>(</span><span class=n>dp</span><span class=p>[</span><span class=n>i</span><span class=p>],</span><span class=n>dp</span><span class=p>[</span><span class=n>i</span><span class=o>-</span><span class=n>cost</span><span class=p>]</span><span class=o>*</span><span class=n>value</span><span class=p>);</span>
 </span></span><span class=line><span class=ln>25</span><span class=cl>    <span class=p>}</span>
-</span></span><span class=line><span class=ln>26</span><span class=cl>    
+</span></span><span class=line><span class=ln>26</span><span class=cl>
 </span></span><span class=line><span class=ln>27</span><span class=cl>    <span class=kt>void</span> <span class=nf>init</span><span class=p>()</span>
 </span></span><span class=line><span class=ln>28</span><span class=cl>    <span class=p>{</span>
 </span></span><span class=line><span class=ln>29</span><span class=cl>        <span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span> <span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span><span class=n>N</span> <span class=p>;</span> <span class=n>i</span><span class=o>++</span> <span class=p>)</span>
@@ -82,7 +82,7 @@ Total Submission(s): 18287    Accepted Submission(s): 7320
 </span></span><span class=line><span class=ln>51</span><span class=cl>                <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%.1lf%%</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,(</span><span class=mi>1</span><span class=o>-</span><span class=n>ans</span><span class=p>)</span><span class=o>*</span><span class=mi>100</span><span class=p>);</span>
 </span></span><span class=line><span class=ln>52</span><span class=cl>                <span class=k>continue</span><span class=p>;</span>
 </span></span><span class=line><span class=ln>53</span><span class=cl>            <span class=p>}</span>
-</span></span><span class=line><span class=ln>54</span><span class=cl>    
+</span></span><span class=line><span class=ln>54</span><span class=cl>
 </span></span><span class=line><span class=ln>55</span><span class=cl>            <span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>1</span> <span class=p>;</span> <span class=n>i</span> <span class=o>&lt;=</span> <span class=n>m</span> <span class=p>;</span> <span class=n>i</span><span class=o>++</span> <span class=p>)</span>
 </span></span><span class=line><span class=ln>56</span><span class=cl>                <span class=n>solve</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>i</span><span class=p>],</span><span class=n>b</span><span class=p>[</span><span class=n>i</span><span class=p>]);</span>
 </span></span><span class=line><span class=ln>57</span><span class=cl>                <span class=n>ans</span> <span class=o>=</span> <span class=mi>1</span><span class=o>-</span><span class=n>dp</span><span class=p>[</span><span class=n>n</span><span class=p>];</span>

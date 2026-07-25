@@ -31,23 +31,23 @@ get 操作,给出 key,获取到相应的 value (value 为非负数),如果不存
 set 操作,设置 key,如果 key 存在则覆盖之前的 value (此时相当于访问过一次)。
 如果 key 不存在,需要进行插入操作,如果此时已经 key 的数量已经到达 capacity,
 这样需要淘汰掉最近最少使用(也就是上次被使用的时间距离现在最久的)的那
-一项。</p><p>要求get和set的时间复杂度都是O(1)</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl><span class=o>/*</span> <span class=o>***********************************************</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=n>Author</span> <span class=p>:</span><span class=mi>111</span><span class=n>qqz</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=n>Created</span> <span class=n>Time</span> <span class=p>:</span><span class=mi>2017</span><span class=n>年08月18日</span> <span class=n>星期五</span> <span class=mi>00</span><span class=n>时00分22秒</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl><span class=n>File</span> <span class=n>Name</span> <span class=p>:</span><span class=n>LRU</span><span class=o>.</span><span class=n>cpp</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl> <span class=o>************************************************</span> <span class=o>*/</span>
+一项。</p><p>要求get和set的时间复杂度都是O(1)</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=cm>/* ***********************************************
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cm>Author :111qqz
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cm>Created Time :2017年08月18日 星期五 00时00分22秒
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cm>File Name :LRU.cpp
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cm> ************************************************ */</span>
 </span></span><span class=line><span class=ln> 6</span><span class=cl>
 </span></span><span class=line><span class=ln> 7</span><span class=cl><span class=k>class</span> <span class=nc>LRUCache</span><span class=p>{</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl>    <span class=n>private</span><span class=p>:</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl>    <span class=o>//</span><span class=nb>map</span><span class=p>:</span><span class=o>&lt;</span><span class=n>key</span><span class=p>,</span><span class=n>Value</span><span class=o>&gt;</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl>    <span class=o>//</span><span class=n>Value</span><span class=p>:</span><span class=n>pair</span><span class=o>&lt;</span><span class=n>value</span><span class=p>,</span><span class=n>time</span><span class=o>&gt;</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl>    <span class=o>//</span><span class=n>time</span><span class=p>:</span><span class=n>vector</span><span class=err>?</span> <span class=nb>list</span><span class=err>?</span>
-</span></span><span class=line><span class=ln>12</span><span class=cl>    <span class=n>typedef</span>  <span class=n>unordered_map</span><span class=o>&lt;</span><span class=nb>int</span><span class=p>,</span> <span class=n>pair</span><span class=o>&lt;</span><span class=nb>int</span> <span class=p>,</span> <span class=nb>list</span><span class=o>&lt;</span><span class=nb>int</span><span class=o>&gt;</span><span class=p>::</span><span class=n>iterator</span> <span class=o>&gt;</span> <span class=o>&gt;</span><span class=n>Cache</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>    <span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>    <span class=c1>//map:&lt;key,Value&gt;
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=c1></span>    <span class=c1>//Value:pair&lt;value,time&gt;
+</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=c1></span>    <span class=c1>//time:vector? list?
+</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=c1></span>    <span class=k>typedef</span>  <span class=n>unordered_map</span><span class=o>&lt;</span><span class=kt>int</span><span class=p>,</span> <span class=n>pair</span><span class=o>&lt;</span><span class=kt>int</span> <span class=p>,</span> <span class=n>list</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;::</span><span class=n>iterator</span> <span class=o>&gt;</span> <span class=o>&gt;</span><span class=n>Cache</span><span class=p>;</span>
 </span></span><span class=line><span class=ln>13</span><span class=cl>    <span class=n>Cache</span> <span class=n>cache</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>14</span><span class=cl>    <span class=nb>list</span><span class=o>&lt;</span><span class=nb>int</span><span class=o>&gt;</span><span class=n>hit_seq</span><span class=p>;</span> <span class=o>//</span><span class=n>头部最新元素</span><span class=err>，</span><span class=n>尾部最旧元素</span>
-</span></span><span class=line><span class=ln>15</span><span class=cl>    <span class=nb>int</span> <span class=n>siz</span><span class=p>;</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl>        <span class=cp>#define fst first 
-</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cp></span>        <span class=cp>#define sec  second 
+</span></span><span class=line><span class=ln>14</span><span class=cl>    <span class=n>list</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span><span class=n>hit_seq</span><span class=p>;</span> <span class=c1>//头部最新元素，尾部最旧元素
+</span></span></span><span class=line><span class=ln>15</span><span class=cl><span class=c1></span>    <span class=kt>int</span> <span class=n>siz</span><span class=p>;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl>        <span class=cp>#define fst first
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cp></span>        <span class=cp>#define sec  second
 </span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cp></span>        <span class=cp>#define MP make_pair
 </span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cp></span>    <span class=kt>void</span> <span class=nf>hit</span><span class=p>(</span><span class=n>Cache</span><span class=o>::</span><span class=n>iterator</span> <span class=n>it</span><span class=p>)</span> <span class=c1>//access once
 </span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=c1></span>    <span class=p>{</span>
@@ -58,18 +58,18 @@ set 操作,设置 key,如果 key 存在则覆盖之前的 value (此时相当于
 </span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=c1></span>
 </span></span><span class=line><span class=ln>11</span><span class=cl>    <span class=p>}</span>
 </span></span><span class=line><span class=ln>12</span><span class=cl>    <span class=k>public</span><span class=o>:</span>
-</span></span><span class=line><span class=ln>13</span><span class=cl>    <span class=n>LRUCache</span><span class=p>(</span><span class=kt>int</span> <span class=n>capacity</span><span class=p>)</span> 
+</span></span><span class=line><span class=ln>13</span><span class=cl>    <span class=n>LRUCache</span><span class=p>(</span><span class=kt>int</span> <span class=n>capacity</span><span class=p>)</span>
 </span></span><span class=line><span class=ln>14</span><span class=cl>    <span class=p>{</span>
 </span></span><span class=line><span class=ln>15</span><span class=cl>        <span class=n>siz</span> <span class=o>=</span> <span class=n>capacity</span><span class=p>;</span>
 </span></span><span class=line><span class=ln>16</span><span class=cl>    <span class=p>}</span>
-</span></span><span class=line><span class=ln>17</span><span class=cl>    <span class=kt>int</span> <span class=nf>get</span><span class=p>(</span><span class=kt>int</span> <span class=n>key</span><span class=p>)</span> 
+</span></span><span class=line><span class=ln>17</span><span class=cl>    <span class=kt>int</span> <span class=nf>get</span><span class=p>(</span><span class=kt>int</span> <span class=n>key</span><span class=p>)</span>
 </span></span><span class=line><span class=ln>18</span><span class=cl>    <span class=p>{</span>
 </span></span><span class=line><span class=ln>19</span><span class=cl>        <span class=k>auto</span> <span class=n>it</span> <span class=o>=</span> <span class=n>cache</span><span class=p>.</span><span class=n>find</span><span class=p>(</span><span class=n>key</span><span class=p>);</span>
 </span></span><span class=line><span class=ln>20</span><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>it</span><span class=o>==</span><span class=n>cache</span><span class=p>.</span><span class=n>end</span><span class=p>())</span> <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
 </span></span><span class=line><span class=ln>21</span><span class=cl>        <span class=n>hit</span><span class=p>(</span><span class=n>it</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>22</span><span class=cl>        <span class=k>return</span> <span class=n>it</span><span class=o>-&gt;</span><span class=n>sec</span><span class=p>.</span><span class=n>fst</span><span class=p>;</span> 
+</span></span><span class=line><span class=ln>22</span><span class=cl>        <span class=k>return</span> <span class=n>it</span><span class=o>-&gt;</span><span class=n>sec</span><span class=p>.</span><span class=n>fst</span><span class=p>;</span>
 </span></span><span class=line><span class=ln>23</span><span class=cl>    <span class=p>}</span>
-</span></span><span class=line><span class=ln>24</span><span class=cl>    <span class=kt>void</span> <span class=nf>put</span><span class=p>(</span><span class=kt>int</span> <span class=n>key</span><span class=p>,</span> <span class=kt>int</span> <span class=n>value</span><span class=p>)</span> 
+</span></span><span class=line><span class=ln>24</span><span class=cl>    <span class=kt>void</span> <span class=nf>put</span><span class=p>(</span><span class=kt>int</span> <span class=n>key</span><span class=p>,</span> <span class=kt>int</span> <span class=n>value</span><span class=p>)</span>
 </span></span><span class=line><span class=ln>25</span><span class=cl>    <span class=p>{</span>
 </span></span><span class=line><span class=ln>26</span><span class=cl>        <span class=k>auto</span> <span class=n>it</span> <span class=o>=</span> <span class=n>cache</span><span class=p>.</span><span class=n>find</span><span class=p>(</span><span class=n>key</span><span class=p>);</span>
 </span></span><span class=line><span class=ln>27</span><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>it</span> <span class=o>!=</span> <span class=n>cache</span><span class=p>.</span><span class=n>end</span><span class=p>())</span> <span class=n>hit</span><span class=p>(</span><span class=n>it</span><span class=p>);</span>

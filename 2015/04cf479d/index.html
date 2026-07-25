@@ -22,27 +22,27 @@
 <span class=post_date>2015-04-08</span>
 <span class=post_time>· 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/binary-search title="binary search" class="post_tag button button_translucent">binary search
 </a><a href=https://111qqz.com/tags/greedy title=greedy class="post_tag button button_translucent">greedy</a></span></div><div class=post_body><p><a href=http://codeforces.com/problemset/problem/479/D>http://codeforces.com/problemset/problem/479/D</a></p><p>题意是说有一把尺子，本身有一些刻度，然后需要测量x和y，问最少需要添加多少个刻度，如果需要，这些刻度分别添加在什么位置。</p><p>一开始没有看清题目，以为答案最多为4，但是发现，a[1]=0 a[n]=l这两个是确定的，所以答案最多为2，</p><p>而不会出现中间有两个刻度，无论是往前刻还是往后都会越界的情况。</p><p>先去看看已知的刻度里有没有直接满足的。</p><p>除此之外，如果在已知的刻度下无法测量x也无法测量y，我们还可以找找是否能有公用点使得只刻一个刻度就可以满足题意。公用点分两种情况，一种是在两个刻度之间，另一种是在两个刻度的同侧。</p><p>前一种没什么坑，后一种要判断是否越界！！！</p><p>如果在已知的刻度下能测量x或者能测量出y但不能同时测量的话，就没有必要找公用点。</p><p>还有就是查找的话如果线性找复杂度是O(n2)，会TLE在第27个点。</p><p>我们用二分&mldr;</p><p>话说STL里竟然连二分查找也有。。。。简直orz。。。。真是省时省力。</p><p>代码：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=line><span class=ln> 1</span><span class=cl>
-</span></span><span class=line><span class=ln> 2</span><span class=cl>   
+</span></span><span class=line><span class=ln> 2</span><span class=cl>
 </span></span><span class=line><span class=ln> 3</span><span class=cl>   <span class=cm>/* ***********************************************
 </span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cm>   Author :111qqz
 </span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cm>   Created Time :2016年02月22日 星期一 23时42分46秒
 </span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=cm>   File Name :code/cf/problem/479D.cpp
 </span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=cm>   ************************************************ */</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl>   
+</span></span><span class=line><span class=ln> 8</span><span class=cl>
 </span></span><span class=line><span class=ln> 9</span><span class=cl>   <span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
 </span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=cp></span>   <span class=cp>#include</span> <span class=cpf>&lt;algorithm&gt;</span><span class=cp>
 </span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=cp></span>   <span class=cp>#include</span> <span class=cpf>&lt;cstring&gt;</span><span class=cp>
 </span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=cp></span>   <span class=cp>#include</span> <span class=cpf>&lt;cstdio&gt;</span><span class=cp>
 </span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=cp></span>   <span class=cp>#include</span> <span class=cpf>&lt;cmath&gt;</span><span class=cp>
-</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=cp></span>   
+</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=cp></span>
 </span></span><span class=line><span class=ln>15</span><span class=cl>   <span class=k>using</span> <span class=k>namespace</span> <span class=n>std</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>16</span><span class=cl>   
+</span></span><span class=line><span class=ln>16</span><span class=cl>
 </span></span><span class=line><span class=ln>17</span><span class=cl>   <span class=kt>int</span> <span class=n>n</span><span class=p>,</span><span class=n>l</span><span class=p>,</span><span class=n>x</span><span class=p>,</span><span class=n>y</span><span class=p>;</span>
 </span></span><span class=line><span class=ln>18</span><span class=cl>   <span class=k>const</span> <span class=kt>int</span> <span class=n>N</span><span class=o>=</span><span class=mf>1E5</span><span class=o>+</span><span class=mi>7</span><span class=p>;</span>
 </span></span><span class=line><span class=ln>19</span><span class=cl>   <span class=kt>int</span> <span class=n>a</span><span class=p>[</span><span class=n>N</span><span class=p>];</span>
 </span></span><span class=line><span class=ln>20</span><span class=cl>   <span class=kt>int</span> <span class=n>ans</span><span class=p>,</span><span class=n>p</span><span class=p>,</span><span class=n>q</span><span class=p>;</span>
 </span></span><span class=line><span class=ln>21</span><span class=cl>   <span class=kt>bool</span> <span class=n>flag1</span><span class=p>,</span><span class=n>flag2</span><span class=p>,</span><span class=n>flag3</span><span class=p>,</span><span class=n>flag4</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>22</span><span class=cl>   
+</span></span><span class=line><span class=ln>22</span><span class=cl>
 </span></span><span class=line><span class=ln>23</span><span class=cl>   <span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
 </span></span><span class=line><span class=ln>24</span><span class=cl>   <span class=p>{</span>
 </span></span><span class=line><span class=ln>25</span><span class=cl>       <span class=n>scanf</span><span class=p>(</span><span class=s>&#34;%d %d %d %d&#34;</span><span class=p>,</span><span class=o>&amp;</span><span class=n>n</span><span class=p>,</span><span class=o>&amp;</span><span class=n>l</span><span class=p>,</span><span class=o>&amp;</span><span class=n>x</span><span class=p>,</span><span class=o>&amp;</span><span class=n>y</span><span class=p>);</span>
@@ -50,7 +50,7 @@
 </span></span><span class=line><span class=ln>27</span><span class=cl>       <span class=n>flag2</span> <span class=o>=</span> <span class=nb>false</span><span class=p>;</span>
 </span></span><span class=line><span class=ln>28</span><span class=cl>       <span class=n>flag3</span> <span class=o>=</span> <span class=nb>false</span><span class=p>;</span>
 </span></span><span class=line><span class=ln>29</span><span class=cl>       <span class=n>flag4</span> <span class=o>=</span> <span class=nb>false</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>30</span><span class=cl>   
+</span></span><span class=line><span class=ln>30</span><span class=cl>
 </span></span><span class=line><span class=ln>31</span><span class=cl>       <span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>1</span> <span class=p>;</span> <span class=n>i</span> <span class=o>&lt;=</span> <span class=n>n</span> <span class=p>;</span> <span class=n>i</span><span class=o>++</span> <span class=p>)</span>
 </span></span><span class=line><span class=ln>32</span><span class=cl>           <span class=n>scanf</span><span class=p>(</span><span class=s>&#34;%d&#34;</span><span class=p>,</span><span class=o>&amp;</span><span class=n>a</span><span class=p>[</span><span class=n>i</span><span class=p>]);</span>
 </span></span><span class=line><span class=ln>33</span><span class=cl>           <span class=n>ans</span> <span class=o>=</span> <span class=mi>2</span><span class=p>;</span>
@@ -61,7 +61,7 @@
 </span></span><span class=line><span class=ln>38</span><span class=cl>           <span class=k>if</span><span class=p>(</span><span class=n>binary_search</span><span class=p>(</span><span class=n>a</span><span class=p>,</span><span class=n>a</span><span class=o>+</span><span class=n>n</span><span class=o>+</span><span class=mi>1</span><span class=p>,</span><span class=n>a</span><span class=p>[</span><span class=n>i</span><span class=p>]</span><span class=o>+</span><span class=n>x</span><span class=p>))</span>
 </span></span><span class=line><span class=ln>39</span><span class=cl>           <span class=p>{</span>
 </span></span><span class=line><span class=ln>40</span><span class=cl>               <span class=n>flag1</span> <span class=o>=</span> <span class=nb>true</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>41</span><span class=cl>   
+</span></span><span class=line><span class=ln>41</span><span class=cl>
 </span></span><span class=line><span class=ln>42</span><span class=cl>           <span class=p>}</span>
 </span></span><span class=line><span class=ln>43</span><span class=cl>           <span class=k>if</span> <span class=p>(</span><span class=n>binary_search</span><span class=p>(</span><span class=n>a</span><span class=p>,</span><span class=n>a</span><span class=o>+</span><span class=n>n</span><span class=o>+</span><span class=mi>1</span><span class=p>,</span><span class=n>a</span><span class=p>[</span><span class=n>i</span><span class=p>]</span><span class=o>+</span><span class=n>y</span><span class=p>))</span>
 </span></span><span class=line><span class=ln>44</span><span class=cl>           <span class=p>{</span>
@@ -78,7 +78,7 @@
 </span></span><span class=line><span class=ln>55</span><span class=cl>               <span class=n>p</span> <span class=o>=</span> <span class=n>a</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
 </span></span><span class=line><span class=ln>56</span><span class=cl>           <span class=p>}</span>
 </span></span><span class=line><span class=ln>57</span><span class=cl>       <span class=p>}</span>
-</span></span><span class=line><span class=ln>58</span><span class=cl>   
+</span></span><span class=line><span class=ln>58</span><span class=cl>
 </span></span><span class=line><span class=ln>59</span><span class=cl>           <span class=k>if</span> <span class=p>(</span> <span class=n>flag1</span><span class=p>)</span> <span class=p>{</span><span class=n>ans</span><span class=o>--</span><span class=p>;</span><span class=n>q</span> <span class=o>=</span> <span class=mi>1</span> <span class=p>;}</span>
 </span></span><span class=line><span class=ln>60</span><span class=cl>           <span class=k>if</span> <span class=p>(</span> <span class=n>flag2</span> <span class=p>){</span> <span class=n>ans</span><span class=o>--</span><span class=p>;</span><span class=n>q</span> <span class=o>=</span> <span class=mi>2</span> <span class=p>;}</span>
 </span></span><span class=line><span class=ln>61</span><span class=cl>           <span class=k>if</span> <span class=p>(</span> <span class=n>ans</span><span class=o>==</span><span class=mi>2</span><span class=o>&amp;&amp;</span><span class=p>(</span><span class=n>flag3</span><span class=o>||</span><span class=n>flag4</span><span class=p>))</span>

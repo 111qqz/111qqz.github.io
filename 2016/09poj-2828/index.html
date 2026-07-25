@@ -21,7 +21,7 @@
 <span class=post_time>· 2 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/%E7%BA%BF%E6%AE%B5%E6%A0%91 title=线段树 class="post_tag button button_translucent">线段树</a></span></div><div class=post_body><p><a href="http://poj.org/problem?id=2828">poj 2828 题目链接</a></p><p>题意：n个人，每个人有一个rp值（用来区分不同的人），还有一个pos[i]，表示当第i个人来排队的时候插入到第pos[i]个人的后面（也就是排在位置pos[i]+1)</p><p>现在问最后的序列，从1到n输出n个人的rp值</p><p>思路：第二道线段树，并不会做，看了题解。</p><p>比较关键的一点是：按照顺序的话，当后来的一个人插入到前面，那么之前很多人排好的位置将发生改变，这个代价是巨大的。</p><p><strong>由于越后来的人越容易确定位置，因此正确的做法是倒序处理。</strong></p><p><strong>对于第i个人，我们把他放在从前往后数的第i个空的位置即可。</strong></p><p>接下来需要做的就是线段树处理，线段树存储的信息是某一个区间中空位置的个数。</p><p>感觉是一道很好的题目，对于新手来说并不是很容易，不过理解了这道题目以后，感觉进一步理解线段树，有点开心。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=cm>/*************************************************************************
 </span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cm>	&gt; File Name: code/poj/2828.cpp
 </span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cm>	&gt; Author: 111qqz
-</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cm>	&gt; Email: rkz2013@126.com 
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cm>	&gt; Email: rkz2013@126.com
 </span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cm>	&gt; Created Time: 2015年10月29日 星期四 09时00分08秒
 </span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=cm> ************************************************************************/</span>
 </span></span><span class=line><span class=ln> 7</span><span class=cl><span class=cp>#include&lt;iostream&gt;
@@ -84,7 +84,7 @@
 </span></span><span class=line><span class=ln>64</span><span class=cl><span class=p>}</span>
 </span></span><span class=line><span class=ln>65</span><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
 </span></span><span class=line><span class=ln>66</span><span class=cl><span class=p>{</span>
-</span></span><span class=line><span class=ln>67</span><span class=cl>  <span class=cp>#ifndef  ONLINE_JUDGE 
+</span></span><span class=line><span class=ln>67</span><span class=cl>  <span class=cp>#ifndef  ONLINE_JUDGE
 </span></span></span><span class=line><span class=ln>68</span><span class=cl><span class=cp></span>   <span class=n>freopen</span><span class=p>(</span><span class=s>&#34;code/in.txt&#34;</span><span class=p>,</span><span class=s>&#34;r&#34;</span><span class=p>,</span><span class=n>stdin</span><span class=p>);</span>
 </span></span><span class=line><span class=ln>69</span><span class=cl>  <span class=cp>#endif
 </span></span></span><span class=line><span class=ln>70</span><span class=cl><span class=cp></span>   <span class=k>while</span> <span class=p>(</span><span class=o>~</span><span class=n>scanf</span><span class=p>(</span><span class=s>&#34;%d&#34;</span><span class=p>,</span><span class=o>&amp;</span><span class=n>n</span><span class=p>))</span>
@@ -99,7 +99,7 @@
 </span></span><span class=line><span class=ln>79</span><span class=cl>	<span class=k>for</span> <span class=p>(</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span>  <span class=mi>1</span> <span class=p>;</span> <span class=n>i</span> <span class=o>&lt;=</span> <span class=n>n</span><span class=o>-</span><span class=mi>1</span> <span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span> <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%d &#34;</span><span class=p>,</span><span class=n>ans</span><span class=p>[</span><span class=n>i</span><span class=p>]);</span>
 </span></span><span class=line><span class=ln>80</span><span class=cl>	<span class=n>printf</span><span class=p>(</span><span class=s>&#34;%d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span><span class=n>ans</span><span class=p>[</span><span class=n>n</span><span class=p>]);</span>
 </span></span><span class=line><span class=ln>81</span><span class=cl>    <span class=p>}</span>
-</span></span><span class=line><span class=ln>82</span><span class=cl> <span class=cp>#ifndef ONLINE_JUDGE  
+</span></span><span class=line><span class=ln>82</span><span class=cl> <span class=cp>#ifndef ONLINE_JUDGE
 </span></span></span><span class=line><span class=ln>83</span><span class=cl><span class=cp></span>  <span class=n>fclose</span><span class=p>(</span><span class=n>stdin</span><span class=p>);</span>
 </span></span><span class=line><span class=ln>84</span><span class=cl>  <span class=cp>#endif
 </span></span></span><span class=line><span class=ln>85</span><span class=cl><span class=cp></span>	<span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
