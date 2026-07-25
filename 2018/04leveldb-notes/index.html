@@ -18,338 +18,385 @@
 <a href=https://111qqz.com/tags/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86 class="nav_child nav_item" title=图像处理>图像处理</a>
 <a href=https://111qqz.com/tags/docker class="nav_child nav_item" title=容器>容器</a></div></div><div class=nav_parent><a href=https://111qqz.com/categories/%E9%9A%8F%E7%AC%94%E6%9D%82%E8%B0%88 class=nav_item title=随笔杂谈>随笔杂谈</a></div><div class=nav_parent><a href=https://111qqz.com/tags/%E9%9D%A2%E8%AF%95%E7%BB%8F%E5%8E%86 class=nav_item title=面试>面试</a></div><div class=nav_parent><a href=https://111qqz.com/top/about/ class=nav_item title=About>About</a></div><div class=follow><a href=https://github.com/111qqz><svg class="icon"><use xlink:href="#github"/></svg></a><div class=color_mode><input type=checkbox class=color_choice id=mode></div></div></div></nav></header><main><div class="grid-inverse wrap content"><article class=post_content><h1 class=post_title>levelDB 使用笔记</h1><div class=post_meta><span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>2018-04-19</span>
-<span class=post_time>· 6 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb</a></span></div><div class=post_body><p>2022-02-26 update:</p><p><strong>说学习笔记听起来像在分析代码。。。但是实际上什么都没干，还是写"使用笔记"好了</strong></p><p>大三的时候看过一点levelDB的源码，不过没有怎么用过。</p><p>最近有个需求是存人脸的feature到硬盘，似乎使用levelDB比较合适，因此来学习一下使用。</p><p>先放参考资料。</p><p>关于levelDB的语法，看<a href=https://github.com/google/leveldb/blob/master/doc/index.md>这里</a>就好了。</p><p>以及由于caffe中使用了levelDB，因此也可以参考下caffe源码。不过caffe中对levelDB的使用是又封装了一层。</p><p>具体可以参考：</p><pre><code>#ifdef USE_LEVELDB
-#ifndef CAFFE_UTIL_DB_LEVELDB_HPP
-#define CAFFE_UTIL_DB_LEVELDB_HPP
-
-#include &lt;string&gt;
-
-#include &quot;leveldb/db.h&quot;
-#include &quot;leveldb/write_batch.h&quot;
-
-#include &quot;caffe/util/db.hpp&quot;
-
-namespace caffe { namespace db {
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln> 1</span><span class=cl><span class=kr>class</span> <span class=kt>LevelDBCursor</span> <span class=kt>:</span> <span class=n>public</span> <span class=kt>Cursor</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl> <span class=n>public</span><span class=kt>:</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl>  <span class=n>explicit</span> <span class=kt>LevelDBCursor</span><span class=p>(</span><span class=n>leveldb</span><span class=ow>::</span><span class=kt>Iterator</span><span class=o>*</span> <span class=n>iter</span><span class=p>)</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl>    <span class=kt>:</span> <span class=n>iter_</span><span class=p>(</span><span class=n>iter</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl>    <span class=kt>SeekToFirst</span><span class=nb>()</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl>    <span class=kt>CHECK</span><span class=p>(</span><span class=n>iter_</span><span class=ow>-&gt;</span><span class=n>status</span><span class=nb>()</span><span class=o>.</span><span class=n>ok</span><span class=nb>()</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=n>iter_</span><span class=ow>-&gt;</span><span class=n>status</span><span class=nb>()</span><span class=o>.</span><span class=kt>ToString</span><span class=nb>()</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl>  <span class=p>}</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl>  <span class=o>~</span><span class=kt>LevelDBCursor</span><span class=nb>()</span> <span class=p>{</span> <span class=n>delete</span> <span class=n>iter_</span><span class=p>;</span> <span class=p>}</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=kt>SeekToFirst</span><span class=nb>()</span> <span class=p>{</span> <span class=n>iter_</span><span class=ow>-&gt;</span><span class=kt>SeekToFirst</span><span class=nb>()</span><span class=p>;</span> <span class=p>}</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=kt>Next</span><span class=nb>()</span> <span class=p>{</span> <span class=n>iter_</span><span class=ow>-&gt;</span><span class=kt>Next</span><span class=nb>()</span><span class=p>;</span> <span class=p>}</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl>  <span class=n>virtual</span> <span class=n>string</span> <span class=n>key</span><span class=nb>()</span> <span class=p>{</span> <span class=n>return</span> <span class=n>iter_</span><span class=ow>-&gt;</span><span class=n>key</span><span class=nb>()</span><span class=o>.</span><span class=kt>ToString</span><span class=nb>()</span><span class=p>;</span> <span class=p>}</span>
-</span></span><span class=line><span class=ln>12</span><span class=cl>  <span class=n>virtual</span> <span class=n>string</span> <span class=n>value</span><span class=nb>()</span> <span class=p>{</span> <span class=n>return</span> <span class=n>iter_</span><span class=ow>-&gt;</span><span class=n>value</span><span class=nb>()</span><span class=o>.</span><span class=kt>ToString</span><span class=nb>()</span><span class=p>;</span> <span class=p>}</span>
-</span></span><span class=line><span class=ln>13</span><span class=cl>  <span class=n>virtual</span> <span class=n>bool</span> <span class=n>valid</span><span class=nb>()</span> <span class=p>{</span> <span class=n>return</span> <span class=n>iter_</span><span class=ow>-&gt;</span><span class=kt>Valid</span><span class=nb>()</span><span class=p>;</span> <span class=p>}</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln>1</span><span class=cl> <span class=n>private</span><span class=kt>:</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=n>leveldb</span><span class=ow>::</span><span class=kt>Iterator</span><span class=o>*</span> <span class=n>iter_</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=p>};</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln> 1</span><span class=cl><span class=kr>class</span> <span class=kt>LevelDBTransaction</span> <span class=kt>:</span> <span class=n>public</span> <span class=kt>Transaction</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl> <span class=n>public</span><span class=kt>:</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl>  <span class=n>explicit</span> <span class=kt>LevelDBTransaction</span><span class=p>(</span><span class=n>leveldb</span><span class=ow>::</span><span class=kt>DB</span><span class=o>*</span> <span class=n>db</span><span class=p>)</span> <span class=kt>:</span> <span class=n>db_</span><span class=p>(</span><span class=n>db</span><span class=p>)</span> <span class=p>{</span> <span class=kt>CHECK_NOTNULL</span><span class=p>(</span><span class=n>db_</span><span class=p>);</span> <span class=p>}</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=kt>Put</span><span class=p>(</span><span class=n>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>key</span><span class=p>,</span> <span class=n>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>value</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl>    <span class=n>batch_</span><span class=o>.</span><span class=kt>Put</span><span class=p>(</span><span class=n>key</span><span class=p>,</span> <span class=n>value</span><span class=p>);</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl>  <span class=p>}</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=kt>Commit</span><span class=nb>()</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl>    <span class=n>leveldb</span><span class=ow>::</span><span class=kt>Status</span> <span class=n>status</span> <span class=ow>=</span> <span class=n>db_</span><span class=ow>-&gt;</span><span class=kt>Write</span><span class=p>(</span><span class=n>leveldb</span><span class=ow>::</span><span class=kt>WriteOptions</span><span class=nb>()</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>batch_</span><span class=p>);</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl>    <span class=kt>CHECK</span><span class=p>(</span><span class=n>status</span><span class=o>.</span><span class=n>ok</span><span class=nb>()</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Failed to write batch to leveldb &#34;</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl>                       <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=ow>::</span><span class=n>endl</span> <span class=o>&lt;&lt;</span> <span class=n>status</span><span class=o>.</span><span class=kt>ToString</span><span class=nb>()</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl>  <span class=p>}</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln>1</span><span class=cl> <span class=n>private</span><span class=kt>:</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=n>leveldb</span><span class=ow>::</span><span class=kt>DB</span><span class=o>*</span> <span class=n>db_</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>leveldb</span><span class=ow>::</span><span class=kt>WriteBatch</span> <span class=n>batch_</span><span class=p>;</span>
-</span></span></code></pre></div><pre><code>  DISABLE_COPY_AND_ASSIGN(LevelDBTransaction);
-};
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln> 1</span><span class=cl><span class=kr>class</span> <span class=kt>LevelDB</span> <span class=kt>:</span> <span class=n>public</span> <span class=kt>DB</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl> <span class=n>public</span><span class=kt>:</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl>  <span class=kt>LevelDB</span><span class=nb>()</span> <span class=kt>:</span> <span class=n>db_</span><span class=p>(</span><span class=kt>NULL</span><span class=p>)</span> <span class=p>{</span> <span class=p>}</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl>  <span class=n>virtual</span> <span class=o>~</span><span class=kt>LevelDB</span><span class=nb>()</span> <span class=p>{</span> <span class=kt>Close</span><span class=nb>()</span><span class=p>;</span> <span class=p>}</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=kt>Open</span><span class=p>(</span><span class=n>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>source</span><span class=p>,</span> <span class=kt>Mode</span> <span class=n>mode</span><span class=p>);</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=kt>Close</span><span class=nb>()</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl>    <span class=kr>if</span> <span class=p>(</span><span class=n>db_</span> <span class=o>!=</span> <span class=kt>NULL</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl>      <span class=n>delete</span> <span class=n>db_</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl>      <span class=n>db_</span> <span class=ow>=</span> <span class=kt>NULL</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl>    <span class=p>}</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl>  <span class=p>}</span>
-</span></span><span class=line><span class=ln>12</span><span class=cl>  <span class=n>virtual</span> <span class=kt>LevelDBCursor</span><span class=o>*</span> <span class=kt>NewCursor</span><span class=nb>()</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>13</span><span class=cl>    <span class=n>return</span> <span class=n>new</span> <span class=kt>LevelDBCursor</span><span class=p>(</span><span class=n>db_</span><span class=ow>-&gt;</span><span class=kt>NewIterator</span><span class=p>(</span><span class=n>leveldb</span><span class=ow>::</span><span class=kt>ReadOptions</span><span class=nb>()</span><span class=p>));</span>
-</span></span><span class=line><span class=ln>14</span><span class=cl>  <span class=p>}</span>
-</span></span><span class=line><span class=ln>15</span><span class=cl>  <span class=n>virtual</span> <span class=kt>LevelDBTransaction</span><span class=o>*</span> <span class=kt>NewTransaction</span><span class=nb>()</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>16</span><span class=cl>    <span class=n>return</span> <span class=n>new</span> <span class=kt>LevelDBTransaction</span><span class=p>(</span><span class=n>db_</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>17</span><span class=cl>  <span class=p>}</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln>1</span><span class=cl> <span class=n>private</span><span class=kt>:</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=n>leveldb</span><span class=ow>::</span><span class=kt>DB</span><span class=o>*</span> <span class=n>db_</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=p>};</span>
-</span></span></code></pre></div><pre><code>}  // namespace db
-}  // namespace caffe
-
-#endif  // CAFFE_UTIL_DB_LEVELDB_HPP
-#endif  // USE_LEVELDB
-
-
-
-
-
-
-#ifndef CAFFE_UTIL_DB_HPP
-#define CAFFE_UTIL_DB_HPP
-
-#include &lt;string&gt;
-
-#include &quot;caffe/common.hpp&quot;
-#include &quot;caffe/proto/caffe.pb.h&quot;
-
-namespace caffe { namespace db {
-
-enum Mode { READ, WRITE, NEW };
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=k>class</span> <span class=nc>Cursor</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl> <span class=n>public</span><span class=p>:</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>Cursor</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=n>virtual</span> <span class=o>~</span><span class=n>Cursor</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
-</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=n>SeekToFirst</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>6</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=n>Next</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>7</span><span class=cl>  <span class=n>virtual</span> <span class=n>string</span> <span class=n>key</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>8</span><span class=cl>  <span class=n>virtual</span> <span class=n>string</span> <span class=n>value</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>9</span><span class=cl>  <span class=n>virtual</span> <span class=nb>bool</span> <span class=n>valid</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
-</span></span></code></pre></div><pre><code>  DISABLE_COPY_AND_ASSIGN(Cursor);
-};
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=k>class</span> <span class=nc>Transaction</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl> <span class=n>public</span><span class=p>:</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>Transaction</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=n>virtual</span> <span class=o>~</span><span class=n>Transaction</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
-</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=n>Put</span><span class=p>(</span><span class=n>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>key</span><span class=p>,</span> <span class=n>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>value</span><span class=p>)</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>6</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=n>Commit</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
-</span></span></code></pre></div><pre><code>  DISABLE_COPY_AND_ASSIGN(Transaction);
-};
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=k>class</span> <span class=nc>DB</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl> <span class=n>public</span><span class=p>:</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>DB</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=n>virtual</span> <span class=o>~</span><span class=n>DB</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
-</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=n>Open</span><span class=p>(</span><span class=n>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>source</span><span class=p>,</span> <span class=n>Mode</span> <span class=n>mode</span><span class=p>)</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>6</span><span class=cl>  <span class=n>virtual</span> <span class=n>void</span> <span class=n>Close</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>7</span><span class=cl>  <span class=n>virtual</span> <span class=n>Cursor</span><span class=o>*</span> <span class=n>NewCursor</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>8</span><span class=cl>  <span class=n>virtual</span> <span class=n>Transaction</span><span class=o>*</span> <span class=n>NewTransaction</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
-</span></span></code></pre></div><pre><code>  DISABLE_COPY_AND_ASSIGN(DB);
-};
-
-DB* GetDB(DataParameter::DB backend);
-DB* GetDB(const string&amp; backend);
-
-}  // namespace db
-}  // namespace caffe
-
-#endif  // CAFFE_UTIL_DB_HPP
-
-
-
-
-
-
-#ifdef USE_LEVELDB
-#include &quot;caffe/util/db_leveldb.hpp&quot;
-
-#include &lt;string&gt;
-
-namespace caffe { namespace db {
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=kt>void</span> <span class=n>LevelDB</span><span class=o>::</span><span class=n>Open</span><span class=p>(</span><span class=k>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>source</span><span class=p>,</span> <span class=n>Mode</span> <span class=n>mode</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl>  <span class=n>leveldb</span><span class=o>::</span><span class=n>Options</span> <span class=n>options</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl>  <span class=n>options</span><span class=p>.</span><span class=n>block_size</span> <span class=o>=</span> <span class=mi>65536</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl>  <span class=n>options</span><span class=p>.</span><span class=n>write_buffer_size</span> <span class=o>=</span> <span class=mi>268435456</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=n>options</span><span class=p>.</span><span class=n>max_open_files</span> <span class=o>=</span> <span class=mi>100</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl>  <span class=n>options</span><span class=p>.</span><span class=n>error_if_exists</span> <span class=o>=</span> <span class=n>mode</span> <span class=o>==</span> <span class=n>NEW</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl>  <span class=n>options</span><span class=p>.</span><span class=n>create_if_missing</span> <span class=o>=</span> <span class=n>mode</span> <span class=o>!=</span> <span class=n>READ</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl>  <span class=n>leveldb</span><span class=o>::</span><span class=n>Status</span> <span class=n>status</span> <span class=o>=</span> <span class=n>leveldb</span><span class=o>::</span><span class=n>DB</span><span class=o>::</span><span class=n>Open</span><span class=p>(</span><span class=n>options</span><span class=p>,</span> <span class=n>source</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>db_</span><span class=p>);</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl>  <span class=n>CHECK</span><span class=p>(</span><span class=n>status</span><span class=p>.</span><span class=n>ok</span><span class=p>())</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Failed to open leveldb &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>source</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl>                     <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span> <span class=o>&lt;&lt;</span> <span class=n>status</span><span class=p>.</span><span class=n>ToString</span><span class=p>();</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl>  <span class=n>LOG</span><span class=p>(</span><span class=n>INFO</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Opened leveldb &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>source</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>12</span><span class=cl><span class=p>}</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=p>}</span>  <span class=c1>// namespace db
-</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span><span class=p>}</span>  <span class=c1>// namespace caffe
-</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1></span><span class=cp>#endif  </span><span class=c1>// USE_LEVELDB
-</span></span></span></code></pre></div><pre><code>#include &quot;caffe/util/db.hpp&quot;
-#include &quot;caffe/util/db_leveldb.hpp&quot;
-#include &quot;caffe/util/db_lmdb.hpp&quot;
-
-#include &lt;string&gt;
-
-namespace caffe { namespace db {
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln> 1</span><span class=cl><span class=kt>DB</span><span class=o>*</span> <span class=kt>GetDB</span><span class=p>(</span><span class=kt>DataParameter</span><span class=ow>::</span><span class=kt>DB</span> <span class=n>backend</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl>  <span class=n>switch</span> <span class=p>(</span><span class=n>backend</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=o>#</span><span class=n>ifdef</span> <span class=kt>USE_LEVELDB</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl>  <span class=kr>case</span> <span class=kt>DataParameter_DB_LEVELDB:</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl>    <span class=n>return</span> <span class=n>new</span> <span class=kt>LevelDB</span><span class=nb>()</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=o>#</span><span class=n>endif</span>  <span class=o>//</span> <span class=kt>USE_LEVELDB</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=o>#</span><span class=n>ifdef</span> <span class=kt>USE_LMDB</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl>  <span class=kr>case</span> <span class=kt>DataParameter_DB_LMDB:</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl>    <span class=n>return</span> <span class=n>new</span> <span class=kt>LMDB</span><span class=nb>()</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl><span class=o>#</span><span class=n>endif</span>  <span class=o>//</span> <span class=kt>USE_LMDB</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl>  <span class=kr>default</span><span class=kt>:</span>
-</span></span><span class=line><span class=ln>12</span><span class=cl>    <span class=kt>LOG</span><span class=p>(</span><span class=kt>FATAL</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Unknown database backend&#34;</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>13</span><span class=cl>    <span class=n>return</span> <span class=kt>NULL</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>14</span><span class=cl>  <span class=p>}</span>
-</span></span><span class=line><span class=ln>15</span><span class=cl><span class=p>}</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln> 1</span><span class=cl>DB* GetDB<span class=o>(</span>const string<span class=p>&amp;</span> backend<span class=o>)</span> <span class=o>{</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=c1>#ifdef USE_LEVELDB</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl>  <span class=k>if</span> <span class=o>(</span><span class=nv>backend</span> <span class=o>==</span> <span class=s2>&#34;leveldb&#34;</span><span class=o>)</span> <span class=o>{</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl>    <span class=k>return</span> new LevelDB<span class=o>()</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=o>}</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=c1>#endif  // USE_LEVELDB</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=c1>#ifdef USE_LMDB</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl>  <span class=k>if</span> <span class=o>(</span><span class=nv>backend</span> <span class=o>==</span> <span class=s2>&#34;lmdb&#34;</span><span class=o>)</span> <span class=o>{</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl>    <span class=k>return</span> new LMDB<span class=o>()</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl>  <span class=o>}</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl><span class=c1>#endif  // USE_LMDB</span>
-</span></span><span class=line><span class=ln>12</span><span class=cl>  LOG<span class=o>(</span>FATAL<span class=o>)</span> &lt;&lt; <span class=s2>&#34;Unknown database backend&#34;</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>13</span><span class=cl>  <span class=k>return</span> NULL<span class=p>;</span>
-</span></span><span class=line><span class=ln>14</span><span class=cl><span class=o>}</span>
-</span></span></code></pre></div><pre><code>}  // namespace db
-}  // namespace caffe
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln>1</span><span class=cl><span class=o>//</span> <span class=kt>This</span> <span class=n>program</span> <span class=n>converts</span> <span class=n>a</span> <span class=n>set</span> <span class=kr>of</span> <span class=n>images</span> <span class=n>to</span> <span class=n>a</span> <span class=n>lmdb</span><span class=o>/</span><span class=n>leveldb</span> <span class=n>by</span> <span class=n>storing</span> <span class=n>them</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=o>//</span> <span class=n>as</span> <span class=kt>Datum</span> <span class=n>proto</span> <span class=n>buffers</span><span class=o>.</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=o>//</span> <span class=kt>Usage:</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl><span class=o>//</span>   <span class=n>convert_imageset</span> <span class=p>[</span><span class=kt>FLAGS</span><span class=p>]</span> <span class=kt>ROOTFOLDER</span><span class=o>/</span> <span class=kt>LISTFILE</span> <span class=kt>DB_NAME</span>
-</span></span><span class=line><span class=ln>5</span><span class=cl><span class=o>//</span>
-</span></span><span class=line><span class=ln>6</span><span class=cl><span class=o>//</span> <span class=kr>where</span> <span class=kt>ROOTFOLDER</span> <span class=n>is</span> <span class=n>the</span> <span class=n>root</span> <span class=n>folder</span> <span class=n>that</span> <span class=n>holds</span> <span class=n>all</span> <span class=n>the</span> <span class=n>images</span><span class=p>,</span> <span class=n>and</span> <span class=kt>LISTFILE</span>
-</span></span><span class=line><span class=ln>7</span><span class=cl><span class=o>//</span> <span class=n>should</span> <span class=n>be</span> <span class=n>a</span> <span class=n>list</span> <span class=kr>of</span> <span class=n>files</span> <span class=n>as</span> <span class=n>well</span> <span class=n>as</span> <span class=n>their</span> <span class=n>labels</span><span class=p>,</span> <span class=kr>in</span> <span class=n>the</span> <span class=n>format</span> <span class=n>as</span>
-</span></span><span class=line><span class=ln>8</span><span class=cl><span class=o>//</span>   <span class=n>subfolder1</span><span class=o>/</span><span class=n>file1</span><span class=o>.</span><span class=kt>JPEG</span> <span class=mi>7</span>
-</span></span><span class=line><span class=ln>9</span><span class=cl><span class=o>//</span>   <span class=o>....</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;algorithm&gt;</span><span class=cp>
-</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;fstream&gt;</span><span class=cp>  </span><span class=c1>// NOLINT(readability/streams)
-</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1></span><span class=cp>#include</span> <span class=cpf>&lt;string&gt;</span><span class=cp>
-</span></span></span><span class=line><span class=ln>4</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;utility&gt;</span><span class=cp>
-</span></span></span><span class=line><span class=ln>5</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;vector&gt;</span><span class=cp>
-</span></span></span></code></pre></div><pre><code>#include &quot;boost/scoped_ptr.hpp&quot;
-#include &quot;gflags/gflags.h&quot;
-#include &quot;glog/logging.h&quot;
-
-#include &quot;caffe/proto/caffe.pb.h&quot;
-#include &quot;caffe/util/db.hpp&quot;
-#include &quot;caffe/util/format.hpp&quot;
-#include &quot;caffe/util/io.hpp&quot;
-#include &quot;caffe/util/rng.hpp&quot;
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=k>using</span> <span class=k>namespace</span> <span class=n>caffe</span><span class=p>;</span>  <span class=c1>// NOLINT(build/namespaces)
-</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span><span class=k>using</span> <span class=n>std</span><span class=o>::</span><span class=n>pair</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=k>using</span> <span class=n>boost</span><span class=o>::</span><span class=n>scoped_ptr</span><span class=p>;</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=n>DEFINE_bool</span><span class=p>(</span><span class=n>gray</span><span class=p>,</span> <span class=nb>false</span><span class=p>,</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl>    <span class=s>&#34;When this option is on, treat images as grayscale ones&#34;</span><span class=p>);</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=n>DEFINE_bool</span><span class=p>(</span><span class=n>shuffle</span><span class=p>,</span> <span class=nb>false</span><span class=p>,</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl>    <span class=s>&#34;Randomly shuffle the order of images and their labels&#34;</span><span class=p>);</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=n>DEFINE_string</span><span class=p>(</span><span class=n>backend</span><span class=p>,</span> <span class=s>&#34;lmdb&#34;</span><span class=p>,</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl>        <span class=s>&#34;The backend {lmdb, leveldb} for storing the result&#34;</span><span class=p>);</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=n>DEFINE_int32</span><span class=p>(</span><span class=n>resize_width</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=s>&#34;Width images are resized to&#34;</span><span class=p>);</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl><span class=n>DEFINE_int32</span><span class=p>(</span><span class=n>resize_height</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=s>&#34;Height images are resized to&#34;</span><span class=p>);</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl><span class=n>DEFINE_bool</span><span class=p>(</span><span class=n>check_size</span><span class=p>,</span> <span class=nb>false</span><span class=p>,</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl>    <span class=s>&#34;When this option is on, check that all the datum have the same size&#34;</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl><span class=n>DEFINE_bool</span><span class=p>(</span><span class=n>encoded</span><span class=p>,</span> <span class=nb>false</span><span class=p>,</span>
-</span></span><span class=line><span class=ln>12</span><span class=cl>    <span class=s>&#34;When this option is on, the encoded image will be save in datum&#34;</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>13</span><span class=cl><span class=n>DEFINE_string</span><span class=p>(</span><span class=n>encode_type</span><span class=p>,</span> <span class=s>&#34;&#34;</span><span class=p>,</span>
-</span></span><span class=line><span class=ln>14</span><span class=cl>    <span class=s>&#34;Optional: What type should we encode the image as (&#39;png&#39;,&#39;jpg&#39;,...).&#34;</span><span class=p>);</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>(</span><span class=kt>int</span> <span class=n>argc</span><span class=p>,</span> <span class=kt>char</span><span class=o>**</span> <span class=n>argv</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=cp>#ifdef USE_OPENCV
-</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=cp></span>  <span class=o>::</span><span class=n>google</span><span class=o>::</span><span class=n>InitGoogleLogging</span><span class=p>(</span><span class=n>argv</span><span class=p>[</span><span class=mi>0</span><span class=p>]);</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=c1>// Print output to stderr (while still logging)
-</span></span></span><span class=line><span class=ln>5</span><span class=cl><span class=c1></span>  <span class=n>FLAGS_alsologtostderr</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl><span class=cp>#ifndef GFLAGS_GFLAGS_H_
-</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=cp></span>  <span class=k>namespace</span> <span class=n>gflags</span> <span class=o>=</span> <span class=n>google</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=cp>#endif
-</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln>1</span><span class=cl>  <span class=n>gflags</span><span class=ow>::</span><span class=kt>SetUsageMessage</span><span class=p>(</span><span class=s>&#34;Convert a set of images to the leveldb/lmdb</span><span class=se>\n</span><span class=s>&#34;</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>        <span class=s>&#34;format used as input for Caffe.</span><span class=se>\n</span><span class=s>&#34;</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=s>&#34;Usage:</span><span class=se>\n</span><span class=s>&#34;</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=s>&#34;    convert_imageset [FLAGS] ROOTFOLDER/ LISTFILE DB_NAME</span><span class=se>\n</span><span class=s>&#34;</span>
-</span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=s>&#34;The ImageNet dataset for the training demo is at</span><span class=se>\n</span><span class=s>&#34;</span>
-</span></span><span class=line><span class=ln>6</span><span class=cl>        <span class=s>&#34;    http://www.image-net.org/download-images</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>7</span><span class=cl>  <span class=n>gflags</span><span class=ow>::</span><span class=kt>ParseCommandLineFlags</span><span class=p>(</span><span class=o>&amp;</span><span class=n>argc</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>argv</span><span class=p>,</span> <span class=n>true</span><span class=p>);</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>  <span class=k>if</span> <span class=o>(</span>argc &lt; 4<span class=o>)</span> <span class=o>{</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>    gflags::ShowUsageWithFlagsRestrict<span class=o>(</span>argv<span class=o>[</span>0<span class=o>]</span>, <span class=s2>&#34;tools/convert_imageset&#34;</span><span class=o>)</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=k>return</span> 1<span class=p>;</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=o>}</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>  <span class=k>const</span> <span class=kt>bool</span> <span class=n>is_color</span> <span class=o>=</span> <span class=o>!</span><span class=n>FLAGS_gray</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=k>const</span> <span class=kt>bool</span> <span class=n>check_size</span> <span class=o>=</span> <span class=n>FLAGS_check_size</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=k>const</span> <span class=kt>bool</span> <span class=n>encoded</span> <span class=o>=</span> <span class=n>FLAGS_encoded</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=k>const</span> <span class=n>string</span> <span class=n>encode_type</span> <span class=o>=</span> <span class=n>FLAGS_encode_type</span><span class=p>;</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl>  <span class=n>std</span><span class=o>::</span><span class=n>ifstream</span> <span class=n>infile</span><span class=p>(</span><span class=n>argv</span><span class=p>[</span><span class=mi>2</span><span class=p>]);</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl>  <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>pair</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=p>,</span> <span class=kt>int</span><span class=o>&gt;</span> <span class=o>&gt;</span> <span class=n>lines</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl>  <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>line</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl>  <span class=n>size_t</span> <span class=n>pos</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=kt>int</span> <span class=n>label</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl>  <span class=k>while</span> <span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>getline</span><span class=p>(</span><span class=n>infile</span><span class=p>,</span> <span class=n>line</span><span class=p>))</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl>    <span class=n>pos</span> <span class=o>=</span> <span class=n>line</span><span class=p>.</span><span class=n>find_last_of</span><span class=p>(</span><span class=sc>&#39; &#39;</span><span class=p>);</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl>    <span class=n>label</span> <span class=o>=</span> <span class=n>atoi</span><span class=p>(</span><span class=n>line</span><span class=p>.</span><span class=n>substr</span><span class=p>(</span><span class=n>pos</span> <span class=o>+</span> <span class=mi>1</span><span class=p>).</span><span class=n>c_str</span><span class=p>());</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl>    <span class=n>lines</span><span class=p>.</span><span class=n>push_back</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>make_pair</span><span class=p>(</span><span class=n>line</span><span class=p>.</span><span class=n>substr</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=n>pos</span><span class=p>),</span> <span class=n>label</span><span class=p>));</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl>  <span class=p>}</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>FLAGS_shuffle</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>12</span><span class=cl>    <span class=c1>// randomly shuffle data
-</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=c1></span>    <span class=n>LOG</span><span class=p>(</span><span class=n>INFO</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Shuffling data&#34;</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>14</span><span class=cl>    <span class=n>shuffle</span><span class=p>(</span><span class=n>lines</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span> <span class=n>lines</span><span class=p>.</span><span class=n>end</span><span class=p>());</span>
-</span></span><span class=line><span class=ln>15</span><span class=cl>  <span class=p>}</span>
-</span></span><span class=line><span class=ln>16</span><span class=cl>  <span class=n>LOG</span><span class=p>(</span><span class=n>INFO</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;A total of &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>lines</span><span class=p>.</span><span class=n>size</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=s>&#34; images.&#34;</span><span class=p>;</span>
-</span></span></code></pre></div><pre><code>  if (encode_type.size() &amp;&amp; !encoded)
-    LOG(INFO) &lt;&lt; &quot;encode_type specified, assuming encoded=true.&quot;;
-
-  int resize_height = std::max&lt;int&gt;(0, FLAGS_resize_height);
-  int resize_width = std::max&lt;int&gt;(0, FLAGS_resize_width);
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln>1</span><span class=cl>  <span class=o>//</span> <span class=kt>Create</span> <span class=n>new</span> <span class=kt>DB</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=n>scoped_ptr</span><span class=o>&lt;</span><span class=n>db</span><span class=ow>::</span><span class=kt>DB</span><span class=o>&gt;</span> <span class=n>db</span><span class=p>(</span><span class=n>db</span><span class=ow>::</span><span class=kt>GetDB</span><span class=p>(</span><span class=kt>FLAGS_backend</span><span class=p>));</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>db</span><span class=ow>-&gt;</span><span class=kt>Open</span><span class=p>(</span><span class=n>argv</span><span class=p>[</span><span class=mi>3</span><span class=p>],</span> <span class=n>db</span><span class=ow>::</span><span class=kt>NEW</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=n>scoped_ptr</span><span class=o>&lt;</span><span class=n>db</span><span class=ow>::</span><span class=kt>Transaction</span><span class=o>&gt;</span> <span class=n>txn</span><span class=p>(</span><span class=n>db</span><span class=ow>-&gt;</span><span class=kt>NewTransaction</span><span class=nb>()</span><span class=p>);</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>1</span><span class=cl>  <span class=c1>// Storing to db
-</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1></span>  <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>root_folder</span><span class=p>(</span><span class=n>argv</span><span class=p>[</span><span class=mi>1</span><span class=p>]);</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>Datum</span> <span class=n>datum</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=kt>int</span> <span class=n>count</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=kt>int</span> <span class=n>data_size</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>6</span><span class=cl>  <span class=kt>bool</span> <span class=n>data_size_initialized</span> <span class=o>=</span> <span class=nb>false</span><span class=p>;</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl>  <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>line_id</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>line_id</span> <span class=o>&lt;</span> <span class=n>lines</span><span class=p>.</span><span class=n>size</span><span class=p>();</span> <span class=o>++</span><span class=n>line_id</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl>    <span class=kt>bool</span> <span class=n>status</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>enc</span> <span class=o>=</span> <span class=n>encode_type</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>encoded</span> <span class=o>&amp;&amp;</span> <span class=o>!</span><span class=n>enc</span><span class=p>.</span><span class=n>size</span><span class=p>())</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl>      <span class=c1>// Guess the encoding type from the file name
-</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=c1></span>      <span class=n>string</span> <span class=n>fn</span> <span class=o>=</span> <span class=n>lines</span><span class=p>[</span><span class=n>line_id</span><span class=p>].</span><span class=n>first</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl>      <span class=n>size_t</span> <span class=n>p</span> <span class=o>=</span> <span class=n>fn</span><span class=p>.</span><span class=n>rfind</span><span class=p>(</span><span class=sc>&#39;.&#39;</span><span class=p>);</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl>      <span class=k>if</span> <span class=p>(</span> <span class=n>p</span> <span class=o>==</span> <span class=n>fn</span><span class=p>.</span><span class=n>npos</span> <span class=p>)</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl>        <span class=n>LOG</span><span class=p>(</span><span class=n>WARNING</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Failed to guess the encoding of &#39;&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>fn</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;&#39;&#34;</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl>      <span class=n>enc</span> <span class=o>=</span> <span class=n>fn</span><span class=p>.</span><span class=n>substr</span><span class=p>(</span><span class=n>p</span><span class=o>+</span><span class=mi>1</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl>      <span class=n>std</span><span class=o>::</span><span class=n>transform</span><span class=p>(</span><span class=n>enc</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span> <span class=n>enc</span><span class=p>.</span><span class=n>end</span><span class=p>(),</span> <span class=n>enc</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span> <span class=o>::</span><span class=n>tolower</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>12</span><span class=cl>    <span class=p>}</span>
-</span></span><span class=line><span class=ln>13</span><span class=cl>    <span class=n>status</span> <span class=o>=</span> <span class=n>ReadImageToDatum</span><span class=p>(</span><span class=n>root_folder</span> <span class=o>+</span> <span class=n>lines</span><span class=p>[</span><span class=n>line_id</span><span class=p>].</span><span class=n>first</span><span class=p>,</span>
-</span></span><span class=line><span class=ln>14</span><span class=cl>        <span class=n>lines</span><span class=p>[</span><span class=n>line_id</span><span class=p>].</span><span class=n>second</span><span class=p>,</span> <span class=n>resize_height</span><span class=p>,</span> <span class=n>resize_width</span><span class=p>,</span> <span class=n>is_color</span><span class=p>,</span>
-</span></span><span class=line><span class=ln>15</span><span class=cl>        <span class=n>enc</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>datum</span><span class=p>);</span>
-</span></span><span class=line><span class=ln>16</span><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>status</span> <span class=o>==</span> <span class=nb>false</span><span class=p>)</span> <span class=k>continue</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>17</span><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>check_size</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>18</span><span class=cl>      <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>data_size_initialized</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>19</span><span class=cl>        <span class=n>data_size</span> <span class=o>=</span> <span class=n>datum</span><span class=p>.</span><span class=n>channels</span><span class=p>()</span> <span class=o>*</span> <span class=n>datum</span><span class=p>.</span><span class=n>height</span><span class=p>()</span> <span class=o>*</span> <span class=n>datum</span><span class=p>.</span><span class=n>width</span><span class=p>();</span>
-</span></span><span class=line><span class=ln>20</span><span class=cl>        <span class=n>data_size_initialized</span> <span class=o>=</span> <span class=nb>true</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>21</span><span class=cl>      <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
-</span></span><span class=line><span class=ln>22</span><span class=cl>        <span class=k>const</span> <span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=o>&amp;</span> <span class=n>data</span> <span class=o>=</span> <span class=n>datum</span><span class=p>.</span><span class=n>data</span><span class=p>();</span>
-</span></span><span class=line><span class=ln>23</span><span class=cl>        <span class=n>CHECK_EQ</span><span class=p>(</span><span class=n>data</span><span class=p>.</span><span class=n>size</span><span class=p>(),</span> <span class=n>data_size</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Incorrect data field size &#34;</span>
-</span></span><span class=line><span class=ln>24</span><span class=cl>            <span class=o>&lt;&lt;</span> <span class=n>data</span><span class=p>.</span><span class=n>size</span><span class=p>();</span>
-</span></span><span class=line><span class=ln>25</span><span class=cl>      <span class=p>}</span>
-</span></span><span class=line><span class=ln>26</span><span class=cl>    <span class=p>}</span>
-</span></span><span class=line><span class=ln>27</span><span class=cl>    <span class=c1>// sequential
-</span></span></span><span class=line><span class=ln>28</span><span class=cl><span class=c1></span>    <span class=n>string</span> <span class=n>key_str</span> <span class=o>=</span> <span class=n>caffe</span><span class=o>::</span><span class=n>format_int</span><span class=p>(</span><span class=n>line_id</span><span class=p>,</span> <span class=mi>8</span><span class=p>)</span> <span class=o>+</span> <span class=s>&#34;_&#34;</span> <span class=o>+</span> <span class=n>lines</span><span class=p>[</span><span class=n>line_id</span><span class=p>].</span><span class=n>first</span><span class=p>;</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-haskell data-lang=haskell><span class=line><span class=ln>1</span><span class=cl>    <span class=o>//</span> <span class=kt>Put</span> <span class=kr>in</span> <span class=n>db</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>    <span class=n>string</span> <span class=n>out</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>    <span class=kt>CHECK</span><span class=p>(</span><span class=n>datum</span><span class=o>.</span><span class=kt>SerializeToString</span><span class=p>(</span><span class=o>&amp;</span><span class=n>out</span><span class=p>));</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>    <span class=n>txn</span><span class=ow>-&gt;</span><span class=kt>Put</span><span class=p>(</span><span class=n>key_str</span><span class=p>,</span> <span class=n>out</span><span class=p>);</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln> 1</span><span class=cl>    <span class=k>if</span> <span class=o>(</span>++count % <span class=nv>1000</span> <span class=o>==</span> 0<span class=o>)</span> <span class=o>{</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl>      // Commit db
-</span></span><span class=line><span class=ln> 3</span><span class=cl>      txn-&gt;Commit<span class=o>()</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl>      txn.reset<span class=o>(</span>db-&gt;NewTransaction<span class=o>())</span><span class=p>;</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl>      LOG<span class=o>(</span>INFO<span class=o>)</span> &lt;&lt; <span class=s2>&#34;Processed &#34;</span> <span class=s>&lt;&lt; count &lt;&lt; &#34; files.&#34;;
-</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=s>    }
-</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=s>  }
-</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=s>  // write the last batch
-</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=s>  if (count</span> % <span class=m>1000</span> !<span class=o>=</span> 0<span class=o>)</span> <span class=o>{</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl>    txn-&gt;Commit<span class=o>()</span><span class=p>;</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl>    LOG<span class=o>(</span>INFO<span class=o>)</span> &lt;&lt; <span class=s2>&#34;Processed &#34;</span> <span class=s>&lt;&lt; count &lt;&lt; &#34; files.&#34;;
-</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=s>  }
-</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=s>#else
-</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=s>  LOG(FATAL) &lt;&lt; &#34;This tool requires OpenCV; co</span>mpile with USE_OPENCV.<span class=s2>&#34;;
-</span></span></span><span class=line><span class=ln>15</span><span class=cl><span class=s2>#endif  // USE_OPENCV
-</span></span></span><span class=line><span class=ln>16</span><span class=cl><span class=s2>  return 0;
-</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=s2>}
-</span></span></span></code></pre></div><p>几个文件。。。感觉比看文档更有实际意义orz</p><h3 id=leveldb简介>levelDB简介</h3><p>Leveldb是google开源的一个高效率的K/V数据库.有如下特点：</p><pre><code>  1. 首先，LevelDb是一个持久化存储的KV系统，和Redis这种内存型的KV系统不同，LevelDb不会像Redis一样狂吃内存，而是将大部分数据存储到磁盘上。
+<span class=post_time>· 6 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/leveldb title=leveldb class="post_tag button button_translucent">leveldb</a></span></div><div class=post_body><p>2022-02-26 update:</p><p><strong>说学习笔记听起来像在分析代码。。。但是实际上什么都没干，还是写"使用笔记"好了</strong></p><p>大三的时候看过一点levelDB的源码，不过没有怎么用过。</p><p>最近有个需求是存人脸的feature到硬盘，似乎使用levelDB比较合适，因此来学习一下使用。</p><p>先放参考资料。</p><p>关于levelDB的语法，看<a href=https://github.com/google/leveldb/blob/master/doc/index.md>这里</a>就好了。</p><p>以及由于caffe中使用了levelDB，因此也可以参考下caffe源码。不过caffe中对levelDB的使用是又封装了一层。</p><p>具体可以参考：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>  1</span><span class=cl><span class=cp>#ifdef USE_LEVELDB
+</span></span></span><span class=line><span class=ln>  2</span><span class=cl><span class=cp>#ifndef CAFFE_UTIL_DB_LEVELDB_HPP
+</span></span></span><span class=line><span class=ln>  3</span><span class=cl><span class=cp>#define CAFFE_UTIL_DB_LEVELDB_HPP
+</span></span></span><span class=line><span class=ln>  4</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln>  5</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;string&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>  6</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln>  7</span><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;leveldb/db.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>  8</span><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;leveldb/write_batch.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>  9</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln> 10</span><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;caffe/util/db.hpp&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 11</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln> 12</span><span class=cl><span class=k>namespace</span> <span class=n>caffe</span> <span class=p>{</span> <span class=k>namespace</span> <span class=n>db</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 13</span><span class=cl>
+</span></span><span class=line><span class=ln> 14</span><span class=cl><span class=k>class</span> <span class=nc>LevelDBCursor</span> <span class=o>:</span> <span class=k>public</span> <span class=n>Cursor</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 15</span><span class=cl> <span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=ln> 16</span><span class=cl>  <span class=k>explicit</span> <span class=n>LevelDBCursor</span><span class=p>(</span><span class=n>leveldb</span><span class=o>::</span><span class=n>Iterator</span><span class=o>*</span> <span class=n>iter</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 17</span><span class=cl>    <span class=o>:</span> <span class=n>iter_</span><span class=p>(</span><span class=n>iter</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 18</span><span class=cl>    <span class=n>SeekToFirst</span><span class=p>();</span>
+</span></span><span class=line><span class=ln> 19</span><span class=cl>    <span class=n>CHECK</span><span class=p>(</span><span class=n>iter_</span><span class=o>-&gt;</span><span class=n>status</span><span class=p>().</span><span class=n>ok</span><span class=p>())</span> <span class=o>&lt;&lt;</span> <span class=n>iter_</span><span class=o>-&gt;</span><span class=n>status</span><span class=p>().</span><span class=n>ToString</span><span class=p>();</span>
+</span></span><span class=line><span class=ln> 20</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln> 21</span><span class=cl>  <span class=o>~</span><span class=n>LevelDBCursor</span><span class=p>()</span> <span class=p>{</span> <span class=k>delete</span> <span class=n>iter_</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 22</span><span class=cl>  <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>SeekToFirst</span><span class=p>()</span> <span class=p>{</span> <span class=n>iter_</span><span class=o>-&gt;</span><span class=n>SeekToFirst</span><span class=p>();</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 23</span><span class=cl>  <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>Next</span><span class=p>()</span> <span class=p>{</span> <span class=n>iter_</span><span class=o>-&gt;</span><span class=n>Next</span><span class=p>();</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 24</span><span class=cl>  <span class=k>virtual</span> <span class=n>string</span> <span class=nf>key</span><span class=p>()</span> <span class=p>{</span> <span class=k>return</span> <span class=n>iter_</span><span class=o>-&gt;</span><span class=n>key</span><span class=p>().</span><span class=n>ToString</span><span class=p>();</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 25</span><span class=cl>  <span class=k>virtual</span> <span class=n>string</span> <span class=nf>value</span><span class=p>()</span> <span class=p>{</span> <span class=k>return</span> <span class=n>iter_</span><span class=o>-&gt;</span><span class=n>value</span><span class=p>().</span><span class=n>ToString</span><span class=p>();</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 26</span><span class=cl>  <span class=k>virtual</span> <span class=kt>bool</span> <span class=nf>valid</span><span class=p>()</span> <span class=p>{</span> <span class=k>return</span> <span class=n>iter_</span><span class=o>-&gt;</span><span class=n>Valid</span><span class=p>();</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 27</span><span class=cl>
+</span></span><span class=line><span class=ln> 28</span><span class=cl> <span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=ln> 29</span><span class=cl>  <span class=n>leveldb</span><span class=o>::</span><span class=n>Iterator</span><span class=o>*</span> <span class=n>iter_</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 30</span><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=ln> 31</span><span class=cl>
+</span></span><span class=line><span class=ln> 32</span><span class=cl><span class=k>class</span> <span class=nc>LevelDBTransaction</span> <span class=o>:</span> <span class=k>public</span> <span class=n>Transaction</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 33</span><span class=cl> <span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=ln> 34</span><span class=cl>  <span class=k>explicit</span> <span class=n>LevelDBTransaction</span><span class=p>(</span><span class=n>leveldb</span><span class=o>::</span><span class=n>DB</span><span class=o>*</span> <span class=n>db</span><span class=p>)</span> <span class=o>:</span> <span class=n>db_</span><span class=p>(</span><span class=n>db</span><span class=p>)</span> <span class=p>{</span> <span class=n>CHECK_NOTNULL</span><span class=p>(</span><span class=n>db_</span><span class=p>);</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 35</span><span class=cl>  <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>Put</span><span class=p>(</span><span class=k>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>key</span><span class=p>,</span> <span class=k>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>value</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 36</span><span class=cl>    <span class=n>batch_</span><span class=p>.</span><span class=n>Put</span><span class=p>(</span><span class=n>key</span><span class=p>,</span> <span class=n>value</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 37</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln> 38</span><span class=cl>  <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>Commit</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 39</span><span class=cl>    <span class=n>leveldb</span><span class=o>::</span><span class=n>Status</span> <span class=n>status</span> <span class=o>=</span> <span class=n>db_</span><span class=o>-&gt;</span><span class=n>Write</span><span class=p>(</span><span class=n>leveldb</span><span class=o>::</span><span class=n>WriteOptions</span><span class=p>(),</span> <span class=o>&amp;</span><span class=n>batch_</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 40</span><span class=cl>    <span class=n>CHECK</span><span class=p>(</span><span class=n>status</span><span class=p>.</span><span class=n>ok</span><span class=p>())</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Failed to write batch to leveldb &#34;</span>
+</span></span><span class=line><span class=ln> 41</span><span class=cl>                       <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span> <span class=o>&lt;&lt;</span> <span class=n>status</span><span class=p>.</span><span class=n>ToString</span><span class=p>();</span>
+</span></span><span class=line><span class=ln> 42</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln> 43</span><span class=cl>
+</span></span><span class=line><span class=ln> 44</span><span class=cl> <span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=ln> 45</span><span class=cl>  <span class=n>leveldb</span><span class=o>::</span><span class=n>DB</span><span class=o>*</span> <span class=n>db_</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 46</span><span class=cl>  <span class=n>leveldb</span><span class=o>::</span><span class=n>WriteBatch</span> <span class=n>batch_</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 47</span><span class=cl>
+</span></span><span class=line><span class=ln> 48</span><span class=cl>  <span class=n>DISABLE_COPY_AND_ASSIGN</span><span class=p>(</span><span class=n>LevelDBTransaction</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 49</span><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=ln> 50</span><span class=cl>
+</span></span><span class=line><span class=ln> 51</span><span class=cl><span class=k>class</span> <span class=nc>LevelDB</span> <span class=o>:</span> <span class=k>public</span> <span class=n>DB</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 52</span><span class=cl> <span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=ln> 53</span><span class=cl>  <span class=n>LevelDB</span><span class=p>()</span> <span class=o>:</span> <span class=n>db_</span><span class=p>(</span><span class=nb>NULL</span><span class=p>)</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 54</span><span class=cl>  <span class=k>virtual</span> <span class=o>~</span><span class=n>LevelDB</span><span class=p>()</span> <span class=p>{</span> <span class=n>Close</span><span class=p>();</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln> 55</span><span class=cl>  <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>Open</span><span class=p>(</span><span class=k>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>source</span><span class=p>,</span> <span class=n>Mode</span> <span class=n>mode</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 56</span><span class=cl>  <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>Close</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 57</span><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>db_</span> <span class=o>!=</span> <span class=nb>NULL</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 58</span><span class=cl>      <span class=k>delete</span> <span class=n>db_</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 59</span><span class=cl>      <span class=n>db_</span> <span class=o>=</span> <span class=nb>NULL</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 60</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln> 61</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln> 62</span><span class=cl>  <span class=k>virtual</span> <span class=n>LevelDBCursor</span><span class=o>*</span> <span class=nf>NewCursor</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 63</span><span class=cl>    <span class=k>return</span> <span class=k>new</span> <span class=n>LevelDBCursor</span><span class=p>(</span><span class=n>db_</span><span class=o>-&gt;</span><span class=n>NewIterator</span><span class=p>(</span><span class=n>leveldb</span><span class=o>::</span><span class=n>ReadOptions</span><span class=p>()));</span>
+</span></span><span class=line><span class=ln> 64</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln> 65</span><span class=cl>  <span class=k>virtual</span> <span class=n>LevelDBTransaction</span><span class=o>*</span> <span class=nf>NewTransaction</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 66</span><span class=cl>    <span class=k>return</span> <span class=k>new</span> <span class=n>LevelDBTransaction</span><span class=p>(</span><span class=n>db_</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 67</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln> 68</span><span class=cl>
+</span></span><span class=line><span class=ln> 69</span><span class=cl> <span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=ln> 70</span><span class=cl>  <span class=n>leveldb</span><span class=o>::</span><span class=n>DB</span><span class=o>*</span> <span class=n>db_</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 71</span><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=ln> 72</span><span class=cl>
+</span></span><span class=line><span class=ln> 73</span><span class=cl>
+</span></span><span class=line><span class=ln> 74</span><span class=cl><span class=p>}</span>  <span class=c1>// namespace db
+</span></span></span><span class=line><span class=ln> 75</span><span class=cl><span class=c1></span><span class=p>}</span>  <span class=c1>// namespace caffe
+</span></span></span><span class=line><span class=ln> 76</span><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=ln> 77</span><span class=cl><span class=cp>#endif  </span><span class=c1>// CAFFE_UTIL_DB_LEVELDB_HPP
+</span></span></span><span class=line><span class=ln> 78</span><span class=cl><span class=c1></span><span class=cp>#endif  </span><span class=c1>// USE_LEVELDB
+</span></span></span><span class=line><span class=ln> 79</span><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=ln> 80</span><span class=cl>
+</span></span><span class=line><span class=ln> 81</span><span class=cl>
+</span></span><span class=line><span class=ln> 82</span><span class=cl>
+</span></span><span class=line><span class=ln> 83</span><span class=cl>
+</span></span><span class=line><span class=ln> 84</span><span class=cl>
+</span></span><span class=line><span class=ln> 85</span><span class=cl><span class=cp>#ifndef CAFFE_UTIL_DB_HPP
+</span></span></span><span class=line><span class=ln> 86</span><span class=cl><span class=cp>#define CAFFE_UTIL_DB_HPP
+</span></span></span><span class=line><span class=ln> 87</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln> 88</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;string&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 89</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln> 90</span><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;caffe/common.hpp&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 91</span><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;caffe/proto/caffe.pb.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 92</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln> 93</span><span class=cl><span class=k>namespace</span> <span class=n>caffe</span> <span class=p>{</span> <span class=k>namespace</span> <span class=n>db</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 94</span><span class=cl>
+</span></span><span class=line><span class=ln> 95</span><span class=cl><span class=k>enum</span> <span class=nc>Mode</span> <span class=p>{</span> <span class=n>READ</span><span class=p>,</span> <span class=n>WRITE</span><span class=p>,</span> <span class=n>NEW</span> <span class=p>};</span>
+</span></span><span class=line><span class=ln> 96</span><span class=cl>
+</span></span><span class=line><span class=ln> 97</span><span class=cl><span class=k>class</span> <span class=nc>Cursor</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 98</span><span class=cl> <span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=ln> 99</span><span class=cl>  <span class=n>Cursor</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>100</span><span class=cl>  <span class=k>virtual</span> <span class=o>~</span><span class=n>Cursor</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>101</span><span class=cl>  <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>SeekToFirst</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>102</span><span class=cl>  <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>Next</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>103</span><span class=cl>  <span class=k>virtual</span> <span class=n>string</span> <span class=nf>key</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>104</span><span class=cl>  <span class=k>virtual</span> <span class=n>string</span> <span class=nf>value</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>105</span><span class=cl>  <span class=k>virtual</span> <span class=kt>bool</span> <span class=nf>valid</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>106</span><span class=cl>
+</span></span><span class=line><span class=ln>107</span><span class=cl>  <span class=n>DISABLE_COPY_AND_ASSIGN</span><span class=p>(</span><span class=n>Cursor</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>108</span><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=ln>109</span><span class=cl>
+</span></span><span class=line><span class=ln>110</span><span class=cl><span class=k>class</span> <span class=nc>Transaction</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>111</span><span class=cl> <span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=ln>112</span><span class=cl>  <span class=n>Transaction</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>113</span><span class=cl>  <span class=k>virtual</span> <span class=o>~</span><span class=n>Transaction</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>114</span><span class=cl>  <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>Put</span><span class=p>(</span><span class=k>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>key</span><span class=p>,</span> <span class=k>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>value</span><span class=p>)</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>115</span><span class=cl>  <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>Commit</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>116</span><span class=cl>
+</span></span><span class=line><span class=ln>117</span><span class=cl>  <span class=n>DISABLE_COPY_AND_ASSIGN</span><span class=p>(</span><span class=n>Transaction</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>118</span><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=ln>119</span><span class=cl>
+</span></span><span class=line><span class=ln>120</span><span class=cl><span class=k>class</span> <span class=nc>DB</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>121</span><span class=cl> <span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=ln>122</span><span class=cl>  <span class=n>DB</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>123</span><span class=cl>  <span class=k>virtual</span> <span class=o>~</span><span class=n>DB</span><span class=p>()</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=ln>124</span><span class=cl>  <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>Open</span><span class=p>(</span><span class=k>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>source</span><span class=p>,</span> <span class=n>Mode</span> <span class=n>mode</span><span class=p>)</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>125</span><span class=cl>  <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>Close</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>126</span><span class=cl>  <span class=k>virtual</span> <span class=n>Cursor</span><span class=o>*</span> <span class=nf>NewCursor</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>127</span><span class=cl>  <span class=k>virtual</span> <span class=n>Transaction</span><span class=o>*</span> <span class=nf>NewTransaction</span><span class=p>()</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>128</span><span class=cl>
+</span></span><span class=line><span class=ln>129</span><span class=cl>  <span class=n>DISABLE_COPY_AND_ASSIGN</span><span class=p>(</span><span class=n>DB</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>130</span><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=ln>131</span><span class=cl>
+</span></span><span class=line><span class=ln>132</span><span class=cl><span class=n>DB</span><span class=o>*</span> <span class=nf>GetDB</span><span class=p>(</span><span class=n>DataParameter</span><span class=o>::</span><span class=n>DB</span> <span class=n>backend</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>133</span><span class=cl><span class=n>DB</span><span class=o>*</span> <span class=nf>GetDB</span><span class=p>(</span><span class=k>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>backend</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>134</span><span class=cl>
+</span></span><span class=line><span class=ln>135</span><span class=cl><span class=p>}</span>  <span class=c1>// namespace db
+</span></span></span><span class=line><span class=ln>136</span><span class=cl><span class=c1></span><span class=p>}</span>  <span class=c1>// namespace caffe
+</span></span></span><span class=line><span class=ln>137</span><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=ln>138</span><span class=cl><span class=cp>#endif  </span><span class=c1>// CAFFE_UTIL_DB_HPP
+</span></span></span><span class=line><span class=ln>139</span><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=ln>140</span><span class=cl>
+</span></span><span class=line><span class=ln>141</span><span class=cl>
+</span></span><span class=line><span class=ln>142</span><span class=cl>
+</span></span><span class=line><span class=ln>143</span><span class=cl>
+</span></span><span class=line><span class=ln>144</span><span class=cl>
+</span></span><span class=line><span class=ln>145</span><span class=cl><span class=cp>#ifdef USE_LEVELDB
+</span></span></span><span class=line><span class=ln>146</span><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;caffe/util/db_leveldb.hpp&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>147</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln>148</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;string&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>149</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln>150</span><span class=cl><span class=k>namespace</span> <span class=n>caffe</span> <span class=p>{</span> <span class=k>namespace</span> <span class=n>db</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>151</span><span class=cl>
+</span></span><span class=line><span class=ln>152</span><span class=cl><span class=kt>void</span> <span class=n>LevelDB</span><span class=o>::</span><span class=n>Open</span><span class=p>(</span><span class=k>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>source</span><span class=p>,</span> <span class=n>Mode</span> <span class=n>mode</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>153</span><span class=cl>  <span class=n>leveldb</span><span class=o>::</span><span class=n>Options</span> <span class=n>options</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>154</span><span class=cl>  <span class=n>options</span><span class=p>.</span><span class=n>block_size</span> <span class=o>=</span> <span class=mi>65536</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>155</span><span class=cl>  <span class=n>options</span><span class=p>.</span><span class=n>write_buffer_size</span> <span class=o>=</span> <span class=mi>268435456</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>156</span><span class=cl>  <span class=n>options</span><span class=p>.</span><span class=n>max_open_files</span> <span class=o>=</span> <span class=mi>100</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>157</span><span class=cl>  <span class=n>options</span><span class=p>.</span><span class=n>error_if_exists</span> <span class=o>=</span> <span class=n>mode</span> <span class=o>==</span> <span class=n>NEW</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>158</span><span class=cl>  <span class=n>options</span><span class=p>.</span><span class=n>create_if_missing</span> <span class=o>=</span> <span class=n>mode</span> <span class=o>!=</span> <span class=n>READ</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>159</span><span class=cl>  <span class=n>leveldb</span><span class=o>::</span><span class=n>Status</span> <span class=n>status</span> <span class=o>=</span> <span class=n>leveldb</span><span class=o>::</span><span class=n>DB</span><span class=o>::</span><span class=n>Open</span><span class=p>(</span><span class=n>options</span><span class=p>,</span> <span class=n>source</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>db_</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>160</span><span class=cl>  <span class=n>CHECK</span><span class=p>(</span><span class=n>status</span><span class=p>.</span><span class=n>ok</span><span class=p>())</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Failed to open leveldb &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>source</span>
+</span></span><span class=line><span class=ln>161</span><span class=cl>                     <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span> <span class=o>&lt;&lt;</span> <span class=n>status</span><span class=p>.</span><span class=n>ToString</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>162</span><span class=cl>  <span class=n>LOG</span><span class=p>(</span><span class=n>INFO</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Opened leveldb &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>source</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>163</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>164</span><span class=cl>
+</span></span><span class=line><span class=ln>165</span><span class=cl><span class=p>}</span>  <span class=c1>// namespace db
+</span></span></span><span class=line><span class=ln>166</span><span class=cl><span class=c1></span><span class=p>}</span>  <span class=c1>// namespace caffe
+</span></span></span><span class=line><span class=ln>167</span><span class=cl><span class=c1></span><span class=cp>#endif  </span><span class=c1>// USE_LEVELDB
+</span></span></span><span class=line><span class=ln>168</span><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=ln>169</span><span class=cl>
+</span></span><span class=line><span class=ln>170</span><span class=cl>
+</span></span><span class=line><span class=ln>171</span><span class=cl>
+</span></span><span class=line><span class=ln>172</span><span class=cl>
+</span></span><span class=line><span class=ln>173</span><span class=cl>
+</span></span><span class=line><span class=ln>174</span><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;caffe/util/db.hpp&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>175</span><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;caffe/util/db_leveldb.hpp&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>176</span><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;caffe/util/db_lmdb.hpp&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>177</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln>178</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;string&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>179</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln>180</span><span class=cl><span class=k>namespace</span> <span class=n>caffe</span> <span class=p>{</span> <span class=k>namespace</span> <span class=n>db</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>181</span><span class=cl>
+</span></span><span class=line><span class=ln>182</span><span class=cl><span class=n>DB</span><span class=o>*</span> <span class=nf>GetDB</span><span class=p>(</span><span class=n>DataParameter</span><span class=o>::</span><span class=n>DB</span> <span class=n>backend</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>183</span><span class=cl>  <span class=k>switch</span> <span class=p>(</span><span class=n>backend</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>184</span><span class=cl><span class=cp>#ifdef USE_LEVELDB
+</span></span></span><span class=line><span class=ln>185</span><span class=cl><span class=cp></span>  <span class=k>case</span> <span class=nl>DataParameter_DB_LEVELDB</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>186</span><span class=cl>    <span class=k>return</span> <span class=k>new</span> <span class=n>LevelDB</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>187</span><span class=cl><span class=cp>#endif  </span><span class=c1>// USE_LEVELDB
+</span></span></span><span class=line><span class=ln>188</span><span class=cl><span class=c1></span><span class=cp>#ifdef USE_LMDB
+</span></span></span><span class=line><span class=ln>189</span><span class=cl><span class=cp></span>  <span class=k>case</span> <span class=nl>DataParameter_DB_LMDB</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>190</span><span class=cl>    <span class=k>return</span> <span class=k>new</span> <span class=n>LMDB</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>191</span><span class=cl><span class=cp>#endif  </span><span class=c1>// USE_LMDB
+</span></span></span><span class=line><span class=ln>192</span><span class=cl><span class=c1></span>  <span class=k>default</span><span class=o>:</span>
+</span></span><span class=line><span class=ln>193</span><span class=cl>    <span class=n>LOG</span><span class=p>(</span><span class=n>FATAL</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Unknown database backend&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>194</span><span class=cl>    <span class=k>return</span> <span class=nb>NULL</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>195</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>196</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>197</span><span class=cl>
+</span></span><span class=line><span class=ln>198</span><span class=cl><span class=n>DB</span><span class=o>*</span> <span class=nf>GetDB</span><span class=p>(</span><span class=k>const</span> <span class=n>string</span><span class=o>&amp;</span> <span class=n>backend</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>199</span><span class=cl><span class=cp>#ifdef USE_LEVELDB
+</span></span></span><span class=line><span class=ln>200</span><span class=cl><span class=cp></span>  <span class=k>if</span> <span class=p>(</span><span class=n>backend</span> <span class=o>==</span> <span class=s>&#34;leveldb&#34;</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>201</span><span class=cl>    <span class=k>return</span> <span class=k>new</span> <span class=n>LevelDB</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>202</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>203</span><span class=cl><span class=cp>#endif  </span><span class=c1>// USE_LEVELDB
+</span></span></span><span class=line><span class=ln>204</span><span class=cl><span class=c1></span><span class=cp>#ifdef USE_LMDB
+</span></span></span><span class=line><span class=ln>205</span><span class=cl><span class=cp></span>  <span class=k>if</span> <span class=p>(</span><span class=n>backend</span> <span class=o>==</span> <span class=s>&#34;lmdb&#34;</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>206</span><span class=cl>    <span class=k>return</span> <span class=k>new</span> <span class=n>LMDB</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>207</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>208</span><span class=cl><span class=cp>#endif  </span><span class=c1>// USE_LMDB
+</span></span></span><span class=line><span class=ln>209</span><span class=cl><span class=c1></span>  <span class=n>LOG</span><span class=p>(</span><span class=n>FATAL</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Unknown database backend&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>210</span><span class=cl>  <span class=k>return</span> <span class=nb>NULL</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>211</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>212</span><span class=cl>
+</span></span><span class=line><span class=ln>213</span><span class=cl><span class=p>}</span>  <span class=c1>// namespace db
+</span></span></span><span class=line><span class=ln>214</span><span class=cl><span class=c1></span><span class=p>}</span>  <span class=c1>// namespace caffe
+</span></span></span><span class=line><span class=ln>215</span><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=ln>216</span><span class=cl>
+</span></span><span class=line><span class=ln>217</span><span class=cl>
+</span></span><span class=line><span class=ln>218</span><span class=cl>
+</span></span><span class=line><span class=ln>219</span><span class=cl>
+</span></span><span class=line><span class=ln>220</span><span class=cl><span class=c1>// This program converts a set of images to a lmdb/leveldb by storing them
+</span></span></span><span class=line><span class=ln>221</span><span class=cl><span class=c1>// as Datum proto buffers.
+</span></span></span><span class=line><span class=ln>222</span><span class=cl><span class=c1>// Usage:
+</span></span></span><span class=line><span class=ln>223</span><span class=cl><span class=c1>//   convert_imageset [FLAGS] ROOTFOLDER/ LISTFILE DB_NAME
+</span></span></span><span class=line><span class=ln>224</span><span class=cl><span class=c1>//
+</span></span></span><span class=line><span class=ln>225</span><span class=cl><span class=c1>// where ROOTFOLDER is the root folder that holds all the images, and LISTFILE
+</span></span></span><span class=line><span class=ln>226</span><span class=cl><span class=c1>// should be a list of files as well as their labels, in the format as
+</span></span></span><span class=line><span class=ln>227</span><span class=cl><span class=c1>//   subfolder1/file1.JPEG 7
+</span></span></span><span class=line><span class=ln>228</span><span class=cl><span class=c1>//   ....
+</span></span></span><span class=line><span class=ln>229</span><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=ln>230</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;algorithm&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>231</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;fstream&gt;</span><span class=cp>  </span><span class=c1>// NOLINT(readability/streams)
+</span></span></span><span class=line><span class=ln>232</span><span class=cl><span class=c1></span><span class=cp>#include</span> <span class=cpf>&lt;string&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>233</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;utility&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>234</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;vector&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>235</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln>236</span><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;boost/scoped_ptr.hpp&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>237</span><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;gflags/gflags.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>238</span><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;glog/logging.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>239</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln>240</span><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;caffe/proto/caffe.pb.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>241</span><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;caffe/util/db.hpp&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>242</span><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;caffe/util/format.hpp&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>243</span><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;caffe/util/io.hpp&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>244</span><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;caffe/util/rng.hpp&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=ln>245</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln>246</span><span class=cl><span class=k>using</span> <span class=k>namespace</span> <span class=n>caffe</span><span class=p>;</span>  <span class=c1>// NOLINT(build/namespaces)
+</span></span></span><span class=line><span class=ln>247</span><span class=cl><span class=c1></span><span class=k>using</span> <span class=n>std</span><span class=o>::</span><span class=n>pair</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>248</span><span class=cl><span class=k>using</span> <span class=n>boost</span><span class=o>::</span><span class=n>scoped_ptr</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>249</span><span class=cl>
+</span></span><span class=line><span class=ln>250</span><span class=cl><span class=n>DEFINE_bool</span><span class=p>(</span><span class=n>gray</span><span class=p>,</span> <span class=nb>false</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>251</span><span class=cl>    <span class=s>&#34;When this option is on, treat images as grayscale ones&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>252</span><span class=cl><span class=n>DEFINE_bool</span><span class=p>(</span><span class=n>shuffle</span><span class=p>,</span> <span class=nb>false</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>253</span><span class=cl>    <span class=s>&#34;Randomly shuffle the order of images and their labels&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>254</span><span class=cl><span class=n>DEFINE_string</span><span class=p>(</span><span class=n>backend</span><span class=p>,</span> <span class=s>&#34;lmdb&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>255</span><span class=cl>        <span class=s>&#34;The backend {lmdb, leveldb} for storing the result&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>256</span><span class=cl><span class=n>DEFINE_int32</span><span class=p>(</span><span class=n>resize_width</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=s>&#34;Width images are resized to&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>257</span><span class=cl><span class=n>DEFINE_int32</span><span class=p>(</span><span class=n>resize_height</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=s>&#34;Height images are resized to&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>258</span><span class=cl><span class=n>DEFINE_bool</span><span class=p>(</span><span class=n>check_size</span><span class=p>,</span> <span class=nb>false</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>259</span><span class=cl>    <span class=s>&#34;When this option is on, check that all the datum have the same size&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>260</span><span class=cl><span class=n>DEFINE_bool</span><span class=p>(</span><span class=n>encoded</span><span class=p>,</span> <span class=nb>false</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>261</span><span class=cl>    <span class=s>&#34;When this option is on, the encoded image will be save in datum&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>262</span><span class=cl><span class=n>DEFINE_string</span><span class=p>(</span><span class=n>encode_type</span><span class=p>,</span> <span class=s>&#34;&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>263</span><span class=cl>    <span class=s>&#34;Optional: What type should we encode the image as (&#39;png&#39;,&#39;jpg&#39;,...).&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>264</span><span class=cl>
+</span></span><span class=line><span class=ln>265</span><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>(</span><span class=kt>int</span> <span class=n>argc</span><span class=p>,</span> <span class=kt>char</span><span class=o>**</span> <span class=n>argv</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>266</span><span class=cl><span class=cp>#ifdef USE_OPENCV
+</span></span></span><span class=line><span class=ln>267</span><span class=cl><span class=cp></span>  <span class=o>::</span><span class=n>google</span><span class=o>::</span><span class=n>InitGoogleLogging</span><span class=p>(</span><span class=n>argv</span><span class=p>[</span><span class=mi>0</span><span class=p>]);</span>
+</span></span><span class=line><span class=ln>268</span><span class=cl>  <span class=c1>// Print output to stderr (while still logging)
+</span></span></span><span class=line><span class=ln>269</span><span class=cl><span class=c1></span>  <span class=n>FLAGS_alsologtostderr</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>270</span><span class=cl>
+</span></span><span class=line><span class=ln>271</span><span class=cl><span class=cp>#ifndef GFLAGS_GFLAGS_H_
+</span></span></span><span class=line><span class=ln>272</span><span class=cl><span class=cp></span>  <span class=k>namespace</span> <span class=n>gflags</span> <span class=o>=</span> <span class=n>google</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>273</span><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=ln>274</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln>275</span><span class=cl>  <span class=n>gflags</span><span class=o>::</span><span class=n>SetUsageMessage</span><span class=p>(</span><span class=s>&#34;Convert a set of images to the leveldb/lmdb</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=ln>276</span><span class=cl>        <span class=s>&#34;format used as input for Caffe.</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=ln>277</span><span class=cl>        <span class=s>&#34;Usage:</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=ln>278</span><span class=cl>        <span class=s>&#34;    convert_imageset [FLAGS] ROOTFOLDER/ LISTFILE DB_NAME</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=ln>279</span><span class=cl>        <span class=s>&#34;The ImageNet dataset for the training demo is at</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=ln>280</span><span class=cl>        <span class=s>&#34;    http://www.image-net.org/download-images</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>281</span><span class=cl>  <span class=n>gflags</span><span class=o>::</span><span class=n>ParseCommandLineFlags</span><span class=p>(</span><span class=o>&amp;</span><span class=n>argc</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>argv</span><span class=p>,</span> <span class=nb>true</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>282</span><span class=cl>
+</span></span><span class=line><span class=ln>283</span><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>argc</span> <span class=o>&lt;</span> <span class=mi>4</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>284</span><span class=cl>    <span class=n>gflags</span><span class=o>::</span><span class=n>ShowUsageWithFlagsRestrict</span><span class=p>(</span><span class=n>argv</span><span class=p>[</span><span class=mi>0</span><span class=p>],</span> <span class=s>&#34;tools/convert_imageset&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>285</span><span class=cl>    <span class=k>return</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>286</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>287</span><span class=cl>
+</span></span><span class=line><span class=ln>288</span><span class=cl>  <span class=k>const</span> <span class=kt>bool</span> <span class=n>is_color</span> <span class=o>=</span> <span class=o>!</span><span class=n>FLAGS_gray</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>289</span><span class=cl>  <span class=k>const</span> <span class=kt>bool</span> <span class=n>check_size</span> <span class=o>=</span> <span class=n>FLAGS_check_size</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>290</span><span class=cl>  <span class=k>const</span> <span class=kt>bool</span> <span class=n>encoded</span> <span class=o>=</span> <span class=n>FLAGS_encoded</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>291</span><span class=cl>  <span class=k>const</span> <span class=n>string</span> <span class=n>encode_type</span> <span class=o>=</span> <span class=n>FLAGS_encode_type</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>292</span><span class=cl>
+</span></span><span class=line><span class=ln>293</span><span class=cl>  <span class=n>std</span><span class=o>::</span><span class=n>ifstream</span> <span class=n>infile</span><span class=p>(</span><span class=n>argv</span><span class=p>[</span><span class=mi>2</span><span class=p>]);</span>
+</span></span><span class=line><span class=ln>294</span><span class=cl>  <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>pair</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=p>,</span> <span class=kt>int</span><span class=o>&gt;</span> <span class=o>&gt;</span> <span class=n>lines</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>295</span><span class=cl>  <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>line</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>296</span><span class=cl>  <span class=n>size_t</span> <span class=n>pos</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>297</span><span class=cl>  <span class=kt>int</span> <span class=n>label</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>298</span><span class=cl>  <span class=k>while</span> <span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>getline</span><span class=p>(</span><span class=n>infile</span><span class=p>,</span> <span class=n>line</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>299</span><span class=cl>    <span class=n>pos</span> <span class=o>=</span> <span class=n>line</span><span class=p>.</span><span class=n>find_last_of</span><span class=p>(</span><span class=sc>&#39; &#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>300</span><span class=cl>    <span class=n>label</span> <span class=o>=</span> <span class=n>atoi</span><span class=p>(</span><span class=n>line</span><span class=p>.</span><span class=n>substr</span><span class=p>(</span><span class=n>pos</span> <span class=o>+</span> <span class=mi>1</span><span class=p>).</span><span class=n>c_str</span><span class=p>());</span>
+</span></span><span class=line><span class=ln>301</span><span class=cl>    <span class=n>lines</span><span class=p>.</span><span class=n>push_back</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>make_pair</span><span class=p>(</span><span class=n>line</span><span class=p>.</span><span class=n>substr</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=n>pos</span><span class=p>),</span> <span class=n>label</span><span class=p>));</span>
+</span></span><span class=line><span class=ln>302</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>303</span><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>FLAGS_shuffle</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>304</span><span class=cl>    <span class=c1>// randomly shuffle data
+</span></span></span><span class=line><span class=ln>305</span><span class=cl><span class=c1></span>    <span class=n>LOG</span><span class=p>(</span><span class=n>INFO</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Shuffling data&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>306</span><span class=cl>    <span class=n>shuffle</span><span class=p>(</span><span class=n>lines</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span> <span class=n>lines</span><span class=p>.</span><span class=n>end</span><span class=p>());</span>
+</span></span><span class=line><span class=ln>307</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>308</span><span class=cl>  <span class=n>LOG</span><span class=p>(</span><span class=n>INFO</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;A total of &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>lines</span><span class=p>.</span><span class=n>size</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=s>&#34; images.&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>309</span><span class=cl>
+</span></span><span class=line><span class=ln>310</span><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>encode_type</span><span class=p>.</span><span class=n>size</span><span class=p>()</span> <span class=o>&amp;&amp;</span> <span class=o>!</span><span class=n>encoded</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>311</span><span class=cl>    <span class=n>LOG</span><span class=p>(</span><span class=n>INFO</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;encode_type specified, assuming encoded=true.&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>312</span><span class=cl>
+</span></span><span class=line><span class=ln>313</span><span class=cl>  <span class=kt>int</span> <span class=n>resize_height</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>max</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=n>FLAGS_resize_height</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>314</span><span class=cl>  <span class=kt>int</span> <span class=n>resize_width</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>max</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=n>FLAGS_resize_width</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>315</span><span class=cl>
+</span></span><span class=line><span class=ln>316</span><span class=cl>  <span class=c1>// Create new DB
+</span></span></span><span class=line><span class=ln>317</span><span class=cl><span class=c1></span>  <span class=n>scoped_ptr</span><span class=o>&lt;</span><span class=n>db</span><span class=o>::</span><span class=n>DB</span><span class=o>&gt;</span> <span class=n>db</span><span class=p>(</span><span class=n>db</span><span class=o>::</span><span class=n>GetDB</span><span class=p>(</span><span class=n>FLAGS_backend</span><span class=p>));</span>
+</span></span><span class=line><span class=ln>318</span><span class=cl>  <span class=n>db</span><span class=o>-&gt;</span><span class=n>Open</span><span class=p>(</span><span class=n>argv</span><span class=p>[</span><span class=mi>3</span><span class=p>],</span> <span class=n>db</span><span class=o>::</span><span class=n>NEW</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>319</span><span class=cl>  <span class=n>scoped_ptr</span><span class=o>&lt;</span><span class=n>db</span><span class=o>::</span><span class=n>Transaction</span><span class=o>&gt;</span> <span class=n>txn</span><span class=p>(</span><span class=n>db</span><span class=o>-&gt;</span><span class=n>NewTransaction</span><span class=p>());</span>
+</span></span><span class=line><span class=ln>320</span><span class=cl>
+</span></span><span class=line><span class=ln>321</span><span class=cl>  <span class=c1>// Storing to db
+</span></span></span><span class=line><span class=ln>322</span><span class=cl><span class=c1></span>  <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>root_folder</span><span class=p>(</span><span class=n>argv</span><span class=p>[</span><span class=mi>1</span><span class=p>]);</span>
+</span></span><span class=line><span class=ln>323</span><span class=cl>  <span class=n>Datum</span> <span class=n>datum</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>324</span><span class=cl>  <span class=kt>int</span> <span class=n>count</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>325</span><span class=cl>  <span class=kt>int</span> <span class=n>data_size</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>326</span><span class=cl>  <span class=kt>bool</span> <span class=n>data_size_initialized</span> <span class=o>=</span> <span class=nb>false</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>327</span><span class=cl>
+</span></span><span class=line><span class=ln>328</span><span class=cl>  <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>line_id</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>line_id</span> <span class=o>&lt;</span> <span class=n>lines</span><span class=p>.</span><span class=n>size</span><span class=p>();</span> <span class=o>++</span><span class=n>line_id</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>329</span><span class=cl>    <span class=kt>bool</span> <span class=n>status</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>330</span><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>enc</span> <span class=o>=</span> <span class=n>encode_type</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>331</span><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>encoded</span> <span class=o>&amp;&amp;</span> <span class=o>!</span><span class=n>enc</span><span class=p>.</span><span class=n>size</span><span class=p>())</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>332</span><span class=cl>      <span class=c1>// Guess the encoding type from the file name
+</span></span></span><span class=line><span class=ln>333</span><span class=cl><span class=c1></span>      <span class=n>string</span> <span class=n>fn</span> <span class=o>=</span> <span class=n>lines</span><span class=p>[</span><span class=n>line_id</span><span class=p>].</span><span class=n>first</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>334</span><span class=cl>      <span class=n>size_t</span> <span class=n>p</span> <span class=o>=</span> <span class=n>fn</span><span class=p>.</span><span class=n>rfind</span><span class=p>(</span><span class=sc>&#39;.&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>335</span><span class=cl>      <span class=k>if</span> <span class=p>(</span> <span class=n>p</span> <span class=o>==</span> <span class=n>fn</span><span class=p>.</span><span class=n>npos</span> <span class=p>)</span>
+</span></span><span class=line><span class=ln>336</span><span class=cl>        <span class=n>LOG</span><span class=p>(</span><span class=n>WARNING</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Failed to guess the encoding of &#39;&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>fn</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;&#39;&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>337</span><span class=cl>      <span class=n>enc</span> <span class=o>=</span> <span class=n>fn</span><span class=p>.</span><span class=n>substr</span><span class=p>(</span><span class=n>p</span><span class=o>+</span><span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>338</span><span class=cl>      <span class=n>std</span><span class=o>::</span><span class=n>transform</span><span class=p>(</span><span class=n>enc</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span> <span class=n>enc</span><span class=p>.</span><span class=n>end</span><span class=p>(),</span> <span class=n>enc</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span> <span class=o>::</span><span class=n>tolower</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>339</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>340</span><span class=cl>    <span class=n>status</span> <span class=o>=</span> <span class=n>ReadImageToDatum</span><span class=p>(</span><span class=n>root_folder</span> <span class=o>+</span> <span class=n>lines</span><span class=p>[</span><span class=n>line_id</span><span class=p>].</span><span class=n>first</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>341</span><span class=cl>        <span class=n>lines</span><span class=p>[</span><span class=n>line_id</span><span class=p>].</span><span class=n>second</span><span class=p>,</span> <span class=n>resize_height</span><span class=p>,</span> <span class=n>resize_width</span><span class=p>,</span> <span class=n>is_color</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>342</span><span class=cl>        <span class=n>enc</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>datum</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>343</span><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>status</span> <span class=o>==</span> <span class=nb>false</span><span class=p>)</span> <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>344</span><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>check_size</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>345</span><span class=cl>      <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>data_size_initialized</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>346</span><span class=cl>        <span class=n>data_size</span> <span class=o>=</span> <span class=n>datum</span><span class=p>.</span><span class=n>channels</span><span class=p>()</span> <span class=o>*</span> <span class=n>datum</span><span class=p>.</span><span class=n>height</span><span class=p>()</span> <span class=o>*</span> <span class=n>datum</span><span class=p>.</span><span class=n>width</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>347</span><span class=cl>        <span class=n>data_size_initialized</span> <span class=o>=</span> <span class=nb>true</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>348</span><span class=cl>      <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>349</span><span class=cl>        <span class=k>const</span> <span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=o>&amp;</span> <span class=n>data</span> <span class=o>=</span> <span class=n>datum</span><span class=p>.</span><span class=n>data</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>350</span><span class=cl>        <span class=n>CHECK_EQ</span><span class=p>(</span><span class=n>data</span><span class=p>.</span><span class=n>size</span><span class=p>(),</span> <span class=n>data_size</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Incorrect data field size &#34;</span>
+</span></span><span class=line><span class=ln>351</span><span class=cl>            <span class=o>&lt;&lt;</span> <span class=n>data</span><span class=p>.</span><span class=n>size</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>352</span><span class=cl>      <span class=p>}</span>
+</span></span><span class=line><span class=ln>353</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>354</span><span class=cl>    <span class=c1>// sequential
+</span></span></span><span class=line><span class=ln>355</span><span class=cl><span class=c1></span>    <span class=n>string</span> <span class=n>key_str</span> <span class=o>=</span> <span class=n>caffe</span><span class=o>::</span><span class=n>format_int</span><span class=p>(</span><span class=n>line_id</span><span class=p>,</span> <span class=mi>8</span><span class=p>)</span> <span class=o>+</span> <span class=s>&#34;_&#34;</span> <span class=o>+</span> <span class=n>lines</span><span class=p>[</span><span class=n>line_id</span><span class=p>].</span><span class=n>first</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>356</span><span class=cl>
+</span></span><span class=line><span class=ln>357</span><span class=cl>    <span class=c1>// Put in db
+</span></span></span><span class=line><span class=ln>358</span><span class=cl><span class=c1></span>    <span class=n>string</span> <span class=n>out</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>359</span><span class=cl>    <span class=n>CHECK</span><span class=p>(</span><span class=n>datum</span><span class=p>.</span><span class=n>SerializeToString</span><span class=p>(</span><span class=o>&amp;</span><span class=n>out</span><span class=p>));</span>
+</span></span><span class=line><span class=ln>360</span><span class=cl>    <span class=n>txn</span><span class=o>-&gt;</span><span class=n>Put</span><span class=p>(</span><span class=n>key_str</span><span class=p>,</span> <span class=n>out</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>361</span><span class=cl>
+</span></span><span class=line><span class=ln>362</span><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=o>++</span><span class=n>count</span> <span class=o>%</span> <span class=mi>1000</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>363</span><span class=cl>      <span class=c1>// Commit db
+</span></span></span><span class=line><span class=ln>364</span><span class=cl><span class=c1></span>      <span class=n>txn</span><span class=o>-&gt;</span><span class=n>Commit</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>365</span><span class=cl>      <span class=n>txn</span><span class=p>.</span><span class=n>reset</span><span class=p>(</span><span class=n>db</span><span class=o>-&gt;</span><span class=n>NewTransaction</span><span class=p>());</span>
+</span></span><span class=line><span class=ln>366</span><span class=cl>      <span class=n>LOG</span><span class=p>(</span><span class=n>INFO</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Processed &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>count</span> <span class=o>&lt;&lt;</span> <span class=s>&#34; files.&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>367</span><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=ln>368</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>369</span><span class=cl>  <span class=c1>// write the last batch
+</span></span></span><span class=line><span class=ln>370</span><span class=cl><span class=c1></span>  <span class=k>if</span> <span class=p>(</span><span class=n>count</span> <span class=o>%</span> <span class=mi>1000</span> <span class=o>!=</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>371</span><span class=cl>    <span class=n>txn</span><span class=o>-&gt;</span><span class=n>Commit</span><span class=p>();</span>
+</span></span><span class=line><span class=ln>372</span><span class=cl>    <span class=n>LOG</span><span class=p>(</span><span class=n>INFO</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;Processed &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>count</span> <span class=o>&lt;&lt;</span> <span class=s>&#34; files.&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>373</span><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=ln>374</span><span class=cl><span class=cp>#else
+</span></span></span><span class=line><span class=ln>375</span><span class=cl><span class=cp></span>  <span class=n>LOG</span><span class=p>(</span><span class=n>FATAL</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;This tool requires OpenCV; compile with USE_OPENCV.&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>376</span><span class=cl><span class=cp>#endif  </span><span class=c1>// USE_OPENCV
+</span></span></span><span class=line><span class=ln>377</span><span class=cl><span class=c1></span>  <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>378</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>几个文件。。。感觉比看文档更有实际意义orz</p><h3 id=leveldb简介>levelDB简介</h3><p>Leveldb是google开源的一个高效率的K/V数据库.有如下特点：</p><pre><code>  1. 首先，LevelDb是一个持久化存储的KV系统，和Redis这种内存型的KV系统不同，LevelDb不会像Redis一样狂吃内存，而是将大部分数据存储到磁盘上。
   2. 其次，LevleDb在存储数据时，是根据记录的key值有序存储的，就是说相邻的key值在存储文件中是依次顺序存储的，而应用可以自定义key大小比较函数，LevleDb会按照用户定义的比较函数依序存储这些记录。
   3. 再次，像大多数KV系统一样，LevelDb的操作接口很简单，基本操作包括写记录，读记录以及删除记录。也支持针对多条操作的原子批量操作。
   4. 另外，LevelDb支持数据快照(snapshot)功能，使得读取操作不受写操作影响，可以在读操作过程中始终看到一致的数据。

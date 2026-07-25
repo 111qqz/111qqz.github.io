@@ -1,19 +1,23 @@
 <!doctype html><html lang=zh data-figures class=page><head><title>codeforces 123 D. String　（后缀数组+两次二分得到区间＋rmq） | 111qqz的小窝</title>
 <meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta http-equiv=X-UA-Compatible content="IE=edge"><script async src="https://www.googletagmanager.com/gtag/js?id=UA-219255388-1"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","UA-219255388-1")</script><meta property="og:locale" content="zh"><meta property="og:type" content="article"><meta name=description content="题目链接
 题意：定义一个函数F．．
-For exampe: _F_(_babbabbababbab_, _babb_) = 6. The list of pairs is as follows:
+
+For exampe: F(babbabbababbab, babb) = 6. The list of pairs is as follows:
 (1, 4), (4, 7), (9, 12)
 Its continuous sequences are:
   *
 
-(1, …"><meta name=twitter:card content="summary"><meta name=twitter:creator content><meta name=twitter:title content="codeforces 123 D. String　（后缀数组+两次二分得到区间＋rmq）"><meta property="og:url" content="https://111qqz.com/2016/08cf-123/"><meta property="og:title" content="codeforces 123 D. String　（后缀数组+两次二分得到区间＋rmq）"><meta property="og:description" content="题目链接
+
+(1, 4) …"><meta name=twitter:card content="summary"><meta name=twitter:creator content><meta name=twitter:title content="codeforces 123 D. String　（后缀数组+两次二分得到区间＋rmq）"><meta property="og:url" content="https://111qqz.com/2016/08cf-123/"><meta property="og:title" content="codeforces 123 D. String　（后缀数组+两次二分得到区间＋rmq）"><meta property="og:description" content="题目链接
 题意：定义一个函数F．．
-For exampe: _F_(_babbabbababbab_, _babb_) = 6. The list of pairs is as follows:
+
+For exampe: F(babbabbababbab, babb) = 6. The list of pairs is as follows:
 (1, 4), (4, 7), (9, 12)
 Its continuous sequences are:
   *
 
-(1, …"><meta property="og:image" content="https://111qqz.com/images/2.png"><link rel=apple-touch-icon sizes=180x180 href=https://111qqz.com/icons/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=https://111qqz.com/icons/favicon-32x32.png><link rel=manifest href=https://111qqz.com/icons/site.webmanifest><link rel=canonical href=https://111qqz.com/2016/08cf-123/><link rel=preload href=https://111qqz.com/css/styles.f143f2039d975cd60c5524f52c5fbb6dd2236d44d0d53d71b5cb6f6127d4fe8082960bbb71fe0345b5bab4119124e0b09c0b7d7f4238a9288afc02815d258f76.css integrity="sha512-8UPyA52XXNYMVST1LF+7bdIjbUTQ1T1xtctvYSfU/oCClgu7cf4DRbW6tBGRJOCwnAt9f0I4qSiK/AKBXSWPdg==" as=style crossorigin=anonymous><link rel=preload href=https://111qqz.com/js/bundle.min.bcaa4356b3671ffa6f41987d56e87dfd749683d23fd99a70769b5dda29225b669759d387454da9cdf0988ec4da70f274486671d24ab4dcea2ae987fe33bdc030.js as=script integrity="sha512-vKpDVrNnH/pvQZh9Vuh9/XSWg9I/2Zpwdptd2ikiW2aXWdOHRU2pzfCYjsTacPJ0SGZx0kq03Ooq6Yf+M73AMA==" crossorigin=anonymous><link rel=stylesheet type=text/css href=https://111qqz.com/css/styles.f143f2039d975cd60c5524f52c5fbb6dd2236d44d0d53d71b5cb6f6127d4fe8082960bbb71fe0345b5bab4119124e0b09c0b7d7f4238a9288afc02815d258f76.css integrity="sha512-8UPyA52XXNYMVST1LF+7bdIjbUTQ1T1xtctvYSfU/oCClgu7cf4DRbW6tBGRJOCwnAt9f0I4qSiK/AKBXSWPdg==" crossorigin=anonymous></head><body data-code=15 data-lines=true id=documentTop><header class=nav_header><nav class=nav><a href=https://111qqz.com/ class="nav_brand nav_item" title=111qqz的小窝><img src=https://111qqz.com/logos/logo.png class=logo alt=111qqz的小窝><div class=nav_close><div><svg class="icon"><use xlink:href="#open-menu"/></svg><svg class="icon"><use xlink:href="#closeme"/></svg></div></div></a><div class='nav_body nav_body_left'><div class=nav_parent><a href=https://111qqz.com/ class=nav_item title=Home>Home</a></div><div class=nav_parent><a href=https://111qqz.com/categories/acm/ class=nav_item title=ACM-ICPC>ACM-ICPC</a></div><div class=nav_parent><a href=https://111qqz.com/ class=nav_item title=深度学习>深度学习 <img src=https://111qqz.com/icons/caret-icon.svg alt=icon class=nav_icon></a><div class=nav_sub><span class=nav_child></span>
+
+(1, 4) …"><meta property="og:image" content="https://111qqz.com/images/2.png"><link rel=apple-touch-icon sizes=180x180 href=https://111qqz.com/icons/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=https://111qqz.com/icons/favicon-32x32.png><link rel=manifest href=https://111qqz.com/icons/site.webmanifest><link rel=canonical href=https://111qqz.com/2016/08cf-123/><link rel=preload href=https://111qqz.com/css/styles.f143f2039d975cd60c5524f52c5fbb6dd2236d44d0d53d71b5cb6f6127d4fe8082960bbb71fe0345b5bab4119124e0b09c0b7d7f4238a9288afc02815d258f76.css integrity="sha512-8UPyA52XXNYMVST1LF+7bdIjbUTQ1T1xtctvYSfU/oCClgu7cf4DRbW6tBGRJOCwnAt9f0I4qSiK/AKBXSWPdg==" as=style crossorigin=anonymous><link rel=preload href=https://111qqz.com/js/bundle.min.bcaa4356b3671ffa6f41987d56e87dfd749683d23fd99a70769b5dda29225b669759d387454da9cdf0988ec4da70f274486671d24ab4dcea2ae987fe33bdc030.js as=script integrity="sha512-vKpDVrNnH/pvQZh9Vuh9/XSWg9I/2Zpwdptd2ikiW2aXWdOHRU2pzfCYjsTacPJ0SGZx0kq03Ooq6Yf+M73AMA==" crossorigin=anonymous><link rel=stylesheet type=text/css href=https://111qqz.com/css/styles.f143f2039d975cd60c5524f52c5fbb6dd2236d44d0d53d71b5cb6f6127d4fe8082960bbb71fe0345b5bab4119124e0b09c0b7d7f4238a9288afc02815d258f76.css integrity="sha512-8UPyA52XXNYMVST1LF+7bdIjbUTQ1T1xtctvYSfU/oCClgu7cf4DRbW6tBGRJOCwnAt9f0I4qSiK/AKBXSWPdg==" crossorigin=anonymous></head><body data-code=15 data-lines=true id=documentTop><header class=nav_header><nav class=nav><a href=https://111qqz.com/ class="nav_brand nav_item" title=111qqz的小窝><img src=https://111qqz.com/logos/logo.png class=logo alt=111qqz的小窝><div class=nav_close><div><svg class="icon"><use xlink:href="#open-menu"/></svg><svg class="icon"><use xlink:href="#closeme"/></svg></div></div></a><div class='nav_body nav_body_left'><div class=nav_parent><a href=https://111qqz.com/ class=nav_item title=Home>Home</a></div><div class=nav_parent><a href=https://111qqz.com/categories/acm/ class=nav_item title=ACM-ICPC>ACM-ICPC</a></div><div class=nav_parent><a href=https://111qqz.com/ class=nav_item title=深度学习>深度学习 <img src=https://111qqz.com/icons/caret-icon.svg alt=icon class=nav_icon></a><div class=nav_sub><span class=nav_child></span>
 <a href=https://111qqz.com/tags/caffe/ class="nav_child nav_item" title=caffe源码阅读笔记>caffe源码阅读笔记</a>
 <a href=https://111qqz.com/tags/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F/ class="nav_child nav_item" title=推荐系统>推荐系统</a>
 <a href=https://111qqz.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89 class="nav_child nav_item" title=计算机视觉>计算机视觉</a></div></div><div class=nav_parent><a href=https://111qqz.com/ class=nav_item title=公开课>公开课 <img src=https://111qqz.com/icons/caret-icon.svg alt=icon class=nav_icon></a><div class=nav_sub><span class=nav_child></span>
@@ -30,13 +34,13 @@ Its continuous sequences are:
 <span class=post_date>2016-08-02</span>
 <span class=post_time>· 3 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/rmq title=rmq class="post_tag button button_translucent">rmq
 </a><a href=https://111qqz.com/tags/%E4%BA%8C%E5%88%86 title=二分 class="post_tag button button_translucent">二分
-</a><a href=https://111qqz.com/tags/%E5%90%8E%E7%BC%80%E6%95%B0%E7%BB%84 title=后缀数组 class="post_tag button button_translucent">后缀数组</a></span></div><div class=post_body><p><a href=http://codeforces.com/problemset/problem/123/D>题目链接</a></p><p>题意：定义一个函数F．．</p><blockquote>For exampe: _F_(_babbabbababbab_, _babb_) = 6. The list of pairs is as follows:<p>(1, 4), (4, 7), (9, 12)</p><p>Its continuous sequences are:</blockquote></p><pre><code>  *
-</code></pre><blockquote>(1, 4)</blockquote><pre><code>  *
-</code></pre><blockquote>(4, 7)</blockquote><pre><code>  *
-</code></pre><blockquote>(9, 12)</blockquote><pre><code>  *
-</code></pre><blockquote>(1, 4), (4, 7)</blockquote><pre><code>  *
-</code></pre><blockquote>(4, 7), (9, 12)</blockquote><pre><code>  *
-</code></pre><blockquote>(1, 4), (4, 7), (9, 12)</blockquote><p>erfen</p><p>．
+</a><a href=https://111qqz.com/tags/%E5%90%8E%E7%BC%80%E6%95%B0%E7%BB%84 title=后缀数组 class="post_tag button button_translucent">后缀数组</a></span></div><div class=post_body><p><a href=http://codeforces.com/problemset/problem/123/D>题目链接</a></p><p>题意：定义一个函数F．．</p><blockquote><p>For exampe: <em>F</em>(<em>babbabbababbab</em>, <em>babb</em>) = 6. The list of pairs is as follows:</p><p>(1, 4), (4, 7), (9, 12)</p><p>Its continuous sequences are:</p></blockquote><pre><code>  *
+</code></pre><blockquote><p>(1, 4)</p></blockquote><pre><code>  *
+</code></pre><blockquote><p>(4, 7)</p></blockquote><pre><code>  *
+</code></pre><blockquote><p>(9, 12)</p></blockquote><pre><code>  *
+</code></pre><blockquote><p>(1, 4), (4, 7)</p></blockquote><pre><code>  *
+</code></pre><blockquote><p>(4, 7), (9, 12)</p></blockquote><pre><code>  *
+</code></pre><blockquote><p>(1, 4), (4, 7), (9, 12)</p></blockquote><p>erfen</p><p>．
 erfen
 题目描述得很烂．．看例子把．．大概就是：如果字符串y在字符串x中出现n次，那么F(x,y)=n*(n+1)/2</p><p>现在给一个字符串，求所有的F(s,x)的和，x为字符串的所有不相同的子串．</p><p>思路：由于刚刚写了一个求一个字符串所有不同子串个数的题目．．．于是就想到了后缀数组．．．</p><p>写完之后观察height[i]．如果把height[i]看成底在x轴上的第i个矩形的高的话，n就是一段连续的矩形的长度．</p><p>然后．．．暴力会tle 48</p><p>题解说单调栈．．．但是单调栈之后还要线段树or并查集？　（by 羊神）</p><p>．．．不会啊orz</p><p>最后用了二分+rmp过掉的</p><p>大概就是两次二分得到一个矩形的区间，和whust2016 #1的那道题有点像．</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln>  1</span><span class=cl><span class=cm>/* ***********************************************
 </span></span></span><span class=line><span class=ln>  2</span><span class=cl><span class=cm>Author :111qqz

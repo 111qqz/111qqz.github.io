@@ -16,349 +16,422 @@
 <a href=https://111qqz.com/tags/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86 class="nav_child nav_item" title=图像处理>图像处理</a>
 <a href=https://111qqz.com/tags/docker class="nav_child nav_item" title=容器>容器</a></div></div><div class=nav_parent><a href=https://111qqz.com/categories/%E9%9A%8F%E7%AC%94%E6%9D%82%E8%B0%88 class=nav_item title=随笔杂谈>随笔杂谈</a></div><div class=nav_parent><a href=https://111qqz.com/tags/%E9%9D%A2%E8%AF%95%E7%BB%8F%E5%8E%86 class=nav_item title=面试>面试</a></div><div class=nav_parent><a href=https://111qqz.com/top/about/ class=nav_item title=About>About</a></div><div class=follow><a href=https://github.com/111qqz><svg class="icon"><use xlink:href="#github"/></svg></a><div class=color_mode><input type=checkbox class=color_choice id=mode></div></div></div></nav></header><main><div class="grid-inverse wrap content"><article class=post_content><h1 class=post_title>lua学习笔记</h1><div class=post_meta><span><svg class="icon"><use xlink:href="#calendar"/></svg></span>
 <span class=post_date>2018-10-26</span>
-<span class=post_time>· 5 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/lua title=lua class="post_tag button button_translucent">lua</a></span></div><div class=post_body><p>lua是一门轻量级的脚本语言&mldr;好像比较适合写游戏？在 <a href=https://github.com/Mogara/QSanguosha>太阳神三国杀</a> 中见过很多lua脚本。 由于<a href=https://splash.readthedocs.io/en/stable/scripting-tutorial.html>splash</a> 的渲染脚本需要用lua来写，因此来学习一波。</p><p>直接上语法&mldr;看到了python和pascal的影子orz</p><pre><code>-- Two dashes start a one-line comment.
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=cm>--[[
-</span></span></span><span class=line><span class=ln>2</span><span class=cl><span class=cm>     Adding two [&#39;s and ]&#39;s makes it a
-</span></span></span><span class=line><span class=ln>3</span><span class=cl><span class=cm>     multi-line comment.
-</span></span></span><span class=line><span class=ln>4</span><span class=cl><span class=cm>--]]</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>----------------------------------------------------</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>-- 1. Variables and flow control.</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1>----------------------------------------------------</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=n>num</span> <span class=o>=</span> <span class=mi>42</span>  <span class=c1>-- All numbers are doubles.</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>-- Don&#39;t freak out, 64-bit doubles have 52 bits for</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1>-- storing exact int values; machine precision is</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl><span class=c1>-- not a problem for ints that need &lt; 52 bits.</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=n>s</span> <span class=o>=</span> <span class=s1>&#39;walternate&#39;</span>  <span class=c1>-- Immutable strings like Python.</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=n>t</span> <span class=o>=</span> <span class=s2>&#34;double-quotes are also fine&#34;</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>u</span> <span class=o>=</span> <span class=s>[[ Double brackets
-</span></span></span><span class=line><span class=ln>4</span><span class=cl><span class=s>       start and end
-</span></span></span><span class=line><span class=ln>5</span><span class=cl><span class=s>       multi-line strings.]]</span>
-</span></span><span class=line><span class=ln>6</span><span class=cl><span class=n>t</span> <span class=o>=</span> <span class=kc>nil</span>  <span class=c1>-- Undefines t; Lua has garbage collection.</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- Blocks are denoted with keywords like do/end:</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=kr>while</span> <span class=n>num</span> <span class=o>&lt;</span> <span class=mi>50</span> <span class=kr>do</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>num</span> <span class=o>=</span> <span class=n>num</span> <span class=o>+</span> <span class=mi>1</span>  <span class=c1>-- No ++ or += type operators.</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl><span class=kr>end</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=o>--</span> <span class=n>If</span> <span class=n>clauses</span><span class=p>:</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=k>if</span> <span class=n>num</span> <span class=o>&gt;</span> <span class=mi>40</span> <span class=n>then</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=nb>print</span><span class=p>(</span><span class=s1>&#39;over 40&#39;</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl><span class=n>elseif</span> <span class=n>s</span> <span class=o>~=</span> <span class=s1>&#39;walternate&#39;</span> <span class=n>then</span>  <span class=o>--</span> <span class=o>~=</span> <span class=ow>is</span> <span class=ow>not</span> <span class=n>equals</span><span class=o>.</span>
-</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=o>--</span> <span class=n>Equality</span> <span class=n>check</span> <span class=ow>is</span> <span class=o>==</span> <span class=n>like</span> <span class=n>Python</span><span class=p>;</span> <span class=n>ok</span> <span class=k>for</span> <span class=n>strs</span><span class=o>.</span>
-</span></span><span class=line><span class=ln>6</span><span class=cl>  <span class=n>io</span><span class=o>.</span><span class=n>write</span><span class=p>(</span><span class=s1>&#39;not over 40</span><span class=se>\n</span><span class=s1>&#39;</span><span class=p>)</span>  <span class=o>--</span> <span class=n>Defaults</span> <span class=n>to</span> <span class=n>stdout</span><span class=o>.</span>
-</span></span><span class=line><span class=ln>7</span><span class=cl><span class=k>else</span>
-</span></span><span class=line><span class=ln>8</span><span class=cl>  <span class=o>--</span> <span class=n>Variables</span> <span class=n>are</span> <span class=k>global</span> <span class=n>by</span> <span class=n>default</span><span class=o>.</span>
-</span></span><span class=line><span class=ln>9</span><span class=cl>  <span class=n>thisIsGlobal</span> <span class=o>=</span> <span class=mi>5</span>  <span class=o>--</span> <span class=n>Camel</span> <span class=k>case</span> <span class=ow>is</span> <span class=n>common</span><span class=o>.</span>
-</span></span></code></pre></div><pre><code>  -- How to make a variable local:
-  local line = io.read()  -- Reads next stdin line.
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl>  <span class=c1>-- String concatenation uses the .. operator:</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=n>print</span><span class=p>(</span><span class=s1>&#39;Winter is coming, &#39;</span> <span class=o>..</span> <span class=n>line</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=kr>end</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- Undefined variables return nil.</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>-- This is not an error:</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>foo</span> <span class=o>=</span> <span class=n>anUnknownVariable</span>  <span class=c1>-- Now foo = nil.</span>
-</span></span></code></pre></div><pre><code>aBoolValue = false
-
--- Only nil and false are falsy; 0 and '' are true!
-if not aBoolValue then print('twas false') end
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- &#39;or&#39; and &#39;and&#39; are short-circuited.</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>-- This is similar to the a?b:c operator in C/js:</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>ans</span> <span class=o>=</span> <span class=n>aBoolValue</span> <span class=ow>and</span> <span class=s1>&#39;yes&#39;</span> <span class=ow>or</span> <span class=s1>&#39;no&#39;</span>  <span class=c1>--&gt; &#39;no&#39;</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=n>karlSum</span> <span class=o>=</span> <span class=mi>0</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=kr>for</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>100</span> <span class=kr>do</span>  <span class=c1>-- The range includes both ends.</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>karlSum</span> <span class=o>=</span> <span class=n>karlSum</span> <span class=o>+</span> <span class=n>i</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl><span class=kr>end</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- Use &#34;100, 1, -1&#34; as the range to count down:</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=n>fredSum</span> <span class=o>=</span> <span class=mi>0</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=kr>for</span> <span class=n>j</span> <span class=o>=</span> <span class=mi>100</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=o>-</span><span class=mi>1</span> <span class=kr>do</span> <span class=n>fredSum</span> <span class=o>=</span> <span class=n>fredSum</span> <span class=o>+</span> <span class=n>j</span> <span class=kr>end</span>
-</span></span></code></pre></div><pre><code>-- In general, the range is begin, end[, step].
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=o>--</span> <span class=n>Another</span> <span class=n>loop</span> <span class=n>construct</span><span class=p>:</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=n>repeat</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=nb>print</span><span class=p>(</span><span class=s1>&#39;the way of the future&#39;</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=n>num</span> <span class=o>=</span> <span class=n>num</span> <span class=o>-</span> <span class=mi>1</span>
-</span></span><span class=line><span class=ln>5</span><span class=cl><span class=n>until</span> <span class=n>num</span> <span class=o>==</span> <span class=mi>0</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>----------------------------------------------------</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>-- 2. Functions.</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1>----------------------------------------------------</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=kr>function</span> <span class=nf>fib</span><span class=p>(</span><span class=n>n</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=kr>if</span> <span class=n>n</span> <span class=o>&lt;</span> <span class=mi>2</span> <span class=kr>then</span> <span class=kr>return</span> <span class=mi>1</span> <span class=kr>end</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=kr>return</span> <span class=n>fib</span><span class=p>(</span><span class=n>n</span> <span class=o>-</span> <span class=mi>2</span><span class=p>)</span> <span class=o>+</span> <span class=n>fib</span><span class=p>(</span><span class=n>n</span> <span class=o>-</span> <span class=mi>1</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl><span class=kr>end</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln> 1</span><span class=cl><span class=c1>-- Closures and anonymous functions are ok:</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=kr>function</span> <span class=nf>adder</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl>  <span class=c1>-- The returned function is created when adder is</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl>  <span class=c1>-- called, and remembers the value of x:</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=kr>return</span> <span class=kr>function</span> <span class=p>(</span><span class=n>y</span><span class=p>)</span> <span class=kr>return</span> <span class=n>x</span> <span class=o>+</span> <span class=n>y</span> <span class=kr>end</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=kr>end</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=n>a1</span> <span class=o>=</span> <span class=n>adder</span><span class=p>(</span><span class=mi>9</span><span class=p>)</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl><span class=n>a2</span> <span class=o>=</span> <span class=n>adder</span><span class=p>(</span><span class=mi>36</span><span class=p>)</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl><span class=n>print</span><span class=p>(</span><span class=n>a1</span><span class=p>(</span><span class=mi>16</span><span class=p>))</span>  <span class=c1>--&gt; 25</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl><span class=n>print</span><span class=p>(</span><span class=n>a2</span><span class=p>(</span><span class=mi>64</span><span class=p>))</span>  <span class=c1>--&gt; 100</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- Returns, func calls, and assignments all work</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>-- with lists that may be mismatched in length.</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1>-- Unmatched receivers are nil;</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl><span class=c1>-- unmatched senders are discarded.</span>
-</span></span></code></pre></div><pre><code>x, y, z = 1, 2, 3, 4
--- Now x = 1, y = 2, z = 3, and 4 is thrown away.
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=kr>function</span> <span class=nf>bar</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>c</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=n>print</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>c</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=kr>return</span> <span class=mi>4</span><span class=p>,</span> <span class=mi>8</span><span class=p>,</span> <span class=mi>15</span><span class=p>,</span> <span class=mi>16</span><span class=p>,</span> <span class=mi>23</span><span class=p>,</span> <span class=mi>42</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl><span class=kr>end</span>
-</span></span></code></pre></div><pre><code>x, y = bar('zaphod')  --&gt; prints &quot;zaphod  nil nil&quot;
--- Now x = 4, y = 8, values 15..42 are discarded.
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- Functions are first-class, may be local/global.</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>-- These are the same:</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=kr>function</span> <span class=nf>f</span><span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=kr>return</span> <span class=n>x</span> <span class=o>*</span> <span class=n>x</span> <span class=kr>end</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl><span class=n>f</span> <span class=o>=</span> <span class=kr>function</span> <span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=kr>return</span> <span class=n>x</span> <span class=o>*</span> <span class=n>x</span> <span class=kr>end</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- And so are these:</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=kd>local</span> <span class=kr>function</span> <span class=nf>g</span><span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=kr>return</span> <span class=n>math.sin</span><span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=kr>end</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=kd>local</span> <span class=n>g</span><span class=p>;</span> <span class=n>g</span>  <span class=o>=</span> <span class=kr>function</span> <span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=kr>return</span> <span class=n>math.sin</span><span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=kr>end</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl><span class=c1>-- the &#39;local g&#39; decl makes g-self-references ok.</span>
-</span></span></code></pre></div><pre><code>-- Trig funcs work in radians, by the way.
-
--- Calls with one string param don't need parens:
-print 'hello'  -- Works fine.
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>----------------------------------------------------</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>-- 3. Tables.</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1>----------------------------------------------------</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- Tables = Lua&#39;s only compound data structure;</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>--          they are associative arrays.</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1>-- Similar to php arrays or js objects, they are</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl><span class=c1>-- hash-lookup dicts that can also be used as lists.</span>
-</span></span></code></pre></div><pre><code>-- Using tables as dictionaries / maps:
-
--- Dict literals have string keys by default:
-t = {key1 = 'value1', key2 = false}
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=o>--</span> <span class=n>String</span> <span class=n>keys</span> <span class=n>can</span> <span class=n>use</span> <span class=n>js</span><span class=o>-</span><span class=n>like</span> <span class=n>dot</span> <span class=n>notation</span><span class=p>:</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>t</span><span class=o>.</span><span class=n>key1</span><span class=p>)</span>  <span class=o>--</span> <span class=n>Prints</span> <span class=s1>&#39;value1&#39;</span><span class=o>.</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>t</span><span class=o>.</span><span class=n>newKey</span> <span class=o>=</span> <span class=p>{}</span>  <span class=o>--</span> <span class=n>Adds</span> <span class=n>a</span> <span class=n>new</span> <span class=n>key</span><span class=o>/</span><span class=n>value</span> <span class=n>pair</span><span class=o>.</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl><span class=n>t</span><span class=o>.</span><span class=n>key2</span> <span class=o>=</span> <span class=n>nil</span>   <span class=o>--</span> <span class=n>Removes</span> <span class=n>key2</span> <span class=kn>from</span> <span class=nn>the</span> <span class=n>table</span><span class=o>.</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=o>--</span> <span class=n>Literal</span> <span class=n>notation</span> <span class=k>for</span> <span class=nb>any</span> <span class=p>(</span><span class=n>non</span><span class=o>-</span><span class=n>nil</span><span class=p>)</span> <span class=n>value</span> <span class=k>as</span> <span class=n>key</span><span class=p>:</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=n>u</span> <span class=o>=</span> <span class=p>{[</span><span class=s1>&#39;@!#&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=s1>&#39;qbert&#39;</span><span class=p>,</span> <span class=p>[{}]</span> <span class=o>=</span> <span class=mi>1729</span><span class=p>,</span> <span class=p>[</span><span class=mf>6.28</span><span class=p>]</span> <span class=o>=</span> <span class=s1>&#39;tau&#39;</span><span class=p>}</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>u</span><span class=p>[</span><span class=mf>6.28</span><span class=p>])</span>  <span class=o>--</span> <span class=n>prints</span> <span class=s2>&#34;tau&#34;</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- Key matching is basically by value for numbers</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>-- and strings, but by identity for tables.</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>a</span> <span class=o>=</span> <span class=n>u</span><span class=p>[</span><span class=s1>&#39;@!#&#39;</span><span class=p>]</span>  <span class=c1>-- Now a = &#39;qbert&#39;.</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl><span class=n>b</span> <span class=o>=</span> <span class=n>u</span><span class=p>[{}]</span>     <span class=c1>-- We might expect 1729, but it&#39;s nil:</span>
-</span></span><span class=line><span class=ln>5</span><span class=cl><span class=c1>-- b = nil since the lookup fails. It fails</span>
-</span></span><span class=line><span class=ln>6</span><span class=cl><span class=c1>-- because the key we used is not the same object</span>
-</span></span><span class=line><span class=ln>7</span><span class=cl><span class=c1>-- as the one used to store the original value. So</span>
-</span></span><span class=line><span class=ln>8</span><span class=cl><span class=c1>-- strings &amp; numbers are more portable keys.</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- A one-table-param function call needs no parens:</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=kr>function</span> <span class=nf>h</span><span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=n>print</span><span class=p>(</span><span class=n>x.key1</span><span class=p>)</span> <span class=kr>end</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>h</span><span class=p>{</span><span class=n>key1</span> <span class=o>=</span> <span class=s1>&#39;Sonmi~451&#39;</span><span class=p>}</span>  <span class=c1>-- Prints &#39;Sonmi~451&#39;.</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=kr>for</span> <span class=n>key</span><span class=p>,</span> <span class=n>val</span> <span class=kr>in</span> <span class=n>pairs</span><span class=p>(</span><span class=n>u</span><span class=p>)</span> <span class=kr>do</span>  <span class=c1>-- Table iteration.</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=n>print</span><span class=p>(</span><span class=n>key</span><span class=p>,</span> <span class=n>val</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=kr>end</span>
-</span></span></code></pre></div><pre><code>-- _G is a special table of all globals.
-print(_G['_G'] == _G)  -- Prints 'true'.
-
--- Using tables as lists / arrays:
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- List literals implicitly set up int keys:</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=n>v</span> <span class=o>=</span> <span class=p>{</span><span class=s1>&#39;value1&#39;</span><span class=p>,</span> <span class=s1>&#39;value2&#39;</span><span class=p>,</span> <span class=mf>1.21</span><span class=p>,</span> <span class=s1>&#39;gigawatts&#39;</span><span class=p>}</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=kr>for</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>1</span><span class=p>,</span> <span class=o>#</span><span class=n>v</span> <span class=kr>do</span>  <span class=c1>-- #v is the size of v for lists.</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=n>print</span><span class=p>(</span><span class=n>v</span><span class=p>[</span><span class=n>i</span><span class=p>])</span>  <span class=c1>-- Indices start at 1 !! SO CRAZY!</span>
-</span></span><span class=line><span class=ln>5</span><span class=cl><span class=kr>end</span>
-</span></span><span class=line><span class=ln>6</span><span class=cl><span class=c1>-- A &#39;list&#39; is not a real type. v is just a table</span>
-</span></span><span class=line><span class=ln>7</span><span class=cl><span class=c1>-- with consecutive integer keys, treated as a list.</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>----------------------------------------------------</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>-- 3.1 Metatables and metamethods.</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1>----------------------------------------------------</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- A table can have a metatable that gives the table</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>-- operator-overloadish behavior. Later we&#39;ll see</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1>-- how metatables support js-prototypey behavior.</span>
-</span></span></code></pre></div><pre><code>f1 = {a = 1, b = 2}  -- Represents the fraction a/b.
-f2 = {a = 2, b = 3}
-
--- This would fail:
--- s = f1 + f2
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=n>metafraction</span> <span class=o>=</span> <span class=p>{}</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=kr>function</span> <span class=nc>metafraction</span><span class=p>.</span><span class=nf>__add</span><span class=p>(</span><span class=n>f1</span><span class=p>,</span> <span class=n>f2</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>sum</span> <span class=o>=</span> <span class=p>{}</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=n>sum.b</span> <span class=o>=</span> <span class=n>f1.b</span> <span class=o>*</span> <span class=n>f2.b</span>
-</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=n>sum.a</span> <span class=o>=</span> <span class=n>f1.a</span> <span class=o>*</span> <span class=n>f2.b</span> <span class=o>+</span> <span class=n>f2.a</span> <span class=o>*</span> <span class=n>f1.b</span>
-</span></span><span class=line><span class=ln>6</span><span class=cl>  <span class=kr>return</span> <span class=n>sum</span>
-</span></span><span class=line><span class=ln>7</span><span class=cl><span class=kr>end</span>
-</span></span></code></pre></div><pre><code>setmetatable(f1, metafraction)
-setmetatable(f2, metafraction)
-
-s = f1 + f2  -- call __add(f1, f2) on f1's metatable
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- f1, f2 have no key for their metatable, unlike</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>-- prototypes in js, so you must retrieve it as in</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1>-- getmetatable(f1). The metatable is a normal table</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl><span class=c1>-- with keys that Lua knows about, like __add.</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- But the next line fails since s has no metatable:</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>-- t = s + s</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1>-- Class-like patterns given below would fix this.</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- An __index on a metatable overloads dot lookups:</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=n>defaultFavs</span> <span class=o>=</span> <span class=p>{</span><span class=n>animal</span> <span class=o>=</span> <span class=s1>&#39;gru&#39;</span><span class=p>,</span> <span class=n>food</span> <span class=o>=</span> <span class=s1>&#39;donuts&#39;</span><span class=p>}</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>myFavs</span> <span class=o>=</span> <span class=p>{</span><span class=n>food</span> <span class=o>=</span> <span class=s1>&#39;pizza&#39;</span><span class=p>}</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl><span class=n>setmetatable</span><span class=p>(</span><span class=n>myFavs</span><span class=p>,</span> <span class=p>{</span><span class=n>__index</span> <span class=o>=</span> <span class=n>defaultFavs</span><span class=p>})</span>
-</span></span><span class=line><span class=ln>5</span><span class=cl><span class=n>eatenBy</span> <span class=o>=</span> <span class=n>myFavs.animal</span>  <span class=c1>-- works! thanks, metatable</span>
-</span></span></code></pre></div><pre><code>-- Direct table lookups that fail will retry using
--- the metatable's __index value, and this recurses.
-
--- An __index value can also be a function(tbl, key)
--- for more customized lookups.
-
--- Values of __index,add, .. are called metamethods.
--- Full list. Here a is a table with the metamethod.
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln> 1</span><span class=cl><span class=c1>-- __add(a, b)                     for a + b</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=c1>-- __sub(a, b)                     for a - b</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=c1>-- __mul(a, b)                     for a * b</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl><span class=c1>-- __div(a, b)                     for a / b</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=c1>-- __mod(a, b)                     for a % b</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=c1>-- __pow(a, b)                     for a ^ b</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=c1>-- __unm(a)                        for -a</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl><span class=c1>-- __concat(a, b)                  for a .. b</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl><span class=c1>-- __len(a)                        for #a</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl><span class=c1>-- __eq(a, b)                      for a == b</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl><span class=c1>-- __lt(a, b)                      for a &lt; b</span>
-</span></span><span class=line><span class=ln>12</span><span class=cl><span class=c1>-- __le(a, b)                      for a &lt;= b</span>
-</span></span><span class=line><span class=ln>13</span><span class=cl><span class=c1>-- __index(a, b)  &lt;fn or a table&gt;  for a.b</span>
-</span></span><span class=line><span class=ln>14</span><span class=cl><span class=c1>-- __newindex(a, b, c)             for a.b = c</span>
-</span></span><span class=line><span class=ln>15</span><span class=cl><span class=c1>-- __call(a, ...)                  for a(...)</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>----------------------------------------------------</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>-- 3.2 Class-like tables and inheritance.</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1>----------------------------------------------------</span>
-</span></span></code></pre></div><pre><code>-- Classes aren't built in; there are different ways
--- to make them using tables and metatables.
-
--- Explanation for this example is below it.
-
-Dog = {}                                   -- 1.
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=kr>function</span> <span class=nc>Dog</span><span class=p>:</span><span class=nf>new</span><span class=p>()</span>                         <span class=c1>-- 2.</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=n>newObj</span> <span class=o>=</span> <span class=p>{</span><span class=n>sound</span> <span class=o>=</span> <span class=s1>&#39;woof&#39;</span><span class=p>}</span>                <span class=c1>-- 3.</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>self.__index</span> <span class=o>=</span> <span class=n>self</span>                      <span class=c1>-- 4.</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=kr>return</span> <span class=n>setmetatable</span><span class=p>(</span><span class=n>newObj</span><span class=p>,</span> <span class=n>self</span><span class=p>)</span>        <span class=c1>-- 5.</span>
-</span></span><span class=line><span class=ln>5</span><span class=cl><span class=kr>end</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=kr>function</span> <span class=nc>Dog</span><span class=p>:</span><span class=nf>makeSound</span><span class=p>()</span>                   <span class=c1>-- 6.</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=n>print</span><span class=p>(</span><span class=s1>&#39;I say &#39;</span> <span class=o>..</span> <span class=n>self.sound</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=kr>end</span>
-</span></span></code></pre></div><pre><code>mrDog = Dog:new()                          -- 7.
-mrDog:makeSound()  -- 'I say woof'         -- 8.
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln> 1</span><span class=cl><span class=c1>-- 1. Dog acts like a class; it&#39;s really a table.</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=c1>-- 2. function tablename:fn(...) is the same as</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=c1>--    function tablename.fn(self, ...)</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl><span class=c1>--    The : just adds a first arg called self.</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=c1>--    Read 7 &amp; 8 below for how self gets its value.</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=c1>-- 3. newObj will be an instance of class Dog.</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=c1>-- 4. self = the class being instantiated. Often</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl><span class=c1>--    self = Dog, but inheritance can change it.</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl><span class=c1>--    newObj gets self&#39;s functions when we set both</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl><span class=c1>--    newObj&#39;s metatable and self&#39;s __index to self.</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl><span class=c1>-- 5. Reminder: setmetatable returns its first arg.</span>
-</span></span><span class=line><span class=ln>12</span><span class=cl><span class=c1>-- 6. The : works as in 2, but this time we expect</span>
-</span></span><span class=line><span class=ln>13</span><span class=cl><span class=c1>--    self to be an instance instead of a class.</span>
-</span></span><span class=line><span class=ln>14</span><span class=cl><span class=c1>-- 7. Same as Dog.new(Dog), so self = Dog in new().</span>
-</span></span><span class=line><span class=ln>15</span><span class=cl><span class=c1>-- 8. Same as mrDog.makeSound(mrDog); self = mrDog.</span>
-</span></span></code></pre></div><pre><code>----------------------------------------------------
-
--- Inheritance example:
-
-LoudDog = Dog:new()                           -- 1.
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=kr>function</span> <span class=nc>LoudDog</span><span class=p>:</span><span class=nf>makeSound</span><span class=p>()</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=n>s</span> <span class=o>=</span> <span class=n>self.sound</span> <span class=o>..</span> <span class=s1>&#39; &#39;</span>                       <span class=c1>-- 2.</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>print</span><span class=p>(</span><span class=n>s</span> <span class=o>..</span> <span class=n>s</span> <span class=o>..</span> <span class=n>s</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl><span class=kr>end</span>
-</span></span></code></pre></div><pre><code>seymour = LoudDog:new()                       -- 3.
-seymour:makeSound()  -- 'woof woof woof'      -- 4.
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln> 1</span><span class=cl><span class=c1>-- 1. LoudDog gets Dog&#39;s methods and variables.</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=c1>-- 2. self has a &#39;sound&#39; key from new(), see 3.</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=c1>-- 3. Same as LoudDog.new(LoudDog), and converted to</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl><span class=c1>--    Dog.new(LoudDog) as LoudDog has no &#39;new&#39; key,</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=c1>--    but does have __index = Dog on its metatable.</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=c1>--    Result: seymour&#39;s metatable is LoudDog, and</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=c1>--    LoudDog.__index = LoudDog. So seymour.key will</span>
-</span></span><span class=line><span class=ln> 8</span><span class=cl><span class=c1>--    = seymour.key, LoudDog.key, Dog.key, whichever</span>
-</span></span><span class=line><span class=ln> 9</span><span class=cl><span class=c1>--    table is the first with the given key.</span>
-</span></span><span class=line><span class=ln>10</span><span class=cl><span class=c1>-- 4. The &#39;makeSound&#39; key is found in LoudDog; this</span>
-</span></span><span class=line><span class=ln>11</span><span class=cl><span class=c1>--    is the same as LoudDog.makeSound(seymour).</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- If needed, a subclass&#39;s new() is like the base&#39;s:</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=kr>function</span> <span class=nc>LoudDog</span><span class=p>:</span><span class=nf>new</span><span class=p>()</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>newObj</span> <span class=o>=</span> <span class=p>{}</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=c1>-- set up newObj</span>
-</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=n>self.__index</span> <span class=o>=</span> <span class=n>self</span>
-</span></span><span class=line><span class=ln>6</span><span class=cl>  <span class=kr>return</span> <span class=n>setmetatable</span><span class=p>(</span><span class=n>newObj</span><span class=p>,</span> <span class=n>self</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>7</span><span class=cl><span class=kr>end</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>----------------------------------------------------</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>-- 4. Modules.</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1>----------------------------------------------------</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>--[[ I&#39;m commenting out this section so the rest of</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>--   this script remains runnable.</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1>-- Suppose the file mod.lua looks like this:</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl><span class=kd>local</span> <span class=n>M</span> <span class=o>=</span> <span class=p>{}</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=kd>local</span> <span class=kr>function</span> <span class=nf>sayMyName</span><span class=p>()</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=n>print</span><span class=p>(</span><span class=s1>&#39;Hrunkner&#39;</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=kr>end</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=kr>function</span> <span class=nc>M</span><span class=p>.</span><span class=nf>sayHello</span><span class=p>()</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=n>print</span><span class=p>(</span><span class=s1>&#39;Why hello there&#39;</span><span class=p>)</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  <span class=n>sayMyName</span><span class=p>()</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl><span class=kr>end</span>
-</span></span></code></pre></div><pre><code>return M
-
--- Another file can use mod.lua's functionality:
-local mod = require('mod')  -- Run the file mod.lua.
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- require is the standard way to include modules.</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>-- require acts like:     (if not cached; see below)</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=kd>local</span> <span class=n>mod</span> <span class=o>=</span> <span class=p>(</span><span class=kr>function</span> <span class=p>()</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>  <span class=o>&lt;</span><span class=n>contents</span> <span class=n>of</span> <span class=n>mod.lua</span><span class=o>&gt;</span>
-</span></span><span class=line><span class=ln>5</span><span class=cl><span class=kr>end</span><span class=p>)()</span>
-</span></span><span class=line><span class=ln>6</span><span class=cl><span class=c1>-- It&#39;s like mod.lua is a function body, so that</span>
-</span></span><span class=line><span class=ln>7</span><span class=cl><span class=c1>-- locals inside mod.lua are invisible outside it.</span>
-</span></span></code></pre></div><pre><code>-- This works because mod here = M in mod.lua:
-mod.sayHello()  -- Says hello to Hrunkner.
-
--- This is wrong; sayMyName only exists in mod.lua:
-mod.sayMyName()  -- error
-
--- require's return values are cached so a file is
--- run at most once, even when require'd many times.
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- Suppose mod2.lua contains &#34;print(&#39;Hi!&#39;)&#34;.</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=kd>local</span> <span class=n>a</span> <span class=o>=</span> <span class=n>require</span><span class=p>(</span><span class=s1>&#39;mod2&#39;</span><span class=p>)</span>  <span class=c1>-- Prints Hi!</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=kd>local</span> <span class=n>b</span> <span class=o>=</span> <span class=n>require</span><span class=p>(</span><span class=s1>&#39;mod2&#39;</span><span class=p>)</span>  <span class=c1>-- Doesn&#39;t print; a=b.</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>-- dofile is like require without caching:</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=n>dofile</span><span class=p>(</span><span class=s1>&#39;mod2.lua&#39;</span><span class=p>)</span>  <span class=c1>--&gt; Hi!</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>dofile</span><span class=p>(</span><span class=s1>&#39;mod2.lua&#39;</span><span class=p>)</span>  <span class=c1>--&gt; Hi! (runs it again)</span>
-</span></span></code></pre></div><pre><code>-- loadfile loads a lua file but doesn't run it yet.
-f = loadfile('mod2.lua')  -- Call f() to run it.
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln>1</span><span class=cl><span class=o>--</span> <span class=n>loadstring</span> <span class=ow>is</span> <span class=n>loadfile</span> <span class=k>for</span> <span class=n>strings</span><span class=o>.</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=n>g</span> <span class=o>=</span> <span class=n>loadstring</span><span class=p>(</span><span class=s1>&#39;print(343)&#39;</span><span class=p>)</span>  <span class=o>--</span> <span class=n>Returns</span> <span class=n>a</span> <span class=n>function</span><span class=o>.</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>g</span><span class=p>()</span>  <span class=o>--</span> <span class=n>Prints</span> <span class=n>out</span> <span class=mi>343</span><span class=p>;</span> <span class=n>nothing</span> <span class=n>printed</span> <span class=n>before</span> <span class=n>now</span><span class=o>.</span>
-</span></span></code></pre></div><pre><code>--]]
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>1</span><span class=cl><span class=c1>----------------------------------------------------</span>
-</span></span><span class=line><span class=ln>2</span><span class=cl><span class=c1>-- 5. References.</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl><span class=c1>----------------------------------------------------</span>
-</span></span></code></pre></div><pre><code>--[[
-
-I was excited to learn Lua so I could make games
-with the Löve 2D game engine. That's the why.
-
-I started with BlackBulletIV's Lua for programmers.
-Next I read the official Programming in Lua book.
-That's the how.
-
-It might be helpful to check out the Lua short
-reference on lua-users.org.
-
-The main topics not covered are standard libraries:
- * string library
- * table library
- * math library
- * io library
- * os library
-
-By the way, this entire file is valid Lua; save it
-as learn.lua and run it with &quot;lua learn.lua&quot; !
-
-This was first written for tylerneylon.com. It's
-also available as a github gist. Tutorials for other
-languages, in the same style as this one, are here:
-
-http://learnxinyminutes.com/
-
-Have fun with Lua!
-
---]]
-</code></pre></div><div class=post_comments><script src=https://giscus.app/client.js data-repo=111qqz/111qqz.github.io data-repo-id='MDEwOlJlcG9zaXRvcnkxODYwNDY3NTQ=' data-category=Announcements data-category-id=DIC_kwDOCxbZIs4C3Y8D data-mapping=pathname data-strict=1 data-reactions-enabled=1 data-emit-metadata=1 data-input-position=bottom data-theme=preferred_color_scheme data-lang=zh-CN crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
+<span class=post_time>· 5 min read</span><span>&nbsp;· <a href=https://111qqz.com/tags/lua title=lua class="post_tag button button_translucent">lua</a></span></div><div class=post_body><p>lua是一门轻量级的脚本语言&mldr;好像比较适合写游戏？在 <a href=https://github.com/Mogara/QSanguosha>太阳神三国杀</a> 中见过很多lua脚本。 由于<a href=https://splash.readthedocs.io/en/stable/scripting-tutorial.html>splash</a> 的渲染脚本需要用lua来写，因此来学习一波。</p><p>直接上语法&mldr;看到了python和pascal的影子orz</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-lua data-lang=lua><span class=line><span class=ln>  1</span><span class=cl><span class=c1>-- Two dashes start a one-line comment.</span>
+</span></span><span class=line><span class=ln>  2</span><span class=cl>
+</span></span><span class=line><span class=ln>  3</span><span class=cl><span class=cm>--[[
+</span></span></span><span class=line><span class=ln>  4</span><span class=cl><span class=cm>     Adding two [&#39;s and ]&#39;s makes it a
+</span></span></span><span class=line><span class=ln>  5</span><span class=cl><span class=cm>     multi-line comment.
+</span></span></span><span class=line><span class=ln>  6</span><span class=cl><span class=cm>--]]</span>
+</span></span><span class=line><span class=ln>  7</span><span class=cl>
+</span></span><span class=line><span class=ln>  8</span><span class=cl><span class=c1>----------------------------------------------------</span>
+</span></span><span class=line><span class=ln>  9</span><span class=cl><span class=c1>-- 1. Variables and flow control.</span>
+</span></span><span class=line><span class=ln> 10</span><span class=cl><span class=c1>----------------------------------------------------</span>
+</span></span><span class=line><span class=ln> 11</span><span class=cl>
+</span></span><span class=line><span class=ln> 12</span><span class=cl><span class=n>num</span> <span class=o>=</span> <span class=mi>42</span>  <span class=c1>-- All numbers are doubles.</span>
+</span></span><span class=line><span class=ln> 13</span><span class=cl><span class=c1>-- Don&#39;t freak out, 64-bit doubles have 52 bits for</span>
+</span></span><span class=line><span class=ln> 14</span><span class=cl><span class=c1>-- storing exact int values; machine precision is</span>
+</span></span><span class=line><span class=ln> 15</span><span class=cl><span class=c1>-- not a problem for ints that need &lt; 52 bits.</span>
+</span></span><span class=line><span class=ln> 16</span><span class=cl>
+</span></span><span class=line><span class=ln> 17</span><span class=cl><span class=n>s</span> <span class=o>=</span> <span class=s1>&#39;walternate&#39;</span>  <span class=c1>-- Immutable strings like Python.</span>
+</span></span><span class=line><span class=ln> 18</span><span class=cl><span class=n>t</span> <span class=o>=</span> <span class=s2>&#34;double-quotes are also fine&#34;</span>
+</span></span><span class=line><span class=ln> 19</span><span class=cl><span class=n>u</span> <span class=o>=</span> <span class=s>[[ Double brackets
+</span></span></span><span class=line><span class=ln> 20</span><span class=cl><span class=s>       start and end
+</span></span></span><span class=line><span class=ln> 21</span><span class=cl><span class=s>       multi-line strings.]]</span>
+</span></span><span class=line><span class=ln> 22</span><span class=cl><span class=n>t</span> <span class=o>=</span> <span class=kc>nil</span>  <span class=c1>-- Undefines t; Lua has garbage collection.</span>
+</span></span><span class=line><span class=ln> 23</span><span class=cl>
+</span></span><span class=line><span class=ln> 24</span><span class=cl><span class=c1>-- Blocks are denoted with keywords like do/end:</span>
+</span></span><span class=line><span class=ln> 25</span><span class=cl><span class=kr>while</span> <span class=n>num</span> <span class=o>&lt;</span> <span class=mi>50</span> <span class=kr>do</span>
+</span></span><span class=line><span class=ln> 26</span><span class=cl>  <span class=n>num</span> <span class=o>=</span> <span class=n>num</span> <span class=o>+</span> <span class=mi>1</span>  <span class=c1>-- No ++ or += type operators.</span>
+</span></span><span class=line><span class=ln> 27</span><span class=cl><span class=kr>end</span>
+</span></span><span class=line><span class=ln> 28</span><span class=cl>
+</span></span><span class=line><span class=ln> 29</span><span class=cl><span class=c1>-- If clauses:</span>
+</span></span><span class=line><span class=ln> 30</span><span class=cl><span class=kr>if</span> <span class=n>num</span> <span class=o>&gt;</span> <span class=mi>40</span> <span class=kr>then</span>
+</span></span><span class=line><span class=ln> 31</span><span class=cl>  <span class=n>print</span><span class=p>(</span><span class=s1>&#39;over 40&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 32</span><span class=cl><span class=kr>elseif</span> <span class=n>s</span> <span class=o>~=</span> <span class=s1>&#39;walternate&#39;</span> <span class=kr>then</span>  <span class=c1>-- ~= is not equals.</span>
+</span></span><span class=line><span class=ln> 33</span><span class=cl>  <span class=c1>-- Equality check is == like Python; ok for strs.</span>
+</span></span><span class=line><span class=ln> 34</span><span class=cl>  <span class=n>io.write</span><span class=p>(</span><span class=s1>&#39;not over 40</span><span class=se>\n</span><span class=s1>&#39;</span><span class=p>)</span>  <span class=c1>-- Defaults to stdout.</span>
+</span></span><span class=line><span class=ln> 35</span><span class=cl><span class=kr>else</span>
+</span></span><span class=line><span class=ln> 36</span><span class=cl>  <span class=c1>-- Variables are global by default.</span>
+</span></span><span class=line><span class=ln> 37</span><span class=cl>  <span class=n>thisIsGlobal</span> <span class=o>=</span> <span class=mi>5</span>  <span class=c1>-- Camel case is common.</span>
+</span></span><span class=line><span class=ln> 38</span><span class=cl>
+</span></span><span class=line><span class=ln> 39</span><span class=cl>  <span class=c1>-- How to make a variable local:</span>
+</span></span><span class=line><span class=ln> 40</span><span class=cl>  <span class=kd>local</span> <span class=n>line</span> <span class=o>=</span> <span class=n>io.read</span><span class=p>()</span>  <span class=c1>-- Reads next stdin line.</span>
+</span></span><span class=line><span class=ln> 41</span><span class=cl>
+</span></span><span class=line><span class=ln> 42</span><span class=cl>  <span class=c1>-- String concatenation uses the .. operator:</span>
+</span></span><span class=line><span class=ln> 43</span><span class=cl>  <span class=n>print</span><span class=p>(</span><span class=s1>&#39;Winter is coming, &#39;</span> <span class=o>..</span> <span class=n>line</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 44</span><span class=cl><span class=kr>end</span>
+</span></span><span class=line><span class=ln> 45</span><span class=cl>
+</span></span><span class=line><span class=ln> 46</span><span class=cl><span class=c1>-- Undefined variables return nil.</span>
+</span></span><span class=line><span class=ln> 47</span><span class=cl><span class=c1>-- This is not an error:</span>
+</span></span><span class=line><span class=ln> 48</span><span class=cl><span class=n>foo</span> <span class=o>=</span> <span class=n>anUnknownVariable</span>  <span class=c1>-- Now foo = nil.</span>
+</span></span><span class=line><span class=ln> 49</span><span class=cl>
+</span></span><span class=line><span class=ln> 50</span><span class=cl><span class=n>aBoolValue</span> <span class=o>=</span> <span class=kc>false</span>
+</span></span><span class=line><span class=ln> 51</span><span class=cl>
+</span></span><span class=line><span class=ln> 52</span><span class=cl><span class=c1>-- Only nil and false are falsy; 0 and &#39;&#39; are true!</span>
+</span></span><span class=line><span class=ln> 53</span><span class=cl><span class=kr>if</span> <span class=ow>not</span> <span class=n>aBoolValue</span> <span class=kr>then</span> <span class=n>print</span><span class=p>(</span><span class=s1>&#39;twas false&#39;</span><span class=p>)</span> <span class=kr>end</span>
+</span></span><span class=line><span class=ln> 54</span><span class=cl>
+</span></span><span class=line><span class=ln> 55</span><span class=cl><span class=c1>-- &#39;or&#39; and &#39;and&#39; are short-circuited.</span>
+</span></span><span class=line><span class=ln> 56</span><span class=cl><span class=c1>-- This is similar to the a?b:c operator in C/js:</span>
+</span></span><span class=line><span class=ln> 57</span><span class=cl><span class=n>ans</span> <span class=o>=</span> <span class=n>aBoolValue</span> <span class=ow>and</span> <span class=s1>&#39;yes&#39;</span> <span class=ow>or</span> <span class=s1>&#39;no&#39;</span>  <span class=c1>--&gt; &#39;no&#39;</span>
+</span></span><span class=line><span class=ln> 58</span><span class=cl>
+</span></span><span class=line><span class=ln> 59</span><span class=cl><span class=n>karlSum</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=ln> 60</span><span class=cl><span class=kr>for</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>100</span> <span class=kr>do</span>  <span class=c1>-- The range includes both ends.</span>
+</span></span><span class=line><span class=ln> 61</span><span class=cl>  <span class=n>karlSum</span> <span class=o>=</span> <span class=n>karlSum</span> <span class=o>+</span> <span class=n>i</span>
+</span></span><span class=line><span class=ln> 62</span><span class=cl><span class=kr>end</span>
+</span></span><span class=line><span class=ln> 63</span><span class=cl>
+</span></span><span class=line><span class=ln> 64</span><span class=cl><span class=c1>-- Use &#34;100, 1, -1&#34; as the range to count down:</span>
+</span></span><span class=line><span class=ln> 65</span><span class=cl><span class=n>fredSum</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=ln> 66</span><span class=cl><span class=kr>for</span> <span class=n>j</span> <span class=o>=</span> <span class=mi>100</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=o>-</span><span class=mi>1</span> <span class=kr>do</span> <span class=n>fredSum</span> <span class=o>=</span> <span class=n>fredSum</span> <span class=o>+</span> <span class=n>j</span> <span class=kr>end</span>
+</span></span><span class=line><span class=ln> 67</span><span class=cl>
+</span></span><span class=line><span class=ln> 68</span><span class=cl><span class=c1>-- In general, the range is begin, end[, step].</span>
+</span></span><span class=line><span class=ln> 69</span><span class=cl>
+</span></span><span class=line><span class=ln> 70</span><span class=cl><span class=c1>-- Another loop construct:</span>
+</span></span><span class=line><span class=ln> 71</span><span class=cl><span class=kr>repeat</span>
+</span></span><span class=line><span class=ln> 72</span><span class=cl>  <span class=n>print</span><span class=p>(</span><span class=s1>&#39;the way of the future&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 73</span><span class=cl>  <span class=n>num</span> <span class=o>=</span> <span class=n>num</span> <span class=o>-</span> <span class=mi>1</span>
+</span></span><span class=line><span class=ln> 74</span><span class=cl><span class=kr>until</span> <span class=n>num</span> <span class=o>==</span> <span class=mi>0</span>
+</span></span><span class=line><span class=ln> 75</span><span class=cl>
+</span></span><span class=line><span class=ln> 76</span><span class=cl>
+</span></span><span class=line><span class=ln> 77</span><span class=cl><span class=c1>----------------------------------------------------</span>
+</span></span><span class=line><span class=ln> 78</span><span class=cl><span class=c1>-- 2. Functions.</span>
+</span></span><span class=line><span class=ln> 79</span><span class=cl><span class=c1>----------------------------------------------------</span>
+</span></span><span class=line><span class=ln> 80</span><span class=cl>
+</span></span><span class=line><span class=ln> 81</span><span class=cl><span class=kr>function</span> <span class=nf>fib</span><span class=p>(</span><span class=n>n</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 82</span><span class=cl>  <span class=kr>if</span> <span class=n>n</span> <span class=o>&lt;</span> <span class=mi>2</span> <span class=kr>then</span> <span class=kr>return</span> <span class=mi>1</span> <span class=kr>end</span>
+</span></span><span class=line><span class=ln> 83</span><span class=cl>  <span class=kr>return</span> <span class=n>fib</span><span class=p>(</span><span class=n>n</span> <span class=o>-</span> <span class=mi>2</span><span class=p>)</span> <span class=o>+</span> <span class=n>fib</span><span class=p>(</span><span class=n>n</span> <span class=o>-</span> <span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 84</span><span class=cl><span class=kr>end</span>
+</span></span><span class=line><span class=ln> 85</span><span class=cl>
+</span></span><span class=line><span class=ln> 86</span><span class=cl><span class=c1>-- Closures and anonymous functions are ok:</span>
+</span></span><span class=line><span class=ln> 87</span><span class=cl><span class=kr>function</span> <span class=nf>adder</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 88</span><span class=cl>  <span class=c1>-- The returned function is created when adder is</span>
+</span></span><span class=line><span class=ln> 89</span><span class=cl>  <span class=c1>-- called, and remembers the value of x:</span>
+</span></span><span class=line><span class=ln> 90</span><span class=cl>  <span class=kr>return</span> <span class=kr>function</span> <span class=p>(</span><span class=n>y</span><span class=p>)</span> <span class=kr>return</span> <span class=n>x</span> <span class=o>+</span> <span class=n>y</span> <span class=kr>end</span>
+</span></span><span class=line><span class=ln> 91</span><span class=cl><span class=kr>end</span>
+</span></span><span class=line><span class=ln> 92</span><span class=cl><span class=n>a1</span> <span class=o>=</span> <span class=n>adder</span><span class=p>(</span><span class=mi>9</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 93</span><span class=cl><span class=n>a2</span> <span class=o>=</span> <span class=n>adder</span><span class=p>(</span><span class=mi>36</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 94</span><span class=cl><span class=n>print</span><span class=p>(</span><span class=n>a1</span><span class=p>(</span><span class=mi>16</span><span class=p>))</span>  <span class=c1>--&gt; 25</span>
+</span></span><span class=line><span class=ln> 95</span><span class=cl><span class=n>print</span><span class=p>(</span><span class=n>a2</span><span class=p>(</span><span class=mi>64</span><span class=p>))</span>  <span class=c1>--&gt; 100</span>
+</span></span><span class=line><span class=ln> 96</span><span class=cl>
+</span></span><span class=line><span class=ln> 97</span><span class=cl><span class=c1>-- Returns, func calls, and assignments all work</span>
+</span></span><span class=line><span class=ln> 98</span><span class=cl><span class=c1>-- with lists that may be mismatched in length.</span>
+</span></span><span class=line><span class=ln> 99</span><span class=cl><span class=c1>-- Unmatched receivers are nil;</span>
+</span></span><span class=line><span class=ln>100</span><span class=cl><span class=c1>-- unmatched senders are discarded.</span>
+</span></span><span class=line><span class=ln>101</span><span class=cl>
+</span></span><span class=line><span class=ln>102</span><span class=cl><span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>,</span> <span class=n>z</span> <span class=o>=</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>4</span>
+</span></span><span class=line><span class=ln>103</span><span class=cl><span class=c1>-- Now x = 1, y = 2, z = 3, and 4 is thrown away.</span>
+</span></span><span class=line><span class=ln>104</span><span class=cl>
+</span></span><span class=line><span class=ln>105</span><span class=cl><span class=kr>function</span> <span class=nf>bar</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>c</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>106</span><span class=cl>  <span class=n>print</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>c</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>107</span><span class=cl>  <span class=kr>return</span> <span class=mi>4</span><span class=p>,</span> <span class=mi>8</span><span class=p>,</span> <span class=mi>15</span><span class=p>,</span> <span class=mi>16</span><span class=p>,</span> <span class=mi>23</span><span class=p>,</span> <span class=mi>42</span>
+</span></span><span class=line><span class=ln>108</span><span class=cl><span class=kr>end</span>
+</span></span><span class=line><span class=ln>109</span><span class=cl>
+</span></span><span class=line><span class=ln>110</span><span class=cl><span class=n>x</span><span class=p>,</span> <span class=n>y</span> <span class=o>=</span> <span class=n>bar</span><span class=p>(</span><span class=s1>&#39;zaphod&#39;</span><span class=p>)</span>  <span class=c1>--&gt; prints &#34;zaphod  nil nil&#34;</span>
+</span></span><span class=line><span class=ln>111</span><span class=cl><span class=c1>-- Now x = 4, y = 8, values 15..42 are discarded.</span>
+</span></span><span class=line><span class=ln>112</span><span class=cl>
+</span></span><span class=line><span class=ln>113</span><span class=cl><span class=c1>-- Functions are first-class, may be local/global.</span>
+</span></span><span class=line><span class=ln>114</span><span class=cl><span class=c1>-- These are the same:</span>
+</span></span><span class=line><span class=ln>115</span><span class=cl><span class=kr>function</span> <span class=nf>f</span><span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=kr>return</span> <span class=n>x</span> <span class=o>*</span> <span class=n>x</span> <span class=kr>end</span>
+</span></span><span class=line><span class=ln>116</span><span class=cl><span class=n>f</span> <span class=o>=</span> <span class=kr>function</span> <span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=kr>return</span> <span class=n>x</span> <span class=o>*</span> <span class=n>x</span> <span class=kr>end</span>
+</span></span><span class=line><span class=ln>117</span><span class=cl>
+</span></span><span class=line><span class=ln>118</span><span class=cl><span class=c1>-- And so are these:</span>
+</span></span><span class=line><span class=ln>119</span><span class=cl><span class=kd>local</span> <span class=kr>function</span> <span class=nf>g</span><span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=kr>return</span> <span class=n>math.sin</span><span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=kr>end</span>
+</span></span><span class=line><span class=ln>120</span><span class=cl><span class=kd>local</span> <span class=n>g</span><span class=p>;</span> <span class=n>g</span>  <span class=o>=</span> <span class=kr>function</span> <span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=kr>return</span> <span class=n>math.sin</span><span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=kr>end</span>
+</span></span><span class=line><span class=ln>121</span><span class=cl><span class=c1>-- the &#39;local g&#39; decl makes g-self-references ok.</span>
+</span></span><span class=line><span class=ln>122</span><span class=cl>
+</span></span><span class=line><span class=ln>123</span><span class=cl><span class=c1>-- Trig funcs work in radians, by the way.</span>
+</span></span><span class=line><span class=ln>124</span><span class=cl>
+</span></span><span class=line><span class=ln>125</span><span class=cl><span class=c1>-- Calls with one string param don&#39;t need parens:</span>
+</span></span><span class=line><span class=ln>126</span><span class=cl><span class=n>print</span> <span class=s1>&#39;hello&#39;</span>  <span class=c1>-- Works fine.</span>
+</span></span><span class=line><span class=ln>127</span><span class=cl>
+</span></span><span class=line><span class=ln>128</span><span class=cl>
+</span></span><span class=line><span class=ln>129</span><span class=cl><span class=c1>----------------------------------------------------</span>
+</span></span><span class=line><span class=ln>130</span><span class=cl><span class=c1>-- 3. Tables.</span>
+</span></span><span class=line><span class=ln>131</span><span class=cl><span class=c1>----------------------------------------------------</span>
+</span></span><span class=line><span class=ln>132</span><span class=cl>
+</span></span><span class=line><span class=ln>133</span><span class=cl><span class=c1>-- Tables = Lua&#39;s only compound data structure;</span>
+</span></span><span class=line><span class=ln>134</span><span class=cl><span class=c1>--          they are associative arrays.</span>
+</span></span><span class=line><span class=ln>135</span><span class=cl><span class=c1>-- Similar to php arrays or js objects, they are</span>
+</span></span><span class=line><span class=ln>136</span><span class=cl><span class=c1>-- hash-lookup dicts that can also be used as lists.</span>
+</span></span><span class=line><span class=ln>137</span><span class=cl>
+</span></span><span class=line><span class=ln>138</span><span class=cl><span class=c1>-- Using tables as dictionaries / maps:</span>
+</span></span><span class=line><span class=ln>139</span><span class=cl>
+</span></span><span class=line><span class=ln>140</span><span class=cl><span class=c1>-- Dict literals have string keys by default:</span>
+</span></span><span class=line><span class=ln>141</span><span class=cl><span class=n>t</span> <span class=o>=</span> <span class=p>{</span><span class=n>key1</span> <span class=o>=</span> <span class=s1>&#39;value1&#39;</span><span class=p>,</span> <span class=n>key2</span> <span class=o>=</span> <span class=kc>false</span><span class=p>}</span>
+</span></span><span class=line><span class=ln>142</span><span class=cl>
+</span></span><span class=line><span class=ln>143</span><span class=cl><span class=c1>-- String keys can use js-like dot notation:</span>
+</span></span><span class=line><span class=ln>144</span><span class=cl><span class=n>print</span><span class=p>(</span><span class=n>t.key1</span><span class=p>)</span>  <span class=c1>-- Prints &#39;value1&#39;.</span>
+</span></span><span class=line><span class=ln>145</span><span class=cl><span class=n>t.newKey</span> <span class=o>=</span> <span class=p>{}</span>  <span class=c1>-- Adds a new key/value pair.</span>
+</span></span><span class=line><span class=ln>146</span><span class=cl><span class=n>t.key2</span> <span class=o>=</span> <span class=kc>nil</span>   <span class=c1>-- Removes key2 from the table.</span>
+</span></span><span class=line><span class=ln>147</span><span class=cl>
+</span></span><span class=line><span class=ln>148</span><span class=cl><span class=c1>-- Literal notation for any (non-nil) value as key:</span>
+</span></span><span class=line><span class=ln>149</span><span class=cl><span class=n>u</span> <span class=o>=</span> <span class=p>{[</span><span class=s1>&#39;@!#&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=s1>&#39;qbert&#39;</span><span class=p>,</span> <span class=p>[{}]</span> <span class=o>=</span> <span class=mi>1729</span><span class=p>,</span> <span class=p>[</span><span class=mf>6.28</span><span class=p>]</span> <span class=o>=</span> <span class=s1>&#39;tau&#39;</span><span class=p>}</span>
+</span></span><span class=line><span class=ln>150</span><span class=cl><span class=n>print</span><span class=p>(</span><span class=n>u</span><span class=p>[</span><span class=mf>6.28</span><span class=p>])</span>  <span class=c1>-- prints &#34;tau&#34;</span>
+</span></span><span class=line><span class=ln>151</span><span class=cl>
+</span></span><span class=line><span class=ln>152</span><span class=cl><span class=c1>-- Key matching is basically by value for numbers</span>
+</span></span><span class=line><span class=ln>153</span><span class=cl><span class=c1>-- and strings, but by identity for tables.</span>
+</span></span><span class=line><span class=ln>154</span><span class=cl><span class=n>a</span> <span class=o>=</span> <span class=n>u</span><span class=p>[</span><span class=s1>&#39;@!#&#39;</span><span class=p>]</span>  <span class=c1>-- Now a = &#39;qbert&#39;.</span>
+</span></span><span class=line><span class=ln>155</span><span class=cl><span class=n>b</span> <span class=o>=</span> <span class=n>u</span><span class=p>[{}]</span>     <span class=c1>-- We might expect 1729, but it&#39;s nil:</span>
+</span></span><span class=line><span class=ln>156</span><span class=cl><span class=c1>-- b = nil since the lookup fails. It fails</span>
+</span></span><span class=line><span class=ln>157</span><span class=cl><span class=c1>-- because the key we used is not the same object</span>
+</span></span><span class=line><span class=ln>158</span><span class=cl><span class=c1>-- as the one used to store the original value. So</span>
+</span></span><span class=line><span class=ln>159</span><span class=cl><span class=c1>-- strings &amp; numbers are more portable keys.</span>
+</span></span><span class=line><span class=ln>160</span><span class=cl>
+</span></span><span class=line><span class=ln>161</span><span class=cl><span class=c1>-- A one-table-param function call needs no parens:</span>
+</span></span><span class=line><span class=ln>162</span><span class=cl><span class=kr>function</span> <span class=nf>h</span><span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=n>print</span><span class=p>(</span><span class=n>x.key1</span><span class=p>)</span> <span class=kr>end</span>
+</span></span><span class=line><span class=ln>163</span><span class=cl><span class=n>h</span><span class=p>{</span><span class=n>key1</span> <span class=o>=</span> <span class=s1>&#39;Sonmi~451&#39;</span><span class=p>}</span>  <span class=c1>-- Prints &#39;Sonmi~451&#39;.</span>
+</span></span><span class=line><span class=ln>164</span><span class=cl>
+</span></span><span class=line><span class=ln>165</span><span class=cl><span class=kr>for</span> <span class=n>key</span><span class=p>,</span> <span class=n>val</span> <span class=kr>in</span> <span class=n>pairs</span><span class=p>(</span><span class=n>u</span><span class=p>)</span> <span class=kr>do</span>  <span class=c1>-- Table iteration.</span>
+</span></span><span class=line><span class=ln>166</span><span class=cl>  <span class=n>print</span><span class=p>(</span><span class=n>key</span><span class=p>,</span> <span class=n>val</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>167</span><span class=cl><span class=kr>end</span>
+</span></span><span class=line><span class=ln>168</span><span class=cl>
+</span></span><span class=line><span class=ln>169</span><span class=cl><span class=c1>-- _G is a special table of all globals.</span>
+</span></span><span class=line><span class=ln>170</span><span class=cl><span class=n>print</span><span class=p>(</span><span class=n>_G</span><span class=p>[</span><span class=s1>&#39;_G&#39;</span><span class=p>]</span> <span class=o>==</span> <span class=n>_G</span><span class=p>)</span>  <span class=c1>-- Prints &#39;true&#39;.</span>
+</span></span><span class=line><span class=ln>171</span><span class=cl>
+</span></span><span class=line><span class=ln>172</span><span class=cl><span class=c1>-- Using tables as lists / arrays:</span>
+</span></span><span class=line><span class=ln>173</span><span class=cl>
+</span></span><span class=line><span class=ln>174</span><span class=cl><span class=c1>-- List literals implicitly set up int keys:</span>
+</span></span><span class=line><span class=ln>175</span><span class=cl><span class=n>v</span> <span class=o>=</span> <span class=p>{</span><span class=s1>&#39;value1&#39;</span><span class=p>,</span> <span class=s1>&#39;value2&#39;</span><span class=p>,</span> <span class=mf>1.21</span><span class=p>,</span> <span class=s1>&#39;gigawatts&#39;</span><span class=p>}</span>
+</span></span><span class=line><span class=ln>176</span><span class=cl><span class=kr>for</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>1</span><span class=p>,</span> <span class=o>#</span><span class=n>v</span> <span class=kr>do</span>  <span class=c1>-- #v is the size of v for lists.</span>
+</span></span><span class=line><span class=ln>177</span><span class=cl>  <span class=n>print</span><span class=p>(</span><span class=n>v</span><span class=p>[</span><span class=n>i</span><span class=p>])</span>  <span class=c1>-- Indices start at 1 !! SO CRAZY!</span>
+</span></span><span class=line><span class=ln>178</span><span class=cl><span class=kr>end</span>
+</span></span><span class=line><span class=ln>179</span><span class=cl><span class=c1>-- A &#39;list&#39; is not a real type. v is just a table</span>
+</span></span><span class=line><span class=ln>180</span><span class=cl><span class=c1>-- with consecutive integer keys, treated as a list.</span>
+</span></span><span class=line><span class=ln>181</span><span class=cl>
+</span></span><span class=line><span class=ln>182</span><span class=cl><span class=c1>----------------------------------------------------</span>
+</span></span><span class=line><span class=ln>183</span><span class=cl><span class=c1>-- 3.1 Metatables and metamethods.</span>
+</span></span><span class=line><span class=ln>184</span><span class=cl><span class=c1>----------------------------------------------------</span>
+</span></span><span class=line><span class=ln>185</span><span class=cl>
+</span></span><span class=line><span class=ln>186</span><span class=cl><span class=c1>-- A table can have a metatable that gives the table</span>
+</span></span><span class=line><span class=ln>187</span><span class=cl><span class=c1>-- operator-overloadish behavior. Later we&#39;ll see</span>
+</span></span><span class=line><span class=ln>188</span><span class=cl><span class=c1>-- how metatables support js-prototypey behavior.</span>
+</span></span><span class=line><span class=ln>189</span><span class=cl>
+</span></span><span class=line><span class=ln>190</span><span class=cl><span class=n>f1</span> <span class=o>=</span> <span class=p>{</span><span class=n>a</span> <span class=o>=</span> <span class=mi>1</span><span class=p>,</span> <span class=n>b</span> <span class=o>=</span> <span class=mi>2</span><span class=p>}</span>  <span class=c1>-- Represents the fraction a/b.</span>
+</span></span><span class=line><span class=ln>191</span><span class=cl><span class=n>f2</span> <span class=o>=</span> <span class=p>{</span><span class=n>a</span> <span class=o>=</span> <span class=mi>2</span><span class=p>,</span> <span class=n>b</span> <span class=o>=</span> <span class=mi>3</span><span class=p>}</span>
+</span></span><span class=line><span class=ln>192</span><span class=cl>
+</span></span><span class=line><span class=ln>193</span><span class=cl><span class=c1>-- This would fail:</span>
+</span></span><span class=line><span class=ln>194</span><span class=cl><span class=c1>-- s = f1 + f2</span>
+</span></span><span class=line><span class=ln>195</span><span class=cl>
+</span></span><span class=line><span class=ln>196</span><span class=cl><span class=n>metafraction</span> <span class=o>=</span> <span class=p>{}</span>
+</span></span><span class=line><span class=ln>197</span><span class=cl><span class=kr>function</span> <span class=nc>metafraction</span><span class=p>.</span><span class=nf>__add</span><span class=p>(</span><span class=n>f1</span><span class=p>,</span> <span class=n>f2</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>198</span><span class=cl>  <span class=n>sum</span> <span class=o>=</span> <span class=p>{}</span>
+</span></span><span class=line><span class=ln>199</span><span class=cl>  <span class=n>sum.b</span> <span class=o>=</span> <span class=n>f1.b</span> <span class=o>*</span> <span class=n>f2.b</span>
+</span></span><span class=line><span class=ln>200</span><span class=cl>  <span class=n>sum.a</span> <span class=o>=</span> <span class=n>f1.a</span> <span class=o>*</span> <span class=n>f2.b</span> <span class=o>+</span> <span class=n>f2.a</span> <span class=o>*</span> <span class=n>f1.b</span>
+</span></span><span class=line><span class=ln>201</span><span class=cl>  <span class=kr>return</span> <span class=n>sum</span>
+</span></span><span class=line><span class=ln>202</span><span class=cl><span class=kr>end</span>
+</span></span><span class=line><span class=ln>203</span><span class=cl>
+</span></span><span class=line><span class=ln>204</span><span class=cl><span class=n>setmetatable</span><span class=p>(</span><span class=n>f1</span><span class=p>,</span> <span class=n>metafraction</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>205</span><span class=cl><span class=n>setmetatable</span><span class=p>(</span><span class=n>f2</span><span class=p>,</span> <span class=n>metafraction</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>206</span><span class=cl>
+</span></span><span class=line><span class=ln>207</span><span class=cl><span class=n>s</span> <span class=o>=</span> <span class=n>f1</span> <span class=o>+</span> <span class=n>f2</span>  <span class=c1>-- call __add(f1, f2) on f1&#39;s metatable</span>
+</span></span><span class=line><span class=ln>208</span><span class=cl>
+</span></span><span class=line><span class=ln>209</span><span class=cl><span class=c1>-- f1, f2 have no key for their metatable, unlike</span>
+</span></span><span class=line><span class=ln>210</span><span class=cl><span class=c1>-- prototypes in js, so you must retrieve it as in</span>
+</span></span><span class=line><span class=ln>211</span><span class=cl><span class=c1>-- getmetatable(f1). The metatable is a normal table</span>
+</span></span><span class=line><span class=ln>212</span><span class=cl><span class=c1>-- with keys that Lua knows about, like __add.</span>
+</span></span><span class=line><span class=ln>213</span><span class=cl>
+</span></span><span class=line><span class=ln>214</span><span class=cl><span class=c1>-- But the next line fails since s has no metatable:</span>
+</span></span><span class=line><span class=ln>215</span><span class=cl><span class=c1>-- t = s + s</span>
+</span></span><span class=line><span class=ln>216</span><span class=cl><span class=c1>-- Class-like patterns given below would fix this.</span>
+</span></span><span class=line><span class=ln>217</span><span class=cl>
+</span></span><span class=line><span class=ln>218</span><span class=cl><span class=c1>-- An __index on a metatable overloads dot lookups:</span>
+</span></span><span class=line><span class=ln>219</span><span class=cl><span class=n>defaultFavs</span> <span class=o>=</span> <span class=p>{</span><span class=n>animal</span> <span class=o>=</span> <span class=s1>&#39;gru&#39;</span><span class=p>,</span> <span class=n>food</span> <span class=o>=</span> <span class=s1>&#39;donuts&#39;</span><span class=p>}</span>
+</span></span><span class=line><span class=ln>220</span><span class=cl><span class=n>myFavs</span> <span class=o>=</span> <span class=p>{</span><span class=n>food</span> <span class=o>=</span> <span class=s1>&#39;pizza&#39;</span><span class=p>}</span>
+</span></span><span class=line><span class=ln>221</span><span class=cl><span class=n>setmetatable</span><span class=p>(</span><span class=n>myFavs</span><span class=p>,</span> <span class=p>{</span><span class=n>__index</span> <span class=o>=</span> <span class=n>defaultFavs</span><span class=p>})</span>
+</span></span><span class=line><span class=ln>222</span><span class=cl><span class=n>eatenBy</span> <span class=o>=</span> <span class=n>myFavs.animal</span>  <span class=c1>-- works! thanks, metatable</span>
+</span></span><span class=line><span class=ln>223</span><span class=cl>
+</span></span><span class=line><span class=ln>224</span><span class=cl><span class=c1>-- Direct table lookups that fail will retry using</span>
+</span></span><span class=line><span class=ln>225</span><span class=cl><span class=c1>-- the metatable&#39;s __index value, and this recurses.</span>
+</span></span><span class=line><span class=ln>226</span><span class=cl>
+</span></span><span class=line><span class=ln>227</span><span class=cl><span class=c1>-- An __index value can also be a function(tbl, key)</span>
+</span></span><span class=line><span class=ln>228</span><span class=cl><span class=c1>-- for more customized lookups.</span>
+</span></span><span class=line><span class=ln>229</span><span class=cl>
+</span></span><span class=line><span class=ln>230</span><span class=cl><span class=c1>-- Values of __index,add, .. are called metamethods.</span>
+</span></span><span class=line><span class=ln>231</span><span class=cl><span class=c1>-- Full list. Here a is a table with the metamethod.</span>
+</span></span><span class=line><span class=ln>232</span><span class=cl>
+</span></span><span class=line><span class=ln>233</span><span class=cl><span class=c1>-- __add(a, b)                     for a + b</span>
+</span></span><span class=line><span class=ln>234</span><span class=cl><span class=c1>-- __sub(a, b)                     for a - b</span>
+</span></span><span class=line><span class=ln>235</span><span class=cl><span class=c1>-- __mul(a, b)                     for a * b</span>
+</span></span><span class=line><span class=ln>236</span><span class=cl><span class=c1>-- __div(a, b)                     for a / b</span>
+</span></span><span class=line><span class=ln>237</span><span class=cl><span class=c1>-- __mod(a, b)                     for a % b</span>
+</span></span><span class=line><span class=ln>238</span><span class=cl><span class=c1>-- __pow(a, b)                     for a ^ b</span>
+</span></span><span class=line><span class=ln>239</span><span class=cl><span class=c1>-- __unm(a)                        for -a</span>
+</span></span><span class=line><span class=ln>240</span><span class=cl><span class=c1>-- __concat(a, b)                  for a .. b</span>
+</span></span><span class=line><span class=ln>241</span><span class=cl><span class=c1>-- __len(a)                        for #a</span>
+</span></span><span class=line><span class=ln>242</span><span class=cl><span class=c1>-- __eq(a, b)                      for a == b</span>
+</span></span><span class=line><span class=ln>243</span><span class=cl><span class=c1>-- __lt(a, b)                      for a &lt; b</span>
+</span></span><span class=line><span class=ln>244</span><span class=cl><span class=c1>-- __le(a, b)                      for a &lt;= b</span>
+</span></span><span class=line><span class=ln>245</span><span class=cl><span class=c1>-- __index(a, b)  &lt;fn or a table&gt;  for a.b</span>
+</span></span><span class=line><span class=ln>246</span><span class=cl><span class=c1>-- __newindex(a, b, c)             for a.b = c</span>
+</span></span><span class=line><span class=ln>247</span><span class=cl><span class=c1>-- __call(a, ...)                  for a(...)</span>
+</span></span><span class=line><span class=ln>248</span><span class=cl>
+</span></span><span class=line><span class=ln>249</span><span class=cl><span class=c1>----------------------------------------------------</span>
+</span></span><span class=line><span class=ln>250</span><span class=cl><span class=c1>-- 3.2 Class-like tables and inheritance.</span>
+</span></span><span class=line><span class=ln>251</span><span class=cl><span class=c1>----------------------------------------------------</span>
+</span></span><span class=line><span class=ln>252</span><span class=cl>
+</span></span><span class=line><span class=ln>253</span><span class=cl><span class=c1>-- Classes aren&#39;t built in; there are different ways</span>
+</span></span><span class=line><span class=ln>254</span><span class=cl><span class=c1>-- to make them using tables and metatables.</span>
+</span></span><span class=line><span class=ln>255</span><span class=cl>
+</span></span><span class=line><span class=ln>256</span><span class=cl><span class=c1>-- Explanation for this example is below it.</span>
+</span></span><span class=line><span class=ln>257</span><span class=cl>
+</span></span><span class=line><span class=ln>258</span><span class=cl><span class=n>Dog</span> <span class=o>=</span> <span class=p>{}</span>                                   <span class=c1>-- 1.</span>
+</span></span><span class=line><span class=ln>259</span><span class=cl>
+</span></span><span class=line><span class=ln>260</span><span class=cl><span class=kr>function</span> <span class=nc>Dog</span><span class=p>:</span><span class=nf>new</span><span class=p>()</span>                         <span class=c1>-- 2.</span>
+</span></span><span class=line><span class=ln>261</span><span class=cl>  <span class=n>newObj</span> <span class=o>=</span> <span class=p>{</span><span class=n>sound</span> <span class=o>=</span> <span class=s1>&#39;woof&#39;</span><span class=p>}</span>                <span class=c1>-- 3.</span>
+</span></span><span class=line><span class=ln>262</span><span class=cl>  <span class=n>self.__index</span> <span class=o>=</span> <span class=n>self</span>                      <span class=c1>-- 4.</span>
+</span></span><span class=line><span class=ln>263</span><span class=cl>  <span class=kr>return</span> <span class=n>setmetatable</span><span class=p>(</span><span class=n>newObj</span><span class=p>,</span> <span class=n>self</span><span class=p>)</span>        <span class=c1>-- 5.</span>
+</span></span><span class=line><span class=ln>264</span><span class=cl><span class=kr>end</span>
+</span></span><span class=line><span class=ln>265</span><span class=cl>
+</span></span><span class=line><span class=ln>266</span><span class=cl><span class=kr>function</span> <span class=nc>Dog</span><span class=p>:</span><span class=nf>makeSound</span><span class=p>()</span>                   <span class=c1>-- 6.</span>
+</span></span><span class=line><span class=ln>267</span><span class=cl>  <span class=n>print</span><span class=p>(</span><span class=s1>&#39;I say &#39;</span> <span class=o>..</span> <span class=n>self.sound</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>268</span><span class=cl><span class=kr>end</span>
+</span></span><span class=line><span class=ln>269</span><span class=cl>
+</span></span><span class=line><span class=ln>270</span><span class=cl><span class=n>mrDog</span> <span class=o>=</span> <span class=n>Dog</span><span class=p>:</span><span class=n>new</span><span class=p>()</span>                          <span class=c1>-- 7.</span>
+</span></span><span class=line><span class=ln>271</span><span class=cl><span class=n>mrDog</span><span class=p>:</span><span class=n>makeSound</span><span class=p>()</span>  <span class=c1>-- &#39;I say woof&#39;         -- 8.</span>
+</span></span><span class=line><span class=ln>272</span><span class=cl>
+</span></span><span class=line><span class=ln>273</span><span class=cl><span class=c1>-- 1. Dog acts like a class; it&#39;s really a table.</span>
+</span></span><span class=line><span class=ln>274</span><span class=cl><span class=c1>-- 2. function tablename:fn(...) is the same as</span>
+</span></span><span class=line><span class=ln>275</span><span class=cl><span class=c1>--    function tablename.fn(self, ...)</span>
+</span></span><span class=line><span class=ln>276</span><span class=cl><span class=c1>--    The : just adds a first arg called self.</span>
+</span></span><span class=line><span class=ln>277</span><span class=cl><span class=c1>--    Read 7 &amp; 8 below for how self gets its value.</span>
+</span></span><span class=line><span class=ln>278</span><span class=cl><span class=c1>-- 3. newObj will be an instance of class Dog.</span>
+</span></span><span class=line><span class=ln>279</span><span class=cl><span class=c1>-- 4. self = the class being instantiated. Often</span>
+</span></span><span class=line><span class=ln>280</span><span class=cl><span class=c1>--    self = Dog, but inheritance can change it.</span>
+</span></span><span class=line><span class=ln>281</span><span class=cl><span class=c1>--    newObj gets self&#39;s functions when we set both</span>
+</span></span><span class=line><span class=ln>282</span><span class=cl><span class=c1>--    newObj&#39;s metatable and self&#39;s __index to self.</span>
+</span></span><span class=line><span class=ln>283</span><span class=cl><span class=c1>-- 5. Reminder: setmetatable returns its first arg.</span>
+</span></span><span class=line><span class=ln>284</span><span class=cl><span class=c1>-- 6. The : works as in 2, but this time we expect</span>
+</span></span><span class=line><span class=ln>285</span><span class=cl><span class=c1>--    self to be an instance instead of a class.</span>
+</span></span><span class=line><span class=ln>286</span><span class=cl><span class=c1>-- 7. Same as Dog.new(Dog), so self = Dog in new().</span>
+</span></span><span class=line><span class=ln>287</span><span class=cl><span class=c1>-- 8. Same as mrDog.makeSound(mrDog); self = mrDog.</span>
+</span></span><span class=line><span class=ln>288</span><span class=cl>
+</span></span><span class=line><span class=ln>289</span><span class=cl><span class=c1>----------------------------------------------------</span>
+</span></span><span class=line><span class=ln>290</span><span class=cl>
+</span></span><span class=line><span class=ln>291</span><span class=cl><span class=c1>-- Inheritance example:</span>
+</span></span><span class=line><span class=ln>292</span><span class=cl>
+</span></span><span class=line><span class=ln>293</span><span class=cl><span class=n>LoudDog</span> <span class=o>=</span> <span class=n>Dog</span><span class=p>:</span><span class=n>new</span><span class=p>()</span>                           <span class=c1>-- 1.</span>
+</span></span><span class=line><span class=ln>294</span><span class=cl>
+</span></span><span class=line><span class=ln>295</span><span class=cl><span class=kr>function</span> <span class=nc>LoudDog</span><span class=p>:</span><span class=nf>makeSound</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>296</span><span class=cl>  <span class=n>s</span> <span class=o>=</span> <span class=n>self.sound</span> <span class=o>..</span> <span class=s1>&#39; &#39;</span>                       <span class=c1>-- 2.</span>
+</span></span><span class=line><span class=ln>297</span><span class=cl>  <span class=n>print</span><span class=p>(</span><span class=n>s</span> <span class=o>..</span> <span class=n>s</span> <span class=o>..</span> <span class=n>s</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>298</span><span class=cl><span class=kr>end</span>
+</span></span><span class=line><span class=ln>299</span><span class=cl>
+</span></span><span class=line><span class=ln>300</span><span class=cl><span class=n>seymour</span> <span class=o>=</span> <span class=n>LoudDog</span><span class=p>:</span><span class=n>new</span><span class=p>()</span>                       <span class=c1>-- 3.</span>
+</span></span><span class=line><span class=ln>301</span><span class=cl><span class=n>seymour</span><span class=p>:</span><span class=n>makeSound</span><span class=p>()</span>  <span class=c1>-- &#39;woof woof woof&#39;      -- 4.</span>
+</span></span><span class=line><span class=ln>302</span><span class=cl>
+</span></span><span class=line><span class=ln>303</span><span class=cl><span class=c1>-- 1. LoudDog gets Dog&#39;s methods and variables.</span>
+</span></span><span class=line><span class=ln>304</span><span class=cl><span class=c1>-- 2. self has a &#39;sound&#39; key from new(), see 3.</span>
+</span></span><span class=line><span class=ln>305</span><span class=cl><span class=c1>-- 3. Same as LoudDog.new(LoudDog), and converted to</span>
+</span></span><span class=line><span class=ln>306</span><span class=cl><span class=c1>--    Dog.new(LoudDog) as LoudDog has no &#39;new&#39; key,</span>
+</span></span><span class=line><span class=ln>307</span><span class=cl><span class=c1>--    but does have __index = Dog on its metatable.</span>
+</span></span><span class=line><span class=ln>308</span><span class=cl><span class=c1>--    Result: seymour&#39;s metatable is LoudDog, and</span>
+</span></span><span class=line><span class=ln>309</span><span class=cl><span class=c1>--    LoudDog.__index = LoudDog. So seymour.key will</span>
+</span></span><span class=line><span class=ln>310</span><span class=cl><span class=c1>--    = seymour.key, LoudDog.key, Dog.key, whichever</span>
+</span></span><span class=line><span class=ln>311</span><span class=cl><span class=c1>--    table is the first with the given key.</span>
+</span></span><span class=line><span class=ln>312</span><span class=cl><span class=c1>-- 4. The &#39;makeSound&#39; key is found in LoudDog; this</span>
+</span></span><span class=line><span class=ln>313</span><span class=cl><span class=c1>--    is the same as LoudDog.makeSound(seymour).</span>
+</span></span><span class=line><span class=ln>314</span><span class=cl>
+</span></span><span class=line><span class=ln>315</span><span class=cl><span class=c1>-- If needed, a subclass&#39;s new() is like the base&#39;s:</span>
+</span></span><span class=line><span class=ln>316</span><span class=cl><span class=kr>function</span> <span class=nc>LoudDog</span><span class=p>:</span><span class=nf>new</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>317</span><span class=cl>  <span class=n>newObj</span> <span class=o>=</span> <span class=p>{}</span>
+</span></span><span class=line><span class=ln>318</span><span class=cl>  <span class=c1>-- set up newObj</span>
+</span></span><span class=line><span class=ln>319</span><span class=cl>  <span class=n>self.__index</span> <span class=o>=</span> <span class=n>self</span>
+</span></span><span class=line><span class=ln>320</span><span class=cl>  <span class=kr>return</span> <span class=n>setmetatable</span><span class=p>(</span><span class=n>newObj</span><span class=p>,</span> <span class=n>self</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>321</span><span class=cl><span class=kr>end</span>
+</span></span><span class=line><span class=ln>322</span><span class=cl>
+</span></span><span class=line><span class=ln>323</span><span class=cl><span class=c1>----------------------------------------------------</span>
+</span></span><span class=line><span class=ln>324</span><span class=cl><span class=c1>-- 4. Modules.</span>
+</span></span><span class=line><span class=ln>325</span><span class=cl><span class=c1>----------------------------------------------------</span>
+</span></span><span class=line><span class=ln>326</span><span class=cl>
+</span></span><span class=line><span class=ln>327</span><span class=cl>
+</span></span><span class=line><span class=ln>328</span><span class=cl><span class=cm>--[[ I&#39;m commenting out this section so the rest of
+</span></span></span><span class=line><span class=ln>329</span><span class=cl><span class=cm>--   this script remains runnable.
+</span></span></span><span class=line><span class=ln>330</span><span class=cl><span class=cm>-- Suppose the file mod.lua looks like this:
+</span></span></span><span class=line><span class=ln>331</span><span class=cl><span class=cm>local M = {}
+</span></span></span><span class=line><span class=ln>332</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>333</span><span class=cl><span class=cm>local function sayMyName()
+</span></span></span><span class=line><span class=ln>334</span><span class=cl><span class=cm>  print(&#39;Hrunkner&#39;)
+</span></span></span><span class=line><span class=ln>335</span><span class=cl><span class=cm>end
+</span></span></span><span class=line><span class=ln>336</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>337</span><span class=cl><span class=cm>function M.sayHello()
+</span></span></span><span class=line><span class=ln>338</span><span class=cl><span class=cm>  print(&#39;Why hello there&#39;)
+</span></span></span><span class=line><span class=ln>339</span><span class=cl><span class=cm>  sayMyName()
+</span></span></span><span class=line><span class=ln>340</span><span class=cl><span class=cm>end
+</span></span></span><span class=line><span class=ln>341</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>342</span><span class=cl><span class=cm>return M
+</span></span></span><span class=line><span class=ln>343</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>344</span><span class=cl><span class=cm>-- Another file can use mod.lua&#39;s functionality:
+</span></span></span><span class=line><span class=ln>345</span><span class=cl><span class=cm>local mod = require(&#39;mod&#39;)  -- Run the file mod.lua.
+</span></span></span><span class=line><span class=ln>346</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>347</span><span class=cl><span class=cm>-- require is the standard way to include modules.
+</span></span></span><span class=line><span class=ln>348</span><span class=cl><span class=cm>-- require acts like:     (if not cached; see below)
+</span></span></span><span class=line><span class=ln>349</span><span class=cl><span class=cm>local mod = (function ()
+</span></span></span><span class=line><span class=ln>350</span><span class=cl><span class=cm>  &lt;contents of mod.lua&gt;
+</span></span></span><span class=line><span class=ln>351</span><span class=cl><span class=cm>end)()
+</span></span></span><span class=line><span class=ln>352</span><span class=cl><span class=cm>-- It&#39;s like mod.lua is a function body, so that
+</span></span></span><span class=line><span class=ln>353</span><span class=cl><span class=cm>-- locals inside mod.lua are invisible outside it.
+</span></span></span><span class=line><span class=ln>354</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>355</span><span class=cl><span class=cm>-- This works because mod here = M in mod.lua:
+</span></span></span><span class=line><span class=ln>356</span><span class=cl><span class=cm>mod.sayHello()  -- Says hello to Hrunkner.
+</span></span></span><span class=line><span class=ln>357</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>358</span><span class=cl><span class=cm>-- This is wrong; sayMyName only exists in mod.lua:
+</span></span></span><span class=line><span class=ln>359</span><span class=cl><span class=cm>mod.sayMyName()  -- error
+</span></span></span><span class=line><span class=ln>360</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>361</span><span class=cl><span class=cm>-- require&#39;s return values are cached so a file is
+</span></span></span><span class=line><span class=ln>362</span><span class=cl><span class=cm>-- run at most once, even when require&#39;d many times.
+</span></span></span><span class=line><span class=ln>363</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>364</span><span class=cl><span class=cm>-- Suppose mod2.lua contains &#34;print(&#39;Hi!&#39;)&#34;.
+</span></span></span><span class=line><span class=ln>365</span><span class=cl><span class=cm>local a = require(&#39;mod2&#39;)  -- Prints Hi!
+</span></span></span><span class=line><span class=ln>366</span><span class=cl><span class=cm>local b = require(&#39;mod2&#39;)  -- Doesn&#39;t print; a=b.
+</span></span></span><span class=line><span class=ln>367</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>368</span><span class=cl><span class=cm>-- dofile is like require without caching:
+</span></span></span><span class=line><span class=ln>369</span><span class=cl><span class=cm>dofile(&#39;mod2.lua&#39;)  --&gt; Hi!
+</span></span></span><span class=line><span class=ln>370</span><span class=cl><span class=cm>dofile(&#39;mod2.lua&#39;)  --&gt; Hi! (runs it again)
+</span></span></span><span class=line><span class=ln>371</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>372</span><span class=cl><span class=cm>-- loadfile loads a lua file but doesn&#39;t run it yet.
+</span></span></span><span class=line><span class=ln>373</span><span class=cl><span class=cm>f = loadfile(&#39;mod2.lua&#39;)  -- Call f() to run it.
+</span></span></span><span class=line><span class=ln>374</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>375</span><span class=cl><span class=cm>-- loadstring is loadfile for strings.
+</span></span></span><span class=line><span class=ln>376</span><span class=cl><span class=cm>g = loadstring(&#39;print(343)&#39;)  -- Returns a function.
+</span></span></span><span class=line><span class=ln>377</span><span class=cl><span class=cm>g()  -- Prints out 343; nothing printed before now.
+</span></span></span><span class=line><span class=ln>378</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>379</span><span class=cl><span class=cm>--]]</span>
+</span></span><span class=line><span class=ln>380</span><span class=cl>
+</span></span><span class=line><span class=ln>381</span><span class=cl><span class=c1>----------------------------------------------------</span>
+</span></span><span class=line><span class=ln>382</span><span class=cl><span class=c1>-- 5. References.</span>
+</span></span><span class=line><span class=ln>383</span><span class=cl><span class=c1>----------------------------------------------------</span>
+</span></span><span class=line><span class=ln>384</span><span class=cl>
+</span></span><span class=line><span class=ln>385</span><span class=cl><span class=cm>--[[
+</span></span></span><span class=line><span class=ln>386</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>387</span><span class=cl><span class=cm>I was excited to learn Lua so I could make games
+</span></span></span><span class=line><span class=ln>388</span><span class=cl><span class=cm>with the Löve 2D game engine. That&#39;s the why.
+</span></span></span><span class=line><span class=ln>389</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>390</span><span class=cl><span class=cm>I started with BlackBulletIV&#39;s Lua for programmers.
+</span></span></span><span class=line><span class=ln>391</span><span class=cl><span class=cm>Next I read the official Programming in Lua book.
+</span></span></span><span class=line><span class=ln>392</span><span class=cl><span class=cm>That&#39;s the how.
+</span></span></span><span class=line><span class=ln>393</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>394</span><span class=cl><span class=cm>It might be helpful to check out the Lua short
+</span></span></span><span class=line><span class=ln>395</span><span class=cl><span class=cm>reference on lua-users.org.
+</span></span></span><span class=line><span class=ln>396</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>397</span><span class=cl><span class=cm>The main topics not covered are standard libraries:
+</span></span></span><span class=line><span class=ln>398</span><span class=cl><span class=cm> * string library
+</span></span></span><span class=line><span class=ln>399</span><span class=cl><span class=cm> * table library
+</span></span></span><span class=line><span class=ln>400</span><span class=cl><span class=cm> * math library
+</span></span></span><span class=line><span class=ln>401</span><span class=cl><span class=cm> * io library
+</span></span></span><span class=line><span class=ln>402</span><span class=cl><span class=cm> * os library
+</span></span></span><span class=line><span class=ln>403</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>404</span><span class=cl><span class=cm>By the way, this entire file is valid Lua; save it
+</span></span></span><span class=line><span class=ln>405</span><span class=cl><span class=cm>as learn.lua and run it with &#34;lua learn.lua&#34; !
+</span></span></span><span class=line><span class=ln>406</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>407</span><span class=cl><span class=cm>This was first written for tylerneylon.com. It&#39;s
+</span></span></span><span class=line><span class=ln>408</span><span class=cl><span class=cm>also available as a github gist. Tutorials for other
+</span></span></span><span class=line><span class=ln>409</span><span class=cl><span class=cm>languages, in the same style as this one, are here:
+</span></span></span><span class=line><span class=ln>410</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>411</span><span class=cl><span class=cm>http://learnxinyminutes.com/
+</span></span></span><span class=line><span class=ln>412</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>413</span><span class=cl><span class=cm>Have fun with Lua!
+</span></span></span><span class=line><span class=ln>414</span><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=ln>415</span><span class=cl><span class=cm>--]]</span>
+</span></span></code></pre></div></div><div class=post_comments><script src=https://giscus.app/client.js data-repo=111qqz/111qqz.github.io data-repo-id='MDEwOlJlcG9zaXRvcnkxODYwNDY3NTQ=' data-category=Announcements data-category-id=DIC_kwDOCxbZIs4C3Y8D data-mapping=pathname data-strict=1 data-reactions-enabled=1 data-emit-metadata=1 data-input-position=bottom data-theme=preferred_color_scheme data-lang=zh-CN crossorigin=anonymous async></script></div></article><aside class=sidebar><section class=sidebar_inner><h2>111qqz</h2><div class=author_bio>ex-ICPCer@HUST, engineer@Tencent</div><a href=https://111qqz.com/top/about/ class="button mt-1" role=button title=阅读更多>阅读更多</a><h2 class=mt-4>最新文章</h2><ul class=flex-column><li><a href=https://111qqz.com/2020/06caffe-notes/ class=nav-link title="caffe 源码阅读笔记">caffe 源码阅读笔记</a></li><li><a href=https://111qqz.com/2023/12cupy-torch-import-order-impact/ class=nav-link title="[施工中] cupy与torch的导入顺序不同对计算结果的影响">[施工中] cupy与torch的导入顺序不同对计算结果的影响</a></li><li><a href=https://111qqz.com/2023/01build-onnxruntime-with-bazel/ class=nav-link title="Build Onnxruntime With Bazel">Build Onnxruntime With Bazel</a></li><li><a href=https://111qqz.com/2022/12Specify-User-to-Run-Docker-Executor-in-Gitlab-Ci/ class=nav-link title="【施工中】gitlab ci docker executor指定用户执行">【施工中】gitlab ci docker executor指定用户执行</a></li><li><a href=https://111qqz.com/2022/08caffe-source-code-analysis-part12/ class=nav-link title="[施工中]caffe 源码学习笔记(11) softmax">[施工中]caffe 源码学习笔记(11) softmax</a></li><li><a href=https://111qqz.com/2022/04cpp-value-categories/ class=nav-link title="浅谈 Cpp Value Categories">浅谈 Cpp Value Categories</a></li><li><a href=https://111qqz.com/2022/04redis-notes/ class=nav-link title=redis学习笔记>redis学习笔记</a></li><li><a href=https://111qqz.com/2022/03ledeldb-notes-06/ class=nav-link title="[施工中] levelDB 代码阅读笔记 06 iterator">[施工中] levelDB 代码阅读笔记 06 iterator</a></li><li><a href=https://111qqz.com/2022/03ledeldb-notes-05/ class=nav-link title="levelDB 代码阅读笔记 05 arena">levelDB 代码阅读笔记 05 arena</a></li><li><a href=https://111qqz.com/2022/03ledeldb-notes-04/ class=nav-link title="levelDB 代码阅读笔记 04 filter">levelDB 代码阅读笔记 04 filter</a></li></ul><div><h2 class="mt-4 taxonomy" id=categories-section>分类</h2><nav class=tags_nav><a href=https://111qqz.com/categories/acm/ class="post_tag button button_translucent" title=acm>ACM
 <span class=button_tally>913</span>
 </a><a href=https://111qqz.com/categories/%E5%85%B6%E4%BB%96/ class="post_tag button button_translucent" title=其他>其他
 <span class=button_tally>90</span>

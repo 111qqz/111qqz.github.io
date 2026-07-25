@@ -20,24 +20,25 @@ master,chief worker,Supervisor 这几个概念有点搞不清（我最菜.jpg  
 </a><a href=https://111qqz.com/tags/tensorflow title=tensorflow class="post_tag button button_translucent">tensorflow</a></span></div><div class=post_body><p>update:supervisor的缺点是遇到问题只会抛异常，所以现在有一个better的管理工具,<a href=https://www.tensorflow.org/api_docs/python/tf/train/MonitoredSession>MonitoredSession</a></p><p>master,chief worker,Supervisor 这几个概念有点搞不清（我最菜.jpg  因此来学习一下。</p><h2 id=概述>概述</h2><p>原生的tensorflow 是各种东西都需要自己手动，如果是小规模的训练问题倒是不大，但是如果是训练的数据量比较大，可能需要训练几天或者几个月。。。</p><p>那原生的tensorflow的健壮性可能就比较堪忧。。。</p><p>万一断电了之类。。。</p><p>这时候我们就可以使用supervisor</p><p>其主要提供下面三个功能，以增强训练的健壮性：</p><pre><code>  * Handles shutdowns and crashes cleanly.
   * Can be resumed after a shutdown or a crash.
   * Can be monitored through TensorBoard.
-</code></pre><p>supervisor可以看做一个工具，或者说是对原生tensorflow的一层封装，目的主要是通过定期save的方法增强训练健壮性，</p><p>就算程序挂掉了也可以从上一次save的checkpoint恢复，而不是从头再来（虽然这些也可以手动实现（？）</p><p>同时也可以简化代码量</p><p>除了supervisor,还有tf.learn库，里面提供对原生tensorflow更高层的封装，也提供更丰富的功能。</p><h2 id=实例>实例</h2><p>来举个具体的例子好了：</p><p>在不使用supervisor的时候，我们的训练代码如下：</p><pre><code>variables
-...
-ops
-...
-summary_op
-...
-merge_all_summarie
-saver
-init_op
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>with tf.Session<span class=o>()</span> as sess:
-</span></span><span class=line><span class=ln>2</span><span class=cl>  <span class=nv>writer</span> <span class=o>=</span> tf.tf.train.SummaryWriter<span class=o>()</span>
-</span></span><span class=line><span class=ln>3</span><span class=cl>  sess.run<span class=o>(</span>init<span class=o>)</span>
-</span></span><span class=line><span class=ln>4</span><span class=cl>  saver.restore<span class=o>()</span>
-</span></span><span class=line><span class=ln>5</span><span class=cl>  <span class=k>for</span> ...:
-</span></span><span class=line><span class=ln>6</span><span class=cl>    train
-</span></span><span class=line><span class=ln>7</span><span class=cl>    <span class=nv>merged_summary</span> <span class=o>=</span> sess.run<span class=o>(</span>merge_all_summarie<span class=o>)</span>
-</span></span><span class=line><span class=ln>8</span><span class=cl>    writer.add_summary<span class=o>(</span>merged_summary,i<span class=o>)</span>
-</span></span><span class=line><span class=ln>9</span><span class=cl>  saver.save
+</code></pre><p>supervisor可以看做一个工具，或者说是对原生tensorflow的一层封装，目的主要是通过定期save的方法增强训练健壮性，</p><p>就算程序挂掉了也可以从上一次save的checkpoint恢复，而不是从头再来（虽然这些也可以手动实现（？）</p><p>同时也可以简化代码量</p><p>除了supervisor,还有tf.learn库，里面提供对原生tensorflow更高层的封装，也提供更丰富的功能。</p><h2 id=实例>实例</h2><p>来举个具体的例子好了：</p><p>在不使用supervisor的时候，我们的训练代码如下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=ln> 1</span><span class=cl><span class=n>variables</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=p>...</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=n>ops</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl><span class=p>...</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=n>summary_op</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=p>...</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=n>merge_all_summarie</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl><span class=n>saver</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl><span class=n>init_op</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>
+</span></span><span class=line><span class=ln>11</span><span class=cl><span class=n>with</span> <span class=n>tf</span><span class=p>.</span><span class=n>Session</span><span class=p>()</span> <span class=n>as</span> <span class=nl>sess</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>  <span class=n>writer</span> <span class=o>=</span> <span class=n>tf</span><span class=p>.</span><span class=n>tf</span><span class=p>.</span><span class=n>train</span><span class=p>.</span><span class=n>SummaryWriter</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>  <span class=n>sess</span><span class=p>.</span><span class=n>run</span><span class=p>(</span><span class=n>init</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>  <span class=n>saver</span><span class=p>.</span><span class=n>restore</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>  <span class=k>for</span> <span class=p>...</span><span class=o>:</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>    <span class=n>train</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>    <span class=n>merged_summary</span> <span class=o>=</span> <span class=n>sess</span><span class=p>.</span><span class=n>run</span><span class=p>(</span><span class=n>merge_all_summarie</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>    <span class=n>writer</span><span class=p>.</span><span class=n>add_summary</span><span class=p>(</span><span class=n>merged_summary</span><span class=p>,</span><span class=n>i</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>  <span class=n>saver</span><span class=p>.</span><span class=n>save</span>
 </span></span></code></pre></div><p>如果使用supervisor，代码如下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl><span class=kn>import</span> <span class=nn>tensorflow</span> <span class=k>as</span> <span class=nn>tf</span>
 </span></span><span class=line><span class=ln> 2</span><span class=cl><span class=n>a</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>Variable</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span>
 </span></span><span class=line><span class=ln> 3</span><span class=cl><span class=n>b</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>Variable</span><span class=p>(</span><span class=mi>2</span><span class=p>)</span>

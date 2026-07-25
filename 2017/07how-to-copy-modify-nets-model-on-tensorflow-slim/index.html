@@ -22,34 +22,36 @@
 </span></span><span class=line><span class=ln>3</span><span class=cl>        <span class=n>num_classes</span><span class=o>=</span><span class=p>(</span><span class=n>dataset</span><span class=o>.</span><span class=n>num_classes</span> <span class=o>-</span> <span class=n>FLAGS</span><span class=o>.</span><span class=n>labels_offset</span><span class=p>),</span>
 </span></span><span class=line><span class=ln>4</span><span class=cl>        <span class=n>weight_decay</span><span class=o>=</span><span class=n>FLAGS</span><span class=o>.</span><span class=n>weight_decay</span><span class=p>,</span>
 </span></span><span class=line><span class=ln>5</span><span class=cl>        <span class=n>is_training</span><span class=o>=</span><span class=kc>True</span><span class=p>)</span>
-</span></span></code></pre></div><p>调用了nets_factory.get_network_fn，get_network如下：</p><pre><code>def get_network_fn(name, num_classes, weight_decay=0.0, is_training=False):
-  &quot;&quot;&quot;Returns a network_fn such as `logits, end_points = network_fn(images)`.
-
-  Args:
-    name: The name of the network.
-    num_classes: The number of classes to use for classification.
-    weight_decay: The l2 coefficient for the model weights.
-    is_training: `True` if the model is being used for training and `False`
-      otherwise.
-</code></pre><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl>  <span class=n>Returns</span><span class=p>:</span>
-</span></span><span class=line><span class=ln> 2</span><span class=cl>    <span class=n>network_fn</span><span class=p>:</span> <span class=n>A</span> <span class=n>function</span> <span class=n>that</span> <span class=n>applies</span> <span class=n>the</span> <span class=n>model</span> <span class=n>to</span> <span class=n>a</span> <span class=n>batch</span> <span class=n>of</span> <span class=n>images</span><span class=o>.</span> <span class=n>It</span> <span class=n>has</span>
-</span></span><span class=line><span class=ln> 3</span><span class=cl>      <span class=n>the</span> <span class=n>following</span> <span class=n>signature</span><span class=p>:</span>
-</span></span><span class=line><span class=ln> 4</span><span class=cl>        <span class=n>logits</span><span class=p>,</span> <span class=n>end_points</span> <span class=o>=</span> <span class=n>network_fn</span><span class=p>(</span><span class=n>images</span><span class=p>)</span>
-</span></span><span class=line><span class=ln> 5</span><span class=cl>  <span class=n>Raises</span><span class=p>:</span>
-</span></span><span class=line><span class=ln> 6</span><span class=cl>    <span class=ne>ValueError</span><span class=p>:</span> <span class=n>If</span> <span class=n>network</span> <span class=err>`</span><span class=n>name</span><span class=err>`</span> <span class=ow>is</span> <span class=ow>not</span> <span class=n>recognized</span><span class=o>.</span>
-</span></span><span class=line><span class=ln> 7</span><span class=cl>  <span class=s2>&#34;&#34;&#34;
-</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=s2>  if name not in networks_map:
-</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=s2>    raise ValueError(&#39;Name of network unknown </span><span class=si>%s</span><span class=s2>&#39; % name)
-</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=s2>  func = networks_map[name]
-</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=s2>  @functools.wraps(func)
-</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=s2>  def network_fn(images):
-</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=s2>    arg_scope = arg_scopes_map[name](weight_decay=weight_decay)
-</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=s2>    with slim.arg_scope(arg_scope):
-</span></span></span><span class=line><span class=ln>15</span><span class=cl><span class=s2>      return func(images, num_classes, is_training=is_training)
-</span></span></span><span class=line><span class=ln>16</span><span class=cl><span class=s2>  if hasattr(func, &#39;default_image_size&#39;):
-</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=s2>    network_fn.default_image_size = func.default_image_size
-</span></span></span></code></pre></div><pre><code>  return network_fn
-</code></pre><p>我们看到model name 是通过 networks_map映射到func的</p><p>因此需要添加对于我们新的model,kk_v2的映射</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl><span class=n>networks_map</span> <span class=o>=</span> <span class=p>{</span><span class=s1>&#39;alexnet_v2&#39;</span><span class=p>:</span> <span class=n>alexnet</span><span class=o>.</span><span class=n>alexnet_v2</span><span class=p>,</span>
+</span></span></code></pre></div><p>调用了nets_factory.get_network_fn，get_network如下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl><span class=k>def</span> <span class=nf>get_network_fn</span><span class=p>(</span><span class=n>name</span><span class=p>,</span> <span class=n>num_classes</span><span class=p>,</span> <span class=n>weight_decay</span><span class=o>=</span><span class=mf>0.0</span><span class=p>,</span> <span class=n>is_training</span><span class=o>=</span><span class=kc>False</span><span class=p>):</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>  <span class=s2>&#34;&#34;&#34;Returns a network_fn such as `logits, end_points = network_fn(images)`.
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=s2>  Args:
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=s2>    name: The name of the network.
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=s2>    num_classes: The number of classes to use for classification.
+</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=s2>    weight_decay: The l2 coefficient for the model weights.
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=s2>    is_training: `True` if the model is being used for training and `False`
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=s2>      otherwise.
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=s2>  Returns:
+</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=s2>    network_fn: A function that applies the model to a batch of images. It has
+</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=s2>      the following signature:
+</span></span></span><span class=line><span class=ln>14</span><span class=cl><span class=s2>        logits, end_points = network_fn(images)
+</span></span></span><span class=line><span class=ln>15</span><span class=cl><span class=s2>  Raises:
+</span></span></span><span class=line><span class=ln>16</span><span class=cl><span class=s2>    ValueError: If network `name` is not recognized.
+</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=s2>  &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>  <span class=k>if</span> <span class=n>name</span> <span class=ow>not</span> <span class=ow>in</span> <span class=n>networks_map</span><span class=p>:</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>    <span class=k>raise</span> <span class=ne>ValueError</span><span class=p>(</span><span class=s1>&#39;Name of network unknown </span><span class=si>%s</span><span class=s1>&#39;</span> <span class=o>%</span> <span class=n>name</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl>  <span class=n>func</span> <span class=o>=</span> <span class=n>networks_map</span><span class=p>[</span><span class=n>name</span><span class=p>]</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl>  <span class=nd>@functools.wraps</span><span class=p>(</span><span class=n>func</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>22</span><span class=cl>  <span class=k>def</span> <span class=nf>network_fn</span><span class=p>(</span><span class=n>images</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>23</span><span class=cl>    <span class=n>arg_scope</span> <span class=o>=</span> <span class=n>arg_scopes_map</span><span class=p>[</span><span class=n>name</span><span class=p>](</span><span class=n>weight_decay</span><span class=o>=</span><span class=n>weight_decay</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>24</span><span class=cl>    <span class=k>with</span> <span class=n>slim</span><span class=o>.</span><span class=n>arg_scope</span><span class=p>(</span><span class=n>arg_scope</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>25</span><span class=cl>      <span class=k>return</span> <span class=n>func</span><span class=p>(</span><span class=n>images</span><span class=p>,</span> <span class=n>num_classes</span><span class=p>,</span> <span class=n>is_training</span><span class=o>=</span><span class=n>is_training</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>26</span><span class=cl>  <span class=k>if</span> <span class=nb>hasattr</span><span class=p>(</span><span class=n>func</span><span class=p>,</span> <span class=s1>&#39;default_image_size&#39;</span><span class=p>):</span>
+</span></span><span class=line><span class=ln>27</span><span class=cl>    <span class=n>network_fn</span><span class=o>.</span><span class=n>default_image_size</span> <span class=o>=</span> <span class=n>func</span><span class=o>.</span><span class=n>default_image_size</span>
+</span></span><span class=line><span class=ln>28</span><span class=cl>
+</span></span><span class=line><span class=ln>29</span><span class=cl>  <span class=k>return</span> <span class=n>network_fn</span>
+</span></span></code></pre></div><p>我们看到model name 是通过 networks_map映射到func的</p><p>因此需要添加对于我们新的model,kk_v2的映射</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=ln> 1</span><span class=cl><span class=n>networks_map</span> <span class=o>=</span> <span class=p>{</span><span class=s1>&#39;alexnet_v2&#39;</span><span class=p>:</span> <span class=n>alexnet</span><span class=o>.</span><span class=n>alexnet_v2</span><span class=p>,</span>
 </span></span><span class=line><span class=ln> 2</span><span class=cl>                <span class=s1>&#39;cifarnet&#39;</span><span class=p>:</span> <span class=n>cifarnet</span><span class=o>.</span><span class=n>cifarnet</span><span class=p>,</span>
 </span></span><span class=line><span class=ln> 3</span><span class=cl>                <span class=s1>&#39;overfeat&#39;</span><span class=p>:</span> <span class=n>overfeat</span><span class=o>.</span><span class=n>overfeat</span><span class=p>,</span>
 </span></span><span class=line><span class=ln> 4</span><span class=cl>                <span class=s1>&#39;vgg_a&#39;</span><span class=p>:</span> <span class=n>vgg</span><span class=o>.</span><span class=n>vgg_a</span><span class=p>,</span>
