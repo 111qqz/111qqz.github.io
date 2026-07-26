@@ -1,26 +1,82 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>6.828 on 111qqz的小窝</title><link>https://111qqz.com/tags/6.828/</link><description>Recent content in 6.828 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh</language><copyright>Copyright © 2012-2026 all rights reserved.</copyright><lastBuildDate>Sun, 03 Mar 2019 12:45:25 +0000</lastBuildDate><atom:link href="https://111qqz.com/tags/6.828/index.xml" rel="self" type="application/rss+xml"/><item><title>【施工中】MIT 6.828 lab 3: User Environments</title><link>https://111qqz.com/2019/03mit-6-828-lab-3-user-environments/</link><pubDate>Sun, 03 Mar 2019 12:45:25 +0000</pubDate><guid>https://111qqz.com/2019/03mit-6-828-lab-3-user-environments/</guid><description>
-&lt;p>JOS的environments基本可以理解成&amp;quot;process&amp;quot;进程的同义词，但是由于&amp;quot;process&amp;quot;是一个unix术语，因此使用environment这个词．&lt;/p></description></item><item><title>【施工完毕】MIT 6.828 lab 2: Memory Management</title><link>https://111qqz.com/2019/02mit-6-828-lab-2/</link><pubDate>Thu, 14 Feb 2019 14:01:46 +0000</pubDate><guid>https://111qqz.com/2019/02mit-6-828-lab-2/</guid><description>
-&lt;h3 id="2019年2月24完成了除了challenge以外的全部练习和问题-总共花费15个小时">2019年2月24:完成了除了&amp;quot;Challenge&amp;quot;以外的全部练习和问题. 总共花费15个小时.&lt;/h3>
-&lt;h3 id="2019年2月26完成challenge-2应该是最简单的一个orz只花了不到一个小时">2019年2月26:完成&amp;quot;Challenge 2&amp;quot;(应该是最简单的一个orz，只花了不到一个小时)&lt;/h3>
-&lt;h2 id="part-1-physical-page-management">Part 1: Physical Page Management&lt;/h2>
-&lt;p>操作系统必须时刻追踪哪些物理内存在使用，哪些物理内存没有在使用。&lt;/p></description></item><item><title>【施工完成】MIT 6.828 lab 1: C, Assembly, Tools and Bootstrapping</title><link>https://111qqz.com/2019/01mit-6-828-lab-1/</link><pubDate>Thu, 24 Jan 2019 12:27:58 +0000</pubDate><guid>https://111qqz.com/2019/01mit-6-828-lab-1/</guid><description>
-&lt;h2 id="花费了30小时终于搞定了orz">花费了30+小时，终于搞定了orz&lt;/h2>
-&lt;h2 id="part-1-pc-bootstrap">Part 1: PC Bootstrap&lt;/h2>
-&lt;h3 id="the-pcs-physical-address-space">The PC&amp;rsquo;s Physical Address Space&lt;/h3>
-&lt;h4 id="80868088时代">8086/8088时代&lt;/h4>
-&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-lua" data-lang="lua">&lt;span class="line">&lt;span class="ln"> 1&lt;/span>&lt;span class="cl">&lt;span class="o">+------------------+&lt;/span> &lt;span class="o">&amp;lt;-&lt;/span> &lt;span class="mh">0x00100000&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="n">MB&lt;/span>&lt;span class="p">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 2&lt;/span>&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="n">BIOS&lt;/span> &lt;span class="n">ROM&lt;/span> &lt;span class="o">|&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 3&lt;/span>&lt;span class="cl">&lt;span class="o">+------------------+&lt;/span> &lt;span class="o">&amp;lt;-&lt;/span> &lt;span class="mh">0x000F0000&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="mi">960&lt;/span>&lt;span class="n">KB&lt;/span>&lt;span class="p">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 4&lt;/span>&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="mi">16&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="n">bit&lt;/span> &lt;span class="n">devices&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">|&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 5&lt;/span>&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="n">expansion&lt;/span> &lt;span class="n">ROMs&lt;/span> &lt;span class="o">|&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 6&lt;/span>&lt;span class="cl">&lt;span class="o">+------------------+&lt;/span> &lt;span class="o">&amp;lt;-&lt;/span> &lt;span class="mh">0x000C0000&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="mi">768&lt;/span>&lt;span class="n">KB&lt;/span>&lt;span class="p">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 7&lt;/span>&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="n">VGA&lt;/span> &lt;span class="n">Display&lt;/span> &lt;span class="o">|&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 8&lt;/span>&lt;span class="cl">&lt;span class="o">+------------------+&lt;/span> &lt;span class="o">&amp;lt;-&lt;/span> &lt;span class="mh">0x000A0000&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="mi">640&lt;/span>&lt;span class="n">KB&lt;/span>&lt;span class="p">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 9&lt;/span>&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="o">|&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">10&lt;/span>&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="n">Low&lt;/span> &lt;span class="n">Memory&lt;/span> &lt;span class="o">|&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">11&lt;/span>&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="o">|&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">12&lt;/span>&lt;span class="cl">&lt;span class="o">+------------------+&lt;/span> &lt;span class="o">&amp;lt;-&lt;/span> &lt;span class="mh">0x00000000&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>由于8086/8088只有20跟地址线，因此物理内存空间就是2^20=1MB.地址空间从0x00000到0xFFFFF.其中从0x00000开始的640k空间被称为&amp;quot;low memory&amp;quot;，是PC真正能使用的RAM。从 0xA0000 到 0xFFFFF　的384k的non-volatile memory被硬件保留，用作video display buffers和BIOS等。&lt;/p></description></item><item><title>【施工中】MIT 6.828 Operating System Engineering 学习笔记</title><link>https://111qqz.com/2019/01mit-6-828-overview/</link><pubDate>Tue, 15 Jan 2019 16:39:18 +0000</pubDate><guid>https://111qqz.com/2019/01mit-6-828-overview/</guid><description>
-&lt;p>&lt;a href="https://pdos.csail.mit.edu/6.828/2018/index.html">课程主页&lt;/a>&lt;/p>
-&lt;p>这课稍微有点硬核&amp;hellip;感觉基础稍微有些不扎实就做不下去orz.&lt;/p>
-&lt;p>网上似乎是有博客写了6.828的学习笔记，不过我更希望自己能够独立完成，二手的知识，谁知道是对的错的呢&amp;hellip;况且课程本身给的参考资料应该还是足够多的。&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>6.828 on 111qqz的小窝</title><link>https://111qqz.com/tags/6.828/</link><description>Recent content in 6.828 on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>© 2026 111qqz</copyright><lastBuildDate>Sun, 03 Mar 2019 12:45:25 +0000</lastBuildDate><atom:link href="https://111qqz.com/tags/6.828/index.xml" rel="self" type="application/rss+xml"/><item><title>【施工中】MIT 6.828 lab 3: User Environments</title><link>https://111qqz.com/2019/03mit-6-828-lab-3-user-environments/</link><pubDate>Sun, 03 Mar 2019 12:45:25 +0000</pubDate><guid>https://111qqz.com/2019/03mit-6-828-lab-3-user-environments/</guid><description>&lt;p&gt;JOS的environments基本可以理解成&amp;quot;process&amp;quot;进程的同义词，但是由于&amp;quot;process&amp;quot;是一个unix术语，因此使用environment这个词．&lt;/p&gt;</description></item><item><title>【施工完毕】MIT 6.828 lab 2: Memory Management</title><link>https://111qqz.com/2019/02mit-6-828-lab-2/</link><pubDate>Thu, 14 Feb 2019 14:01:46 +0000</pubDate><guid>https://111qqz.com/2019/02mit-6-828-lab-2/</guid><description>&lt;h3 class="relative group"&gt;2019年2月24:完成了除了&amp;quot;Challenge&amp;quot;以外的全部练习和问题. 总共花费15个小时.
+ &lt;div id="2019年2月24完成了除了challenge以外的全部练习和问题-总共花费15个小时" class="anchor"&gt;&lt;/div&gt;
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#2019%e5%b9%b42%e6%9c%8824%e5%ae%8c%e6%88%90%e4%ba%86%e9%99%a4%e4%ba%86challenge%e4%bb%a5%e5%a4%96%e7%9a%84%e5%85%a8%e9%83%a8%e7%bb%83%e4%b9%a0%e5%92%8c%e9%97%ae%e9%a2%98-%e6%80%bb%e5%85%b1%e8%8a%b1%e8%b4%b915%e4%b8%aa%e5%b0%8f%e6%97%b6" aria-label="锚点"&gt;#&lt;/a&gt;
+ &lt;/span&gt;
+ 
+&lt;/h3&gt;
+
+&lt;h3 class="relative group"&gt;2019年2月26:完成&amp;quot;Challenge 2&amp;quot;(应该是最简单的一个orz，只花了不到一个小时)
+ &lt;div id="2019年2月26完成challenge-2应该是最简单的一个orz只花了不到一个小时" class="anchor"&gt;&lt;/div&gt;
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#2019%e5%b9%b42%e6%9c%8826%e5%ae%8c%e6%88%90challenge-2%e5%ba%94%e8%af%a5%e6%98%af%e6%9c%80%e7%ae%80%e5%8d%95%e7%9a%84%e4%b8%80%e4%b8%aaorz%e5%8f%aa%e8%8a%b1%e4%ba%86%e4%b8%8d%e5%88%b0%e4%b8%80%e4%b8%aa%e5%b0%8f%e6%97%b6" aria-label="锚点"&gt;#&lt;/a&gt;
+ &lt;/span&gt;
+ 
+&lt;/h3&gt;
+
+&lt;h2 class="relative group"&gt;Part 1: Physical Page Management
+ &lt;div id="part-1-physical-page-management" class="anchor"&gt;&lt;/div&gt;
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#part-1-physical-page-management" aria-label="锚点"&gt;#&lt;/a&gt;
+ &lt;/span&gt;
+ 
+&lt;/h2&gt;
+&lt;p&gt;操作系统必须时刻追踪哪些物理内存在使用，哪些物理内存没有在使用。&lt;/p&gt;</description></item><item><title>【施工完成】MIT 6.828 lab 1: C, Assembly, Tools and Bootstrapping</title><link>https://111qqz.com/2019/01mit-6-828-lab-1/</link><pubDate>Thu, 24 Jan 2019 12:27:58 +0000</pubDate><guid>https://111qqz.com/2019/01mit-6-828-lab-1/</guid><description>&lt;h2 class="relative group"&gt;花费了30+小时，终于搞定了orz
+ &lt;div id="花费了30小时终于搞定了orz" class="anchor"&gt;&lt;/div&gt;
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#%e8%8a%b1%e8%b4%b9%e4%ba%8630%e5%b0%8f%e6%97%b6%e7%bb%88%e4%ba%8e%e6%90%9e%e5%ae%9a%e4%ba%86orz" aria-label="锚点"&gt;#&lt;/a&gt;
+ &lt;/span&gt;
+ 
+&lt;/h2&gt;
+
+&lt;h2 class="relative group"&gt;Part 1: PC Bootstrap
+ &lt;div id="part-1-pc-bootstrap" class="anchor"&gt;&lt;/div&gt;
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#part-1-pc-bootstrap" aria-label="锚点"&gt;#&lt;/a&gt;
+ &lt;/span&gt;
+ 
+&lt;/h2&gt;
+
+&lt;h3 class="relative group"&gt;The PC&amp;rsquo;s Physical Address Space
+ &lt;div id="the-pcs-physical-address-space" class="anchor"&gt;&lt;/div&gt;
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#the-pcs-physical-address-space" aria-label="锚点"&gt;#&lt;/a&gt;
+ &lt;/span&gt;
+ 
+&lt;/h3&gt;
+
+&lt;h4 class="relative group"&gt;8086/8088时代
+ &lt;div id="80868088时代" class="anchor"&gt;&lt;/div&gt;
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#80868088%e6%97%b6%e4%bb%a3" aria-label="锚点"&gt;#&lt;/a&gt;
+ &lt;/span&gt;
+ 
+&lt;/h4&gt;
+&lt;div class="highlight-wrapper"&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-lua" data-lang="lua"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 1&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;+------------------+&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="mh"&gt;0x00100000&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="n"&gt;MB&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 2&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;BIOS&lt;/span&gt; &lt;span class="n"&gt;ROM&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 3&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;+------------------+&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="mh"&gt;0x000F0000&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;960&lt;/span&gt;&lt;span class="n"&gt;KB&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 4&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="mi"&gt;16&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;bit&lt;/span&gt; &lt;span class="n"&gt;devices&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 5&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;expansion&lt;/span&gt; &lt;span class="n"&gt;ROMs&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 6&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;+------------------+&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="mh"&gt;0x000C0000&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;768&lt;/span&gt;&lt;span class="n"&gt;KB&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 7&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;VGA&lt;/span&gt; &lt;span class="n"&gt;Display&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 8&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;+------------------+&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="mh"&gt;0x000A0000&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;640&lt;/span&gt;&lt;span class="n"&gt;KB&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 9&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;10&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;Low&lt;/span&gt; &lt;span class="n"&gt;Memory&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;11&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;12&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;+------------------+&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="mh"&gt;0x00000000&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;由于8086/8088只有20跟地址线，因此物理内存空间就是2^20=1MB.地址空间从0x00000到0xFFFFF.其中从0x00000开始的640k空间被称为&amp;quot;low memory&amp;quot;，是PC真正能使用的RAM。从 0xA0000 到 0xFFFFF　的384k的non-volatile memory被硬件保留，用作video display buffers和BIOS等。&lt;/p&gt;</description></item><item><title>【施工中】MIT 6.828 Operating System Engineering 学习笔记</title><link>https://111qqz.com/2019/01mit-6-828-overview/</link><pubDate>Tue, 15 Jan 2019 16:39:18 +0000</pubDate><guid>https://111qqz.com/2019/01mit-6-828-overview/</guid><description>&lt;p&gt;&lt;a href="https://pdos.csail.mit.edu/6.828/2018/index.html" target="_blank" rel="noreferrer"&gt;课程主页&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;这课稍微有点硬核&amp;hellip;感觉基础稍微有些不扎实就做不下去orz.&lt;/p&gt;</description></item></channel></rss>
