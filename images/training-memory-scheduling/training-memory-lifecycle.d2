@@ -1,0 +1,52 @@
+direction: right
+
+Title: 训练 Iteration 显存生命周期与依赖 {
+  shape: text
+  style.bold: true
+  style.font-size: 24
+}
+
+"常驻状态 (Persistent)": {
+  style.stroke: green
+  "Parameters"
+  "Optimizer States"
+}
+
+"Forward (生成 Activation)": {
+  style.stroke: blue
+  direction: right
+  "Act L1" -> "Act L2" -> "Act L3" -> "Act L4"
+}
+
+"Backward (计算 Gradient)": {
+  style.stroke: orange
+  direction: right
+  "Grad L4" -> "Grad L3" -> "Grad L2" -> "Grad L1"
+}
+
+"Optimizer (参数更新)": {
+  style.stroke: red
+  "Optimizer Step"
+}
+
+# Dependencies
+"Forward (生成 Activation)"."Act L4" -> "Backward (计算 Gradient)"."Grad L4": "依赖" {
+  style.stroke-dash: 4
+  style.stroke: blue
+}
+"Forward (生成 Activation)"."Act L3" -> "Backward (计算 Gradient)"."Grad L3": "依赖 (长存活期)" {
+  style.stroke-dash: 4
+  style.stroke: blue
+}
+"Forward (生成 Activation)"."Act L2" -> "Backward (计算 Gradient)"."Grad L2": "依赖 (长存活期)" {
+  style.stroke-dash: 4
+  style.stroke: blue
+}
+"Forward (生成 Activation)"."Act L1" -> "Backward (计算 Gradient)"."Grad L1": "依赖 (最长存活期)" {
+  style.stroke-dash: 4
+  style.stroke: blue
+}
+
+"Backward (计算 Gradient)"."Grad L1" -> "Optimizer (参数更新)"."Optimizer Step"
+"常驻状态 (Persistent)"."Parameters" -> "Optimizer (参数更新)"."Optimizer Step" {style.stroke-dash: 4}
+"常驻状态 (Persistent)"."Optimizer States" -> "Optimizer (参数更新)"."Optimizer Step" {style.stroke-dash: 4}

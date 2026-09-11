@@ -1,0 +1,30 @@
+direction: down
+
+R: Tensor 申请 N bytes {
+    style.bold: true
+}
+C: allocator 中有\n合适的 cached block? {
+    shape: diamond
+}
+Reuse: 复用 cached block
+Alloc: 向 CUDA 申请新 Segment {
+    style.stroke: blue
+}
+Split: 从 Segment 中切出 block
+Ret: 返回 block 给 Tensor {
+    style.stroke: green
+}
+Free: Tensor 生命周期结束 {
+    style.stroke: red
+}
+Mark: Block 标记为 free\n留在 allocator cache
+TryMerge: 尝试与相邻 free block 合并
+
+R -> C
+C -> Reuse: 有
+C -> Alloc: 没有
+Alloc -> Split
+Split -> Ret
+Reuse -> Ret
+Free -> Mark
+Mark -> TryMerge

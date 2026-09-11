@@ -1,0 +1,50 @@
+direction: down
+
+ControlPlane: {
+  style.stroke: blue
+  style.stroke-dash: 4
+
+  DatasetMetadata: { style.stroke: blue }
+  Scheduler: { style.stroke: blue }
+  DatasetVersionManifest: { style.stroke: blue }
+}
+
+DataPlane: {
+  style.stroke: blue
+  style.stroke-dash: 4
+
+  DistributedStorage: { style.stroke: green }
+  DataWorker1: { style.stroke: blue }
+  DataWorker2: { style.stroke: blue }
+  DataWorker3: { style.stroke: blue }
+  MemoryCache1: { style.stroke: blue }
+  MemoryCache2: { style.stroke: blue }
+  MemoryCache3: { style.stroke: blue }
+  TrainerPrefetchBuffer: { style.stroke: blue }
+  GPUTrainer: {
+    style.stroke: blue
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  DistributedStorage -> DataWorker1
+  DistributedStorage -> DataWorker2
+  DistributedStorage -> DataWorker3
+
+  DataWorker1 -> MemoryCache1
+  DataWorker2 -> MemoryCache2
+  DataWorker3 -> MemoryCache3
+
+  MemoryCache1 -> TrainerPrefetchBuffer
+  MemoryCache2 -> TrainerPrefetchBuffer
+  MemoryCache3 -> TrainerPrefetchBuffer
+
+  TrainerPrefetchBuffer -> GPUTrainer
+}
+
+ControlPlane.DatasetMetadata -> ControlPlane.Scheduler
+ControlPlane.DatasetVersionManifest -> ControlPlane.Scheduler
+
+ControlPlane.Scheduler -> DataPlane.DataWorker1
+ControlPlane.Scheduler -> DataPlane.DataWorker2
+ControlPlane.Scheduler -> DataPlane.DataWorker3
