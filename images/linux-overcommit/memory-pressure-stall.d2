@@ -1,0 +1,76 @@
+direction: down
+
+trigger: 触发源头：Memory Pressure 持续升高\n(整机物理内存逼近回收水位线) {
+  shape: rectangle
+  style: {
+    stroke: "#eab308"
+    stroke-width: 3
+    bold: true
+  }
+}
+
+paths: 恶性循环的双向夹击 (Dual-Pincer Stall) {
+  style: {
+    stroke-width: 1
+    stroke-dash: 3
+  }
+
+  path_a: 路径 A：内存分配端受阻 {
+    style: {
+      stroke: "#dc2626"
+      stroke-width: 2
+    }
+
+    dr: 内核 Direct Reclaim\n(直接回收)\n• 申请物理页陷入内核态\n• 必须就地回收旧页才能分配 {
+      shape: rectangle
+    }
+
+    stall: Allocation Stall\n(分配线程挂起)\n• PyTorch / NumPy 分配被卡住\n• 线程失去 CPU 调度，同步等待 {
+      shape: rectangle
+      style: {
+        stroke: "#dc2626"
+        stroke-width: 2
+        bold: true
+      }
+    }
+
+    dr -> stall: 同步阻塞
+  }
+
+  path_b: 路径 B：数据读取端雪崩 {
+    style: {
+      stroke: "#f97316"
+      stroke-width: 2
+    }
+
+    pcr: 回收 Page Cache 页面\n• 物理内存紧缺\n• 训练数据文件缓存被清空 {
+      shape: rectangle
+    }
+
+    io: I/O 穿透到存储底层\n• 缓存未命中率激增\n• 必须重新从磁盘/网络读样本\n• 数据加载延迟剧增 (I/O Latency ↑) {
+      shape: rectangle
+      style: {
+        stroke: "#f97316"
+        stroke-width: 2
+        bold: true
+      }
+    }
+
+    pcr -> io: 缓存击穿
+  }
+}
+
+trigger -> paths.path_a.dr: 强制同步回收
+trigger -> paths.path_b.pcr: 剥夺 I/O 缓冲
+
+result: 恶性共振：Job Throughput 坠崖式下跌 ↓\n• 一边卡在内存分配（等待可用物理页）\n• 一边卡在数据读取（等待底层存储 I/O）\n• 整个节点的训练任务集体表现为“假死卡顿” {
+  shape: rectangle
+  style: {
+    stroke: "#dc2626"
+    stroke-width: 3
+    bold: true
+  }
+}
+
+paths.path_a.stall -> result: 算力挂起
+paths.path_b.io -> result: 数据断供

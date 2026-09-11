@@ -1,0 +1,45 @@
+direction: right
+
+host: 训练机物理节点 (Host Node) {
+  style: {
+    stroke-width: 2
+  }
+
+  storage: 存储系统\n(本地SSD / 共享存储) {
+    shape: cylinder
+  }
+
+  ram: 物理内存池 (Physical RAM) {
+    style: {
+      stroke-width: 3
+    }
+
+    anon: 匿名内存 (Anonymous Memory)\n• 训练进程堆 (Heap)\n• 大块 NumPy 数组与张量\n• 随训练持续写入，只增不减 {
+      shape: rectangle
+      style: {
+        stroke: "#2563eb"
+        stroke-width: 2
+        bold: true
+      }
+    }
+
+    cache: 文件页缓存 (Page Cache)\n• 训练样本数据 I/O 读写缓存\n• 命中时无需磁盘访问\n• 内存吃紧时被内核最先回收 {
+      shape: rectangle
+      style: {
+        stroke: "#16a34a"
+        stroke-width: 2
+        bold: true
+      }
+    }
+
+    anon <-> cache: 空间争夺：匿名页膨胀 ➔ 强行挤压并驱逐 Page Cache {
+      style: {
+        stroke: "#dc2626"
+        stroke-width: 2
+        stroke-dash: 4
+      }
+    }
+  }
+
+  storage -> ram.cache: 读取训练样本
+}

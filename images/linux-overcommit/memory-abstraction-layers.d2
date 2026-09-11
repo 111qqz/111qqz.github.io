@@ -1,0 +1,61 @@
+direction: down
+
+k8s: 1. Kubernetes Scheduler Accounting\n(调度账本口径：用于集群调度与放置打分，不锁定物理内存) {
+  shape: rectangle
+  style: {
+    stroke: "#3b82f6"
+    stroke-width: 2
+    bold: true
+  }
+}
+
+cgroup: 2. Cgroup Enforcement\n(资源限额口径：设置 memory.limit，超限才触发 cgroup 回收/OOM) {
+  shape: rectangle
+  style: {
+    stroke: "#2563eb"
+    stroke-width: 2
+    bold: true
+  }
+}
+
+vm: 3. Virtual Address Space\n(虚拟地址空间：malloc/mmap 申请的 64 位连续地址，仅仅是指针) {
+  shape: rectangle
+  style: {
+    stroke: "#6366f1"
+    stroke-width: 2
+    bold: true
+  }
+}
+
+commit: 4. Memory Commitment\n(系统承诺量：内核承诺分配的内存，overcommit=1 时无限制开白条) {
+  shape: rectangle
+  style: {
+    stroke: "#8b5cf6"
+    stroke-width: 2
+    bold: true
+  }
+}
+
+rss: 5. Resident Pages (RSS)\n(驻留物理页：真正写入并产生 Page Fault 映射到页表的内存) {
+  shape: rectangle
+  style: {
+    stroke: "#ec4899"
+    stroke-width: 2
+    bold: true
+  }
+}
+
+hardware: 6. Physical Capacity\n(真实物理容量：主板上插的真实物理内存条 RAM 容量上限) {
+  shape: rectangle
+  style: {
+    stroke: "#dc2626"
+    stroke-width: 3
+    bold: true
+  }
+}
+
+k8s -> cgroup: 调度与放置
+cgroup -> vm: 容器资源配额
+vm -> commit: 申请分配
+commit -> rss: 运行时写入 (Touch / Fault)
+rss -> hardware: 底层物理承载
