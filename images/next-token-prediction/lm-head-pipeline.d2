@@ -1,12 +1,18 @@
-direction: right
+direction: down
 
-ht: "h_t"
-lmhead: "LM Head（Linear）"
-logits: "logits"
-sm: "softmax"
-dist: "P(next token)"
+stage1: 线性映射 {
+  direction: right
+  ht: "h_t"
+  lmhead: "LM Head（Linear）"
+  logits: "logits"
+  ht -> lmhead -> logits
+}
 
-ht -> lmhead
-lmhead -> logits
-logits -> sm
-sm -> dist
+stage2: 概率分布 {
+  direction: right
+  sm: "softmax"
+  dist: "P(next token)"
+  sm -> dist
+}
+
+stage1 -> stage2

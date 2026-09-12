@@ -1,0 +1,64 @@
+direction: down
+
+stage3: 阶段 3：集群集体假死 (Stall) {
+  style: {
+    stroke: "#dc2626"
+    stroke-width: 2
+  }
+
+  dr_stall: Allocation Stall：分配线程被卡住
+  io_stall: Page Cache 丢失：I/O 穿透到底层存储
+  progress_zero: Useful Progress 趋近于零（算力空转）
+  stuck: 现象：所有 Job 表面存活但集体卡死 {
+    style: {
+      stroke: "#dc2626"
+      stroke-width: 3
+      bold: true
+    }
+  }
+
+  dr_stall -> progress_zero
+  io_stall -> progress_zero
+  progress_zero -> stuck
+}
+
+oom_branch: 极端分支：OOM Killer 触发 {
+  shape: rectangle
+  style: {
+    stroke: "#dc2626"
+    stroke-dash: 4
+  }
+}
+
+stage4: 阶段 4：人工干预与秒级恢复 (Mitigation) {
+  style: {
+    stroke: "#16a34a"
+    stroke-width: 2
+  }
+
+  kill_job: 手动 Kill 掉一个占用极大的训练 Job {
+    shape: oval
+    style.bold: true
+  }
+  free_mem: 瞬间释放数十乃至上百 GB 物理内存
+  pressure_drop: 整机内存压力直接触底解除
+  resume: 恢复：其余所有挂起的 Job 瞬间满血恢复运行！ {
+    style: {
+      stroke: "#16a34a"
+      stroke-width: 3
+      bold: true
+    }
+  }
+
+  kill_job -> free_mem
+  free_mem -> pressure_drop
+  pressure_drop -> resume
+}
+
+stage3.stuck -> stage4.kill_job: 排查发现后手动干涉
+stage3.stuck -> oom_branch: 若持续耗尽至绝对极限 {
+  style: {
+    stroke: "#dc2626"
+    stroke-dash: 4
+  }
+}

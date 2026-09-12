@@ -1,25 +1,31 @@
-direction: right
-GPFS: GPFS {
-  style.stroke: green
-}
-NPY: NPY File\n480MB Sequential Read {
-  style.stroke: blue
-}
-RAM: RAM {
-  style.stroke: green
-}
-FS: Feature Subset\n~72MB {
-  style.stroke: blue
-  style.bold: true
-}
-SI: Shuffle Indices
-T: Training {
-  style.stroke: blue
-  style.bold: true
+direction: down
+
+stage1: 从 GPFS 读 NPY {
+  direction: right
+  GPFS: GPFS {
+    style.stroke: "#16a34a"
+  }
+  NPY: "NPY File\n480MB Sequential Read" {
+    style.stroke: "#2563eb"
+  }
+  RAM: RAM {
+    style.stroke: "#16a34a"
+  }
+  GPFS -> NPY -> RAM
 }
 
-GPFS -> NPY
-NPY -> RAM
-RAM -> FS
-FS -> SI
-SI -> T
+stage2: 取特征并训练 {
+  direction: right
+  FS: "Feature Subset\n~72MB" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  SI: Shuffle Indices
+  T: Training {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  FS -> SI -> T
+}
+
+stage1 -> stage2: 取 feature 子集

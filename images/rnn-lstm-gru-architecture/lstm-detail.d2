@@ -1,52 +1,43 @@
 direction: down
 
-lstm: LSTM 内部结构详情 {
-  shape: package
-  style: {
-    stroke: "#2563eb"
-    stroke-width: 2
-    fill: transparent
-  }
+c_prev: "c_{t-1}\n(上时刻记忆)" { shape: cylinder; style.stroke: "#16a34a" }
+h_prev: "h_{t-1}\n(上时刻隐藏)" { shape: cylinder; style.stroke: "#16a34a" }
+x: "x_t\n(当前输入)" { shape: parallelogram; style.stroke: "#2563eb" }
 
-  c_prev: "c_{t-1}\n(上一时刻记忆)" { shape: cylinder; style.stroke: "#16a34a" }
-  h_prev: "h_{t-1}\n(上一时刻隐藏状态)" { shape: cylinder; style.stroke: "#16a34a" }
-  x: "x_t\n(当前输入)" { shape: parallelogram; style.stroke: "#2563eb" }
+f: "f_t\n忘多少" { shape: rectangle; style.stroke: "#ca8a04" }
+i: "i_t\n写多少" { shape: rectangle; style.stroke: "#2563eb" }
+c_tilde: "c̃_t\n新内容" { shape: rectangle; style.stroke: "#9333ea" }
+o: "o_t\n输出多少" { shape: rectangle; style.stroke: "#dc2626" }
 
-  f: "f_t\n忘多少" { shape: rectangle; style.stroke: "#ca8a04" }
-  i: "i_t\n写多少" { shape: rectangle; style.stroke: "#2563eb" }
-  c_tilde: "c̃_t\n新内容" { shape: rectangle; style.stroke: "#9333ea" }
-  o: "o_t\n输出多少" { shape: rectangle; style.stroke: "#dc2626" }
-  
-  mul_f: "⊙" { shape: circle }
-  add_c: "+" { shape: circle }
-  mul_i: "⊙" { shape: circle }
-  act_c: "tanh" { shape: oval }
-  mul_o: "⊙" { shape: circle }
+mul_f: "⊙" { shape: circle }
+add_c: "+" { shape: circle }
+mul_i: "⊙" { shape: circle }
+act_c: "tanh" { shape: oval }
+mul_o: "⊙" { shape: circle }
 
-  c_curr: "c_t\n(长期记忆)" { shape: cylinder; style.stroke: "#16a34a" }
-  h_curr: "h_t\n(当前输出/短期状态)" { shape: cylinder; style.stroke: "#16a34a" }
+c_curr: "c_t\n(长期记忆)" { shape: cylinder; style.stroke: "#16a34a" }
+h_curr: "h_t\n(输出/短期状态)" { shape: cylinder; style.stroke: "#16a34a" }
 
-  h_prev -> f
-  x -> f
-  h_prev -> i
-  x -> i
-  h_prev -> c_tilde
-  x -> c_tilde
-  h_prev -> o
-  x -> o
+h_prev -> f
+x -> f
+h_prev -> i
+x -> i
+h_prev -> c_tilde
+x -> c_tilde
+h_prev -> o
+x -> o
 
-  c_prev -> mul_f
-  f -> mul_f
-  mul_f -> add_c
-  
-  i -> mul_i
-  c_tilde -> mul_i
-  mul_i -> add_c
-  
-  add_c -> c_curr
-  add_c -> act_c
-  
-  act_c -> mul_o
-  o -> mul_o
-  mul_o -> h_curr
-}
+c_prev -> mul_f
+f -> mul_f
+mul_f -> add_c
+
+i -> mul_i
+c_tilde -> mul_i
+mul_i -> add_c
+
+add_c -> c_curr
+add_c -> act_c
+
+act_c -> mul_o
+o -> mul_o
+mul_o -> h_curr

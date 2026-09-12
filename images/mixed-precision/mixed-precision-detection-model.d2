@@ -1,22 +1,31 @@
-direction: right
+direction: down
 
-Input: {
-  style.stroke: blue
-}
-INT8 Backbone: {
-  style.stroke: green
-  style.bold: true
-}
-INT8 Neck: {
-  style.stroke: green
-  style.bold: true
-}
-FP16/FP32 Head: {
-  style.stroke: orange
-  style.bold: true
-}
-Output: {
-  style.stroke: blue
+stage1: INT8 量化部分 {
+  direction: right
+  Input: {
+    style.stroke: "#2563eb"
+  }
+  Backbone: "INT8 Backbone" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  Neck: "INT8 Neck" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  Input -> Backbone -> Neck
 }
 
-Input -> INT8 Backbone -> INT8 Neck -> FP16/FP32 Head -> Output
+stage2: 高精度头部 {
+  direction: right
+  Head: "FP16/FP32 Head" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+  Output: {
+    style.stroke: "#2563eb"
+  }
+  Head -> Output
+}
+
+stage1 -> stage2

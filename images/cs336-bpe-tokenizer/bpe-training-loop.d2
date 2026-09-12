@@ -1,34 +1,36 @@
-direction: right
+direction: down
 
-A: Corpus {
-  style.stroke: green
-  style.stroke-width: 3
+stage1: 预分词 {
+  direction: right
+  A: Corpus {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+  }
+  B: Pre-tokenization {
+    style.stroke: "#2563eb"
+  }
+  C: Byte sequences {
+    style.stroke: "#2563eb"
+  }
+  A -> B -> C
 }
 
-B: Pre-tokenization {
-  style.stroke: blue
+stage2: 统计与合并循环 {
+  direction: right
+  D: Count adjacent pairs {
+    style.stroke: "#2563eb"
+  }
+  E: Choose best pair {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 3
+  }
+  F: Merge {
+    style.stroke: "#2563eb"
+  }
+  D -> E -> F
+  F -> D: 循环 {
+    style.stroke-dash: 4
+  }
 }
 
-C: Byte sequences {
-  style.stroke: blue
-}
-
-D: Count adjacent pairs {
-  style.stroke: blue
-}
-
-E: Choose best pair {
-  style.stroke: orange
-  style.stroke-width: 3
-}
-
-F: Merge {
-  style.stroke: blue
-}
-
-A -> B
-B -> C
-C -> D
-D -> E
-E -> F
-F -> D
+stage1 -> stage2

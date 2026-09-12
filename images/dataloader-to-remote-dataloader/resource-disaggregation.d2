@@ -1,20 +1,25 @@
-direction: right
+direction: down
 
-CPU / Data Worker Fleet: {
-  style.stroke: blue
-}
-Read: { style.stroke: blue }
-Decode: { style.stroke: blue }
-Preprocess: { style.stroke: blue }
-Prefetch: { style.stroke: blue }
-GPU Training Fleet: {
-  style.stroke: blue
-  style.bold: true
-  style.stroke-width: 3
+stage1: 读取与解码 {
+  direction: right
+  Fleet: "CPU / Data Worker Fleet" {
+    style.stroke: "#2563eb"
+  }
+  Read: { style.stroke: "#2563eb" }
+  Decode: { style.stroke: "#2563eb" }
+  Fleet -> Read -> Decode
 }
 
-CPU / Data Worker Fleet -> Read
-Read -> Decode
-Decode -> Preprocess
-Preprocess -> Prefetch
-Prefetch -> GPU Training Fleet
+stage2: 预处理与送入训练 {
+  direction: right
+  Preprocess: { style.stroke: "#2563eb" }
+  Prefetch: { style.stroke: "#2563eb" }
+  GPU: "GPU Training Fleet" {
+    style.stroke: "#2563eb"
+    style.bold: true
+    style.stroke-width: 3
+  }
+  Preprocess -> Prefetch -> GPU
+}
+
+stage1 -> stage2

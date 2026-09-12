@@ -1,8 +1,17 @@
-direction: right
+direction: down
 
-A: "FP32 Input\n4 bytes / element"
-B: "TF32 Precision\nMultiply"
-C: "FP32\nAccumulation"
-D: "FP32 Output\n4 bytes / element"
+stage1: 输入与乘法 {
+  direction: right
+  A: "FP32 Input\n4 bytes / element"
+  B: "TF32 Precision\nMultiply"
+  A -> B
+}
 
-A -> B -> C -> D
+stage2: 累加与输出 {
+  direction: right
+  C: "FP32\nAccumulation"
+  D: "FP32 Output\n4 bytes / element"
+  C -> D
+}
+
+stage1.B -> stage2.C

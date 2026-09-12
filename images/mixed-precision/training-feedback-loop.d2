@@ -1,19 +1,29 @@
-direction: right
+direction: down
 
-Forward: {
-  style.stroke: blue
-}
-Loss: {
-  style.stroke: orange
-}
-Backward: {
-  style.stroke: blue
-}
-Gradient: {
-  style.stroke: orange
-}
-Parameter Update: {
-  style.stroke: green
+stage1: 前向与损失 {
+  direction: right
+  Forward: {
+    style.stroke: "#2563eb"
+  }
+  Loss: {
+    style.stroke: "#f59e0b"
+  }
+  Backward: {
+    style.stroke: "#2563eb"
+  }
+  Forward -> Loss -> Backward
 }
 
-Forward -> Loss -> Backward -> Gradient -> Parameter Update -> Forward
+stage2: 梯度与更新 {
+  direction: right
+  Gradient: {
+    style.stroke: "#f59e0b"
+  }
+  Update: "Parameter Update" {
+    style.stroke: "#16a34a"
+  }
+  Gradient -> Update
+}
+
+stage1.Backward -> stage2.Gradient
+stage2.Update -> stage1.Forward: 下一轮迭代
