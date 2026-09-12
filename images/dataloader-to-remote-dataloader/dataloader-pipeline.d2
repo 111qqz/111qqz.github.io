@@ -1,36 +1,30 @@
-direction: right
+direction: down
 
-Storage: {
-  style.stroke: green
-}
-Read: {
-  style.stroke: blue
-}
-Decode / Deserialize: {
-  style.stroke: blue
-}
-Preprocess: {
-  style.stroke: blue
-}
-Batch / Collate: {
-  style.stroke: blue
-}
-CPU Memory: {
-  style.stroke: blue
-}
-H2D Transfer: {
-  style.stroke: blue
-}
-GPU Training: {
-  style.stroke: blue
-  style.bold: true
-  style.stroke-width: 3
+read_stage: 数据读取 {
+  direction: right
+  Storage: { style.stroke: "#16a34a" }
+  Read: { style.stroke: "#2563eb" }
+  "Decode / Deserialize": { style.stroke: "#2563eb" }
+  Storage -> Read -> "Decode / Deserialize"
 }
 
-Storage -> Read
-Read -> Decode / Deserialize
-Decode / Deserialize -> Preprocess
-Preprocess -> Batch / Collate
-Batch / Collate -> CPU Memory
-CPU Memory -> H2D Transfer
-H2D Transfer -> GPU Training
+prep_stage: 预处理与批处理 {
+  direction: right
+  Preprocess: { style.stroke: "#2563eb" }
+  "Batch / Collate": { style.stroke: "#2563eb" }
+  "CPU Memory": { style.stroke: "#2563eb" }
+  Preprocess -> "Batch / Collate" -> "CPU Memory"
+}
+
+gpu_stage: 送入 GPU {
+  direction: right
+  "H2D Transfer": { style.stroke: "#2563eb" }
+  "GPU Training": {
+    style.stroke: "#2563eb"
+    style.bold: true
+    style.stroke-width: 3
+  }
+  "H2D Transfer" -> "GPU Training"
+}
+
+read_stage -> prep_stage -> gpu_stage

@@ -1,26 +1,30 @@
-direction: right
+direction: down
 
-A: Raw Text
-B: Tokenizer / BPE
-C: Token
-D: Token ID {
-  style: {
-    stroke-dash: 5
-  }
+text_stage: 文本与 Token {
+  direction: right
+  A: Raw Text
+  B: Tokenizer / BPE
+  C: Token
+  A -> B -> C
 }
-E: One-hot {
-  style: {
-    stroke-dash: 5
-  }
-}
-F: Embedding Lookup
-G: Dense Vector
-H: RNN / Transformer
 
-A -> B
-B -> C
-C -> D
-D -> E
-E -> F
-F -> G
-G -> H
+discrete_stage: 离散表示 {
+  direction: right
+  D: Token ID {
+    style.stroke-dash: 5
+  }
+  E: One-hot {
+    style.stroke-dash: 5
+  }
+  D -> E
+}
+
+dense_stage: 连续表示 {
+  direction: right
+  F: Embedding Lookup
+  G: Dense Vector
+  H: RNN / Transformer
+  F -> G -> H
+}
+
+text_stage -> discrete_stage -> dense_stage

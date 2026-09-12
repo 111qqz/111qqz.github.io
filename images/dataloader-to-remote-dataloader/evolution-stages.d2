@@ -1,20 +1,29 @@
-direction: right
+direction: down
 
-SingleThreadDataLoading: { style.stroke: blue }
-MultiWorkerDataLoader: { style.stroke: blue }
-PrefetchPipeline: { style.stroke: blue }
-ShardedDataFormat: { style.stroke: blue }
-RemoteDataLoader: { style.stroke: blue }
-PersistentRemoteCache: { style.stroke: blue }
-DistributedDataServingSystem: {
-  style.stroke: blue
-  style.bold: true
-  style.stroke-width: 3
+stage1: 单机阶段 {
+  direction: right
+  SingleThreadDataLoading: { style.stroke: "#2563eb" }
+  MultiWorkerDataLoader: { style.stroke: "#2563eb" }
+  SingleThreadDataLoading -> MultiWorkerDataLoader
 }
 
-SingleThreadDataLoading -> MultiWorkerDataLoader
-MultiWorkerDataLoader -> PrefetchPipeline
-PrefetchPipeline -> ShardedDataFormat
-ShardedDataFormat -> RemoteDataLoader
-RemoteDataLoader -> PersistentRemoteCache
-PersistentRemoteCache -> DistributedDataServingSystem
+stage2: 流水线与数据格式 {
+  direction: right
+  PrefetchPipeline: { style.stroke: "#2563eb" }
+  ShardedDataFormat: { style.stroke: "#2563eb" }
+  PrefetchPipeline -> ShardedDataFormat
+}
+
+stage3: 远程数据服务 {
+  direction: right
+  RemoteDataLoader: { style.stroke: "#2563eb" }
+  PersistentRemoteCache: { style.stroke: "#2563eb" }
+  DistributedDataServingSystem: {
+    style.stroke: "#2563eb"
+    style.bold: true
+    style.stroke-width: 3
+  }
+  RemoteDataLoader -> PersistentRemoteCache -> DistributedDataServingSystem
+}
+
+stage1 -> stage2 -> stage3
