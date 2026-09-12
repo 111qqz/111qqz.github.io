@@ -1,0 +1,27 @@
+direction: down
+
+calib_set: "校准数据集" { style.stroke: "#2563eb" }
+
+preprocess: "预处理\n尺寸 / 均值 / 缩放" { style.stroke: "#2563eb" }
+
+model: "FP32 caffe 模型\ninput dim 固定" { style.stroke: "#16a34a" }
+
+calibrator: "TensorRT calibrator\n逐 batch 前向，统计激活分布" {
+  style.bold: true
+  style.stroke-width: 3
+}
+
+cache: "校准表\nper-tensor scale" { style.stroke: "#16a34a" }
+
+int8: "INT8 engine" { style.bold: true }
+
+calib_set -> preprocess
+preprocess -> calibrator: "校准样本"
+model -> calibrator: "网络与权重"
+calibrator -> cache
+cache -> int8
+
+preprocess -> model: "尺寸须一致" {
+  style.stroke: "#dc2626"
+  style.stroke-dash: 4
+}

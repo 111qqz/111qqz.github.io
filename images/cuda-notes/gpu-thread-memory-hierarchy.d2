@@ -1,0 +1,34 @@
+direction: down
+
+host: "Host（CPU）内存" {
+  style.stroke: "#2563eb"
+}
+
+grid: "Grid" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  block: "Block" {
+    style.stroke: "#16a34a"
+
+    t0: "thread\nregister：每个 thread 私有" {
+      style.stroke: "#f59e0b"
+    }
+
+    t1: "thread\nregister：每个 thread 私有" {
+      style.stroke: "#f59e0b"
+    }
+  }
+}
+
+smem: "shared memory\n同一 block 内的 thread 共享" {
+  style.stroke: "#16a34a"
+}
+
+gmem: "global memory\n所有 block 可见，容量大、延迟高" {
+  style.stroke: "#dc2626"
+}
+
+host -> gmem: "cudaMemcpy / cudaMallocManaged"
+smem -> grid.block: "block 内可见"
+gmem -> grid: "读写"

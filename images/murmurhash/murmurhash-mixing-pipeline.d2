@@ -1,0 +1,20 @@
+direction: down
+
+init: "初始化\nh = seed\nc1 = 0xcc9e2d51\nc2 = 0x1b873593\nm = 5，n = 0xe6546b64" {
+  style.bold: true
+}
+
+chunk: "每个 4 字节 chunk\nk *= c1 → k = rotl(k, 15) → k *= c2\nh ^= k → h = rotl(h, 13) → h = h * m + n" {
+  style.stroke: "#2563eb"
+}
+
+tail: "尾部剩余 len % 4 字节\nk ^= 剩余字节 → k *= c1 → rotl 15 → k *= c2\nh ^= k" {
+  style.stroke: "#f59e0b"
+}
+
+final: "收尾混合（雪崩）\nh ^= len\nh ^= h >> 16 → h *= 0x85ebca6b\nh ^= h >> 13 → h *= 0xc2b2ae35\nh ^= h >> 16" {
+  style.stroke: "#16a34a"
+  style.bold: true
+}
+
+init -> chunk -> tail -> final

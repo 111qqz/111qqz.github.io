@@ -1,0 +1,33 @@
+direction: down
+
+sp_a: "shared_ptr A\nT* ptr + ControlBlock* ctrl" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+sp_b: "shared_ptr B\nT* ptr + ControlBlock* ctrl" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+wp: "weak_ptr\nControlBlock* ctrl" {
+  style.stroke: "#f59e0b"
+}
+
+cb: "Control Block（dynamically-allocated，引用计数在其中）" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 3
+
+  strong: "shared count（atomic）"
+  weak: "weak count（atomic）"
+  deleter: "deleter（type-erased）"
+  allocator: "allocator（type-erased）"
+}
+
+obj: "T 对象" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+}
+
+sp_a -> cb: "共享同一个 ctrl"
+sp_b -> cb: "共享同一个 ctrl"
+wp -> cb: "只影响 weak count"
+cb -> obj: "delete"

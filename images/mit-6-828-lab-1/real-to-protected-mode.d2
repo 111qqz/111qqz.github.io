@@ -1,0 +1,28 @@
+direction: down
+
+stage1: 实模式准备 {
+  entry: "BIOS 把 boot sector 加载到 0x7c00\n以实模式跳入：CS = 0x0000, IP = 0x7c00"
+  setup: "cli / cld\nDS = ES = SS = 0"
+}
+
+stage2: 切换准备 {
+  a20: "打开 A20 地址线\n先向端口 0x64 写 0xd1，再向端口 0x60 写 0xdf"
+  gdt: "lgdt gdtdesc\n把 bootstrap GDT 的地址与大小装入 GDTR"
+}
+
+stage3: 进入保护模式 {
+  pe: "CR0.PE 置 1\n开启保护模式" {
+    style.bold: true
+    style.stroke: "#2563eb"
+  }
+  flush: "ljmp \$0x8, \$protcseg\n刷新 CS，切换到 32-bit 代码段"
+  dataseg: "DS / ES / FS / GS / SS = 0x10\n载入保护模式数据段"
+}
+
+stage1.entry -> stage1.setup
+stage1.setup -> stage2.a20
+stage2.a20 -> stage2.gdt
+stage2.gdt -> stage3.pe
+stage3.pe -> stage3.flush
+stage3.flush -> stage3.dataseg
+stage3.dataseg -> bootmain: "call bootmain\n开始执行 C 代码"

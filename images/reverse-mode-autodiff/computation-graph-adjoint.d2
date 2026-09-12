@@ -1,0 +1,29 @@
+direction: down
+
+forward: "前向：从输入算到输出" {
+  x1: "x1 = 1"
+  x2: "x2 = x1 + 3 = 4"
+  x3: "x3 = x1 + 5 = 6"
+  y: "y = x2 × x3 = 24"
+  x1 -> x2: "∂x2/∂x1 = 1"
+  x1 -> x3: "∂x3/∂x1 = 1"
+  x2 -> y: "∂y/∂x2 = x3"
+  x3 -> y: "∂y/∂x3 = x2"
+}
+
+backward: "反向：从输出回传伴随" {
+  g_y: "∂L/∂y = 1"
+  g_x2: "∂L/∂x2 = 1 × x3 = 6"
+  g_x3: "∂L/∂x3 = 1 × x2 = 4"
+  g_x1: "∂L/∂x1 = 6 + 4 = 10"
+  g_y -> g_x2
+  g_y -> g_x3
+  g_x2 -> g_x1: "×1"
+  g_x3 -> g_x1: "×1"
+}
+
+forward.y -> backward.g_y: "反向传播起点"
+
+forward.x1.style.stroke: "#2563eb"
+backward.g_x1.style.stroke: "#dc2626"
+backward.g_x1.style.bold: true

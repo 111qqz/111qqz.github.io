@@ -1,0 +1,19 @@
+direction: down
+
+gdtdesc: "gdtdesc（lgdt 的操作数）\n.word 0x17 = sizeof(gdt) - 1\n.long gdt = GDT 的起始地址"
+
+lgdt: "lgdt gdtdesc\nGDTR 记录 GDT 的起始地址与长度" {
+  style.bold: true
+  style.stroke: "#2563eb"
+}
+
+gdt: "bootstrap GDT\nindex 0：NULL 段\nindex 1：code segment，base = 0x0，limit = 0xffffffff，STA_X|STA_R\nindex 2：data segment，base = 0x0，limit = 0xffffffff，STA_W"
+
+selectors: "段寄存器载入选择子\nCS = 0x08 → index 1 → code segment\nDS / ES / SS = 0x10 → index 2 → data segment"
+
+linear: "线性地址 = 段基址 (0) + offset\nboot.S 阶段等于物理地址（等价映射）"
+
+gdtdesc -> lgdt: "读取"
+lgdt -> gdt: "定位"
+gdt -> selectors: "按 index 查表"
+selectors -> linear

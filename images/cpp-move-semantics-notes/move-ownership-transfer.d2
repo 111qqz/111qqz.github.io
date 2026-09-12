@@ -1,0 +1,28 @@
+direction: down
+
+src: "源对象 A\n持有堆上的资源（指针、缓冲区等）" {
+  style.stroke: "#dc2626"
+}
+
+cast: "std::move(A)\n只把 A 转换成 rvalue reference，不移动任何数据" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+ctor: "目标对象的 move 构造 / move 赋值\n窃取 A 的资源，并把 A 的指针置空" {
+  style.stroke: "#16a34a"
+  style.bold: true
+}
+
+dst: "目标对象 B\n接管资源所有权，没有发生拷贝" {
+  style.stroke: "#16a34a"
+}
+
+unspec: "A 变成 moved-from 对象\nvalid but unspecified state\n只能安全地析构或重新赋值" {
+  style.stroke: "#f59e0b"
+}
+
+src -> cast: "传入"
+cast -> ctor: "触发"
+ctor -> dst: "资源转移到 B"
+ctor -> unspec: "留下空壳"

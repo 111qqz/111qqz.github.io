@@ -1,0 +1,25 @@
+direction: down
+
+prologue: "序言块\nheader | footer，没有 payload"
+alloc1: "已分配块\nheader | payload | footer"
+free1: "空闲块\nheader | prev | next | footer\n（prev/next 存在 payload 中）"
+alloc2: "已分配块\nheader | payload | footer"
+free2: "空闲块\nheader | prev | next | footer\n（prev/next 存在 payload 中）"
+
+prologue -> alloc1: "物理相邻"
+alloc1 -> free1: "物理相邻"
+free1 -> alloc2: "物理相邻"
+alloc2 -> free2: "物理相邻"
+
+free1 -> free2: "next" {
+  style.stroke-dash: 4
+}
+free2 -> free1: "prev" {
+  style.stroke-dash: 4
+}
+
+free1.style.stroke: "#16a34a"
+free2.style.stroke: "#16a34a"
+free1.style.bold: true
+alloc1.style.stroke: "#2563eb"
+alloc2.style.stroke: "#2563eb"

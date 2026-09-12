@@ -1,0 +1,27 @@
+direction: down
+
+api: "ShardedLRUCache\nHashSlice(key) → Shard(hash) = hash >> 28（kNumShards = 16）" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+table: "HandleTable（closed addressing）\nkey → LRUHandle" {
+  style.stroke: "#2563eb"
+}
+
+in_use: "in_use_（环形双向链表）\nrefs ≥ 2，client 正在使用" {
+  style.stroke: "#f59e0b"
+}
+
+lru: "lru_（环形双向链表）\nrefs == 1，缓存持有，等待淘汰" {
+  style.stroke: "#16a34a"
+}
+
+gone: "Unref 到 refs == 0\ndelete key/value，free(handle)" {
+  style.stroke: "#dc2626"
+}
+
+api -> table: "路由到某个 shard（独立 mutex）"
+table -> in_use: "Insert：直接进入\nLookup 命中：Ref"
+in_use -> lru: "Release：Unref 到 refs == 1"
+lru -> gone: "Erase / 超出 capacity 淘汰"

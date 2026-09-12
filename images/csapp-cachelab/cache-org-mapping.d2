@@ -1,0 +1,25 @@
+direction: down
+
+addr: "64 位地址：tag (t) | set index (s) | block offset (b)"
+
+select: 用 set index 选中一个 Set（共 2^s 个）
+compare: "比较 Set 内 E 行的 valid 与 tag（Line = valid + tag + 数据块）"
+hit: Hit：直接读写
+miss: Miss
+empty: 有空行：装入新行
+evict: 无空行：按 LRU 替换最久未用的一行
+
+addr -> select
+select -> compare
+compare -> hit: 命中
+compare -> miss: 未命中
+miss -> empty: Set 未满
+miss -> evict: Set 已满
+empty -> hit: 访问
+evict -> hit: 访问
+
+compare.style.stroke: "#2563eb"
+compare.style.bold: true
+hit.style.stroke: "#16a34a"
+miss.style.stroke: "#f59e0b"
+evict.style.stroke: "#dc2626"

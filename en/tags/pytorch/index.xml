@@ -43,9 +43,9 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;公司内部的基于torch的toolbox发现某个版本之后，结果发生了偏移. 通过一系列排查，发现当导入cupy和torch的顺序不同时，计算结果会有所差异。
-也就是说，如下两段代码会导致模型训练等环节的计算得到不同的结果.&lt;/p&gt;</description></item><item><title>pytorch 函数笔记</title><link>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2018-02-23-pytorch-function-notes/</link><pubDate>Fri, 23 Feb 2018 02:55:25 +0000</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2018-02-23-pytorch-function-notes/</guid><description>&lt;p&gt;记录一些常用的&amp;hellip;总去查文档也是有点麻烦&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt; * 
+&lt;p&gt;公司内部的基于torch的toolbox在某个版本之后，结果发生了偏移。通过一系列排查，发现当导入cupy和torch的顺序不同时，计算结果会有所差异。
+也就是说，如下两段代码会导致模型训练等环节得到不同的计算结果。&lt;/p&gt;</description></item><item><title>pytorch 函数笔记</title><link>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2018-02-23-pytorch-function-notes/</link><pubDate>Fri, 23 Feb 2018 02:55:25 +0000</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2018-02-23-pytorch-function-notes/</guid><description>&lt;p&gt;记录一些常用的&amp;hellip;总去查文档也是有点麻烦&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt; *
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h3 class="relative group"&gt;tensor.view 的作用是reshape 比如 a = torch.range(1, 16) 得到一个tensor that has 16 elements from 1 to 16. 在a=a.view(4,4)就得到了一个4&lt;em&gt;4的tensor。 需要注意reshape之后元素的个数不能改变(16==4&lt;/em&gt;4) 参数-1的作用是，我懒得算这一维度应该是多少，（由于元素个数不能改变）所以希望自动被计算。**需要注意的是，只有一个维度可以写-1。 **不过view和reshape有些区别：&lt;em&gt;reshape always copies memory. view never copies memory&lt;/em&gt;
@@ -57,7 +57,7 @@
  &lt;/span&gt;
  
 &lt;/h3&gt;
-&lt;pre&gt;&lt;code&gt; * 
+&lt;pre&gt;&lt;code&gt; *
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h3 class="relative group"&gt;torch.squeeze 将输入张量形状中的&lt;code&gt;1&lt;/code&gt; 去除并返回。 如果输入是形如(A×1×B×1×C×1×D)，那么输出形状就为： (A×B×C×D)当给定&lt;code&gt;dim&lt;/code&gt;时，那么挤压操作只在给定维度上。例如，输入形状为： (A×1×B), &lt;code&gt;squeeze(input, 0)&lt;/code&gt; 将会保持张量不变，只有用 &lt;code&gt;squeeze(input, 1)&lt;/code&gt;，形状会变成 (A×B)。注意： 返回张量与输入张量共享内存，所以改变其中一个的内容会改变另一个。
@@ -69,15 +69,15 @@
  &lt;/span&gt;
  
 &lt;/h3&gt;
-&lt;pre&gt;&lt;code&gt; * 
+&lt;pre&gt;&lt;code&gt; *
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h3 class="relative group"&gt;torch.unsqueeze 返回一个新的张量，对输入的制定位置插入维度 1 注意： 返回张量与输入张量共享内存，所以改变其中一个的内容会改变另一个。如果&lt;code&gt;dim&lt;/code&gt;为负，则将会被转化dim+input.dim()+1
- &lt;div id="torchunsqueeze--返回一个新的张量对输入的制定位置插入维度-1-注意-返回张量与输入张量共享内存所以改变其中一个的内容会改变另一个如果dim为负则将会被转化diminputdim1" class="anchor"&gt;&lt;/div&gt;
+&lt;h3 class="relative group"&gt;torch.unsqueeze 返回一个新的张量，对输入的指定位置插入维度 1 注意： 返回张量与输入张量共享内存，所以改变其中一个的内容会改变另一个。如果&lt;code&gt;dim&lt;/code&gt;为负，则将会被转化dim+input.dim()+1
+ &lt;div id="torchunsqueeze--返回一个新的张量对输入的指定位置插入维度-1-注意-返回张量与输入张量共享内存所以改变其中一个的内容会改变另一个如果dim为负则将会被转化diminputdim1" class="anchor"&gt;&lt;/div&gt;
  
  &lt;span
  class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
- &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#torchunsqueeze--%e8%bf%94%e5%9b%9e%e4%b8%80%e4%b8%aa%e6%96%b0%e7%9a%84%e5%bc%a0%e9%87%8f%e5%af%b9%e8%be%93%e5%85%a5%e7%9a%84%e5%88%b6%e5%ae%9a%e4%bd%8d%e7%bd%ae%e6%8f%92%e5%85%a5%e7%bb%b4%e5%ba%a6-1-%e6%b3%a8%e6%84%8f-%e8%bf%94%e5%9b%9e%e5%bc%a0%e9%87%8f%e4%b8%8e%e8%be%93%e5%85%a5%e5%bc%a0%e9%87%8f%e5%85%b1%e4%ba%ab%e5%86%85%e5%ad%98%e6%89%80%e4%bb%a5%e6%94%b9%e5%8f%98%e5%85%b6%e4%b8%ad%e4%b8%80%e4%b8%aa%e7%9a%84%e5%86%85%e5%ae%b9%e4%bc%9a%e6%94%b9%e5%8f%98%e5%8f%a6%e4%b8%80%e4%b8%aa%e5%a6%82%e6%9e%9cdim%e4%b8%ba%e8%b4%9f%e5%88%99%e5%b0%86%e4%bc%9a%e8%a2%ab%e8%bd%ac%e5%8c%96diminputdim1" aria-label="Anchor"&gt;#&lt;/a&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#torchunsqueeze--%e8%bf%94%e5%9b%9e%e4%b8%80%e4%b8%aa%e6%96%b0%e7%9a%84%e5%bc%a0%e9%87%8f%e5%af%b9%e8%be%93%e5%85%a5%e7%9a%84%e6%8c%87%e5%ae%9a%e4%bd%8d%e7%bd%ae%e6%8f%92%e5%85%a5%e7%bb%b4%e5%ba%a6-1-%e6%b3%a8%e6%84%8f-%e8%bf%94%e5%9b%9e%e5%bc%a0%e9%87%8f%e4%b8%8e%e8%be%93%e5%85%a5%e5%bc%a0%e9%87%8f%e5%85%b1%e4%ba%ab%e5%86%85%e5%ad%98%e6%89%80%e4%bb%a5%e6%94%b9%e5%8f%98%e5%85%b6%e4%b8%ad%e4%b8%80%e4%b8%aa%e7%9a%84%e5%86%85%e5%ae%b9%e4%bc%9a%e6%94%b9%e5%8f%98%e5%8f%a6%e4%b8%80%e4%b8%aa%e5%a6%82%e6%9e%9cdim%e4%b8%ba%e8%b4%9f%e5%88%99%e5%b0%86%e4%bc%9a%e8%a2%ab%e8%bd%ac%e5%8c%96diminputdim1" aria-label="Anchor"&gt;#&lt;/a&gt;
  &lt;/span&gt;
  
 &lt;/h3&gt;
@@ -105,7 +105,7 @@
  &lt;/span&gt;
  
 &lt;/h3&gt;
-&lt;pre&gt;&lt;code&gt; * 
+&lt;pre&gt;&lt;code&gt; *
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h3 class="relative group"&gt;&lt;strong&gt;tensor.contiguous 将一个tensor变成连续的。（一些ops如expand/expand_as会让tensor 不连续）&lt;/strong&gt;

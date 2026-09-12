@@ -1,0 +1,44 @@
+direction: down
+
+write: "写入" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+read: "读取（按同一顺序自上而下查，命中即返回）" {
+  style.stroke: "#16a34a"
+  style.bold: true
+}
+
+wal: "WAL：先追加日志，保证持久化" {
+  style.stroke: "#dc2626"
+}
+
+mem: "memtable（内存，有序）\n读路径第 1 站" {
+  style.stroke: "#f59e0b"
+}
+
+imm: "immutable memtable\n写满后转为只读\n读路径第 2 站" {
+  style.stroke: "#f59e0b"
+}
+
+l0: "Level 0 SSTable\nkey 范围相互重叠\n读路径第 3 站" {
+  style.stroke: "#16a34a"
+}
+
+ln: "Level 1+ SSTable\n分层有序，范围不重叠\n读路径第 4 站" {
+  style.stroke: "#16a34a"
+}
+
+comp: "compaction\n后台把上层 SSTable 归并到下层" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 3
+}
+
+write -> wal: "写"
+wal -> mem: "写"
+read -> mem: "查"
+mem -> imm: "写满"
+imm -> l0: "flush"
+l0 -> ln: "compaction"
+ln -> comp: "继续下沉"

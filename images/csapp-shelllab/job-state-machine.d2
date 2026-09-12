@@ -1,0 +1,22 @@
+direction: down
+
+new: "fork + setpgid(0, 0) + addjob\n按 bg 标志初始化为 FG 或 BG"
+fg: "FG：前台运行\nshell 调用 waitfg 阻塞等待"
+bg: "BG：后台运行\nshell 不等待，立即返回"
+st: "ST：已停止\n收到 SIGTSTP / SIGSTOP"
+done: "已终止\nSIGCHLD 中 deletejob"
+
+new -> fg: "bg = 0"
+new -> bg: "bg = 1"
+fg -> st: "SIGTSTP\nstate = ST"
+st -> fg: "fg 命令\nSIGCONT + waitfg"
+st -> bg: "bg 命令\nSIGCONT，state = BG"
+bg -> fg: "fg 命令\nSIGCONT + waitfg"
+fg -> done: "WIFEXITED / WIFSIGNALED"
+bg -> done: "WIFEXITED / WIFSIGNALED"
+
+fg.style.stroke: "#2563eb"
+bg.style.stroke: "#16a34a"
+st.style.stroke: "#f59e0b"
+done.style.stroke: "#6b7280"
+new.style.stroke: "#6b7280"

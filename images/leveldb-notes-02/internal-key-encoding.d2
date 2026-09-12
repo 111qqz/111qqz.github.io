@@ -1,0 +1,24 @@
+direction: down
+
+seq: "sequence（SequenceNumber）"
+ty: "type（ValueType）"
+
+pack: "PackSequenceAndType(seq, t)\n= (seq << 8) | t" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+tag: "tag：uint64_t（8 byte）\n高 56 bit 是 sequence，低 8 bit 是 type" {
+  style.stroke: "#f59e0b"
+  style.stroke-width: 3
+}
+
+rep: "InternalKey 的 rep_（std::string）\nuser_key（变长）+ tag（8 byte）" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+}
+
+seq -> pack
+ty -> pack
+pack -> tag: "PutFixed64"
+tag -> rep: "AppendInternalKey"

@@ -1,0 +1,30 @@
+direction: down
+
+stage1: 签名计算 {
+  seg: 分词\n特征词 + 权重
+  h: hash\n每个词得到 n-bit 签名
+  w: 加权\n按位与权重正负相乘
+  m: 合并\n按位累加
+  d: 降维\n大于 0 记 1
+  seg -> h -> w -> m -> d
+  d.style.bold: true
+  d.style.stroke-width: 3
+}
+
+stage2: 相似判定 {
+  x: 两个签名异或
+  hm: 数 1 的个数\n= 海明距离
+  x -> hm
+  hm.style.bold: true
+  hm.style.stroke-width: 3
+}
+
+stage3: 海量候选 {
+  b: 64 位均分 4 块\n每块 16 位
+  idx: 每块建倒排索引\n同块即候选
+  b -> idx
+  idx.style.stroke: "#16a34a"
+}
+
+stage1.d -> stage2.x
+stage2.hm -> stage3.b
