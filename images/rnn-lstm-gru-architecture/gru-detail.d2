@@ -1,0 +1,63 @@
+direction: right
+
+gru: GRU (Gated Recurrent Unit) 结构详解 {
+  shape: package
+  style: {
+    stroke: "#16a34a"
+    stroke-width: 2
+    fill: transparent
+  }
+
+  h_prev: "h_{t-1}\n(上一时刻隐藏状态)" { shape: cylinder; style.stroke: "#2563eb" }
+  x: "x_t\n(当前输入)" { shape: parallelogram; style.stroke: "#dc2626" }
+
+  z: "z_t\n(更新门)\n保留多少旧状态\n写入多少新状态" { shape: rectangle; style.stroke: "#ca8a04" }
+  r: "r_t\n(重置门)\n生成候选状态时\n参考多少过去信息" { shape: rectangle; style.stroke: "#ca8a04" }
+  
+  mul_r: "\times" { shape: circle }
+  h_tilde: "\tilde{h}_t\n(候选隐藏状态)\n根据 x_t 和 r_t \odot h_{t-1}\n生成候选状态" { shape: rectangle; style.stroke: "#9333ea" }
+  
+  one_minus_z: "1 - z_t" { shape: rectangle; style.stroke: "#2563eb" }
+  
+  mul_old: "\times" { shape: circle }
+  mul_new: "\times" { shape: circle }
+  add_h: "+" { shape: circle }
+
+  h_curr: "h_t\n(新的隐藏状态/当前输出)" { shape: cylinder; style.stroke: "#2563eb" }
+
+  h_prev -> z
+  x -> z
+  h_prev -> r
+  x -> r
+  
+  r -> mul_r
+  h_prev -> mul_r
+  
+  mul_r -> h_tilde
+  x -> h_tilde
+  
+  z -> one_minus_z
+  one_minus_z -> mul_old
+  h_prev -> mul_old
+  
+  z -> mul_new
+  h_tilde -> mul_new
+  
+  mul_old -> add_h: "(1-z_t) \odot h_{t-1}"
+  mul_new -> add_h: "z_t \odot \tilde{h}_t"
+  
+  add_h -> h_curr
+}
+
+note: |md
+  **核心直觉**：
+  GRU 可以理解为：
+  用 **update gate (z_t)** 决定“旧状态保留多少、新状态写入多少”；
+  用 **reset gate (r_t)** 决定“生成新状态时，要看多少历史”。
+| {
+  shape: rectangle
+  style.fill: transparent
+  style.stroke: "#ca8a04"
+}
+
+gru -> note { style.stroke: transparent }
