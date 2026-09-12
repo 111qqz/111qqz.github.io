@@ -1,0 +1,27 @@
+direction: down
+
+c_prev: "c_{t-1}" { shape: cylinder; style.stroke: "#16a34a" }
+h_prev: "h_{t-1}" { shape: cylinder; style.stroke: "#16a34a" }
+x: "x_t" { shape: parallelogram; style.stroke: "#2563eb" }
+
+concat: Concat & Linear
+
+f: "f_t (Forget)" { shape: oval }
+i: "i_t (Input)" { shape: oval }
+c_tilde: "c̃_t (Candidate)" { shape: oval }
+o: "o_t (Output)" { shape: oval }
+
+c_curr: "c_t" { shape: cylinder; style.stroke: "#16a34a" }
+h_curr: "h_t" { shape: cylinder; style.stroke: "#16a34a" }
+
+h_prev -> concat
+x -> concat
+
+concat -> f
+concat -> i
+concat -> c_tilde
+concat -> o
+
+c_prev -> c_curr: "⊙ f_t"
+c_tilde -> c_curr: "⊙ i_t"
+c_curr -> h_curr: "tanh ⊙ o_t"
