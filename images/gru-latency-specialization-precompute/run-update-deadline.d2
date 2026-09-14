@@ -1,0 +1,30 @@
+direction: down
+
+critical: {
+  label: "latency-critical path：deadline 是 score_t 什么时候交出去"
+  xt: "x_t arrives"
+  run: "Run：W_ih x_t + 与缓存项合并 + output"
+  score: "score_t ready"
+  xt -> run -> score
+}
+
+maintenance: {
+  label: "maintenance path：deadline 是下一个 tick 到来之前"
+  update: "Update：写入 h_t，顺手算好 rec_r / rec_z / rec_n"
+  state: "state_{t+1} ready"
+  update -> state
+}
+
+critical.score -> maintenance.update: "score 交出去之后才开始"
+maintenance.state -> critical.xt {
+  style.stroke-dash: 4
+}
+
+critical.style.stroke: "#dc2626"
+critical.style.stroke-width: 3
+maintenance.style.stroke: "#16a34a"
+maintenance.style.stroke-width: 3
+critical.score.style.stroke: "#dc2626"
+critical.score.style.bold: true
+maintenance.state.style.stroke: "#16a34a"
+maintenance.state.style.bold: true
