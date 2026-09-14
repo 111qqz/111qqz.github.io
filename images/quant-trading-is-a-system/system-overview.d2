@@ -1,0 +1,38 @@
+direction: down
+
+pipeline: "" {
+	mkt: "Market Data"
+	alpha: "Alpha Model"
+	pc: "Portfolio Construction" {
+		style.bold: true
+		style.stroke: "#2563eb"
+		style.stroke-width: 3
+	}
+	exec: "Execution"
+	out: "Market"
+
+	mkt -> alpha: "行情 / 基本面 / 另类数据"
+	alpha -> pc: "score / expected return"
+	pc -> exec: "target position"
+	exec -> out: "orders → trades"
+}
+
+risk: "Risk Model"
+cost: "Transaction Cost Model"
+
+risk -> pipeline.pc
+cost -> pipeline.pc
+
+data: "Data（原料与基础设施，支撑每一层）" {
+	style.stroke: "#16a34a"
+}
+research: "Research（设计 / 验证 / 改进整个系统）" {
+	style.stroke: "#f59e0b"
+}
+
+data -> pipeline: "" {
+	style.stroke-dash: 4
+}
+research -> pipeline: "" {
+	style.stroke-dash: 4
+}
