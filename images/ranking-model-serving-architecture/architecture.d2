@@ -1,0 +1,59 @@
+direction: down
+
+config: Config Center\n(七彩石) {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+request: Request
+
+trpc: tRPC Serving Process {
+  style.bold: true
+  style.stroke: "#2563eb"
+}
+
+runtime: Runtime Configuration\n- intra_op_thread_num\n- inter_op_thread_num {
+  style.stroke-dash: 4
+}
+
+keys: Feature / Sparse Keys
+
+lookup: Embedding Lookup {
+  style.bold: true
+}
+
+local_cache: Local Hot-Key Cache {
+  style.stroke: "#16a34a"
+}
+
+ronda: Ronda Cache {
+  style.stroke: "#16a34a"
+}
+
+compressed: FP16 / INT8 Embedding
+restore: On-demand Restore
+fp32: FP32
+dense_input: Dense Features + Embeddings
+
+tf: TensorFlow 1.x Dense Model {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+prediction: Prediction / Score
+
+config -> runtime: startup config { style.stroke-dash: 4 }
+request -> trpc
+trpc -> runtime
+trpc -> keys
+keys -> lookup
+
+lookup -> local_cache
+lookup -> ronda
+
+ronda -> compressed
+compressed -> restore
+restore -> fp32
+fp32 -> dense_input
+dense_input -> tf
+tf -> prediction
