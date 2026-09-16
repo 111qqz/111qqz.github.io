@@ -1,0 +1,38 @@
+direction: down
+classes: {
+  core: {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+}
+
+Total Quota: capacity budget (total_quota)
+Total Quota -> Error Calc
+
+Error Calc: Error = total_quota - quota_sum {
+  shape: diamond
+}
+
+Error Calc -> PID Controller
+PID Controller: PID {
+  class: core
+}
+
+PID Controller -> Base Quota
+Base Quota: base quota
+
+Base Quota -> Clamp
+Clamp: clamp(min, max)
+
+Clamp -> Next Requests
+Next Requests: future requests
+
+Next Requests -> Quota Sum
+Quota Sum: quota_sum (Redis) {
+  shape: cylinder
+  style.stroke: "#16a34a"
+}
+
+Quota Sum -> Error Calc: Feedback Loop {
+  style.stroke-dash: 4
+}
