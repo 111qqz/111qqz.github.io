@@ -1,6 +1,7 @@
-direction: down
+direction: right
 
 stage1: 签名计算 {
+  grid-columns: 1
   seg: 分词\n特征词 + 权重
   h: hash\n每个词得到 n-bit 签名
   w: 加权\n按位与权重正负相乘
@@ -12,6 +13,7 @@ stage1: 签名计算 {
 }
 
 stage2: 相似判定 {
+  grid-columns: 1
   x: 两个签名异或
   hm: 数 1 的个数\n= 海明距离
   x -> hm
@@ -20,11 +22,12 @@ stage2: 相似判定 {
 }
 
 stage3: 海量候选 {
+  grid-columns: 1
   b: 64 位均分 4 块\n每块 16 位
   idx: 每块建倒排索引\n同块即候选
   b -> idx
   idx.style.stroke: "#16a34a"
 }
 
-stage1.d -> stage2.x
-stage2.hm -> stage3.b
+stage1 -> stage2
+stage2 -> stage3
