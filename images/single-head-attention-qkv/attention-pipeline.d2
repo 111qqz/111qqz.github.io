@@ -1,0 +1,75 @@
+direction: down
+
+H: "H\n[n, d_model]\nsequence representation" {
+  style.bold: true
+  style.stroke-width: 3
+}
+
+proj: "Projection" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+
+  Q: "Q = HW_Q\n[n, d_k]" {
+    style.stroke: "#2563eb"
+  }
+  K: "K = HW_K\n[n, d_k]" {
+    style.stroke: "#f59e0b"
+  }
+  V: "V = HW_V\n[n, d_v]" {
+    style.stroke: "#16a34a"
+  }
+}
+
+scores: "QKᵀ\n[n, n]\nrouting score table" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+}
+
+scale: "÷ √d_k\ndimension-aware scaling" {
+  style.stroke-dash: 4
+}
+
+softmax: "softmax (per row)\n[n, n]\nrelative routing weights" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+}
+
+read: "× V\nweighted information read" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+}
+
+O: "O\n[n, d_v]\nread result per token" {
+  style.bold: true
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+}
+
+H -> proj.Q: "W_Q" {
+  style.stroke: "#2563eb"
+}
+H -> proj.K: "W_K" {
+  style.stroke: "#f59e0b"
+}
+H -> proj.V: "W_V" {
+  style.stroke: "#16a34a"
+}
+
+proj.Q -> scores {
+  style.stroke: "#2563eb"
+}
+proj.K -> scores {
+  style.stroke: "#f59e0b"
+}
+
+scores -> scale
+scale -> softmax
+
+softmax -> read {
+  style.stroke: "#dc2626"
+}
+proj.V -> read {
+  style.stroke: "#16a34a"
+}
+
+read -> O
