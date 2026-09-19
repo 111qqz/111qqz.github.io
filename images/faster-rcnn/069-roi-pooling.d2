@@ -1,27 +1,28 @@
-direction: down
+direction: right
 
 InputFeature: {
   shape: step
-  label: "Input Feature Map (e.g., 8x8)\nwith Proposal (e.g., 7x5)"
-  style: { stroke: "#aaaaaa"; bold: true }
+  label: "任意大小 RoI\n(h × w)"
 }
 
-Divide: {
+Projection: {
   shape: rectangle
-  label: "Divide proposal into target grid\n(e.g., 2x2 cells)\nFloor/Ceil for irregular splits"
-  style: { stroke: "#f5a623"; bold: true }
+  label: "映射到 Feature Map"
+}
+
+GridDivision: {
+  shape: rectangle
+  label: "划分为 H × W 个网格\n(如 7 × 7)"
 }
 
 MaxPool: {
   shape: rectangle
-  label: "Max Pool inside each cell"
-  style: { stroke: "#4a90e2"; bold: true }
+  label: "网格内做 Max-Pooling"
 }
 
-Output: {
-  shape: document
-  label: "Fixed-size Output\n(e.g., 2x2)"
-  style: { stroke: "#50e3c2"; bold: true }
+FixedVector: {
+  shape: step
+  label: "固定尺寸输出\n(7 × 7 × C)"
 }
 
-InputFeature -> Divide -> MaxPool -> Output
+InputFeature -> Projection -> GridDivision -> MaxPool -> FixedVector

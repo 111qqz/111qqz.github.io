@@ -1,21 +1,15 @@
-layout-engine: elk
-direction: down
+direction: right
 
 "稠密模型": {
   D1: "总参数 = 激活参数\n671B 激活 671B"
+  D2: "每个 token\n走过全部参数"
+  D3: "算力与参数\n强绑定"
+  D1 -> D2 -> D3
 }
 
-"稀疏 MoE": {
-  S1: "总参数 671B\nDeepSeek-V3"
-  S2: "每个 token 只激活 37B\ntop-k 专家"
-  S1 -> S2
+"MoE 稀疏模型": {
+  M1: "总参数 ≫ 激活参数\n671B 激活 37B"
+  M2: "每个 token\n只走 Top-K 专家"
+  M3: "参数容量膨胀\n算力成本基本不变"
+  M1 -> M2 -> M3
 }
-
-"稠密模型".D1 -> "稀疏 MoE".S1: "容量相当" { style.stroke-dash: 4 }
-
-Cost: "推理成本 ≈ 正比于激活参数\n知识容量 ≈ 正比于总参数" {
-  style.stroke: green
-  style.stroke-width: 3
-}
-
-"稀疏 MoE".S2 -> Cost
