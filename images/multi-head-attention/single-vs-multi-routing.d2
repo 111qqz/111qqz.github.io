@@ -1,89 +1,53 @@
 direction: down
 
-single: "Single-Head Attention" {
-  style.bold: true
-  style.stroke-width: 3
+single: "Single-Head (1 个宽空间)" {
   style.stroke: "#2563eb"
+  style.stroke-width: 2
 
-  input: "h_i ∈ R^512\n(完整 hidden representation)" {
+  in: "输入表示 H\n[n, 512]" {
     style.bold: true
   }
 
-  space: "一套 Q/K/V projection\n→ 一个 matching space\n→ 一个 routing distribution" {
+  proj: "1 套 512-d 投影\nQ, K, V ∈ R^{n×512}" {
     style.stroke: "#2563eb"
-    style.stroke-width: 2
   }
 
-  read: "一次 weighted read" {
+  routing: "单一匹配空间\n1 套权重 A ∈ R^{n×n}\n(所有关系均摊竞争)" {
     style.stroke: "#2563eb"
     style.stroke-width: 2
+    style.bold: true
   }
 
-  output: "一个 read result" {
+  read: "1 次加权读取\nO = AV ∈ R^{n×512}" {
     style.stroke: "#2563eb"
-    style.stroke-width: 2
   }
 
-  input -> space
-  space -> read
-  read -> output
+  in -> proj -> routing -> read
 }
 
-multi: "Multi-Head Attention" {
-  style.bold: true
-  style.stroke-width: 3
+multi: "Multi-Head (8 个窄子空间)" {
   style.stroke: "#16a34a"
+  style.stroke-width: 2
 
-  input: "h_i ∈ R^512\n(同一份 hidden representation)" {
+  in: "同一份输入 H\n[n, 512]" {
     style.bold: true
   }
 
-  h1: "Head 1\n独立 Q/K/V → 64-d space" {
+  proj: "8 套独立 64-d 投影\n(总维度 8×64=512 守恒)" {
     style.stroke: "#16a34a"
-    style.stroke-width: 2
-  }
-  h2: "Head 2\n独立 Q/K/V → 64-d space" {
-    style.stroke: "#16a34a"
-    style.stroke-width: 2
-  }
-  h3: "..." {
-    style.stroke: "#16a34a"
-    style.stroke-dash: 4
-  }
-  h8: "Head 8\n独立 Q/K/V → 64-d space" {
-    style.stroke: "#16a34a"
-    style.stroke-width: 2
   }
 
-  r1: "read 1" { style.stroke: "#16a34a" }
-  r2: "read 2" { style.stroke: "#16a34a" }
-  r3: "..." { style.stroke: "#16a34a"; style.stroke-dash: 4 }
-  r8: "read 8" { style.stroke: "#16a34a" }
+  routing: "8 个独立子空间\n8 套权重 A₁ ~ A₈ ∈ R^{n×n}\n(同时捕捉多种关系)" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
 
-  fusion: "Concat → W_O\n跨 head fusion" {
+  fusion: "8 次读取 O₁ ~ O₈ [n, 64]\n→ Concat [n, 512]\n→ × W_O 跨 head 融合\n输出 O ∈ R^{n×512}" {
     style.stroke: "#dc2626"
     style.stroke-width: 2
     style.bold: true
   }
 
-  input -> h1
-  input -> h2
-  input -> h3
-  input -> h8
-
-  h1 -> r1
-  h2 -> r2
-  h3 -> r3
-  h8 -> r8
-
-  r1 -> fusion
-  r2 -> fusion
-  r3 -> fusion
-  r8 -> fusion
-}
-
-single -> multi: "为什么还不够？" {
-  style.stroke-dash: 4
-  style.stroke: "#f59e0b"
-  style.bold: true
+  in -> proj -> routing -> fusion
 }
