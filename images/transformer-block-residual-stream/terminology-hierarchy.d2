@@ -1,0 +1,66 @@
+direction: down
+
+mha: Multi-Head Attention Module {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+  style.bold: true
+  label: "Multi-Head Attention\n(QKV Projection → Heads → Concat → W_O)"
+}
+
+attn-sublayer: Attention Sublayer {
+  style.stroke: "#7c3aed"
+  style.stroke-width: 2
+  attn: Attention Module
+  res: Residual Connection
+  norm: Normalization
+  dropout: Dropout
+}
+
+ffn-sublayer: FFN Sublayer {
+  style.stroke: "#7c3aed"
+  style.stroke-width: 2
+  ffn: FFN (Position-wise MLP)
+  res2: Residual Connection
+  norm2: Normalization
+  dropout2: Dropout
+}
+
+block: Transformer Block {
+  style.stroke: "#dc2626"
+  style.stroke-width: 3
+  style.bold: true
+  attn-sub: Attention Sublayer
+  ffn-sub: FFN Sublayer
+}
+
+stack: Transformer Stack {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+  style.bold: true
+  b1: "Block 1 (params₁)"
+  b2: "Block 2 (params₂)"
+  dots: "..."  {
+    style.stroke-dash: 4
+  }
+  bn: "Block N (params_N)"
+  b1 -> b2
+  b2 -> dots
+  dots -> bn
+}
+
+mha -> attn-sublayer: "belongs to" {
+  style.stroke-dash: 4
+}
+
+attn-sublayer -> block: "is a sublayer of" {
+  style.stroke-dash: 4
+}
+
+ffn-sublayer -> block: "is a sublayer of" {
+  style.stroke-dash: 4
+}
+
+block -> stack: "× N" {
+  style.stroke: "#16a34a"
+  style.bold: true
+}

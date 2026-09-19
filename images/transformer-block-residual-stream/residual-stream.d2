@@ -1,0 +1,132 @@
+direction: down
+
+x0: "x₀  (embedding + position)" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+  style.bold: true
+}
+
+block1: Block 1 {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+
+  stream1a: "residual stream" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  norm1: "Norm" {
+    style.stroke: "#f59e0b"
+  }
+  attn1: "Multi-Head Attention" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+  add1: "(+)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  stream1b: "residual stream" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  norm2: "Norm" {
+    style.stroke: "#f59e0b"
+  }
+  ffn1: "FFN" {
+    style.stroke: "#7c3aed"
+    style.stroke-width: 2
+  }
+  add2: "(+)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  stream1a -> norm1: "read"
+  norm1 -> attn1
+  attn1 -> add1: "contextual update"
+  stream1a -> add1: "identity" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  add1 -> stream1b
+
+  stream1b -> norm2: "read"
+  norm2 -> ffn1
+  ffn1 -> add2: "feature update"
+  stream1b -> add2: "identity" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+}
+
+block2: Block 2 {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+
+  stream2a: "residual stream" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  norm3: "Norm" {
+    style.stroke: "#f59e0b"
+  }
+  attn2: "Multi-Head Attention" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+  add3: "(+)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  stream2b: "residual stream" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  norm4: "Norm" {
+    style.stroke: "#f59e0b"
+  }
+  ffn2: "FFN" {
+    style.stroke: "#7c3aed"
+    style.stroke-width: 2
+  }
+  add4: "(+)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  stream2a -> norm3: "read"
+  norm3 -> attn2
+  attn2 -> add3: "contextual update"
+  stream2a -> add3: "identity" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  add3 -> stream2b
+
+  stream2b -> norm4: "read"
+  norm4 -> ffn2
+  ffn2 -> add4: "feature update"
+  stream2b -> add4: "identity" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+}
+
+dots: "... Block 3 ~ N ..." {
+  style.stroke-dash: 4
+}
+
+xn: "x_N  (final representation)" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+  style.bold: true
+}
+
+x0 -> block1
+block1 -> block2
+block2 -> dots
+dots -> xn

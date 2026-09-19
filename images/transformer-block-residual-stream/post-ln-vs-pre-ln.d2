@@ -1,0 +1,90 @@
+direction: down
+
+post-ln: Post-LN {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+
+  x: "x" {
+    style.bold: true
+  }
+  attn: "Attention" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+  add: "(+)" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  ln: "LayerNorm" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  out: "x'" {
+    style.bold: true
+  }
+
+  x -> attn: "sublayer"
+  attn -> add
+  x -> add: "residual" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  add -> ln
+  ln -> out
+
+  formula: "LN( x + F(x) )" {
+    style.stroke-dash: 4
+    style.italic: true
+  }
+  out -> formula: "" {
+    style.stroke-dash: 4
+    style.opacity: 0.5
+  }
+}
+
+pre-ln: Pre-LN {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+
+  x2: "x" {
+    style.bold: true
+  }
+  ln2: "LayerNorm" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  attn2: "Attention" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+  add2: "(+)" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+    style.bold: true
+  }
+  out2: "x'" {
+    style.bold: true
+  }
+
+  x2 -> ln2: "conditioning"
+  ln2 -> attn2: "sublayer"
+  attn2 -> add2: "update"
+  x2 -> add2: "identity path" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+    style.bold: true
+  }
+  add2 -> out2
+
+  formula2: "x + F( LN(x) )" {
+    style.stroke-dash: 4
+    style.italic: true
+  }
+  out2 -> formula2: "" {
+    style.stroke-dash: 4
+    style.opacity: 0.5
+  }
+}
