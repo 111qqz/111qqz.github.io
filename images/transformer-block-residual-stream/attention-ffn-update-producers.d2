@@ -1,0 +1,81 @@
+direction: down
+
+stream_in: "Residual Stream (已有表示)" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+block1: "" {
+  style.stroke-dash: 3
+  
+  attn: "Attention Sublayer\n跨 Token 交互 (Inter-token)\n从 Sequence 读取上下文信息" {
+    style.stroke: "#8b5cf6"
+    style.stroke-width: 2
+  }
+  
+  id1: "Identity 旁路" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+  }
+}
+
+add1: "+" {
+  shape: circle
+  style.stroke: "#f59e0b"
+  style.stroke-width: 2
+}
+
+stream_mid: "Residual Stream (融入上下文更新)" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+block2: "" {
+  style.stroke-dash: 3
+  
+  ffn: "FFN Sublayer\n单 Token 内部变换 (Intra-token)\n非线性特征维度扩展与抽取" {
+    style.stroke: "#06b6d4"
+    style.stroke-width: 2
+  }
+  
+  id2: "Identity 旁路" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+  }
+}
+
+add2: "+" {
+  shape: circle
+  style.stroke: "#f59e0b"
+  style.stroke-width: 2
+}
+
+stream_out: "Residual Stream (最终表示)" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+stream_in -> block1.attn: "读取 Stream"
+stream_in -> block1.id1: "直通保持" {
+  style.stroke: "#16a34a"
+}
+
+block1.attn -> add1: "Δ_attention (Contextual Update)"
+block1.id1 -> add1: "原有信息" {
+  style.stroke: "#16a34a"
+}
+
+add1 -> stream_mid
+stream_mid -> block2.ffn: "读取 Stream"
+stream_mid -> block2.id2: "直通保持" {
+  style.stroke: "#16a34a"
+}
+
+block2.ffn -> add2: "Δ_ffn (Feature Update)"
+block2.id2 -> add2: "原有信息" {
+  style.stroke: "#16a34a"
+}
+
+add2 -> stream_out

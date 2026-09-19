@@ -1,0 +1,102 @@
+direction: down
+
+in: "输入 x_l\n(来自上一个 Block / Embedding)" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+sublayer1: "Attention 子层 (Pre-LN)" {
+  style.stroke-dash: 3
+
+  norm1: "LayerNorm" {
+    style.stroke: "#10b981"
+  }
+
+  mha: "Multi-Head Attention\n(上下文读取)" {
+    style.stroke: "#8b5cf6"
+    style.stroke-width: 2
+  }
+
+  id1: "Identity 旁路 (直通)" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  norm1 -> mha: "规范化输入"
+}
+
+add1: "+" {
+  shape: circle
+  style.stroke: "#f59e0b"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+mid: "中间状态 x' = x_l + Δ_attn" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+sublayer2: "FFN 子层 (Pre-LN)" {
+  style.stroke-dash: 3
+
+  norm2: "LayerNorm" {
+    style.stroke: "#10b981"
+  }
+
+  ffn: "Feed-Forward Network (MLP)\n(特征非线性映射)" {
+    style.stroke: "#06b6d4"
+    style.stroke-width: 2
+  }
+
+  id2: "Identity 旁路 (直通)" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  norm2 -> ffn: "规范化输入"
+}
+
+add2: "+" {
+  shape: circle
+  style.stroke: "#f59e0b"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+out: "输出 x_{l+1} = x' + Δ_ffn\n(写入 Residual Stream / 下一 Block)" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+in -> sublayer1.norm1: "进入计算分支"
+in -> sublayer1.id1: "Identity 直通" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+}
+
+sublayer1.mha -> add1: "Δ_attn"
+sublayer1.id1 -> add1: "x_l" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+}
+
+add1 -> mid
+
+mid -> sublayer2.norm2: "进入计算分支"
+mid -> sublayer2.id2: "Identity 直通" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+}
+
+sublayer2.ffn -> add2: "Δ_ffn"
+sublayer2.id2 -> add2: "x'" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+}
+
+add2 -> out

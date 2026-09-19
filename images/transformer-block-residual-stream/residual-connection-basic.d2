@@ -1,0 +1,47 @@
+direction: down
+
+input: "输入 x\n(Representation)" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+container: "" {
+  style.stroke-dash: 3
+
+  residual_branch: "残差分支 F(x)\n学习相对于 identity 的增量 (update)" {
+    style.stroke: "#8b5cf6"
+    style.stroke-width: 2
+  }
+
+  identity_path: "Identity 旁路 (恒等映射)\n保留已有信息与梯度直通" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+}
+
+add: "+" {
+  shape: circle
+  style.stroke: "#f59e0b"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+output: "输出 y = x + F(x)\n(更新后的 Representation)" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+input -> container.residual_branch: "进入变换"
+input -> container.identity_path: "直通路径 x" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+}
+
+container.residual_branch -> add: "增量 F(x)"
+container.identity_path -> add: "原有 x" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+}
+
+add -> output
