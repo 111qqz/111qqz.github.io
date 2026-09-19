@@ -1,0 +1,78 @@
+direction: down
+
+standard: "✅ 标准 MHA：Late Fusion" {
+  style.bold: true
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+
+  s_route: "Route separately" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+
+    a1: "A₁ = [0.9, 0.1]\n主要读 token A" {
+      style.stroke: "#2563eb"
+    }
+    a2: "A₂ = [0.1, 0.9]\n主要读 token B" {
+      style.stroke: "#f59e0b"
+    }
+  }
+
+  s_read: "Read separately" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+
+    r1: "A₁ × V₁\n≈ token A 的信息" {
+      style.stroke: "#2563eb"
+    }
+    r2: "A₂ × V₂\n≈ token B 的信息" {
+      style.stroke: "#f59e0b"
+    }
+  }
+
+  s_fuse: "Concat → W_O\n两路信息都保留\n跨 head mixing" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  s_route.a1 -> s_read.r1 {
+    style.stroke: "#2563eb"
+  }
+  s_route.a2 -> s_read.r2 {
+    style.stroke: "#f59e0b"
+  }
+  s_read.r1 -> s_fuse
+  s_read.r2 -> s_fuse
+}
+
+early: "❌ Early Fusion：先合并 attention weights" {
+  style.bold: true
+  style.stroke: "#dc2626"
+  style.stroke-width: 3
+
+  e_route: "先合并 routing weights" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+
+    ea1: "A₁ = [0.9, 0.1]" {
+      style.stroke: "#dc2626"
+    }
+    ea2: "A₂ = [0.1, 0.9]" {
+      style.stroke: "#dc2626"
+    }
+    merge: "平均 → A = [0.5, 0.5]\n两种 routing policy 被抹平" {
+      style.stroke: "#dc2626"
+      style.bold: true
+    }
+
+    ea1 -> merge
+    ea2 -> merge
+  }
+
+  e_read: "一次 read\nA × V = ?\nV 用哪个？\n两个 token 被平均读取" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+  }
+
+  e_route.merge -> e_read
+}

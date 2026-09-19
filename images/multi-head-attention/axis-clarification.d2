@@ -1,0 +1,78 @@
+direction: down
+
+correct: "✅ 正确理解" {
+  style.bold: true
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+
+  seq: "Sequence axis\n每个 Head 都看完整 n 个 token\ntoken 1, token 2, ... token n" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  feat: "Feature axis\n每个 Head 从完整 d_model=512\n通过 learned projection\n投影到自己的 d_head=64 子空间" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  seq -> feat: "不切 token，投影 feature" {
+    style.stroke: "#16a34a"
+  }
+}
+
+wrong: "❌ 常见错误" {
+  style.bold: true
+  style.stroke: "#dc2626"
+  style.stroke-width: 3
+
+  wrong1: "Head 1 只看 token 1~10\nHead 2 只看 token 11~20\n（切 sequence axis）" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+  }
+
+  wrong2: "Head 1 只看 feature[0:64]\nHead 2 只看 feature[64:128]\n（机械切 feature axis）" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+  }
+
+  wrong1 -> wrong2: "都不对" {
+    style.stroke: "#dc2626"
+    style.stroke-dash: 4
+  }
+}
+
+real: "实际发生的事" {
+  style.bold: true
+  style.stroke: "#2563eb"
+  style.stroke-width: 3
+
+  h: "h_i ∈ R^512\n完整 hidden state" {
+    style.bold: true
+  }
+
+  p1: "W_Q^(1) ∈ R^{512×64}\nlearned projection" {
+    style.stroke: "#2563eb"
+  }
+  p2: "W_Q^(2) ∈ R^{512×64}\nlearned projection" {
+    style.stroke: "#2563eb"
+  }
+  p8: "W_Q^(8) ∈ R^{512×64}\nlearned projection" {
+    style.stroke: "#2563eb"
+  }
+
+  q1: "q_i^(1) ∈ R^64\nlearned view 1" {
+    style.stroke: "#16a34a"
+  }
+  q2: "q_i^(2) ∈ R^64\nlearned view 2" {
+    style.stroke: "#16a34a"
+  }
+  q8: "q_i^(8) ∈ R^64\nlearned view 8" {
+    style.stroke: "#16a34a"
+  }
+
+  h -> p1 -> q1
+  h -> p2 -> q2
+  h -> p8 -> q8
+}

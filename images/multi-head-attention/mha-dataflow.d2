@@ -1,0 +1,116 @@
+direction: down
+
+H: "H\n[n, 512]\nsequence representation" {
+  style.bold: true
+  style.stroke-width: 3
+}
+
+heads: "8 个独立 Head" {
+  style.stroke-width: 2
+
+  head1: "Head 1" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+
+    proj1: "Q₁ K₁ V₁\n[n, 64] each" {
+      style.stroke: "#2563eb"
+    }
+    attn1: "A₁ = softmax(Q₁K₁ᵀ/√d)\n[n, n]" {
+      style.stroke: "#2563eb"
+    }
+    read1: "O₁ = A₁V₁\n[n, 64]" {
+      style.stroke: "#2563eb"
+      style.bold: true
+    }
+
+    proj1 -> attn1
+    attn1 -> read1
+  }
+
+  head2: "Head 2" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+
+    proj2: "Q₂ K₂ V₂\n[n, 64] each" {
+      style.stroke: "#16a34a"
+    }
+    attn2: "A₂ = softmax(Q₂K₂ᵀ/√d)\n[n, n]" {
+      style.stroke: "#16a34a"
+    }
+    read2: "O₂ = A₂V₂\n[n, 64]" {
+      style.stroke: "#16a34a"
+      style.bold: true
+    }
+
+    proj2 -> attn2
+    attn2 -> read2
+  }
+
+  dots: "..." {
+    style.stroke-dash: 4
+  }
+
+  head8: "Head 8" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+
+    proj8: "Q₈ K₈ V₈\n[n, 64] each" {
+      style.stroke: "#f59e0b"
+    }
+    attn8: "A₈ = softmax(Q₈K₈ᵀ/√d)\n[n, n]" {
+      style.stroke: "#f59e0b"
+    }
+    read8: "O₈ = A₈V₈\n[n, 64]" {
+      style.stroke: "#f59e0b"
+      style.bold: true
+    }
+
+    proj8 -> attn8
+    attn8 -> read8
+  }
+}
+
+concat: "Concat\n[n, 8×64] = [n, 512]\ncollect（不融合）" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+}
+
+Wo: "× W_O ∈ R^{512×512}\n跨 head feature mixing" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+output: "Output\n[n, 512]" {
+  style.bold: true
+  style.stroke-width: 3
+}
+
+H -> heads.head1.proj1: "W_Q^(1) W_K^(1) W_V^(1)" {
+  style.stroke: "#2563eb"
+}
+H -> heads.head2.proj2: "W_Q^(2) W_K^(2) W_V^(2)" {
+  style.stroke: "#16a34a"
+}
+H -> heads.dots {
+  style.stroke-dash: 4
+}
+H -> heads.head8.proj8: "W_Q^(8) W_K^(8) W_V^(8)" {
+  style.stroke: "#f59e0b"
+}
+
+heads.head1.read1 -> concat {
+  style.stroke: "#2563eb"
+}
+heads.head2.read2 -> concat {
+  style.stroke: "#16a34a"
+}
+heads.dots -> concat {
+  style.stroke-dash: 4
+}
+heads.head8.read8 -> concat {
+  style.stroke: "#f59e0b"
+}
+
+concat -> Wo
+Wo -> output

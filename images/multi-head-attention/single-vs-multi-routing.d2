@@ -1,0 +1,89 @@
+direction: down
+
+single: "Single-Head Attention" {
+  style.bold: true
+  style.stroke-width: 3
+  style.stroke: "#2563eb"
+
+  input: "h_i ∈ R^512\n(完整 hidden representation)" {
+    style.bold: true
+  }
+
+  space: "一套 Q/K/V projection\n→ 一个 matching space\n→ 一个 routing distribution" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+
+  read: "一次 weighted read" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+
+  output: "一个 read result" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+
+  input -> space
+  space -> read
+  read -> output
+}
+
+multi: "Multi-Head Attention" {
+  style.bold: true
+  style.stroke-width: 3
+  style.stroke: "#16a34a"
+
+  input: "h_i ∈ R^512\n(同一份 hidden representation)" {
+    style.bold: true
+  }
+
+  h1: "Head 1\n独立 Q/K/V → 64-d space" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+  }
+  h2: "Head 2\n独立 Q/K/V → 64-d space" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+  }
+  h3: "..." {
+    style.stroke: "#16a34a"
+    style.stroke-dash: 4
+  }
+  h8: "Head 8\n独立 Q/K/V → 64-d space" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+  }
+
+  r1: "read 1" { style.stroke: "#16a34a" }
+  r2: "read 2" { style.stroke: "#16a34a" }
+  r3: "..." { style.stroke: "#16a34a"; style.stroke-dash: 4 }
+  r8: "read 8" { style.stroke: "#16a34a" }
+
+  fusion: "Concat → W_O\n跨 head fusion" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  input -> h1
+  input -> h2
+  input -> h3
+  input -> h8
+
+  h1 -> r1
+  h2 -> r2
+  h3 -> r3
+  h8 -> r8
+
+  r1 -> fusion
+  r2 -> fusion
+  r3 -> fusion
+  r8 -> fusion
+}
+
+single -> multi: "为什么还不够？" {
+  style.stroke-dash: 4
+  style.stroke: "#f59e0b"
+  style.bold: true
+}
