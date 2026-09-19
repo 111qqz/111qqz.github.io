@@ -1,27 +1,23 @@
-direction: down
+direction: right
 
-x: "输入 x: [batch, dim]"
+x: "输入 x\n[batch, dim]"
 
-W: "Gate 网络\nlinear + softmax\nshape: [batch, n_experts]" {
+W: "Gate 网络\nlinear + softmax\n[batch, n_experts]" {
   style.stroke: blue
 }
 
-S: "Softmax\nrow-wise"
-T: "Top-k 选择\nk=2"
+T: "Top-k\n选择 k=2"
 
-x -> W -> S -> T
+E1: "Expert 1\nE₁(x)" { style.stroke: green }
+E2: "Expert 2\nE₂(x)" { style.stroke: green }
 
-E1: "Expert 1: E₁(x)" { style.stroke: green }
-E2: "Expert 2: E₂(x)" { style.stroke: green }
+P: "概率加权\np₁·E₁ + p₂·E₂"
 
+y: "输出 y" { style.bold: true }
+
+x -> W -> T
 T -> E1
 T -> E2
-
-P: "概率加权\np₁, p₂ = softmax 输出"
-
 E1 -> P
 E2 -> P
-
-y: "输出 y = p₁·E₁(x) + p₂·E₂(x)" { style.bold: true }
-
 P -> y
