@@ -1,0 +1,26 @@
+direction: down
+
+stage1: "阶段一：初始化与数据准备\n• 参数初始化：以高斯分布随机初始化用户偏好矩阵 P (|U| × K) 与物品特征矩阵 Q (K × |I|)\n• 样本流读取：遍历数据集中的有效评分三元组 (u, i, r_ui)，跳过未知缺失项" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+stage2: "阶段二：SGD 梯度反向传播与参数微调" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  p3: "前向预测与残差计算\n• 预测兴趣度: r̂_ui = ∑ p_uk · q_ki\n• 预测误差残差: e_ui = r_ui - r̂_ui"
+  p4: "带 L2 正则化的参数梯度更新 (防止过拟合)\n• 用户向量更新: p_uk ← p_uk + γ · (e_ui · q_ki - λ · p_uk)\n• 物品向量更新: q_ki ← q_ki + γ · (e_ui · p_uk - λ · q_ki)"
+  p3 -> p4: "误差反向传播"
+  p4 -> p3: "迭代下一条有效样本" {
+    style.stroke-dash: 4
+  }
+}
+
+stage3: "阶段三：模型收敛与线上推荐服务" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  desc: "• 收敛判定：验证集均方根误差 (RMSE) 趋于平稳或达到预设 Epoch 轮数上限\n• 线上服务：离线固化 P 和 Q 矩阵，线上通过用户向量与候选物品向量点积实时排序"
+}
+
+stage1 -> stage2.p3: "输入初始矩阵与样本数据"
+stage2.p4 -> stage3: "满足收敛判定条件"

@@ -1,0 +1,62 @@
+direction: down
+
+inputs: "输入三元组 (Triplet)" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  anchor: "Anchor (锚点 x_a)\n基准样本 (类别 A)" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  pos: "Positive (正例 x_p)\n同类样本 (类别 A)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  neg: "Negative (负例 x_n)\n异类样本 (类别 B)" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+}
+
+network: "共享权重的深度网络特征映射 f(·)" {
+  shape: diamond
+  style.stroke: "#8b5cf6"
+  style.bold: true
+}
+
+metric_space: "度量嵌入空间与 Margin 间隔几何约束" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+  embed_a: "f(x_a) 锚点向量" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  embed_p: "f(x_p) 正例向量" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  embed_n: "f(x_n) 负例向量" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+  embed_a -> embed_p: "d(a, p) 欧氏距离尽量拉近" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  embed_a -> embed_n: "d(a, n) 欧氏距离尽量推远" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+  margin_rule: "几何边界约束: d(a, n) ≥ d(a, p) + α\n目标损失函数: Loss = max(0, d(a, p) - d(a, n) + α)" {
+    shape: rectangle
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+}
+
+inputs.anchor -> network: "输入 x_a"
+inputs.pos -> network: "输入 x_p"
+inputs.neg -> network: "输入 x_n"
+
+network -> metric_space.embed_a: "输出特征"
+network -> metric_space.embed_p: "输出特征"
+network -> metric_space.embed_n: "输出特征"
