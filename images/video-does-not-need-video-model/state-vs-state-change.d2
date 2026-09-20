@@ -1,40 +1,19 @@
 direction: right
 
-appearance: "状态识别 (Appearance)" {
+appearance: "第一类：状态与静态外观识别 (Appearance)" {
   style.stroke: "#2563eb"
   style.stroke-width: 2
+  style.bold: true
 
-  label1: "色情内容"
-  label2: "logo / 二维码"
-  label3: "人脸 / 场景"
-  signal: "单帧已有\n足够信号" {
-    style.bold: true
-    style.stroke: "#2563eb"
-  }
-
-  label1 -> signal
-  label2 -> signal
-  label3 -> signal
+  cases: "典型任务:\n• 色情内容识别\n• Logo 与二维码检测\n• 人脸 / 静态场景分类"
+  reason: "判别依据:\n单帧静态画面已包含充分判别信息\n不依赖帧与帧之间的时间变化"
 }
 
-action: "状态变化识别 (Action)" {
+action: "第二类：状态变化与连续动作识别 (Motion)" {
   style.stroke: "#dc2626"
   style.stroke-width: 2
-
-  label1: "挥手 vs 手举着"
-  label2: "坐下 vs 已经坐着"
-  label3: "摔倒 vs 躺着"
-  signal: "必须看到\nbefore → after" {
-    style.bold: true
-    style.stroke: "#dc2626"
-  }
-
-  label1 -> signal
-  label2 -> signal
-  label3 -> signal
-}
-
-appearance -> action: "需要 temporal\nmodeling?" {
-  style.stroke: "#f59e0b"
   style.bold: true
+
+  cases: "典型任务:\n• 挥手 vs 手一直举着\n• 坐下 vs 已经坐着\n• 摔倒 vs 原本就躺着"
+  reason: "判别依据:\n必须观察 before → during → after 过渡\n标签语义本质就是状态在时序上的演变"
 }

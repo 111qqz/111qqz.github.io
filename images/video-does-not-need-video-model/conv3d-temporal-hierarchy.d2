@@ -1,0 +1,28 @@
+direction: down
+
+in: "输入 5D 视频张量: [B, C, 16, H, W]\n时间轴 T 显式独立，包含 16 帧连续画面" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+}
+
+l1: "Layer 1 (Conv3D, K_t=3)\n局部时空卷积 → 输出: [B, C₁, 14, H₁, W₁]\n捕获 3 帧微动作（瞬时位移 / 局部运动基元）\n时间轴 T 显式保留 (16 → 14)" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+l2: "Layer 2 (Conv3D, K_t=3)\n沿 T 轴继续滑窗卷积 → 输出: [B, C₂, 12, H₂, W₂]\n时序感受野扩张至 5 帧，组合成连贯动作片段（如“手开始举起”）" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+l3: "深层 Conv3D / 顶层表征\n输出: [B, C_deep, T_out, H', W']\n时序视野持续累积，逐层组合完整事件模式（如“完整挥手动作”）" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+in -> l1: "时空滑窗卷积 (T 轴存活)"
+l1 -> l2: "后续层继续沿时间轴卷积"
+l2 -> l3: "逐层组合更长时序模式 (Temporal Hierarchy)"

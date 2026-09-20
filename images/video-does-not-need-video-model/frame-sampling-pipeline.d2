@@ -1,20 +1,22 @@
 direction: down
 
-video: Video {
-  style.bold: true
+video_sample: "1. 视频输入与稀疏抽帧采样\n输入几十秒~几分钟的长视频流，按固定步长均匀抽取 K 张图片" {
   style.stroke: "#2563eb"
-  style.stroke-width: 3
+  style.stroke-width: 2
+  style.bold: true
 }
 
-process: "抽帧 (每隔 N 帧) → 2D CNN (逐帧独立)" {
+conv2d: "2. 2D CNN 逐帧独立推理打分\n每张图片单独送入二维卷积网络，输出帧级置信度 [s₁, s₂, ..., s_K]" {
   style.stroke: "#16a34a"
   style.stroke-width: 2
-}
-
-agg: "Frame Scores → Aggregation (max / top-k / avg) → Video Prediction" {
   style.bold: true
-  style.stroke: "#dc2626"
-  style.stroke-width: 3
 }
 
-video -> process -> agg
+agg_pred: "3. 时序分数聚合与视频级分类\n对所有帧得分取 Max（色情审核）/ Top-k / 平均，输出最终视频预测" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+video_sample -> conv2d: "K 张图片独立前向计算"
+conv2d -> agg_pred: "汇聚帧级置信度"

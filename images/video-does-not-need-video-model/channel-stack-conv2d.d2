@@ -1,0 +1,20 @@
+direction: down
+
+in: "多帧输入通道堆叠: [B, 16 × 3, H, W]\n将 16 帧图像强行塞入通道维 (48 channels)" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+}
+
+l1: "Layer 1 (Conv2D)\n48 通道全混线性组合 → 输出: [B, C₁, H₁, W₁]\n时间维度在首层彻底被压扁折叠" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+l2: "Layer 2+ (Conv2D)\n后续层仅能做常规 2D 空间卷积 → 输出: [B, C₂, H₂, W₂]\n时间轴已不复存在，无法继续做跨帧时序建模" {
+  style.stroke: "#dc2626"
+  style.stroke-dash: 3
+}
+
+in -> l1: "通道混合 (Channel Mixing)"
+l1 -> l2: "时序结构永久丢失"
