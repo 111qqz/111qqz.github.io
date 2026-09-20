@@ -1,102 +1,102 @@
-direction: down
+grid-columns: 2
 
-in: "输入 x_l\n(来自上一个 Block / Embedding)" {
-  style.stroke: "#2563eb"
+stage1: "第一子层：Self-Attention 残差块 (Pre-LN)" {
+  style.stroke: "#8b5cf6"
   style.stroke-width: 2
   style.bold: true
-}
 
-sublayer1: "Attention 子层 (Pre-LN)" {
-  style.stroke-dash: 3
-
-  norm1: "LayerNorm" {
-    style.stroke: "#10b981"
+  in1: "输入表示 x_l\n[n, d_model]" {
+    style.stroke: "#2563eb"
+    style.bold: true
   }
 
-  mha: "Multi-Head Attention\n(上下文读取)" {
+  norm1: "LayerNorm\n(对各 Token 特征归一化)" {
+    style.stroke: "#10b981"
+    style.stroke-width: 2
+  }
+
+  mha: "Multi-Head Attention\n(读取上下文并投影)" {
     style.stroke: "#8b5cf6"
     style.stroke-width: 2
+    style.bold: true
   }
 
-  id1: "Identity 旁路 (直通)" {
+  id1: "Identity 恒等映射旁路\n(无损传递历史表示与直通梯度)" {
     style.stroke: "#16a34a"
     style.stroke-width: 2
     style.bold: true
   }
 
-  norm1 -> mha: "规范化输入"
-}
-
-add1: "+" {
-  shape: circle
-  style.stroke: "#f59e0b"
-  style.stroke-width: 2
-  style.bold: true
-}
-
-mid: "中间状态 x' = x_l + Δ_attn" {
-  style.stroke: "#2563eb"
-  style.bold: true
-}
-
-sublayer2: "FFN 子层 (Pre-LN)" {
-  style.stroke-dash: 3
-
-  norm2: "LayerNorm" {
-    style.stroke: "#10b981"
+  add1: "+ (残差相加)" {
+    shape: circle
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+    style.bold: true
   }
 
-  ffn: "Feed-Forward Network (MLP)\n(特征非线性映射)" {
+  out1: "中间状态 x'\n= x_l + Attention(LN(x_l))" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  in1 -> norm1: "归一化后计算"
+  norm1 -> mha: "输入 QKV"
+  mha -> add1: "增量 Δ_attn"
+  in1 -> id1: "直通保持" {style.stroke: "#16a34a"; style.stroke-width: 2}
+  id1 -> add1: "原值 x_l" {style.stroke: "#16a34a"; style.stroke-width: 2}
+  add1 -> out1
+}
+
+stage2: "第二子层：Feed-Forward 残差块 (Pre-LN)" {
+  style.stroke: "#06b6d4"
+  style.stroke-width: 2
+  style.bold: true
+
+  in2: "输入状态 x'\n[n, d_model]" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  norm2: "LayerNorm\n(对中间状态归一化)" {
+    style.stroke: "#10b981"
+    style.stroke-width: 2
+  }
+
+  ffn: "Feed-Forward Network\n(两层 MLP，非线性特征维度扩展)" {
     style.stroke: "#06b6d4"
     style.stroke-width: 2
+    style.bold: true
   }
 
-  id2: "Identity 旁路 (直通)" {
+  id2: "Identity 恒等映射旁路\n(保留已有上下文特征与直通梯度)" {
     style.stroke: "#16a34a"
     style.stroke-width: 2
     style.bold: true
   }
 
-  norm2 -> ffn: "规范化输入"
+  add2: "+ (残差相加)" {
+    shape: circle
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  out2: "输出表示 x_{l+1}\n= x' + FFN(LN(x'))\n(写回 Residual Stream)" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  in2 -> norm2: "归一化后计算"
+  norm2 -> ffn: "升维激活降维"
+  ffn -> add2: "增量 Δ_ffn"
+  in2 -> id2: "直通保持" {style.stroke: "#16a34a"; style.stroke-width: 2}
+  id2 -> add2: "原值 x'" {style.stroke: "#16a34a"; style.stroke-width: 2}
+  add2 -> out2
 }
 
-add2: "+" {
-  shape: circle
-  style.stroke: "#f59e0b"
-  style.stroke-width: 2
-  style.bold: true
-}
-
-out: "输出 x_{l+1} = x' + Δ_ffn\n(写入 Residual Stream / 下一 Block)" {
+stage1.out1 -> stage2.in2: "写出至中间流并作为第二子层输入" {
   style.stroke: "#2563eb"
   style.stroke-width: 2
   style.bold: true
 }
-
-in -> sublayer1.norm1: "进入计算分支"
-in -> sublayer1.id1: "Identity 直通" {
-  style.stroke: "#16a34a"
-  style.stroke-width: 2
-}
-
-sublayer1.mha -> add1: "Δ_attn"
-sublayer1.id1 -> add1: "x_l" {
-  style.stroke: "#16a34a"
-  style.stroke-width: 2
-}
-
-add1 -> mid
-
-mid -> sublayer2.norm2: "进入计算分支"
-mid -> sublayer2.id2: "Identity 直通" {
-  style.stroke: "#16a34a"
-  style.stroke-width: 2
-}
-
-sublayer2.ffn -> add2: "Δ_ffn"
-sublayer2.id2 -> add2: "x'" {
-  style.stroke: "#16a34a"
-  style.stroke-width: 2
-}
-
-add2 -> out

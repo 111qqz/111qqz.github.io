@@ -1,0 +1,46 @@
+direction: down
+
+geom: "几何空间：扫描线由下向上切分矩形并集" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  grid-columns: 4
+  grid-gap: 15
+
+  strip1: "切片 1 (高 Δy_1)\n有效覆盖长 L_1" {
+    style.stroke: "#16a34a"
+  }
+  strip2: "切片 2 (高 Δy_2)\n有效覆盖长 L_2" {
+    style.stroke: "#0891b2"
+  }
+  strip3: "切片 3 (高 Δy_3)\n有效覆盖长 L_3 (两矩形重叠)" {
+    style.stroke: "#f59e0b"
+  }
+  strip4: "切片 4 (高 Δy_4)\n有效覆盖长 L_4" {
+    style.stroke: "#9333ea"
+  }
+}
+
+tree_algo: "算法状态机：X 轴线段树动态维护" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  grid-columns: 3
+  grid-gap: 20
+
+  step_init: "1. 离散化 X 坐标构建线段树\n每个叶子维护元区间 [x_i, x_{i+1}]" {
+    shape: rectangle
+    style.stroke: "#2563eb"
+  }
+  step_event: "2. 按 Y 升序扫描事件线：\n• 遇下边：区间覆盖计数 cnt + 1\n• 遇上边：区间覆盖计数 cnt - 1" {
+    shape: rectangle
+    style.stroke: "#f59e0b"
+  }
+  step_sum: "3. 累加水平切片并集面积：\nS += L_active × (y_{k+1} - y_k)\nL_active 为线段树根节点覆盖长度" {
+    shape: rectangle
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+}
+
+geom -> tree_algo: "事件线驱动线段树更新与积分求和"

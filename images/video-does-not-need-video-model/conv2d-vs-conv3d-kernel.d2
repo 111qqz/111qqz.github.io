@@ -1,17 +1,50 @@
-direction: right
+direction: down
 
-k2d: "Conv2D 卷积核\n空间局部感受野" {
+conv2d_flow: "Conv2D: 纯空间滑窗 (Spatial Sliding)" {
   style.stroke: "#2563eb"
   style.stroke-width: 2
-  style.bold: true
+  direction: right
 
-  spec: "核形状: K_h × K_w (如 3×3)\n输入维度: [B, C, H, W]\n滑窗轴: 仅在空间 (H, W) 两个维度滑动\n特征: 每个位置吃下所有通道，输出单点空间标量"
+  in2d: "输入图像 [C, H, W]\n单帧空间切片" {
+    style.stroke: "#2563eb"
+  }
+
+  kernel2d: "二维卷积核 [C, K_h, K_w]\n沿 (H, W) 两个空间维度滑动\n一次性跨通道求和加权" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  out2d: "输出特征图 [C_out, H', W']\n时间轴 T 未定义" {
+    style.stroke: "#2563eb"
+  }
+
+  in2d -> kernel2d: "空间滑动"
+  kernel2d -> out2d: "单点响应"
 }
 
-k3d: "Conv3D 卷积核\n时空三维小立方体" {
+conv3d_flow: "Conv3D: 时空立方体滑窗 (Spatiotemporal Sliding)" {
   style.stroke: "#16a34a"
   style.stroke-width: 2
   style.bold: true
+  direction: right
 
-  spec: "核形状: K_t × K_h × K_w (如 3×3×3)\n输入维度: [B, C, T, H, W]\n滑窗轴: 在时间与空间 (T, H, W) 三个维度同步滑动\n特征: 每个位置覆盖跨帧局部时空立体区域"
+  in3d: "输入视频 [C, T, H, W]\n多帧连续画面" {
+    style.stroke: "#16a34a"
+  }
+
+  kernel3d: "三维卷积核 [C, K_t, K_h, K_w]\n沿 (T, H, W) 三个维度同步滑动\n局部覆盖相邻 K_t 帧" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  out3d: "时空特征 [C_out, T', H', W']\n时间轴 T 显式保留" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  in3d -> kernel3d: "时空同步滑动"
+  kernel3d -> out3d: "跨帧局部时空响应"
 }

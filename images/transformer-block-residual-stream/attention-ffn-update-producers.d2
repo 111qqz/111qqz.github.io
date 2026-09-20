@@ -1,81 +1,88 @@
-direction: down
+grid-columns: 2
 
-stream_in: "Residual Stream (已有表示)" {
-  style.stroke: "#2563eb"
+prod1: "Update Producer 1：Multi-Head Attention" {
+  style.stroke: "#8b5cf6"
   style.stroke-width: 2
   style.bold: true
-}
 
-block1: "" {
-  style.stroke-dash: 3
-  
-  attn: "Attention Sublayer\n跨 Token 交互 (Inter-token)\n从 Sequence 读取上下文信息" {
+  stream1: "Residual Stream 输入\n已有 Token 表示 x_l" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  op1: "跨 Token 交互计算 (Inter-token)\n在 Sequence 维度动态路由并聚合上下文" {
     style.stroke: "#8b5cf6"
     style.stroke-width: 2
+    style.bold: true
   }
-  
-  id1: "Identity 旁路" {
+
+  id1: "Identity 直通旁路\n保留原始未变换信息" {
     style.stroke: "#16a34a"
     style.stroke-width: 2
   }
+
+  add1: "+ (写回 Stream)" {
+    shape: circle
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  stream_mid: "更新后 Stream 状态\nx' = x_l + Δ_attn" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  stream1 -> op1: "读取"
+  op1 -> add1: "Δ_attn (Context Update)"
+  stream1 -> id1: "直通" {style.stroke: "#16a34a"}
+  id1 -> add1: "原值" {style.stroke: "#16a34a"}
+  add1 -> stream_mid
 }
 
-add1: "+" {
-  shape: circle
-  style.stroke: "#f59e0b"
+prod2: "Update Producer 2：Feed-Forward Network" {
+  style.stroke: "#06b6d4"
   style.stroke-width: 2
-}
-
-stream_mid: "Residual Stream (融入上下文更新)" {
-  style.stroke: "#2563eb"
   style.bold: true
-}
 
-block2: "" {
-  style.stroke-dash: 3
-  
-  ffn: "FFN Sublayer\n单 Token 内部变换 (Intra-token)\n非线性特征维度扩展与抽取" {
+  stream2: "Residual Stream 输入\n已融入上下文的表示 x'" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  op2: "Token 内部特征变换 (Intra-token)\n在 Feature 维度做非线性扩展与抽取" {
     style.stroke: "#06b6d4"
     style.stroke-width: 2
+    style.bold: true
   }
-  
-  id2: "Identity 旁路" {
+
+  id2: "Identity 直通旁路\n保留已有上下文表示" {
     style.stroke: "#16a34a"
     style.stroke-width: 2
   }
+
+  add2: "+ (写回 Stream)" {
+    shape: circle
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  stream_out: "最终 Stream 状态\nx_{l+1} = x' + Δ_ffn" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  stream2 -> op2: "读取"
+  op2 -> add2: "Δ_ffn (Feature Update)"
+  stream2 -> id2: "直通" {style.stroke: "#16a34a"}
+  id2 -> add2: "原值" {style.stroke: "#16a34a"}
+  add2 -> stream_out
 }
 
-add2: "+" {
-  shape: circle
-  style.stroke: "#f59e0b"
-  style.stroke-width: 2
-}
-
-stream_out: "Residual Stream (最终表示)" {
+prod1.stream_mid -> prod2.stream2: "写回后作为下一 Producer 的读取源" {
   style.stroke: "#2563eb"
   style.stroke-width: 2
   style.bold: true
 }
-
-stream_in -> block1.attn: "读取 Stream"
-stream_in -> block1.id1: "直通保持" {
-  style.stroke: "#16a34a"
-}
-
-block1.attn -> add1: "Δ_attention (Contextual Update)"
-block1.id1 -> add1: "原有信息" {
-  style.stroke: "#16a34a"
-}
-
-add1 -> stream_mid
-stream_mid -> block2.ffn: "读取 Stream"
-stream_mid -> block2.id2: "直通保持" {
-  style.stroke: "#16a34a"
-}
-
-block2.ffn -> add2: "Δ_ffn (Feature Update)"
-block2.id2 -> add2: "原有信息" {
-  style.stroke: "#16a34a"
-}
-
-add2 -> stream_out

@@ -1,0 +1,32 @@
+direction: down
+
+inputs: "输入与历史状态" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  desc: "• 前序细胞状态 C_{t-1}：存储上一步传递下来的长期记忆\n• 前序隐藏状态 h_{t-1} 与当前输入 x_t：用于计算门控权重"
+}
+
+cell: "LSTM 神经元核心计算结构" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+
+  conveyor: "细胞状态传送带 (主线通路)：以最小线性运算贯穿，避免梯度消失" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  gates: "门控系统 (控制记忆更新)\n• 遗忘门 f_t ∈ [0, 1]：决定遗忘多少 C_{t-1} 旧信息\n• 输入门 i_t ∈ [0, 1]：决定写入多少 C̃_t 新候选信息\n• 输出门 o_t ∈ [0, 1]：结合双曲正切激活过滤生成当前输出 h_t" {
+    style.stroke: "#dc2626"
+  }
+
+  conveyor -> gates: "状态调节"
+}
+
+outputs: "输出新状态" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  desc: "• 当前细胞状态 C_t：继续沿传送带传向下一时间步 t+1\n• 当前隐藏状态 h_t：作为当前时间步输出，并参与下一步门控决策"
+}
+
+inputs -> cell: "输入向量与历史状态"
+cell -> outputs: "生成当前时间步状态"

@@ -1,0 +1,55 @@
+grid-columns: 2
+
+anchor_based: "Anchor-Based 机制：预定义模板框与偏移修正" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+  style.bold: true
+  direction: down
+
+  anchor: "1. 预定义 Anchor 模板\n每个采样点预设不同 Scale 与 Ratio\n(人为硬编码几何假设)" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+
+  offset: "2. 网络预测相对偏移量\n回归目标: (Δx, Δy, Δw, Δh)\n学习问题:「从这个参考框出发，该怎么平移缩放？」" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  box_out: "3. 解码目标边界框\nBox = Decode(Anchor, Δx, Δy, Δw, Δh)\n需根据 IoU 设定阈值匹配正负样本" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  anchor -> offset: "提供初始基准"
+  offset -> box_out: "坐标微调"
+}
+
+anchor_free: "Anchor-Free 机制 (FCOS)：网格点直接距离回归" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+  style.bold: true
+  direction: down
+
+  point: "1. 特征图采样点 (Point)\n直接以 Feature Map 上的网格点 (x, y) 为中心\n(无需人工设计锚框超参)" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+  }
+
+  distances: "2. 网络直接预测四边物理距离\n回归目标: (l, t, r, b) + Centerness 中心度\n学习问题:「从当前网格点出发，到物体四边的距离是多少？」" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  box_free: "3. 直接映射边界框\nx₁ = x - l, y₁ = y - t, x₂ = x + r, y₂ = y + b\n中心度权重抑制离目标中心过远的低质框" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+    style.bold: true
+  }
+
+  point -> distances: "当前特征点"
+  distances -> box_free: "几何距离映射"
+}

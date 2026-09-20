@@ -1,34 +1,55 @@
-direction: down
+direction: right
 
-samples: "Dense Detection: ~100,000 候选" {
+samples: "稠密候选样本分布\n(极端类别失衡: ~100k)" {
   style.stroke: "#2563eb"
   style.stroke-width: 2
+  style.bold: true
+  direction: down
 
-  easy_bg: "Easy Background\n~95,000\n(天空、墙壁、空白)" {
+  easy_bg: "简单背景 (Easy Negatives)\n~95,000 样本 (95%)\n纯色无信息区域" {
     style.stroke: "#9ca3af"
   }
-  hard_neg: "Hard Negatives\n~4,500" {
+  hard_neg: "困难负样本 (Hard Negatives)\n~4,500 样本 (4.5%)\n局部易混淆纹理" {
     style.stroke: "#f59e0b"
-    style.stroke-width: 2
   }
-  positive: "Positive\n~500" {
+  positive: "真实正样本 (Positives)\n~500 样本 (0.5%)\n待检测真实物体" {
     style.stroke: "#16a34a"
     style.stroke-width: 2
     style.bold: true
   }
 }
 
-ce: "Cross-Entropy Loss" {
-  style.stroke: "#dc2626"
-  note: "所有样本平等贡献 loss\neasy background 数量巨大\n→ 淹没有效梯度"
+losses: "损失函数梯度预算分配" {
+  style.stroke: transparent
+  direction: down
+
+  ce: "标准交叉熵 (Standard CE)" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+    style.bold: true
+
+    formula_ce: "Loss = - log(p_t)\n(所有样本同等权重视之)" {style.stroke: "#dc2626"}
+    result_ce: "失衡后果:\n9.5 万个微小梯度累加形成海量总和\n正样本有效梯度被彻底淹没" {
+      style.stroke: "#dc2626"
+      style.bold: true
+    }
+    formula_ce -> result_ce
+  }
+
+  fl: "焦点损失 (Focal Loss, RetinaNet)" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+    style.bold: true
+
+    formula_fl: "Loss = - (1 - p_t)^γ log(p_t)\n(引入调制因子动态衰减权重)" {style.stroke: "#16a34a"}
+    result_fl: "重平衡效果:\n高置信背景权重衰减千倍以上\n有效梯度 90%+ 重新聚焦正样本" {
+      style.stroke: "#16a34a"
+      style.bold: true
+    }
+    formula_fl -> result_fl
+  }
 }
 
-fl: "Focal Loss" {
-  style.stroke: "#16a34a"
-  style.stroke-width: 2
-  style.bold: true
-  note: "easy samples 的 loss 被\n(1 - p_t)^γ 大幅压低\n→ 训练预算留给 hard examples"
-}
-
-samples -> ce: "普通 CE"
-samples -> fl: "Focal Loss"
+samples.easy_bg -> losses.ce: "海量小梯度淹没更新" {style.stroke: "#dc2626"}
+samples.easy_bg -> losses.fl: "权重被调制因子强力压制" {style.stroke: "#16a34a"}
+samples.positive -> losses.fl: "主导网络有效更新" {style.stroke: "#16a34a"; style.stroke-width: 2}

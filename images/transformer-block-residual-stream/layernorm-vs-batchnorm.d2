@@ -1,20 +1,47 @@
-direction: down
+grid-columns: 2
 
-bn_box: "BatchNorm: 跨样本聚合 (Cross-Sample)" {
+bn_box: "BatchNorm: 跨样本统计聚合 (Cross-Sample)" {
   style.stroke: "#f59e0b"
   style.stroke-width: 2
-  
-  bn_slice: "统计切片: 固定某一 Feature，沿整个 Batch 聚合所有 Token\n• 均值方差受 Batch 内其他样本干扰\n• 推理与微批次 (Batch=1) 表现不稳定"
+
+  in_bn: "输入张量: [B, n, d_model]" {
+    style.stroke: "#2563eb"
+  }
+
+  slice_bn: "归一化轴: 跨 Batch 维度统计\n固定单个特征通道，聚合当前 Batch 内所有 Token\nμ_c, σ_c = MeanVar(x_{b, t, c})" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  trait_bn: "特性与局限:\n• 样本间存在相互干扰与统计耦合\n• 强依赖 Batch Size，极不适配动态变长 Sequence 与 Batch=1 自回归推理" {
+    style.stroke: "#dc2626"
+  }
+
+  in_bn -> slice_bn: "沿 Batch 轴聚合"
+  slice_bn -> trait_bn: "产生跨样本依赖"
 }
 
-ln_box: "LayerNorm: 单样本独立 (Per-Token)" {
+ln_box: "LayerNorm: 单 Token 自身特征归一化 (Per-Token)" {
   style.stroke: "#16a34a"
   style.stroke-width: 3
   style.bold: true
-  
-  ln_slice: "统计切片: 固定单个 Token，沿自身全部 d_model 特征独立归一化\n• Token 间零干扰，Batch 间零干扰\n• 天然适配自回归生成 (Inference) 与变长 Sequence"
-}
 
-bn_box -> ln_box: "序列模型选择: 摆脱 Batch 依赖" {
-  style.stroke-dash: 3
+  in_ln: "输入张量: [B, n, d_model]" {
+    style.stroke: "#2563eb"
+  }
+
+  slice_ln: "归一化轴: 跨 Feature 维度统计\n固定单个 Token，仅沿自身全部 d_model 个特征计算\nμ_{b,t}, σ_{b,t} = MeanVar(x_{b, t, :})" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  trait_ln: "特性与优势:\n• Token 间零干扰，Batch 间零干扰\n• 计算完全局部自包含，天然支持变长序列与流式自回归逐字生成" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  in_ln -> slice_ln: "沿 Feature 轴聚合"
+  slice_ln -> trait_ln: "完全消除 Batch 耦合"
 }

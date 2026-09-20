@@ -1,0 +1,37 @@
+direction: down
+
+ellipse_model: "标准椭圆截面面积问题模型 (x^2 / a^2 + y^2 / b^2 = 1)" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  grid-columns: 3
+  grid-gap: 20
+
+  left_bound: "积分下限 x = l\n左侧竖直截面边界" {
+    shape: rectangle
+    style.stroke: "#0891b2"
+  }
+
+  target_area: "截面并集面积 S\nS = 2 ∫[l, r] b√(1 - x^2 / a^2) dx\n利用对称性求上半部 2 倍" {
+    shape: rectangle
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  right_bound: "积分上限 x = r\n右侧竖直截面边界" {
+    shape: rectangle
+    style.stroke: "#0891b2"
+  }
+}
+
+simpson_box: "自适应辛普森积分数值求解 (Adaptive Simpson)" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+
+  quad: "抛物线拟合与误差控制\nS(A,B) = (B - A)/6 × [f(A) + 4f(mid) + f(B)]\n若 |S(A,mid) + S(mid,B) - S(A,B)| < 15*eps 则收敛返回" {
+    shape: rectangle
+    style.stroke: "#f59e0b"
+  }
+}
+
+ellipse_model -> simpson_box: "数值自适应积分近似求解"

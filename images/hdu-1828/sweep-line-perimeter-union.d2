@@ -1,0 +1,45 @@
+direction: down
+
+concept: "周长并分解：正交分解与端点覆盖变化量" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  grid-columns: 2
+  grid-gap: 20
+
+  horiz_box: "水平边周长贡献 (横向线段)\n在每条扫描线 y_k 触发更新时：\nΔC_horizontal = |L_curr - L_prev|\n（即当前与上次非零覆盖长度差的绝对值）" {
+    shape: rectangle
+    style.stroke: "#0891b2"
+    style.bold: true
+  }
+
+  vert_box: "竖直边周长贡献 (纵向线段)\n实现策略一：正交对称，绕 X 轴由左向右再扫一次\n实现策略二：单次扫描中维护连通线段块数 count\nΔC_vertical = 2 × count × (y_k - y_{k-1})" {
+    shape: rectangle
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+}
+
+algo_step: "线段树扫描线执行流程（正交两次扫描法）" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  grid-columns: 3
+  grid-gap: 20
+
+  step1: "1. 离散化 X 坐标\n自底向上扫描水平边\n累加 |L_curr - L_prev|" {
+    shape: rectangle
+    style.stroke: "#2563eb"
+  }
+  step2: "2. 离散化 Y 坐标\n自左向右扫描竖直边\n累加 |H_curr - H_prev|" {
+    shape: rectangle
+    style.stroke: "#0891b2"
+  }
+  step3: "3. 累加得最终总周长\nC_total = C_horizontal + C_vertical\n注：最后一条边必须计入贡献" {
+    shape: rectangle
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+}
+
+concept -> algo_step: "正交分解降低状态维护复杂度"

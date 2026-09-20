@@ -1,0 +1,34 @@
+direction: down
+
+inputs: "输入数据与分区标识 (Inputs)" {
+  data: "原始数据 Data: [d0, d1, d2, d3, d4, d5]" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  partitions: "分区索引 Partitions: [0, 1, 0, 1, 1, 0]" {
+    style.stroke: "#8b5cf6"
+    style.bold: true
+  }
+}
+
+op: "tf.dynamic_partition(data, partitions, num_partitions=2)" {
+  shape: diamond
+  style.stroke: "#f59e0b"
+  style.bold: true
+}
+
+outputs: "分区输出集合 (Partitioned Outputs)" {
+  p0: "Partition 0 (训练集 Train Set): [d0, d2, d5]" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  p1: "Partition 1 (测试集 Test Set): [d1, d3, d4]" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+}
+
+inputs.data -> op: "提供元素数据"
+inputs.partitions -> op: "提供归属标签"
+op -> outputs.p0: "分配至分区 0"
+op -> outputs.p1: "分配至分区 1"

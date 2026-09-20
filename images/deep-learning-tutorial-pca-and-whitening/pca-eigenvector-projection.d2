@@ -1,0 +1,29 @@
+direction: down
+
+data_cloud: "原始数据分布 (2D 空间)" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  desc: "• 样本点呈现斜向相关性扩散分布，特征之间存在明显协方差\n• 存在主要方差变化轴线与次要变化轴线，样本记为 x = [x1, x2]ᵀ"
+}
+
+eigen_basis: "协方差矩阵特征向量基 (主成分正交坐标系)" {
+  style.stroke: "#8b5cf6"
+  style.bold: true
+  u1: "第一主特征向量 u_1：指向方差最大的主轴方向 (捕获最核心信号)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  u2: "第二主特征向量 u_2：与 u_1 严格正交垂直 (对应次要残留信息)" {
+    style.stroke: "#94a3b8"
+  }
+  u1 -> u2: "正交基底 (u_1 ⊥ u_2)"
+}
+
+projection: "降维投影 (Scalar Projection)" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+  desc: "• 标量投影值计算: y_1 = u_1ᵀ · x (计算样本点在主特征向量上的投影长度)\n• 降维与去相关: 丢弃较小的 u_2 分量，将 2D 样本压缩至 1D，保留最大方差"
+}
+
+data_cloud -> eigen_basis: "计算协方差矩阵并求解特征向量"
+eigen_basis -> projection: "将原始样本点投影到第一主成分 u_1"

@@ -1,21 +1,29 @@
-direction: down
+grid-columns: 2
 
-anchor: "Anchor (reference box)" {
+anchor_box: "1. 初始参考框 Anchor\n中心 (x_a, y_a)，宽高 (w_a, h_a)\n预先设定的几何尺度先验" {
   style.stroke: "#2563eb"
   style.stroke-width: 2
   style.bold: true
 }
 
-regression: "Network predicts Δx, Δy, Δw, Δh" {
-  style.stroke: "#f59e0b"
-  style.stroke-width: 2
-}
-
-predicted: "Predicted Box (object)" {
+gt_box: "2. 真实目标 Ground Truth (GT)\n中心 (x*, y*)，宽高 (w*, h*)\n训练阶段监督参考标注" {
   style.stroke: "#16a34a"
   style.stroke-width: 2
   style.bold: true
 }
 
-anchor -> regression: "输入 reference"
-regression -> predicted: "offset 修正"
+reg_head: "3. 卷积头回归相对偏移量\nΔx = (x - x_a) / w_a\nΔy = (y - y_a) / h_a\nΔw = log(w / w_a)\nΔh = log(h / h_a)" {
+  style.stroke: "#f59e0b"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+decode_out: "4. 解码生成最终预测边界框\nx = x_a + w_a · Δx\ny = y_a + h_a · Δy\nw = w_a · exp(Δw)\nh = h_a · exp(Δh)" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+  style.bold: true
+}
+
+anchor_box -> reg_head: "空间尺度基准"
+gt_box -> reg_head: "计算回归损失 (Smooth L1)" {style.stroke-dash: 4}
+reg_head -> decode_out: "推理指数缩放解码"

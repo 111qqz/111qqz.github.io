@@ -1,38 +1,41 @@
-direction: right
+direction: up
 
-emb: "Token Embedding\n+ Positional Encoding" {
-  style.stroke: "#2563eb"
-  style.bold: true
-}
-
-b1: "Transformer\nBlock 1" {
-  style.stroke: "#8b5cf6"
-  style.stroke-width: 2
-}
-
-b2: "Transformer\nBlock 2" {
-  style.stroke: "#8b5cf6"
-  style.stroke-width: 2
-}
-
-dots: "…" {
-  shape: text
-  style.bold: true
-}
-
-bn: "Transformer\nBlock N" {
-  style.stroke: "#8b5cf6"
-  style.stroke-width: 2
-}
-
-head: "Final Norm →\nOutput Head" {
+head: "Output Head (顶部输出层)\nFinal LayerNorm → Linear Projection → Softmax 词表分布预测" {
   style.stroke: "#f59e0b"
   style.stroke-width: 2
   style.bold: true
 }
 
-emb -> b1: "x₀"
-b1 -> b2: "x₁"
-b2 -> dots
-dots -> bn
-bn -> head: "x_N"
+stack: "Transformer Stack (逐层串行堆叠)" {
+  style.stroke: "#8b5cf6"
+  style.stroke-width: 2
+  style.bold: true
+  direction: up
+
+  bn: "Transformer Block N\nAttention + FFN + Pre-LN + 残差相加 → 产生 x_N" {
+    style.stroke: "#8b5cf6"
+    style.stroke-width: 2
+  }
+
+  dots: "• • •  中间连续堆叠 N 个结构相同的 Block (独立权重参数)  • • •" {
+    style.stroke-dash: 4
+    style.stroke: "#9ca3af"
+  }
+
+  b1: "Transformer Block 1\nAttention + FFN + Pre-LN + 残差相加 → 产生 x₁" {
+    style.stroke: "#8b5cf6"
+    style.stroke-width: 2
+  }
+
+  b1 -> dots: "x₁ 向上输入"
+  dots -> bn: "x_{N-1} 向上输入"
+}
+
+emb: "Input Representation (底部输入层)\nToken ID 查表 (Token Embedding) + 位置编码 (Positional Encoding) 相加 → x₀" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+emb -> stack.b1: "初始序列表示 x₀"
+stack.bn -> head: "顶层深层表示 x_N"

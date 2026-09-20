@@ -1,20 +1,57 @@
-grid-rows: 1
-grid-columns: 2
-style.stroke: transparent
+direction: down
 
-before: "Original\n\nInput:\nobject on left ◀\n\n↓ Conv\n\nFeature Map:\nresponse on left ◀" {
+pipe1: "路径一：原始输入卷积响应" {
   style.stroke: "#2563eb"
   style.stroke-width: 2
-  style.bold: true
+  direction: right
+
+  in1: "原始图像 x\n(目标位于左侧区域 ◀)" {
+    style.stroke: "#2563eb"
+  }
+
+  conv1: "卷积运算 Conv" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  out1: "特征响应图 Conv(x)\n(特征高响应同样位于左侧 ◀)" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  in1 -> conv1 -> out1
 }
 
-after: "Shifted\n\nInput:\n▶ object on right\n\n↓ Conv\n\nFeature Map:\n▶ response on right" {
-  style.stroke: "#f59e0b"
+pipe2: "路径二：平移后输入卷积响应" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+  style.bold: true
+  direction: right
+
+  in2: "平移图像 T(x)\n(目标平移 Δs 至右侧 ▶)" {
+    style.stroke: "#16a34a"
+  }
+
+  conv2: "相同卷积运算 Conv" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  out2: "平移特征响应图 Conv(T(x))\n(响应位置同样平移精确 Δs 至右侧 ▶)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  in2 -> conv2 -> out2
+}
+
+equiv: "平移等变性保证：Conv(T(x)) = T(Conv(x))\n输入空间移动，特征图相应位置同步同向移动，空间拓扑关系严格保真" {
+  style.stroke: "#dc2626"
   style.stroke-width: 2
   style.bold: true
 }
 
-before -> after: "平移输入\n→ 平移输出\nConv(Tx) = T(Conv(x))" {
-  style.stroke: "#dc2626"
-  style.bold: true
-}
+pipe1.out1 -> equiv: "对比输出" {style.stroke: "#2563eb"}
+pipe2.out2 -> equiv: "对比输出" {style.stroke: "#16a34a"}

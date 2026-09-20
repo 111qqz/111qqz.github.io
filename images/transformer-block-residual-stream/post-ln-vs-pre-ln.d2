@@ -1,90 +1,79 @@
-direction: down
+grid-columns: 2
 
-post-ln: Post-LN {
+post_ln: "Post-LN 结构 (传统设计)" {
   style.stroke: "#dc2626"
   style.stroke-width: 2
+  style.bold: true
 
-  x: "x" {
-    style.bold: true
-  }
-  attn: "Attention" {
+  x1: "输入 x" {style.bold: true}
+  sub1: "子层变换 F(x)\n(Attention / FFN)" {
     style.stroke: "#2563eb"
     style.stroke-width: 2
   }
-  add: "(+)" {
+  id1: "Identity 旁路" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+  }
+  add1: "+ (相加: x + F(x))" {
+    shape: circle
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  ln1: "LayerNorm 归一化\nLN(x + F(x))" {
     style.stroke: "#dc2626"
     style.stroke-width: 2
     style.bold: true
   }
-  ln: "LayerNorm" {
-    style.stroke: "#f59e0b"
-    style.stroke-width: 2
-    style.bold: true
-  }
-  out: "x'" {
+  out1: "输出 x'\nIdentity 路径被 LN 截断\n深层梯度反传受阻" {
+    style.stroke: "#dc2626"
     style.bold: true
   }
 
-  x -> attn: "sublayer"
-  attn -> add
-  x -> add: "residual" {
-    style.stroke: "#16a34a"
-    style.bold: true
-  }
-  add -> ln
-  ln -> out
-
-  formula: "LN( x + F(x) )" {
-    style.stroke-dash: 4
-    style.italic: true
-  }
-  out -> formula: "" {
-    style.stroke-dash: 4
-    style.opacity: 0.5
-  }
+  x1 -> sub1: "计算分支"
+  sub1 -> add1: "F(x)"
+  x1 -> id1: "旁路" {style.stroke: "#16a34a"}
+  id1 -> add1: "x" {style.stroke: "#16a34a"}
+  add1 -> ln1: "相加结果"
+  ln1 -> out1: "归一化后输出"
 }
 
-pre-ln: Pre-LN {
+pre_ln: "Pre-LN 结构 (现代主流)" {
   style.stroke: "#16a34a"
   style.stroke-width: 2
+  style.bold: true
 
-  x2: "x" {
-    style.bold: true
-  }
-  ln2: "LayerNorm" {
-    style.stroke: "#f59e0b"
+  x2: "输入 x" {style.bold: true}
+  ln2: "LayerNorm 归一化\nLN(x)" {
+    style.stroke: "#10b981"
     style.stroke-width: 2
     style.bold: true
   }
-  attn2: "Attention" {
+  sub2: "子层变换 F(LN(x))\n(仅处理归一化后特征)" {
     style.stroke: "#2563eb"
     style.stroke-width: 2
   }
-  add2: "(+)" {
+  id2: "Identity 纯净直通高速路\n(完全绕过 LayerNorm)" {
     style.stroke: "#16a34a"
     style.stroke-width: 3
     style.bold: true
   }
-  out2: "x'" {
+  add2: "+ (相加: x + F(LN(x)))" {
+    shape: circle
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
     style.bold: true
   }
-
-  x2 -> ln2: "conditioning"
-  ln2 -> attn2: "sublayer"
-  attn2 -> add2: "update"
-  x2 -> add2: "identity path" {
+  out2: "输出 x'\n恒等主干畅通无阻\n深层可稳定直通训练" {
     style.stroke: "#16a34a"
-    style.stroke-width: 3
+    style.stroke-width: 2
     style.bold: true
   }
-  add2 -> out2
 
-  formula2: "x + F( LN(x) )" {
-    style.stroke-dash: 4
-    style.italic: true
-  }
-  out2 -> formula2: "" {
-    style.stroke-dash: 4
-    style.opacity: 0.5
-  }
+  x2 -> ln2: "归一化分支"
+  ln2 -> sub2: "输入子层"
+  sub2 -> add2: "F(LN(x))"
+  x2 -> id2: "直通" {style.stroke: "#16a34a"; style.stroke-width: 2}
+  id2 -> add2: "纯净 x" {style.stroke: "#16a34a"; style.stroke-width: 2}
+  add2 -> out2: "相加后直接输出"
 }

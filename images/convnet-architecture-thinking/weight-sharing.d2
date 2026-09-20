@@ -1,41 +1,63 @@
-direction: down
+grid-columns: 2
 
-sharing: "Weight Sharing" {
-  style.stroke: "#2563eb"
-  style.stroke-width: 2
+sharing: "卷积参数共享 (Weight Sharing)" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
   style.bold: true
+  direction: down
 
-  direction: right
-  kernel: "Kernel K\n(learnable)" {
-    style.bold: true
-    style.stroke: "#2563eb"
-    style.stroke-width: 3
-  }
-
-  positions: "Spatial Plane" {
+  kernel: "单一共享卷积核 K\n(参数量: C_in × K_h × K_w)\n跨所有空间位置完全复用" {
     style.stroke: "#16a34a"
-
-    p1: "(0,0)"
-    p2: "(0,1)"
-    p3: "(1,0)"
-    p4: "(1,1)"
+    style.stroke-width: 2
+    style.bold: true
   }
 
-  kernel -> positions.p1: "K" {style.stroke: "#2563eb"}
-  kernel -> positions.p2: "K" {style.stroke: "#2563eb"}
-  kernel -> positions.p3: "K" {style.stroke: "#2563eb"}
-  kernel -> positions.p4: "K" {style.stroke: "#2563eb"}
+  positions: "空间各滑窗位置" {
+    style.stroke: "#16a34a"
+    direction: right
+    p1: "位置 (0,0)\n使用权重 K" {style.stroke: "#16a34a"}
+    p2: "位置 (0,1)\n使用权重 K" {style.stroke: "#16a34a"}
+    p3: "位置 (1,0)\n使用权重 K" {style.stroke: "#16a34a"}
+    p4: "位置 (1,1)\n使用权重 K" {style.stroke: "#16a34a"}
+  }
+
+  trait: "核心收益:\n• 参数量与输入分辨率解耦 (极低显存开销)\n• 假设特征在图像各处具有统计重复性" {
+    style.stroke: "#16a34a"
+  }
+
+  kernel -> positions.p1: "复用 K"
+  kernel -> positions.p2: "复用 K"
+  kernel -> positions.p3: "复用 K"
+  kernel -> positions.p4: "复用 K"
+  positions -> trait
 }
 
-no-share: "Without Sharing" {
+no_sharing: "位置独立权重 (Locally Connected / 无共享)" {
   style.stroke: "#dc2626"
   style.stroke-width: 2
+  direction: down
 
-  direction: right
-  w1: "(0,0) uses W1"
-  w2: "(0,1) uses W2"
-  w3: "(1,0) uses W3"
-  w4: "(1,1) uses W4"
+  weights: "每个位置维护独立参数集\n(参数量: H × W × C_in × K_h × K_w)" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+  }
+
+  positions_no: "空间各滑窗位置" {
+    style.stroke: "#dc2626"
+    direction: right
+    w1: "位置 (0,0)\n独立权重 W₁" {style.stroke: "#dc2626"}
+    w2: "位置 (0,1)\n独立权重 W₂" {style.stroke: "#dc2626"}
+    w3: "位置 (1,0)\n独立权重 W₃" {style.stroke: "#dc2626"}
+    w4: "位置 (1,1)\n独立权重 W₄" {style.stroke: "#dc2626"}
+  }
+
+  trait_no: "代价与瓶颈:\n• 参数量随图像尺寸线性膨胀，极易过拟合\n• 无法泛化相同特征在不同位置的平移" {
+    style.stroke: "#dc2626"
+  }
+
+  weights -> positions_no.w1
+  weights -> positions_no.w2
+  weights -> positions_no.w3
+  weights -> positions_no.w4
+  positions_no -> trait_no
 }
-
-sharing -> no-share: "vs: 每个位置独立参数" {style.stroke-dash: 5; style.stroke: "#dc2626"}

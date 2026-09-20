@@ -1,60 +1,46 @@
 direction: down
 
-context: "context tokens (j, k, ...)" {
+context: "上下文 Tokens (j, k, ...)\n[n, d_model]" {
   style.stroke: "#7c3aed"
   style.stroke-width: 2
 }
 
-attn: "Attention\n(dynamic read)" {
+attn: "Attention 子层 (动态路由与读取)\n按相似度加权聚合候选 Token 的 Value" {
   style.stroke: "#2563eb"
   style.stroke-width: 2
   style.bold: true
 }
 
-read-result: "contextual read result\n(update)" {
+read_update: "上下文读取增量\nΔ_attn ∈ ℝ^{d_model}" {
   style.stroke: "#2563eb"
   style.stroke-width: 2
 }
 
-old-repr: "existing representation (x)" {
+old_repr: "已有自身表示 x\n(保留历史演化与底层特征)" {
   style.stroke: "#16a34a"
   style.stroke-width: 2
   style.bold: true
 }
 
-add: "(+)" {
-  style.stroke: "#dc2626"
-  style.stroke-width: 3
-  style.bold: true
-}
-
-new-repr: "new representation (x')" {
-  style.stroke: "#16a34a"
-  style.stroke-width: 3
-  style.bold: true
-}
-
-context -> attn: "routing + read"
-attn -> read-result
-read-result -> add: "contextual update"
-old-repr -> add: "identity path" {
-  style.stroke: "#16a34a"
-  style.bold: true
-}
-add -> new-repr
-
-note: |md
-  x' = x + Attention(x)
-
-  existing information
-  \+ newly read contextual information
-  = updated representation
-| {
+add: "+ (残差合并)" {
+  shape: circle
   style.stroke: "#f59e0b"
   style.stroke-width: 2
+  style.bold: true
 }
 
-new-repr -> note: "" {
-  style.stroke-dash: 4
-  style.opacity: 0.5
+new_repr: "更新后新表示 x' = x + Δ_attn\n(自身语义 + 注入的上下文信息)" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+  style.bold: true
 }
+
+context -> attn: "Softmax 动态加权求和"
+attn -> read_update
+read_update -> add: "注入上下文增量"
+old_repr -> add: "Identity 恒等直通路径" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+  style.bold: true
+}
+add -> new_repr

@@ -1,0 +1,41 @@
+direction: down
+
+step1: "阶段一：起点规整（消除起点敏感）" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  orig: "原链码 (Original Code)\n顺时针追踪闭合边界方向序列（具平移不变性，但受起点影响）" {
+    shape: rectangle
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  norm: "归一化链码 (Normalized Code)\n将原链码视为循环自然数序列，取所有起点中字典序最小者" {
+    shape: rectangle
+    style.stroke: "#0891b2"
+    style.bold: true
+  }
+
+  orig -> norm: "循环移位取字典序最小"
+}
+
+step2: "阶段二：旋转规整（消除旋转敏感）" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  diff: "差分码 (Differential Code)\nd_k = (a_k - a_{k-1}) mod N（以逆时针转角量消除旋转偏移）" {
+    shape: rectangle
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  shape_num: "形状数 (Shape Number)\n差分码经循环移位后的字典序最小序列（序列长度即为其阶）" {
+    shape: rectangle
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  diff -> shape_num: "循环移位规整"
+}
+
+step1 -> step2: "计算相邻方向差分"

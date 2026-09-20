@@ -1,0 +1,22 @@
+direction: down
+
+planar: "1. Planar 平面存储 (如 YUV420P / I420)" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  desc: "分平面独立连续存储：先存储完整的 Y 矩阵，再存完整的 U 矩阵，最后存完整的 V 矩阵\n内存连续块: [ Y Y Y Y ... Y ]  [ U U ... U ]  [ V V ... V ]"
+}
+
+semi: "2. Semi-Planar 半平面存储 (如 YUV420SP / NV12)" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  desc: "双平面混合存储：Y 单独存储为一个连续平面，U 和 V 色度分量在第二平面交织存储\n内存连续块: [ Y Y Y Y ... Y ]  [ U V U V U V ... ]"
+}
+
+packed: "3. Packed 打包存储 (如 YUYV / YUY2)" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+  desc: "单一连续块交错存储：每个像素或相邻像素组的 Y、U、V 紧密交替排列在同一缓冲区\n内存连续块: [ Y0 U0 Y1 V0  Y2 U2 Y3 V2 ... ]"
+}
+
+planar -> semi: "移动端与 GPU 渲染常用"
+semi -> packed: "摄像头硬件直接采集常用"

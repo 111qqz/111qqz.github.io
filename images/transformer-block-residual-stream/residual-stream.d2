@@ -1,42 +1,86 @@
 direction: right
 
-x0: "x₀\n(embed+pos)" {
-  style.stroke: "#16a34a"
-  style.stroke-width: 3
+x0: "初始输入 x₀\n(Embed + PE)" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
   style.bold: true
 }
 
-attn1: "Norm →\nAttention\n→ (+)" {
-  style.stroke: "#2563eb"
-  style.stroke-width: 2
+b1: "Block 1 处理区间" {
+  style.stroke: "#8b5cf6"
+  style.stroke-dash: 3
+
+  direction: down
+  attn1: "Attention 1\n(读取流 → 产生 Δ_attn₁)" {
+    style.stroke: "#8b5cf6"
+    style.stroke-width: 2
+  }
+  stream1: "Residual Stream 主干 (+)\nx₁ = x₀ + Δ_attn₁ + Δ_ffn₁" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+    style.bold: true
+  }
+  ffn1: "FFN 1\n(读取流 → 产生 Δ_ffn₁)" {
+    style.stroke: "#06b6d4"
+    style.stroke-width: 2
+  }
+
+  stream1 -> attn1: "读取" {style.stroke-dash: 3}
+  attn1 -> stream1: "写回增量" {style.stroke: "#8b5cf6"; style.stroke-width: 2}
+  stream1 -> ffn1: "读取" {style.stroke-dash: 3}
+  ffn1 -> stream1: "写回增量" {style.stroke: "#06b6d4"; style.stroke-width: 2}
 }
 
-ffn1: "Norm →\nFFN\n→ (+)" {
-  style.stroke: "#7c3aed"
-  style.stroke-width: 2
+b2: "Block 2 处理区间" {
+  style.stroke: "#8b5cf6"
+  style.stroke-dash: 3
+
+  direction: down
+  attn2: "Attention 2\n(读取流 → 产生 Δ_attn₂)" {
+    style.stroke: "#8b5cf6"
+    style.stroke-width: 2
+  }
+  stream2: "Residual Stream 主干 (+)\nx₂ = x₁ + Δ_attn₂ + Δ_ffn₂" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+    style.bold: true
+  }
+  ffn2: "FFN 2\n(读取流 → 产生 Δ_ffn₂)" {
+    style.stroke: "#06b6d4"
+    style.stroke-width: 2
+  }
+
+  stream2 -> attn2: "读取" {style.stroke-dash: 3}
+  attn2 -> stream2: "写回增量" {style.stroke: "#8b5cf6"; style.stroke-width: 2}
+  stream2 -> ffn2: "读取" {style.stroke-dash: 3}
+  ffn2 -> stream2: "写回增量" {style.stroke: "#06b6d4"; style.stroke-width: 2}
 }
 
-attn2: "Norm →\nAttention\n→ (+)" {
-  style.stroke: "#2563eb"
-}
-
-ffn2: "Norm →\nFFN\n→ (+)" {
-  style.stroke: "#7c3aed"
-}
-
-dots: "…" {
+dots: "• • •\n持续累积\n∑ Δ_l\n• • •" {
   style.stroke-dash: 4
+  style.stroke: "#9ca3af"
 }
 
-xn: "x_N" {
+xL: "最终表示 x_L\n= x₀ + ∑_{l=0}^{L-1} Δ_l\n(主干保留全部未失真历史)" {
   style.stroke: "#16a34a"
   style.stroke-width: 3
   style.bold: true
 }
 
-x0 -> attn1: "residual\nstream" {style.stroke: "#16a34a"; style.bold: true}
-attn1 -> ffn1: "identity +" {style.stroke: "#16a34a"}
-ffn1 -> attn2: "identity +" {style.stroke: "#16a34a"}
-attn2 -> ffn2
-ffn2 -> dots
-dots -> xn
+x0 -> b1.stream1: "信息直通主干" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+  style.bold: true
+}
+
+b1.stream1 -> b2.stream2: "直通主干持续流动" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+  style.bold: true
+}
+
+b2.stream2 -> dots -> xL: "主干汇聚" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+  style.bold: true
+}

@@ -1,0 +1,37 @@
+direction: down
+
+query: "待查询签名 Q (64 bit): 拆分为 [B1, B2, B3, B4]" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+tables: "4 个倒排索引表 (分别以对应分块作为 Key 进行精确匹配)" {
+  t1: "Table 1\nKey: 块 1 (16b)\n→ 候选列表 1" {
+    style.stroke: "#2563eb"
+  }
+  t2: "Table 2\nKey: 块 2 (16b)\n→ 候选列表 2" {
+    style.stroke: "#8b5cf6"
+  }
+  t3: "Table 3\nKey: 块 3 (16b)\n→ 候选列表 3" {
+    style.stroke: "#f59e0b"
+  }
+  t4: "Table 4\nKey: 块 4 (16b)\n→ 候选列表 4" {
+    style.stroke: "#16a34a"
+  }
+}
+
+verify: "合并候选集并精确验证海明距离" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  desc: "• 取 4 个表返回结果的并集：比对候选数量从 10 亿级剧降至约 100 万级 (过滤掉 99.9% 无关样本)\n• 仅对候选集进行 64 位异或与 popcount 计算：若 HammingDist(Q, D) ≤ 3 则判定为相似文档"
+}
+
+query -> tables.t1: "检索 B1"
+query -> tables.t2: "检索 B2"
+query -> tables.t3: "检索 B3"
+query -> tables.t4: "检索 B4"
+
+tables.t1 -> verify: "并集汇聚"
+tables.t2 -> verify: "并集汇聚"
+tables.t3 -> verify: "并集汇聚"
+tables.t4 -> verify: "并集汇聚"

@@ -1,25 +1,36 @@
-direction: right
+direction: down
 
-p: "position p\n(integer)" {
+mapping: "从离散标量到单位圆几何映射 (Positional Mapping)" {
   style.stroke: "#2563eb"
+  style.stroke-width: 2
   style.bold: true
-}
 
-theta: "phase\nθ = ω × p" {
-  style.stroke: "#2563eb"
-}
+  grid-columns: 2
 
-vec: "[sin(θ), cos(θ)]\n恒在单位圆上\nsin²θ+cos²θ=1" {
-  style.stroke: "#16a34a"
-  style.bold: true
-  style.stroke-width: 3
-}
+  pos: "1. 离散标量整数\nPosition p ∈ {0, 1, 2, ...}\n(绝对索引标量，直接使用容易数值爆炸)" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
 
-seq: "position 递增时\nphase 每步 +ω" {
-  style.stroke: "#dc2626"
-  style.bold: true
-}
+  phase: "2. 线性相位累加\nPhase θ = ω × p\n(每前进 1 步，相位沿角度旋转 ω 弧度)" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+    style.bold: true
+  }
 
-p -> theta: "× ω"
-theta -> vec: "sin, cos"
-vec -> seq: "p=0→1→2→3…"
+  coord: "3. 单位圆欧几里得坐标\nv(p) = [sin(ωp), cos(ωp)]ᵀ\n(sin²θ + cos²θ = 1，向量模长恒为 1 有界)" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  geom: "4. 相对几何不变性\n内积 v(p₁)ᵀ v(p₂) = cos(ω(p₁ - p₂))\n(绝对位置相消，内积纯粹由相对位移 Δp 决定)" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  pos -> phase: "乘基频 ω"
+  phase -> coord: "三角函数投影"
+  coord -> geom: "内积三角恒等式"
+}

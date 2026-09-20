@@ -1,0 +1,33 @@
+direction: down
+
+state_update: "4. 细胞状态更新：生成当前记忆 C_t" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  f_term: "旧记忆留存项: f_t ⊙ C_{t-1} (按比例遗忘历史)" {
+    style.stroke: "#dc2626"
+  }
+  i_term: "新知识写入项: i_t ⊙ C̃_t (按比例存入新特征)" {
+    style.stroke: "#2563eb"
+  }
+  add: "线性相加融合: C_t = f_t ⊙ C_{t-1} + i_t ⊙ C̃_t" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  f_term -> add
+  i_term -> add
+}
+
+output_gate: "5. 输出门控：过滤产生隐藏输出 h_t" {
+  style.stroke: "#8b5cf6"
+  style.bold: true
+  o_calc: "输出门权重: o_t = σ(W_o · x_t + U_o · h_{t-1} + b_o)" {
+    style.stroke: "#8b5cf6"
+  }
+  h_calc: "隐藏状态输出: h_t = o_t ⊙ 双曲正切激活(C_t)" {
+    style.stroke: "#8b5cf6"
+    style.bold: true
+  }
+  o_calc -> h_calc
+}
+
+state_update.add -> output_gate.h_calc: "传入更新后的 C_t"

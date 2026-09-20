@@ -1,0 +1,48 @@
+direction: down
+
+subgraph_src: "工程源代码结构 (Project Source Files)" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  grid-columns: 2
+  grid-gap: 20
+
+  header_box: "头文件 (Header Files)\nCircle.h\n• 声明 Circle 类接口与成员变量\n• 使用 #ifndef 宏防御重复引用" {
+    shape: rectangle
+    style.stroke: "#0891b2"
+    style.bold: true
+  }
+
+  impl_box: "源文件 (Source Files)\nCircle.cpp 与 main.cpp\n• #include \"Circle.h\"\n• 分别实现类函数与 main() 入口" {
+    shape: rectangle
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+}
+
+compile_step: "编译阶段：独立编译为目标文件" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+
+  grid-columns: 2
+  grid-gap: 20
+
+  obj_circle: "Circle.obj 目标模块" {
+    shape: rectangle
+    style.stroke: "#f59e0b"
+  }
+
+  obj_main: "main.obj 目标模块" {
+    shape: rectangle
+    style.stroke: "#f59e0b"
+  }
+}
+
+linker_box: "链接阶段 (Linker) 合并生成可执行文件 CircleProject.exe" {
+  shape: rectangle
+  style.stroke: "#16a34a"
+  style.bold: true
+}
+
+subgraph_src -> compile_step: "编译器预处理展开头文件并分别编译"
+compile_step -> linker_box: "链接器解析符号引用并打包程序"

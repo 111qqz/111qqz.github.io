@@ -1,0 +1,22 @@
+direction: down
+
+forget_gate: "1. 遗忘门 (Forget Gate)" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  desc: "• 作用：决定上一时刻细胞状态 C_{t-1} 有多少比例留存\n• 计算：f_t = σ(W_f · x_t + U_f · h_{t-1} + b_f)\n• 输出：介于 [0, 1]，0 代表彻底丢弃，1 代表完全保留"
+}
+
+input_gate: "2. 输入门 (Input Gate)" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  desc: "• 作用：决定当前新知识有多少权重被存入记忆单元\n• 计算：i_t = σ(W_i · x_t + U_i · h_{t-1} + b_i)\n• 输出：介于 [0, 1]，充当当前候选信息的写入开关"
+}
+
+candidate_cell: "3. 候选记忆状态 (Candidate Memory)" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+  desc: "• 作用：从当前输入提取准备存入记忆的新特征候选向量\n• 计算：C̃_t = 双曲正切激活(W_c · x_t + U_c · h_{t-1} + b_c)\n• 输出：规范化至 [-1, 1]，待与输入门逐项相乘"
+}
+
+forget_gate -> input_gate: "独立门控参数"
+input_gate -> candidate_cell: "协同准备写入"

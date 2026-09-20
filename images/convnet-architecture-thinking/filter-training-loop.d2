@@ -1,42 +1,45 @@
-grid-rows: 2
-grid-columns: 3
-style.stroke: transparent
+grid-columns: 2
 
-init: "① Random Init\nvariance scaling\nbreak symmetry" {
+init: "① 权重初始化 (Init)\n方差缩放控制权重尺度 (He / Xavier)" {
   style.stroke: "#f59e0b"
   style.stroke-width: 2
   style.bold: true
 }
 
-forward: "② Conv Forward\napply filters\nproduce feature map" {
+forward: "② 卷积前向 (Forward)\n滑窗与通道求和，生成 Feature Map" {
   style.stroke: "#2563eb"
   style.stroke-width: 2
+  style.bold: true
 }
 
-loss: "③ Compute Loss\ncompare prediction\nwith target" {
+loss: "③ 损失评估 (Loss)\n比较模型预测分布与任务真实标签" {
   style.stroke: "#dc2626"
   style.stroke-width: 2
   style.bold: true
 }
 
-backward: "④ Backprop\ncompute ∂L/∂W\nfor each filter" {
+backward: "④ 反向传播 (Backpropagation)\n链式法则计算卷积核梯度 ∂Loss / ∂W" {
   style.stroke: "#2563eb"
   style.stroke-width: 2
 }
 
-update: "⑤ Optimizer\nupdate W\nrepeat from ②" {
+update: "⑤ 优化器更新 (Optimizer)\n依据梯度更新参数: W ← W - η ∇W" {
   style.stroke: "#16a34a"
   style.stroke-width: 2
   style.bold: true
 }
 
-note: "Not handcrafted\nNot fixed\nLearned end-to-end" {
+iter: "⑥ 闭环参数就绪\n更新后参数送入下一 Batch 迭代优化" {
+  style.stroke: "#16a34a"
   style.stroke-dash: 4
-  style.stroke: "#f59e0b"
 }
 
-init -> forward -> loss -> backward -> update
-update -> forward: "next iteration" {
+init -> forward: "初始权重"
+forward -> loss: "输出预测"
+loss -> backward: "标量误差"
+backward -> update: "核梯度"
+update -> iter: "参数优化"
+iter -> forward: "持续闭环训练" {
   style.stroke: "#16a34a"
   style.stroke-dash: 4
 }

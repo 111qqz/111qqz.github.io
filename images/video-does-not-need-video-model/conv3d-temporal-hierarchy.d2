@@ -1,28 +1,89 @@
 direction: down
 
-in: "输入 5D 视频张量: [B, C, 16, H, W]\n时间轴 T 显式独立，包含 16 帧连续画面" {
-  style.stroke: "#2563eb"
+title: "Conv3D 时序层次化建模 (Temporal Hierarchy)" {
+  style.bold: true
   style.stroke-width: 2
+  style.stroke: "#2563eb"
 }
 
-l1: "Layer 1 (Conv3D, K_t=3)\n局部时空卷积 → 输出: [B, C₁, 14, H₁, W₁]\n捕获 3 帧微动作（瞬时位移 / 局部运动基元）\n时间轴 T 显式保留 (16 → 14)" {
+level0: "输入视频序列: [B, C, T=16, H, W]" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+
+  direction: right
+  f1: "Frame 1" {style.stroke: "#2563eb"}
+  f2: "Frame 2" {style.stroke: "#2563eb"}
+  f3: "Frame 3" {style.stroke: "#2563eb"}
+  f4: "Frame 4" {style.stroke: "#2563eb"}
+  f5: "Frame 5" {style.stroke: "#2563eb"}
+  dots0: "..." {style.stroke-dash: 4}
+  f16: "Frame 16" {style.stroke: "#2563eb"}
+
+  f1 -> f2 -> f3 -> f4 -> f5 -> dots0 -> f16: {style.stroke: "#2563eb"; style.opacity: 0.4}
+}
+
+level1: "Layer 1 (Conv3D, K_t=3) → 输出: [B, C₁, T=14, H₁, W₁] (T 轴完整保留)" {
   style.stroke: "#16a34a"
   style.stroke-width: 2
   style.bold: true
+
+  direction: right
+  m1: "时序特征 t₁'\n(感受野: 帧 1~3)\n微动作基元" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  m2: "时序特征 t₂'\n(感受野: 帧 2~4)\n微动作基元" {
+    style.stroke: "#16a34a"
+  }
+  m3: "时序特征 t₃'\n(感受野: 帧 3~5)\n微动作基元" {
+    style.stroke: "#16a34a"
+  }
+  dots1: "..." {style.stroke-dash: 4}
+  m14: "时序特征 t₁₄'\n(感受野: 帧 14~16)" {
+    style.stroke: "#16a34a"
+  }
+
+  m1 -> m2 -> m3 -> dots1 -> m14: {style.stroke: "#16a34a"; style.opacity: 0.4}
 }
 
-l2: "Layer 2 (Conv3D, K_t=3)\n沿 T 轴继续滑窗卷积 → 输出: [B, C₂, 12, H₂, W₂]\n时序感受野扩张至 5 帧，组合成连贯动作片段（如“手开始举起”）" {
-  style.stroke: "#16a34a"
+level2: "Layer 2 (Conv3D, K_t=3) → 输出: [B, C₂, T=12, H₂, W₂] (感受野时序扩张)" {
+  style.stroke: "#f59e0b"
   style.stroke-width: 2
+  style.bold: true
+
+  direction: right
+  a1: "复合动作 t₁''\n(时序感受野扩张至 5 帧)\n如「手腕开始抬起」" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+  a2: "复合动作 t₂''\n(时序感受野扩张至 5 帧)\n如「手掌开始挥动」" {
+    style.stroke: "#f59e0b"
+  }
+  dots2: "..." {style.stroke-dash: 4}
+  a12: "复合动作 t₁₂''" {
+    style.stroke: "#f59e0b"
+  }
+
+  a1 -> a2 -> dots2 -> a12: {style.stroke: "#f59e0b"; style.opacity: 0.4}
+}
+
+deep_event: "深层时序聚合 → [B, C_deep, T_out, H', W'] → 完整事件识别 (如「挥手动作」)" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 3
   style.bold: true
 }
 
-l3: "深层 Conv3D / 顶层表征\n输出: [B, C_deep, T_out, H', W']\n时序视野持续累积，逐层组合完整事件模式（如“完整挥手动作”）" {
-  style.stroke: "#2563eb"
-  style.stroke-width: 2
-  style.bold: true
-}
+level0.f1 -> level1.m1: "时空滑窗 K_t=3" {style.stroke: "#16a34a"}
+level0.f2 -> level1.m1 {style.stroke: "#16a34a"}
+level0.f3 -> level1.m1 {style.stroke: "#16a34a"}
 
-in -> l1: "时空滑窗卷积 (T 轴存活)"
-l1 -> l2: "后续层继续沿时间轴卷积"
-l2 -> l3: "逐层组合更长时序模式 (Temporal Hierarchy)"
+level0.f3 -> level1.m2 {style.stroke: "#16a34a"; style.stroke-dash: 3}
+level0.f4 -> level1.m2 {style.stroke: "#16a34a"; style.stroke-dash: 3}
+level0.f5 -> level1.m3 {style.stroke: "#16a34a"; style.stroke-dash: 3}
+
+level1.m1 -> level2.a1: "沿 T 轴继续卷积" {style.stroke: "#f59e0b"}
+level1.m2 -> level2.a1 {style.stroke: "#f59e0b"}
+level1.m3 -> level2.a1 {style.stroke: "#f59e0b"}
+
+level2.a1 -> deep_event: "时序视野持续累积" {style.stroke: "#dc2626"; style.bold: true}
+level2.a2 -> deep_event {style.stroke: "#dc2626"; style.stroke-dash: 3}

@@ -1,0 +1,30 @@
+direction: down
+
+hash_split: "64 位 SimHash 签名均分为 4 块 (每块 16 bit)" {
+  direction: right
+  b1: "块 1 (16 bit)\n[bit 0 ~ 15]" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  b2: "块 2 (16 bit)\n[bit 16 ~ 31]" {
+    style.stroke: "#8b5cf6"
+    style.bold: true
+  }
+  b3: "块 3 (16 bit)\n[bit 32 ~ 47]" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+  b4: "块 4 (16 bit)\n[bit 48 ~ 63]" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  b1 -> b2 -> b3 -> b4
+}
+
+pigeonhole: "抽屉原理 (鸽巢原理) 保障：海明距离 ≤ 3 时必有一块完全相同" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  desc: "最坏情况：3 个差异位 (Diff Bit) 最多分别落在其中 3 个块中 (如块 1、块 2、块 3 各有 1 位差异)\n根据抽屉原理，必存在至少 1 个块 (如块 4) 包含 0 个差异位，即完全相等！\n结论：只要对 4 个块分别建立精确匹配倒排索引，就能保证召回率 100% (无漏检)！"
+}
+
+hash_split -> pigeonhole: "容错分块原理"

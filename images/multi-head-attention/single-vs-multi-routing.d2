@@ -1,53 +1,54 @@
-direction: down
+grid-columns: 2
 
-single: "Single-Head (1 个宽空间)" {
+single: "Single-Head：单一宽空间竞争 (Single Routing Space)" {
   style.stroke: "#2563eb"
   style.stroke-width: 2
+  direction: down
 
-  in: "输入表示 H\n[n, 512]" {
-    style.bold: true
-  }
+  in1: "输入序列表示 H\n[n, d_model = 512]" {style.stroke: "#2563eb"}
 
-  proj: "1 套 512-d 投影\nQ, K, V ∈ R^{n×512}" {
+  proj1: "单套 512 维投影\nQ, K, V ∈ ℝ^{n × 512}" {
     style.stroke: "#2563eb"
+    style.stroke-width: 2
   }
 
-  routing: "单一匹配空间\n1 套权重 A ∈ R^{n×n}\n(所有关系均摊竞争)" {
+  routing1: "单一注意力概率分布\n仅有 1 套权重 A ∈ ℝ^{n × n}\n所有语法、指代与语义关系在同一 Softmax 中均摊竞争" {
     style.stroke: "#2563eb"
     style.stroke-width: 2
     style.bold: true
   }
 
-  read: "1 次加权读取\nO = AV ∈ R^{n×512}" {
+  out1: "单次加权读取输出\nO = A × V ∈ ℝ^{n × 512}\n只能选定单一主导关系" {
     style.stroke: "#2563eb"
   }
 
-  in -> proj -> routing -> read
+  in1 -> proj1 -> routing1 -> out1
 }
 
-multi: "Multi-Head (8 个窄子空间)" {
+multi: "Multi-Head：多独立窄子空间解耦 (Multiple Subspaces)" {
   style.stroke: "#16a34a"
-  style.stroke-width: 2
+  style.stroke-width: 3
+  style.bold: true
+  direction: down
 
-  in: "同一份输入 H\n[n, 512]" {
-    style.bold: true
-  }
+  in2: "同一输入序列表示 H\n[n, d_model = 512]" {style.stroke: "#2563eb"}
 
-  proj: "8 套独立 64-d 投影\n(总维度 8×64=512 守恒)" {
+  proj2: "8 套独立 64 维投影\nQ_i, K_i, V_i ∈ ℝ^{n × 64}\n(总参数量与计算量严格守恒)" {
     style.stroke: "#16a34a"
+    style.stroke-width: 2
   }
 
-  routing: "8 个独立子空间\n8 套权重 A₁ ~ A₈ ∈ R^{n×n}\n(同时捕捉多种关系)" {
+  routing2: "8 个并行独立注意力空间\n产生 8 套权重 A₁ ~ A₈ ∈ ℝ^{n × n}\n同时捕捉就近依存、长程主谓、语义相似等多元关系" {
     style.stroke: "#16a34a"
     style.stroke-width: 2
     style.bold: true
   }
 
-  fusion: "8 次读取 O₁ ~ O₈ [n, 64]\n→ Concat [n, 512]\n→ × W_O 跨 head 融合\n输出 O ∈ R^{n×512}" {
-    style.stroke: "#dc2626"
+  out2: "8 次独立读取与投影融合\nO = Concat(O₁, ..., O₈) × W_O\n输出高保真综合表征" {
+    style.stroke: "#16a34a"
     style.stroke-width: 2
     style.bold: true
   }
 
-  in -> proj -> routing -> fusion
+  in2 -> proj2 -> routing2 -> out2
 }

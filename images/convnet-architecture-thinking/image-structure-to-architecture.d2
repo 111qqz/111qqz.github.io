@@ -1,42 +1,60 @@
 direction: down
 
-image-structure: "Image Structure" {
+title: "图像物理特性到视觉架构归纳偏置的映射 (Inductive Bias Mapping)" {
   style.bold: true
+  style.stroke-width: 2
   style.stroke: "#2563eb"
-  style.stroke-width: 3
-
-  direction: right
-  a: "Locality\n(nearby pixels\nmatter more)"
-  b: "Repeated\nLocal Patterns"
-  c: "Spatial\nTopology"
-  d: "Hierarchical\nStructure"
 }
 
-arch-choices: "Architectural Choices" {
-  style.bold: true
-  style.stroke: "#16a34a"
-  style.stroke-width: 3
+mappings: "" {
+  grid-columns: 2
+  style.stroke: transparent
 
-  direction: right
-  a: "Local\nConnectivity"
-  b: "Weight\nSharing"
-  c: "Learnable\nFilters"
-  d: "Translation\nEquivariance"
-  e: "Hierarchical\nComposition"
-  f: "Receptive-field\nGrowth"
-}
+  pair1: "1. 空间局部相关性 → 局部连接" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+    direction: down
+    d1: "图像统计特性:\n近处像素空间相关性远高于远处" {style.stroke: "#2563eb"}
+    a1: "CNN 架构偏置:\n局部卷积核 (K_h × K_w)\n优先在几何邻域内聚合特征" {
+      style.stroke: "#2563eb"
+      style.bold: true
+    }
+    d1 -> a1: "先验映射"
+  }
 
-bias: "Inductive Bias\n把对数据结构的理解\n编码进 Architecture" {
-  style.bold: true
-  style.stroke: "#dc2626"
-  style.stroke-width: 3
-}
+  pair2: "2. 视觉模式同质性 → 权重共享" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    direction: down
+    d2: "图像统计特性:\n相同视觉基元可在画面任意位置出现" {style.stroke: "#16a34a"}
+    a2: "CNN 架构偏置:\n同一组卷积核全图滑窗复用\n参数量与图像物理分辨率彻底解耦" {
+      style.stroke: "#16a34a"
+      style.bold: true
+    }
+    d2 -> a2: "先验映射"
+  }
 
-image-structure -> arch-choices: "假设 → 设计" {
-  style.stroke: "#2563eb"
-  style.bold: true
-}
-arch-choices -> bias: "ConvNet 是经典范例" {
-  style.stroke: "#dc2626"
-  style.bold: true
+  pair3: "3. 几何拓扑连续性 → 平移等变" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+    direction: down
+    d3: "图像统计特性:\n目标平移不改变其内部语义与类别" {style.stroke: "#f59e0b"}
+    a3: "CNN 架构偏置:\n输入平移导致特征图精确同步平移\n严格保真底层到高层的相对空间拓扑" {
+      style.stroke: "#f59e0b"
+      style.bold: true
+    }
+    d3 -> a3: "先验映射"
+  }
+
+  pair4: "4. 语义层级组合性 → 逐层抽象" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+    direction: down
+    d4: "图像统计特性:\n边缘组合为部件，部件组合为完整物体" {style.stroke: "#dc2626"}
+    a4: "CNN 架构偏置:\n深层网络堆叠，感受野逐层扩张\n从局部纹理自发组合为高阶语义" {
+      style.stroke: "#dc2626"
+      style.bold: true
+    }
+    d4 -> a4: "先验映射"
+  }
 }

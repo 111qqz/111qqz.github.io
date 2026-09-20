@@ -1,78 +1,51 @@
-direction: down
+grid-columns: 2
 
-standard: "✅ 标准 MHA：Late Fusion" {
-  style.bold: true
+late: "标准 MHA：Late Fusion (结果空间后期融合)" {
   style.stroke: "#16a34a"
   style.stroke-width: 3
+  style.bold: true
 
-  s_route: "Route separately" {
+  route_late: "1. 独立并行路由\nHead 1 权重 A₁: [0.9, 0.1] (侧重 Token A)\nHead 2 权重 A₂: [0.1, 0.9] (侧重 Token B)" {
     style.stroke: "#16a34a"
     style.stroke-width: 2
-
-    a1: "A₁ = [0.9, 0.1]\n主要读 token A" {
-      style.stroke: "#2563eb"
-    }
-    a2: "A₂ = [0.1, 0.9]\n主要读 token B" {
-      style.stroke: "#f59e0b"
-    }
   }
 
-  s_read: "Read separately" {
+  read_late: "2. 独立加权读取\nO₁ = A₁ V₁ (提取 Token A 语义)\nO₂ = A₂ V₂ (提取 Token B 语义)" {
     style.stroke: "#16a34a"
     style.stroke-width: 2
-
-    r1: "A₁ × V₁\n≈ token A 的信息" {
-      style.stroke: "#2563eb"
-    }
-    r2: "A₂ × V₂\n≈ token B 的信息" {
-      style.stroke: "#f59e0b"
-    }
   }
 
-  s_fuse: "Concat → W_O\n两路信息都保留\n跨 head mixing" {
+  fuse_late: "3. 拼接投影融合\nConcat([O₁, O₂]) × W_O\n两路独立发现的语义信息均被完整保留" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  route_late -> read_late: "独立加权"
+  read_late -> fuse_late: "拼接投影"
+}
+
+early: "退化方案：Early Fusion (过早混合注意力矩阵)" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+  style.bold: true
+
+  route_early: "1. 过早平均路由权重\n直接计算 A_avg = (A₁ + A₂) / 2\n得到平坦权重 [0.5, 0.5]" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+  }
+
+  read_early: "2. 单次模糊读取\nO = A_avg × V\nToken A 与 B 的特征被强制平均混合" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+  }
+
+  defect_early: "3. 语义策略丢失\n无法同时表达「既关注主语又关注宾语」\n多头解耦优势彻底丧失" {
     style.stroke: "#dc2626"
     style.stroke-width: 2
     style.bold: true
   }
 
-  s_route.a1 -> s_read.r1 {
-    style.stroke: "#2563eb"
-  }
-  s_route.a2 -> s_read.r2 {
-    style.stroke: "#f59e0b"
-  }
-  s_read.r1 -> s_fuse
-  s_read.r2 -> s_fuse
-}
-
-early: "❌ Early Fusion：先合并 attention weights" {
-  style.bold: true
-  style.stroke: "#dc2626"
-  style.stroke-width: 3
-
-  e_route: "先合并 routing weights" {
-    style.stroke: "#dc2626"
-    style.stroke-width: 2
-
-    ea1: "A₁ = [0.9, 0.1]" {
-      style.stroke: "#dc2626"
-    }
-    ea2: "A₂ = [0.1, 0.9]" {
-      style.stroke: "#dc2626"
-    }
-    merge: "平均 → A = [0.5, 0.5]\n两种 routing policy 被抹平" {
-      style.stroke: "#dc2626"
-      style.bold: true
-    }
-
-    ea1 -> merge
-    ea2 -> merge
-  }
-
-  e_read: "一次 read\nA × V = ?\nV 用哪个？\n两个 token 被平均读取" {
-    style.stroke: "#dc2626"
-    style.stroke-width: 2
-  }
-
-  e_route.merge -> e_read
+  route_early -> read_early: "平铺加权"
+  read_early -> defect_early: "策略抹平"
 }

@@ -1,32 +1,40 @@
 direction: down
 
-progression: "" {
-  label: ""
-  grid-columns: 3
+title: "从黎曼矩形逼近到定积分：概率是面积 (Probability as Area)" {
+  style.bold: true
+  style.stroke-width: 2
+  style.stroke: "#2563eb"
+}
 
-  s1: "Step 1\n\n4 wide bars\nrough approximation\nlarge gaps between\ncurve and bars" {
+stages: "" {
+  direction: down
+  style.stroke: transparent
+
+  step1: "1. 粗粒度阶梯离散\n少量宽矩形条 (Δx 较大，高 = f(x_i))\n阶梯与真实曲线之间存在显著误差空隙" {
     style.stroke: "#2563eb"
     style.stroke-width: 2
-    style.bold: true
   }
 
-  s2: "Step 2\n\n10 narrow bars\nbetter approximation\nsmaller gaps\ncloser to curve" {
+  step2: "2. 细化步长密集细分\n大量窄矩形条 (Δx 缩小)\n矩形顶端阶梯快速贴合连续密度曲线，误差大幅缩小" {
     style.stroke: "#f59e0b"
     style.stroke-width: 2
     style.bold: true
   }
 
-  s3: "Step 3\n\ninfinitely thin bars\nperfect fit to curve\nintegral f(x) dx\n= exact area" {
+  step3: "3. 极限积分精确拟合\n步长趋于无穷小 (Δx → 0, dx)\n无穷窄微元矩形无缝填满曲线下方: ∑ f(x_i)Δx → ∫ f(x)dx" {
     style.stroke: "#16a34a"
     style.stroke-width: 3
     style.bold: true
   }
+
+  step1 -> step2: "缩窄矩形宽度 Δx"
+  step2 -> step3: "逼近极限 (Δx → 0)"
 }
 
-progression -> conclusion
-
-conclusion: "Sum f(xi) delta-x    ---->    integral f(x) dx = exact area = probability" {
+core_insight: "核心几何结论：\n• 单点 (宽度 dx = 0) 竖线面积恒为零 → P(X = x) = 0\n• 曲线下方的闭合面积严格等于概率 → P(a < X < b) = ∫_a^b f(x) dx" {
   style.stroke: "#16a34a"
-  style.stroke-width: 3
+  style.stroke-width: 2
   style.bold: true
 }
+
+stages.step3 -> core_insight: "几何意义映射"

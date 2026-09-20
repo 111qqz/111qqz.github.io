@@ -1,75 +1,75 @@
-direction: down
+grid-columns: 2
 
-H: "H\n[n, d_model]\nsequence representation" {
-  style.bold: true
-  style.stroke-width: 3
-}
-
-proj: "Projection" {
+phase1: "阶段一：动态路由权重计算 (Matching & Routing)" {
   style.stroke: "#2563eb"
   style.stroke-width: 2
+  style.bold: true
 
-  Q: "Q = HW_Q\n[n, d_k]" {
+  H1: "输入序列表示 H\n[n, d_model]" {
     style.stroke: "#2563eb"
+    style.bold: true
   }
-  K: "K = HW_K\n[n, d_k]" {
-    style.stroke: "#f59e0b"
+
+  proj_qk: "线性投影 (HW_Q, HW_K)" {
+    style.stroke: "#2563eb"
+    direction: right
+    Q: "Query 矩阵 Q\n[n, d_k] (需求描述)" {style.stroke: "#2563eb"}
+    K: "Key 矩阵 K\n[n, d_k] (索引描述)" {style.stroke: "#f59e0b"}
   }
-  V: "V = HW_V\n[n, d_v]" {
-    style.stroke: "#16a34a"
+
+  score: "点积匹配 QKᵀ\n[n, n] (全局相关性分数表)" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
   }
+
+  scale_sm: "缩放与行归一化\nS = QKᵀ / √d_k\nA = softmax(S)\n[n, n] 相对路由权重" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  H1 -> proj_qk.Q: "W_Q"
+  H1 -> proj_qk.K: "W_K"
+  proj_qk.Q -> score: "点积"
+  proj_qk.K -> score: "点积"
+  score -> scale_sm: "除以根号 d_k 并做 Softmax"
 }
 
-scores: "QKᵀ\n[n, n]\nrouting score table" {
-  style.stroke: "#2563eb"
-  style.stroke-width: 2
-}
-
-scale: "÷ √d_k\ndimension-aware scaling" {
-  style.stroke-dash: 4
-}
-
-softmax: "softmax (per row)\n[n, n]\nrelative routing weights" {
-  style.stroke: "#dc2626"
-  style.stroke-width: 2
-}
-
-read: "× V\nweighted information read" {
+phase2: "阶段二：信息载荷加权提取 (Weighted Payload Read)" {
   style.stroke: "#16a34a"
   style.stroke-width: 2
-}
-
-O: "O\n[n, d_v]\nread result per token" {
   style.bold: true
-  style.stroke: "#16a34a"
-  style.stroke-width: 3
+
+  H2: "输入序列表示 H\n[n, d_model]" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  V: "Value 矩阵 V = HW_V\n[n, d_v] (实际响应载荷)" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  read: "矩阵乘法加权读取\nO = A × V\n按行权重加权聚合所有候选的 Value" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  out: "最终输出表示 O\n[n, d_v]\n(每个 Token 注入上下文后的新特征)" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+    style.bold: true
+  }
+
+  H2 -> V: "W_V 投影"
+  V -> read: "候选信息"
+  read -> out: "加权组合"
 }
 
-H -> proj.Q: "W_Q" {
-  style.stroke: "#2563eb"
-}
-H -> proj.K: "W_K" {
-  style.stroke: "#f59e0b"
-}
-H -> proj.V: "W_V" {
-  style.stroke: "#16a34a"
-}
-
-proj.Q -> scores {
-  style.stroke: "#2563eb"
-}
-proj.K -> scores {
-  style.stroke: "#f59e0b"
-}
-
-scores -> scale
-scale -> softmax
-
-softmax -> read {
+phase1.scale_sm -> phase2.read: "传递注意力分布矩阵 A [n, n]" {
   style.stroke: "#dc2626"
+  style.stroke-width: 2
+  style.bold: true
 }
-proj.V -> read {
-  style.stroke: "#16a34a"
-}
-
-read -> O

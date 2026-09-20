@@ -1,61 +1,51 @@
 direction: right
 
-proj: "Projection weights\n（模型参数，feature dimension）" {
+proj: "静态投影权重 W (作用于 Feature Axis)" {
   style.stroke: "#2563eb"
   style.stroke-width: 2
-  label: ""
+  direction: down
 
-  title: "Projection weights W_Q / W_K / W_V\n作用于 feature dimension" {
+  hi: "输入特征向量 h_i\n形状: [d_model]" {
+    style.stroke: "#2563eb"
+  }
+
+  wq: "投影矩阵 W_Q / W_K / W_V\n形状: [d_model, d_k]\n• 训练学得的静态模型参数\n• 跨 Token 全局共享，不随输入动态改变" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
     style.bold: true
-    style.stroke: "#2563eb"
   }
 
-  hi: "h_i\n[d_model]"
-  wq: "W_Q\n[d_model, d_k]" {
+  qi: "投影子空间向量 q_i\n形状: [d_k] (进入注意力匹配)" {
     style.stroke: "#2563eb"
-  }
-  qi: "q_i\n[d_k]"
-
-  hi -> wq: "linear\ntransform" {
-    style.stroke: "#2563eb"
-  }
-  wq -> qi {
-    style.stroke: "#2563eb"
+    style.bold: true
   }
 
-  note: "trained params\nshared across tokens\nno softmax" {
-    style.stroke-dash: 4
-  }
+  hi -> wq: "特征空间线性映射"
+  wq -> qi: "产生匹配描述符"
 }
 
-attn: "Attention weights\n（动态产生，token dimension）" {
+attn: "动态注意力权重 α (作用于 Token Axis)" {
   style.stroke: "#dc2626"
   style.stroke-width: 2
-  label: ""
+  style.bold: true
+  direction: down
 
-  title: "Attention weights alpha_ij\n作用于 token dimension" {
+  cands: "候选 Value 向量组\n[v₁, v₂, v₃] ∈ ℝ^{d_v}" {
+    style.stroke: "#16a34a"
+  }
+
+  weights: "动态路由权重 α_{i,j}\n• 由当前 Query 与 Key 实时点积产生\n• 经过 Softmax 归一化 (∑ α = 1)\n• 随输入上下文动态生成" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
     style.bold: true
-    style.stroke: "#dc2626"
   }
 
-  v1: "v₁"
-  v2: "v₂"
-  v3: "v₃"
-  oi: "o_i\n= 0.1v₁ + 0.15v₂ + 0.75v₃" {
+  oi: "加权聚合输出 o_i\n= α_{i,1} v₁ + α_{i,2} v₂ + α_{i,3} v₃" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
     style.bold: true
   }
 
-  v1 -> oi: "alpha = 0.10" {
-    style.stroke: "#dc2626"
-  }
-  v2 -> oi: "alpha = 0.15" {
-    style.stroke: "#dc2626"
-  }
-  v3 -> oi: "alpha = 0.75" {
-    style.stroke: "#dc2626"
-  }
-
-  note: "input-dependent\nper-query dynamic\nsoftmax normalized" {
-    style.stroke-dash: 4
-  }
+  cands -> weights: "输入相关性计算"
+  weights -> oi: "动态加权求和"
 }

@@ -1,78 +1,67 @@
 direction: down
 
-correct: "✅ 正确理解" {
+title: "Multi-Head 投影机制：全局特征视角到多子空间解耦" {
   style.bold: true
-  style.stroke: "#16a34a"
-  style.stroke-width: 3
-
-  seq: "Sequence axis\n每个 Head 都看完整 n 个 token\ntoken 1, token 2, ... token n" {
-    style.stroke: "#16a34a"
-    style.stroke-width: 2
-    style.bold: true
-  }
-
-  feat: "Feature axis\n每个 Head 从完整 d_model=512\n通过 learned projection\n投影到自己的 d_head=64 子空间" {
-    style.stroke: "#16a34a"
-    style.stroke-width: 2
-    style.bold: true
-  }
-
-  seq -> feat: "不切 token，投影 feature" {
-    style.stroke: "#16a34a"
-  }
-}
-
-wrong: "❌ 常见错误" {
-  style.bold: true
-  style.stroke: "#dc2626"
-  style.stroke-width: 3
-
-  wrong1: "Head 1 只看 token 1~10\nHead 2 只看 token 11~20\n（切 sequence axis）" {
-    style.stroke: "#dc2626"
-    style.stroke-width: 2
-  }
-
-  wrong2: "Head 1 只看 feature[0:64]\nHead 2 只看 feature[64:128]\n（机械切 feature axis）" {
-    style.stroke: "#dc2626"
-    style.stroke-width: 2
-  }
-
-  wrong1 -> wrong2: "都不对" {
-    style.stroke: "#dc2626"
-    style.stroke-dash: 4
-  }
-}
-
-real: "实际发生的事" {
-  style.bold: true
+  style.stroke-width: 2
   style.stroke: "#2563eb"
-  style.stroke-width: 3
+}
 
-  h: "h_i ∈ R^512\n完整 hidden state" {
-    style.bold: true
-  }
+input_node: "输入 Token 隐藏状态 h_i\n完整未切分向量: [d_model = 512]\n(每个 Head 都能看到全部 512 个特征维度)" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+  style.bold: true
+}
 
-  p1: "W_Q^(1) ∈ R^{512×64}\nlearned projection" {
-    style.stroke: "#2563eb"
-  }
-  p2: "W_Q^(2) ∈ R^{512×64}\nlearned projection" {
-    style.stroke: "#2563eb"
-  }
-  p8: "W_Q^(8) ∈ R^{512×64}\nlearned projection" {
-    style.stroke: "#2563eb"
-  }
+heads: "8 个独立可学习投影空间 (Learned Subspaces)" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+  style.bold: true
+  direction: right
 
-  q1: "q_i^(1) ∈ R^64\nlearned view 1" {
+  h1: "Head 1 投影" {
     style.stroke: "#16a34a"
-  }
-  q2: "q_i^(2) ∈ R^64\nlearned view 2" {
-    style.stroke: "#16a34a"
-  }
-  q8: "q_i^(8) ∈ R^64\nlearned view 8" {
-    style.stroke: "#16a34a"
+    w1: "W_Q⁽¹⁾ ∈ ℝ⁵¹²ˣ⁶⁴" {style.stroke: "#2563eb"}
+    q1: "q_i⁽¹⁾ ∈ ℝ⁶⁴\n语义视角 1" {style.stroke: "#16a34a"; style.bold: true}
+    w1 -> q1
   }
 
-  h -> p1 -> q1
-  h -> p2 -> q2
-  h -> p8 -> q8
+  h2: "Head 2 投影" {
+    style.stroke: "#16a34a"
+    w2: "W_Q⁽²⁾ ∈ ℝ⁵¹²ˣ⁶⁴" {style.stroke: "#2563eb"}
+    q2: "q_i⁽²⁾ ∈ ℝ⁶⁴\n语义视角 2" {style.stroke: "#16a34a"; style.bold: true}
+    w2 -> q2
+  }
+
+  dots: "• • •\n各 Head 独立投影\n维度 8×64=512 守恒\n• • •" {
+    style.stroke-dash: 4
+    style.stroke: "#9ca3af"
+  }
+
+  h8: "Head 8 投影" {
+    style.stroke: "#16a34a"
+    w8: "W_Q⁽⁸⁾ ∈ ℝ⁵¹²ˣ⁶⁴" {style.stroke: "#2563eb"}
+    q8: "q_i⁽⁸⁾ ∈ ℝ⁶⁴\n语义视角 8" {style.stroke: "#16a34a"; style.bold: true}
+    w8 -> q8
+  }
+}
+
+impl: "工程实现加速 (Batched Single GEMM + Reshape)" {
+  style.stroke: "#f59e0b"
+  style.stroke-width: 2
+  style.bold: true
+
+  gemm: "单次大矩阵乘法: H × W_Q (形状 [n, 512] × [512, 512] → [n, 512])\n随后 Reshape 成 [n, 8, 64] 切分张量内存布局，兼顾 GPU 并行效率与多头独立语义" {
+    style.stroke: "#f59e0b"
+    style.stroke-dash: 3
+  }
+}
+
+input_node -> heads.h1.w1: "全维度投影" {style.stroke: "#16a34a"}
+input_node -> heads.h2.w2: "全维度投影" {style.stroke: "#16a34a"}
+input_node -> heads.dots
+input_node -> heads.h8.w8: "全维度投影" {style.stroke: "#16a34a"}
+
+heads -> impl: "等价于高效 GEMM 实现" {
+  style.stroke: "#f59e0b"
+  style.stroke-dash: 4
 }

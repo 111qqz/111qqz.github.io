@@ -1,19 +1,52 @@
-direction: right
+direction: down
 
-appearance: "第一类：状态与静态外观识别 (Appearance)" {
+app_path: "静态状态识别 (Appearance Recognition)" {
   style.stroke: "#2563eb"
   style.stroke-width: 2
-  style.bold: true
+  direction: right
 
-  cases: "典型任务:\n• 色情内容识别\n• Logo 与二维码检测\n• 人脸 / 静态场景分类"
-  reason: "判别依据:\n单帧静态画面已包含充分判别信息\n不依赖帧与帧之间的时间变化"
+  in_single: "单帧静态画面\n输入: [C, H, W]" {
+    style.stroke: "#2563eb"
+  }
+
+  model_2d: "2D CNN / ViT 空间特征提取\n空间纹理、物体边缘、语义构图" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  out_static: "静态目标判定\n色情审核 / Logo / 人脸 / 场景\n单帧信息已完全自洽" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  in_single -> model_2d: "单帧前向"
+  model_2d -> out_static: "充分判别"
 }
 
-action: "第二类：状态变化与连续动作识别 (Motion)" {
+act_path: "状态变化与连续动作识别 (State Transition / Motion)" {
   style.stroke: "#dc2626"
   style.stroke-width: 2
   style.bold: true
+  direction: right
 
-  cases: "典型任务:\n• 挥手 vs 手一直举着\n• 坐下 vs 已经坐着\n• 摔倒 vs 原本就躺着"
-  reason: "判别依据:\n必须观察 before → during → after 过渡\n标签语义本质就是状态在时序上的演变"
+  in_seq: "跨时帧连续序列\n(t_before → t_during → t_after)" {
+    style.stroke: "#dc2626"
+  }
+
+  model_temporal: "时序建模 (Conv3D / 时序差分)\n捕获状态演变过程与速度矢量" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  out_motion: "动作与事件判定\n摔倒(非躺着) / 坐下(非坐着)\n必须依赖时间轴演化" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  in_seq -> model_temporal: "跨帧时序建模"
+  model_temporal -> out_motion: "状态差分判别"
 }

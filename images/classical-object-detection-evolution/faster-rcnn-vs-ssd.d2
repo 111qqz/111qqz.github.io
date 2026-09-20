@@ -1,0 +1,53 @@
+grid-columns: 2
+
+two_stage: "Faster R-CNN：两阶段检测管线 (Two-Stage Pipeline)" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+  style.bold: true
+  direction: down
+
+  feat1: "1. 图像输入与特征提取\nImage → Backbone CNN → 特征图" {
+    style.stroke: "#2563eb"
+  }
+
+  rpn: "2. Stage 1: RPN 候选区域初筛\n在全图 ~20k 密集 Anchor 上做二分类 (前景 vs 背景)\n经粗回归与 NMS 筛选出 ~300 个稀疏 Proposal" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  roi: "3. Stage 2: RoI Align + 检测头精细分类回归\n仅对筛选后的稀疏 Proposal 区域做特征对齐与池化\n输出最终精细目标类别与精细位置" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+    style.bold: true
+  }
+
+  feat1 -> rpn: "密集锚框输入"
+  rpn -> roi: "输入筛选后的稀疏候选区"
+}
+
+single_stage: "SSD：单阶段密集预测管线 (Single-Stage Pipeline)" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+  style.bold: true
+  direction: down
+
+  pyramid: "1. 多尺度特征金字塔 (Multi-scale Feature Maps)\nBackbone + 逐层下采样卷积 (大图测小目标，小图测大目标)" {
+    style.stroke: "#dc2626"
+  }
+
+  dense_pred: "2. 多尺度全图直接密集预测 (Direct Dense Prediction)\n跳过任何专门的 Proposal 提取与筛选阶段\n各层特征图每个位置直接预测: (类别置信度 + BBox 偏移)" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  out_ssd: "3. 终点聚合与 NMS\n所有尺度的密集预测框直接汇总\n通过置信度门限与 NMS 得到最终目标检测框" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+    style.bold: true
+  }
+
+  pyramid -> dense_pred: "多层特征图并行前向"
+  dense_pred -> out_ssd: "直接密集输出"
+}

@@ -1,18 +1,36 @@
-direction: down
+grid-columns: 2
 
-input: "position 变大\ne.g. position = 10000" {
-  style.stroke: "#2563eb"
-  style.bold: true
-}
-
-wrong: "magnitude 增长？ ✗\nvector 的值随 position 线性变大？" {
+naive_scale: "幅度直接增长 (Magnitude Scaling)" {
   style.stroke: "#dc2626"
+  style.stroke-width: 2
+
+  in1: "位置增大: p → 10000" {style.stroke: "#2563eb"}
+  op1: "标量数值直接线性外推\n向量元素值随 p 持续无界放大" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+  }
+  res1: "破坏特征数值稳定性\n巨大的位置值直接淹没语义 Embedding\n导致注意力和梯度计算崩溃" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+
+  in1 -> op1 -> res1
 }
 
-right: "phase pattern 变化 ✓\nsin/cos ∈ [-1, 1] 每维始终有界\n差异在各频率的相位组合" {
+phase_rot: "正弦相位旋转 (Phase Pattern Rotation)" {
   style.stroke: "#16a34a"
+  style.stroke-width: 3
   style.bold: true
-}
 
-input -> wrong
-input -> right
+  in2: "位置增大: p → 10000" {style.stroke: "#2563eb"}
+  op2: "映射为单位圆上的高维旋转\n各维度分量严格受限于 [-1, 1]" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+  }
+  res2: "保持恒定数值能量\n以多频相位的相对夹角编码距离\n完全与序列长度数值尺度解耦" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  in2 -> op2 -> res2
+}
