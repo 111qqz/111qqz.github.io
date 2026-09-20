@@ -1,0 +1,38 @@
+grid-rows: 2
+
+pipeline: "" {
+  label: ""
+  direction: right
+
+  input_x: "输入 x\n（原始数据）" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  encoder: "Encoder\nz = f(x)" {
+    style.stroke: "#8b5cf6"
+  }
+
+  latent_z: "latent point z\n（确定值）" {
+    shape: hexagon
+    style.stroke: "#16a34a"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  decoder: "Decoder\nx' = g(z)" {
+    style.stroke: "#8b5cf6"
+  }
+
+  output_x: "重建 x'\n（重建结果）" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  input_x -> encoder -> latent_z -> decoder -> output_x
+}
+
+note: "z = f(x) 是确定性映射\n同一个 x 永远得到同一个 z\n\n训练目标：让重建 x' 尽量接近原始 x\nLatent space 没有全局概率结构约束\n随机选的 z 不保证 Decoder 能输出合理结果" {
+  style.stroke: "#6b7280"
+  style.stroke-dash: 4
+}

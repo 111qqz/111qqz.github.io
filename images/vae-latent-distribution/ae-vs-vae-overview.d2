@@ -1,0 +1,70 @@
+grid-columns: 2
+
+ae_col: "普通 Autoencoder" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  direction: down
+
+  ae_input: "输入 x" {
+    style.stroke: "#2563eb"
+  }
+  ae_enc: "Encoder"
+  ae_z: "确定性 latent point z" {
+    style.stroke: "#2563eb"
+    style.bold: true
+    style.stroke-width: 3
+  }
+  ae_dec: "Decoder"
+  ae_out: "重建 x'" {
+    style.stroke: "#2563eb"
+  }
+
+  ae_input -> ae_enc -> ae_z -> ae_dec -> ae_out
+
+  ae_note: "训练目标：重建\nLatent space 无全局概率约束\n不保证随机采样能生成合理输出" {
+    style.stroke: "#6b7280"
+    style.stroke-dash: 4
+  }
+}
+
+vae_col: "VAE" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  direction: down
+
+  vae_input: "输入 x" {
+    style.stroke: "#16a34a"
+  }
+  vae_enc: "Encoder → μ(x), σ(x)"
+  vae_dist: "概率分布 q(z|x)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    style.stroke-width: 3
+  }
+  vae_sample: "采样 z ~ q(z|x)" {
+    shape: diamond
+    style.stroke: "#f59e0b"
+  }
+  vae_dec: "Decoder"
+  vae_out: "重建 x'" {
+    style.stroke: "#16a34a"
+  }
+
+  vae_input -> vae_enc -> vae_dist -> vae_sample -> vae_dec -> vae_out
+
+  vae_prior: "prior p(z) = N(0, I)" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+
+  vae_prior -> vae_dist: "KL 约束" {
+    style.stroke: "#dc2626"
+    style.stroke-dash: 4
+  }
+
+  vae_gen: "生成路径：\nz ~ N(0,I) → Decoder → 新样本" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+    style.stroke-width: 3
+  }
+}
