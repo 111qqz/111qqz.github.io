@@ -1,0 +1,34 @@
+direction: down
+
+samples: "Dense Detection: ~100,000 候选" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+
+  easy_bg: "Easy Background\n~95,000\n(天空、墙壁、空白)" {
+    style.stroke: "#9ca3af"
+  }
+  hard_neg: "Hard Negatives\n~4,500" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+  positive: "Positive\n~500" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+}
+
+ce: "Cross-Entropy Loss" {
+  style.stroke: "#dc2626"
+  note: "所有样本平等贡献 loss\neasy background 数量巨大\n→ 淹没有效梯度"
+}
+
+fl: "Focal Loss" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+  style.bold: true
+  note: "easy samples 的 loss 被\n(1 - p_t)^γ 大幅压低\n→ 训练预算留给 hard examples"
+}
+
+samples -> ce: "普通 CE"
+samples -> fl: "Focal Loss"
