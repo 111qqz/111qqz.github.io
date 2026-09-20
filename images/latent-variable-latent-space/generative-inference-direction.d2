@@ -1,23 +1,27 @@
 direction: right
 
-gen: "Generative Direction\n（生成方向）" {
+gen: "生成方向 (Generative Direction)" {
   direction: down
-  z1: "latent z" {
-    style.stroke: "#2563eb"
+  z1: "潜变量 z\n(未观测隐状态 / 先验采样)" {
+    style.stroke: "#16a34a"
     style.bold: true
   }
-  proc1: "生成过程\nz → x"
-  x1: "observable x"
-  z1 -> proc1 -> x1
+  p_xz: "生成映射\nDecoder / p(x|z)"
+  x1: "可观测数据 x\n(生成的样本结果)" {
+    style.stroke: "#16a34a"
+  }
+  z1 -> p_xz -> x1: "展开生成"
 }
 
-inf: "Inference Direction\n（推断方向）" {
+inf: "推断方向 (Inference Direction)" {
   direction: down
-  x2: "observable x"
-  proc2: "推断过程\nx → z"
-  z2: "latent z" {
+  x2: "可观测数据 x\n(真实观测样本)" {
+    style.stroke: "#2563eb"
+  }
+  q_zx: "推断映射\nEncoder / q(z|x)"
+  z2: "潜变量 z\n(推断所得内部坐标)" {
     style.stroke: "#2563eb"
     style.bold: true
   }
-  x2 -> proc2 -> z2
+  x2 -> q_zx -> z2: "反推状态"
 }

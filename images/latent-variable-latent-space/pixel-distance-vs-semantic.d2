@@ -1,39 +1,32 @@
-direction: right
+direction: down
 
-pixel_space: Pixel Space {
+inputs: "输入样本对比" {
   direction: right
-  faceA: "Face A\n(正面)" {
+  img_a: "图像 x_A\n(正面人脸)" {
     style.stroke: "#2563eb"
     style.bold: true
   }
-  gap: "像素距离很大\n大量 pixel 变化" {
+  img_b: "图像 x_B\n(右转 5° 人脸)" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+}
+
+p_eval: "视角一：像素空间直接度量" {
+  diff_p: "像素级欧氏距离: ||x_A - x_B||\n轮廓边缘位移、大面积明暗翻转\n→ 数值距离巨大，无法识别出微小语义变化" {
     style.stroke: "#dc2626"
-    style.stroke-dash: 5
-  }
-  faceB: "Face B\n(转头 5°)" {
-    style.stroke: "#2563eb"
     style.bold: true
   }
-  faceA -> gap -> faceB
 }
 
-latent_space: Latent Space {
-  direction: right
-  zA: "z_A" {
+l_eval: "视角二：潜空间内部坐标度量" {
+  enc_z: "推断编码隐状态: z_A = E(x_A), z_B = E(x_B)\n剥离底层高频噪声，锁定内在物理/语义因子\n→ 潜空间距离微小，仅姿态维度有微量位移" {
     style.stroke: "#16a34a"
     style.bold: true
   }
-  close_dist: "潜空间距离很近\n语义几乎相同" {
-    style.stroke: "#16a34a"
-    style.stroke-dash: 5
-  }
-  zB: "z_B" {
-    style.stroke: "#16a34a"
-    style.bold: true
-  }
-  zA -> close_dist -> zB
 }
 
-comparison: pixel_space -> latent_space: "同一对象\n稍微旋转" {
-  style.stroke-dash: 5
-}
+inputs.img_a -> p_eval.diff_p: "原始像素比较"
+inputs.img_b -> p_eval.diff_p: "原始像素比较"
+inputs.img_a -> l_eval.enc_z: "编码器推断"
+inputs.img_b -> l_eval.enc_z: "编码器推断"

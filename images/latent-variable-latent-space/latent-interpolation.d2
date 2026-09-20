@@ -1,26 +1,44 @@
 direction: down
 
-interp: "Latent Space Interpolation" {
-  label: ""
+interp: "潜空间线性插值：z(t) = (1-t)·z_A + t·z_B" {
   direction: right
-  zA: "z_A" {
+  zA: "z_A\n(起始隐状态)" {
     style.stroke: "#2563eb"
     style.bold: true
-    style.stroke-width: 3
   }
-  z1: "z(0.25)"
-  z2: "z(0.5)"
-  z3: "z(0.75)"
-  zB: "z_B" {
+  z1: "z(0.25)\n过渡点 1"
+  z2: "z(0.50)\n中点混合"
+  z3: "z(0.75)\n过渡点 2"
+  zB: "z_B\n(目标隐状态)" {
     style.stroke: "#2563eb"
     style.bold: true
-    style.stroke-width: 3
   }
   zA -> z1 -> z2 -> z3 -> zB
 }
 
-formula: "z(t) = (1-t)·z_A + t·z_B — 如果潜空间结构良好，中间状态也对应合理的数据" {
-  style.stroke-dash: 5
+decoded: "生成网络映射输出：x(t) = G(z(t))" {
+  direction: right
+  imgA: "生成图像 x_A\n(语义清晰状态 A)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  img1: "生成图像 x_0.25\n(平滑特征微调)" {
+    style.stroke: "#16a34a"
+  }
+  img2: "生成图像 x_0.50\n(两特征对称平衡)" {
+    style.stroke: "#16a34a"
+  }
+  img3: "生成图像 x_0.75\n(平滑特征微调)" {
+    style.stroke: "#16a34a"
+  }
+  imgB: "生成图像 x_B\n(语义清晰状态 B)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
 }
 
-interp -> formula
+interp.zA -> decoded.imgA: "生成 G"
+interp.z1 -> decoded.img1: "生成 G"
+interp.z2 -> decoded.img2: "生成 G"
+interp.z3 -> decoded.img3: "生成 G"
+interp.zB -> decoded.imgB: "生成 G"

@@ -1,17 +1,31 @@
 direction: down
 
-emb: "Embedding（表示学习）— input x → representation → downstream task" {
-  style.stroke: "#2563eb"
-  style.bold: true
+emb_block: "Embedding：判别式特征表示（从数据到任务）" {
+  direction: right
+  x_in: "输入对象 x\n(Token / 图像)" {
+    style.stroke: "#2563eb"
+  }
+  enc: "编码 / 查表\nEmbedding"
+  rep: "特征向量 e\n(Dense Vector)" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  task: "下游任务\n(分类 / 检索 / 预测)" {
+    style.stroke: "#2563eb"
+  }
+  x_in -> enc -> rep -> task
 }
 
-sep: "形式相似，建模语义不同" {
-  style.stroke-dash: 5
+lat_block: "Latent Variable：生成式隐藏解释（从状态到数据）" {
+  direction: right
+  z_prior: "未观测状态 z\n~ 先验分布 p(z)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  gen: "生成映射\nDecoder / G(z)"
+  x_out: "可观测数据 x\n(完整高维数据)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  z_prior -> gen -> x_out
 }
-
-lat: "Latent Variable（生成建模）— 生成 z → x ，推断 x → z" {
-  style.stroke: "#16a34a"
-  style.bold: true
-}
-
-emb -> sep -> lat
