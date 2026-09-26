@@ -1,0 +1,47 @@
+grid-columns: 2
+
+phase1: "从概率到似然" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+  style.bold: true
+  direction: down
+
+  node_bernoulli: "伯努利概率\nP(Y=y | p) = pʸ(1−p)¹⁻ʸ\n给定参数 p，描述数据 y 出现的概率" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  node_likelihood: "似然 L(p)\n同一个公式，换提问方向\n固定已观察到的 y，把 p 当作变量\n比较哪个 p 给数据分配了更高的概率" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  node_bernoulli -> node_likelihood: "固定 y，p 可变"
+}
+
+phase2: "从似然到损失" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+  style.bold: true
+  direction: down
+
+  node_loglik: "对数似然 ℓ(p) = log L(p)\n取 log 不改变最优 p（单调性）\n乘积变求和，数值更稳定\n极端错误受到更大惩罚" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  node_bce: "负对数似然 = BCE 损失\n−[y log p + (1−y) log(1−p)]\n取负号后从最大化变成最小化\n可以直接用作训练 loss" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 3
+    style.bold: true
+  }
+
+  node_loglik -> node_bce: "取负号\n最大化 → 最小化"
+}
+
+phase1 -> phase2: "取 log\n保持单调" {
+  style.stroke-width: 2
+}
