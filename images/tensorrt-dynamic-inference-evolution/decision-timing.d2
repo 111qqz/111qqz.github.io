@@ -1,0 +1,64 @@
+build: 构建阶段：确定范围与优化重点 {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  grid-columns: 3
+
+  profile: Optimization Profile\nmin / opt / max {
+    style.stroke: "#2563eb"
+  }
+  compiler: 编译器围绕 opt\n选择内核、层融合 {
+    style.stroke: "#2563eb"
+  }
+  engine_out: Engine\n（编译产物，只读） {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  profile -> compiler: 形状范围
+  compiler -> engine_out: 产出
+}
+
+request: 请求阶段：确定实际形状与执行实例 {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  grid-columns: 3
+
+  input: 请求到达\n实际输入形状 {
+    style.stroke: "#16a34a"
+  }
+  ctx: Context\n绑定形状、分配内存 {
+    style.stroke: "#16a34a"
+  }
+  stream: CUDA Stream\n提交 kernel launch {
+    style.stroke: "#16a34a"
+  }
+
+  input -> ctx: 选择 Profile
+  ctx -> stream: 执行
+}
+
+replay: 热点路径复用：固定重复的 CPU 提交 {
+  style.stroke: "#f59e0b"
+  style.bold: true
+
+  grid-columns: 3
+
+  hot: 反复出现的\n固定形状请求 {
+    style.stroke: "#f59e0b"
+  }
+  graph: CUDA Graph\n捕获命令序列 {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+  gpu: GPU 直接重放\n跳过逐个 launch {
+    style.stroke: "#f59e0b"
+  }
+
+  hot -> graph: 首次捕获
+  graph -> gpu: 后续重放
+}
+
+build -> request: 加载 Engine
+request -> replay: 识别热点形状

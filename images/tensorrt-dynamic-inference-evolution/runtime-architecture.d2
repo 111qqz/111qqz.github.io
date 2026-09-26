@@ -1,0 +1,49 @@
+engine: Engine（共享编译产物，只读） {
+  style.stroke: "#2563eb"
+  style.bold: true
+  style.stroke-width: 3
+
+  kernels: 编译后的 CUDA 内核\n+ 层融合策略\n+ 内存规划
+}
+
+grid-columns: 3
+
+ctx_a: Context A {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  shape_a: 绑定形状\nbatch=4, 224×224
+  mem_a: 执行期内存
+  stream_a: Stream 0
+
+  shape_a -> mem_a
+  mem_a -> stream_a: kernel launch
+}
+
+ctx_b: Context B {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  shape_b: 绑定形状\nbatch=1, 320×320
+  mem_b: 执行期内存
+  stream_b: Stream 1
+
+  shape_b -> mem_b
+  mem_b -> stream_b: kernel launch
+}
+
+ctx_c: Context C {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  shape_c: 绑定形状\nbatch=8, 224×224
+  mem_c: 执行期内存
+  stream_c: Stream 2
+
+  shape_c -> mem_c
+  mem_c -> stream_c: kernel launch
+}
+
+engine -> ctx_a: 共享内核
+engine -> ctx_b: 共享内核
+engine -> ctx_c: 共享内核
