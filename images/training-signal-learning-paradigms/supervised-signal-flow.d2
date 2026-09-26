@@ -1,0 +1,45 @@
+grid-columns: 2
+
+forward_stage: "Forward Pass" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  input_x: "输入 x" {
+    style.bold: true
+  }
+
+  model_block: "Model" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  pred: "预测 ŷ"
+
+  input_x -> model_block -> pred
+}
+
+eval_stage: "计算 Loss" {
+  style.stroke: "#dc2626"
+  style.bold: true
+
+  target_y: "外部 target y\n（人工标注 / 业务提供）" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  compare: "比较\nprediction vs target" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 3
+    style.bold: true
+  }
+
+  loss_node: "Loss → Gradient\n→ 参数更新" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+
+  target_y -> compare
+  compare -> loss_node
+}
+
+forward_stage -> eval_stage: "ŷ 进入比较"
