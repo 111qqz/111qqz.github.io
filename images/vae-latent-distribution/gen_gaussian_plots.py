@@ -37,9 +37,9 @@ def plot_gaussian_params():
     for mu, sigma, color in params_mu:
         y = gaussian_pdf(x, mu, sigma)
         ax1.plot(x, y, color=color, linewidth=2.2, label=f"μ={mu}, σ²=1")
-    ax1.set_title("μ 不同，σ² 相同", fontsize=13)
+    ax1.set_title("Different μ, same σ²", fontsize=13)
     ax1.set_xlabel("z", fontsize=11)
-    ax1.set_ylabel("概率密度", fontsize=11)
+    ax1.set_ylabel("Density", fontsize=11)
     ax1.legend(fontsize=10)
     ax1.set_xlim(-5.5, 5.5)
     ax1.set_ylim(0, 0.5)
@@ -49,9 +49,9 @@ def plot_gaussian_params():
     for mu, sigma, color in params_sigma:
         y = gaussian_pdf(x, mu, sigma)
         ax2.plot(x, y, color=color, linewidth=2.2, label=f"μ=0, σ={sigma}")
-    ax2.set_title("μ 相同，σ 不同", fontsize=13)
+    ax2.set_title("Same μ, different σ", fontsize=13)
     ax2.set_xlabel("z", fontsize=11)
-    ax2.set_ylabel("概率密度", fontsize=11)
+    ax2.set_ylabel("Density", fontsize=11)
     ax2.legend(fontsize=10)
     ax2.set_xlim(-5.5, 5.5)
     ax2.set_ylim(0, 0.9)
@@ -69,9 +69,9 @@ def plot_kl_divergence():
     p_y = gaussian_pdf(x, 0, 1)
 
     cases = [
-        {"mu_q": 0, "sigma_q": 1.0, "title": "完全重合"},
-        {"mu_q": 0.5, "sigma_q": 0.8, "title": "稍有偏移"},
-        {"mu_q": 5, "sigma_q": 0.2, "title": "严重偏离"},
+        {"mu_q": 0, "sigma_q": 1.0, "title": "Full overlap"},
+        {"mu_q": 0.5, "sigma_q": 0.8, "title": "Slight shift"},
+        {"mu_q": 5, "sigma_q": 0.2, "title": "Heavy divergence"},
     ]
 
     for ax, case in zip(axes, cases):
@@ -104,7 +104,7 @@ def plot_kl_divergence():
 
 
 if __name__ == "__main__":
-    plt.rcParams["font.family"] = ["DejaVu Sans", "WenQuanYi Micro Hei", "sans-serif"]
+    plt.rcParams["font.family"] = ["DejaVu Sans", "sans-serif"]
     plot_gaussian_params()
     plot_kl_divergence()
     print("Done.")

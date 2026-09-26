@@ -1,0 +1,114 @@
+grid-columns: 2
+
+no_reg: "Not Regularized" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  direction: down
+
+  q1: "q(z|x₁)\nμ far away" {
+    shape: cloud
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  gap1: "    ?    " {
+    style.stroke: "#6b7280"
+    style.stroke-dash: 4
+  }
+
+  q2: "q(z|x₂)\nμ far away" {
+    shape: cloud
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  gap2: "    ?    " {
+    style.stroke: "#6b7280"
+    style.stroke-dash: 4
+  }
+
+  q3: "q(z|x₃)\nμ far away" {
+    shape: cloud
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  q1 -> gap1: "空洞" {
+    style.stroke: "#dc2626"
+    style.stroke-dash: 4
+  }
+  gap1 -> q2: "空洞" {
+    style.stroke: "#dc2626"
+    style.stroke-dash: 4
+  }
+  q2 -> gap2: "空洞" {
+    style.stroke: "#dc2626"
+    style.stroke-dash: 4
+  }
+  gap2 -> q3: "空洞" {
+    style.stroke: "#dc2626"
+    style.stroke-dash: 4
+  }
+
+  note: "Posterior 各自为政\nDecoder 在空洞区域\n没有训练信号" {
+    style.stroke: "#dc2626"
+    style.stroke-dash: 4
+  }
+}
+
+with_reg: "Regularized toward N(0, I)" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  direction: down
+
+  prior_area: "p(z) = N(0, I) 覆盖区域" {
+    style.stroke: "#6b7280"
+    style.stroke-dash: 4
+    style.stroke-width: 2
+
+    q1: "q(z|x₁)" {
+      shape: cloud
+      style.stroke: "#2563eb"
+      style.bold: true
+    }
+
+    overlap: "overlap\nregion" {
+      style.stroke: "#8b5cf6"
+      style.stroke-dash: 4
+    }
+
+    q2: "q(z|x₂)" {
+      shape: cloud
+      style.stroke: "#16a34a"
+      style.bold: true
+    }
+
+    q3: "q(z|x₃)" {
+      shape: cloud
+      style.stroke: "#f59e0b"
+      style.bold: true
+    }
+
+    q1 -> overlap: {
+      style.stroke-dash: 4
+      style.opacity: 0.4
+    }
+    q2 -> overlap: {
+      style.stroke-dash: 4
+      style.opacity: 0.4
+    }
+    q3 -> overlap: {
+      style.stroke-dash: 4
+      style.opacity: 0.4
+    }
+  }
+
+  note: "Posterior 聚拢在共同区域\n采样更易落在\nDecoder 熟悉的地方" {
+    style.stroke: "#16a34a"
+    style.stroke-dash: 4
+  }
+
+  prior_area -> note: "KL 约束" {
+    style.stroke: "#16a34a"
+  }
+}
