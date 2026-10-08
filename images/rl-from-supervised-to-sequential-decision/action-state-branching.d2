@@ -1,0 +1,50 @@
+direction: down
+
+start_state: "State s_t (current position)" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  style.stroke-width: 3
+}
+
+branches: "" {
+  grid-columns: 2
+  label: ""
+
+  branch_a: "Action: move right" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+
+    sa1: "s_{t+1}: open area"
+    sa2: "s_{t+2}: near goal"
+    sa3: "s_{t+3}: reach goal\nr = +10" {
+      style.stroke: "#16a34a"
+      style.bold: true
+    }
+
+    sa1 -> sa2 -> sa3
+  }
+
+  branch_b: "Action: move up" {
+    style.stroke: "#dc2626"
+    style.bold: true
+
+    sb1: "s_{t+1}: near trap"
+    sb2: "s_{t+2}: fall into trap\nr = -10" {
+      style.stroke: "#dc2626"
+      style.bold: true
+    }
+
+    sb1 -> sb2
+  }
+}
+
+start_state -> branches.branch_a: "choose right" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+  style.stroke-width: 3
+}
+start_state -> branches.branch_b: "choose up" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  style.stroke-width: 3
+}
