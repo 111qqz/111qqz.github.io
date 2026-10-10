@@ -1,0 +1,52 @@
+grid-columns: 2
+
+hmm: "HMM：时序隐状态" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  direction: right
+
+  z1: "Z₁" { shape: circle; style.stroke: "#2563eb" }
+  z2: "Z₂" { shape: circle; style.stroke: "#2563eb" }
+  z3: "Z₃" { shape: circle; style.stroke: "#2563eb" }
+
+  o1: "O₁" { shape: diamond; style.stroke: "#2563eb" }
+  o2: "O₂" { shape: diamond; style.stroke: "#2563eb" }
+  o3: "O₃" { shape: diamond; style.stroke: "#2563eb" }
+
+  z1 -> z2: "Transition" { style.stroke: "#2563eb" }
+  z2 -> z3: "" { style.stroke: "#2563eb" }
+
+  z1 -> o1: "Emission" { style.stroke: "#2563eb"; style.stroke-dash: 4 }
+  z2 -> o2: "" { style.stroke: "#2563eb"; style.stroke-dash: 4 }
+  z3 -> o3: "" { style.stroke: "#2563eb"; style.stroke-dash: 4 }
+}
+
+vae: "VAE：潜变量生成" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  prior: "p(z) = N(0, I)\n（Prior）" {
+    style.stroke: "#16a34a"
+  }
+  z_node: "z\n（Latent Variable）" {
+    shape: circle
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  decoder: "Decoder\np(x|z)" {
+    style.stroke: "#16a34a"
+  }
+  x_node: "x\n（Observation）" {
+    shape: diamond
+    style.stroke: "#16a34a"
+  }
+  encoder: "Encoder\nq(z|x)" {
+    style.stroke: "#16a34a"
+    style.stroke-dash: 4
+  }
+
+  prior -> z_node: "采样" { style.stroke: "#16a34a" }
+  z_node -> decoder -> x_node: "生成" { style.stroke: "#16a34a" }
+  x_node -> encoder -> z_node: "近似推断" { style.stroke: "#16a34a"; style.stroke-dash: 4 }
+}
