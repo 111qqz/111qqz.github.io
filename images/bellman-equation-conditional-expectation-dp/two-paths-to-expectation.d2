@@ -1,0 +1,40 @@
+direction: down
+
+results: "四种可能的结果" {
+  grid-columns: 4
+  r1: "80\n(35%)"
+  r2: "120\n(35%)"
+  r3: "0\n(15%)"
+  r4: "40\n(15%)"
+}
+
+grid-columns: 2
+
+path_direct: "路径一：直接加权" {
+  calc: "80×0.35 + 120×0.35\n+ 0×0.15 + 40×0.15"
+}
+
+path_group: "路径二：先分组再加权" {
+  grp_b: "B 组均值 = 100" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+  }
+  grp_c: "C 组均值 = 20" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+  calc: "100×0.7 + 20×0.3"
+  grp_b -> calc
+  grp_c -> calc
+}
+
+final_result: "期望 = 76" {
+  style.bold: true
+  style.stroke: "#2563eb"
+  style.stroke-width: 3
+}
+
+results -> path_direct
+results -> path_group
+path_direct -> final_result
+path_group -> final_result
