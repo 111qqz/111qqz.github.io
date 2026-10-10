@@ -16,7 +16,14 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;我们的线上推理系统中存在大量模型——MLP、GNN、MoE，以及它们的各种组合。这个 workload 有几个重要特点：&lt;/p&gt;</description></item><item><title>从参数量到 Peak Memory：模型显存到底应该怎么算？</title><link>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-08-17-gpu-memory-mental-model/</link><pubDate>Mon, 17 Aug 2026 22:36:06 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-08-17-gpu-memory-mental-model/</guid><description>&lt;h2 class="relative group"&gt;起因
+&lt;p&gt;我们的线上推理系统中存在大量模型——MLP、GNN、MoE，以及它们的各种组合。这个 workload 有几个重要特点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;单张 GPU 上可能同时存在多个模型；&lt;/li&gt;
+&lt;li&gt;很多模型的 architecture 相同或者高度相似；&lt;/li&gt;
+&lt;li&gt;模型会随着业务时间轴不断上线、下线和切换；&lt;/li&gt;
+&lt;li&gt;模型切换过程对 latency 比较敏感。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;随着模型数量增加以及动态上下线越来越频繁，我们逐渐观察到两个问题：GPU memory fragmentation，以及 model loading / switching latency。&lt;/p&gt;</description></item><item><title>从参数量到 Peak Memory：模型显存到底应该怎么算？</title><link>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-08-17-gpu-memory-mental-model/</link><pubDate>Mon, 17 Aug 2026 22:36:06 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-08-17-gpu-memory-mental-model/</guid><description>&lt;h2 class="relative group"&gt;起因
  &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
  
  &lt;span
@@ -25,4 +32,5 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;&lt;a href="https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-08-15-flops-to-latency/" &gt;上一篇&lt;/a&gt;讨论了模型调度中的 Performance Constraint：一个模型放到 GPU 上以后，到底跑多快？&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;&lt;a href="https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-08-15-flops-to-latency/" &gt;上一篇&lt;/a&gt;讨论了模型调度中的 Performance Constraint：一个模型放到 GPU 上以后，到底跑多快？&lt;/p&gt;
+&lt;p&gt;这一篇讨论另一个最基础的约束：Capacity Constraint。&lt;/p&gt;</description></item></channel></rss>

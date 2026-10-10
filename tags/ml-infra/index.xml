@@ -34,7 +34,14 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;最近在团队内部重新整理 Python 项目的打包、发布和依赖管理规范，逐渐把各个工程统一收敛到：&lt;/p&gt;</description></item><item><title>训练数据从哪里来：回看 2018 年的一套图片与视频采集系统</title><link>https://111qqz.com/2026/09/where-training-data-comes-from/</link><pubDate>Thu, 10 Sep 2026 10:00:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/09/where-training-data-comes-from/</guid><description>&lt;h2 class="relative group"&gt;起因
+&lt;p&gt;最近在团队内部重新整理 Python 项目的打包、发布和依赖管理规范，逐渐把各个工程统一收敛到：&lt;/p&gt;
+&lt;div class="highlight-wrapper"&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;pyproject.toml
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;2&lt;/span&gt;&lt;span class="cl"&gt;uv
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;3&lt;/span&gt;&lt;span class="cl"&gt;uv.lock
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;4&lt;/span&gt;&lt;span class="cl"&gt;wheel
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;5&lt;/span&gt;&lt;span class="cl"&gt;src layout
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;6&lt;/span&gt;&lt;span class="cl"&gt;internal package registry&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;在这个过程中，大家交流最多的往往是一些具体的工具用法：私有源怎么配、build backend 选哪一个、&lt;code&gt;uv&lt;/code&gt; 的命令参数怎么写。但我越梳理越发现，这些工程细节很容易盖住一个更基础的问题：&lt;/p&gt;</description></item><item><title>训练数据从哪里来：回看 2018 年的一套图片与视频采集系统</title><link>https://111qqz.com/2026/09/where-training-data-comes-from/</link><pubDate>Thu, 10 Sep 2026 10:00:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/09/where-training-data-comes-from/</guid><description>&lt;h2 class="relative group"&gt;起因
  &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
  
  &lt;span
@@ -43,7 +50,11 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;写训练代码的时候，经常从这里开始：&lt;/p&gt;</description></item><item><title>从一次训练集群卡顿，理解 Linux Overcommit</title><link>https://111qqz.com/2026/09/linux-overcommit-training-cluster/</link><pubDate>Wed, 09 Sep 2026 23:00:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/09/linux-overcommit-training-cluster/</guid><description>&lt;h2 class="relative group"&gt;起因
+&lt;p&gt;写训练代码的时候，经常从这里开始：&lt;/p&gt;
+&lt;div class="highlight-wrapper"&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-python" data-lang="python"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;dataset&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;load_dataset&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;2&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;model&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;build_model&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;3&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;train&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;dataset&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;dataset&lt;/code&gt; 像是一个天然存在的东西。打开一个 benchmark，下载一个压缩包，解压，加载，开始训练。ML 课程、论文、demo 大多也是从这一步开始。&lt;/p&gt;</description></item><item><title>从一次训练集群卡顿，理解 Linux Overcommit</title><link>https://111qqz.com/2026/09/linux-overcommit-training-cluster/</link><pubDate>Wed, 09 Sep 2026 23:00:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/09/linux-overcommit-training-cluster/</guid><description>&lt;h2 class="relative group"&gt;起因
  &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
  
  &lt;span
@@ -61,7 +72,8 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;最近在继续 CS336 和 MIT 6.S191。&lt;/p&gt;</description></item><item><title>从 Forward 到 Optimizer：再看一遍 Training Loop</title><link>https://111qqz.com/2026/09/nn-training-loop-mental-model/</link><pubDate>Sun, 06 Sep 2026 22:00:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/09/nn-training-loop-mental-model/</guid><description>&lt;h2 class="relative group"&gt;起因
+&lt;p&gt;最近在继续 CS336 和 MIT 6.S191。&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://111qqz.com/2026/08/cs336-bpe-tokenizer/" &gt;之前那篇&lt;/a&gt;写了 BPE tokenizer——从训练到编解码，关注的是 raw text 怎么变成 token，token 怎么映射成 token ID。做完之后，对这条链路的前半段算是搞清楚了：&lt;/p&gt;</description></item><item><title>从 Forward 到 Optimizer：再看一遍 Training Loop</title><link>https://111qqz.com/2026/09/nn-training-loop-mental-model/</link><pubDate>Sun, 06 Sep 2026 22:00:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/09/nn-training-loop-mental-model/</guid><description>&lt;h2 class="relative group"&gt;起因
  &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
  
  &lt;span
@@ -88,7 +100,8 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;这是 CS336 系列的又一篇。&lt;/p&gt;</description></item><item><title>从 reshape 到 einops：理解 Transformer 代码中的 Tensor Shape DSL</title><link>https://111qqz.com/2026/08/einops-tensor-shape-dsl/</link><pubDate>Thu, 27 Aug 2026 21:35:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/08/einops-tensor-shape-dsl/</guid><description>&lt;h2 class="relative group"&gt;起因
+&lt;p&gt;这是 CS336 系列的又一篇。&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://111qqz.com/2026/08/flops-to-latency/" &gt;之前那篇&lt;/a&gt;讨论了 FLOPs 到 Latency 之间的鸿沟：FLOPs 相同的两个 GEMM，latency 可能差几倍甚至十几倍。那篇文章的核心结论是 &lt;strong&gt;FLOPs 是 workload metric，不是 performance metric&lt;/strong&gt;，并且引入了 Arithmetic Intensity 和 Roofline Model 作为分析工具。&lt;/p&gt;</description></item><item><title>从 reshape 到 einops：理解 Transformer 代码中的 Tensor Shape DSL</title><link>https://111qqz.com/2026/08/einops-tensor-shape-dsl/</link><pubDate>Thu, 27 Aug 2026 21:35:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/08/einops-tensor-shape-dsl/</guid><description>&lt;h2 class="relative group"&gt;起因
  &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
  
  &lt;span
@@ -115,7 +128,8 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;前阵子运维同事找到我，大意是：&lt;/p&gt;</description></item><item><title>从 DataLoader 到 Remote DataLoader：如何让 GPU 不再等待数据</title><link>https://111qqz.com/2026/08/dataloader-to-remote-dataloader/</link><pubDate>Sun, 23 Aug 2026 23:58:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/08/dataloader-to-remote-dataloader/</guid><description>&lt;h2 class="relative group"&gt;起因：GPU 没吃满，但不是算力问题
+&lt;p&gt;前阵子运维同事找到我，大意是：&lt;/p&gt;
+&lt;blockquote&gt;&lt;p&gt;&amp;ldquo;我们现在训练特征大部分还是 NumPy / Parquet。最近看到 Lance，说是一个更适合 AI 训练、推理的数据格式。我们为什么没有用 Lance？&amp;rdquo;&lt;/p&gt;</description></item><item><title>从 DataLoader 到 Remote DataLoader：如何让 GPU 不再等待数据</title><link>https://111qqz.com/2026/08/dataloader-to-remote-dataloader/</link><pubDate>Sun, 23 Aug 2026 23:58:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/08/dataloader-to-remote-dataloader/</guid><description>&lt;h2 class="relative group"&gt;起因：GPU 没吃满，但不是算力问题
  &lt;div id="起因gpu-没吃满但不是算力问题" class="anchor"&gt;&lt;/div&gt;
  
  &lt;span
@@ -142,7 +156,30 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;&lt;a href="https://111qqz.com/2026/08/gpu-memory-mental-model/" &gt;上一篇&lt;/a&gt;讨论模型显存时，我直接用了一张表：&lt;/p&gt;</description></item><item><title>从参数量到 Peak Memory：模型显存到底应该怎么算？</title><link>https://111qqz.com/2026/08/gpu-memory-mental-model/</link><pubDate>Mon, 17 Aug 2026 22:36:06 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/08/gpu-memory-mental-model/</guid><description>&lt;h2 class="relative group"&gt;起因
+&lt;p&gt;&lt;a href="https://111qqz.com/2026/08/gpu-memory-mental-model/" &gt;上一篇&lt;/a&gt;讨论模型显存时，我直接用了一张表：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;dtype&lt;/th&gt;
+					&lt;th style="text-align: right"&gt;bytes / param&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;FP32&lt;/td&gt;
+					&lt;td style="text-align: right"&gt;4&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;FP16 / BF16&lt;/td&gt;
+					&lt;td style="text-align: right"&gt;2&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;INT8&lt;/td&gt;
+					&lt;td style="text-align: right"&gt;~1&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;当时关注的是 peak memory model，所以这张表只是作为 parameter memory 的输入，没有展开。&lt;/p&gt;</description></item><item><title>从参数量到 Peak Memory：模型显存到底应该怎么算？</title><link>https://111qqz.com/2026/08/gpu-memory-mental-model/</link><pubDate>Mon, 17 Aug 2026 22:36:06 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/08/gpu-memory-mental-model/</guid><description>&lt;h2 class="relative group"&gt;起因
  &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
  
  &lt;span

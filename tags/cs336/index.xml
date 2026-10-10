@@ -7,7 +7,8 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;最近在继续 CS336 和 MIT 6.S191。&lt;/p&gt;</description></item><item><title>从推理到训练：模型调度中的显存约束</title><link>https://111qqz.com/2026/09/training-memory-scheduling/</link><pubDate>Sat, 05 Sep 2026 11:00:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/09/training-memory-scheduling/</guid><description>&lt;h2 class="relative group"&gt;推理任务能放下，为什么训练任务放不下
+&lt;p&gt;最近在继续 CS336 和 MIT 6.S191。&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://111qqz.com/2026/08/cs336-bpe-tokenizer/" &gt;之前那篇&lt;/a&gt;写了 BPE tokenizer——从训练到编解码，关注的是 raw text 怎么变成 token，token 怎么映射成 token ID。做完之后，对这条链路的前半段算是搞清楚了：&lt;/p&gt;</description></item><item><title>从推理到训练：模型调度中的显存约束</title><link>https://111qqz.com/2026/09/training-memory-scheduling/</link><pubDate>Sat, 05 Sep 2026 11:00:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/09/training-memory-scheduling/</guid><description>&lt;h2 class="relative group"&gt;推理任务能放下，为什么训练任务放不下
  &lt;div id="推理任务能放下为什么训练任务放不下" class="anchor"&gt;&lt;/div&gt;
  
  &lt;span
@@ -25,7 +26,8 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;这是 CS336 系列的又一篇。&lt;/p&gt;</description></item><item><title>从 reshape 到 einops：理解 Transformer 代码中的 Tensor Shape DSL</title><link>https://111qqz.com/2026/08/einops-tensor-shape-dsl/</link><pubDate>Thu, 27 Aug 2026 21:35:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/08/einops-tensor-shape-dsl/</guid><description>&lt;h2 class="relative group"&gt;起因
+&lt;p&gt;这是 CS336 系列的又一篇。&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://111qqz.com/2026/08/flops-to-latency/" &gt;之前那篇&lt;/a&gt;讨论了 FLOPs 到 Latency 之间的鸿沟：FLOPs 相同的两个 GEMM，latency 可能差几倍甚至十几倍。那篇文章的核心结论是 &lt;strong&gt;FLOPs 是 workload metric，不是 performance metric&lt;/strong&gt;，并且引入了 Arithmetic Intensity 和 Roofline Model 作为分析工具。&lt;/p&gt;</description></item><item><title>从 reshape 到 einops：理解 Transformer 代码中的 Tensor Shape DSL</title><link>https://111qqz.com/2026/08/einops-tensor-shape-dsl/</link><pubDate>Thu, 27 Aug 2026 21:35:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/08/einops-tensor-shape-dsl/</guid><description>&lt;h2 class="relative group"&gt;起因
  &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
  
  &lt;span
@@ -34,7 +36,8 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;最近在做 CS336（Language Modeling from Scratch）的 Transformer 实现，代码里反复出现这种写法：&lt;/p&gt;</description></item><item><title>从 Bytes 到 Tokens：我在 CS336 中实现 BPE Tokenizer</title><link>https://111qqz.com/2026/08/cs336-bpe-tokenizer/</link><pubDate>Sun, 23 Aug 2026 21:34:18 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/08/cs336-bpe-tokenizer/</guid><description>&lt;p&gt;最近在做 Stanford CS336（Language Modeling from Scratch）的 Assignment 1，实现了一个 BPE Tokenizer。最初的 trainer 跑 TinyStories 要约 8 分钟，改完后降到约 36 秒。&lt;/p&gt;</description></item><item><title>从参数量到 Peak Memory：模型显存到底应该怎么算？</title><link>https://111qqz.com/2026/08/gpu-memory-mental-model/</link><pubDate>Mon, 17 Aug 2026 22:36:06 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/08/gpu-memory-mental-model/</guid><description>&lt;h2 class="relative group"&gt;起因
+&lt;p&gt;最近在做 CS336（Language Modeling from Scratch）的 Transformer 实现，代码里反复出现这种写法：&lt;/p&gt;</description></item><item><title>从 Bytes 到 Tokens：我在 CS336 中实现 BPE Tokenizer</title><link>https://111qqz.com/2026/08/cs336-bpe-tokenizer/</link><pubDate>Sun, 23 Aug 2026 21:34:18 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/08/cs336-bpe-tokenizer/</guid><description>&lt;p&gt;最近在做 Stanford CS336（Language Modeling from Scratch）的 Assignment 1，实现了一个 BPE Tokenizer。最初的 trainer 跑 TinyStories 要约 8 分钟，改完后降到约 36 秒。&lt;/p&gt;
+&lt;p&gt;耗时主要花在 merge 循环里。要判断哪些工作可以省，得先弄清每次 merge 改变了哪些统计量。下面先交代 BPE 的表示和合并规则，再回到这段实现。&lt;/p&gt;</description></item><item><title>从参数量到 Peak Memory：模型显存到底应该怎么算？</title><link>https://111qqz.com/2026/08/gpu-memory-mental-model/</link><pubDate>Mon, 17 Aug 2026 22:36:06 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/08/gpu-memory-mental-model/</guid><description>&lt;h2 class="relative group"&gt;起因
  &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
  
  &lt;span

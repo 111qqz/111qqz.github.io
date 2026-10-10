@@ -16,7 +16,14 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;我们的线上推理系统中存在大量模型——MLP、GNN、MoE，以及它们的各种组合。这个 workload 有几个重要特点：&lt;/p&gt;</description></item><item><title>tensorRT 模型兼容性说明</title><link>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2020-03-24-tensorrt-model-compatibility-notes/</link><pubDate>Tue, 24 Mar 2020 12:26:01 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2020-03-24-tensorrt-model-compatibility-notes/</guid><description>&lt;h2 class="relative group"&gt;名词说明
+&lt;p&gt;我们的线上推理系统中存在大量模型——MLP、GNN、MoE，以及它们的各种组合。这个 workload 有几个重要特点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;单张 GPU 上可能同时存在多个模型；&lt;/li&gt;
+&lt;li&gt;很多模型的 architecture 相同或者高度相似；&lt;/li&gt;
+&lt;li&gt;模型会随着业务时间轴不断上线、下线和切换；&lt;/li&gt;
+&lt;li&gt;模型切换过程对 latency 比较敏感。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;随着模型数量增加以及动态上下线越来越频繁，我们逐渐观察到两个问题：GPU memory fragmentation，以及 model loading / switching latency。&lt;/p&gt;</description></item><item><title>tensorRT 模型兼容性说明</title><link>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2020-03-24-tensorrt-model-compatibility-notes/</link><pubDate>Tue, 24 Mar 2020 12:26:01 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2020-03-24-tensorrt-model-compatibility-notes/</guid><description>&lt;h2 class="relative group"&gt;名词说明
  &lt;div id="名词说明" class="anchor"&gt;&lt;/div&gt;
  
  &lt;span
@@ -42,7 +49,29 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;Engine plan 的兼容性依赖于GPU的compute capability 和 TensorRT 版本， 不依赖于CUDA和CUDNN版本.&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>CUDA C Best Practices Guide 阅读笔记（二） Heterogeneous Computing</title><link>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-13-cuda-c-best-practices-guide-heterogeneous-computing/</link><pubDate>Tue, 13 Feb 2018 06:38:38 +0000</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-13-cuda-c-best-practices-guide-heterogeneous-computing/</guid><description>&lt;p&gt;CUDA 编程涉及到在不同的平台上同时运行代码：包含 CPU 的 host 和包含 GPU 的 device。&lt;/p&gt;</description></item><item><title>CUDA C Best Practices Guide 阅读笔记（1） 并行计算方法论(APOD)</title><link>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-12-cuda-c-best-practices-parallel-computing-methodology/</link><pubDate>Mon, 12 Feb 2018 04:58:31 +0000</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-12-cuda-c-best-practices-parallel-computing-methodology/</guid><description>&lt;p&gt;APOD指的是Assess, Parallelize, Optimize, Deploy&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Engine plan 的兼容性依赖于GPU的compute capability 和 TensorRT 版本， 不依赖于CUDA和CUDNN版本.&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>CUDA C Best Practices Guide 阅读笔记（二） Heterogeneous Computing</title><link>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-13-cuda-c-best-practices-guide-heterogeneous-computing/</link><pubDate>Tue, 13 Feb 2018 06:38:38 +0000</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-13-cuda-c-best-practices-guide-heterogeneous-computing/</guid><description>&lt;p&gt;CUDA 编程涉及到在不同的平台上同时运行代码：包含 CPU 的 host 和包含 GPU 的 device。&lt;/p&gt;
+&lt;p&gt;所以了解 host 和 device 的差异对性能优化是非常重要的。&lt;/p&gt;
+
+&lt;h2 class="relative group"&gt;&lt;a href="http://docs.nvidia.com/cuda/cuda-c-best-practices-guide/#differences-between-host-and-device" target="_blank" rel="noreferrer"&gt;2.1. Differences between Host and Device&lt;/a&gt;
+ &lt;div id="21-differences-between-host-and-device" class="anchor"&gt;&lt;/div&gt;
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#21-differences-between-host-and-device" aria-label="Anchor"&gt;#&lt;/a&gt;
+ &lt;/span&gt;
+ 
+&lt;/h2&gt;
+
+&lt;h2 class="relative group"&gt;Threading resources
+ &lt;div id="threading-resources" class="anchor"&gt;&lt;/div&gt;
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#threading-resources" aria-label="Anchor"&gt;#&lt;/a&gt;
+ &lt;/span&gt;
+ 
+&lt;/h2&gt;
+&lt;p&gt;host 上能同时运行的线程数目比较少（比如 24 个）。&lt;/p&gt;</description></item><item><title>CUDA C Best Practices Guide 阅读笔记（1） 并行计算方法论(APOD)</title><link>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-12-cuda-c-best-practices-parallel-computing-methodology/</link><pubDate>Mon, 12 Feb 2018 04:58:31 +0000</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-12-cuda-c-best-practices-parallel-computing-methodology/</guid><description>&lt;p&gt;APOD指的是Assess, Parallelize, Optimize, Deploy&lt;/p&gt;
 &lt;figure&gt;&lt;img
  class="my-0 rounded-md"
  loading="lazy"
@@ -52,7 +81,33 @@
  src="https://111qqz.com/images/cuda-c-best-practices-parallel-computing-methodology/cuda-apod-cycle.svg"
  width="603"
  height="871"&gt;&lt;/figure&gt;
-&lt;p&gt;如图所示，APOD过程是一个循环的过程，每次只进行一部分，从A到P到O到D，然后再进行下一轮的APOD&lt;/p&gt;</description></item><item><title>cuda c++ 基础算法库 thrust 学习笔记</title><link>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-10-cuda-thrust-notes/</link><pubDate>Sat, 10 Feb 2018 08:43:54 +0000</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-10-cuda-thrust-notes/</guid><description>&lt;p&gt;可以了解成并行版的STL(?&lt;/p&gt;
+&lt;p&gt;如图所示，APOD过程是一个循环的过程，每次只进行一部分，从A到P到O到D，然后再进行下一轮的APOD&lt;/p&gt;
+
+&lt;h2 class="relative group"&gt;Assess
+ &lt;div id="assess" class="anchor"&gt;&lt;/div&gt;
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#assess" aria-label="Anchor"&gt;#&lt;/a&gt;
+ &lt;/span&gt;
+ 
+&lt;/h2&gt;
+&lt;p&gt;对于一个项目，第一步要做的是接触(Assess)项目，得到项目代码中每部分的执行时间。有了这部分内容，开发者就可以找到并行优化的瓶颈所在，并开始尝试用GPU加速。&lt;/p&gt;</description></item><item><title>cuda c++ 基础算法库 thrust 学习笔记</title><link>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-10-cuda-thrust-notes/</link><pubDate>Sat, 10 Feb 2018 08:43:54 +0000</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-10-cuda-thrust-notes/</guid><description>&lt;p&gt;可以了解成并行版的STL(?&lt;/p&gt;
 &lt;p&gt;过了一遍&lt;a href="http://docs.nvidia.com/cuda/thrust/index.html" target="_blank" rel="noreferrer"&gt;nvidia的官方网文档&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;发现如果熟悉STL的话，thrust没什么太多好说的，看起来很简单&amp;hellip;&lt;/p&gt;</description></item><item><title>cuda error checking 学习笔记</title><link>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-09-cuda-error-checking-notes/</link><pubDate>Fri, 09 Feb 2018 06:55:00 +0000</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-09-cuda-error-checking-notes/</guid><description>&lt;p&gt;由于发现cuda c++ 的 debug方式和c++ 差别很大，因此打算再开一篇，专门记录一些和error checking 以及debug有关的内容.&lt;/p&gt;</description></item><item><title>cuda 学习笔记</title><link>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-01-cuda-notes/</link><pubDate>Thu, 01 Feb 2018 07:20:04 +0000</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-01-cuda-notes/</guid><description>&lt;p&gt;update：有毒吧，kernel 中出问题原来不会报错。&lt;/p&gt;
-&lt;p&gt;请教了组里的 hust 学长 orz..&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;发现如果熟悉STL的话，thrust没什么太多好说的，看起来很简单&amp;hellip;&lt;/p&gt;
+&lt;p&gt;不过还是开一篇记录一下，一段时间内估计要和cuda c++ 打交道，就当记录使用过程中遇到的问题吧.&lt;/p&gt;</description></item><item><title>cuda error checking 学习笔记</title><link>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-09-cuda-error-checking-notes/</link><pubDate>Fri, 09 Feb 2018 06:55:00 +0000</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-09-cuda-error-checking-notes/</guid><description>&lt;p&gt;由于发现cuda c++ 的 debug方式和c++ 差别很大，因此打算再开一篇，专门记录一些和error checking 以及debug有关的内容.&lt;/p&gt;
+&lt;p&gt;Error checks in CUDA code can help catch CUDA errors at their source. There are 2 sources of errors in CUDA source code:&lt;/p&gt;</description></item><item><title>cuda 学习笔记</title><link>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-01-cuda-notes/</link><pubDate>Thu, 01 Feb 2018 07:20:04 +0000</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E5%B7%A5%E7%A8%8B/cuda/2018-02-01-cuda-notes/</guid><description>&lt;p&gt;update：有毒吧，kernel 中出问题原来不会报错。&lt;/p&gt;
+&lt;p&gt;请教了组里的 hust 学长 orz..&lt;/p&gt;
+&lt;p&gt;学到了 cuda-memcheck 命令和 cudaGetLastError 来查看问题，可以参考&lt;a href="https://stackoverflow.com/questions/14038589/what-is-the-canonical-way-to-check-for-errors-using-the-cuda-runtime-api" target="_blank" rel="noreferrer"&gt;What is the canonical way to check for errors using the CUDA runtime API?&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;先放一波资料。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;del&gt;&lt;a href="https://devblogs.nvidia.com/even-easier-introduction-cuda/" target="_blank" rel="noreferrer"&gt;An Even Easier Introduction to CUDA&lt;/a&gt;&lt;/del&gt;&lt;/li&gt;
+&lt;li&gt;&lt;del&gt;&lt;a href="https://drive.google.com/open?id=1kHYyM4yiJoyjkWjp7FJp0vae_TcvskjK" target="_blank" rel="noreferrer"&gt;CUDA C/C++ Basics&lt;/a&gt;&lt;/del&gt;&lt;/li&gt;
+&lt;li&gt;&lt;del&gt;&lt;a href="http://docs.nvidia.com/cuda/thrust/index.html" target="_blank" rel="noreferrer"&gt;nvidia-thrust 官方文档&lt;/a&gt;&lt;/del&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://devblogs.nvidia.com/how-access-global-memory-efficiently-cuda-c-kernels/" target="_blank" rel="noreferrer"&gt;how-access-global-memory-efficiently-cuda-c-kernels&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://devblogs.nvidia.com/efficient-matrix-transpose-cuda-cc/" target="_blank" rel="noreferrer"&gt;efficient-matrix-transpose-cuda-cc&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://devblogs.nvidia.com/faster-parallel-reductions-kepler/" target="_blank" rel="noreferrer"&gt;很强大的warp内shuffle&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://docs.nvidia.com/cuda/cuda-gdb/index.html" target="_blank" rel="noreferrer"&gt;cuda-GDB官方文档&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://docs.nvidia.com/cuda/cuda-c-best-practices-guide/" target="_blank" rel="noreferrer"&gt;cuda-c-best-practices-guide&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;cuda 提出的目的是能够让程序员透明地使用GPU来高效地进行并行运算。&lt;/p&gt;</description></item></channel></rss>
