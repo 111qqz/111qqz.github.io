@@ -1,0 +1,53 @@
+grid-columns: 2
+
+model_based: "Model-Based（已知模型）" {
+  agent_mb: "Agent\n在状态 s 选动作 a" {
+    style.bold: true
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+  model: "已知模型\nP(s'|s,a) 和 r(s,a,s')" {
+    style.stroke: "#7c3aed"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  calc: "对所有 s' 求加权和\n计算 Bellman 期望" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+  }
+  result_mb: "V(s) 或 Q(s,a)\n精确期望更新" {
+    style.bold: true
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+  }
+
+  agent_mb -> model: "查询转移概率"
+  model -> calc: "P(s'|s,a), r"
+  calc -> result_mb
+}
+
+model_free: "Model-Free（未知模型）" {
+  agent_mf: "Agent\n在状态 s 选动作 a" {
+    style.bold: true
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+  env: "环境（黑盒）\n转移概率未知" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  sample: "获得一条经验\n(s, a, r, s')" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+  result_mf: "Q(s,a)\n基于样本逐步更新" {
+    style.bold: true
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+
+  agent_mf -> env: "执行动作 a"
+  env -> sample: "返回 r, s'"
+  sample -> result_mf
+}

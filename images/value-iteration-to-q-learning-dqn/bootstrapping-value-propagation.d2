@@ -1,0 +1,46 @@
+grid-columns: 2
+
+step1: "第一步：B 获得真实 Reward" {
+  b_action: "B 选 b₁" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+  terminal1: "终止 R=3（真实奖励）" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  q_b: "Q(B, b₁): 0 → 3" {
+    style.bold: true
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+  }
+
+  b_action -> terminal1: "R = 3"
+  terminal1 -> q_b: "直接更新"
+}
+
+step2: "第二步：A 利用 B 的 Q 值" {
+  a_action: "A 选前往 B" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+  arrive_b: "到达 B，R=0\nmax Q(B,·) = 3" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+  q_a: "Q(A, 前往B): 0 → 2.7\ny = 0 + 0.9 × 3" {
+    style.bold: true
+    style.stroke: "#7c3aed"
+    style.stroke-width: 3
+  }
+
+  a_action -> arrive_b: "R = 0"
+  arrive_b -> q_a: "Bootstrapping"
+}
+
+step1 -> step2: "价值向前传播" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  style.stroke-width: 2
+}

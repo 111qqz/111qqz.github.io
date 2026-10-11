@@ -1,0 +1,52 @@
+env: "环境" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+buffer: "Experience Buffer\n存储 (s,a,r,s',d)" {
+  style.stroke: "#f59e0b"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+training: "训练" {
+  grid-columns: 2
+
+  online: "Online Network\n参数 θ（实时更新）" {
+    style.stroke: "#7c3aed"
+    style.stroke-width: 3
+    style.bold: true
+  }
+  target_net: "Target Network\n参数 θ⁻（定期同步）" {
+    style.stroke: "#9ca3af"
+    style.stroke-width: 2
+    style.stroke-dash: 4
+  }
+
+  online -> target_net: "定期复制 θ → θ⁻" {
+    style.stroke: "#9ca3af"
+    style.stroke-dash: 4
+  }
+}
+
+loss_node: "Loss = (Q_θ(s,a) − y)²\ny = r + γ(1−d) max Q_θ⁻(s',a')" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+env -> buffer: "交互产生经验"
+buffer -> training: "随机采样 batch\n（打破相关性）" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+}
+training -> loss_node: "Online 预测 + Target 构造目标"
+loss_node -> training: "梯度更新 θ" {
+  style.stroke: "#dc2626"
+  style.bold: true
+}
+training -> env: "ε-greedy 选动作" {
+  style.stroke: "#16a34a"
+  style.stroke-dash: 4
+}
