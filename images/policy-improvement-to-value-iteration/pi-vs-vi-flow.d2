@@ -1,0 +1,69 @@
+grid-columns: 2
+
+pi_side: "Policy Iteration" {
+  init_pi: "初始化策略 π" {
+    style.bold: true
+    style.stroke-width: 2
+  }
+  eval_pi: "Policy Evaluation\n固定 π，反复更新 V\n直到收敛" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  improve_pi: "Policy Improvement\n对每个状态\n选 argmax Q 的动作" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  check_pi: "策略是否稳定？" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+  done_pi: "输出最优策略 π*" {
+    style.bold: true
+    style.stroke-width: 2
+  }
+
+  init_pi -> eval_pi
+  eval_pi -> improve_pi
+  improve_pi -> check_pi
+  check_pi -> eval_pi: "否（继续迭代）" {
+    style.stroke-dash: 4
+    style.stroke: "#f59e0b"
+  }
+  check_pi -> done_pi: "是"
+}
+
+vi_side: "Value Iteration" {
+  init_vi: "初始化 V" {
+    style.bold: true
+    style.stroke-width: 2
+  }
+  update_vi: "Bellman Optimality 更新\n每个状态直接取 max\nV(s) ← max_a E[R+γV(S')]" {
+    style.stroke: "#7c3aed"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  check_vi: "V 是否收敛？" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+  extract_vi: "提取贪心策略\nπ*(s) = argmax_a" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  done_vi: "输出最优策略 π*" {
+    style.bold: true
+    style.stroke-width: 2
+  }
+
+  init_vi -> update_vi
+  update_vi -> check_vi
+  check_vi -> update_vi: "否（继续迭代）" {
+    style.stroke-dash: 4
+    style.stroke: "#f59e0b"
+  }
+  check_vi -> extract_vi: "是"
+  extract_vi -> done_vi
+}
