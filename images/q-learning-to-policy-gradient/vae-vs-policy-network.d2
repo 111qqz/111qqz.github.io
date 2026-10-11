@@ -1,0 +1,67 @@
+grid-columns: 2
+
+vae: "VAE Encoder" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 3
+  style.bold: true
+
+  input_v: "输入 x\n（数据样本）" {
+    style.bold: true
+  }
+  encoder: "Encoder 网络\n参数 φ" {
+    style.stroke: "#7c3aed"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  params_v: "输出分布参数\nμ_φ(x), σ_φ(x)" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+  sample_v: "z ~ N(μ, σ²)\n采样 Latent Variable" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  goal_v: "目标：近似后验 q(z|x)\n优化 ELBO" {
+    style.stroke: "#9ca3af"
+    style.stroke-width: 2
+  }
+
+  input_v -> encoder
+  encoder -> params_v
+  params_v -> sample_v
+  sample_v -> goal_v
+}
+
+policy_net: "Policy Network" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+  style.bold: true
+
+  input_p: "输入 State s\n（环境状态）" {
+    style.bold: true
+  }
+  pnet: "Policy 网络\n参数 θ" {
+    style.stroke: "#7c3aed"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  params_p: "输出分布参数\nμ_θ(s), σ_θ(s)" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+  sample_p: "a ~ N(μ, σ²)\n采样 Action" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  goal_p: "目标：最大化期望 Return\n优化 J(θ) = E[G₀]" {
+    style.stroke: "#9ca3af"
+    style.stroke-width: 2
+  }
+
+  input_p -> pnet
+  pnet -> params_p
+  params_p -> sample_p
+  sample_p -> goal_p
+}

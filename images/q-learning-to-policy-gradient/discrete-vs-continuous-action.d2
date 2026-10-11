@@ -1,0 +1,64 @@
+grid-columns: 2
+
+discrete: "离散动作空间" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 3
+  style.bold: true
+
+  actions: "候选动作（可枚举）" {
+    style.bold: true
+  }
+  a1: "左转\nQ = 2.1" {
+    style.stroke: "#9ca3af"
+    style.stroke-width: 2
+  }
+  a2: "直行\nQ = 3.5 ★" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+    style.bold: true
+  }
+  a3: "右转\nQ = 1.8" {
+    style.stroke: "#9ca3af"
+    style.stroke-width: 2
+  }
+  argmax_d: "argmax：直接比较\n选 Q 最大的动作" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  actions -> a1
+  actions -> a2
+  actions -> a3
+  a2 -> argmax_d
+}
+
+continuous: "连续动作空间" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+  style.bold: true
+
+  range_c: "方向盘转角 a ∈ [-30°, 30°]\n动作取值连续，无法枚举" {
+    style.bold: true
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+  problem: "argmax 变成连续优化问题\n无法简单比较有限个 Q 值" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+    style.stroke-dash: 4
+  }
+  solution: "Policy Network 直接输出\nμ_θ(s) 和 σ_θ(s)\n定义高斯分布 N(μ, σ²)" {
+    style.stroke: "#7c3aed"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  sample_c: "从分布中采样\n得到具体转角值" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+  }
+
+  range_c -> problem: "DQN 的困难"
+  range_c -> solution: "Policy Gradient\n的思路"
+  solution -> sample_c
+}

@@ -1,0 +1,67 @@
+grid-columns: 2
+
+dqn: "DQN：间接选择动作" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 3
+  style.bold: true
+
+  state_d: "State s" {
+    style.bold: true
+  }
+  qnet: "Q Network Q_θ\n（神经网络）" {
+    style.stroke: "#7c3aed"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  qvals: "Q(s,a₁) = 2.1\nQ(s,a₂) = 3.5\nQ(s,a₃) = 1.8" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+  argmax_d: "argmax → 选 a₂" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    style.stroke-width: 2
+  }
+  note_d: "学习目标：Q 值（动作价值）\n策略通过 argmax 间接得到" {
+    style.stroke: "#9ca3af"
+    style.stroke-width: 2
+  }
+
+  state_d -> qnet: "输入"
+  qnet -> qvals: "输出各动作 Q 值"
+  qvals -> argmax_d: "取最大值"
+  argmax_d -> note_d
+}
+
+pg: "Policy Gradient：直接输出策略" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+  style.bold: true
+
+  state_p: "State s" {
+    style.bold: true
+  }
+  pnet: "Policy Network π_θ\n（神经网络）" {
+    style.stroke: "#7c3aed"
+    style.stroke-width: 2
+    style.bold: true
+  }
+  probs: "P(a₁) = 0.2\nP(a₂) = 0.7\nP(a₃) = 0.1" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+  sample_p: "Sampling → 采样 a₂" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    style.stroke-width: 2
+  }
+  note_p: "学习目标：动作概率分布\n策略就是网络本身" {
+    style.stroke: "#9ca3af"
+    style.stroke-width: 2
+  }
+
+  state_p -> pnet: "输入"
+  pnet -> probs: "输出动作概率"
+  probs -> sample_p: "按概率采样"
+  sample_p -> note_p
+}
