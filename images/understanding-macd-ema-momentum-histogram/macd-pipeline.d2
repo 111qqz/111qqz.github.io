@@ -1,0 +1,35 @@
+direction: down
+
+price: "收盘价（原始信号）" {
+  style.stroke: "#7c3aed"
+  style.bold: true
+  style.stroke-width: 3
+}
+
+lp_fast: "低通滤波 EMA₁₂\n截止频率较高，保留更多短期变化" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+lp_slow: "低通滤波 EMA₂₆\n截止频率较低，输出更平滑" {
+  style.stroke: "#16a34a"
+  style.bold: true
+}
+
+dif: "第一层差分  DIF = EMA₁₂ − EMA₂₆\n（具有带通特性，突出中等时间尺度的价格变化）" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  style.stroke-width: 3
+}
+
+output_node: "第二层差分  DEA = EMA₉(DIF)，Histogram = DIF − DEA\n（对 DIF 再平滑后取差值，提取 DIF 自身的变化速度）" {
+  style.stroke: "#7c3aed"
+  style.bold: true
+  style.stroke-width: 3
+}
+
+price -> lp_fast
+price -> lp_slow
+lp_fast -> dif
+lp_slow -> dif
+dif -> output_node: "减去自身平滑值"
