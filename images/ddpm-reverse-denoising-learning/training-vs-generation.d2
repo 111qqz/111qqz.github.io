@@ -1,0 +1,56 @@
+grid-columns: 2
+
+training: "训练阶段" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  direction: down
+
+  x0: "x₀ (真实图片)" {
+    style.bold: true
+  }
+  add_noise: "加噪构造 x_t\n√ᾱ_t · x₀ + √(1-ᾱ_t) · ε" {
+    style.stroke: "#2563eb"
+  }
+  known_eps: "ε 已知\n(自己采样的)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    style.stroke-width: 3
+  }
+  supervised: "有监督学习\n网络预测 ε̂，和真实 ε 算 loss" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  x0 -> add_noise: "随机选 t"
+  add_noise -> known_eps
+  known_eps -> supervised
+}
+
+generation: "生成阶段" {
+  style.stroke: "#dc2626"
+  style.bold: true
+
+  direction: down
+
+  noise: "x_T ~ N(0, I)\n(随机噪声)" {
+    style.stroke: "#f59e0b"
+  }
+  unknown: "没有 x₀\n没有真实 ε" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    style.stroke-width: 3
+  }
+  predict: "网络预测 ε̂\n逐步去噪 x_T → x₀" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+  result: "生成新图片\n(从未见过的样本)" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  noise -> unknown
+  unknown -> predict: "只能靠网络"
+  predict -> result: "迭代 T 步"
+}
