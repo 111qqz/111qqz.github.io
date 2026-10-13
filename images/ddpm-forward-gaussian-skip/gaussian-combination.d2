@@ -1,0 +1,61 @@
+direction: down
+
+grid-columns: 2
+
+combination: "线性组合路径" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  direction: down
+
+  inputs: "两个独立采样" {
+    direction: right
+    x_sample: "X ~ N(0, 1)"
+    y_sample: "Y ~ N(0, 1)"
+  }
+
+  combine: "Z = 3X + 4Y" {
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  result: "Z ~ N(0, 25)\nVar = 3² + 4² = 25" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  inputs -> combine: "加权组合"
+  combine -> result: "高斯封闭性"
+}
+
+single: "单次采样路径" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  direction: down
+
+  eps: "ε ~ N(0, 1)\n一次采样"
+
+  scaled: "5ε" {
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  result2: "5ε ~ N(0, 25)\nVar = 5² = 25" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  eps -> scaled: "× 5"
+  scaled -> result2: "线性变换"
+}
+
+eq: "两者概率规律完全相同\n3X + 4Y =d 5ε" {
+  style.bold: true
+  style.stroke: "#dc2626"
+  style.stroke-width: 3
+  style.font-size: 18
+}
+
+combination -> eq
+single -> eq
