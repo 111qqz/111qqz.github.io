@@ -1,0 +1,54 @@
+grid-columns: 2
+
+transformer_pe: "Transformer Positional Encoding" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  direction: down
+
+  pos_in: "标量整数 pos\n(token 在序列中的位置)"
+
+  sincos_enc: "Sin/Cos 编码\n多组不同频率 ω₁, ω₂, ..." {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+    style.bold: true
+  }
+
+  pe_vec: "PE 向量 ∈ R^d\n[sin(ω₁·pos), cos(ω₁·pos), ...]"
+
+  inject_pe: "直接加到 Token Embedding\n(网络输入端，一次性)" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+
+  pos_in -> sincos_enc -> pe_vec -> inject_pe
+}
+
+ddpm_te: "DDPM Timestep Embedding" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+
+  direction: down
+
+  t_in: "标量整数 t\n(噪声 schedule 上的位置)"
+
+  sincos_enc2: "Sin/Cos 编码\n多组不同频率 ω₁, ω₂, ..." {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+    style.bold: true
+  }
+
+  te_vec: "TE 向量 ∈ R^d\n[sin(ω₁·t), cos(ω₁·t), ...]"
+
+  mlp_proj: "MLP 变换\n(SiLU + Linear，可学习)" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+
+  inject_te: "注入 U-Net 每个 ResBlock\n(加法 / Scale & Shift)" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+
+  t_in -> sincos_enc2 -> te_vec -> mlp_proj -> inject_te
+}

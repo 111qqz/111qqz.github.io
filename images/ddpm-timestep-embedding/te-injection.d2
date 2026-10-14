@@ -1,0 +1,75 @@
+grid-rows: 2
+
+time_row: "时间编码路径" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  direction: right
+
+  input_t: "t\n(时间步)" {
+    style.bold: true
+    style.stroke: "#2563eb"
+    style.stroke-width: 3
+  }
+
+  sincos: "Sin/Cos\n编码\n(固定公式)"
+
+  mlp_node: "两层 MLP\n(SiLU + Linear)\n可学习参数" {
+    style.stroke: "#2563eb"
+    style.bold: true
+    style.stroke-width: 2
+  }
+
+  proj_note: "投影到每层\nchannel 维度\nb_t ∈ R^{B×C}" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  input_t -> sincos -> mlp_node -> proj_note
+}
+
+unet_row: "U-Net 特征路径" {
+  style.stroke: "#16a34a"
+
+  direction: right
+
+  input_xt: "x_t\n(带噪图片)" {
+    style.bold: true
+    style.stroke-width: 2
+  }
+
+  enc_rb: "ResBlock\n(Encoder ↓)\n+ 时间注入" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+  }
+
+  bneck: "Bottleneck\n最深层\n+ 时间注入" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  dec_rb: "ResBlock\n(Decoder ↑)\n+ 时间注入" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+  }
+
+  output_eps: "ε̂\n(噪声预测)" {
+    style.bold: true
+    style.stroke-width: 2
+  }
+
+  input_xt -> enc_rb -> bneck -> dec_rb -> output_eps
+}
+
+time_row.proj_note -> unet_row.enc_rb: "注入" {
+  style.stroke-dash: 4
+  style.stroke: "#2563eb"
+}
+time_row.proj_note -> unet_row.bneck: {
+  style.stroke-dash: 4
+  style.stroke: "#2563eb"
+}
+time_row.proj_note -> unet_row.dec_rb: "注入" {
+  style.stroke-dash: 4
+  style.stroke: "#2563eb"
+}

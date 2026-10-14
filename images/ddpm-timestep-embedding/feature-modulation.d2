@@ -1,0 +1,65 @@
+grid-columns: 2
+
+add_method: "方式一：简单加法\n(DDPM 原始实现)" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  direction: down
+
+  h_input: "h (feature map)\nB × C × H × W"
+
+  conv_gn_act: "Conv → GroupNorm → SiLU"
+
+  add_op: "h + b_t\n广播加法\n(B×C×1×1 → B×C×H×W)" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  conv_out: "Conv → 输出"
+
+  h_input -> conv_gn_act -> add_op -> conv_out
+
+  te_proj: "时间编码 → Linear\nb_t ∈ R^{B×C}" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  te_proj -> add_op: {
+    style.stroke-dash: 4
+    style.stroke: "#f59e0b"
+  }
+}
+
+scale_shift: "方式二：Scale & Shift\n(Improved DDPM)" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  direction: down
+
+  h_input2: "h (feature map)\nB × C × H × W"
+
+  conv_step: "Conv"
+
+  gn_step: "GroupNorm"
+
+  modulate: "(1 + s_t) × Norm(h) + b_t\n同时缩放和偏移\n(更灵活的调制)" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  act_conv_out: "SiLU → Conv → 输出"
+
+  h_input2 -> conv_step -> gn_step -> modulate -> act_conv_out
+
+  te_proj2: "时间编码 → Linear\ns_t, b_t ∈ R^{B×C}" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  te_proj2 -> modulate: {
+    style.stroke-dash: 4
+    style.stroke: "#f59e0b"
+  }
+}
