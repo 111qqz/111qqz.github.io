@@ -1,63 +1,51 @@
-grid-columns: 2
+direction: down
 
-unet_side: "U-Net" {
-  direction: down
+unet_side: "U-Net: 编码器-解码器单尺度全分辨率重构" {
+  grid-columns: 2
 
-  ue1: "Encoder 1\n256×256×64" {style.stroke: "#2563eb"}
-  ue2: "Encoder 2\n128×128×128" {style.stroke: "#2563eb"}
-  ue3: "Encoder 3\n64×64×256" {style.stroke: "#2563eb"}
+  enc: "Encoder" {
+    ue1: "Encoder 1 (256×256)" {style.stroke: "#2563eb"}
+    ue2: "Encoder 2 (128×128)" {style.stroke: "#2563eb"}
+    ue3: "Encoder 3 (64×64)" {style.stroke: "#2563eb"}
+    ubn: "Bottleneck (32×32)" {style.stroke: "#dc2626"; style.bold: true}
+    ue1 -> ue2 -> ue3 -> ubn: "MaxPool"
+  }
 
-  ubn: "Bottleneck\n32×32×512" {style.stroke: "#dc2626"; style.bold: true; style.stroke-width: 2}
+  dec: "Decoder" {
+    ud3: "Decoder 3 (64×64)" {style.stroke: "#f59e0b"}
+    ud2: "Decoder 2 (128×128)" {style.stroke: "#f59e0b"}
+    ud1: "Decoder 1 (256×256)" {style.stroke: "#f59e0b"}
+    uout: "最终输出 (256×256×C)" {style.stroke: "#16a34a"; style.bold: true}
+    ud3 -> ud2 -> ud1 -> uout: "Upsample"
+  }
 
-  ud3: "Decoder 3\n64×64×256" {style.stroke: "#f59e0b"}
-  ud2: "Decoder 2\n128×128×128" {style.stroke: "#f59e0b"}
-  ud1: "Decoder 1\n256×256×64" {style.stroke: "#f59e0b"}
-
-  uout: "Output\n256×256×C\n(single full-res)" {style.stroke: "#6b7280"; style.bold: true}
-
-  ue1 -> ue2: "MaxPool"
-  ue2 -> ue3: "MaxPool"
-  ue3 -> ubn: "MaxPool"
-  ubn -> ud3: "Upsample"
-  ud3 -> ud2: "Upsample"
-  ud2 -> ud1: "Upsample"
-  ud1 -> uout
-
-  ue3 -> ud3: "concat" {style.stroke: "#16a34a"; style.stroke-dash: 4}
-  ue2 -> ud2: "concat" {style.stroke: "#16a34a"; style.stroke-dash: 4}
-  ue1 -> ud1: "concat" {style.stroke: "#16a34a"; style.stroke-dash: 4}
+  enc.ubn -> dec.ud3: "Upsample"
+  enc.ue3 -> dec.ud3: "Skip" {style.stroke: "#16a34a"; style.stroke-dash: 4}
+  enc.ue2 -> dec.ud2: "Skip" {style.stroke: "#16a34a"; style.stroke-dash: 4}
+  enc.ue1 -> dec.ud1: "Skip" {style.stroke: "#16a34a"; style.stroke-dash: 4}
 }
 
-fpn_side: "FPN" {
-  direction: down
+fpn_side: "FPN: 特征金字塔多尺度独立预测" {
+  grid-columns: 2
 
-  fc2: "C2 (Backbone)\n256×256" {style.stroke: "#2563eb"}
-  fc3: "C3 (Backbone)\n128×128" {style.stroke: "#2563eb"}
-  fc4: "C4 (Backbone)\n64×64" {style.stroke: "#2563eb"}
-  fc5: "C5 (Backbone)\n32×32" {style.stroke: "#2563eb"; style.bold: true}
+  bb: "Backbone" {
+    fc2: "C2 (256×256)" {style.stroke: "#2563eb"}
+    fc3: "C3 (128×128)" {style.stroke: "#2563eb"}
+    fc4: "C4 (64×64)" {style.stroke: "#2563eb"}
+    fc5: "C5 (32×32)" {style.stroke: "#2563eb"; style.bold: true}
+    fc2 -> fc3 -> fc4 -> fc5: "stride 2"
+  }
 
-  fp5: "P5" {style.stroke: "#f59e0b"}
-  fp4: "P4" {style.stroke: "#f59e0b"}
-  fp3: "P3" {style.stroke: "#f59e0b"}
-  fp2: "P2" {style.stroke: "#f59e0b"}
+  pyr: "Pyramid" {
+    fp5: "P5 (预测超大目标)" {style.stroke: "#f59e0b"}
+    fp4: "P4 (预测大目标)" {style.stroke: "#f59e0b"}
+    fp3: "P3 (预测中目标)" {style.stroke: "#f59e0b"}
+    fp2: "P2 (预测小目标)" {style.stroke: "#f59e0b"}
+    fp5 -> fp4 -> fp3 -> fp2: "Upsample"
+  }
 
-  fout: "Multi-scale Output\nP2, P3, P4, P5\n(each level predicts)" {style.stroke: "#6b7280"; style.bold: true}
-
-  fc2 -> fc3: "Conv"
-  fc3 -> fc4: "Conv"
-  fc4 -> fc5: "Conv"
-
-  fc5 -> fp5: "1×1 Conv"
-  fp5 -> fp4: "Upsample"
-  fp4 -> fp3: "Upsample"
-  fp3 -> fp2: "Upsample"
-
-  fc4 -> fp4: "add (lateral)" {style.stroke: "#16a34a"; style.stroke-dash: 4}
-  fc3 -> fp3: "add (lateral)" {style.stroke: "#16a34a"; style.stroke-dash: 4}
-  fc2 -> fp2: "add (lateral)" {style.stroke: "#16a34a"; style.stroke-dash: 4}
-
-  fp2 -> fout
-  fp3 -> fout
-  fp4 -> fout
-  fp5 -> fout
+  bb.fc5 -> pyr.fp5: "1×1 Conv"
+  bb.fc4 -> pyr.fp4: "Lateral Add" {style.stroke: "#16a34a"; style.stroke-dash: 4}
+  bb.fc3 -> pyr.fp3: "Lateral Add" {style.stroke: "#16a34a"; style.stroke-dash: 4}
+  bb.fc2 -> pyr.fp2: "Lateral Add" {style.stroke: "#16a34a"; style.stroke-dash: 4}
 }

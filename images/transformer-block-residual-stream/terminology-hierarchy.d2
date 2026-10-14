@@ -1,66 +1,51 @@
-direction: down
+grid-columns: 2
 
-mha: Multi-Head Attention Module {
-  style.stroke: "#2563eb"
-  style.stroke-width: 2
-  style.bold: true
-  label: "Multi-Head Attention\n(QKV Projection → Heads → Concat → W_O)"
-}
-
-attn-sublayer: Attention Sublayer {
-  style.stroke: "#7c3aed"
-  style.stroke-width: 2
-  attn: Attention Module
-  res: Residual Connection
-  norm: Normalization
-  dropout: Dropout
-}
-
-ffn-sublayer: FFN Sublayer {
-  style.stroke: "#7c3aed"
-  style.stroke-width: 2
-  ffn: FFN (Position-wise MLP)
-  res2: Residual Connection
-  norm2: Normalization
-  dropout2: Dropout
-}
-
-block: Transformer Block {
-  style.stroke: "#dc2626"
-  style.stroke-width: 3
-  style.bold: true
-  attn-sub: Attention Sublayer
-  ffn-sub: FFN Sublayer
-}
-
-stack: Transformer Stack {
-  style.stroke: "#16a34a"
-  style.stroke-width: 3
-  style.bold: true
-  b1: "Block 1 (params₁)"
-  b2: "Block 2 (params₂)"
-  dots: "..."  {
-    style.stroke-dash: 4
+modules: "1. 基础计算模块 (Module)" {
+  direction: down
+  mha: "Multi-Head Attention\n(QKV 投影 → 多头注意力 → 线性映射)" {
+    style.stroke: "#2563eb"
+    style.bold: true
   }
-  bn: "Block N (params_N)"
-  b1 -> b2
-  b2 -> dots
-  dots -> bn
+  ffn: "FFN (Position-wise MLP)\n(两层线性映射 + 激活函数)" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
 }
 
-mha -> attn-sublayer: "belongs to" {
-  style.stroke-dash: 4
+sublayers: "2. 子层包装 (Sublayer)" {
+  direction: down
+  attn_sub: "Attention Sublayer\n• Attention Module\n• Residual Connection\n• Normalization" {
+    style.stroke: "#7c3aed"
+    style.bold: true
+  }
+  ffn_sub: "FFN Sublayer\n• FFN Module\n• Residual Connection\n• Normalization" {
+    style.stroke: "#7c3aed"
+    style.bold: true
+  }
 }
 
-attn-sublayer -> block: "is a sublayer of" {
-  style.stroke-dash: 4
-}
-
-ffn-sublayer -> block: "is a sublayer of" {
-  style.stroke-dash: 4
-}
-
-block -> stack: "× N" {
-  style.stroke: "#16a34a"
+block: "3. Transformer Block (基本单元)" {
+  direction: down
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
   style.bold: true
+  b_top: "• Attention Sublayer (上下文读取)"
+  b_bot: "• FFN Sublayer (特征空间重构)"
+  b_top -> b_bot
 }
+
+stack: "4. Transformer Stack (网络整体)" {
+  direction: down
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+  style.bold: true
+  b1: "Block 1 (底层特征提取)"
+  b2: "Block 2 (中间语义表征)"
+  dots: "..." {style.stroke-dash: 4}
+  bn: "Block N (顶层任务表征)"
+  b1 -> b2 -> dots -> bn
+}
+
+modules.mha -> sublayers.attn_sub: "添加残差与归一化"
+sublayers.attn_sub -> block.b_top: "组合进 Block"
+block -> stack.b1: "N 层重复堆叠"
