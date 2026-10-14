@@ -1,0 +1,39 @@
+direction: down
+
+enc_feat: "Encoder Feature\n来自 Encoder 同级层\nH × W × C" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  style.stroke-width: 2
+}
+
+up_feat: "Upsampled Feature\n来自 Decoder 更深层\nH × W × C'" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+  style.stroke-width: 2
+}
+
+concat_op: "Concat (沿 Channel 拼接)\nH × W × (C + C')" {
+  shape: hexagon
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+}
+
+conv_block: "Conv 3×3 + ReLU\n融合拼接后的特征" {
+  style.stroke: "#8b5cf6"
+  style.stroke-width: 2
+}
+
+fused: "Fused Feature\nH × W × C''" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  style.stroke-width: 2
+}
+
+enc_feat -> concat_op: "高分辨率\n空间细节" {
+  style.stroke: "#2563eb"
+}
+up_feat -> concat_op: "深层语义\n信息" {
+  style.stroke: "#f59e0b"
+}
+concat_op -> conv_block
+conv_block -> fused

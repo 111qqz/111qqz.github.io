@@ -1,0 +1,95 @@
+grid-columns: 2
+
+enc_side: "Encoder (下采样)" {
+  direction: down
+
+  e1: "Input → 256×256×64" {
+    style.stroke: "#2563eb"
+    style.bold: true
+    style.stroke-width: 2
+  }
+
+  e2: "128×128×128" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+
+  e3: "64×64×256" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+
+  e4: "32×32×512" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+
+  bn: "Bottleneck 16×16×1024" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  e1 -> e2: "MaxPool + Conv"
+  e2 -> e3: "MaxPool + Conv"
+  e3 -> e4: "MaxPool + Conv"
+  e4 -> bn: "MaxPool + Conv"
+}
+
+dec_side: "Decoder (上采样)" {
+  direction: up
+
+  d4: "32×32×512" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+
+  d3: "64×64×256" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+
+  d2: "128×128×128" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+
+  d1: "256×256×64 → Output" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+    style.stroke-width: 2
+  }
+
+  d4 -> d3: "Upsample + Conv"
+  d3 -> d2: "Upsample + Conv"
+  d2 -> d1: "Upsample + 1×1 Conv"
+}
+
+enc_side.bn -> dec_side.d4: Upsample {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+}
+
+enc_side.e4 -> dec_side.d4: "Skip (concat)" {
+  style.stroke: "#16a34a"
+  style.stroke-dash: 4
+  style.stroke-width: 2
+}
+
+enc_side.e3 -> dec_side.d3: "Skip (concat)" {
+  style.stroke: "#16a34a"
+  style.stroke-dash: 4
+  style.stroke-width: 2
+}
+
+enc_side.e2 -> dec_side.d2: "Skip (concat)" {
+  style.stroke: "#16a34a"
+  style.stroke-dash: 4
+  style.stroke-width: 2
+}
+
+enc_side.e1 -> dec_side.d1: "Skip (concat)" {
+  style.stroke: "#16a34a"
+  style.stroke-dash: 4
+  style.stroke-width: 2
+}

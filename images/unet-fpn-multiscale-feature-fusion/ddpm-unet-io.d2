@@ -1,0 +1,59 @@
+direction: down
+
+inputs: "" {
+  label: ""
+  grid-columns: 2
+
+  xt: "Noisy Image x_t\n(H × W × C)" {
+    style.stroke: "#2563eb"
+    style.bold: true
+    style.stroke-width: 2
+  }
+
+  t_emb: "Timestep t\n→ Sinusoidal Embedding" {
+    style.stroke: "#8b5cf6"
+    style.bold: true
+    style.stroke-width: 2
+  }
+}
+
+unet_block: "Diffusion U-Net" {
+  style.stroke: "#6b7280"
+  style.stroke-width: 2
+
+  direction: right
+
+  enc_path: "Encoder\n+ ResBlock\n+ Attention" {
+    style.stroke: "#2563eb"
+  }
+
+  mid: "Middle\nBlock" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+
+  dec_path: "Decoder\n+ ResBlock\n+ Attention" {
+    style.stroke: "#f59e0b"
+  }
+
+  enc_path -> mid
+  mid -> dec_path
+
+  enc_path -> dec_path: "Skip Connection" {
+    style.stroke: "#16a34a"
+    style.stroke-dash: 4
+  }
+}
+
+noise_pred: "Predicted Noise\n(H × W × C)\n与输入 x_t 同形状" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  style.stroke-width: 2
+}
+
+inputs.xt -> unet_block
+inputs.t_emb -> unet_block: "inject at each block" {
+  style.stroke: "#8b5cf6"
+  style.stroke-dash: 4
+}
+unet_block -> noise_pred
