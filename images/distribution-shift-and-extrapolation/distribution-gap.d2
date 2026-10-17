@@ -1,0 +1,57 @@
+grid-columns: 2
+
+offline_world: "离线开发与评估体系\n(依赖历史联合分布 P_history)" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+
+  hist_pool: "历史采集数据池\n从历史分布中采样" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  train_branch: "训练路径" {
+    style.stroke: "#16a34a"
+    train_set: "训练集 (Train Set)\n100 万样本"
+    model_fit: "模型参数优化\n拟合历史统计规律"
+    train_set -> model_fit: "最小化经验风险"
+  }
+
+  test_branch: "评估路径" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    test_set: "测试集 (Test Set)\n10 万样本隔离"
+    eval_metric: "评估结果：98% 准确率\n验证在历史分布下的泛化"
+    test_set -> eval_metric: "计算测试指标"
+  }
+
+  hist_pool -> train_branch.train_set: "随机切分"
+  hist_pool -> test_branch.test_set: "IID 采样"
+}
+
+online_world: "未来真实生产环境\n(面对动态未知分布 P_prod)" {
+  style.stroke: "#f59e0b"
+  style.stroke-width: 2
+
+  env_shift: "真实世界动态演化\n用户/环境/业务机制变化" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  input_stream: "输入流演变" {
+    style.stroke: "#dc2626"
+    prod_x: "线上实时输入流 X_prod\n边缘特征分布发生漂移\nP_prod(X) ≠ P_history(X)"
+    inference: "已部署模型推理\n以旧参数预测新数据"
+    prod_x -> inference: "实时请求"
+  }
+
+  ground_truth: "真实规律演变" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    prod_relation: "新环境真实规律\n条件概率可能重构\nP_prod(Y|X) ≠ P_history(Y|X)"
+    perf_drop: "生产表现可能脱节\n实际准确率面临滑坡"
+    prod_relation -> perf_drop: "决定真实效果"
+  }
+
+  env_shift -> input_stream.prod_x: "输入特征变化"
+  env_shift -> ground_truth.prod_relation: "底层规律变迁"
+}

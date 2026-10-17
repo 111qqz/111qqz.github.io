@@ -1,0 +1,55 @@
+direction: down
+
+grid-columns: 2
+
+ood_input_stage: "未知样本输入流" {
+  style.stroke: "#f59e0b"
+  style.stroke-width: 2
+
+  novel_sample: "未知物种 / 分布外输入\n(既不是猫，也不是狗)" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  feature_extract: "深层特征提取\n投影到已训练特征空间\n(该空间仅定义过猫与狗的决策面)" {
+    style.stroke: "#2563eb"
+  }
+
+  novel_sample -> feature_extract: "输入前向传播"
+}
+
+softmax_mechanism: "闭集归一化困境" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+
+  unbounded_logits: "输出层原始得分 (Logits)\nz_cat = 8.5, z_dog = 3.9\n(仅反映在二元决策边界的相对投影)" {
+    style.stroke: "#dc2626"
+  }
+
+  softmax_op: "Softmax 强制指数归一化\nexp(z_i) / Σ exp(z_j)\n(必须强制约束所有概率和为 1.0)" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+
+  unbounded_logits -> softmax_op: "非线性指数压缩"
+}
+
+output_contrast: "输出结果与真实物理意义" {
+  style.stroke: "#888888"
+  style.stroke-dash: 4
+
+  grid-columns: 2
+
+  model_output: "模型内部输出置信度\nP(cat) = 0.99, P(dog) = 0.01\n(看似极度自信的高确定性判断)" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+
+  reality: "真实物理语义\n输入根本不属于任何已知类别\n(模型内部缺乏表示「我不知道」的机制)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+}
+
+ood_input_stage.feature_extract -> softmax_mechanism.unbounded_logits: "计算分类边界"
+softmax_mechanism.softmax_op -> output_contrast.model_output: "产生输出向量"
