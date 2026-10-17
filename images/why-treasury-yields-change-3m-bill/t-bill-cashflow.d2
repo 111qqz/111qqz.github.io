@@ -1,0 +1,43 @@
+direction: down
+
+timeline: "时间线与交易事件" {
+  grid-columns: 3
+
+  t0: "今天 (t = 0)\n折价买入" {
+    shape: rectangle
+    style.stroke: "#2563eb"
+    style.bold: true
+    price: "买入支出: 9,900 美元\n(低于到期面值)"
+  }
+
+  holding: "持有期 (~91 天)\n零定期票息 (Zero Coupon)\n名义现金流静止" {
+    shape: oval
+    style.stroke-dash: 4
+    style.stroke: "#64748b"
+  }
+
+  t_end: "到期日 (t = 3 个月)\n财政部还本" {
+    shape: rectangle
+    style.stroke: "#16a34a"
+    style.bold: true
+    par: "收回面值: 10,000 美元\n(全额偿付承诺)"
+  }
+
+  t0 -> holding: "持有推移"
+  holding -> t_end: "到期兑付"
+}
+
+summary: "到期损益与收益率核算" {
+  grid-columns: 2
+  box_cash: "名义现金流结算" {
+    style.stroke: "#64748b"
+    diff: "到期兑付现金: +10,000 美元\n期初买入支出: -9,900 美元\n净利得额: +100 美元"
+  }
+  box_yield: "换算收益率口径" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+    rates: "单期持有期回报: 100 / 9900 ≈ 1.01%\n简单单利年化收益: 1.01% × 4 ≈ 4.04%"
+  }
+}
+
+timeline -> summary: "持有到期结算"
