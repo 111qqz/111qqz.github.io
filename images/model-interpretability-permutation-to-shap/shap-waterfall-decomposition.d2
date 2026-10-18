@@ -1,0 +1,38 @@
+grid-columns: 2
+
+stage1: "阶段一：特征边际贡献分配" {
+  style.stroke: "#2563eb"
+
+  base_val: "参考基准期望 (Baseline)\n+0.10% (无特征先验期望)" {
+    style.stroke: "#64748b"
+  }
+  f_mom: "特征 1: 动量 (Momentum)\nSHAP: +0.30% (正向推高)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  f_vol: "特征 2: 波动率 (Volatility)\nSHAP: -0.10% (负向压低)" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+
+  base_val -> f_mom: "边际提升"
+  f_mom -> f_vol: "边际抑制"
+}
+
+stage2: "阶段二：加性汇总与最终输出" {
+  style.stroke: "#16a34a"
+
+  f_others: "其余所有特征综合\nNet SHAP: +0.20% (微幅推高)" {
+    style.stroke: "#2563eb"
+  }
+  sum_box: "加性公式汇聚\n0.10% + 0.30% - 0.10% + 0.20%"
+  final_pred: "单次样本最终预测 ŷ\nf(x) = +0.50% (精确加性展开)" {
+    style.stroke: "#0f172a"
+    style.stroke-width: 3
+    style.bold: true
+  }
+
+  f_others -> sum_box -> final_pred
+}
+
+stage1.f_vol -> stage2.sum_box: "传递累计贡献"

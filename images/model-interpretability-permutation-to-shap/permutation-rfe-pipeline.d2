@@ -1,0 +1,28 @@
+grid-columns: 2
+
+eval_stage: "阶段一：逐日 Permutation 重要度评估" {
+  style.stroke: "#2563eb"
+
+  train_baseline: "训练当前轮基准模型\n(固定当前特征子集与权重)"
+  daily_perm: "按交易日独立打乱特征列\n保留每日市场环境与横截面口径"
+  daily_metric: "逐日重新执行推理评估\n计算每日 IC / RankIC"
+  mean_importance: "汇总平均指标降幅\nImportance = Mean(IC_orig) - Mean(IC_perm)"
+
+  train_baseline -> daily_perm -> daily_metric -> mean_importance
+}
+
+rfe_stage: "阶段二：迭代淘汰与重新训练闭环" {
+  style.stroke: "#16a34a"
+
+  rank_node: "全量特征重要度降序排列"
+  drop_node: "淘汰排名末尾 5% 的低贡献特征\n(例如 1000 → 950 → ...)"
+  retrain_node: "重置结构并使用剩余 95% 特征重新训练\n适应特征子集变动与参数重构"
+  loop_check: "重复迭代约 25 轮\n最终精简至约 277 个核心特征"
+
+  rank_node -> drop_node -> retrain_node -> loop_check
+}
+
+eval_stage.mean_importance -> rfe_stage.rank_node: "输出特征重要度"
+rfe_stage.retrain_node -> eval_stage.train_baseline: "新特征集合重新输入" {
+  style.stroke-dash: 4
+}
