@@ -1,0 +1,45 @@
+direction: down
+
+taylor_box: "期权价格的多变量泰勒展开 (多元函数的偏导数视角)\nΔP ≈ Delta · ΔS + 1/2 · Gamma · (ΔS)² + Theta · Δt + Vega · Δσ" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+greeks_grid: "" {
+  grid-columns: 3
+
+  delta_col: "价格变动 (ΔS)" {
+    style.stroke: "#2563eb"
+
+    d_node: "Delta (-0.7554)\n股价跌 1 港元，期权理论涨 0.7554 港元\n(单张合约增值 +151.08 港元)"
+    g_node: "Gamma (+0.0908)\nDelta 自身的加速度 (二阶导)\n下跌时使 Delta 朝 -1.0 加速扩大"
+
+    d_node -> g_node: "价格大幅波动时修正"
+  }
+
+  theta_col: "时间流逝 (Δt)" {
+    style.stroke: "#dc2626"
+
+    t_node: "Theta (-0.0425)\n每流逝一个自然日\n期权理论损失 0.0425 港元/股\n(单张合约每日损耗 -8.50 港元)"
+    decay_node: "非线性加速损耗\n越临近到期日\n平值期权的时间价值蒸发越快"
+
+    t_node -> decay_node: "到期前最后两周急剧加速"
+  }
+
+  vega_col: "波动率变动 (Δσ)" {
+    style.stroke: "#16a34a"
+
+    v_node: "Vega (+0.0776)\n隐含波动率变动 1 个百分点\n期权价格理论变动 0.0776 港元\n(单张合约变动 15.52 港元)"
+    crush_node: "IV Crush (波动率暴跌)\n重大事件落地后 IV 骤降\nVega 亏损可能直接吃掉 Delta 收益"
+
+    v_node -> crush_node: "买方的隐形陷阱"
+  }
+}
+
+pnl_result: "综合损益落地：期权总盈亏 = Delta收益 + Gamma加速 - Theta磨损 ± Vega波动冲击" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+}
+
+taylor_box -> greeks_grid: "分解到各个希腊字母"
+greeks_grid -> pnl_result: "共同合成每日账户净值变动"

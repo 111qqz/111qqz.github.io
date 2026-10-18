@@ -1,0 +1,60 @@
+direction: down
+
+payoff_formula: "Long Put 到期净损益结构 (以泡泡玛特 145 Put 为例)\n每张净损益 = [max(145.00 - S_T, 0) - 4.50] × 200 港元" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+zones: "" {
+  grid-columns: 4
+
+  zone1: "① 盈利区间\n(S_T < 140.50 港元)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    style.stroke-width: 2
+
+    z1_desc: "跌幅穿透权利金成本\n净收益 > 0 且向下敞口扩大\n例: 跌至 130 港元\n净赚 +2,100 港元 (+233%)"
+  }
+
+  zone2: "② 盈亏平衡点\n(Breakeven = 140.50)" {
+    style.stroke: "#2563eb"
+    style.bold: true
+
+    z2_desc: "Breakeven = K - 权利金\n= 145.00 - 4.50\n内在价值恰好等于成本\n净损益 = 0 港元"
+  }
+
+  zone3: "③ 减亏但仍亏损区\n(140.50 < S_T < 145.00)" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+    style.stroke-width: 2
+
+    z3_desc: "方向看对但跌幅不足！\n现价 142.20 跌至 141.00\n内在价值仅 4.00 港元\n每张仍亏损 -100 港元"
+  }
+
+  zone4: "④ 最大损失平坦区\n(S_T ≥ 145.00 港元)" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    style.stroke-width: 2
+
+    z4_desc: "期权虚值到期归零\n内在价值 = 0 港元\n最大损失锁定为全部权利金\n每张净亏损 -900 港元 (-100%)"
+  }
+}
+
+landmarks: "关键价格刻度与风险边界" {
+  grid-columns: 3
+
+  lm_max_loss: "最大下行损失: -900 港元\n(S_T ≥ 145.00 无论涨多高都不追加)" {
+    style.stroke: "#dc2626"
+  }
+
+  lm_current: "当前建仓价格: S_0 = 142.20 港元\n距离到期平衡点还需下跌 1.20%" {
+    style.stroke: "#64748b"
+  }
+
+  lm_profit_open: "下行盈利空间: 理论上限 +28,100 港元\n(当股价跌至极限 0 港元时)" {
+    style.stroke: "#16a34a"
+  }
+}
+
+payoff_formula -> zones: "不同到期股价 (S_T) 的结算结果"
+zones -> landmarks: "边界与风险锁定特性"

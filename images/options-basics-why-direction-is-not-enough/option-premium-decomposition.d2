@@ -1,0 +1,37 @@
+direction: down
+
+formula_node: "期权权利金构成 (Premium Decomposition)\n期权价格 (4.50 港元) = 内在价值 (2.80 港元) + 时间价值 (1.70 港元)" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+cards: "" {
+  grid-columns: 3
+
+  itm_node: "实值期权 (ITM)\n行权价 145 Put (当前案例)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+
+    itm_status: "S (142.20) < K (145.00)\n若立刻行权已有正向差价"
+    itm_comp: "内在价值: 2.80 港元 (实值安全垫)\n时间价值: 1.70 港元 (博弈剩余天数)"
+    itm_status -> itm_comp
+  }
+
+  atm_node: "平值期权 (ATM)\n行权价 142.5 Put" {
+    style.stroke: "#2563eb"
+
+    atm_status: "S (142.20) ≈ K (142.50)\n行权价与标的正股现价重合"
+    atm_comp: "内在价值: 0.30 港元 (微弱实值)\n时间价值: 处于极值峰值区域"
+    atm_status -> atm_comp
+  }
+
+  otm_node: "虚值期权 (OTM)\n行权价 135 Put" {
+    style.stroke: "#dc2626"
+
+    otm_status: "S (142.20) > K (135.00)\n若立刻行权差价为负 (max=0)"
+    otm_comp: "内在价值: 0.00 港元\n时间价值: 100% 纯时间与波动期望"
+    otm_status -> otm_comp
+  }
+}
+
+formula_node -> cards: "不同行权价下的价值解构"
