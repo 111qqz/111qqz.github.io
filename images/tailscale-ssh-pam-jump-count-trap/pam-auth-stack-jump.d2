@@ -1,0 +1,64 @@
+grid-columns: 2
+
+correct: "正确配置（默认 Arch）" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+
+  s0: "[0] pam_systemd_home.so\n[success=2 default=ignore]" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  s1: "[1] pam_unix.so\ntry_first_pass nullok\n[success=1 default=bad]" {
+    style.stroke-dash: 4
+  }
+  s2: "[2] pam_faillock.so authfail\n[default=die]" {
+    style.stroke: "#dc2626"
+    style.stroke-dash: 4
+  }
+  s3: "[3] pam_permit.so\noptional" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  s0 -> s1: "失败时继续"
+  s0 -> s3: "成功 → 跳 2 步\n安全着陆 ✓" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+  }
+  s1 -> s2
+  s2 -> s3
+}
+
+broken: "故障配置（插入 fprintd 后）" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+
+  b0: "[0] pam_systemd_home.so\n[success=2 default=ignore]" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  b1: "[1] pam_fprintd.so\nsufficient （新插入）" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+  b2: "[2] pam_unix.so\ntry_first_pass nullok\n[success=1 default=bad]" {
+    style.stroke-dash: 4
+  }
+  b3: "[3] pam_faillock.so authfail\n[default=die] ← 命中！" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    style.stroke-width: 3
+  }
+  b4: "[4] pam_permit.so\noptional" {
+    style.stroke-dash: 4
+  }
+
+  b0 -> b1: "失败时继续"
+  b0 -> b3: "成功 → 跳 2 步\n命中 die ✗" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 3
+  }
+  b1 -> b2
+  b2 -> b3
+  b3 -> b4
+}
