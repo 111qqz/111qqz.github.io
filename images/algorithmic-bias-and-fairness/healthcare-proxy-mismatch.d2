@@ -1,0 +1,39 @@
+direction: down
+
+stage1: "阶段一：预测目标的代理化选择" {
+  grid-columns: 2
+  true_goal: "真实业务目标（难以直接量化）\n患者实际健康需求与疾病负担" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  proxy_target: "训练代理标签（系统现成数值）\n患者未来一年账面医疗支出" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+}
+
+stage2: "阶段二：现实维度的系统性中介扭曲" {
+  grid-columns: 2
+  group_high: "高医疗可及性群体：\n医保覆盖全、自付压力低\n相近健康需求产生更高账面支出" {
+    style.stroke: "#2563eb"
+  }
+  group_low: "低医疗可及性群体：\n自付负担重、就医门槛高\n极度重病才就医，账面支出被系统压低" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+}
+
+stage3: "阶段三：模型预测与实际照护影响（Obermeyer et al., 2019）" {
+  grid-columns: 2
+  model_metric: "算法工程评估视角：\n医疗支出预测高度准确\nLoss 收敛，离线测试表现优异" {
+    style.stroke: "#16a34a"
+  }
+  real_consequence: "实际健康照护后果：\n相同支出评分下黑人患者病情更重\n入选额外照护比例从 17.7% 应升至 46.5%" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+}
+
+stage1.true_goal -> stage1.proxy_target: "用账面支出替代健康需求"
+stage1.proxy_target -> stage2: "代理目标进入存在现实差异的社会环境"
+stage2 -> stage3: "模型完美拟合了支出标签并指导照护分配"

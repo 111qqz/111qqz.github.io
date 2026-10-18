@@ -1,0 +1,47 @@
+grid-columns: 2
+
+col_left: "路径 A：基于历史数据的算法优化路径" {
+  style.stroke: "#2563eb"
+
+  feat_box: "输入特征与代理特征\n直接敏感特征（School）+ 关联实习/项目\n即便剔除 School，代理特征依然编码背景" {
+    style.stroke: "#f59e0b"
+  }
+
+  model_box: "历史拟合模型（98% 准确率）\n严格优化历史录用标签（Label = 1 / 0）\n成功学习并泛化了过往人工筛选倾向" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  pred_box: "算法筛选输出\n高置信度推荐特定高校与背景候选人\n系统性压低非目标院校候选人评分" {
+    style.stroke: "#dc2626"
+  }
+
+  feat_box -> model_box: "输入特征空间"
+  model_box -> pred_box: "推理打分与决策"
+}
+
+col_right: "路径 B：真实业务目标与现实观测边界" {
+  style.stroke: "#16a34a"
+
+  competency_box: "真实核心目标：实际工作胜任力\n候选人入职后解决工程问题的真实能力\n在简历筛选当下无法直接观测" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  counterfactual_box: "反事实观测缺失（Selection Bias）\n历史未被录用候选人哪怕具备极高能力\n其真实工作绩效也永远无法被系统记录" {
+    style.stroke: "#f59e0b"
+  }
+
+  reality_gap: "业务本质矛盾\n历史录用结果 ≠ 真实工作能力\n模型完美复现历史偏好，不代表公正评估实力" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+
+  competency_box -> counterfactual_box: "只有被录用者产生绩效"
+  counterfactual_box -> reality_gap: "造成永久性的认知盲区"
+}
+
+col_left.pred_box -> col_right.reality_gap: "预测历史偏好与衡量真实能力脱节" {
+  style.stroke: "#dc2626"
+  style.stroke-dash: 3
+}

@@ -1,0 +1,57 @@
+direction: down
+
+spaces: "" {
+  grid-columns: 2
+
+  real_world: "真实世界的目标服务总体（Target Population）" {
+    style.stroke: "#2563eb"
+    style.bold: true
+
+    pop_core: "主流人群与常见样本\n占人口主体，特征完备" {
+      style.stroke: "#2563eb"
+    }
+    pop_edge: "少数群体与边缘多样性\n包含不同肤色、地区、罕见病理表现" {
+      style.stroke: "#16a34a"
+    }
+    pop_core -> pop_edge: "共存于真实世界连续分布中" {
+      style.stroke-dash: 3
+    }
+  }
+
+  sampled_data: "实际采样的训练数据集（Training Set）" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+
+    sample_rich: "过度采样的优势群体（85%+）\n数据量极大（如百万级图片）" {
+      style.stroke: "#16a34a"
+    }
+    sample_sparse: "代表性不足的少数群体（<5%）\n存在严重的特征与样本覆盖空洞" {
+      style.stroke: "#dc2626"
+      style.bold: true
+    }
+    sample_rich -> sample_sparse: "采样密度严重失衡" {
+      style.stroke-dash: 3
+    }
+  }
+}
+
+real_world -> sampled_data: "受限于采集渠道、设备普及与历史门槛的非均匀采样" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+}
+
+evaluation: "IID 随机划分与评估结果" {
+  style.stroke: "#dc2626"
+  eval_train: "训练集（80%）\n继承采样偏差分布"
+  eval_test: "测试集（20%）\n同样继承采样偏差分布"
+  conclusion: "高测试集准确率仅证明在有偏采样池内的拟合\n无法填补现实世界边缘群体的性能空洞" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+  eval_train -> eval_test: "IID 随机划分" {
+    style.stroke-dash: 3
+  }
+  eval_test -> conclusion: "给出虚假的安全感"
+}
+
+sampled_data -> evaluation: "基于该采样池进行常规机器学习工程流程"
