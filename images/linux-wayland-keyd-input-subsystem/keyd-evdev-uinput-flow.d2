@@ -1,0 +1,55 @@
+grid-columns: 2
+
+capture: "阶段一：抓取与重映射" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+
+  kbd: "物理键盘 (USB HID)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  evdev: "/dev/input/eventX\n(evdev 字符设备)" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  grab: "keyd: EVIOCGRAB\n独占抓取物理设备\n(阻断原始事件上传)" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 3
+    style.bold: true
+  }
+  remap: "keyd 状态机\nrightalt -> KEY_1\nshift+rightalt -> !" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  kbd -> evdev: "中断 -> HID 驱动"
+  evdev -> grab: "原始 KEY_RIGHTALT"
+  grab -> remap: "内部转换"
+}
+
+inject: "阶段二：注入与透明分发" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  uinput: "/dev/uinput\n注册 keyd virtual keyboard" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 3
+    style.bold: true
+  }
+  kernel: "内核 input 子系统\n重新生成输入事件" {
+    style.stroke: "#2563eb"
+  }
+  libinput2: "libinput" {
+    style.stroke: "#16a34a"
+  }
+  compositor2: "Wayland Compositor\n/ TTY 虚拟控制台" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  uinput -> kernel: "注入 KEY_1"
+  kernel -> libinput2
+  libinput2 -> compositor2: "对上层完全透明"
+}
+
+capture.remap -> inject.uinput: "写入虚拟设备"

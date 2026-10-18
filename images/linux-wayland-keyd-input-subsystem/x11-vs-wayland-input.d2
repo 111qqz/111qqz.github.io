@@ -1,0 +1,77 @@
+grid-columns: 2
+
+x11_flow: "X11 传统输入流" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  kbd: "物理键盘\n(USB HID)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  xserver: "X Server\n(全局输入管理)" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  xmodmap_zone: "xmodmap 改键\n(修改 X Server 键表)" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 3
+    style.bold: true
+  }
+  xclient: "X Client\n(xev / 终端 / 应用)" {
+    style.stroke: "#2563eb"
+  }
+
+  kbd -> xserver: "硬件事件"
+  xserver -> xmodmap_zone: "键表查询"
+  xmodmap_zone -> xserver: "映射后的 keysym"
+  xserver -> xclient: "分发给聚焦窗口\n(改键已生效)"
+}
+
+wayland_flow: "Wayland + XWayland 输入流" {
+  style.stroke: "#dc2626"
+  style.bold: true
+
+  kbd2: "物理键盘\n(USB HID)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  libinput: "libinput" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+  compositor: "Wayland Compositor\n(全局输入垄断)" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 3
+    style.bold: true
+  }
+  native_app: "Wayland 原生应用" {
+    style.stroke: "#2563eb"
+  }
+  xwayland_box: "XWayland 沙箱" {
+    style.stroke: "#f59e0b"
+    style.stroke-dash: 4
+
+    xwayland_srv: "XWayland 进程\n(虚拟 X Server)" {
+      style.stroke: "#f59e0b"
+    }
+    xmodmap2: "xmodmap 改键\n(仅改沙箱内键表)" {
+      style.stroke: "#dc2626"
+      style.stroke-dash: 4
+    }
+    xev_app: "xev\n(能收到事件)" {
+      style.stroke: "#f59e0b"
+    }
+
+    xwayland_srv -> xmodmap2: "沙箱内键表" {style.stroke-dash: 4}
+    xmodmap2 -> xwayland_srv: "Compositor 不读" {
+      style.stroke: "#dc2626"
+      style.stroke-dash: 4
+    }
+    xwayland_srv -> xev_app: "转发事件\n(原始 keycode)"
+  }
+
+  kbd2 -> libinput: "硬件事件"
+  libinput -> compositor: "输入事件"
+  compositor -> native_app: "wl_keyboard 协议"
+  compositor -> xwayland_box.xwayland_srv: "转发给聚焦的\nXWayland 窗口"
+}
