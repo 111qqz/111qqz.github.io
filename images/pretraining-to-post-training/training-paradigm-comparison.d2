@@ -1,0 +1,59 @@
+direction: down
+
+cv: "传统 CV 训练流程" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  direction: right
+
+  pretrain: "ImageNet\nPre-training" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 3
+  }
+  backbone: "Pre-trained\nBackbone" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  finetune: "Task\nFine-tuning" {
+    style.stroke: "#f59e0b"
+  }
+  task_model: "目标任务\n模型" {
+    style.stroke: "#16a34a"
+  }
+
+  pretrain -> backbone
+  backbone -> finetune
+  finetune -> task_model
+}
+
+llm: "LLM 训练流程" {
+  style.stroke: "#dc2626"
+  style.bold: true
+
+  direction: right
+
+  pretrain: "NTP\nPre-training" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 3
+  }
+  base: "Base\nModel" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  sft_step: "SFT" {
+    style.stroke: "#f59e0b"
+  }
+  rl_step: "偏好优化\n/ RL" {
+    style.stroke: "#f59e0b"
+  }
+  assistant: "Assistant\nModel" {
+    style.stroke: "#16a34a"
+  }
+
+  pretrain -> base
+  base -> sft_step
+  sft_step -> rl_step
+  rl_step -> assistant
+}
+
+cv -> llm: "" {style.stroke-dash: 4}
