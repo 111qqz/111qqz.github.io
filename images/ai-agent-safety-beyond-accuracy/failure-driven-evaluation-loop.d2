@@ -1,0 +1,61 @@
+direction: down
+
+discover: "发现与定位" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+  style.bold: true
+
+  direction: right
+
+  prod_failure: "生产环境\n发现输出错误" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 3
+    style.bold: true
+  }
+
+  trace_analysis: "Trace 分析\n回溯执行过程\n定位错误 Span" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+
+  root_cause: "根因定位\n确定失败模式\n如: 单位转换错误" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+
+  prod_failure -> trace_analysis
+  trace_analysis -> root_cause
+}
+
+verify: "积累与验证" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+  style.bold: true
+
+  direction: right
+
+  regression_dataset: "扩充回归测试集\n保存失败样本\n补充同类边界条件" {
+    style.stroke: "#7c3aed"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  release_eval: "Release Gate\n新版本发布前\n回归测试必须通过" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+
+  prod_monitor: "生产监控\n上线后持续采集\n新的失败案例" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+  }
+
+  regression_dataset -> release_eval
+  release_eval -> prod_monitor: "部署上线"
+}
+
+discover -> verify: "失败案例进入测试集"
+verify.prod_monitor -> discover.prod_failure: "发现新问题\n闭环持续运转" {
+  style.stroke: "#dc2626"
+  style.stroke-dash: 4
+}

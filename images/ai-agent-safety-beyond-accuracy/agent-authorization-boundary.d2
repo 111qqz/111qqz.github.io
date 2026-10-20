@@ -1,0 +1,62 @@
+direction: down
+
+agent: "LLM Agent\n生成操作提议（如 SQL 语句）" {
+  style.stroke: "#7c3aed"
+  style.stroke-width: 3
+  style.bold: true
+}
+
+auth_layer: "独立授权层（与 LLM 完全解耦）" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 3
+  style.bold: true
+
+  direction: right
+
+  param_check: "参数校验\nWHERE 条件\n影响行数上限" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+
+  permission: "权限验证\n工具白名单\n最小权限" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+
+  human_review: "高风险审批\nHuman Approval\n审计记录" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+
+  param_check -> permission
+  permission -> human_review: "高风险"
+}
+
+result: "执行结果" {
+  style.stroke: "#9ca3af"
+  style.stroke-width: 2
+
+  grid-columns: 2
+
+  prod_tool: "授权通过\n执行生产操作\n数据库 / API" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  reject: "授权拒绝\n记录违规尝试\n通知相关人员" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+    style.bold: true
+  }
+}
+
+agent -> auth_layer: "提交操作请求"
+auth_layer -> result.prod_tool: "通过" {
+  style.stroke: "#16a34a"
+  style.bold: true
+}
+auth_layer -> result.reject: "拒绝" {
+  style.stroke: "#dc2626"
+  style.stroke-dash: 4
+}
