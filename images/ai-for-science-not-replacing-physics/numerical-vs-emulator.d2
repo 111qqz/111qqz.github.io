@@ -1,0 +1,30 @@
+grid-columns: 2
+
+traditional: "传统数值模拟" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  direction: down
+  state0: "当前大气状态"
+  solve: "求解物理方程"
+  state1: "下一时刻状态"
+  cost: "每步都重新求解\n重复成百上千次"
+
+  state0 -> solve
+  solve -> state1
+  state1 -> cost
+  cost -> solve: "循环" {style.stroke-dash: 4}
+}
+
+neural: "Neural Emulator" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  direction: down
+  data: "大量历史/模拟数据"
+  train: "训练网络 (一次性)"
+  infer: "当前状态 → 推理\n→ 下一时刻状态"
+  fast: "单步推理成本远低于\n求解物理方程"
+
+  data -> train
+  train -> infer
+  infer -> fast
+}
