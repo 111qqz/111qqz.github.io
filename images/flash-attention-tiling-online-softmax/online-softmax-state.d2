@@ -1,0 +1,35 @@
+grid-columns: 2
+
+phase1: "Block 1: [0, 0]" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  compute: "m = max(0, 0) = 0\nl = e^0 + e^0 = 2"
+  state: "(m, l) = (0, 2)" {
+    style.stroke-width: 3
+  }
+  compute -> state
+}
+
+phase2: "Block 2: [ln2, ln2]" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+
+  new_max: "新 max = max(0, ln2) = ln2"
+  rescale: "旧 l 缩放: e^(0-ln2) × 2 = 1" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 3
+    style.bold: true
+  }
+  add_new: "加新贡献: 1 + (e^0 + e^0) = 3"
+  final_state: "(m, l) = (ln2, 3)" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+    style.bold: true
+  }
+  new_max -> rescale
+  rescale -> add_new
+  add_new -> final_state
+}
+
+phase1 -> phase2: "传递 (m, l)\n缩放系数 e^(m_old - m_new)"

@@ -1,0 +1,51 @@
+grid-columns: 3
+
+a: "1×16 逐行" {
+  direction: down
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  block: "当前 Block\n1 Query × 全部 Key" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 3
+  }
+  action: "Softmax → V 加权"
+  result: "输出 output_i\n丢弃 Score 行"
+
+  block -> action
+  action -> result
+}
+
+b: "4×16 多行" {
+  direction: down
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  block: "当前 Block\n4 Query × 全部 Key\nK/V 跨 Query 复用" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+  }
+  action: "Softmax → V 加权 (GEMM)"
+  result: "输出 4 行\n丢弃 Score 块"
+
+  block -> action
+  action -> result
+}
+
+c: "4×4 双向分块" {
+  direction: down
+  style.stroke: "#f59e0b"
+  style.bold: true
+
+  block: "当前 Block\n4 Query × 4 Key" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 3
+  }
+  action: "Online Softmax\n更新 m, l, acc"
+  iterate: "遍历所有 K Block"
+  result: "Output = acc / l"
+
+  block -> action
+  action -> iterate
+  iterate -> result
+}

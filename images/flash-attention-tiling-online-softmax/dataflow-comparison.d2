@@ -1,0 +1,47 @@
+grid-columns: 2
+
+traditional: "传统 Attention" {
+  direction: down
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  step1: "Q × K^T → Score (S×S)" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 3
+  }
+  step2: "Softmax → P (S×S)" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 3
+  }
+  step3: "P × V → Output O"
+
+  step1 -> step2: "写入 HBM\n再读回" {
+    style.stroke: "#dc2626"
+  }
+  step2 -> step3: "写入 HBM\n再读回" {
+    style.stroke: "#dc2626"
+  }
+}
+
+flash: "FlashAttention" {
+  direction: down
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  step1: "Q_block × K_block^T\n→ Score 小块（片上）" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+  }
+  step2: "在线更新 m, l, acc\n丢弃 Score（片上）" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+  }
+  step3: "遍历完成\nOutput = acc / l"
+
+  step1 -> step2: "片上计算" {
+    style.stroke: "#16a34a"
+  }
+  step2 -> step3: "下一个\nK Block" {
+    style.stroke: "#16a34a"
+  }
+}
