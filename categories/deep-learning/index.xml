@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Deep-Learning on 111qqz的小窝</title><link>https://111qqz.com/categories/deep-learning/</link><description>Recent content in Deep-Learning on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><managingEditor>hust.111qqz@gmail.com (111qqz)</managingEditor><webMaster>hust.111qqz@gmail.com (111qqz)</webMaster><copyright>© 2011-2026 111qqz</copyright><lastBuildDate>Wed, 21 Oct 2026 20:00:00 +0800</lastBuildDate><atom:link href="https://111qqz.com/categories/deep-learning/index.xml" rel="self" type="application/rss+xml"/><item><title>caffe 源码阅读笔记</title><link>https://111qqz.com/2020/06/caffe-notes/</link><pubDate>Tue, 30 Jun 2020 19:47:02 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2020/06/caffe-notes/</guid><description>&lt;p&gt;caffe做部署是YYDS!&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Deep-Learning on 111qqz的小窝</title><link>https://111qqz.com/categories/deep-learning/</link><description>Recent content in Deep-Learning on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><managingEditor>hust.111qqz@gmail.com (111qqz)</managingEditor><webMaster>hust.111qqz@gmail.com (111qqz)</webMaster><copyright>© 2011-2026 111qqz</copyright><lastBuildDate>Wed, 21 Oct 2026 20:40:00 +0800</lastBuildDate><atom:link href="https://111qqz.com/categories/deep-learning/index.xml" rel="self" type="application/rss+xml"/><item><title>caffe 源码阅读笔记</title><link>https://111qqz.com/2020/06/caffe-notes/</link><pubDate>Tue, 30 Jun 2020 19:47:02 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2020/06/caffe-notes/</guid><description>&lt;p&gt;caffe做部署是YYDS!&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;a href="https://111qqz.github.io/2020/01/caffe-source-code-analysis-part1/" target="_blank" rel="noreferrer"&gt;blob&lt;/a&gt;&lt;/p&gt;
@@ -33,7 +33,16 @@
 &lt;li&gt;
 &lt;p&gt;&lt;a href="https://111qqz.github.io/2020/05/caffe-source-code-analysis-part11/" target="_blank" rel="noreferrer"&gt;argmax&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
-&lt;/ol&gt;</description></item><item><title>7B 模型只有 14 GB 权重，一张 80 GB GPU 为什么仍可能 OOM？</title><link>https://111qqz.com/2026/10/7b-training-memory-ledger/</link><pubDate>Wed, 21 Oct 2026 20:00:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/10/7b-training-memory-ledger/</guid><description>&lt;h2 class="relative group"&gt;起因
+&lt;/ol&gt;</description></item><item><title>GPU 显存不够怎么办？Checkpointing 与 Offloading 的工程权衡</title><link>https://111qqz.com/2026/10/checkpointing-offloading-tradeoff/</link><pubDate>Wed, 21 Oct 2026 20:40:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/10/checkpointing-offloading-tradeoff/</guid><description>&lt;h2 class="relative group"&gt;起因
+ &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#%e8%b5%b7%e5%9b%a0" aria-label="锚点"&gt;#&lt;/a&gt;
+ &lt;/span&gt;
+ 
+&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://111qqz.com/2026/10/7b-training-memory-ledger/" &gt;上一篇&lt;/a&gt;算完了 7B 模型的训练显存账本。结论很直接：BF16 mixed precision + AdamW 的 Model States 就有 112 GB，加上 30 GB 的 Activations，单卡至少需要 145 GB——一张 80 GB 的 A100 连 Model States 都放不下。&lt;/p&gt;</description></item><item><title>7B 模型只有 14 GB 权重，一张 80 GB GPU 为什么仍可能 OOM？</title><link>https://111qqz.com/2026/10/7b-training-memory-ledger/</link><pubDate>Wed, 21 Oct 2026 20:00:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/10/7b-training-memory-ledger/</guid><description>&lt;h2 class="relative group"&gt;起因
  &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
  
  &lt;span
@@ -314,17 +323,4 @@
 
 最近复习 RNN、LSTM 和 GRU，我把它们的状态更新公式放在一起看。有一处值得单独想想：candidate 和 input gate 最后只是相乘，为什么要分成两组参数来学？从这个问题往回看，才能看清几个 gate 各自控制了什么。&lt;/p&gt;</description></item><item><title>把 RNN 沿时间展开之后：理解 BPTT 与梯度传播</title><link>https://111qqz.com/2026/09/rnn-bptt/</link><pubDate>Sat, 12 Sep 2026 14:00:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/09/rnn-bptt/</guid><description>&lt;p&gt;复习 RNN 的 backward 时，我关注的是参数共享：同一份 weight 在多个 timestep 被使用，各处产生的梯度最后怎么汇到它上面？把时间展开成计算图之后，这件事就可以用普通的 chain rule 来算。&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://111qqz.com/2026/09/nn-training-loop-mental-model/" &gt;training loop 那篇&lt;/a&gt;重新理过 forward / backward / optimizer 的职责划分，&lt;a href="https://111qqz.com/2026/09/rnn-state-transition/" &gt;RNN state transition 那篇&lt;/a&gt;理过 hidden state、output、prediction 的区别和 weight sharing，&lt;a href="https://111qqz.com/2026/09/next-token-prediction/" &gt;next-token prediction 那篇&lt;/a&gt;解释了为什么每个 timestep 都能产生一个 loss。这篇把这几块拼起来，回答一个问题：&lt;/p&gt;</description></item><item><title>从局部线性化到 RNN：理解 Jacobian 连乘</title><link>https://111qqz.com/2026/09/rnn-gradient-jacobian/</link><pubDate>Sat, 12 Sep 2026 00:20:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/09/rnn-gradient-jacobian/</guid><description>&lt;p&gt;最近在重拾一些深度学习基础，发现了一个很有意思的视角。&lt;/p&gt;
-&lt;p&gt;以前在看 RNN（Recurrent Neural Network）的长距离梯度传播公式时，总能看到一堆 Jacobian 矩阵的连乘，比如 \(\frac{\partial h_T}{\partial h_0} = J_T J_{T-1} \dots J_1\)。&lt;/p&gt;</description></item><item><title>训练数据从哪里来：回看 2018 年的一套图片与视频采集系统</title><link>https://111qqz.com/2026/09/where-training-data-comes-from/</link><pubDate>Thu, 10 Sep 2026 10:00:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/09/where-training-data-comes-from/</guid><description>&lt;h2 class="relative group"&gt;起因
- &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
- 
- &lt;span
- class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
- &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#%e8%b5%b7%e5%9b%a0" aria-label="锚点"&gt;#&lt;/a&gt;
- &lt;/span&gt;
- 
-&lt;/h2&gt;
-&lt;p&gt;写训练代码的时候，经常从这里开始：&lt;/p&gt;
-&lt;div class="highlight-wrapper"&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-python" data-lang="python"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;dataset&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;load_dataset&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;2&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;model&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;build_model&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;3&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;train&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;dataset&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;&lt;code&gt;dataset&lt;/code&gt; 像是一个天然存在的东西。打开一个 benchmark，下载一个压缩包，解压，加载，开始训练。ML 课程、论文、demo 大多也是从这一步开始。&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;以前在看 RNN（Recurrent Neural Network）的长距离梯度传播公式时，总能看到一堆 Jacobian 矩阵的连乘，比如 \(\frac{\partial h_T}{\partial h_0} = J_T J_{T-1} \dots J_1\)。&lt;/p&gt;</description></item></channel></rss>

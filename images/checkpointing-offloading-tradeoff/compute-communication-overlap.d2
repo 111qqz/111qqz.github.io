@@ -1,0 +1,55 @@
+grid-columns: 3
+
+serial: "串行执行" {
+  style.stroke: "#dc2626"
+  style.bold: true
+
+  direction: down
+  xfer: "Transfer\n100 ms" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 3
+  }
+  compute: "Compute\n200 ms" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 3
+  }
+  result: "总耗时\n300 ms" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    style.stroke-dash: 4
+  }
+  xfer -> compute: "等传输完"
+  compute -> result
+}
+
+overlap_ok: "理想重叠" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  direction: down
+  parallel: "Transfer 100 ms\n与 Compute 200 ms\n同时进行" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+  }
+  result: "总耗时\nmax(200,100)\n= 200 ms" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  parallel -> result
+}
+
+overlap_bottleneck: "传输瓶颈" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+
+  direction: down
+  parallel: "Transfer 300 ms\n与 Compute 200 ms\n同时进行" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 3
+  }
+  result: "总耗时\nmax(300,200)\n= 300 ms" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+  parallel -> result: "GPU 等传输"
+}

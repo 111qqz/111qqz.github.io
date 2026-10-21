@@ -1,0 +1,54 @@
+grid-columns: 2
+
+ckpt: "Activation Checkpointing" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  fwd: "Forward:\nActivation 产生" {
+    style.stroke: "#2563eb"
+  }
+  discard: "主动丢弃\n中间 Activation" {
+    style.stroke: "#f59e0b"
+    style.stroke-dash: 4
+  }
+  bwd: "Backward:\n从 Checkpoint 重算" {
+    style.stroke: "#2563eb"
+  }
+  cost: "代价：额外 ~33% FLOPs\n（Compute 资源）" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+
+  fwd -> discard: "不保存"
+  discard -> bwd: "需要时重新计算"
+  bwd -> cost
+}
+
+offload: "CPU Offloading" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  gpu_data: "GPU HBM:\nOptimizer States" {
+    style.stroke: "#16a34a"
+  }
+  transfer_out: "搬运到\nCPU DRAM" {
+    style.stroke: "#f59e0b"
+    style.stroke-dash: 4
+  }
+  cpu_store: "CPU DRAM:\n长期存储" {
+    style.stroke: "#16a34a"
+  }
+  transfer_back: "需要时\n搬回 GPU" {
+    style.stroke: "#f59e0b"
+    style.stroke-dash: 4
+  }
+  cost: "代价：PCIe 传输延迟\n（Bandwidth 资源）" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+
+  gpu_data -> transfer_out
+  transfer_out -> cpu_store
+  cpu_store -> transfer_back: "Optimizer Step 时"
+  transfer_back -> cost
+}
