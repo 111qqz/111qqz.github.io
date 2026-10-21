@@ -1,0 +1,78 @@
+grid-columns: 2
+
+reload: "方案 A：反复从 HBM 加载" {
+  label: ""
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+
+  direction: down
+
+  hbm_a: "HBM\n（数据存放处）" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  compute_a: "计算单元" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  hbm_a -> compute_a: "第 1 次加载" {
+    style.stroke: "#dc2626"
+  }
+  compute_a -> hbm_a: "丢弃" {
+    style.stroke: "#9ca3af"
+    style.stroke-dash: 4
+  }
+  hbm_a -> compute_a: "第 2 次加载" {
+    style.stroke: "#dc2626"
+  }
+  compute_a -> hbm_a: "丢弃" {
+    style.stroke: "#9ca3af"
+    style.stroke-dash: 4
+  }
+  hbm_a -> compute_a: "...\n第 100 次加载" {
+    style.stroke: "#dc2626"
+  }
+
+  cost_a: "HBM 搬运 100 次\n带宽成为瓶颈" {
+    style.stroke: "#dc2626"
+    style.stroke-dash: 4
+  }
+}
+
+reuse: "方案 B：片上复用" {
+  label: ""
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+
+  direction: down
+
+  hbm_b: "HBM\n（数据存放处）" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  shmem_b: "Shared Memory\n（片上缓存）" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  compute_b: "计算单元" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  hbm_b -> shmem_b: "仅加载 1 次" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  shmem_b -> compute_b: "片上复用 100 次\n带宽极高、延迟极低" {
+    style.stroke: "#16a34a"
+  }
+
+  cost_b: "HBM 搬运 1 次\n计算单元利用率高" {
+    style.stroke: "#16a34a"
+    style.stroke-dash: 4
+  }
+}

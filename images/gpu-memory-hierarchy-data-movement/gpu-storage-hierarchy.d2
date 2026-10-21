@@ -1,0 +1,45 @@
+direction: down
+
+hbm: "HBM (High Bandwidth Memory)\n堆叠式 DRAM，不在计算 Die 上\n容量 ~80 GB  |  带宽 ~2 TB/s" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 3
+  style.bold: true
+}
+
+gpu_die: "GPU 计算 Die（片上）" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+
+  grid-columns: 2
+
+  l2: "L2 Cache\n硬件自动管理\n容量 ~40 MB" {
+    style.stroke: "#16a34a"
+    grid-column-span: 2
+  }
+
+  shared_mem: "Shared Memory (SRAM)\n程序主动管理\n~228 KB / SM\n带宽 ~19 TB/s" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  regs: "Registers\n线程私有\n256 KB / SM\n速度最快" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+}
+
+hbm -> gpu_die.l2: "数据加载" {
+  style.stroke: "#2563eb"
+}
+gpu_die.l2 -> gpu_die.shared_mem: {
+  style.stroke: "#16a34a"
+}
+gpu_die.l2 -> gpu_die.regs: {
+  style.stroke: "#16a34a"
+  style.stroke-dash: 4
+}
+
+note: "以 A100 SXM 为参考的近似值\n简化逻辑关系，非严格数据路径" {
+  style.stroke: "#9ca3af"
+  style.stroke-dash: 4
+}
