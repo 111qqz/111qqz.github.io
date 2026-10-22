@@ -1,0 +1,65 @@
+grid-columns: 2
+
+phase1: "阶段一：ReduceScatter" {
+  style.stroke: "#dc2626"
+  style.bold: true
+
+  input_state: "每卡持有完整梯度" {
+    style.stroke: "#dc2626"
+    g0: "GPU 0: [a₀, a₁, a₂, a₃]"
+    g1: "GPU 1: [b₀, b₁, b₂, b₃]"
+    g2: "GPU 2: [c₀, c₁, c₂, c₃]"
+    g3: "GPU 3: [d₀, d₁, d₂, d₃]"
+  }
+
+  ring_rs: "Ring 传递 + 累加\n（N-1 轮）" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  output_state: "每卡持有一个\n归约完成的分片" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    g0: "GPU 0: Σchunk₁"
+    g1: "GPU 1: Σchunk₂"
+    g2: "GPU 2: Σchunk₃"
+    g3: "GPU 3: Σchunk₀"
+  }
+
+  input_state -> ring_rs -> output_state
+}
+
+phase2: "阶段二：AllGather" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  input_state: "每卡持有一个\n归约完成的分片" {
+    style.stroke: "#2563eb"
+    g0: "GPU 0: Σchunk₁"
+    g1: "GPU 1: Σchunk₂"
+    g2: "GPU 2: Σchunk₃"
+    g3: "GPU 3: Σchunk₀"
+  }
+
+  ring_ag: "Ring 传递 + 收集\n（N-1 轮）" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  output_state: "每卡持有完整的\n归约结果" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    style.stroke-width: 3
+    g0: "GPU 0: [Σ₀, Σ₁, Σ₂, Σ₃]"
+    g1: "GPU 1: [Σ₀, Σ₁, Σ₂, Σ₃]"
+    g2: "GPU 2: [Σ₀, Σ₁, Σ₂, Σ₃]"
+    g3: "GPU 3: [Σ₀, Σ₁, Σ₂, Σ₃]"
+  }
+
+  input_state -> ring_ag -> output_state
+}
+
+phase1 -> phase2: "分片已归约\n进入收集阶段" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+}

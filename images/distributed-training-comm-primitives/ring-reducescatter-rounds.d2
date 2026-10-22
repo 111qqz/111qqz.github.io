@@ -1,0 +1,92 @@
+direction: down
+
+title_note: "追踪 chunk 0 的旅程\n（其他 chunk 同时并行推进）" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+round1: "第一轮：GPU 0 发送 chunk 0" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+
+  grid-columns: 4
+
+  g0: "GPU 0\n发送 a₀" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+  g1: "GPU 1\n收到 a₀\n累加：a₀+b₀" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+  g2: "GPU 2" {
+    style.stroke-dash: 4
+  }
+  g3: "GPU 3" {
+    style.stroke-dash: 4
+  }
+
+  g0 -> g1: "a₀" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+}
+
+round2: "第二轮：GPU 1 转发累加结果" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+
+  grid-columns: 4
+
+  g0: "GPU 0" {
+    style.stroke-dash: 4
+  }
+  g1: "GPU 1\n发送 a₀+b₀" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+  g2: "GPU 2\n收到 a₀+b₀\n累加：a₀+b₀+c₀" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+  g3: "GPU 3" {
+    style.stroke-dash: 4
+  }
+
+  g1 -> g2: "a₀+b₀" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+}
+
+round3: "第三轮：GPU 2 转发累加结果" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  grid-columns: 4
+
+  g0: "GPU 0" {
+    style.stroke-dash: 4
+  }
+  g1: "GPU 1" {
+    style.stroke-dash: 4
+  }
+  g2: "GPU 2\n发送 a₀+b₀+c₀" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+  g3: "GPU 3\n收到并累加\na₀+b₀+c₀+d₀" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  g2 -> g3: "a₀+b₀+c₀" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+}
+
+title_note -> round1: {style.stroke-dash: 4}
+round1 -> round2: {style.stroke-dash: 4}
+round2 -> round3: {style.stroke-dash: 4}

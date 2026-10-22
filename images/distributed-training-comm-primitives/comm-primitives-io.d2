@@ -1,0 +1,67 @@
+grid-columns: 3
+
+allgather: "AllGather" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  before: "输入" {
+    style.stroke: "#2563eb"
+    gpu0_in: "GPU 0: [1, 2]"
+    gpu1_in: "GPU 1: [3, 4]"
+  }
+
+  after: "输出" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    gpu0_out: "GPU 0: [1, 2, 3, 4]"
+    gpu1_out: "GPU 1: [1, 2, 3, 4]"
+  }
+
+  before -> after: "收集\n不归约" {
+    style.stroke: "#2563eb"
+  }
+}
+
+allreduce: "AllReduce（求和）" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+
+  before: "输入" {
+    style.stroke: "#f59e0b"
+    gpu0_in: "GPU 0: [1, 2]"
+    gpu1_in: "GPU 1: [3, 4]"
+  }
+
+  after: "输出" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    gpu0_out: "GPU 0: [4, 6]"
+    gpu1_out: "GPU 1: [4, 6]"
+  }
+
+  before -> after: "归约\n每卡完整结果" {
+    style.stroke: "#f59e0b"
+  }
+}
+
+reducescatter: "ReduceScatter（求和）" {
+  style.stroke: "#dc2626"
+  style.bold: true
+
+  before: "输入" {
+    style.stroke: "#dc2626"
+    gpu0_in: "GPU 0: [1, 2]"
+    gpu1_in: "GPU 1: [3, 4]"
+  }
+
+  after: "输出" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    gpu0_out: "GPU 0: [4]"
+    gpu1_out: "GPU 1: [6]"
+  }
+
+  before -> after: "归约\n每卡一个分片" {
+    style.stroke: "#dc2626"
+  }
+}
