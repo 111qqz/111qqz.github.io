@@ -1,0 +1,83 @@
+direction: right
+
+gpu0: "GPU 0" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  model0: "完整模型副本" {
+    style.stroke: "#2563eb"
+  }
+  data0: "Batch 0" {
+    style.stroke: "#16a34a"
+  }
+  grad0: "梯度 g₀" {
+    style.stroke: "#f59e0b"
+  }
+  data0 -> model0: "forward /\nbackward"
+  model0 -> grad0
+}
+
+gpu1: "GPU 1" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  model1: "完整模型副本" {
+    style.stroke: "#2563eb"
+  }
+  data1: "Batch 1" {
+    style.stroke: "#16a34a"
+  }
+  grad1: "梯度 g₁" {
+    style.stroke: "#f59e0b"
+  }
+  data1 -> model1: "forward /\nbackward"
+  model1 -> grad1
+}
+
+gpu2: "GPU 2" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  model2: "完整模型副本" {
+    style.stroke: "#2563eb"
+  }
+  data2: "Batch 2" {
+    style.stroke: "#16a34a"
+  }
+  grad2: "梯度 g₂" {
+    style.stroke: "#f59e0b"
+  }
+  data2 -> model2: "forward /\nbackward"
+  model2 -> grad2
+}
+
+gpu3: "GPU 3" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  model3: "完整模型副本" {
+    style.stroke: "#2563eb"
+  }
+  data3: "Batch 3" {
+    style.stroke: "#16a34a"
+  }
+  grad3: "梯度 g₃" {
+    style.stroke: "#f59e0b"
+  }
+  data3 -> model3: "forward /\nbackward"
+  model3 -> grad3
+}
+
+allreduce: "All-Reduce\n平均梯度 ḡ" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  style.stroke-width: 3
+}
+
+gpu0.grad0 -> allreduce
+gpu1.grad1 -> allreduce
+gpu2.grad2 -> allreduce
+gpu3.grad3 -> allreduce
+
+update: "各卡用 ḡ 更新参数\n参数保持一致" {
+  style.stroke: "#16a34a"
+  style.bold: true
+}
+
+allreduce -> update

@@ -1,0 +1,62 @@
+grid-columns: 2
+
+plan_a: "方案 A：1 个大 Bucket" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  direction: down
+
+  bwd_a: "Backward 计算\n0–80 ms" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 3
+  }
+  wait_a: "等待全部梯度 ready\nBucket 在 80 ms ready" {
+    style.stroke: "#f59e0b"
+    style.stroke-dash: 4
+  }
+  ar_a: "All-Reduce\n80–130 ms (50 ms)" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 3
+  }
+  total_a: "总耗时 130 ms\n通信 50 ms 全部暴露\n无 overlap" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  bwd_a -> wait_a
+  wait_a -> ar_a
+  ar_a -> total_a
+}
+
+plan_b: "方案 B：4 个 Bucket" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  direction: down
+
+  b1: "Bucket 1 AR: 20–35 ms\n计算同时进行（hidden）" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+  }
+  b2: "Bucket 2 AR: 40–55 ms\n计算同时进行（hidden）" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+  }
+  b3: "Bucket 3 AR: 60–75 ms\n计算同时进行（hidden）" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+  }
+  b4: "Bucket 4 AR: 80–95 ms\n（exposed 15 ms）" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 3
+  }
+  total_b: "总耗时 95 ms\n通信 60 ms (多 10 ms)\n但隐藏了 45 ms" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  b1 -> b2
+  b2 -> b3
+  b3 -> b4
+  b4 -> total_b
+}

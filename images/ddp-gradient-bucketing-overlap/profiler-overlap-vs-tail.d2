@@ -1,0 +1,47 @@
+grid-columns: 2
+
+good_overlap: "良好 Overlap" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  direction: down
+
+  g_bwd: "Backward 0–80 ms" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 3
+  }
+  g_comm: "4 次 AR 均在\nbackward 期间完成\n（全部 hidden）" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+  }
+  g_total: "Step Time ≈ 80 ms\n通信尾部 0 ms" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  g_bwd -> g_comm: "通信与计算并行"
+  g_comm -> g_total
+}
+
+bad_overlap: "明显通信尾部" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  direction: down
+
+  b_bwd: "Backward 0–80 ms" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 3
+  }
+  b_comm: "Bucket 太大，AR 启动晚\n70–90 / 90–110 ms\n大段通信在 backward 后" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 3
+  }
+  b_total: "Step Time ≈ 110 ms\n通信尾部 30 ms" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  b_bwd -> b_comm: "通信启动过晚"
+  b_comm -> b_total
+}

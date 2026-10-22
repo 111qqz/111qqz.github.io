@@ -1,0 +1,95 @@
+direction: down
+
+title_node: "不同 Bucket Size 的 Step Time 对比\n（教学模拟，非 GPU benchmark）" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  style.stroke-width: 3
+}
+
+results: "" {
+  label: ""
+  grid-columns: 5
+
+  s5: "5 MiB\n16 Buckets" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    style.stroke-width: 3
+    direction: down
+    detail5: "每次 AR 7 ms\n通信积压严重\n最后 AR 结束 117 ms" {
+      style.stroke: "#dc2626"
+    }
+    time5: "117 ms" {
+      style.stroke: "#dc2626"
+      style.bold: true
+      style.stroke-width: 3
+    }
+    detail5 -> time5
+  }
+
+  s10: "10 MiB\n8 Buckets" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    style.stroke-width: 3
+    direction: down
+    detail10: "每次 AR 8 ms\n通信不积压\nexposed 仅 8 ms" {
+      style.stroke: "#16a34a"
+    }
+    time10: "88 ms ★" {
+      style.stroke: "#16a34a"
+      style.bold: true
+      style.stroke-width: 3
+    }
+    detail10 -> time10
+  }
+
+  s20: "20 MiB\n4 Buckets" {
+    style.stroke: "#2563eb"
+    style.bold: true
+    direction: down
+    detail20: "每次 AR 10 ms\noverlap 良好\nexposed 10 ms" {
+      style.stroke: "#2563eb"
+    }
+    time20: "90 ms" {
+      style.stroke: "#2563eb"
+      style.bold: true
+    }
+    detail20 -> time20
+  }
+
+  s40: "40 MiB\n2 Buckets" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+    direction: down
+    detail40: "每次 AR 14 ms\n仅 2 次通信\noverlap 空间有限" {
+      style.stroke: "#f59e0b"
+    }
+    time40: "94 ms" {
+      style.stroke: "#f59e0b"
+      style.bold: true
+    }
+    detail40 -> time40
+  }
+
+  s80: "80 MiB\n1 Bucket" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    direction: down
+    detail80: "单次 AR 22 ms\n无 overlap\n通信全部暴露" {
+      style.stroke: "#dc2626"
+    }
+    time80: "102 ms" {
+      style.stroke: "#dc2626"
+      style.bold: true
+    }
+    detail80 -> time80
+  }
+}
+
+title_node -> results
+
+note_node: "Backward 固定 80 ms | α=6 ms | 带宽 5 MiB/ms\n最优点在 10 MiB（非单调曲线）" {
+  style.stroke: "#2563eb"
+  style.stroke-dash: 4
+}
+
+results -> note_node

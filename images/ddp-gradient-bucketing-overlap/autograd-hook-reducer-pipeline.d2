@@ -1,0 +1,38 @@
+grid-columns: 2
+
+role_compute: "计算侧" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  direction: down
+  autograd: "Autograd Engine\n沿计算图反向传播\n逐参数计算梯度" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 3
+  }
+  hooks: "Autograd Hooks\n参数梯度 ready 时\n触发回调通知 Reducer" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 3
+  }
+  autograd -> hooks: "梯度 ready"
+}
+
+role_comm: "通信侧" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  direction: down
+  reducer: "Reducer\n跟踪 Bucket 状态\nBucket 满则按序发起" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+  }
+  nccl: "NCCL All-Reduce\n异步执行\n跨 Rank 梯度平均" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 3
+  }
+  optimizer: "Optimizer\n全部 AR 完成后\n用同步梯度更新参数" {
+    style.stroke: "#7c3aed"
+    style.stroke-width: 3
+  }
+  reducer -> nccl: "Bucket ready\n按序发起"
+  nccl -> optimizer: "同步完成"
+}
+
+role_compute.hooks -> role_comm.reducer: "通知 Reducer"
