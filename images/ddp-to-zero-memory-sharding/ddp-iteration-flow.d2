@@ -1,0 +1,39 @@
+grid-columns: 2
+
+phase_top: "计算阶段" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  fwd: "Forward\n(各 GPU 不同 batch)" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  bwd: "Backward\n(本地梯度)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  fwd -> bwd
+}
+
+phase_sync: "同步与更新" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+
+  ar: "AllReduce\n(梯度同步)" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+  opt_step: "Optimizer Step\n(每卡独立更新完整模型)" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+  ar -> opt_step
+}
+
+phase_top -> phase_sync
+
+result_node: "GPU 0~3 参数天然一致\n相同输入 → 相同输出" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  style.stroke-dash: 4
+}

@@ -1,0 +1,67 @@
+grid-columns: 2
+
+plan_a: "方案 A: Forward 后释放" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  a_fwd_ag: "AllGather 参数" {
+    style.stroke: "#16a34a"
+  }
+  a_fwd: "Forward" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  a_release: "释放完整参数" {
+    style.stroke: "#f59e0b"
+  }
+  a_bwd_ag: "再次 AllGather 参数" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+  a_bwd: "Backward" {
+    style.stroke: "#dc2626"
+  }
+  a_note: "通信多\n峰值显存小" {
+    style.stroke-dash: 4
+    style.bold: true
+  }
+
+  a_fwd_ag -> a_fwd
+  a_fwd -> a_release
+  a_release -> a_bwd_ag
+  a_bwd_ag -> a_bwd
+  a_bwd -> a_note
+}
+
+plan_b: "方案 B: 保留到 Backward" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  b_fwd_ag: "AllGather 参数" {
+    style.stroke: "#16a34a"
+  }
+  b_fwd: "Forward" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  b_hold: "保留完整参数" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  b_bwd: "Backward\n(无需再 AllGather)" {
+    style.stroke: "#dc2626"
+  }
+  b_release: "释放完整参数" {
+    style.stroke: "#f59e0b"
+  }
+  b_note: "通信少\n峰值显存大" {
+    style.stroke-dash: 4
+    style.bold: true
+  }
+
+  b_fwd_ag -> b_fwd
+  b_fwd -> b_hold
+  b_hold -> b_bwd
+  b_bwd -> b_release
+  b_release -> b_note
+}

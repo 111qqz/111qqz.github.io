@@ -1,0 +1,57 @@
+grid-columns: 2
+
+allreduce_side: "AllReduce" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+
+  ar_input: "输入" {
+    ar_g0: "GPU 0: [2, 6]" {
+      style.stroke: "#2563eb"
+    }
+    ar_g1: "GPU 1: [4, 10]" {
+      style.stroke: "#2563eb"
+    }
+  }
+  ar_output: "输出 (求平均)" {
+    ar_r0: "GPU 0: [3, 8]" {
+      style.stroke: "#16a34a"
+      style.bold: true
+    }
+    ar_r1: "GPU 1: [3, 8]" {
+      style.stroke: "#16a34a"
+      style.bold: true
+    }
+  }
+  ar_input -> ar_output: "归约"
+  ar_desc: "每卡持有完整结果" {
+    style.stroke-dash: 4
+  }
+}
+
+rs_side: "ReduceScatter" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  rs_input: "输入" {
+    rs_g0: "GPU 0: [2, 6]" {
+      style.stroke: "#2563eb"
+    }
+    rs_g1: "GPU 1: [4, 10]" {
+      style.stroke: "#2563eb"
+    }
+  }
+  rs_output: "输出 (求平均 + 分片)" {
+    rs_r0: "GPU 0: [3]" {
+      style.stroke: "#dc2626"
+      style.bold: true
+    }
+    rs_r1: "GPU 1: [8]" {
+      style.stroke: "#dc2626"
+      style.bold: true
+    }
+  }
+  rs_input -> rs_output: "归约 + 分片"
+  rs_desc: "每卡只持有一个分片" {
+    style.stroke-dash: 4
+  }
+}

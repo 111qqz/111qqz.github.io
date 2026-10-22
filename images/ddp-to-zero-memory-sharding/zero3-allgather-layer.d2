@@ -1,0 +1,56 @@
+direction: down
+
+shards: "长期存储 (参数分片)" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  grid-columns: 4
+  s0: "GPU 0\n[w₀, w₁]" {
+    style.stroke: "#dc2626"
+  }
+  s1: "GPU 1\n[w₂, w₃]" {
+    style.stroke: "#dc2626"
+  }
+  s2: "GPU 2\n[w₄, w₅]" {
+    style.stroke: "#dc2626"
+  }
+  s3: "GPU 3\n[w₆, w₇]" {
+    style.stroke: "#dc2626"
+  }
+}
+
+full_params: "AllGather 后 (临时)" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  grid-columns: 4
+  f0: "GPU 0\n[w₀..w₇]" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  f1: "GPU 1\n[w₀..w₇]" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  f2: "GPU 2\n[w₀..w₇]" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  f3: "GPU 3\n[w₀..w₇]" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+}
+
+compute: "各 GPU 用完整参数\n做自己 batch 的 Forward" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+release: "释放临时参数\n回到分片状态" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+  style.stroke-dash: 4
+}
+
+shards -> full_params: "AllGather"
+full_params -> compute
+compute -> release

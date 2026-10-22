@@ -1,0 +1,51 @@
+grid-columns: 2
+
+ddp_flow: "DDP 通信流程" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+
+  d_rs: "ReduceScatter\n(Gradients)\n每卡发送 10.5 GB" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  d_ag: "AllGather\n(Gradients)\n每卡发送 10.5 GB" {
+    style.stroke: "#16a34a"
+  }
+  d_update: "每卡更新\n完整模型" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+  d_total: "每卡总发送: 21 GB" {
+    style.stroke-dash: 4
+    style.bold: true
+  }
+
+  d_rs -> d_ag
+  d_ag -> d_update
+  d_update -> d_total
+}
+
+zero2_flow: "ZeRO-2 通信流程" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  z_rs: "ReduceScatter\n(Gradients)\n每卡发送 10.5 GB" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  z_update: "每卡更新\n参数分片" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+  z_ag: "AllGather\n(Parameters)\n每卡发送 10.5 GB" {
+    style.stroke: "#2563eb"
+  }
+  z_total: "每卡总发送: 21 GB" {
+    style.stroke-dash: 4
+    style.bold: true
+  }
+
+  z_rs -> z_update
+  z_update -> z_ag
+  z_ag -> z_total
+}

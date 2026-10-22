@@ -1,0 +1,42 @@
+direction: down
+
+stage1: "更新前" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  grid-columns: 2
+  g0_before: "GPU 0: W = [10, 20]" {
+    style.stroke: "#2563eb"
+  }
+  g1_before: "GPU 1: W = [10, 20]" {
+    style.stroke: "#2563eb"
+  }
+}
+
+stage2: "各自更新负责的参数" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+  grid-columns: 2
+  g0_after: "GPU 0 更新 W₀\nW = [9, 20]" {
+    style.stroke: "#f59e0b"
+  }
+  g1_after: "GPU 1 更新 W₁\nW = [10, 18]" {
+    style.stroke: "#f59e0b"
+  }
+}
+
+stage3: "AllGather 参数" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  grid-columns: 2
+  g0_final: "GPU 0: W' = [9, 18]" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  g1_final: "GPU 1: W' = [9, 18]" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+}
+
+stage1 -> stage2: "分片更新"
+stage2 -> stage3: "AllGather"

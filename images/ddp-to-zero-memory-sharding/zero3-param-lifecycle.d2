@@ -1,0 +1,46 @@
+grid-columns: 2
+
+fwd_phase: "Forward 阶段 (Layer i)" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  ag_f: "AllGather 参数" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  compute_f: "Forward 计算" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  release_f: "释放完整参数" {
+    style.stroke: "#f59e0b"
+  }
+
+  ag_f -> compute_f
+  compute_f -> release_f
+}
+
+bwd_phase: "Backward 阶段 (Layer i)" {
+  style.stroke: "#dc2626"
+  style.bold: true
+
+  ag_b: "再次 AllGather 参数" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  compute_b: "Backward 计算" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+  release_b: "释放完整参数" {
+    style.stroke: "#f59e0b"
+  }
+
+  ag_b -> compute_b
+  compute_b -> release_b
+}
+
+note_lc: "参数分片始终保留\n完整参数仅计算时临时聚合" {
+  style.stroke-dash: 4
+  style.bold: true
+}
