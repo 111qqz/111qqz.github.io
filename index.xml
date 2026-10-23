@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>111qqz的小窝</title><link>https://111qqz.com/</link><description>Recent content on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><managingEditor>hust.111qqz@gmail.com (111qqz)</managingEditor><webMaster>hust.111qqz@gmail.com (111qqz)</webMaster><copyright>© 2011-2026 111qqz</copyright><lastBuildDate>Fri, 23 Oct 2026 19:30:00 +0800</lastBuildDate><atom:link href="https://111qqz.com/index.xml" rel="self" type="application/rss+xml"/><item><title>caffe 源码阅读笔记</title><link>https://111qqz.com/2020/06/caffe-notes/</link><pubDate>Tue, 30 Jun 2020 19:47:02 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2020/06/caffe-notes/</guid><description>&lt;p&gt;caffe做部署是YYDS!&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>111qqz的小窝</title><link>https://111qqz.com/</link><description>Recent content on 111qqz的小窝</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><managingEditor>hust.111qqz@gmail.com (111qqz)</managingEditor><webMaster>hust.111qqz@gmail.com (111qqz)</webMaster><copyright>© 2011-2026 111qqz</copyright><lastBuildDate>Fri, 23 Oct 2026 23:00:00 +0800</lastBuildDate><atom:link href="https://111qqz.com/index.xml" rel="self" type="application/rss+xml"/><item><title>caffe 源码阅读笔记</title><link>https://111qqz.com/2020/06/caffe-notes/</link><pubDate>Tue, 30 Jun 2020 19:47:02 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2020/06/caffe-notes/</guid><description>&lt;p&gt;caffe做部署是YYDS!&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;a href="https://111qqz.github.io/2020/01/caffe-source-code-analysis-part1/" target="_blank" rel="noreferrer"&gt;blob&lt;/a&gt;&lt;/p&gt;
@@ -33,7 +33,36 @@
 &lt;li&gt;
 &lt;p&gt;&lt;a href="https://111qqz.github.io/2020/05/caffe-source-code-analysis-part11/" target="_blank" rel="noreferrer"&gt;argmax&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
-&lt;/ol&gt;</description></item><item><title>Pipeline Parallelism 的工程权衡：为什么更多 GPU 不一定更快？</title><link>https://111qqz.com/2026/10/pipeline-parallelism-engineering-tradeoffs/</link><pubDate>Fri, 23 Oct 2026 19:30:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/10/pipeline-parallelism-engineering-tradeoffs/</guid><description>&lt;h2 class="relative group"&gt;起因
+&lt;/ol&gt;</description></item><item><title>从 RVO 到 Guaranteed Copy Elision：C++ 返回值优化的演进</title><link>https://111qqz.com/2026/10/cpp-copy-elision-to-guaranteed/</link><pubDate>Fri, 23 Oct 2026 23:00:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/10/cpp-copy-elision-to-guaranteed/</guid><description>&lt;h2 class="relative group"&gt;一道我答错的题
+ &lt;div id="一道我答错的题" class="anchor"&gt;&lt;/div&gt;
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#%e4%b8%80%e9%81%93%e6%88%91%e7%ad%94%e9%94%99%e7%9a%84%e9%a2%98" aria-label="锚点"&gt;#&lt;/a&gt;
+ &lt;/span&gt;
+ 
+&lt;/h2&gt;
+&lt;p&gt;最近做了一个 Modern C++ 水平测试，碰到这样一道题：&lt;/p&gt;
+&lt;div class="highlight-wrapper"&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-cpp" data-lang="cpp"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 1&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="cp"&gt;#include&lt;/span&gt; &lt;span class="cpf"&gt;&amp;lt;utility&amp;gt;&lt;/span&gt;&lt;span class="cp"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 2&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 3&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;Widget&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 4&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;Widget&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;default&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 5&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;Widget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="n"&gt;Widget&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;delete&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 6&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;Widget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Widget&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;delete&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 7&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 8&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt; 9&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;Widget&lt;/span&gt; &lt;span class="nf"&gt;createA&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;Widget&lt;/span&gt;&lt;span class="p"&gt;{};&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;10&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;11&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;Widget&lt;/span&gt; &lt;span class="nf"&gt;createB&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;12&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;Widget&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;13&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;14&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;15&lt;/span&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;16&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;Widget&lt;/span&gt; &lt;span class="nf"&gt;createC&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;17&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;Widget&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;18&lt;/span&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;std&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;w&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;19&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;问：在 C++17 下，哪些函数能通过编译？&lt;/p&gt;</description></item><item><title>Pipeline Parallelism 的工程权衡：为什么更多 GPU 不一定更快？</title><link>https://111qqz.com/2026/10/pipeline-parallelism-engineering-tradeoffs/</link><pubDate>Fri, 23 Oct 2026 19:30:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/10/pipeline-parallelism-engineering-tradeoffs/</guid><description>&lt;h2 class="relative group"&gt;起因
  &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
  
  &lt;span
@@ -336,14 +365,4 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;几年前我在做计算机视觉模型的部署，用的是 TensorRT 4 和 5。每次把训练好的模型转成 TensorRT engine，都绕不开一个参数：&lt;code&gt;maxBatchSize&lt;/code&gt;。&lt;/p&gt;</description></item><item><title>VAE 为什么要让 Latent Variable 变成一个概率分布</title><link>https://111qqz.com/2026/09/vae-latent-distribution/</link><pubDate>Sun, 20 Sep 2026 19:30:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/09/vae-latent-distribution/</guid><description>&lt;h2 class="relative group"&gt;起因
- &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
- 
- &lt;span
- class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
- &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#%e8%b5%b7%e5%9b%a0" aria-label="锚点"&gt;#&lt;/a&gt;
- &lt;/span&gt;
- 
-&lt;/h2&gt;
-&lt;p&gt;&lt;a href="https://111qqz.com/2026/09/latent-variable-latent-space/" &gt;上一篇文章&lt;/a&gt;理清了 latent variable 和 latent space 的概念，最后停在一个地方：&lt;/p&gt;
-&lt;blockquote&gt;&lt;p&gt;不要直接在复杂的数据空间中生成数据。先在简单的 latent space 中采样一个 \(z\)，再通过学到的映射把 \(z\) 变成 \(x\)。&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;几年前我在做计算机视觉模型的部署，用的是 TensorRT 4 和 5。每次把训练好的模型转成 TensorRT engine，都绕不开一个参数：&lt;code&gt;maxBatchSize&lt;/code&gt;。&lt;/p&gt;</description></item></channel></rss>

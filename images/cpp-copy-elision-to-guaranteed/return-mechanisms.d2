@@ -1,0 +1,22 @@
+grid-columns: 3
+
+a: "return Widget{}" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  style.stroke-width: 2
+  v: "Widget{} 是 prvalue\n\nC++17 保证\n直接初始化目标对象\n不需要 Copy/Move\n\n✓ 保证合法"
+}
+
+b: "return w" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  style.stroke-width: 2
+  v: "w 是 lvalue\n（具名局部变量）\n\n编译器可做 NRVO\n但标准不保证\n\n✗ 无 Move/Copy\n则编译失败"
+}
+
+c: "return std::move(w)" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  style.stroke-width: 2
+  v: "std::move(w) 是 xvalue\n\n阻止 NRVO\n强制要求 Move\n\n✗ 无 Move 编译失败\n有 Move 也不如\nreturn w"
+}
