@@ -1,0 +1,64 @@
+direction: down
+
+x_input: "输入 X（每张 GPU 持有完整副本）" {
+  style.bold: true
+}
+
+layer1: "第一层 Column Parallel：W₁ 按列拆为 4 份" {
+  grid-columns: 4
+
+  g0: "GPU 0\nH₀ = XW₁,₀" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  g1: "GPU 1\nH₁ = XW₁,₁" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  g2: "GPU 2\nH₂ = XW₁,₂" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+  g3: "GPU 3\nH₃ = XW₁,₃" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+}
+
+allgather: "AllGather 通信：每张 GPU 拼回完整 H = [H₀ | H₁ | H₂ | H₃]" {
+  style.stroke-dash: 4
+  style.bold: true
+  style.stroke: "#dc2626"
+  style.stroke-width: 3
+}
+
+layer2: "第二层 Column Parallel：W₂ 按列拆为 4 份（需要完整 H 作为输入）" {
+  grid-columns: 4
+
+  g0: "GPU 0\nY₀ = HW₂,₀" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  g1: "GPU 1\nY₁ = HW₂,₁" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  g2: "GPU 2\nY₂ = HW₂,₂" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+  g3: "GPU 3\nY₃ = HW₂,₃" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+}
+
+output_node: "AllGather → 完整输出 Y = [Y₀ | Y₁ | Y₂ | Y₃]" {
+  style.bold: true
+  style.stroke-width: 3
+}
+
+x_input -> layer1
+layer1 -> allgather
+allgather -> layer2
+layer2 -> output_node

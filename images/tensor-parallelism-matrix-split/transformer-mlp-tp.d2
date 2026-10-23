@@ -1,0 +1,69 @@
+grid-columns: 2
+
+mlp_flow: "MLP（FFN）" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  style.stroke-width: 3
+
+  x_in: "输入 X\n每张 GPU 持有完整副本"
+  col_p: "W_up: Column Parallel\n每卡 (d, d_ff/P)" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  gelu_op: "GELU\n各 GPU 本地独立执行" {
+    style.stroke-dash: 4
+  }
+  row_p: "W_down: Row Parallel\n每卡 (d_ff/P, d)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  allreduce_mlp: "AllReduce(SUM)\n唯一一次跨 GPU 通信" {
+    style.stroke-dash: 4
+    style.bold: true
+  }
+  y_out: "输出 Y"
+
+  x_in -> col_p
+  col_p -> gelu_op: "分片直连"
+  gelu_op -> row_p: "分片直连"
+  row_p -> allreduce_mlp
+  allreduce_mlp -> y_out
+}
+
+attn_flow: "Multi-Head Attention\n8 Heads / 4 GPU" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  style.stroke-width: 3
+
+  head_dist: "Head 分配" {
+    grid-columns: 2
+
+    g0: "GPU 0\nHead 0, 1" {
+      style.stroke: "#2563eb"
+    }
+    g1: "GPU 1\nHead 2, 3" {
+      style.stroke: "#16a34a"
+    }
+    g2: "GPU 2\nHead 4, 5" {
+      style.stroke: "#f59e0b"
+    }
+    g3: "GPU 3\nHead 6, 7" {
+      style.stroke: "#dc2626"
+    }
+  }
+
+  qkv_proj: "QKV Projection\n各 GPU 独立计算\n本地 Heads 的 Q, K, V"
+  attn_comp: "Attention 计算\n各 GPU 独立执行\nScore → Softmax → 加权求和"
+  out_proj: "Output Projection\nRow Parallel 聚合" {
+    style.bold: true
+  }
+  allreduce_attn: "AllReduce(SUM)\n唯一一次跨 GPU 通信" {
+    style.stroke-dash: 4
+    style.bold: true
+  }
+
+  head_dist -> qkv_proj
+  qkv_proj -> attn_comp
+  attn_comp -> out_proj
+  out_proj -> allreduce_attn
+}

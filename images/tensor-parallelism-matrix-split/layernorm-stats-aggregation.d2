@@ -1,0 +1,35 @@
+grid-columns: 2
+
+naive: "方案 A：收集完整数据" {
+  style.stroke: "#dc2626"
+  style.bold: true
+
+  local_data: "GPU 0: [1, 3]\nGPU 1: [5, 7]"
+  allgather_step: "AllGather\n传输整个向量" {
+    style.stroke: "#dc2626"
+    style.stroke-dash: 4
+  }
+  full_data: "每张 GPU 拿到\n完整 H = [1, 3, 5, 7]"
+  compute_ln: "各自计算\nμ = 4, σ² = 5"
+
+  local_data -> allgather_step
+  allgather_step -> full_data
+  full_data -> compute_ln
+}
+
+smart: "方案 B：聚合统计量" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  local_stats: "GPU 0: sum=4, sum²=10\nGPU 1: sum=12, sum²=74"
+  allreduce_step: "AllReduce(SUM)\n只传 2 个标量" {
+    style.stroke: "#16a34a"
+    style.stroke-dash: 4
+  }
+  global_stats: "全局 sum=16, sum²=84\nμ = 16/4 = 4\nσ² = 84/4 − 4² = 5"
+  apply_ln: "各 GPU 用全局 μ, σ²\n对本地分片归一化"
+
+  local_stats -> allreduce_step
+  allreduce_step -> global_stats
+  global_stats -> apply_ln
+}
