@@ -7,7 +7,25 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;&lt;a href="https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-22-ddp-to-zero-memory-sharding/" &gt;上一篇&lt;/a&gt;把 ZeRO 的三个 Stage 走了一遍之后，我以为关于参数分片这件事已经想得差不多了——ZeRO-3 / FSDP 把参数、梯度和 Optimizer States 全部分片存储到多张 GPU 上，单卡 Model States 从 112 GB 降到约 28 GB，问题解决。&lt;/p&gt;</description></item><item><title>从 DDP 到 ZeRO：为什么分布式训练要对参数、梯度和优化器状态分片？</title><link>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-22-ddp-to-zero-memory-sharding/</link><pubDate>Thu, 22 Oct 2026 19:40:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-22-ddp-to-zero-memory-sharding/</guid><description>&lt;h2 class="relative group"&gt;起因
+&lt;p&gt;&lt;a href="https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-22-ddp-to-zero-memory-sharding/" &gt;上一篇&lt;/a&gt;把 ZeRO 的三个 Stage 走了一遍之后，我以为关于参数分片这件事已经想得差不多了——ZeRO-3 / FSDP 把参数、梯度和 Optimizer States 全部分片存储到多张 GPU 上，单卡 Model States 从 112 GB 降到约 28 GB，问题解决。&lt;/p&gt;</description></item><item><title>Pipeline Parallelism 的工程权衡：为什么更多 GPU 不一定更快？</title><link>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-23-pipeline-parallelism-engineering-tradeoffs/</link><pubDate>Fri, 23 Oct 2026 19:30:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-23-pipeline-parallelism-engineering-tradeoffs/</guid><description>&lt;h2 class="relative group"&gt;起因
+ &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#%e8%b5%b7%e5%9b%a0" aria-label="Anchor"&gt;#&lt;/a&gt;
+ &lt;/span&gt;
+ 
+&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-23-pipeline-parallelism-gpipe-1f1b/" &gt;上一篇&lt;/a&gt;搞清楚了 Pipeline Parallelism 的调度机制：GPipe 先 Forward 后 Backward，1F1B 通过交替调度降低 Activation 暂存压力，但理想条件下 Bubble Time 相同。&lt;/p&gt;</description></item><item><title>Pipeline Parallelism：从 GPipe 到 1F1B，为什么 GPU 还是在等待？</title><link>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-23-pipeline-parallelism-gpipe-1f1b/</link><pubDate>Fri, 23 Oct 2026 19:00:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-23-pipeline-parallelism-gpipe-1f1b/</guid><description>&lt;h2 class="relative group"&gt;起因
+ &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#%e8%b5%b7%e5%9b%a0" aria-label="Anchor"&gt;#&lt;/a&gt;
+ &lt;/span&gt;
+ 
+&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-23-tensor-parallelism-matrix-split/" &gt;上一篇 Tensor Parallelism&lt;/a&gt; 写完之后，我对 TP 的基本原理有了底：把单个算子内部的矩阵乘法拆到多张 GPU 上执行，每张卡只算部分输出，最后通过 AllReduce 聚合。TP 分片的是计算本身。&lt;/p&gt;</description></item><item><title>从 DDP 到 ZeRO：为什么分布式训练要对参数、梯度和优化器状态分片？</title><link>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-22-ddp-to-zero-memory-sharding/</link><pubDate>Thu, 22 Oct 2026 19:40:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-22-ddp-to-zero-memory-sharding/</guid><description>&lt;h2 class="relative group"&gt;起因
  &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
  
  &lt;span

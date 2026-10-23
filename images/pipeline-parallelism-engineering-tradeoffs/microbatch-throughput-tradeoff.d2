@@ -1,0 +1,46 @@
+direction: down
+
+premise: "固定 Global Batch Size 和 DP Degree" {
+  style.stroke: "#6b7280"
+  style.stroke-dash: 4
+}
+
+increase_m: "增加 Micro-batch 数量 m" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+consequence: "单个 Micro-batch Size b 减小\n(B_global = DP × m × b)" {
+  style.stroke: "#f59e0b"
+  style.stroke-width: 2
+}
+
+good: "Bubble 比例下降\n(p-1)/(m+p-1) 变小" {
+  style.stroke: "#16a34a"
+  style.bold: true
+}
+
+bad_1: "GEMM 规模缩小\nKernel 执行效率下降" {
+  style.stroke: "#dc2626"
+  style.bold: true
+}
+
+bad_2: "P2P 通信次数增加\n启动延迟占比上升" {
+  style.stroke: "#dc2626"
+  style.bold: true
+}
+
+tradeoff_node: "更少 Bubble ≠ 更高吞吐\n需要在具体硬件上实测" {
+  style.stroke: "#7c3aed"
+  style.bold: true
+  style.stroke-width: 3
+}
+
+premise -> increase_m
+increase_m -> consequence
+consequence -> good
+consequence -> bad_1
+consequence -> bad_2
+good -> tradeoff_node
+bad_1 -> tradeoff_node
+bad_2 -> tradeoff_node

@@ -1,0 +1,51 @@
+direction: down
+
+start_node: "端到端 Iteration Time 过长" {
+  style.stroke: "#dc2626"
+  style.bold: true
+}
+
+check1: "各 Stage Forward/Backward\n耗时是否均衡？" {
+  style.stroke: "#2563eb"
+}
+
+unbalanced: "Stage 不均衡\n→ 优化模型划分" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+}
+
+check2: "Pipeline Bubble 占比\n是否过高？" {
+  style.stroke: "#2563eb"
+}
+
+bubble_high: "调整 m (Micro-batch 数量)\n或使用更高级调度" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+}
+
+check3: "P2P 通信时间\n是否在关键路径上？" {
+  style.stroke: "#2563eb"
+}
+
+comm_bottleneck: "检查 GPU 互连拓扑\n优化 Tensor 大小或 Overlap" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+}
+
+check4: "单个 Kernel 执行效率\n是否过低？" {
+  style.stroke: "#2563eb"
+}
+
+kernel_issue: "Micro-batch Size 可能过小\n或增大 TP Degree" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+}
+
+start_node -> check1
+check1 -> unbalanced: "不均衡"
+check1 -> check2: "均衡"
+check2 -> bubble_high: "过高"
+check2 -> check3: "可接受"
+check3 -> comm_bottleneck: "是"
+check3 -> check4: "否"
+check4 -> kernel_issue: "是"

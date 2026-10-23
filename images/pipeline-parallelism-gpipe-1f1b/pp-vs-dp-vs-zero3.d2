@@ -1,0 +1,62 @@
+direction: right
+grid-columns: 3
+
+dp: "Data Parallelism (DDP)" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  gpu0: "GPU 0\n完整模型副本\n数据分片 0" {
+    style.stroke: "#2563eb"
+  }
+  gpu1: "GPU 1\n完整模型副本\n数据分片 1" {
+    style.stroke: "#2563eb"
+  }
+  gpu2: "GPU 2\n完整模型副本\n数据分片 2" {
+    style.stroke: "#2563eb"
+  }
+  gpu3: "GPU 3\n完整模型副本\n数据分片 3" {
+    style.stroke: "#2563eb"
+  }
+  gpu0 -> gpu1: AllReduce {style.stroke-dash: 4}
+  gpu1 -> gpu2: AllReduce {style.stroke-dash: 4}
+  gpu2 -> gpu3: AllReduce {style.stroke-dash: 4}
+}
+
+zero3: "ZeRO-3 / FSDP" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  gpu0z: "GPU 0\n参数分片 0\n计算: 完整 F/B" {
+    style.stroke: "#16a34a"
+  }
+  gpu1z: "GPU 1\n参数分片 1\n计算: 完整 F/B" {
+    style.stroke: "#16a34a"
+  }
+  gpu2z: "GPU 2\n参数分片 2\n计算: 完整 F/B" {
+    style.stroke: "#16a34a"
+  }
+  gpu3z: "GPU 3\n参数分片 3\n计算: 完整 F/B" {
+    style.stroke: "#16a34a"
+  }
+  gpu0z -> gpu1z: AllGather {style.stroke-dash: 4}
+  gpu1z -> gpu2z: AllGather {style.stroke-dash: 4}
+  gpu2z -> gpu3z: AllGather {style.stroke-dash: 4}
+}
+
+pp: "Pipeline Parallelism" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  gpu0p: "GPU 0\nLayer 0-5\n计算: Stage 0" {
+    style.stroke: "#dc2626"
+  }
+  gpu1p: "GPU 1\nLayer 6-11\n计算: Stage 1" {
+    style.stroke: "#dc2626"
+  }
+  gpu2p: "GPU 2\nLayer 12-17\n计算: Stage 2" {
+    style.stroke: "#dc2626"
+  }
+  gpu3p: "GPU 3\nLayer 18-23\n计算: Stage 3" {
+    style.stroke: "#dc2626"
+  }
+  gpu0p -> gpu1p: Activation {style.stroke: "#dc2626"}
+  gpu1p -> gpu2p: Activation {style.stroke: "#dc2626"}
+  gpu2p -> gpu3p: Activation {style.stroke: "#dc2626"}
+}

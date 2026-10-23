@@ -42,7 +42,25 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;&lt;a href="https://111qqz.com/2026/10/ddp-to-zero-memory-sharding/" &gt;上一篇&lt;/a&gt;把 ZeRO 的三个 Stage 走了一遍之后，我以为关于参数分片这件事已经想得差不多了——ZeRO-3 / FSDP 把参数、梯度和 Optimizer States 全部分片存储到多张 GPU 上，单卡 Model States 从 112 GB 降到约 28 GB，问题解决。&lt;/p&gt;</description></item><item><title>从 DDP 到 ZeRO：为什么分布式训练要对参数、梯度和优化器状态分片？</title><link>https://111qqz.com/2026/10/ddp-to-zero-memory-sharding/</link><pubDate>Thu, 22 Oct 2026 19:40:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/10/ddp-to-zero-memory-sharding/</guid><description>&lt;h2 class="relative group"&gt;起因
+&lt;p&gt;&lt;a href="https://111qqz.com/2026/10/ddp-to-zero-memory-sharding/" &gt;上一篇&lt;/a&gt;把 ZeRO 的三个 Stage 走了一遍之后，我以为关于参数分片这件事已经想得差不多了——ZeRO-3 / FSDP 把参数、梯度和 Optimizer States 全部分片存储到多张 GPU 上，单卡 Model States 从 112 GB 降到约 28 GB，问题解决。&lt;/p&gt;</description></item><item><title>Pipeline Parallelism 的工程权衡：为什么更多 GPU 不一定更快？</title><link>https://111qqz.com/2026/10/pipeline-parallelism-engineering-tradeoffs/</link><pubDate>Fri, 23 Oct 2026 19:30:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/10/pipeline-parallelism-engineering-tradeoffs/</guid><description>&lt;h2 class="relative group"&gt;起因
+ &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#%e8%b5%b7%e5%9b%a0" aria-label="锚点"&gt;#&lt;/a&gt;
+ &lt;/span&gt;
+ 
+&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://111qqz.com/2026/10/pipeline-parallelism-gpipe-1f1b/" &gt;上一篇&lt;/a&gt;搞清楚了 Pipeline Parallelism 的调度机制：GPipe 先 Forward 后 Backward，1F1B 通过交替调度降低 Activation 暂存压力，但理想条件下 Bubble Time 相同。&lt;/p&gt;</description></item><item><title>Pipeline Parallelism：从 GPipe 到 1F1B，为什么 GPU 还是在等待？</title><link>https://111qqz.com/2026/10/pipeline-parallelism-gpipe-1f1b/</link><pubDate>Fri, 23 Oct 2026 19:00:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/10/pipeline-parallelism-gpipe-1f1b/</guid><description>&lt;h2 class="relative group"&gt;起因
+ &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#%e8%b5%b7%e5%9b%a0" aria-label="锚点"&gt;#&lt;/a&gt;
+ &lt;/span&gt;
+ 
+&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://111qqz.com/2026/10/tensor-parallelism-matrix-split/" &gt;上一篇 Tensor Parallelism&lt;/a&gt; 写完之后，我对 TP 的基本原理有了底：把单个算子内部的矩阵乘法拆到多张 GPU 上执行，每张卡只算部分输出，最后通过 AllReduce 聚合。TP 分片的是计算本身。&lt;/p&gt;</description></item><item><title>从 DDP 到 ZeRO：为什么分布式训练要对参数、梯度和优化器状态分片？</title><link>https://111qqz.com/2026/10/ddp-to-zero-memory-sharding/</link><pubDate>Thu, 22 Oct 2026 19:40:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/10/ddp-to-zero-memory-sharding/</guid><description>&lt;h2 class="relative group"&gt;起因
  &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
  
  &lt;span
@@ -328,22 +346,4 @@
  
 &lt;/h2&gt;
 &lt;p&gt;&lt;a href="https://111qqz.com/2026/09/latent-variable-latent-space/" &gt;上一篇文章&lt;/a&gt;理清了 latent variable 和 latent space 的概念，最后停在一个地方：&lt;/p&gt;
-&lt;blockquote&gt;&lt;p&gt;不要直接在复杂的数据空间中生成数据。先在简单的 latent space 中采样一个 \(z\)，再通过学到的映射把 \(z\) 变成 \(x\)。&lt;/p&gt;</description></item><item><title>从特征表示到生成语义：深入理解 Latent Variable 与 Latent Space</title><link>https://111qqz.com/2026/09/latent-variable-latent-space/</link><pubDate>Sun, 20 Sep 2026 17:55:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/09/latent-variable-latent-space/</guid><description>&lt;h2 class="relative group"&gt;起因
- &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
- 
- &lt;span
- class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
- &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#%e8%b5%b7%e5%9b%a0" aria-label="锚点"&gt;#&lt;/a&gt;
- &lt;/span&gt;
- 
-&lt;/h2&gt;
-&lt;p&gt;最近在看 MIT 6.S191 Lecture 4——Generative Modeling。在这之前我对生成模型基本没什么了解，刚建立了一个很粗的认知：&lt;/p&gt;</description></item><item><title>概率密度不是概率：连续随机变量为什么需要 PDF</title><link>https://111qqz.com/2026/09/pdf-is-not-probability/</link><pubDate>Sun, 20 Sep 2026 16:30:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/2026/09/pdf-is-not-probability/</guid><description>&lt;h2 class="relative group"&gt;上一篇只回答了&amp;quot;为什么不矛盾&amp;quot;
- &lt;div id="上一篇只回答了为什么不矛盾" class="anchor"&gt;&lt;/div&gt;
- 
- &lt;span
- class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
- &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#%e4%b8%8a%e4%b8%80%e7%af%87%e5%8f%aa%e5%9b%9e%e7%ad%94%e4%ba%86%e4%b8%ba%e4%bb%80%e4%b9%88%e4%b8%8d%e7%9f%9b%e7%9b%be" aria-label="锚点"&gt;#&lt;/a&gt;
- &lt;/span&gt;
- 
-&lt;/h2&gt;
-&lt;p&gt;&lt;a href="https://111qqz.com/2026/09/countable-uncountable-infinity/" &gt;上一篇文章&lt;/a&gt;里，我沿着一个概率问题一路追到了集合论。&lt;/p&gt;</description></item></channel></rss>
+&lt;blockquote&gt;&lt;p&gt;不要直接在复杂的数据空间中生成数据。先在简单的 latent space 中采样一个 \(z\)，再通过学到的映射把 \(z\) 变成 \(x\)。&lt;/p&gt;</description></item></channel></rss>

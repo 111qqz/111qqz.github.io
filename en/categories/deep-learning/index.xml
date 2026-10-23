@@ -42,7 +42,25 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;&lt;a href="https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-22-ddp-to-zero-memory-sharding/" &gt;上一篇&lt;/a&gt;把 ZeRO 的三个 Stage 走了一遍之后，我以为关于参数分片这件事已经想得差不多了——ZeRO-3 / FSDP 把参数、梯度和 Optimizer States 全部分片存储到多张 GPU 上，单卡 Model States 从 112 GB 降到约 28 GB，问题解决。&lt;/p&gt;</description></item><item><title>从 DDP 到 ZeRO：为什么分布式训练要对参数、梯度和优化器状态分片？</title><link>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-22-ddp-to-zero-memory-sharding/</link><pubDate>Thu, 22 Oct 2026 19:40:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-22-ddp-to-zero-memory-sharding/</guid><description>&lt;h2 class="relative group"&gt;起因
+&lt;p&gt;&lt;a href="https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-22-ddp-to-zero-memory-sharding/" &gt;上一篇&lt;/a&gt;把 ZeRO 的三个 Stage 走了一遍之后，我以为关于参数分片这件事已经想得差不多了——ZeRO-3 / FSDP 把参数、梯度和 Optimizer States 全部分片存储到多张 GPU 上，单卡 Model States 从 112 GB 降到约 28 GB，问题解决。&lt;/p&gt;</description></item><item><title>Pipeline Parallelism 的工程权衡：为什么更多 GPU 不一定更快？</title><link>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-23-pipeline-parallelism-engineering-tradeoffs/</link><pubDate>Fri, 23 Oct 2026 19:30:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-23-pipeline-parallelism-engineering-tradeoffs/</guid><description>&lt;h2 class="relative group"&gt;起因
+ &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#%e8%b5%b7%e5%9b%a0" aria-label="Anchor"&gt;#&lt;/a&gt;
+ &lt;/span&gt;
+ 
+&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-23-pipeline-parallelism-gpipe-1f1b/" &gt;上一篇&lt;/a&gt;搞清楚了 Pipeline Parallelism 的调度机制：GPipe 先 Forward 后 Backward，1F1B 通过交替调度降低 Activation 暂存压力，但理想条件下 Bubble Time 相同。&lt;/p&gt;</description></item><item><title>Pipeline Parallelism：从 GPipe 到 1F1B，为什么 GPU 还是在等待？</title><link>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-23-pipeline-parallelism-gpipe-1f1b/</link><pubDate>Fri, 23 Oct 2026 19:00:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-23-pipeline-parallelism-gpipe-1f1b/</guid><description>&lt;h2 class="relative group"&gt;起因
+ &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#%e8%b5%b7%e5%9b%a0" aria-label="Anchor"&gt;#&lt;/a&gt;
+ &lt;/span&gt;
+ 
+&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-23-tensor-parallelism-matrix-split/" &gt;上一篇 Tensor Parallelism&lt;/a&gt; 写完之后，我对 TP 的基本原理有了底：把单个算子内部的矩阵乘法拆到多张 GPU 上执行，每张卡只算部分输出，最后通过 AllReduce 聚合。TP 分片的是计算本身。&lt;/p&gt;</description></item><item><title>从 DDP 到 ZeRO：为什么分布式训练要对参数、梯度和优化器状态分片？</title><link>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-22-ddp-to-zero-memory-sharding/</link><pubDate>Thu, 22 Oct 2026 19:40:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-10-22-ddp-to-zero-memory-sharding/</guid><description>&lt;h2 class="relative group"&gt;起因
  &lt;div id="起因" class="anchor"&gt;&lt;/div&gt;
  
  &lt;span
@@ -351,16 +369,4 @@
  &lt;/span&gt;
  
 &lt;/h2&gt;
-&lt;p&gt;三年前我参与维护过一个多人共享的训练集群。集群上跑着各业务线的训练任务，用户通过一个队列系统提交，每个用户有自己的资源 Quota。&lt;/p&gt;</description></item><item><title>去掉 RNN 之后，顺序去哪了？</title><link>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-09-13-where-sequence-order-went/</link><pubDate>Sun, 13 Sep 2026 20:00:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-09-13-where-sequence-order-went/</guid><description>&lt;p&gt;在&lt;a href="https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-09-13-rnn-to-self-attention/" &gt;Self-Attention 那篇&lt;/a&gt;里，去掉 recurrence 让不同位置可以并行计算。但顺序原本就编码在这条递推关系里；换成纯 self-attention 后，它由谁来表示？&lt;/p&gt;
-&lt;p&gt;我想先看清去掉了什么，再讨论怎么把位置信息加回来。&lt;/p&gt;
-
-&lt;h2 class="relative group"&gt;RNN 里的顺序存在哪
- &lt;div id="rnn-里的顺序存在哪" class="anchor"&gt;&lt;/div&gt;
- 
- &lt;span
- class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"&gt;
- &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#rnn-%e9%87%8c%e7%9a%84%e9%a1%ba%e5%ba%8f%e5%ad%98%e5%9c%a8%e5%93%aa" aria-label="Anchor"&gt;#&lt;/a&gt;
- &lt;/span&gt;
- 
-&lt;/h2&gt;
-&lt;p&gt;拿一个具体的 sequence 看：&lt;/p&gt;</description></item><item><title>从 RNN 到 Self-Attention：信息为什么一定要沿着 State 一步步传递？</title><link>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-09-13-rnn-to-self-attention/</link><pubDate>Sun, 13 Sep 2026 18:00:00 +0800</pubDate><author>hust.111qqz@gmail.com (111qqz)</author><guid>https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-09-13-rnn-to-self-attention/</guid><description>&lt;p&gt;上一篇&lt;a href="https://111qqz.com/en/post/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/2026-09-13-seq2seq-to-attention/" &gt;《从 RNN / LSTM / GRU 到早期 Attention》&lt;/a&gt;结尾我留了一句话：早期的 attention 并不是为了取代 RNN 而出现的，它只是夹在 encoder–decoder 中间解决 fixed-context bottleneck；但“根据当前需求去读取一组 representation”这种机制，并不一定要依附在 RNN 上。这篇接着讲那个“另一个故事”。&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;三年前我参与维护过一个多人共享的训练集群。集群上跑着各业务线的训练任务，用户通过一个队列系统提交，每个用户有自己的资源 Quota。&lt;/p&gt;</description></item></channel></rss>

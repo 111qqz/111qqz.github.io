@@ -1,0 +1,41 @@
+grid-columns: 2
+
+before_split: "分配前: 4 Stage" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  direction: down
+  s0: "Stage 0: 2ms" { style.stroke: "#3b82f6" }
+  s1: "Stage 1: 2ms" { style.stroke: "#3b82f6" }
+  s2: "Stage 2: 6ms" { style.stroke: "#dc2626"; style.stroke-width: 3 }
+  s3: "Stage 3: 2ms" { style.stroke: "#3b82f6" }
+  bottleneck: "瓶颈: max = 6ms\n理想稳态吞吐上限: 1/6 MB/ms" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    style.stroke-width: 2
+  }
+  s0 -> s1
+  s1 -> s2
+  s2 -> s3
+  s3 -> bottleneck
+}
+
+after_split: "方案 B: 5 Stage (重新划分)" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  direction: down
+  s0b: "Stage 0: 2ms" { style.stroke: "#3b82f6" }
+  s1b: "Stage 1: 2ms" { style.stroke: "#3b82f6" }
+  s2b: "Stage 2: 3ms" { style.stroke: "#22c55e" }
+  s3b: "Stage 3: 3ms" { style.stroke: "#22c55e" }
+  s4b: "Stage 4: 2ms" { style.stroke: "#3b82f6" }
+  result: "瓶颈: max = 3ms\n理想稳态吞吐上限: 1/3 MB/ms" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    style.stroke-width: 2
+  }
+  s0b -> s1b
+  s1b -> s2b
+  s2b -> s3b
+  s3b -> s4b
+  s4b -> result
+}

@@ -1,0 +1,59 @@
+grid-columns: 2
+
+afab: "GPipe / AFAB" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  direction: down
+
+  desc: "Stage 0 执行顺序" {
+    style.stroke-dash: 4
+  }
+
+  seq: "F0 → F1 → F2 → F3\n→ F4 → F5 → F6 → F7\n→ B0 → B1 → ... → B7" {
+    style.stroke: "#6b7280"
+  }
+
+  peak_node: "在途 Activation 峰值:\n8 个 MB 的 Activation\n同时保留\n(所有 F 完成后才 B)" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 3
+  }
+
+  order_node: "在途数量级: O(m)" {
+    style.bold: true
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+  }
+
+  desc -> seq
+  seq -> peak_node
+  peak_node -> order_node
+}
+
+onefb: "1F1B" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  direction: down
+
+  desc2: "Stage 0 执行顺序" {
+    style.stroke-dash: 4
+  }
+
+  seq2: "F0 → F1 → F2 →\nF3 → B0 → F4 → B1\n→ ... → B5 → B6 → B7" {
+    style.stroke: "#6b7280"
+  }
+
+  peak2: "在途 Activation 峰值:\n最多 p 个 MB 的\nActivation 同时保留\n(Warmup 后交替释放)" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+  }
+
+  order2: "在途数量级: O(p)" {
+    style.bold: true
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+  }
+
+  desc2 -> seq2
+  seq2 -> peak2
+  peak2 -> order2
+}
