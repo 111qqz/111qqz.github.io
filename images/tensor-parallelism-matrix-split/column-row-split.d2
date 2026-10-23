@@ -1,0 +1,75 @@
+grid-columns: 2
+
+col_split: "Column Parallel — 沿输出特征切分" {
+  style.stroke: "#2563eb"
+
+  weight_col: "W = [W₀ | W₁]\nW₀: (4×4) W₁: (4×4)" {
+    style.bold: true
+  }
+
+  gpu0_col: "GPU 0" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 3
+    input0c: "输入: 完整 X (B×4)"
+    w0c: "权重: W₀ (4×4)"
+    out0c: "Y₀ = XW₀\nshape: (B×4)"
+    input0c -> out0c
+    w0c -> out0c
+  }
+
+  gpu1_col: "GPU 1" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+    input1c: "输入: 完整 X (B×4)"
+    w1c: "权重: W₁ (4×4)"
+    out1c: "Y₁ = XW₁\nshape: (B×4)"
+    input1c -> out1c
+    w1c -> out1c
+  }
+
+  result_col: "Y = [Y₀ | Y₁] (B×8)\n合并: 拼接" {
+    style.bold: true
+  }
+
+  weight_col -> gpu0_col
+  weight_col -> gpu1_col
+  gpu0_col -> result_col
+  gpu1_col -> result_col
+}
+
+row_split: "Row Parallel — 沿输入特征切分" {
+  style.stroke: "#16a34a"
+
+  weight_row: "W = [W₀; W₁]\nW₀: (2×8) W₁: (2×8)" {
+    style.bold: true
+  }
+
+  gpu0_row: "GPU 0" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 3
+    input0r: "输入: X₀ (B×2)\n前 2 列特征"
+    w0r: "权重: W₀ (2×8)"
+    out0r: "Y₀ = X₀W₀\nshape: (B×8) 部分和"
+    input0r -> out0r
+    w0r -> out0r
+  }
+
+  gpu1_row: "GPU 1" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+    input1r: "输入: X₁ (B×2)\n后 2 列特征"
+    w1r: "权重: W₁ (2×8)"
+    out1r: "Y₁ = X₁W₁\nshape: (B×8) 部分和"
+    input1r -> out1r
+    w1r -> out1r
+  }
+
+  result_row: "Y = Y₀ + Y₁ (B×8)\n合并: 求和" {
+    style.bold: true
+  }
+
+  weight_row -> gpu0_row
+  weight_row -> gpu1_row
+  gpu0_row -> result_row
+  gpu1_row -> result_row
+}

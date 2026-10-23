@@ -1,0 +1,28 @@
+direction: down
+
+upstream_r: "上游梯度 dY\n两张 GPU 持有相同的 dY" {
+  style.bold: true
+}
+
+gpu0_r: "GPU 0 本地计算\ndX₀ = dY × W₀ᵀ\nX₀ 的完整梯度\nshape: (B, 2)" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 3
+}
+
+gpu1_r: "GPU 1 本地计算\ndX₁ = dY × W₁ᵀ\nX₁ 的完整梯度\nshape: (B, 2)" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+}
+
+result0: "GPU 0 持有 dX₀\n对应不同输入变量\n无需跨 GPU 通信" {
+  style.stroke: "#2563eb"
+}
+
+result1: "GPU 1 持有 dX₁\n对应不同输入变量\n无需跨 GPU 通信" {
+  style.stroke: "#16a34a"
+}
+
+upstream_r -> gpu0_r: "W₀ 在 GPU 0"
+upstream_r -> gpu1_r: "W₁ 在 GPU 1"
+gpu0_r -> result0: "独立"
+gpu1_r -> result1: "独立"

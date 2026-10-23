@@ -1,0 +1,65 @@
+fwd: "Forward" {
+  direction: right
+  label: ""
+
+  x_f: "X\n(两卡复制)" {
+    style.bold: true
+  }
+  col_f: "Column W₁\nGPU 0: XW₁₀\nGPU 1: XW₁₁" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 3
+  }
+  relu_f: "ReLU\n(各卡本地)"
+  row_f: "Row W₂\nGPU 0: H₀W₂₀\nGPU 1: H₁W₂₁" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+  }
+  ar_f: "AllReduce\nY = Z₀ + Z₁" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+    style.stroke-width: 3
+  }
+  y_f: "Y\n(两卡复制)" {
+    style.bold: true
+  }
+
+  x_f -> col_f
+  col_f -> relu_f: "H₀,H₁ 分片"
+  relu_f -> row_f: "H₀,H₁ 分片"
+  row_f -> ar_f: "Z₀,Z₁"
+  ar_f -> y_f
+}
+
+bwd: "Backward" {
+  direction: right
+  label: ""
+
+  dy_b: "dY\n(两卡相同)" {
+    style.bold: true
+  }
+  row_b: "Row BW\ndH₀ = dYW₂₀ᵀ\ndH₁ = dYW₂₁ᵀ" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+  }
+  relu_b: "ReLU BW\n(各卡本地)"
+  col_b: "Column BW\nG_X⁰ = ...W₁₀ᵀ\nG_X¹ = ...W₁₁ᵀ" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 3
+  }
+  ar_b: "AllReduce\ndX = G_X⁰ + G_X¹" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+    style.stroke-width: 3
+  }
+  dx_b: "dX\n(完整)" {
+    style.bold: true
+  }
+
+  dy_b -> row_b
+  row_b -> relu_b: "dH₀,dH₁ 分片"
+  relu_b -> col_b: "分片"
+  col_b -> ar_b
+  ar_b -> dx_b
+}
+
+fwd -> bwd: "" {style.stroke-dash: 4}

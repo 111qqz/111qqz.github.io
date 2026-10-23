@@ -1,0 +1,31 @@
+grid-columns: 2
+
+zero3: "ZeRO-3 / FSDP" {
+  style.stroke: "#2563eb"
+
+  params: "参数分片存储\nGPU 0: W 的一部分\nGPU 1: W 的一部分"
+  gather: "AllGather\n收集完整参数 W" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+    style.stroke-width: 3
+  }
+  compute: "每张 GPU 用完整 W\n对不同 mini-batch\n做完整矩阵乘法\nGPU 0: Y = X_batch₀ × W\nGPU 1: Y = X_batch₁ × W"
+
+  params -> gather: "forward 前"
+  gather -> compute
+}
+
+tensor_par: "Column TP" {
+  style.stroke: "#16a34a"
+
+  params2: "参数持久分片\nGPU 0: W₀（前半列）\nGPU 1: W₁（后半列）"
+  compute2: "每张 GPU 用局部 W_i\n对相同输入 X\n做局部矩阵乘法\nGPU 0: Y₀ = X × W₀\nGPU 1: Y₁ = X × W₁"
+  merge: "合并局部输出\nY = [Y₀ | Y₁]" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  params2 -> compute2: "无需 AllGather"
+  compute2 -> merge
+}

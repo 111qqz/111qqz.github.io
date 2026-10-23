@@ -1,0 +1,31 @@
+direction: down
+
+upstream: "上游梯度\ndY = [dY₀ | dY₁]" {
+  style.bold: true
+}
+
+gpu0_grad: "GPU 0 本地计算\nG_X⁰ = dY₀ × W₀ᵀ\nshape: (B, 4)" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 3
+}
+
+gpu1_grad: "GPU 1 本地计算\nG_X¹ = dY₁ × W₁ᵀ\nshape: (B, 4)" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+}
+
+allreduce_sum: "AllReduce(SUM)" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+  style.stroke-width: 3
+}
+
+dx_full: "dX = G_X⁰ + G_X¹\n同一个 X 的完整梯度\nshape: (B, 4)" {
+  style.bold: true
+}
+
+upstream -> gpu0_grad: "dY₀ 在 GPU 0"
+upstream -> gpu1_grad: "dY₁ 在 GPU 1"
+gpu0_grad -> allreduce_sum: "路径 ① 的贡献"
+gpu1_grad -> allreduce_sum: "路径 ② 的贡献"
+allreduce_sum -> dx_full
