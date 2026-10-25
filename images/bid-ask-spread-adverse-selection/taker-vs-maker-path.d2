@@ -1,0 +1,38 @@
+grid-columns: 2
+
+taker_path: "Taker 路径" {
+  signal: "模型信号：买入"
+  order: "市价买入\n（主动吃 Ask）"
+  execution: "几乎确定成交\n成交价 = Ask"
+  spread_cost: "成本：+1 bp\nHalf-Spread"
+  outcome: "获得头寸\n成交价不利"
+
+  signal -> order -> execution -> spread_cost -> outcome
+}
+
+maker_path: "Maker 路径" {
+  signal2: "模型信号：买入"
+  order2: "限价买入\n（挂在 Bid）"
+
+  case_up: "价格上涨：\n买单未成交" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+  }
+  case_down: "价格下跌：\n卖方打到 Bid，成交" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+  }
+  result_up: "无头寸\n利润 = 0" {
+    style.stroke: "#dc2626"
+  }
+  result_down: "获得头寸\n但价格可能继续跌" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+  }
+
+  signal2 -> order2
+  order2 -> case_up: "预测正确"
+  order2 -> case_down: "预测错误"
+  case_up -> result_up
+  case_down -> result_down
+}
