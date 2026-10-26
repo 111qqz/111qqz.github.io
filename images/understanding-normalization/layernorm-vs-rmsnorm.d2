@@ -1,0 +1,59 @@
+grid-columns: 2
+
+ln_box: "LayerNorm" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  style.stroke-width: 2
+
+  input_ln: "输入 x = [x₁, x₂, ..., x_H]" {
+    style.bold: true
+  }
+
+  center_ln: "中心化\nx̂ᵢ = xᵢ − μ\n(减去均值，使均值为 0)" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 2
+    style.bold: true
+  }
+
+  scale_ln: "尺度归一化\nx̂ᵢ / σ\n(除以标准差)" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  affine_ln: "仿射变换\nyᵢ = γᵢ x̂ᵢ + βᵢ" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  input_ln -> center_ln
+  center_ln -> scale_ln
+  scale_ln -> affine_ln
+}
+
+rms_box: "RMSNorm" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  style.stroke-width: 2
+
+  input_rms: "输入 x = [x₁, x₂, ..., x_H]" {
+    style.bold: true
+  }
+
+  no_center: "不做中心化\n(跳过减均值)" {
+    style.stroke-dash: 4
+  }
+
+  scale_rms: "尺度归一化\nxᵢ / RMS(x)\n(除以均方根)" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+
+  affine_rms: "仿射变换\nyᵢ = γᵢ x̂ᵢ\n(通常无 βᵢ)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  input_rms -> no_center
+  no_center -> scale_rms
+  scale_rms -> affine_rms
+}
