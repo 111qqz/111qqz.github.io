@@ -1,0 +1,38 @@
+direction: down
+
+windows: "Walk-forward 验证" {
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+  style.bold: true
+
+  grid-columns: 3
+
+  train: "Training Window\n（固定长度\n历史数据）" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 3
+    style.bold: true
+  }
+
+  purge: "Purge Gap\n（>= Label\n窗口长度）" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 3
+    style.bold: true
+    style.stroke-dash: 4
+  }
+
+  test_blk: "Test Window\n（向前滑动\n评估）" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+    style.bold: true
+  }
+}
+
+reason: "训练集最后样本的 Label\n使用了 [T, T+1s] 价格\n→ 测试必须从 T+1s 之后开始\n→ Purge Gap 避免标签重叠" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+}
+
+windows -> reason: "窗口向前滚动 → 重复" {
+  style.stroke: "#888"
+  style.stroke-dash: 4
+}
