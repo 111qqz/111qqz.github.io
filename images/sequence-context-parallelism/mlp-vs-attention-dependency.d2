@@ -1,0 +1,52 @@
+grid-columns: 2
+
+mlp_side: "MLP：逐 Token 独立" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+
+  gpu0m: "GPU 0" {
+    style.stroke: "#2563eb"
+    t0: "Token 0 → MLP → y₀"
+    t1: "Token 1 → MLP → y₁"
+    t2: "Token 2 → MLP → y₂"
+    t3: "Token 3 → MLP → y₃"
+  }
+  gpu1m: "GPU 1" {
+    style.stroke: "#2563eb"
+    t4: "Token 4 → MLP → y₄"
+    t5: "Token 5 → MLP → y₅"
+    t6: "Token 6 → MLP → y₆"
+    t7: "Token 7 → MLP → y₇"
+  }
+  no_comm: "无跨 GPU 通信" {
+    style.bold: true
+    style.stroke: "#16a34a"
+  }
+
+  gpu0m -> no_comm: "" {style.stroke-dash: 4}
+  gpu1m -> no_comm: "" {style.stroke-dash: 4}
+}
+
+attn_side: "Causal Attention：跨 Token 依赖" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+
+  gpu0a: "GPU 0 (KV 0-3)" {
+    style.stroke: "#2563eb"
+    q03: "Q₀ 看 KV₀ ✓\nQ₁ 看 KV₀₋₁ ✓\nQ₂ 看 KV₀₋₂ ✓\nQ₃ 看 KV₀₋₃ ✓\n全部本地可用"
+  }
+  gpu1a: "GPU 1 (KV 4-7)" {
+    style.stroke: "#2563eb"
+    q47: "Q₆ 看 KV₀₋₆\nKV₀₋₃ 在 GPU 0！\n必须跨 GPU 获取"
+  }
+  need_comm: "GPU 1 需要 GPU 0 的 KV\nGPU 0 不需要 GPU 1 的 KV\n（Causal 非对称依赖）" {
+    style.bold: true
+    style.stroke: "#dc2626"
+  }
+
+  gpu0a -> gpu1a: "KV₀₋₃" {
+    style.stroke: "#f59e0b"
+    style.stroke-width: 3
+  }
+  gpu1a -> need_comm: "" {style.stroke-dash: 4}
+}

@@ -1,0 +1,33 @@
+grid-columns: 2
+
+correct: "正确：先 Reduce 再沿 Sequence Scatter" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+
+  step1: "ReduceScatter 后\nGPU 0 持有 Token 0-3\n完整 Hidden [4 维]" {
+    style.stroke: "#16a34a"
+  }
+  step2: "Token 0: [h₀ h₁ h₂ h₃] → μ₀,σ₀\nToken 1: [h₀ h₁ h₂ h₃] → μ₁,σ₁\nToken 2: [h₀ h₁ h₂ h₃] → μ₂,σ₂\nToken 3: [h₀ h₁ h₂ h₃] → μ₃,σ₃" {
+    style.bold: true
+  }
+  note_ok: "每个 Token 的 4 维特征\n都在同一张 GPU 上\nLN 统计量计算正确"
+
+  step1 -> step2: "LN 沿\nHidden 维"
+  step2 -> note_ok
+}
+
+wrong: "错误：对未归约的部分和做 LN" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 3
+
+  step1w: "GPU 0 持有 Z₀\n= H₀W₂₀ (部分和)\n不是完整的 Y" {
+    style.stroke: "#dc2626"
+  }
+  step2w: "LN(Z₀) 的统计量\n基于不完整的值\nμ,σ 都是错的" {
+    style.bold: true
+  }
+  note_bad: "LN(Z₀) + LN(Z₁)\n≠ LN(Z₀ + Z₁)\nLN 对加法不满足分配律"
+
+  step1w -> step2w: "直接做 LN"
+  step2w -> note_bad: "结果错误"
+}

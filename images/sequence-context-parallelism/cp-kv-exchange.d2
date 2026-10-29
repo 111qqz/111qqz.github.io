@@ -1,0 +1,55 @@
+grid-columns: 2
+
+step1: "① 处理本地 KV" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+
+  gpu0_s1: "GPU 0: Attn(Q₀₋₃, KV₀₋₃)\n→ 初始化 Online Softmax\n状态 m₀, l₀, p₀" {
+    style.stroke: "#2563eb"
+  }
+  gpu1_s1: "GPU 1: Attn(Q₄₋₇, KV₄₋₇)\n→ 初始化 Online Softmax\n状态 m₁, l₁, p₁" {
+    style.stroke: "#2563eb"
+  }
+}
+
+step2: "② 交换 KV Block + 更新状态" {
+  style.stroke: "#f59e0b"
+  style.stroke-width: 2
+
+  gpu0_s2: "GPU 0 收到 KV₄₋₇\nCausal Mask: Q₀₋₃\n不可见未来 Token → 跳过" {
+    style.stroke: "#f59e0b"
+  }
+  gpu1_s2: "GPU 1 收到 KV₀₋₃\nOnline Softmax 增量更新\nm₁,l₁,p₁ 合并新 Block" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  gpu0_s2 -> gpu1_s2: "" {style.stroke-dash: 4}
+}
+
+step3: "③ 最终输出" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+  style.bold: true
+
+  gpu0_f: "GPU 0: O₀₋₃ = p₀/l₀" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  gpu1_f: "GPU 1: O₄₋₇ = p₁/l₁" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+}
+
+key_point: "关键：Q 固定在本地\nKV Block 流式到来\n不需要同时驻留全部远端 KV" {
+  style.bold: true
+  style.stroke: "#2563eb"
+  style.stroke-width: 2
+}
+
+step1 -> step2: "P2P 交换\nKV Block" {
+  style.stroke: "#f59e0b"
+  style.stroke-width: 2
+}
+step2 -> step3: "状态合并完成"

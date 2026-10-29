@@ -1,0 +1,41 @@
+grid-columns: 2
+
+tp_only: "普通 TP" {
+  style.stroke: "#2563eb"
+
+  row: "Row Parallel 输出\nZ₀, Z₁ 部分和"
+  ar: "AllReduce(SUM)" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+    style.stroke-width: 3
+  }
+  out0: "两卡都持有 Y [8,4]\n（完全相同，冗余）" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 3
+  }
+  ln: "LayerNorm → 后续算子\n两卡做相同的计算"
+
+  row -> ar
+  ar -> out0
+  out0 -> ln: "冗余"
+}
+
+tp_sp: "TP + SP" {
+  style.stroke: "#16a34a"
+
+  row2: "Row Parallel 输出\nZ₀, Z₁ 部分和"
+  rs: "ReduceScatter(SUM)" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+    style.stroke-width: 3
+  }
+  out1: "GPU 0: Y[0:4] [4,4]\nGPU 1: Y[4:8] [4,4]" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+  }
+  ln2: "LayerNorm（本地 4 Token）\n→ AllGather → 后续算子"
+
+  row2 -> rs
+  rs -> out1: "先 Reduce 再 Scatter"
+  out1 -> ln2: "无冗余"
+}
