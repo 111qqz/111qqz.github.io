@@ -1,0 +1,45 @@
+direction: right
+
+route: "1. Route\n(Router 本地决策)" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  g0: "GPU 0: A→E6, B→E0"
+  g1: "GPU 1: C→E4, D→E7"
+  g2: "GPU 2: E→E3, F→E5"
+  g3: "GPU 3: G→E1, H→E2"
+}
+
+dispatch: "2. Dispatch\n(All-to-All)" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+
+  d0: "GPU 0 收到:\nB(本地), G(←GPU3)"
+  d1: "GPU 1 收到:\nE(←GPU2), H(←GPU3)"
+  d2: "GPU 2 收到:\nC(←GPU1), F(本地)"
+  d3: "GPU 3 收到:\nA(←GPU0), D(←GPU1)"
+}
+
+compute: "3. Expert Compute\n(本地 GEMM)" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  c0: "GPU 0: E0(B), E1(G)"
+  c1: "GPU 1: E3(E), E2(H)"
+  c2: "GPU 2: E4(C), E5(F)"
+  c3: "GPU 3: E6(A), E7(D)"
+}
+
+combine: "4. Combine\n(All-to-All)" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+
+  r0: "GPU 0 恢复:\nMoE(A), MoE(B)"
+  r1: "GPU 1 恢复:\nMoE(C), MoE(D)"
+  r2: "GPU 2 恢复:\nMoE(E), MoE(F)"
+  r3: "GPU 3 恢复:\nMoE(G), MoE(H)"
+}
+
+route -> dispatch: "Token Hidden\nState 跨 GPU"
+dispatch -> compute
+compute -> combine: "Expert 输出\n沿原路返回"

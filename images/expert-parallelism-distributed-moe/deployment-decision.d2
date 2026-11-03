@@ -1,0 +1,46 @@
+scenario: "场景：64 Expert × 50 MB\n4 GPU × 40 GB" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+grid-columns: 2
+
+plan_a: "EP = 4" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  mem_a: "单卡 Expert\n0.8 GB" {
+    style.stroke: "#2563eb"
+  }
+  comm_a: "需 All-to-All\n通信开销" {
+    style.stroke: "#dc2626"
+  }
+  when_a: "适合：Expert\nBank 放不下\n单卡, 或大\nBatch 显存紧张" {
+    style.stroke: "#16a34a"
+  }
+}
+
+plan_b: "完整复制" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  mem_b: "单卡 Expert\n3.2 GB" {
+    style.stroke: "#f59e0b"
+  }
+  comm_b: "零跨卡通信\n本地计算" {
+    style.stroke: "#16a34a"
+  }
+  when_b: "适合：Expert\nBank 单卡放\n得下, 小 Batch\n低延迟场景" {
+    style.stroke: "#16a34a"
+  }
+}
+
+decision: "决策关键：\n单卡放得下？\nBatch Size？\n延迟 vs 吞吐？" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+}
+
+scenario -> plan_a
+scenario -> plan_b
+plan_a -> decision
+plan_b -> decision

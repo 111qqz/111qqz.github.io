@@ -1,0 +1,41 @@
+direction: right
+
+router_decision: "Router 决策\nToken X → E6" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+dispatcher: "Dispatcher\n选择物理副本" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+}
+
+gpu_layout: "物理部署" {
+  gpu0: "GPU 0\nE0, E1" {
+    style.stroke-dash: 4
+  }
+  gpu1: "GPU 1\nE2, E3" {
+    style.stroke-dash: 4
+  }
+  gpu2: "GPU 2\nE4, E5, E6" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  gpu3: "GPU 3\nE6, E7" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+}
+
+note_box: "逻辑 Expert E6 = 1 个\n物理副本 = 2 份\n(GPU 2 + GPU 3)\n参数完全相同" {
+  style.stroke-dash: 4
+}
+
+router_decision -> dispatcher: "逻辑选择"
+dispatcher -> gpu_layout.gpu2: "副本 1" {
+  style.stroke: "#16a34a"
+}
+dispatcher -> gpu_layout.gpu3: "副本 2" {
+  style.stroke: "#16a34a"
+  style.stroke-dash: 4
+}
