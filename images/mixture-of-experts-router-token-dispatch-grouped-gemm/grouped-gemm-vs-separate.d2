@@ -1,0 +1,34 @@
+grid-columns: 2
+
+separate: "Independent GEMMs\n(N Kernel Launches)" {
+  style.stroke: "#dc2626"
+  style.bold: true
+
+  k0: "Kernel 0\nGEMM₀ [8,4096]×[4096,14336]"
+  k1: "Kernel 1\nGEMM₁ [12,4096]×[4096,14336]"
+  k2: "Kernel 2\nGEMM₂ [5,4096]×[4096,14336]"
+  kn: "...\nKernel 63"
+
+  k0 -> k1 -> k2 -> kn: "sequential\nlaunch" {style.stroke-dash: 4}
+}
+
+grouped: "Grouped GEMM\n(Unified Kernel)" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  kernel: "Single Grouped Kernel" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 3
+
+    tile0: "GEMM₀ Tiles\nM=8"
+    tile1: "GEMM₁ Tiles\nM=12"
+    tile2: "GEMM₂ Tiles\nM=5"
+    tilen: "...\nGEMM₆₃ Tiles"
+  }
+
+  sm: "SM Pool\n(unified tile scheduling)" {
+    style.stroke: "#f59e0b"
+  }
+
+  kernel -> sm: "dispatch tiles\nacross SMs"
+}

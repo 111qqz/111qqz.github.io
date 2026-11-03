@@ -1,0 +1,20 @@
+input: "Input Tokens [4, 4096]" {style.bold: true}
+
+route_dispatch: "Router Top-K + Token Dispatch\n→ expert-major buffer [8, 4096]" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+experts: "Grouped GEMM" {
+  grid-columns: 3
+  e0: "Expert 0\n[3, 4096]" {style.stroke: "#16a34a"}
+  e1: "Expert 1\n[2, 4096]" {style.stroke: "#16a34a"}
+  e2: "Expert 2\n[3, 4096]" {style.stroke: "#16a34a"}
+}
+
+combine: "Token Combine (Weighted Scatter-Add)\n→ Output Tokens [4, 4096]" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+}
+
+input -> route_dispatch -> experts -> combine
