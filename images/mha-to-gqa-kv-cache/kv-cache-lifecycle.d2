@@ -1,0 +1,72 @@
+grid-rows: 2
+
+prefill_phase: "Prefill 阶段" {
+  style.stroke: "#2563eb"
+  direction: right
+
+  prompt: "Prompt Tokens\n[x₁, x₂, x₃, x₄]" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  compute: "计算所有 Token\n的 Q / K / V" {
+    style.stroke: "#2563eb"
+  }
+
+  cache_init: "初始化 KV Cache\n(每层独立)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    style.stroke-width: 3
+
+    layer_detail: "Layer 0: [K₁ K₂ K₃ K₄], [V₁ V₂ V₃ V₄]\nLayer 1: [K₁ K₂ K₃ K₄], [V₁ V₂ V₃ V₄]\n...\nLayer N: [K₁ K₂ K₃ K₄], [V₁ V₂ V₃ V₄]" {
+      style.stroke: "#16a34a"
+    }
+  }
+
+  output_token: "输出第一个\n生成 Token x₅" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  prompt -> compute: "forward"
+  compute -> cache_init: "K/V 写入"
+  compute -> output_token: "最后位置预测"
+}
+
+decode_phase: "Decode 阶段（逐 Token 生成）" {
+  style.stroke: "#dc2626"
+  direction: right
+
+  new_token: "新 Token x₅" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  new_qkv: "计算 x₅ 的\nQ₅ / K₅ / V₅" {
+    style.stroke: "#2563eb"
+  }
+
+  attn_compute: "Q₅ 查询历史\n全部 K/V" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+
+  cache_append: "K₅, V₅\n追加到 Cache" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+  }
+
+  next_token: "输出 x₆\n继续 Decode..." {
+    style.stroke: "#f59e0b"
+  }
+
+  new_token -> new_qkv
+  new_qkv -> attn_compute: "Q₅"
+  new_qkv -> cache_append: "K₅, V₅"
+  attn_compute -> next_token: "预测"
+}
+
+prefill_phase.cache_init -> decode_phase.attn_compute: "读取历史 K/V" {
+  style.stroke-dash: 4
+  style.stroke: "#16a34a"
+}
