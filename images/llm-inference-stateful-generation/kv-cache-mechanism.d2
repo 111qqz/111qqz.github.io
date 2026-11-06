@@ -1,0 +1,95 @@
+direction: down
+
+input_row: "" {
+  label: ""
+  direction: right
+
+  new_token: "新 Token (位置 t)" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  projection: "线性投影 W_Q, W_K, W_V" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  new_token -> projection
+}
+
+core_row: "" {
+  label: ""
+  grid-columns: 3
+
+  q_branch: "Query" {
+    style.stroke: "#dc2626"
+    style.bold: true
+
+    q_new: "Q_t\n(当前 Token 的查询)" {
+      style.stroke: "#dc2626"
+      style.bold: true
+    }
+  }
+
+  kv_cache: "KV Cache (本层)" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+    style.bold: true
+
+    hist_k: "Key 序列\n[K₁, K₂, ..., K_{t-1}, K_t]" {
+      style.stroke: "#16a34a"
+    }
+    hist_v: "Value 序列\n[V₁, V₂, ..., V_{t-1}, V_t]" {
+      style.stroke: "#16a34a"
+    }
+  }
+
+  hist_q: "历史 Q₁...Q_{t-1}\n已用完，不缓存\n不参与后续计算" {
+    style.stroke: "#999999"
+    style.stroke-dash: 4
+  }
+}
+
+attn_row: "" {
+  label: ""
+  direction: right
+
+  score: "Q_t × [K₁...K_t]ᵀ / √d\n→ Attention Score" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  weighted: "Softmax(Score) × [V₁...V_t]\n→ 加权聚合输出" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+
+  score -> weighted
+}
+
+output_node: "本层 Attention 输出 → 下一层\n(每层 Transformer 有独立的 KV Cache)" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+input_row.projection -> core_row.q_branch.q_new: "Q" {
+  style.stroke: "#dc2626"
+}
+input_row.projection -> core_row.kv_cache.hist_k: "K_t 追加" {
+  style.stroke: "#16a34a"
+}
+input_row.projection -> core_row.kv_cache.hist_v: "V_t 追加" {
+  style.stroke: "#16a34a"
+}
+
+core_row.q_branch.q_new -> attn_row.score: "查询"
+core_row.kv_cache.hist_k -> attn_row.score: "读取全部 K" {
+  style.stroke-dash: 4
+}
+core_row.kv_cache.hist_v -> attn_row.weighted: "读取全部 V" {
+  style.stroke-dash: 4
+}
+
+attn_row.weighted -> output_node

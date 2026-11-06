@@ -1,0 +1,103 @@
+grid-rows: 2
+
+prefill_stage: "Prefill 阶段" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  direction: right
+
+  input_tokens: "Prompt Tokens\n[t₁ t₂ t₃ t₄ t₅ t₆]" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  parallel_fwd: "一次 Forward\n并行处理 6 个 Token" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 3
+  }
+
+  kv_init: "KV Cache 初始化\n6 个位置的 K/V\n写入每层缓存" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  first_out: "预测第一个\n输出 Token t₇" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  input_tokens -> parallel_fwd: "已知输入"
+  parallel_fwd -> kv_init: "产生 K/V"
+  parallel_fwd -> first_out: "最后位置 Logits"
+}
+
+decode_stage: "Decode 阶段（逐 Token）" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  direction: right
+
+  step1: "Decode Step 1" {
+    style.stroke: "#dc2626"
+
+    in1: "输入 t₇" {
+      style.stroke: "#f59e0b"
+    }
+    fwd1: "Forward\n(1 new token)" {
+      style.stroke: "#dc2626"
+    }
+    cache1: "Cache 增长\n→ 7 个位置" {
+      style.stroke: "#16a34a"
+    }
+    out1: "预测 t₈" {
+      style.stroke: "#f59e0b"
+    }
+    in1 -> fwd1 -> out1
+    fwd1 -> cache1
+  }
+
+  step2: "Decode Step 2" {
+    style.stroke: "#dc2626"
+
+    in2: "输入 t₈" {
+      style.stroke: "#f59e0b"
+    }
+    fwd2: "Forward\n(1 new token)" {
+      style.stroke: "#dc2626"
+    }
+    cache2: "Cache 增长\n→ 8 个位置" {
+      style.stroke: "#16a34a"
+    }
+    out2: "预测 t₉" {
+      style.stroke: "#f59e0b"
+    }
+    in2 -> fwd2 -> out2
+    fwd2 -> cache2
+  }
+
+  step3: "Decode Step 3" {
+    style.stroke: "#dc2626"
+
+    in3: "输入 t₉" {
+      style.stroke: "#f59e0b"
+    }
+    fwd3: "Forward\n(1 new token)" {
+      style.stroke: "#dc2626"
+    }
+    cache3: "Cache 增长\n→ 9 个位置" {
+      style.stroke: "#16a34a"
+    }
+    out3: "预测 t₁₀ ..." {
+      style.stroke: "#f59e0b"
+    }
+    in3 -> fwd3 -> out3
+    fwd3 -> cache3
+  }
+
+  step1 -> step2: "采样结果\n作为下一步输入"
+  step2 -> step3: "采样结果\n作为下一步输入"
+}
+
+prefill_stage.first_out -> decode_stage.step1.in1: "第一个生成 Token" {
+  style.stroke: "#f59e0b"
+  style.stroke-dash: 4
+}

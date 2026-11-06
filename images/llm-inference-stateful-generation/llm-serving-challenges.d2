@@ -1,0 +1,82 @@
+direction: down
+
+root_cause: "Autoregressive Generation\n一次请求 = 多轮有状态执行" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  style.stroke-width: 3
+}
+
+challenges: "系统层面的新挑战" {
+  grid-columns: 3
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  mem_cap: "显存容量\nKV Cache 随请求数\n和上下文线性增长" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  mem_bw: "访存带宽\nDecode 每步读取\n全部历史 K/V" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  dyn_batch: "动态调度\n请求进度不同\n到达和结束时间各异" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  pd_conflict: "Prefill/Decode\n资源竞争\n计算特性不同" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  latency: "延迟指标\nTTFT 与 TPOT\n对用户体验均重要" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  prefix_dup: "前缀重复\n相同 System Prompt\n重复计算 KV" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+}
+
+solutions: "优化技术" {
+  grid-columns: 3
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  paged: "PagedAttention\n分页管理 KV Cache" {
+    style.stroke: "#16a34a"
+  }
+
+  gqa_sol: "GQA / MQA\n减少 KV Heads" {
+    style.stroke: "#16a34a"
+  }
+
+  cont_batch: "Continuous Batching\n动态请求调度" {
+    style.stroke: "#16a34a"
+  }
+
+  chunked: "Chunked Prefill\nPrefill/Decode\nDisaggregation" {
+    style.stroke: "#16a34a"
+  }
+
+  flash_attn: "FlashAttention\n减少 HBM IO" {
+    style.stroke: "#16a34a"
+  }
+
+  prefix_cache: "Prefix Caching\n共享前缀 KV" {
+    style.stroke: "#16a34a"
+  }
+}
+
+root_cause -> challenges
+
+challenges.mem_cap -> solutions.paged
+challenges.mem_bw -> solutions.gqa_sol
+challenges.dyn_batch -> solutions.cont_batch
+challenges.pd_conflict -> solutions.chunked
+challenges.latency -> solutions.flash_attn
+challenges.prefix_dup -> solutions.prefix_cache

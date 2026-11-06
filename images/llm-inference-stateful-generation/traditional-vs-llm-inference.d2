@@ -1,0 +1,72 @@
+grid-rows: 2
+
+traditional: "传统模型推理" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  direction: right
+
+  req_input: "Input x" {
+    style.stroke: "#2563eb"
+  }
+
+  fwd: "Forward\ny = f(x)" {
+    style.stroke: "#2563eb"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  req_output: "Output y" {
+    style.stroke: "#2563eb"
+  }
+
+  req_input -> fwd -> req_output
+
+  note_label: "一次请求 = 一次 Forward\n请求结束，释放所有临时资源" {
+    style.stroke: "#2563eb"
+    style.stroke-dash: 4
+  }
+}
+
+llm: "LLM 推理" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  direction: right
+
+  prompt: "Prompt\n(N tokens)" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  prefill: "Prefill\n(并行)" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 3
+  }
+
+  t1: "Token 1" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+
+  decode1: "Decode" {
+    style.stroke: "#dc2626"
+  }
+
+  t2: "Token 2" {
+    style.stroke: "#f59e0b"
+  }
+
+  decode2: "Decode" {
+    style.stroke: "#dc2626"
+  }
+
+  t3: "Token 3 ..." {
+    style.stroke: "#f59e0b"
+  }
+
+  prompt -> prefill -> t1 -> decode1 -> t2 -> decode2 -> t3
+
+  note_label: "一次请求 = 多轮执行\n每轮维护 KV Cache 状态" {
+    style.stroke: "#dc2626"
+    style.stroke-dash: 4
+  }
+}
