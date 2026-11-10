@@ -1,0 +1,38 @@
+direction: right
+
+draft: "Draft Model\n采样 x ~ q(x)" {
+  style.stroke: "#2563eb"
+  style.bold: true
+}
+
+verify: "Target Model\n计算 p(x)\n校验 p(x)/q(x)" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+}
+
+branch: {
+  grid-columns: 1
+  label: ""
+
+  accept_box: "接受\n使用 Draft 的 token" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  resample: "拒绝\n从残差分布 p'(x)\n重新采样" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+}
+
+output_node: "输出有效 token\n分布严格等于 p(x)\n无 forward 浪费" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 3
+  style.bold: true
+}
+
+draft -> verify: "候选 token x"
+verify -> branch.accept_box: "u ≤ min(1, p/q)"
+verify -> branch.resample: "u > min(1, p/q)"
+branch.accept_box -> output_node
+branch.resample -> output_node
