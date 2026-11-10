@@ -1,0 +1,66 @@
+grid-columns: 2
+
+serial: "普通串行 Decode" {
+  style.stroke: "#2563eb"
+  style.bold: true
+
+  direction: down
+
+  s1: "Forward 1: love → Logits₃" {
+    style.stroke: "#2563eb"
+  }
+  s2: "Forward 2: machine → Logits₄" {
+    style.stroke: "#2563eb"
+  }
+  s3: "Forward 3: learning → Logits₅" {
+    style.stroke: "#2563eb"
+  }
+  s4: "Forward 4: is → Logits₆" {
+    style.stroke: "#2563eb"
+  }
+
+  s1 -> s2: "采样 machine"
+  s2 -> s3: "采样 learning"
+  s3 -> s4: "采样 is"
+}
+
+speculative: "Speculative Decoding" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  direction: down
+
+  draft_phase: "Draft 串行猜 3 个 token\nmachine → learning → is" {
+    style.stroke: "#f59e0b"
+    style.stroke-dash: 4
+  }
+
+  verify_phase: "Target 一次 Forward 并行验证" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 3
+
+    direction: down
+
+    v1: "love → Logits → 验证 machine ✓" {
+      style.stroke: "#16a34a"
+    }
+    v2: "machine → Logits → 验证 learning ✓" {
+      style.stroke: "#16a34a"
+    }
+    v3: "learning → Logits → 验证 is ✗" {
+      style.stroke: "#dc2626"
+      style.bold: true
+    }
+
+    v1 -> v2: "并行"
+    v2 -> v3: "并行"
+    v3 -> discard: "拒绝"
+
+    discard: "is 路径作废\n从修正分布采样替代" {
+      style.stroke: "#dc2626"
+      style.stroke-dash: 4
+    }
+  }
+
+  draft_phase -> verify_phase: "3 个候选"
+}
