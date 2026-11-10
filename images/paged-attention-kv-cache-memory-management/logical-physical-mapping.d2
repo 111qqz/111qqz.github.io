@@ -1,0 +1,67 @@
+direction: down
+
+header: "Request A: Block Size = 4, 共 16 Token" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  style.stroke-width: 3
+
+  grid-columns: 3
+
+  logical: "逻辑 KV 序列" {
+    style.stroke: "#2563eb"
+    style.bold: true
+
+    lb0: "LB 0 (Token 0-3)"
+    lb1: "LB 1 (Token 4-7)"
+    lb2: "LB 2 (Token 8-11)"
+    lb3: "LB 3 (Token 12-15)"
+    lb0 -> lb1 -> lb2 -> lb3: "" {
+      style.stroke: "#2563eb"
+      style.stroke-dash: 4
+    }
+  }
+
+  block_table: "Block Table" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+    style.stroke-width: 3
+
+    e0: "[0] → Phys 7" { style.stroke: "#f59e0b" }
+    e1: "[1] → Phys 1" { style.stroke: "#f59e0b" }
+    e2: "[2] → Phys 9" { style.stroke: "#f59e0b" }
+    e3: "[3] → Phys 5" { style.stroke: "#f59e0b" }
+  }
+
+  physical: "Physical Blocks\n(GPU 显存)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    style.stroke-width: 3
+
+    pb7: "Block 7 ← LB 0" { style.stroke: "#2563eb"; style.bold: true }
+    pb1: "Block 1 ← LB 1" { style.stroke: "#2563eb"; style.bold: true }
+    pb9: "Block 9 ← LB 2" { style.stroke: "#2563eb"; style.bold: true }
+    pb5: "Block 5 ← LB 3" { style.stroke: "#2563eb"; style.bold: true }
+    free: "Block 0,2,3,4,6,8\n(空闲)" { style.stroke: "#999999"; style.stroke-dash: 4 }
+  }
+
+  logical.lb0 -> block_table.e0: "" { style.stroke: "#f59e0b" }
+  logical.lb1 -> block_table.e1: "" { style.stroke: "#f59e0b" }
+  logical.lb2 -> block_table.e2: "" { style.stroke: "#f59e0b" }
+  logical.lb3 -> block_table.e3: "" { style.stroke: "#f59e0b" }
+
+  block_table.e0 -> physical.pb7: "" { style.stroke: "#16a34a" }
+  block_table.e1 -> physical.pb1: "" { style.stroke: "#16a34a" }
+  block_table.e2 -> physical.pb9: "" { style.stroke: "#16a34a" }
+  block_table.e3 -> physical.pb5: "" { style.stroke: "#16a34a" }
+}
+
+lookup_example: "寻址示例：Token 10\nBlock Index = 10 // 4 = 2\nOffset = 10 % 4 = 2\n→ Physical Block 9, Slot 2" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  style.stroke-width: 3
+}
+
+header -> lookup_example: "" {
+  style.stroke: "#dc2626"
+  style.stroke-dash: 4
+}
