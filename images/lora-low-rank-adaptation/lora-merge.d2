@@ -1,0 +1,70 @@
+grid-columns: 2
+
+training: "训练时" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  style.stroke-width: 2
+
+  input: "x" {
+    style.bold: true
+    style.stroke-width: 2
+  }
+
+  frozen_path: "W₀ · x\n（冻结路径）" {
+    style.stroke-dash: 4
+    style.stroke-width: 2
+  }
+
+  lora_path: "(α/r) · B·A · x\n（可训练路径）" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  output: "y = W₀x + (α/r)BAx" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+    style.stroke-width: 2
+  }
+
+  input -> frozen_path
+  input -> lora_path
+  frozen_path -> output: "+" {
+    style.stroke-width: 2
+  }
+  lora_path -> output: "+" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+  }
+}
+
+inference: "推理时（合并后）" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  style.stroke-width: 2
+
+  input_inf: "x" {
+    style.bold: true
+    style.stroke-width: 2
+  }
+
+  merged: "W' · x\nW' = W₀ + (α/r)BA\n（普通 Linear Layer）" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  output_inf: "y = W'x" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+    style.stroke-width: 2
+  }
+
+  input_inf -> merged: "" {
+    style.stroke-width: 2
+  }
+  merged -> output_inf: "" {
+    style.stroke: "#16a34a"
+    style.stroke-width: 2
+  }
+}
