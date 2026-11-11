@@ -1,0 +1,98 @@
+direction: down
+
+top_row: "" {
+  label: ""
+  grid-columns: 3
+
+  user: "用户请求" {
+    style.stroke: "#999999"
+    style.bold: true
+  }
+
+  router: "Request Router" {
+    style.stroke: "#2563eb"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  response: "流式输出" {
+    style.stroke: "#999999"
+    style.bold: true
+  }
+
+  user -> router: "Prompt" { style.stroke: "#2563eb" }
+}
+
+worker_row: "" {
+  label: ""
+  grid-columns: 2
+
+  prefill_pool: "Prefill Worker" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    style.stroke-width: 3
+
+    gpu_p: "Prefill GPU" {
+      style.stroke: "#16a34a"
+      style.bold: true
+    }
+
+    action_p: "处理 Prompt\n→ 生成 KV Cache\n→ 预测首个 Token" {
+      style.stroke: "#16a34a"
+    }
+
+    bt_p: "Block Table\nLB [0,1,2,3]\n→ PB [7,1,9,5]" {
+      style.stroke: "#f59e0b"
+      style.bold: true
+    }
+
+    gpu_p -> action_p -> bt_p: "" { style.stroke: "#16a34a" }
+  }
+
+  decode_pool: "Decode Worker" {
+    style.stroke: "#2563eb"
+    style.bold: true
+    style.stroke-width: 3
+
+    gpu_d: "Decode GPU" {
+      style.stroke: "#2563eb"
+      style.bold: true
+    }
+
+    bt_d: "Block Table\nLB [0,1,2,3]\n→ PB [3,8,2,11]" {
+      style.stroke: "#f59e0b"
+      style.bold: true
+    }
+
+    action_d: "接收 KV Cache\n→ 继续 Decode\n→ 逐 Token 生成" {
+      style.stroke: "#2563eb"
+    }
+
+    gpu_d -> bt_d -> action_d: "" { style.stroke: "#2563eb" }
+  }
+}
+
+kv_transfer: "KV Transfer\n传输 KV Cache 内容\n（逻辑 Block 对齐，\n物理 Block ID 各自独立）" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  style.stroke-width: 3
+}
+
+top_row.router -> worker_row.prefill_pool.gpu_p: "分发 Prompt" {
+  style.stroke: "#16a34a"
+}
+
+worker_row.prefill_pool.bt_p -> kv_transfer: "源端 KV 数据" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+}
+
+kv_transfer -> worker_row.decode_pool.gpu_d: "写入目标显存" {
+  style.stroke: "#dc2626"
+  style.stroke-width: 2
+}
+
+worker_row.decode_pool.action_d -> top_row.response: "Token Stream" {
+  style.stroke: "#999999"
+  style.stroke-dash: 4
+}

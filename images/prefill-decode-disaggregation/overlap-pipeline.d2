@@ -1,0 +1,94 @@
+direction: right
+
+grid-rows: 4
+
+time_axis: "时间 →" {
+  style.stroke: "#999999"
+  style.bold: true
+  direction: right
+  t1: "t₁" { style.stroke: "#999999" }
+  t2: "t₂" { style.stroke: "#999999" }
+  t3: "t₃" { style.stroke: "#999999" }
+  t4: "t₄" { style.stroke: "#999999" }
+  t5: "t₅" { style.stroke: "#999999" }
+  t1 -> t2 -> t3 -> t4 -> t5: "" { style.stroke: "#999999"; style.stroke-dash: 4 }
+}
+
+prefill_gpu: "Prefill GPU" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  direction: right
+
+  pa: "Prefill\nReq A" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  pb: "Prefill\nReq B" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  pc: "Prefill\nReq C" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  pa -> pb -> pc: "" { style.stroke: "#16a34a" }
+}
+
+network: "网络链路" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  direction: right
+
+  idle1: "..." {
+    style.stroke: "#999999"
+    style.stroke-dash: 4
+  }
+  ta: "Transfer\nKV(A)" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    style.stroke-width: 3
+  }
+  tb: "Transfer\nKV(B)" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    style.stroke-width: 3
+  }
+  tc: "Transfer\nKV(C)" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    style.stroke-width: 3
+  }
+  idle1 -> ta -> tb -> tc: "" { style.stroke: "#dc2626" }
+}
+
+decode_gpu: "Decode GPU" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  direction: right
+
+  existing: "Decode\n已有请求" {
+    style.stroke: "#2563eb"
+  }
+  da: "Decode\n+Req A" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  db: "Decode\n+Req B" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  dc: "Decode\n+Req C" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  existing -> da -> db -> dc: "" { style.stroke: "#2563eb" }
+}
+
+prefill_gpu.pa -> network.ta: "完成后\n开始传输" {
+  style.stroke: "#dc2626"
+  style.stroke-dash: 4
+}
+network.ta -> decode_gpu.da: "KV 到位\n加入 Decode" {
+  style.stroke: "#2563eb"
+  style.stroke-dash: 4
+}

@@ -1,0 +1,116 @@
+grid-rows: 3
+
+mode1: "模式一：无 Chunked Prefill（共享 GPU）" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  direction: right
+
+  d1: "Decode\nBatch" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  p_full: "Prefill 8192 Tokens\n（长时间占用 GPU）" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    style.stroke-width: 3
+  }
+  d2: "Decode\nBatch" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  d3: "Decode\nBatch" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  d1 -> p_full: "" { style.stroke: "#dc2626" }
+  p_full -> d2: "Decode 被阻塞\nITL 突刺" {
+    style.stroke: "#dc2626"
+    style.stroke-dash: 4
+  }
+  d2 -> d3: "" { style.stroke: "#2563eb" }
+}
+
+mode2: "模式二：Chunked Prefill（共享 GPU）" {
+  style.stroke: "#f59e0b"
+  style.bold: true
+  direction: right
+
+  d1: "Decode" {
+    style.stroke: "#2563eb"
+  }
+  pc1: "Prefill\nChunk 1" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+  d2: "Decode" {
+    style.stroke: "#2563eb"
+  }
+  pc2: "Prefill\nChunk 2" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+  d3: "Decode" {
+    style.stroke: "#2563eb"
+  }
+  pcn: "...\nChunk N" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+  d4: "Decode" {
+    style.stroke: "#2563eb"
+  }
+
+  d1 -> pc1 -> d2 -> pc2 -> d3 -> pcn -> d4: "" {
+    style.stroke: "#f59e0b"
+  }
+}
+
+mode3: "模式三：PD 分离（独立 GPU）" {
+  style.stroke: "#16a34a"
+  style.bold: true
+
+  grid-columns: 2
+
+  prefill_gpu: "Prefill GPU" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    direction: right
+
+    p1: "Prefill\nReq A" {
+      style.stroke: "#16a34a"
+      style.bold: true
+    }
+    p2: "Prefill\nReq B" {
+      style.stroke: "#16a34a"
+      style.bold: true
+    }
+    p3: "Prefill\nReq C" {
+      style.stroke: "#16a34a"
+      style.bold: true
+    }
+    p1 -> p2 -> p3: "" { style.stroke: "#16a34a" }
+  }
+
+  decode_gpu: "Decode GPU" {
+    style.stroke: "#2563eb"
+    style.bold: true
+    direction: right
+
+    d1: "Decode\nBatch" {
+      style.stroke: "#2563eb"
+    }
+    d2: "Decode\nBatch" {
+      style.stroke: "#2563eb"
+    }
+    d3: "Decode\nBatch" {
+      style.stroke: "#2563eb"
+    }
+    d4: "Decode\nBatch" {
+      style.stroke: "#2563eb"
+    }
+    d1 -> d2 -> d3 -> d4: "不被 Prefill 打断" {
+      style.stroke: "#2563eb"
+    }
+  }
+}
