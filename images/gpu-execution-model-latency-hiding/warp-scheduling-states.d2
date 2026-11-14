@@ -1,0 +1,86 @@
+direction: down
+
+sm_title: "SM 内部视角" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  style.stroke-width: 3
+
+  warp_pool: "Resident Warp Pool" {
+    style.stroke: "#16a34a"
+
+    grid-columns: 3
+
+    w0: "Warp 0\n等待 Load 返回" {
+      style.stroke: "#f59e0b"
+      style.stroke-dash: 4
+    }
+    w1: "Warp 1\n操作数就绪" {
+      style.stroke: "#16a34a"
+      style.bold: true
+    }
+    w2: "Warp 2\n等待 Load 返回" {
+      style.stroke: "#f59e0b"
+      style.stroke-dash: 4
+    }
+    w3: "Warp 3\n操作数就绪" {
+      style.stroke: "#16a34a"
+      style.bold: true
+    }
+    w4: "Warp 4\n等待依赖指令" {
+      style.stroke: "#f59e0b"
+      style.stroke-dash: 4
+    }
+    w5: "Warp 5\n本 cycle 被选中" {
+      style.stroke: "#2563eb"
+      style.bold: true
+      style.stroke-width: 3
+    }
+  }
+
+  legend: "" {
+    label: ""
+    grid-columns: 3
+
+    stalled: "Stalled (Not Eligible)" {
+      style.stroke: "#f59e0b"
+      style.stroke-dash: 4
+    }
+    eligible: "Eligible (可调度)" {
+      style.stroke: "#16a34a"
+      style.bold: true
+    }
+    issued: "Issued (已发射)" {
+      style.stroke: "#2563eb"
+      style.bold: true
+      style.stroke-width: 3
+    }
+  }
+
+  scheduler: "Warp Scheduler" {
+    style.stroke: "#2563eb"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  exec_unit: "Execution Unit" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  warp_pool.w1 -> scheduler: "Eligible" {
+    style.stroke: "#16a34a"
+    style.stroke-dash: 4
+  }
+  warp_pool.w3 -> scheduler: "Eligible" {
+    style.stroke: "#16a34a"
+    style.stroke-dash: 4
+  }
+  warp_pool.w5 -> scheduler: "选中" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+  scheduler -> exec_unit: "发射 Warp 5 的指令" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+  }
+}

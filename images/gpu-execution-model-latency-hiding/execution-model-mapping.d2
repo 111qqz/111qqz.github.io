@@ -1,0 +1,105 @@
+grid-columns: 2
+
+logical: "逻辑层：任务组织" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  style.stroke-width: 3
+
+  grid_node: "Grid\n(1 个 Kernel Launch)" {
+    style.stroke: "#2563eb"
+    style.bold: true
+
+    blocks: "4 个 Blocks" {
+      style.stroke: "#2563eb"
+
+      grid-columns: 2
+
+      b0: "Block 0\n256 Threads\n= 8 Warps" {
+        style.stroke: "#2563eb"
+      }
+      b1: "Block 1\n256 Threads\n= 8 Warps" {
+        style.stroke: "#2563eb"
+      }
+      b2: "Block 2\n256 Threads\n= 8 Warps" {
+        style.stroke: "#2563eb"
+      }
+      b3: "Block 3\n256 Threads\n= 8 Warps" {
+        style.stroke: "#2563eb"
+      }
+    }
+  }
+}
+
+physical: "物理层：硬件资源" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  style.stroke-width: 3
+
+  gpu: "GPU" {
+    style.stroke: "#16a34a"
+    style.bold: true
+
+    sm0: "SM 0" {
+      style.stroke: "#16a34a"
+      style.stroke-width: 2
+
+      sched: "Warp Scheduler" {
+        style.stroke: "#f59e0b"
+        style.bold: true
+      }
+
+      exec: "Execution Units\n(INT / FP / Tensor Core)" {
+        style.stroke: "#16a34a"
+      }
+
+      resident: "Resident Warps\n(来自 Block 0 + Block 2)" {
+        style.stroke: "#2563eb"
+        style.stroke-dash: 4
+      }
+
+      sched -> exec: "发射指令" {
+        style.stroke: "#f59e0b"
+      }
+    }
+
+    sm1: "SM 1" {
+      style.stroke: "#16a34a"
+      style.stroke-width: 2
+
+      sched1: "Warp Scheduler" {
+        style.stroke: "#f59e0b"
+        style.bold: true
+      }
+
+      exec1: "Execution Units" {
+        style.stroke: "#16a34a"
+      }
+
+      resident1: "Resident Warps\n(来自 Block 1 + Block 3)" {
+        style.stroke: "#2563eb"
+        style.stroke-dash: 4
+      }
+
+      sched1 -> exec1: "发射指令" {
+        style.stroke: "#f59e0b"
+      }
+    }
+  }
+}
+
+logical.grid_node.blocks.b0 -> physical.gpu.sm0: "调度" {
+  style.stroke: "#999999"
+  style.stroke-dash: 4
+}
+logical.grid_node.blocks.b2 -> physical.gpu.sm0: "调度" {
+  style.stroke: "#999999"
+  style.stroke-dash: 4
+}
+logical.grid_node.blocks.b1 -> physical.gpu.sm1: "调度" {
+  style.stroke: "#999999"
+  style.stroke-dash: 4
+}
+logical.grid_node.blocks.b3 -> physical.gpu.sm1: "调度" {
+  style.stroke: "#999999"
+  style.stroke-dash: 4
+}
