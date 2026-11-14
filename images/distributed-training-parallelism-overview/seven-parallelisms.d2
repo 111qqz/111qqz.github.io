@@ -1,0 +1,181 @@
+grid-columns: 4
+
+dp: "DP / DDP\n数据并行" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  style.stroke-width: 3
+
+  gpu0: "GPU 0\n完整模型 + Batch 0" {
+    style.stroke: "#2563eb"
+  }
+  gpu1: "GPU 1\n完整模型 + Batch 1" {
+    style.stroke: "#2563eb"
+  }
+  gpuN: "GPU N\n完整模型 + Batch N" {
+    style.stroke: "#2563eb"
+  }
+  sync: "AllReduce\n同步梯度" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+  gpu0 -> sync
+  gpu1 -> sync
+  gpuN -> sync
+  tag: "切 Batch\n扩展训练吞吐" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+}
+
+zero: "ZeRO / FSDP\n状态分片" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  style.stroke-width: 3
+
+  gpu0z: "GPU 0\nParams 分片 0\nGrads 分片 0\nOptim 分片 0" {
+    style.stroke: "#2563eb"
+  }
+  gpu1z: "GPU 1\nParams 分片 1\nGrads 分片 1\nOptim 分片 1" {
+    style.stroke: "#2563eb"
+  }
+  gpu2z: "GPU 2\nParams 分片 2\nGrads 分片 2\nOptim 分片 2" {
+    style.stroke: "#2563eb"
+  }
+  gather: "计算时按需\nAllGather 聚合" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+  gpu0z -> gather
+  gpu1z -> gather
+  gpu2z -> gather
+  tag: "切训练状态存储\n消除冗余、节省显存" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+}
+
+tp: "TP\n张量并行" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  style.stroke-width: 3
+
+  mat: "单个大矩阵乘法\nW ∈ R^(H×H)" {
+    style.stroke: "#2563eb"
+  }
+  gpu0t: "GPU 0\n列分片 W₀" {
+    style.stroke: "#2563eb"
+  }
+  gpu1t: "GPU 1\n列分片 W₁" {
+    style.stroke: "#2563eb"
+  }
+  merge: "AllReduce\n合并结果" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+  }
+  mat -> gpu0t
+  mat -> gpu1t
+  gpu0t -> merge
+  gpu1t -> merge
+  tag: "切单层算子\n分摊单层计算与参数" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+}
+
+pp: "PP\n流水线并行" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  style.stroke-width: 3
+
+  direction: right
+  gpu0p: "GPU 0\nLayer 1~L₁" {
+    style.stroke: "#2563eb"
+  }
+  gpu1p: "GPU 1\nLayer L₁+1~L₂" {
+    style.stroke: "#2563eb"
+  }
+  gpu2p: "GPU 2\nLayer L₂+1~L" {
+    style.stroke: "#2563eb"
+  }
+  gpu0p -> gpu1p: "Activation"
+  gpu1p -> gpu2p: "Activation"
+  tag: "切模型层\n分摊整个模型" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+}
+
+sp: "SP\n序列并行" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  style.stroke-width: 3
+
+  seq: "Sequence Activation\n[Token 0...N]" {
+    style.stroke: "#16a34a"
+  }
+  gpu0s: "GPU 0\nToken 0~N/2\nLayerNorm / Dropout" {
+    style.stroke: "#2563eb"
+  }
+  gpu1s: "GPU 1\nToken N/2~N\nLayerNorm / Dropout" {
+    style.stroke: "#2563eb"
+  }
+  seq -> gpu0s
+  seq -> gpu1s
+  tag: "切部分算子的 Token\n减少 Activation 冗余" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+}
+
+cp: "CP\n上下文并行" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  style.stroke-width: 3
+
+  gpu0c: "GPU 0\nQ 本地, KV 本地" {
+    style.stroke: "#2563eb"
+  }
+  gpu1c: "GPU 1\nQ 本地, KV 本地" {
+    style.stroke: "#2563eb"
+  }
+  gpu0c <-> gpu1c: "通信远端 KV" {
+    style.stroke: "#f59e0b"
+  }
+  tag: "切 Attention 的 Sequence\n支持更长 Context" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+}
+
+ep: "EP\n专家并行" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  style.stroke-width: 3
+
+  router: "Router\n决定 Token 去向" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+  gpu0e: "GPU 0\nExpert 0" {
+    style.stroke: "#2563eb"
+  }
+  gpu1e: "GPU 1\nExpert 1" {
+    style.stroke: "#2563eb"
+  }
+  gpu2e: "GPU 2\nExpert 2" {
+    style.stroke: "#2563eb"
+  }
+  router -> gpu0e: "AlltoAll"
+  router -> gpu1e: "Dispatch"
+  router -> gpu2e: "Token"
+  tag: "切 MoE Expert\n分摊 Expert 参数与计算" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+}
+
+note: "它们并不互斥：实际训练通常组合多种并行策略\n例如 8 GPU = DP(2) × TP(2) × PP(2)" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  style.stroke-width: 3
+}
