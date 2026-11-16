@@ -1,0 +1,45 @@
+direction: down
+
+grid-columns: 2
+
+block_prev: "历史分块统计状态 (Block A)" {
+  direction: down
+  s_a: "输入数据块 S_A\n(已驻留片上 SRAM)" {
+    style.stroke: "#2563eb"
+  }
+  stats_a: "局部统计量三元组:\n• 最大值 m_A\n• 指数和 l_A\n• 未归一化加权累加 O_A" {
+    style.bold: true
+  }
+  s_a -> stats_a
+}
+
+block_curr: "当前新分块统计状态 (Block B)" {
+  direction: down
+  s_b: "新加载数据块 S_B\n(从 HBM 流式分块载入)" {
+    style.stroke: "#2563eb"
+  }
+  stats_b: "当前块独立统计量:\n• 局部最大值 m_B\n• 局部指数和 l_B\n• 局部加权值 O_B" {
+    style.bold: true
+  }
+  s_b -> stats_b
+}
+
+fusion_box: "在线融合与重缩放 (Online Rescaling)" {
+  direction: down
+  m_update: "1. 刷新全局最大值: m_new = max(m_A, m_B)" {
+    style.stroke: "#f59e0b"
+  }
+  scale_factors: "2. 计算重缩放因子 (指数恒非正，消除 Overflow):\n   α = exp(m_A - m_new) ≤ 1\n   β = exp(m_B - m_new) ≤ 1"
+  merge_state: "3. 修正历史累加，无缝融合分块:\n   l_new = α · l_A + β · l_B\n   O_new = α · O_A + β · O_B" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  final_out: "4. 所有分块流式处理完毕后统一归一化:\n   O_final = O_new / l_new" {
+    style.stroke: "#2563eb"
+  }
+
+  m_update -> scale_factors -> merge_state -> final_out
+}
+
+block_prev -> fusion_box.m_update: "传递 (m_A, l_A, O_A)"
+block_curr -> fusion_box.m_update: "传递 (m_B, l_B, O_B)"

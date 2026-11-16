@@ -1,0 +1,37 @@
+grid-columns: 2
+
+stage_left: "理论与算法排查 (Algorithmic & Mathematical)" {
+  direction: down
+  rep_check: "1. Representation (表示检查)\n• 输入与中间张量物理 dtype\n• 是否存在意外 cast 或尾数截断\n• 累加器是否降级到低精度" {
+    style.stroke: "#2563eb"
+  }
+  range_check: "2. Range (极值与范围)\n• 检查 NaN / ±Inf 出现源头\n• 潜在除零、log(0)、极小分母\n• 指数项是否做过 Max Subtraction" {
+    style.stroke: "#f59e0b"
+  }
+  cond_check: "3. Conditioning (病态性分析)\n• 问题本身对输入扰动的敏感度\n• 区分 Ill-conditioned 与不稳定算法\n• 高精度 (FP64) 无法根治病态输入" {
+    style.stroke: "#8b5cf6"
+  }
+  rep_check -> range_check -> cond_check
+}
+
+stage_right: "系统与执行排查 (Systems & Execution)" {
+  direction: down
+  alg_check: "4. Algorithm (消去与代数变形)\n• 是否存在两接近大数相减 (消去误差)\n• 方差是否使用中心化或 Welford\n• 是否有数值稳定替代算子 (log1p 等)" {
+    style.stroke: "#ec4899"
+  }
+  accum_check: "5. Accumulation (归约与累加)\n• 检查 Reduction 维度的长度规模\n• 树状归约 vs 串行累加结构\n• AllReduce 拓扑与非确定性影响" {
+    style.stroke: "#16a34a"
+  }
+  tradeoff_check: "6. Trade-off (系统开销权衡)\n• 评估高精度带来的吞吐与显存代价\n• 容忍良性舍入噪声 vs 强制保序\n• 寻找系统效率与数值精度的平衡点" {
+    style.stroke: "#06b6d4"
+  }
+  alg_check -> accum_check -> tradeoff_check
+}
+
+debug_action: "核心诊断原则: 在计算图上逐层插桩，定位「首个产生显著相对误差的算子」，而非仅监控最终发散的 Loss" {
+  style.stroke: "#dc2626"
+  style.bold: true
+}
+
+stage_left -> debug_action: "算法自洽"
+stage_right -> debug_action: "系统调优"

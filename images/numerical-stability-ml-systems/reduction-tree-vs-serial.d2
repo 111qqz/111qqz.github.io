@@ -1,0 +1,37 @@
+grid-columns: 2
+
+serial_box: "串行顺序累加 (Sequential)" {
+  direction: down
+  s_in: "输入序列 x_0, x_1, x_2, x_3, ..." {
+    style.stroke: "#2563eb"
+  }
+  s_step1: "s_1 = x_0 + x_1\n(当前和较小，截断误差可控)"
+  s_step2: "s_2 = s_1 + x_2\n(累加和逐渐增大，ULP 随之扩张)"
+  s_step3: "s_N = s_{N-1} + x_N\n(大数加小数，微小量被截断吞噬)" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+  s_depth: "误差累积深度: O(N)\n早期的舍入误差被后续 N 次加法逐层放大" {
+    style.stroke-dash: 4
+  }
+
+  s_in -> s_step1 -> s_step2 -> s_step3 -> s_depth
+}
+
+tree_box: "分层并行归约 (Tree Reduction)" {
+  direction: down
+  t_in: "并行线程输入 [x_0, x_1, x_2, x_3, ...]" {
+    style.stroke: "#2563eb"
+  }
+  t_level1: "Level 1: 两两配对求和 (Pairwise)\n[x_0+x_1,  x_2+x_3,  ...]"
+  t_level2: "Level 2: 跨步长折半求和 (Warp Shuffle)\n[(x_0+x_1) + (x_2+x_3), ...]"
+  t_root: "Root: 最终归约总和\n各分支数量级均衡，无大数吞小数" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+  t_depth: "误差累积深度: O(log N)\n树状拓扑天然约束单路径最大舍入次数" {
+    style.stroke-dash: 4
+  }
+
+  t_in -> t_level1 -> t_level2 -> t_root -> t_depth
+}
