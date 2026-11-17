@@ -1,0 +1,29 @@
+direction: right
+inputs: "输入分组" {
+  a: "分组 0"
+  b: "分组 1"
+  c: "分组 2"
+  d: "分组 3"
+}
+local: "线程局部 Kahan" {
+  a: "线程 0\n局部和 s₀"
+  b: "线程 1\n局部和 s₁"
+  c: "线程 2\n局部和 s₂"
+  d: "线程 3\n局部和 s₃"
+  style.stroke: "#2563eb"
+}
+tree: "固定树形归约（FP32 加法）" {
+  ab: "合并 s₀、s₁"
+  cd: "合并 s₂、s₃"
+  total: "合并局部结果" {style.bold: true; style.stroke: "#16a34a"}
+  ab -> total
+  cd -> total
+}
+inputs.a -> local.a
+inputs.b -> local.b
+inputs.c -> local.c
+inputs.d -> local.d
+local.a -> tree.ab
+local.b -> tree.ab
+local.c -> tree.cd
+local.d -> tree.cd
