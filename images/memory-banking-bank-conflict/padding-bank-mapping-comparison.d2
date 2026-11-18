@@ -1,0 +1,71 @@
+grid-columns: 2
+
+conflict: "tile[32][32]" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  style.stroke-width: 2
+
+  warp: "Warp: 32 Lanes\ntile[lane][col]" {
+    style.bold: true
+  }
+
+  bank_col: "Bank col" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  warp -> bank_col: "全部 32 个 Lane\n→ 同一个 Bank" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+
+  formula: "BankIndex = (row x 32 + col) % 32\n= col" {
+    style.stroke: "#dc2626"
+    style.stroke-dash: 4
+  }
+
+  result: "32-way Bank Conflict\n排队串行 32 轮" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    style.stroke-width: 2
+  }
+
+  bank_col -> formula
+  formula -> result
+}
+
+no_conflict: "tile[32][33]  (Padding)" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  style.stroke-width: 2
+
+  warp: "Warp: 32 Lanes\ntile[lane][col]" {
+    style.bold: true
+  }
+
+  all_banks: "Bank 0, 1, 2, ..., 31" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  warp -> all_banks: "32 个 Lane\n→ 32 个不同 Bank" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  formula: "BankIndex = (row x 33 + col) % 32\n= (row + col) % 32" {
+    style.stroke: "#16a34a"
+    style.stroke-dash: 4
+  }
+
+  result: "无冲突\n1 轮完成" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    style.stroke-width: 2
+  }
+
+  all_banks -> formula
+  formula -> result
+}
