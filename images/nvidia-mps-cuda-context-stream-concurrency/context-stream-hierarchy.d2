@@ -1,0 +1,78 @@
+grid-columns: 2
+
+proc_a: "Process A" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  style.stroke-width: 3
+
+  ctx_a: "CUDA Context A" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+
+    stream_a1: "Stream 0" {
+      style.stroke: "#16a34a"
+
+      k_a1: "Kernel 1" {
+        style.stroke: "#16a34a"
+      }
+      k_a2: "Kernel 2" {
+        style.stroke: "#16a34a"
+      }
+      k_a1 -> k_a2: "顺序执行" {
+        style.stroke: "#16a34a"
+      }
+    }
+
+    stream_a2: "Stream 1" {
+      style.stroke: "#f59e0b"
+
+      k_a3: "Kernel 3" {
+        style.stroke: "#f59e0b"
+      }
+      k_a4: "Kernel 4" {
+        style.stroke: "#f59e0b"
+      }
+      k_a3 -> k_a4: "顺序执行" {
+        style.stroke: "#f59e0b"
+      }
+    }
+  }
+}
+
+proc_b: "Process B" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  style.stroke-width: 3
+
+  ctx_b: "CUDA Context B" {
+    style.stroke: "#dc2626"
+    style.stroke-width: 2
+
+    stream_b1: "Stream 0" {
+      style.stroke: "#16a34a"
+
+      k_b1: "Kernel 5" {
+        style.stroke: "#16a34a"
+      }
+      k_b2: "Kernel 6" {
+        style.stroke: "#16a34a"
+      }
+      k_b1 -> k_b2: "顺序执行" {
+        style.stroke: "#16a34a"
+      }
+    }
+
+    stream_b2: "Stream 1" {
+      style.stroke: "#f59e0b"
+
+      k_b3: "Kernel 7" {
+        style.stroke: "#f59e0b"
+      }
+    }
+  }
+}
+
+note: "同 Context 内不同 Stream 可并发\n不同 Context 间默认 Time-Sliced" {
+  style.stroke: "#9ca3af"
+  style.stroke-dash: 4
+}

@@ -1,0 +1,62 @@
+grid-columns: 2
+
+scenario_a: "场景 A：单进程多 Stream" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  style.stroke-width: 2
+
+  proc: "单个 CUDA Process" {
+    style.stroke: "#2563eb"
+    style.stroke-width: 2
+
+    ctx: "同一个 Context" {
+      style.stroke: "#2563eb"
+
+      grid-columns: 2
+
+      s0: "Stream 0\nKernel A" {
+        style.stroke: "#16a34a"
+      }
+      s1: "Stream 1\nKernel B" {
+        style.stroke: "#f59e0b"
+      }
+    }
+  }
+
+  result_a: "GPU Scheduler 自动并发\n不需要 MPS" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  proc -> result_a {
+    style.stroke: "#16a34a"
+  }
+}
+
+scenario_b: "场景 B：多进程独立 Context" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  style.stroke-width: 2
+
+  grid-columns: 2
+
+  p1: "Process A\nContext A\nKernel X" {
+    style.stroke: "#2563eb"
+  }
+  p2: "Process B\nContext B\nKernel Y" {
+    style.stroke: "#dc2626"
+  }
+
+  result_b: "默认 Time-Sliced\n需要 MPS 才能并发" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    grid-column-span: 2
+  }
+
+  p1 -> result_b {
+    style.stroke: "#dc2626"
+  }
+  p2 -> result_b {
+    style.stroke: "#dc2626"
+  }
+}

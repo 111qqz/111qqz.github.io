@@ -1,0 +1,51 @@
+grid-columns: 1
+
+mps_off: "MPS OFF：Short Kernel 等待调度" {
+  style.stroke: "#dc2626"
+  style.bold: true
+  style.stroke-width: 2
+
+  direction: right
+
+  long_run: "Long Kernel\n执行中 (~130ms)\n54 Blocks" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  wait_node: "Short Kernel\n等待 Context 切换" {
+    style.stroke: "#f59e0b"
+    style.stroke-dash: 4
+  }
+  short_run: "Short Kernel\n终于执行\n5.070 ms" {
+    style.stroke: "#dc2626"
+    style.bold: true
+  }
+
+  long_run -> wait_node: "Short 提交" {
+    style.stroke: "#f59e0b"
+  }
+  wait_node -> short_run: "等待结束" {
+    style.stroke: "#dc2626"
+  }
+}
+
+mps_on: "MPS ON：Short Kernel 立即并发" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  style.stroke-width: 2
+
+  grid-columns: 2
+
+  long_run2: "Long Kernel\n执行中 (~130ms)\n占用部分 SM" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+  short_run2: "Short Kernel\n并发执行\n1.497 ms" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+}
+
+mps_off -> mps_on: "启用 MPS" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+}

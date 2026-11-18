@@ -1,0 +1,48 @@
+direction: down
+
+clients: "CUDA Client Processes" {
+  style.stroke: "#2563eb"
+  style.bold: true
+  style.stroke-width: 2
+
+  grid-columns: 3
+
+  c1: "Client A\n(python train.py)" {
+    style.stroke: "#2563eb"
+  }
+  c2: "Client B\n(python infer.py)" {
+    style.stroke: "#dc2626"
+  }
+  c3: "Client C\n(python eval.py)" {
+    style.stroke: "#f59e0b"
+  }
+}
+
+server: "MPS Server\n汇聚多个 Client 的 GPU 工作\n统一调度到 SM\n各 Client 保留独立地址空间" {
+  style.stroke: "#16a34a"
+  style.bold: true
+  style.stroke-width: 3
+}
+
+gpu: "GPU (A100) — 108 SM\n各 Client 的 Kernel 可并发执行\n共享 HBM / L2 等硬件资源" {
+  style.stroke: "#7c3aed"
+  style.bold: true
+  style.stroke-width: 3
+}
+
+daemon: "MPS Daemon\n管理 MPS Server 生命周期" {
+  style.stroke: "#9ca3af"
+  style.stroke-dash: 4
+}
+
+clients -> server: "提交 Kernel（对应用透明）" {
+  style.stroke: "#2563eb"
+}
+server -> gpu: "并发调度" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+}
+daemon -> server: "启动 / 监控" {
+  style.stroke: "#9ca3af"
+  style.stroke-dash: 4
+}
