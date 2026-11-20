@@ -1,0 +1,47 @@
+grid-rows: 2
+
+load_phase: "Load Phase" {
+  label: ""
+  direction: right
+
+  step1: "① Coalesced Load\nGlobal Mem → Reg\n(Lane 沿 x 连续)" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  step2: "② Write Shared Mem\ntile[ty][tx]\n(row-major)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  step3: "③ __syncthreads()\nbarrier" {
+    style.stroke: "#f59e0b"
+    style.bold: true
+    style.stroke-width: 3
+  }
+
+  step1 -> step2: "row-major write"
+  step2 -> step3: "wait all lanes"
+}
+
+store_phase: "Store Phase" {
+  label: ""
+  direction: right
+
+  step4: "④ Transposed Read\ntile[tx][ty]\n(column-major)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+  }
+
+  step5: "⑤ Coalesced Store\nReg → Global Mem\n(Lane 沿 x 连续)" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  step4 -> step5: "row-major store"
+}
+
+load_phase -> store_phase: "数据已在\nShared Memory\n完成重排" {
+  style.stroke: "#f59e0b"
+  style.stroke-dash: 4
+}

@@ -1,0 +1,45 @@
+grid-columns: 2
+
+coalesced: "Coalesced Access\n(Stride = 1)" {
+  direction: down
+
+  lanes: "Warp: 32 Lanes\nLane 0 → addr 0x000\nLane 1 → addr 0x004\nLane 2 → addr 0x008\n...\nLane 31 → addr 0x07C" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  sectors: "4 Sectors (128B)" {
+    style.stroke: "#16a34a"
+    style.bold: true
+    s0: "Sector 0\n0x000–0x01F\nLane 0–7"
+    s1: "Sector 1\n0x020–0x03F\nLane 8–15"
+    s2: "Sector 2\n0x040–0x05F\nLane 16–23"
+    s3: "Sector 3\n0x060–0x07F\nLane 24–31"
+  }
+
+  lanes -> sectors: "merge into\n4 transactions" {
+    style.stroke: "#16a34a"
+  }
+}
+
+strided: "Stride-2 Access\n(Stride = 2)" {
+  direction: down
+
+  lanes: "Warp: 32 Lanes\nLane 0 → addr 0x000\nLane 1 → addr 0x008\nLane 2 → addr 0x010\n...\nLane 31 → addr 0x0F8" {
+    style.stroke: "#2563eb"
+    style.bold: true
+  }
+
+  sectors: "8 Sectors (256B)" {
+    style.stroke: "#dc2626"
+    style.bold: true
+    s0: "Sector 0\n0x000–0x01F\nLane 0,1,2,3"
+    s1: "Sector 1\n0x020–0x03F\nLane 4,5,6,7"
+    s2: "..."
+    s7: "Sector 7\n0x0E0–0x0FF\nLane 28,29,30,31"
+  }
+
+  lanes -> sectors: "spread across\n8 transactions" {
+    style.stroke: "#dc2626"
+  }
+}
